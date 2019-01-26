@@ -30,6 +30,12 @@ steps:
     - task: Npm@1
       inputs:
           command: custom
+          customCommand: run cbuild
+      displayName: clean build
+
+    - task: Npm@1
+      inputs:
+          command: custom
           customCommand: run test-in-ci
       displayName: run unit tests
 
