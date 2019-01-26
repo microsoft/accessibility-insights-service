@@ -5,9 +5,8 @@ pool:
 steps:
     - task: NodeTool@0
       inputs:
-          versionSpec: 8.x
-          checkLatest: true
-      displayName: 'Use Node 8.x'
+          versionSpec: 10.x
+      displayName: 'Use Node 10.x'
 
     - task: Npm@1
       inputs:
