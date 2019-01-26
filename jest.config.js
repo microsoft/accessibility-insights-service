@@ -18,4 +18,5 @@ module.exports = {
     verbose: true,
     coverageDirectory: './test-results/unit/coverage',
     coverageReporters: ['json', 'lcov', 'text', 'cobertura'],
+    reporters: ['default', ['jest-junit', { outputDirectory: '.', outputName: './test-results/unit/junit.xml' }]],
 };
