@@ -46,9 +46,9 @@ steps:
       condition: always()
       displayName: publish unit test results
 
-     - task: PublishCodeCoverageResults@1
-       inputs:
-            codeCoverageTool: Cobertura
-            summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
-            failIfCoverageEmpty: true
-       displayName: publish code coverage
+    - task: PublishCodeCoverageResults@1
+      inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
+          failIfCoverageEmpty: true
+      displayName: publish code coverage
