@@ -4,12 +4,45 @@ pool:
 
 steps:
     - task: NodeTool@0
-      displayName: 'Use Node 8.x'
       inputs:
           versionSpec: 8.x
           checkLatest: true
+      displayName: 'Use Node 8.x'
 
     - task: Npm@1
-      displayName: 'npm install'
       inputs:
-          verbose: false
+          command: custom
+          customCommand: ci
+      displayName: 'install dependencies'
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run tslint
+      displayName: run linter
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run format-check
+      displayName: check code formatting
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run test-in-ci
+      displayName: run unit tests
+
+    - task: PublishTestResults@2
+      inputs:
+          testResultsFiles: $(System.DefaultWorkingDirectory)/test-results/unit/junit.xml
+          testRunTitle: unit tests
+      condition: always()
+      displayName: publish unit test results
+
+     - task: PublishCodeCoverageResults@1
+       inputs:
+            codeCoverageTool: Cobertura
+            summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
+            failIfCoverageEmpty: true
+       displayName: publish code coverage

@@ -1,0 +1,9 @@
+{
+    "extends": ["tslint-microsoft-contrib"],
+    "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
+    "rules": {
+        "no-relative-imports": false,
+        "export-name": false,
+        "newline-per-chained-call": false
+    }
+}

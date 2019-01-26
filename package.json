@@ -1,20 +1,39 @@
 {
-  "name": "accessibility-insights-service",
-  "version": "1.0.0",
-  "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
-  "main": "index.js",
-  "scripts": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
-  },
-  "author": "Microsoft",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
-  },
-  "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
-  "devDependencies": {
-    "azure-functions-core-tools": "2.4.290"
-  }
+    "name": "accessibility-insights-service",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "main": "index.js",
+    "scripts": {
+        "clean": "rimraf dist",
+        "format": "./node_modules/.bin/prettier --config prettier.config.js --write **/*",
+        "format-check": "./node_modules/.bin/prettier --config prettier.config.js --check **/*",
+        "lint": "tslint -c ./tslint.json -p ./tsconfig.json --force",
+        "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors",
+        "test-in-ci": "jest --ci --coverage --colors"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {
+        "@azure/functions": "^1.0.1-beta2",
+        "@types/jest": "^23.3.13",
+        "azure-functions-core-tools": "2.4.290",
+        "jest": "^24.0.0",
+        "jest-circus": "^24.0.0",
+        "jest-junit": "^6.1.0",
+        "prettier": "1.16.1",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^23.10.5",
+        "tslint": "5.12.1",
+        "tslint-microsoft-contrib": "6.0.0",
+        "typescript": "^3.2.4"
+    }
 }
