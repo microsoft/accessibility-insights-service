@@ -1,0 +1,7 @@
+.gitattributes
+.github
+.prettierignore
+LICENSE
+
+**/.gitignore
+test-results/
