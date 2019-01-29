@@ -13,30 +13,48 @@
     cd accessibility-insights-web
     ```
 
-### 2. Install packages
+### 2. Install Azure Function core tools
+
+-   Follow the instructions in https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local to install azure cli tools for building, running & deploying azure functions
+
+### 3. Install packages
 
 -   Install the packages
     ```bash
     npm install
     ```
 
-### 3. Build & deploy from vscode
+### 4. Create local.settings.json file for local deployment
 
+-   Create local.settings.json files for each azure function. **DO NOT checkin this file**.
+    -   From each local.settings.template.json, create local.settings.json in the same directory.
+    -   Get the secrets mentioned in the json from azure portal.
+        -   For eg, AzureWebJobsStorage, go to the storage account you want to use in portal.
+        -   Click on access keys from the left tab.
+        -   Copy one of the connection strings.
+        -   Paste it as the value for AzureWebJobsStorage in the local.settings.json
+
+### 5. Build & deploy from vscode
+
+-   When you open the root folder, it will suggest you to install the recommended extensions. Install them.
 -   Go to a azure function project (eg, scanner) & open a file, say index.ts
 -   Press F5. This build the project & deploys azure function locally.
 -   Perform trigger operation to trigger an azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
 
-### 4. Build & deploy from command line
+### 5. Build & deploy from command line
 
 -   Build project
+
     ```bash
        npm run build
     ```
--   From each local.settings.template.json, create local.settings.json in the same directory & get the secrets from azure portal.
--   copy local.settings.json to dist folder
+
+-   Copy local.settings.json to dist folder
+
     ```bash
        npm run copy-local-settings
     ```
+
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
     ```bash
        cd dist/scanner
