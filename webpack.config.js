@@ -1,11 +1,11 @@
 const path = require('path');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const uglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
+    devtool: 'cheap-source-map',
     entry: {
-        sample: path.resolve('./src/hello-world.ts'),
+        'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
     },
     mode: 'development',
     module: {
@@ -25,20 +25,25 @@ module.exports = {
             },
         ],
     },
-    name: 'sample-config',
+    name: 'scanner',
     output: {
-        path: path.resolve('./dist'),
-        filename: '[name]/[name].js',
+        path: path.resolve('./dist/scanner'),
+        filename: '[name]/index.js',
         libraryTarget: 'commonjs2',
     },
     plugins: [
         new ForkTsCheckerWebpackPlugin(),
-        new uglifyJSPlugin({
-            uglifyOptions: {
-                ecma: 6,
+        new copyWebpackPlugin([
+            {
+                from: 'src/scanner/host.json',
+                to: 'host.json',
             },
-        }),
-        new copyWebpackPlugin(), // to copy dependencies
+            {
+                context: 'src/scanner',
+                from: '**/function.json',
+                to: '',
+            },
+        ]),
     ],
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],
