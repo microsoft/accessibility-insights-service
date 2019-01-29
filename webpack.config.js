@@ -43,7 +43,7 @@ module.exports = {
                 from: '**/function.json',
                 to: '',
             },
-        ]), // to copy dependencies
+        ]),
     ],
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],
