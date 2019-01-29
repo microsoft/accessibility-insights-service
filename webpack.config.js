@@ -1,11 +1,12 @@
 const path = require('path');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const uglifyJSPlugin = require('uglifyjs-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
+    devtool: 'cheap-source-map',
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
+        'sample-http-trigger': path.resolve('./src/scanner/sample-http-trigger/index.ts'),
     },
     mode: 'development',
     module: {
@@ -33,11 +34,6 @@ module.exports = {
     },
     plugins: [
         new ForkTsCheckerWebpackPlugin(),
-        new uglifyJSPlugin({
-            uglifyOptions: {
-                ecma: 6,
-            },
-        }),
         new copyWebpackPlugin([
             {
                 from: 'src/scanner/host.json',
