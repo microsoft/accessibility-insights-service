@@ -22,7 +22,12 @@
             "options": {
                 "cwd": "${fileDirname}../../../../dist/scanner"
             },
-            "dependsOn": "build"
+            "dependsOn": ["build", "copy-local-settings",]
+        },
+        {
+            "label": "copy-local-settings",
+            "command": "npm run copy-local-settings",
+            "type": "shell",
         },
         {
             "label": "build",

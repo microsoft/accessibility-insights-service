@@ -6,7 +6,6 @@ module.exports = {
     devtool: 'cheap-source-map',
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
-        'sample-http-trigger': path.resolve('./src/scanner/sample-http-trigger/index.ts'),
     },
     mode: 'development',
     module: {
@@ -41,12 +40,7 @@ module.exports = {
             },
             {
                 context: 'src/scanner',
-                from: '**/*.json',
-                to: '',
-            },
-            {
-                context: 'src/scanner',
-                from: '**/*.dat',
+                from: '**/function.json',
                 to: '',
             },
         ]), // to copy dependencies
