@@ -5,7 +5,7 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
-        sample: path.resolve('./src/hello-world.ts'),
+        'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
     },
     mode: 'development',
     module: {
@@ -25,10 +25,10 @@ module.exports = {
             },
         ],
     },
-    name: 'sample-config',
+    name: 'scanner',
     output: {
-        path: path.resolve('./dist'),
-        filename: '[name]/[name].js',
+        path: path.resolve('./dist/scanner'),
+        filename: '[name]/index.js',
         libraryTarget: 'commonjs2',
     },
     plugins: [
@@ -38,7 +38,22 @@ module.exports = {
                 ecma: 6,
             },
         }),
-        new copyWebpackPlugin(), // to copy dependencies
+        new copyWebpackPlugin([
+            {
+                from: 'src/scanner/host.json',
+                to: 'host.json',
+            },
+            {
+                context: 'src/scanner',
+                from: '**/*.json',
+                to: '',
+            },
+            {
+                context: 'src/scanner',
+                from: '**/*.dat',
+                to: '',
+            },
+        ]), // to copy dependencies
     ],
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],

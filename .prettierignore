@@ -5,3 +5,7 @@ LICENSE
 
 **/.gitignore
 test-results/
+**/obj/
+**/bin/
+**/*.dat
+dist/

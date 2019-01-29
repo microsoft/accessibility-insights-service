@@ -1,5 +1,8 @@
 {
     "editor.formatOnSave": true,
     "files.eol": "\n",
-    "files.insertFinalNewline": true
+    "files.insertFinalNewline": true,
+    "prettier.requireConfig": true,
+    "tslint.autoFixOnSave": true,
+    "tslint.configFile": "../tslint.json"
 }

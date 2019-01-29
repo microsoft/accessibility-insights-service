@@ -4,7 +4,7 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "main": "index.js",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --config-name sample-config --colors --progress",
+        "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist",
         "format": "./node_modules/.bin/prettier --config prettier.config.js --write **/*",
@@ -15,7 +15,8 @@
         "test-in-ci": "jest --ci --coverage --colors",
         "watch:build": "npm run build -- --watch",
         "watch:test": "jest --watch --coverage false --colors",
-        "watch": "npm-run-all --parallel watch:build watch:test"
+        "watch": "npm-run-all --parallel watch:build watch:test",
+        "testing": "cd"
     },
     "repository": {
         "type": "git",
