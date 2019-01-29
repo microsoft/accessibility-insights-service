@@ -3,10 +3,5 @@
     "azureFunctions.projectLanguage": "JavaScript",
     "azureFunctions.templateFilter": "Verified",
     "azureFunctions.deploySubpath": ".",
-    "azureFunctions.preDeployTask": "installExtensions",
-    "files.exclude": {
-        "obj": true,
-        "bin": true
-    },
-    "debug.internalConsoleOptions": "neverOpen"
+    "azureFunctions.preDeployTask": "installExtensions"
 }

@@ -36,9 +36,10 @@
 
 ### 5. Build & deploy from vscode
 
--   When you open the root folder, it will suggest you to install the recommended extensions. Install them.
+-   Open workspace.code-workspace from .vscode\ folder under root directory.
+-   On opening the workspace, it will suggest you to install the recommended extensions. Install them.
 -   Go to a azure function project (eg, scanner) & open a file, say index.ts
--   Press F5. This build the project & deploys azure function locally.
+-   Press F5. (Make sure the right launch task is selected from the drop down that appears). This build the project & deploys azure function locally.
 -   Perform trigger operation to trigger an azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
 
 ### 5. Build & deploy from command line

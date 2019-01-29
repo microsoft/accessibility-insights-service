@@ -1,0 +1,23 @@
+{
+    "folders": [
+        {
+            "name": "root",
+            "path": "../"
+        },
+        {
+            "name": "scanner",
+            "path": "../src/scanner"
+        }
+    ],
+    "settings": {
+        "editor.formatOnSave": true,
+        "files.eol": "\n",
+        "files.insertFinalNewline": true,
+        "prettier.requireConfig": true,
+        "tslint.autoFixOnSave": true,
+        "tslint.configFile": "../tslint.json"
+    },
+    "extensions": {
+        "recommendations": ["eg2.tslint", "esbenp.prettier-vscode"]
+    }
+}
