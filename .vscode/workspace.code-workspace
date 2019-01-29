@@ -15,7 +15,7 @@
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
         "tslint.autoFixOnSave": true,
-        "tslint.configFile": "../tslint.json"
+        "tslint.configFile": "tslint.json"
     },
     "extensions": {
         "recommendations": ["eg2.tslint", "esbenp.prettier-vscode"]
