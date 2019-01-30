@@ -7,6 +7,9 @@ module.exports = {
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
     },
+    externals: {
+        puppeteer: 'puppeteer',
+    },
     mode: 'development',
     module: {
         rules: [
@@ -42,6 +45,10 @@ module.exports = {
                 context: 'src/scanner',
                 from: '**/function.json',
                 to: '',
+            },
+            {
+                from: 'node_modules/puppeteer',
+                to: 'scan-url/node_modules/puppeteer',
             },
         ]),
     ],
