@@ -30,7 +30,7 @@ module.exports = {
     },
     name: 'scanner',
     output: {
-        path: path.resolve('./dist/scanner'),
+        path: path.resolve('./src/scanner/dist'),
         filename: '[name]/index.js',
         libraryTarget: 'commonjs2',
     },
@@ -49,6 +49,10 @@ module.exports = {
             {
                 from: 'node_modules/puppeteer',
                 to: 'scan-url/node_modules/puppeteer',
+            },
+            {
+                from: 'node_modules/debug',
+                to: 'scan-url/node_modules/debug',
             },
         ]),
     ],

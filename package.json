@@ -4,10 +4,10 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "main": "index.js",
     "scripts": {
-        "copy-local-settings": "node_modules/.bin/copyfiles \"src/**/local.settings.json\" dist/ -u 1",
+        "copy-local-settings": "node_modules/.bin/copyfiles \"src/scanner/**/local.settings.json\" src/scanner/dist/ -u 2",
         "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
         "cbuild": "npm-run-all --serial clean build",
-        "clean": "rimraf dist",
+        "clean": "rimraf dist src/scanner/dist",
         "format": "./node_modules/.bin/prettier --config prettier.config.js --write \"**/*\"",
         "format-check": "./node_modules/.bin/prettier --config prettier.config.js --check \"**/*\"",
         "lint": "tslint -c ./tslint.json -p ./tsconfig.json --force",
