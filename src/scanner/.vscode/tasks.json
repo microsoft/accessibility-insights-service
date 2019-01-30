@@ -11,18 +11,27 @@
                 "env": {
                     "languageWorkers__node__arguments": "--inspect=9858"
                 },
-                "cwd": "${fileDirname}../../../../dist/scanner"
+                "cwd": "dist"
             },
-            "dependsOn": "installExtensions"
+            "dependsOn": "installExtensionsOnDev"
         },
         {
-            "label": "installExtensions",
+            "label": "installExtensionsOnDev",
             "command": "func extensions install",
             "type": "shell",
             "options": {
-                "cwd": "${fileDirname}../../../../dist/scanner"
+                "cwd": "dist"
             },
-            "dependsOn": ["build", "copy-local-settings"]
+            "dependsOn": ["build", "copy-local-settings", "copy-chrome-dev"]
+        },
+        {
+            "label": "installExtensionsOnProd",
+            "command": "func extensions install",
+            "type": "shell",
+            "options": {
+                "cwd": "dist"
+            },
+            "dependsOn": ["cbuild", "copy-chrome-prod"]
         },
         {
             "label": "copy-local-settings",
@@ -33,6 +42,23 @@
             "label": "build",
             "command": "npm run build",
             "type": "shell"
+        },
+        {
+            "label": "cbuild",
+            "command": "npm run cbuild",
+            "type": "shell"
+        },
+        {
+            "label": "copy-chrome-prod",
+            "command": "npm run copy-chrome-prod",
+            "type": "shell",
+            "dependsOn": ["cbuild"]
+        },
+        {
+            "label": "copy-chrome-dev",
+            "command": "npm run copy-chrome-dev",
+            "type": "shell",
+            "dependsOn": ["build"]
         }
     ]
 }

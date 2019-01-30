@@ -4,6 +4,10 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     devtool: 'cheap-source-map',
+    externals: {
+        bufferutil: 'commonjs bufferutil',
+        'utf-8-validate': 'commonjs utf-8-validate',
+    },
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
     },
@@ -26,8 +30,11 @@ module.exports = {
         ],
     },
     name: 'scanner',
+    node: {
+        __dirname: false,
+    },
     output: {
-        path: path.resolve('./dist/scanner'),
+        path: path.resolve('./src/scanner/dist'),
         filename: '[name]/index.js',
         libraryTarget: 'commonjs2',
     },
@@ -42,12 +49,13 @@ module.exports = {
                 context: 'src/scanner',
                 from: '**/function.json',
                 to: '',
+                ignore: ['dist/**'],
             },
         ]),
     ],
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],
-        extensions: ['.ts', '.js', 'json'],
+        extensions: ['.ts', '.js', '.json'],
     },
     target: 'node',
 };
