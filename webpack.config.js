@@ -51,11 +51,6 @@ module.exports = {
                 to: '',
                 ignore: ['dist/**'],
             },
-            {
-                context: 'node_modules/puppeteer/',
-                from: '.local-chromium/**',
-                to: 'scan-url',
-            },
         ]),
     ],
     resolve: {

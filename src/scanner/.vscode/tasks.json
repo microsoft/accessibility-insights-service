@@ -22,7 +22,7 @@
             "options": {
                 "cwd": "dist"
             },
-            "dependsOn": ["build", "copy-local-settings"]
+            "dependsOn": ["build", "copy-local-settings", "copy-chrome-dev"]
         },
         {
             "label": "installExtensionsOnProd",
@@ -31,7 +31,7 @@
             "options": {
                 "cwd": "dist"
             },
-            "dependsOn": ["cbuild"]
+            "dependsOn": ["cbuild", "copy-chrome-prod"]
         },
         {
             "label": "copy-local-settings",
@@ -47,6 +47,18 @@
             "label": "cbuild",
             "command": "npm run cbuild",
             "type": "shell"
+        },
+        {
+            "label": "copy-chrome-prod",
+            "command": "npm run copy-chrome-prod",
+            "type": "shell",
+            "dependsOn": ["cbuild"]
+        },
+        {
+            "label": "copy-chrome-dev",
+            "command": "npm run copy-chrome-dev",
+            "type": "shell",
+            "dependsOn": ["build"]
         }
     ]
 }
