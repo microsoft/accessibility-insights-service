@@ -4,11 +4,12 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     devtool: 'cheap-source-map',
+    externals: {
+        bufferutil: 'commonjs bufferutil',
+        'utf-8-validate': 'commonjs utf-8-validate',
+    },
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
-    },
-    externals: {
-        puppeteer: 'puppeteer',
     },
     mode: 'development',
     module: {
@@ -29,6 +30,9 @@ module.exports = {
         ],
     },
     name: 'scanner',
+    node: {
+        __dirname: false,
+    },
     output: {
         path: path.resolve('./src/scanner/dist'),
         filename: '[name]/index.js',
@@ -45,20 +49,18 @@ module.exports = {
                 context: 'src/scanner',
                 from: '**/function.json',
                 to: '',
+                ignore: ['dist/**'],
             },
             {
-                from: 'node_modules/puppeteer',
-                to: 'scan-url/node_modules/puppeteer',
-            },
-            {
-                from: 'node_modules/debug',
-                to: 'scan-url/node_modules/debug',
+                context: 'node_modules/puppeteer/',
+                from: '.local-chromium/**',
+                to: 'scan-url',
             },
         ]),
     ],
     resolve: {
         modules: [path.resolve(__dirname, 'node_modules')],
-        extensions: ['.ts', '.js', 'json'],
+        extensions: ['.ts', '.js', '.json'],
     },
     target: 'node',
 };
