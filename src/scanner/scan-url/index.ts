@@ -1,7 +1,6 @@
 import { Context } from '@azure/functions';
-import { AxePuppeteerUtils } from './AxePuppeteerUtils';
-
 import * as Puppeteer from 'puppeteer';
+import { AxePuppeteerUtils } from './AxePuppeteerUtils';
 
 import { Scanner } from './scanner';
 
