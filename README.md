@@ -55,10 +55,14 @@
     ```bash
        npm run copy-local-settings
     ```
+-   Copy local.settings.json to dist folder
 
+    ```bash
+       npm run copy-chrome-dev
+    ```    
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
     ```bash
-       cd dist/scanner
+       cd src/scanner/dist
        func extensions install
        func host start
     ```
