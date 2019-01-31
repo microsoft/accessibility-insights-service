@@ -51,6 +51,10 @@ module.exports = {
                 to: '',
                 ignore: ['dist/**'],
             },
+            {
+                from: 'node_modules/axe-core/*',
+                to: '',
+            },
         ]),
     ],
     resolve: {

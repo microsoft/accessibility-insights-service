@@ -11,6 +11,7 @@
         "no-relative-imports": false,
         "prefer-type-cast": false,
         "typedef": [true, "call-signature", "property-declaration"],
-        "trailing-comma": true
+        "trailing-comma": true,
+        "no-console": false
     }
 }
