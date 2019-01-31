@@ -3,6 +3,7 @@
 .prettierignore
 LICENSE
 
+**/*.code-workspace
 **/.gitignore
 test-results/
 **/obj/

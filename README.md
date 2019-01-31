@@ -50,16 +50,12 @@
        npm run build
     ```
 
--   Copy local.settings.json to dist folder
+-   Copy dev dependencies to dist folder
 
     ```bash
-       npm run copy-local-settings
+       npm run copy-dev
     ```
--   Copy local.settings.json to dist folder
 
-    ```bash
-       npm run copy-chrome-dev
-    ```    
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
     ```bash
        cd src/scanner/dist
