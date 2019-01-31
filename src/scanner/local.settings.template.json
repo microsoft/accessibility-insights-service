@@ -1,9 +1,0 @@
-// This file can be used to create a local copy of local.settings.json, in the current folder
-// secrets for the configs can be fetched from azure portal and used in the local.settings.json
-{
-    "IsEncrypted": false,
-    "Values": {
-        "AzureWebJobsStorage": "<DONOT PASTE CONNECTION STRING HERE>",
-        "FUNCTIONS_WORKER_RUNTIME": "node"
-    }
-}

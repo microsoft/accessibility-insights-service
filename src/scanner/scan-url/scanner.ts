@@ -12,7 +12,9 @@ export class Scanner {
 
     public async scan(url: string): Promise<void> {
         const browser = await this.launchBrowser({
+            headless: true,
             timeout: 15000,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
         });
 
         const page = await browser.newPage();

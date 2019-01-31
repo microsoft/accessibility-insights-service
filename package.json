@@ -4,9 +4,8 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "main": "index.js",
     "scripts": {
-        "copy-chrome-prod": "node src/scanner/scan-url/download-chrome.js",
-        "copy-chrome-dev": "npx copyfiles \"node_modules/puppeteer/.local-chromium/**\" src/scanner/dist/scan-url/ -u 2",
-        "copy-local-settings": "npx copyfiles \"src/scanner/**/local.settings.json\" src/scanner/dist/ -u 2",
+        "build-image": "docker build -t scanner-dep src/scanner",
+        "run-image": "docker run -p 8080:80 -it scanner-dep",
         "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist src/scanner/dist",
@@ -34,6 +33,7 @@
     "devDependencies": {
         "@azure/functions": "^1.0.1-beta2",
         "@types/jest": "^23.3.13",
+        "@types/puppeteer": "^1.12.0",
         "azure-functions-core-tools": "2.4.290",
         "copy-webpack-plugin": "^4.6.0",
         "copyfiles": "^2.1.0",
@@ -52,12 +52,11 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.2.4",
         "webpack": "^4.29.0",
-        "webpack-cli": "^3.2.1"
+        "webpack-cli": "^3.2.1",
+        "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
-        "@types/puppeteer": "^1.11.2",
         "axe-puppeteer": "^1.0.0",
-        "puppeteer": "^1.11.0",
-        "puppeteer-core": "^1.11.0"
+        "puppeteer": "^1.12.1"
     }
 }
