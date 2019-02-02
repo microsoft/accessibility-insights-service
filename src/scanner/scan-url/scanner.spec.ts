@@ -46,18 +46,19 @@ describe('Scanner', () => {
 
     it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
-        const resultMock: IMock<AxeResults> = getPromisableDynamicMock(Mock.ofType<AxeResults>());
-        setupBrowserPageCalls(url);
+        // tslint:disable-next-line:no-any
+        const axeResultsStub = 'axe results' as any;
+        setupNewBrowserPageCall(url);
+        setupPageScanCall(axeResultsStub);
+        setupLogScanResultsCall(axeResultsStub);
         setupBrowserPageCloseCall();
-        setupPageScanCall(resultMock.object);
-        setupLogScanResultsCall(resultMock.object);
 
         await scanner.scan(url);
 
         verifyMocks();
     }, 20000);
 
-    function setupBrowserPageCalls(url: string): void {
+    function setupNewBrowserPageCall(url: string): void {
         pageMock = getPromisableDynamicMock(pageMock);
         browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
         pageMock.setup(async p => p.goto(url)).verifiable(Times.once());
