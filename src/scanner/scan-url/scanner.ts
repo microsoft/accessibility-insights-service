@@ -1,11 +1,12 @@
 import { Context } from '@azure/functions';
+import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
-import { AxePuppeteerUtils } from './AxePuppeteerUtils';
+import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 
 export class Scanner {
     constructor(
         private readonly launchBrowser: typeof Puppeteer.launch,
-        private readonly axePuppeteerUtils: AxePuppeteerUtils,
+        private readonly axePuppeteerFactory: AxePuppeteerFactory,
         private readonly context: Context,
     ) {}
 
@@ -18,8 +19,8 @@ export class Scanner {
         await page.setBypassCSP(true);
 
         await page.goto(url);
-        this.axePuppeteerUtils.init(page);
-        const results = await this.axePuppeteerUtils.analyze();
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.getInstance(page);
+        const results = await axePuppeteer.analyze();
         this.context.log(results);
 
         await page.close();

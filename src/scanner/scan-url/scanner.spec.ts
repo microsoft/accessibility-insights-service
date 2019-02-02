@@ -1,10 +1,11 @@
 import { Context } from '@azure/functions';
 import { AxeResults } from 'axe-core';
+import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxePuppeteerUtils } from './AxePuppeteerUtils';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
@@ -12,16 +13,18 @@ describe('Scanner', () => {
     let browserMock: IMock<Puppeteer.Browser>;
     let pageMock: IMock<Puppeteer.Page>;
     let scanner: Scanner;
-    let axePuppeteerUtilsMock: IMock<AxePuppeteerUtils>;
+    let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
+    let axePuppeteerMock: IMock<AxePuppeteer>;
     let contextMock: IMock<Context>;
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
         launchBrowserMock = Mock.ofType<typeof Puppeteer.launch>();
-        axePuppeteerUtilsMock = Mock.ofType<AxePuppeteerUtils>();
+        axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
         contextMock = Mock.ofType<Context>();
-        scanner = new Scanner(launchBrowserMock.object, axePuppeteerUtilsMock.object, contextMock.object);
+        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
+        axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
         browserMock = getPromisableDynamicMock(browserMock);
 
@@ -67,8 +70,11 @@ describe('Scanner', () => {
     }
 
     function setupPageScanCall(axeResults: AxeResults): void {
-        axePuppeteerUtilsMock.setup(apum => apum.init(pageMock.object)).verifiable(Times.once());
-        axePuppeteerUtilsMock
+        axePuppeteerFactoryMock
+            .setup(apfm => apfm.getInstance(pageMock.object))
+            .returns(() => axePuppeteerMock.object)
+            .verifiable(Times.once());
+        axePuppeteerMock
             .setup(async apum => apum.analyze())
             .returns(async () => Promise.resolve(axeResults))
             .verifiable(Times.once());
@@ -81,7 +87,8 @@ describe('Scanner', () => {
     function verifyMocks(): void {
         pageMock.verifyAll();
         browserMock.verifyAll();
-        axePuppeteerUtilsMock.verifyAll();
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
         contextMock.verifyAll();
     }
 });
