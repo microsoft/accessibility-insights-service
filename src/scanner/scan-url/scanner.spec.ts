@@ -9,7 +9,7 @@ import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
-    let launchBrowserMock: IMock<typeof Puppeteer.launch>;
+    let puppeteerMock: IMock<typeof Puppeteer>;
     let browserMock: IMock<Puppeteer.Browser>;
     let pageMock: IMock<Puppeteer.Page>;
     let scanner: Scanner;
@@ -19,19 +19,21 @@ describe('Scanner', () => {
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
-        launchBrowserMock = Mock.ofType<typeof Puppeteer.launch>();
+        puppeteerMock = Mock.ofType<typeof Puppeteer>();
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
         contextMock = Mock.ofType<Context>();
-        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object);
+        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object, contextMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
         browserMock = getPromisableDynamicMock(browserMock);
 
-        launchBrowserMock
-            .setup(async l =>
-                l({
+        puppeteerMock
+            .setup(async p =>
+                p.launch({
+                    headless: true,
                     timeout: 15000,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
                 }),
             )
             .returns(async () => {
@@ -47,7 +49,7 @@ describe('Scanner', () => {
     it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
         // tslint:disable-next-line:no-any
-        const axeResultsStub = 'axe results' as any;
+        const axeResultsStub = ('axe results' as any) as AxeResults;
         setupNewBrowserPageCall(url);
         setupPageScanCall(axeResultsStub);
         setupLogScanResultsCall(axeResultsStub);
@@ -82,7 +84,11 @@ describe('Scanner', () => {
     }
 
     function setupLogScanResultsCall(axeResults: AxeResults): void {
-        contextMock.setup(cm => cm.log(axeResults)).verifiable(Times.once());
+        contextMock
+            .setup(cm => {
+                cm.log(axeResults);
+            })
+            .verifiable(Times.once());
     }
 
     function verifyMocks(): void {

@@ -1,17 +1,18 @@
 import { Context } from '@azure/functions';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
+
 import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 
 export class Scanner {
     constructor(
-        private readonly launchBrowser: typeof Puppeteer.launch,
+        private readonly puppeteer: typeof Puppeteer,
         private readonly axePuppeteerFactory: AxePuppeteerFactory,
         private readonly context: Context,
     ) {}
 
     public async scan(url: string): Promise<void> {
-        const browser = await this.launchBrowser({
+        const browser = await this.puppeteer.launch({
             headless: true,
             timeout: 15000,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],

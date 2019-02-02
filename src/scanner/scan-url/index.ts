@@ -6,6 +6,6 @@ import { Scanner } from './scanner';
 
 export async function run(context: Context, url: string): Promise<void> {
     context.log(`starting scan ${url}`);
-    await new Scanner(Puppeteer.launch.bind(Puppeteer), new AxePuppeteerFactory(), context).scan(url);
+    await new Scanner(Puppeteer, new AxePuppeteerFactory(), context).scan(url);
     context.log(`successfully scanned ${url}`);
 }
