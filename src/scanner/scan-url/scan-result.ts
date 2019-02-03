@@ -1,9 +1,14 @@
 export enum ProductType {
-    web,
+    web = 'web',
 }
 
 export enum SourceName {
-    accessibility,
+    accessibility = 'accessibility',
+}
+
+export enum ResultLevel {
+    error = 'error',
+    pass = 'pass',
 }
 
 export interface Tool {
@@ -11,11 +16,6 @@ export interface Tool {
     fullName: string;
     version: string;
     semanticVersion: string;
-}
-
-export enum ResultLevel {
-    error,
-    pass,
 }
 
 export interface Product {

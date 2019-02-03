@@ -2,28 +2,43 @@ import { AxeResults, NodeResult, Result } from 'axe-core';
 import { Product, ResultLevel, ScanInfo, ScanResult, SourceName, Tool } from './scan-result';
 
 export class ResultConverter {
-    public convert(axeResults: AxeResults, productInfo: Product, toolInfo: Tool): ScanResult[] {
+    public convert(axeResults: AxeResults, productInfo: Product): ScanResult[] {
         const results: ScanResult[] = [];
+        const toolInfo: Tool = this.buildToolInfo();
         const scanInfo: ScanInfo = {
             totalResultCount: 0,
             passedResultCount: 0,
             failedResultCount: 0,
         };
+
         axeResults.passes.forEach((axeResult: Result) => {
             scanInfo.passedResultCount += axeResult.nodes.length;
             scanInfo.totalResultCount += axeResult.nodes.length;
 
-            this.convertResults(axeResult, axeResult.nodes, scanInfo, productInfo, toolInfo, ResultLevel.pass, axeResults.url);
+            results.push(
+                ...this.convertResults(axeResult, axeResult.nodes, scanInfo, productInfo, toolInfo, ResultLevel.pass, axeResults.url),
+            );
         });
 
         axeResults.violations.forEach((axeResult: Result) => {
             scanInfo.failedResultCount += axeResult.nodes.length;
             scanInfo.totalResultCount += axeResult.nodes.length;
 
-            this.convertResults(axeResult, axeResult.nodes, scanInfo, productInfo, toolInfo, ResultLevel.error, axeResults.url);
+            results.push(
+                ...this.convertResults(axeResult, axeResult.nodes, scanInfo, productInfo, toolInfo, ResultLevel.error, axeResults.url),
+            );
         });
 
         return results;
+    }
+
+    private buildToolInfo(): Tool {
+        return {
+            name: 'KerosWebAgent',
+            fullName: 'KerosWebAgent',
+            version: '1.0.0',
+            semanticVersion: '1.0.0',
+        };
     }
 
     private convertResults(
@@ -33,9 +48,8 @@ export class ResultConverter {
         productInfo: Product,
         toolInfo: Tool,
         level: ResultLevel,
-        url: string
+        url: string,
     ): ScanResult[] {
-
         return nodes.map((node: NodeResult) => {
             const selector = node.target.join(';');
 
@@ -70,12 +84,12 @@ export class ResultConverter {
                                     },
                                 },
                             },
-                            fullyQualifiedLogicalName: selector
+                            fullyQualifiedLogicalName: selector,
                         },
                     ],
                     fingerprints: {
-                        'value0/v1': 'ClientScannerEmulator'
-                    }
+                        'value0/v1': 'ClientScannerEmulator',
+                    },
                 },
             };
         });
