@@ -1,5 +1,5 @@
-import { AxeResults, Result, NodeResult } from 'axe-core';
-import { Product, ScanInfo, ScanResult, Tool, SourceName, ResultLevel } from './scan-result';
+import { AxeResults, NodeResult, Result } from 'axe-core';
+import { Product, ResultLevel, ScanInfo, ScanResult, SourceName, Tool } from './scan-result';
 
 export class ResultConverter {
     public convert(axeResults: AxeResults, productInfo: Product, toolInfo: Tool): ScanResult[] {
