@@ -4,16 +4,24 @@
         {
             "label": "runFunctionsHost",
             "type": "shell",
-            "command": "func host start",
+            "command": "docker run -p 8080:80 -it scanner-dev",
             "isBackground": true,
-            "problemMatcher": "$func-watch",
+            "dependsOn": "build-dev-docker-image"
+        },
+        {
+            "label": "build-dev-docker-image",
+            "command": "docker build -t scanner-dev -f dev.DockerFile .",
             "options": {
-                "env": {
-                    "languageWorkers__node__arguments": "--inspect=9858"
-                },
-                "cwd": "dist"
+                "cwd": "dev-docker"
             },
-            "dependsOn": "installExtensionsOnDev"
+            "type": "shell",
+            "dependsOn": ["build-base-docker-image"]
+        },
+        {
+            "label": "build-base-docker-image",
+            "command": "docker build -t scanner .",
+            "type": "shell",
+            "dependsOn": ["installExtensionsOnDev"]
         },
         {
             "label": "installExtensionsOnDev",
@@ -22,43 +30,12 @@
             "options": {
                 "cwd": "dist"
             },
-            "dependsOn": ["build", "copy-local-settings", "copy-chrome-dev"]
-        },
-        {
-            "label": "installExtensionsOnProd",
-            "command": "func extensions install",
-            "type": "shell",
-            "options": {
-                "cwd": "dist"
-            },
-            "dependsOn": ["cbuild", "copy-chrome-prod"]
-        },
-        {
-            "label": "copy-local-settings",
-            "command": "npm run copy-local-settings",
-            "type": "shell"
+            "dependsOn": ["build"]
         },
         {
             "label": "build",
             "command": "npm run build",
             "type": "shell"
-        },
-        {
-            "label": "cbuild",
-            "command": "npm run cbuild",
-            "type": "shell"
-        },
-        {
-            "label": "copy-chrome-prod",
-            "command": "npm run copy-chrome-prod",
-            "type": "shell",
-            "dependsOn": ["cbuild"]
-        },
-        {
-            "label": "copy-chrome-dev",
-            "command": "npm run copy-chrome-dev",
-            "type": "shell",
-            "dependsOn": ["build"]
         }
     ]
 }
