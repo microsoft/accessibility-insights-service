@@ -1,5 +1,6 @@
 {
     "compilerOptions": {
+        "allowJs": true,
         "target": "es2015",
         "module": "commonjs",
         "moduleResolution": "node",
@@ -9,7 +10,7 @@
         "noImplicitReturns": true,
         "noUnusedLocals": true
     },
-    "include": ["src/**/*.ts"],
+    "include": ["src/**/*.ts", "src/**/sha256.js"],
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,
         "useWebpackText": true
