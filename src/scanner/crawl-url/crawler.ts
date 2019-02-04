@@ -3,17 +3,17 @@ import { IncomingMessage } from 'http';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 export class Crawler {
-    constructor(private readonly crawlerInstance: SimpleCrawlerTyped) {}
+    constructor(private readonly crawlerInstance: SimpleCrawlerTyped) { }
     public async crawl(context: Context, url: string): Promise<void> {
         return new Promise(resolve => {
-            const EXT_BLACKLIST = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
+            const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
             context.log('Received url to crawl ', url);
             const crawledUrls: string[] = [];
             this.crawlerInstance.maxDepth = 1;
             this.crawlerInstance.maxConcurrency = 5;
             this.crawlerInstance.interval = 1000;
 
-            this.crawlerInstance.addFetchCondition(queueItem => !queueItem.path.match(EXT_BLACKLIST));
+            this.crawlerInstance.addFetchCondition(queueItem => !queueItem.path.match(IGNORED_EXTENSIONS));
 
             context.log('Max Depth set to ', this.crawlerInstance.maxDepth);
 
