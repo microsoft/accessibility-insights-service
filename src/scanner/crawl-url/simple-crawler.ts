@@ -5,18 +5,16 @@ export interface QueueItem {
     path: string;
     url: string;
 }
-export interface SimpleCrawler {
-    respectRobotsTxt: boolean;
-    maxDepth: number;
-    maxConcurrency: number;
-    interval: number;
-    initialURL: string;
-    stop(): void;
-    start(): void;
-    addFetchCondition(callback: (queueItem: QueueItem) => void): number;
-    on(eventName: string, callback: Function): number;
+export declare class SimpleCrawlerTyped {
+    public respectRobotsTxt: boolean;
+    public maxDepth: number;
+    public maxConcurrency: number;
+    public interval: number;
+    public initialURL: string;
+    public stop(): void;
+    public start(): void;
+    public addFetchCondition(callback: (queueItem: QueueItem) => void): number;
+    public on(eventName: string, callback: Function): number;
 }
-
-export function getCrawler(url: string): SimpleCrawler {
-    return new simpleCrawler(url) as SimpleCrawler;
-}
+// tslint:disable-next-line:variable-name
+export const SimpleCrawler = simpleCrawler as typeof SimpleCrawlerTyped;

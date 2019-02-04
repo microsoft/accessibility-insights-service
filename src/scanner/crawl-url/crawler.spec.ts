@@ -2,11 +2,10 @@ import { Context } from '@azure/functions';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { Crawler } from './crawler';
-import { getCrawler, QueueItem, SimpleCrawler } from './simple-crawler';
+import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 describe('Crawler', () => {
-    let getCrawlerMock: IMock<typeof getCrawler>;
-    let simpleCrawlerMock: IMock<SimpleCrawler>;
+    let simpleCrawlerMock: IMock<SimpleCrawlerTyped>;
     let contextStub: Context;
     const scanUrl = 'https://www.bing.com';
     let completeCallback: Function;
@@ -14,7 +13,7 @@ describe('Crawler', () => {
     let fetchConditionCallback: Function;
 
     beforeEach(() => {
-        simpleCrawlerMock = Mock.ofType<SimpleCrawler>(undefined, MockBehavior.Strict);
+        simpleCrawlerMock = Mock.ofType<SimpleCrawlerTyped>(undefined, MockBehavior.Strict);
         simpleCrawlerMock.setup(sc => (sc.maxDepth = It.isValue(1)));
         simpleCrawlerMock.setup(sc => (sc.maxConcurrency = It.isValue(5)));
         simpleCrawlerMock.setup(sc => (sc.interval = It.isValue(1000)));
@@ -22,12 +21,10 @@ describe('Crawler', () => {
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-any no-empty
         contextStub = { bindings: {}, log: (() => {}) as any } as Context;
-        getCrawlerMock = Mock.ofType<typeof getCrawler>();
-        getCrawlerMock.setup(gc => gc(scanUrl)).returns(() => simpleCrawlerMock.object);
     });
 
     it('setup should work with params', () => {
-        const testSubject = new Crawler(getCrawlerMock.object);
+        const testSubject = new Crawler(simpleCrawlerMock.object);
         testSubject.crawl(contextStub, scanUrl);
         expect(fetchConditionCallback).not.toBeNull();
         expect(completeCallback).not.toBeNull();
@@ -37,7 +34,7 @@ describe('Crawler', () => {
     test.each([createQueueItem('https://www.bing.com'), createQueueItem('https://www.bing.com/abc.html')])(
         'should return true for valid fetch condition for url %o',
         (testcase: string) => {
-            const newObj = new Crawler(getCrawlerMock.object);
+            const newObj = new Crawler(simpleCrawlerMock.object);
             newObj.crawl(contextStub, scanUrl);
             expect(fetchConditionCallback(testcase)).toBe(true);
         },
@@ -45,13 +42,13 @@ describe('Crawler', () => {
 
     // tslint:disable-next-line: mocha-no-side-effect-code
     test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
-        const newObj = new Crawler(getCrawlerMock.object);
+        const newObj = new Crawler(simpleCrawlerMock.object);
         newObj.crawl(contextStub, scanUrl);
         expect(fetchConditionCallback(testcase)).toBe(false);
     });
 
     it('should complete when no urls to scan', async () => {
-        const testSubject = new Crawler(getCrawlerMock.object);
+        const testSubject = new Crawler(simpleCrawlerMock.object);
         const completePromise = testSubject.crawl(contextStub, scanUrl);
         setupCompleteCallback();
         completeCallback();
@@ -61,7 +58,7 @@ describe('Crawler', () => {
     });
 
     it('should complete when all urls are scanned', async () => {
-        const testSubject = new Crawler(getCrawlerMock.object);
+        const testSubject = new Crawler(simpleCrawlerMock.object);
         const completePromise = testSubject.crawl(contextStub, scanUrl);
         fetchCompleteCallback(createQueueItem('https://www.something.com'));
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
