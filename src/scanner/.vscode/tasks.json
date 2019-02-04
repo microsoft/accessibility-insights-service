@@ -4,7 +4,7 @@
         {
             "label": "runFunctionsHost",
             "type": "shell",
-            "command": "docker run -p 8080:80 -it scanner-dev",
+            "command": "docker run -p 8080:80 --rm -it scanner-dev",
             "isBackground": true,
             "dependsOn": "build-dev-docker-image"
         },
