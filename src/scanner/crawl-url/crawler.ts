@@ -3,7 +3,7 @@ import { IncomingMessage } from 'http';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 export class Crawler {
-    constructor(private readonly crawlerInstance: SimpleCrawlerTyped) { }
+    constructor(private readonly crawlerInstance: SimpleCrawlerTyped) {}
     public async crawl(context: Context, url: string): Promise<void> {
         return new Promise(resolve => {
             const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
