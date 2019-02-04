@@ -4,3 +4,4 @@ test-results/
 
 **/.secrets
 **/local.settings.json
+**/dev.DockerFile

@@ -3,6 +3,9 @@
 .prettierignore
 LICENSE
 
+**/*.code-workspace
+**/Dockerfile
+**/*.Dockerfile
 **/.gitignore
 test-results/
 **/obj/

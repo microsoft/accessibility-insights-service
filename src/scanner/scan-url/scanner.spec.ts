@@ -1,27 +1,39 @@
+import { Context } from '@azure/functions';
+import { AxeResults } from 'axe-core';
+import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
-    let launchBrowserMock: IMock<typeof Puppeteer.launch>;
+    let puppeteerMock: IMock<typeof Puppeteer>;
     let browserMock: IMock<Puppeteer.Browser>;
     let pageMock: IMock<Puppeteer.Page>;
     let scanner: Scanner;
+    let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
+    let axePuppeteerMock: IMock<AxePuppeteer>;
+    let contextMock: IMock<Context>;
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
-        launchBrowserMock = Mock.ofType<typeof Puppeteer.launch>();
-        scanner = new Scanner(launchBrowserMock.object);
+        puppeteerMock = Mock.ofType<typeof Puppeteer>();
+        axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
+        contextMock = Mock.ofType<Context>();
+        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object, contextMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
+        axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
         browserMock = getPromisableDynamicMock(browserMock);
 
-        launchBrowserMock
-            .setup(async l =>
-                l({
+        puppeteerMock
+            .setup(async p =>
+                p.launch({
+                    headless: true,
                     timeout: 15000,
+                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
                 }),
             )
             .returns(async () => {
@@ -34,23 +46,56 @@ describe('Scanner', () => {
         expect(scanner).not.toBeNull();
     });
 
-    it('should launch browser page with given url', async () => {
+    it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
-
-        pageMock = getPromisableDynamicMock(pageMock);
-        browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
-        pageMock
-            .setup(async p => p.goto(url))
-            .returns(async () => Promise.resolve(undefined))
-            .verifiable(Times.once());
+        // tslint:disable-next-line:no-any
+        const axeResultsStub = ('axe results' as any) as AxeResults;
+        setupNewBrowserPageCall(url);
+        setupPageScanCall(axeResultsStub);
+        setupLogScanResultsCall(axeResultsStub);
+        setupBrowserPageCloseCall();
 
         await scanner.scan(url);
-        browserMock
-            .setup(async b => b.close())
-            .returns(async () => Promise.resolve(undefined))
-            .verifiable();
 
+        verifyMocks();
+    }, 20000);
+
+    function setupNewBrowserPageCall(url: string): void {
+        pageMock = getPromisableDynamicMock(pageMock);
+        browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
+        pageMock.setup(async p => p.goto(url)).verifiable(Times.once());
+        pageMock.setup(async p => p.setBypassCSP(true)).verifiable(Times.once());
+    }
+
+    function setupBrowserPageCloseCall(): void {
+        browserMock.setup(async b => b.close()).verifiable();
+        pageMock.setup(async p => p.close()).verifiable(Times.once());
+    }
+
+    function setupPageScanCall(axeResults: AxeResults): void {
+        axePuppeteerFactoryMock
+            .setup(apfm => apfm.getInstance(pageMock.object))
+            .returns(() => axePuppeteerMock.object)
+            .verifiable(Times.once());
+        axePuppeteerMock
+            .setup(async apum => apum.analyze())
+            .returns(async () => Promise.resolve(axeResults))
+            .verifiable(Times.once());
+    }
+
+    function setupLogScanResultsCall(axeResults: AxeResults): void {
+        contextMock
+            .setup(cm => {
+                cm.log(axeResults);
+            })
+            .verifiable(Times.once());
+    }
+
+    function verifyMocks(): void {
         pageMock.verifyAll();
         browserMock.verifyAll();
-    }, 20000);
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+        contextMock.verifyAll();
+    }
 });
