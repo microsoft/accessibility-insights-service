@@ -9,3 +9,5 @@ test-results/
 **/bin/
 **/*.dat
 dist/
+**/*sha256.js
+**/*.code-workspace
