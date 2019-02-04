@@ -10,6 +10,7 @@ module.exports = {
     },
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
+        'crawl-url': path.resolve('./src/scanner/crawl-url/index.ts'),
     },
     mode: 'development',
     module: {

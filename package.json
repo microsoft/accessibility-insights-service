@@ -57,6 +57,7 @@
     "dependencies": {
         "@types/puppeteer": "^1.11.2",
         "puppeteer": "^1.11.0",
-        "puppeteer-core": "^1.11.0"
+        "puppeteer-core": "^1.11.0",
+        "simplecrawler": "^1.1.6"
     }
 }
