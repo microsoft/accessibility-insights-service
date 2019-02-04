@@ -58,6 +58,6 @@
     "dependencies": {
         "axe-puppeteer": "^1.0.0",
         "puppeteer": "^1.12.1",
-        "simplecrawler": "^1.1.6
+        "simplecrawler": "^1.1.6"
     }
 }
