@@ -22,7 +22,7 @@ describe('Scanner', () => {
         launchBrowserMock = Mock.ofType<typeof Puppeteer.launch>();
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
         contextMock = Mock.ofType<Context>();
-        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object);
+        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object, undefined);
         pageMock = Mock.ofType<Puppeteer.Page>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
