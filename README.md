@@ -89,7 +89,7 @@
     ```bash
        cd src/scanner
        npm run cbuild
-       docker build -t scanner
+       docker build -t scanner .
     ```
 
 -   Deploy to container image to production
