@@ -1,0 +1,18 @@
+{
+    "bindings": [
+        {
+            "name": "url",
+            "type": "queueTrigger",
+            "direction": "in",
+            "queueName": "crawl-url-queue",
+            "connection": "AzureWebJobsStorage"
+        },
+        {
+            "type": "queue",
+            "name": "outputQueueItem",
+            "queueName": "scan-url-queue",
+            "connection": "AzureWebJobsStorage",
+            "direction": "out"
+        }
+    ]
+}
