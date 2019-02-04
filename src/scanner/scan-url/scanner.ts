@@ -24,9 +24,10 @@ export class Scanner {
         await page.goto(url);
         const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.getInstance(page);
         const axeResults = await axePuppeteer.analyze();
+        this.context.log(axeResults);
 
         const results = this.resultConverter.convert(axeResults, this.buildFakeProductInfo(url));
-        this.context.log(results.length);
+        this.context.log(results);
 
         await page.close();
         await browser.close();

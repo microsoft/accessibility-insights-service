@@ -6,6 +6,8 @@ import { IMock, Mock, Times } from 'typemoq';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { AxePuppeteerFactory } from './AxePuppeteerFactory';
+import { ResultConverter } from './result-converter';
+import { Product, ProductType, ScanResult } from './scan-result';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
@@ -16,13 +18,15 @@ describe('Scanner', () => {
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
     let contextMock: IMock<Context>;
+    let resultConverterMock: IMock<ResultConverter>;
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
         launchBrowserMock = Mock.ofType<typeof Puppeteer.launch>();
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
         contextMock = Mock.ofType<Context>();
-        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object, undefined);
+        resultConverterMock = Mock.ofType<ResultConverter>();
+        scanner = new Scanner(launchBrowserMock.object, axePuppeteerFactoryMock.object, contextMock.object, resultConverterMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
@@ -48,10 +52,14 @@ describe('Scanner', () => {
         const url = 'some url';
         // tslint:disable-next-line:no-any
         const axeResultsStub = 'axe results' as any;
+        // tslint:disable-next-line:no-any
+        const scanResultsStub = 'converted results' as any;
+
         setupNewBrowserPageCall(url);
         setupPageScanCall(axeResultsStub);
-        setupLogScanResultsCall(axeResultsStub);
+        setupLogScanResultsCall(axeResultsStub, scanResultsStub);
         setupBrowserPageCloseCall();
+        setupResultConvertCall(axeResultsStub, scanResultsStub);
 
         await scanner.scan(url);
 
@@ -81,8 +89,27 @@ describe('Scanner', () => {
             .verifiable(Times.once());
     }
 
-    function setupLogScanResultsCall(axeResults: AxeResults): void {
+    function setupLogScanResultsCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
         contextMock.setup(cm => cm.log(axeResults)).verifiable(Times.once());
+        contextMock.setup(cm => cm.log(scanResults)).verifiable(Times.once());
+    }
+
+    function setupResultConvertCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
+        resultConverterMock
+            .setup(rcm => rcm.convert(axeResults, buildProductInfo()))
+            .returns(() => scanResults)
+            .verifiable(Times.once());
+    }
+
+    function buildProductInfo(): Product {
+        return {
+            type: ProductType.web,
+            id: 'product id',
+            serviceTreeId: 'serviceTree id',
+            name: 'product name',
+            baseUrl: 'some url',
+            version: 'product version',
+        };
     }
 
     function verifyMocks(): void {
@@ -91,5 +118,6 @@ describe('Scanner', () => {
         axePuppeteerFactoryMock.verifyAll();
         axePuppeteerMock.verifyAll();
         contextMock.verifyAll();
+        resultConverterMock.verifyAll();
     }
 });
