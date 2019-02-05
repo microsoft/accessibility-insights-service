@@ -4,7 +4,7 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { LinkedUrlFinder } from './linked-url-finder';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
-describe('Crawler', () => {
+describe('LinkUrlFinder', () => {
     let simpleCrawlerMock: IMock<SimpleCrawlerTyped>;
     let contextStub: Context;
     const scanUrl = 'https://www.bing.com';
