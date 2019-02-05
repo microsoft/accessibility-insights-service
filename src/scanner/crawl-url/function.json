@@ -1,7 +1,7 @@
 {
     "bindings": [
         {
-            "name": "url",
+            "name": "crawlRequest",
             "type": "queueTrigger",
             "direction": "in",
             "queueName": "crawl-url-queue",

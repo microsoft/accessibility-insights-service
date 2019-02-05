@@ -19,3 +19,10 @@ export declare class SimpleCrawlerTyped {
 }
 // tslint:disable-next-line:variable-name
 export const SimpleCrawler = simpleCrawler as typeof SimpleCrawlerTyped;
+
+export interface CrawlRequest {
+    id: string;
+    name: string;
+    baseUrl: string;
+    serviceTreeId: string;
+}
