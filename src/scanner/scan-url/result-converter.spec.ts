@@ -1,17 +1,19 @@
 import { AxeResults } from 'axe-core';
 import { IMock, It, Mock, Times } from 'typemoq';
 
+import { Hash } from 'crypto';
 import { ResultConverter } from './result-converter';
 import { Product, ProductType, ResultLevel, ScanResult, SourceName } from './scan-result';
-import * as sha256 from './sha256';
 
 describe('conver', () => {
-    let sha256Mock: IMock<typeof sha256>;
+    let sha256Mock: IMock<Hash>;
     let resultConverter: ResultConverter;
     const testUrl: string = 'test url';
+    let returnedHashMock: IMock<Hash>;
 
     beforeEach(() => {
-        sha256Mock = Mock.ofType<typeof sha256>();
+        sha256Mock = Mock.ofType<Hash>();
+        returnedHashMock = Mock.ofType<Hash>();
         resultConverter = new ResultConverter(sha256Mock.object);
     });
 
@@ -26,19 +28,24 @@ describe('conver', () => {
 
         expect(resultConverter.convert(axeResults, buildFakeProductInfo(testUrl))).toMatchObject(expectedConvertedResult);
         sha256Mock.verifyAll();
+        returnedHashMock.verifyAll();
     });
 
     function setupHashFunction(): void {
         const expectedHashSeed1: string = 'test url|#class1;#class2|test html1|test rule id1|value0/v1:clientscanneremulator';
         const expectedHashSeed2: string = 'test url|#class3;#class4|test html2|test rule id2|value0/v1:clientscanneremulator';
         sha256Mock
-            .setup(b => b.computeHash(It.isValue(expectedHashSeed1)))
-            .returns(() => 'scan result id')
+            .setup(b => b.update(It.isValue(expectedHashSeed1)))
+            .returns(() => returnedHashMock.object)
             .verifiable(Times.once());
         sha256Mock
-            .setup(b => b.computeHash(It.isValue(expectedHashSeed2)))
-            .returns(() => 'scan result id')
+            .setup(b => b.update(It.isValue(expectedHashSeed2)))
+            .returns(() => returnedHashMock.object)
             .verifiable(Times.once());
+        returnedHashMock
+            .setup(b => b.digest(It.isValue('hex')))
+            .returns(() => 'scan result id')
+            .verifiable(Times.exactly(2));
     }
 
     function buildFakeProductInfo(url: string): Product {

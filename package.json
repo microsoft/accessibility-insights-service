@@ -56,8 +56,10 @@
     },
     "dependencies": {
         "@types/puppeteer": "^1.11.2",
+        "@types/sha.js": "^2.4.0",
         "axe-puppeteer": "^1.0.0",
         "puppeteer": "^1.11.0",
-        "puppeteer-core": "^1.11.0"
+        "puppeteer-core": "^1.11.0",
+        "sha.js": "^2.4.11"
     }
 }

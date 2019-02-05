@@ -1,9 +1,9 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
+import { Hash } from 'crypto';
 import { Product, ResultLevel, ScanInfo, ScanResult, SourceName, Tool } from './scan-result';
-import * as sha256 from './sha256';
 
 export class ResultConverter {
-    public constructor(private readonly hashFunction: typeof sha256) {}
+    public constructor(private readonly sha256: Hash) {}
 
     public convert(axeResults: AxeResults, productInfo: Product): ScanResult[] {
         const results: ScanResult[] = [];
@@ -73,7 +73,7 @@ export class ResultConverter {
         Object.keys(fingerprints).forEach((key: keyof object) => properties.push(`${key}:${fingerprints[key]}`));
         const hashSeed: string = properties.join('|').toLowerCase();
 
-        return this.hashFunction.computeHash(hashSeed);
+        return this.sha256.update(hashSeed).digest('hex');
     }
 
     private convertResults(
