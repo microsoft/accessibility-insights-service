@@ -1,7 +1,7 @@
 import { Context } from '@azure/functions';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
-import { Crawler } from './crawler';
+import { LinkedUrlFinder } from './linked-url-finder';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 describe('Crawler', () => {
@@ -24,32 +24,29 @@ describe('Crawler', () => {
     });
 
     it('setup should work with params', () => {
-        const testSubject = new Crawler(simpleCrawlerMock.object);
-        testSubject.crawl(contextStub, scanUrl);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        testSubject.find(contextStub, scanUrl);
         expect(fetchConditionCallback).not.toBeNull();
         expect(completeCallback).not.toBeNull();
         simpleCrawlerMock.verifyAll();
     });
-    // tslint:disable-next-line: mocha-no-side-effect-code
     test.each([createQueueItem('https://www.bing.com'), createQueueItem('https://www.bing.com/abc.html')])(
         'should return true for valid fetch condition for url %o',
         (testcase: string) => {
-            const newObj = new Crawler(simpleCrawlerMock.object);
-            newObj.crawl(contextStub, scanUrl);
+            const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+            newObj.find(contextStub, scanUrl);
             expect(fetchConditionCallback(testcase)).toBe(true);
         },
     );
-
-    // tslint:disable-next-line: mocha-no-side-effect-code
     test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
-        const newObj = new Crawler(simpleCrawlerMock.object);
-        newObj.crawl(contextStub, scanUrl);
+        const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+        newObj.find(contextStub, scanUrl);
         expect(fetchConditionCallback(testcase)).toBe(false);
     });
 
     it('should complete when no urls to scan', async () => {
-        const testSubject = new Crawler(simpleCrawlerMock.object);
-        const completePromise = testSubject.crawl(contextStub, scanUrl);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const completePromise = testSubject.find(contextStub, scanUrl);
         setupCompleteCallback();
         completeCallback();
         simpleCrawlerMock.verifyAll();
@@ -58,8 +55,8 @@ describe('Crawler', () => {
     });
 
     it('should complete when all urls are scanned', async () => {
-        const testSubject = new Crawler(simpleCrawlerMock.object);
-        const completePromise = testSubject.crawl(contextStub, scanUrl);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const completePromise = testSubject.find(contextStub, scanUrl);
         fetchCompleteCallback(createQueueItem('https://www.something.com'));
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
         setupCompleteCallback();

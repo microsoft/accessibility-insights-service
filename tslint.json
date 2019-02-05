@@ -12,6 +12,12 @@
         "prefer-type-cast": false,
         "typedef": [true, "call-signature", "property-declaration"],
         "trailing-comma": true,
-        "interface-name": false
+        "interface-name": false,
+        "mocha-no-side-effect-code": [
+            true,
+            {
+                "ignore": "test.each"
+            }
+        ]
     }
 }

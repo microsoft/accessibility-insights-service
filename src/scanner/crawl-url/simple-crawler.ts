@@ -11,6 +11,7 @@ export declare class SimpleCrawlerTyped {
     public maxConcurrency: number;
     public interval: number;
     public initialURL: string;
+    constructor(url: string);
     public stop(): void;
     public start(): void;
     public addFetchCondition(callback: (queueItem: QueueItem) => void): number;

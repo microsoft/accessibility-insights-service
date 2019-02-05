@@ -2,9 +2,9 @@ import { Context } from '@azure/functions';
 import { IncomingMessage } from 'http';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
-export class Crawler {
+export class LinkedUrlFinder {
     constructor(private readonly crawlerInstance: SimpleCrawlerTyped) {}
-    public async crawl(context: Context, url: string): Promise<void> {
+    public async find(context: Context, url: string): Promise<void> {
         return new Promise(resolve => {
             const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
             context.log('Received url to crawl ', url);
@@ -27,8 +27,8 @@ export class Crawler {
             });
 
             this.crawlerInstance.on('fetchdataerror', (queueItem: QueueItem, response: IncomingMessage) => {
-                context.log('Crawler got fetchdataerror for queueItem ', queueItem);
-                context.log('Crawler fetchdataerror error response ', response);
+                context.log.error('Crawler got fetchdataerror for queueItem ', queueItem);
+                context.log.error('Crawler fetchdataerror error response ', response);
             });
 
             this.crawlerInstance.on('fetchcomplete', (queueItem: QueueItem, responseBuffer: string | Buffer, response: IncomingMessage) => {
