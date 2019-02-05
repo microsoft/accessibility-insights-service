@@ -1,15 +1,14 @@
 const path = require('path');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
+var nodeExternals = require('webpack-node-externals');
 
 module.exports = {
     devtool: 'cheap-source-map',
-    externals: {
-        bufferutil: 'commonjs bufferutil',
-        'utf-8-validate': 'commonjs utf-8-validate',
-    },
+    externals: [nodeExternals()],
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
+        'crawl-url': path.resolve('./src/scanner/crawl-url/index.ts'),
     },
     mode: 'development',
     module: {
@@ -52,7 +51,7 @@ module.exports = {
                 ignore: ['dist/**'],
             },
             {
-                from: 'node_modules/axe-core/*',
+                from: 'package*.json',
                 to: '',
             },
         ]),

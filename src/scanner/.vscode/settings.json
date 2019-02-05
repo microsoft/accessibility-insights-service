@@ -3,6 +3,5 @@
     "azureFunctions.projectRuntime": "~2",
     "azureFunctions.projectLanguage": "JavaScript",
     "azureFunctions.templateFilter": "Verified",
-    "azureFunctions.preDeployTask": "installExtensionsOnProd",
     "tslint.configFile": "../../tslint.json"
 }
