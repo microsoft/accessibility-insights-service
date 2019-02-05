@@ -87,8 +87,10 @@
 -   Build Docker image
 
     ```bash
-       cd src/scanner
        npm run cbuild
+       cd src/scanner/dist
+       func extensions install
+       cd ..
        docker build -t scanner .
     ```
 
