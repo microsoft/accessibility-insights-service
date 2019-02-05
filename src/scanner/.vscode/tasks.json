@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "runFunctionsHost",
+            "label": "run-dev-container",
             "type": "shell",
             "command": "docker run -p 8080:80 --rm -it scanner-dev",
             "isBackground": true,
@@ -21,10 +21,10 @@
             "label": "build-base-docker-image",
             "command": "docker build -t scanner .",
             "type": "shell",
-            "dependsOn": ["installExtensionsOnDev"]
+            "dependsOn": ["install-extensions"]
         },
         {
-            "label": "installExtensionsOnDev",
+            "label": "install-extensions",
             "command": "func extensions install",
             "type": "shell",
             "options": {

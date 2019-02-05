@@ -5,7 +5,7 @@
             "name": "Attach to JavaScript Functions",
             "type": "node",
             "request": "launch",
-            "preLaunchTask": "runFunctionsHost"
+            "preLaunchTask": "run-dev-container"
         }
     ]
 }
