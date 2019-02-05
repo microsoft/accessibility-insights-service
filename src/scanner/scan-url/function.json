@@ -7,6 +7,15 @@
             "direction": "in",
             "queueName": "scan-url-queue",
             "connection": "AzureWebJobsStorage"
+        },
+        {
+            "name": "scanIssues",
+            "type": "cosmosDB",
+            "databaseName": "scanner-database",
+            "collectionName": "issues-collection",
+            "createIfNotExists": true,
+            "connectionStringSetting": "COSMOSDB_Connection",
+            "direction": "out"
         }
     ]
 }
