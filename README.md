@@ -45,7 +45,7 @@
     -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Attach to JavaScript Functions" from the list that appears.
 -   Perform trigger operation to trigger an azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
 
-### 6. Build & deploy locally from command line (Yet to document on how to build the docker image & run from that)
+### 6. Build & deploy locally from command line
 
 -   Build project
 
