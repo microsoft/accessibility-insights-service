@@ -25,7 +25,7 @@ describe('LinkUrlFinder', () => {
 
     it('setup should work with params', () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
-        testSubject.find(contextStub, scanUrl);
+        testSubject.find(contextStub);
         expect(fetchConditionCallback).not.toBeNull();
         expect(completeCallback).not.toBeNull();
         simpleCrawlerMock.verifyAll();
@@ -34,19 +34,19 @@ describe('LinkUrlFinder', () => {
         'should return true for valid fetch condition for url %o',
         (testcase: string) => {
             const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
-            newObj.find(contextStub, scanUrl);
+            newObj.find(contextStub);
             expect(fetchConditionCallback(testcase)).toBe(true);
         },
     );
     test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
         const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
-        newObj.find(contextStub, scanUrl);
+        newObj.find(contextStub);
         expect(fetchConditionCallback(testcase)).toBe(false);
     });
 
     it('should complete when no urls to scan', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
-        const completePromise = testSubject.find(contextStub, scanUrl);
+        const completePromise = testSubject.find(contextStub);
         setupCompleteCallback();
         completeCallback();
         simpleCrawlerMock.verifyAll();
@@ -56,7 +56,7 @@ describe('LinkUrlFinder', () => {
 
     it('should complete when all urls are scanned', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
-        const completePromise = testSubject.find(contextStub, scanUrl);
+        const completePromise = testSubject.find(contextStub);
         fetchCompleteCallback(createQueueItem('https://www.something.com'));
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
         setupCompleteCallback();

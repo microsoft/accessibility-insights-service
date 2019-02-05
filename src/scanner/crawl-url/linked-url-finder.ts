@@ -4,10 +4,9 @@ import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 export class LinkedUrlFinder {
     constructor(private readonly crawlerInstance: SimpleCrawlerTyped) {}
-    public async find(context: Context, url: string): Promise<void> {
+    public async find(context: Context): Promise<void> {
         return new Promise(resolve => {
             const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
-            context.log('Received url to crawl ', url);
             const crawledUrls: string[] = [];
             this.crawlerInstance.maxDepth = 1;
             this.crawlerInstance.maxConcurrency = 5;
