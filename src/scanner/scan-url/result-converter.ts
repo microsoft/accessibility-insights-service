@@ -90,7 +90,7 @@ export class ResultConverter {
             const selector = node.target.join(';');
 
             const scanResult: ScanResult = {
-                id: undefined,
+                id: '',
                 lastUpdated: timestamp,
                 productId: productInfo.id,
                 tool: toolInfo,
