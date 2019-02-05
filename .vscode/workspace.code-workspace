@@ -18,6 +18,6 @@
         "tslint.configFile": "tslint.json"
     },
     "extensions": {
-        "recommendations": ["eg2.tslint", "esbenp.prettier-vscode"]
+        "recommendations": ["eg2.tslint", "esbenp.prettier-vscode", "rbbit.typescript-hero"]
     }
 }
