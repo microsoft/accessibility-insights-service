@@ -2,7 +2,7 @@ import { Context } from '@azure/functions';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 
-import { AxePuppeteerFactory } from './AxePuppeteerFactory';
+import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { ResultConverter } from './result-converter';
 import { Product, ProductType } from './scan-result';
 
@@ -25,7 +25,7 @@ export class Scanner {
         await page.setBypassCSP(true);
 
         await page.goto(url);
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.getInstance(page);
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createInstance(page);
         const axeResults = await axePuppeteer.analyze();
         this.context.log(axeResults);
 

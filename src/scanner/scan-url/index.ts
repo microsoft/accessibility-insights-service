@@ -2,8 +2,8 @@ import { Context } from '@azure/functions';
 import * as Puppeteer from 'puppeteer';
 
 import * as shaJs from 'sha.js';
+import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { ResultConverter } from './result-converter';
-import { AxePuppeteerFactory } from './AxePuppeteerFactory';
 import { Scanner } from './scanner';
 
 export async function run(context: Context, url: string): Promise<void> {
