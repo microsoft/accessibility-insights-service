@@ -66,7 +66,7 @@
 
     ```bash
        cd src/scanner/dev-docker
-       docker build -t scanner-dev .
+       docker build -t scanner-dev -f dev.DockerFile .
     ```
 
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
