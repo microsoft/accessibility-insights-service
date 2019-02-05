@@ -10,7 +10,7 @@
     ```
 -   Select the created directory
     ```bash
-    cd accessibility-insights-web
+    cd accessibility-insights-service
     ```
 
 ### 2. Install Azure Function core tools
@@ -45,7 +45,7 @@
     -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Attach to JavaScript Functions" from the list that appears.
 -   Perform trigger operation to trigger an azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
 
-### 6. Build & deploy locally from command line (Yet to document on how to build the docker image & run from that)
+### 6. Build & deploy locally from command line
 
 -   Build project
 
@@ -66,7 +66,7 @@
 
     ```bash
        cd src/scanner/dev-docker
-       docker build -t scanner-dev .
+       docker build -t scanner-dev -f dev.DockerFile .
     ```
 
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
@@ -89,7 +89,7 @@
     ```bash
        cd src/scanner
        npm run cbuild
-       docker build -t scanner
+       docker build -t scanner .
     ```
 
 -   Deploy to container image to production
