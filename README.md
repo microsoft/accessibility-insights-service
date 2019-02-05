@@ -10,7 +10,7 @@
     ```
 -   Select the created directory
     ```bash
-    cd accessibility-insights-web
+    cd accessibility-insights-service
     ```
 
 ### 2. Install Azure Function core tools
