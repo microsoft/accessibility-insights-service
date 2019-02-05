@@ -1,7 +1,7 @@
 import { Context } from '@azure/functions';
 import * as Puppeteer from 'puppeteer';
 
-import { AxePuppeteerFactory } from './AxePuppeteerFactory';
+import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { Scanner } from './scanner';
 
 export async function run(context: Context, url: string): Promise<void> {

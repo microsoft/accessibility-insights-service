@@ -5,7 +5,7 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { AxePuppeteerFactory } from './AxePuppeteerFactory';
+import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
@@ -74,7 +74,7 @@ describe('Scanner', () => {
 
     function setupPageScanCall(axeResults: AxeResults): void {
         axePuppeteerFactoryMock
-            .setup(apfm => apfm.getInstance(pageMock.object))
+            .setup(apfm => apfm.createInstance(pageMock.object))
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
         axePuppeteerMock
