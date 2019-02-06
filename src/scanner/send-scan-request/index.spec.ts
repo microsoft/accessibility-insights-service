@@ -6,7 +6,7 @@ describe('SendScanRequest', () => {
     let testData: ScanRequest[];
     beforeEach(() => {
         //tslint:disable-next-line: no-object-literal-type-assertion no-any no-empty
-        contextStub = { bindings: {}, log: (() => { }) as any } as Context;
+        contextStub = { bindings: {}, log: (() => {}) as any } as Context;
         testData = [
             {
                 id: '123',
