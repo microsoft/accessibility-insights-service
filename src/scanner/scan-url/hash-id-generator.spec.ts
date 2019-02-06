@@ -7,8 +7,6 @@ describe('HashIdGenerator', () => {
     let sha256Mock: IMock<Hash>;
     let returnedHashMock: IMock<Hash>;
     let hashIdGenerator: HashIdGenerator;
-    const expectedHashSeed: string = 'a|b|c|d';
-    const expectedId: string = 'test id';
 
     beforeEach(() => {
         sha256Mock = Mock.ofType<Hash>();
@@ -17,14 +15,17 @@ describe('HashIdGenerator', () => {
     });
 
     it('generate scan result', () => {
-        setupHashFunction();
+        const expectedId: string = 'test id';
+        const expectedHashSeed: string = 'a|b|c|d';
+
+        setupHashFunction(expectedId, expectedHashSeed);
 
         expect(hashIdGenerator.generateHashId('a', 'b', 'c', 'd')).toBe(expectedId);
         sha256Mock.verifyAll();
         returnedHashMock.verifyAll();
     });
 
-    function setupHashFunction(): void {
+    function setupHashFunction(expectedId: string, expectedHashSeed: string): void {
         sha256Mock
             .setup(b => b.update(It.isValue(expectedHashSeed)))
             .returns(() => returnedHashMock.object)
