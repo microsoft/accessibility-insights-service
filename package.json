@@ -60,8 +60,10 @@
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
+        "@types/sha.js": "^2.4.0",
         "axe-puppeteer": "^1.0.0",
         "puppeteer": "^1.12.1",
+        "sha.js": "^2.4.11",
         "simplecrawler": "^1.1.6"
     }
 }

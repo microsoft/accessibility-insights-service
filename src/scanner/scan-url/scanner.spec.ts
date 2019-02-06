@@ -1,4 +1,3 @@
-import { Context } from '@azure/functions';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
@@ -15,14 +14,12 @@ describe('Scanner', () => {
     let scanner: Scanner;
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
-    let contextMock: IMock<Context>;
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
         puppeteerMock = Mock.ofType<typeof Puppeteer>();
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
-        contextMock = Mock.ofType<Context>();
-        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object, contextMock.object);
+        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
@@ -52,7 +49,6 @@ describe('Scanner', () => {
         const axeResultsStub = ('axe results' as any) as AxeResults;
         setupNewBrowserPageCall(url);
         setupPageScanCall(axeResultsStub);
-        setupLogScanResultsCall(axeResultsStub);
         setupBrowserPageCloseCall();
 
         await scanner.scan(url);
@@ -83,19 +79,10 @@ describe('Scanner', () => {
             .verifiable(Times.once());
     }
 
-    function setupLogScanResultsCall(axeResults: AxeResults): void {
-        contextMock
-            .setup(cm => {
-                cm.log(axeResults);
-            })
-            .verifiable(Times.once());
-    }
-
     function verifyMocks(): void {
         pageMock.verifyAll();
         browserMock.verifyAll();
         axePuppeteerFactoryMock.verifyAll();
         axePuppeteerMock.verifyAll();
-        contextMock.verifyAll();
     }
 });
