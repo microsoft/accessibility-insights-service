@@ -5,7 +5,7 @@ import { HashIdGenerator } from './hash-id-generator';
 import { ResultConverter } from './result-converter';
 import { ResultLevel, ScanResult } from './scan-result';
 
-describe('result conver', () => {
+describe('ResultConverter', () => {
     let hashIdGeneratorMock: IMock<HashIdGenerator>;
     let resultConverter: ResultConverter;
     const testUrl: string = 'test url';

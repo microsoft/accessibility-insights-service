@@ -24,10 +24,6 @@ describe('IssueFinder', () => {
         issueFinder = new IssueFinder(scannerMock.object, resultConverterMock.object, contextStub);
     });
 
-    it('should create instance', () => {
-        expect(IssueFinder).not.toBeNull();
-    });
-
     it('scan, covert and save ', async () => {
         const axeResultsStub = getAxeResultsStub();
         // tslint:disable-next-line:no-any
