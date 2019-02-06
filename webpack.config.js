@@ -9,6 +9,7 @@ module.exports = {
     entry: {
         'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
         'crawl-url': path.resolve('./src/scanner/crawl-url/index.ts'),
+        'send-scan-request': path.resolve('./src/scanner/send-scan-request/index.ts'),
     },
     mode: 'development',
     module: {
