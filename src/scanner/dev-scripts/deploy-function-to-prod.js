@@ -2,17 +2,10 @@ const inquirer = require('inquirer');
 const shellJs = require('shelljs');
 const shellUtils = require('./shell-utils');
 
-async function deploytoProd() {
+async function deployToProd() {
     shellUtils.echoCommentBanner('Log in to container registry');
     const dockerId = await getDockerId();
-    if (shellUtils.executeCommand(`docker login ${dockerId}`, { doNotThrow: true }) !== 0) {
-        shellJs.echo('\n Login credentials not found / expired. Enter credentials:\n');
-
-        const { userName, password } = await getDockerCredentials();
-        shellUtils.executeCommand(`echo | set /p="${password}" | docker login ${dockerId} --username ${userName} --password-stdin`, {
-            doNotLogCommand: false,
-        });
-    }
+    await loginToDocker(dockerId);
 
     shellUtils.echoCommentBanner(`Performing clean build`);
     shellUtils.executeCommand('npm run cbuild');
@@ -25,6 +18,17 @@ async function deploytoProd() {
 
     shellUtils.echoCommentBanner(`Pushing container to ${dockerId}`);
     shellUtils.executeCommand(`docker push ${dockerId}/scanner`);
+}
+
+async function loginToDocker(dockerId) {
+    if (shellUtils.executeCommand(`docker login ${dockerId}`, { doNotThrow: true }) !== 0) {
+        shellJs.echo('\n Login credentials not found / expired. Enter credentials:\n');
+
+        const { userName, password } = await getDockerCredentials();
+        shellUtils.executeCommand(`echo | set /p="${password}" | docker login ${dockerId} --username ${userName} --password-stdin`, {
+            doNotLogCommand: false,
+        });
+    }
 }
 
 async function getDockerId() {
@@ -55,4 +59,4 @@ async function getDockerCredentials() {
     return await inquirer.prompt(questions);
 }
 
-deploytoProd();
+deployToProd();
