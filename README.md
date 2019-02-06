@@ -53,26 +53,16 @@
        npm run build
     ```
 
--   Build base container image
+-   Build container image
 
     ```bash
-       cd src/scanner/dist
-       func extensions install
-       cd ../
-       docker build -t scanner .
-    ```
-
--   Build dev container image
-
-    ```bash
-       cd src/scanner/dev-docker
-       docker build -t scanner-dev -f dev.DockerFile .
+      npm run build-image
     ```
 
 -   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
 
     ```bash
-       docker run -p 8080:80 -it scanner-dev
+       npm run run-func
     ```
 
 -   Perform trigger operations for the corresponding azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
@@ -84,20 +74,11 @@
     for more information on how to create the azure function.
     Set AzureWebJobsStorage setting as the storage account connection string under App Settings of your Azure function.
 -   Create a Container registry in your azure subscription. Refer https://docs.microsoft.com/en-us/azure/container-registry/ for more information.
--   Build Docker image
+-   Build & deploy Docker image
 
     ```bash
-       cd src/scanner
-       npm run cbuild
-       docker build -t scanner .
-    ```
+       npm run deploy-prod
 
--   Deploy to container image to production
-
-    ```bash
-      docker login <docker-id> // Login Server name under Access keys section of your azure container registry
-      docker tag scanner <docker-id>/scanner
-      docker push <docker-id>/scanner
     ```
 
 ## Testing

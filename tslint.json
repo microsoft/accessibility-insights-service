@@ -13,6 +13,7 @@
         "typedef": [true, "call-signature", "property-declaration"],
         "trailing-comma": true,
         "interface-name": false,
+        "no-void-expression": [true, "ignore-arrow-function-shorthand"],
         "mocha-no-side-effect-code": [
             true,
             {

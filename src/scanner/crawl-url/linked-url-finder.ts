@@ -1,5 +1,6 @@
 import { Context } from '@azure/functions';
 import { IncomingMessage } from 'http';
+
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 export class LinkedUrlFinder {
@@ -12,7 +13,7 @@ export class LinkedUrlFinder {
             this.crawlerInstance.maxConcurrency = 5;
             this.crawlerInstance.interval = 1000;
 
-            this.crawlerInstance.addFetchCondition(queueItem => !queueItem.path.match(IGNORED_EXTENSIONS));
+            this.crawlerInstance.addFetchCondition(queueItem => queueItem.path.match(IGNORED_EXTENSIONS) === null);
 
             context.log('Max Depth set to ', this.crawlerInstance.maxDepth);
 
