@@ -1,4 +1,3 @@
-import { Context } from '@azure/functions';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
@@ -6,8 +5,6 @@ import { IMock, Mock, Times } from 'typemoq';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
-import { ResultConverter } from './result-converter';
-import { ScanResult } from './scan-result';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
@@ -17,16 +14,12 @@ describe('Scanner', () => {
     let scanner: Scanner;
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
-    let contextMock: IMock<Context>;
-    let resultConverterMock: IMock<ResultConverter>;
 
     beforeEach(() => {
         browserMock = Mock.ofType<Puppeteer.Browser>();
         puppeteerMock = Mock.ofType<typeof Puppeteer>();
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
-        contextMock = Mock.ofType<Context>();
-        resultConverterMock = Mock.ofType<ResultConverter>();
-        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object, contextMock.object, resultConverterMock.object);
+        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object);
         pageMock = Mock.ofType<Puppeteer.Page>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
 
@@ -54,13 +47,9 @@ describe('Scanner', () => {
         const url = 'some url';
         // tslint:disable-next-line:no-any
         const axeResultsStub = ('axe results' as any) as AxeResults;
-        // tslint:disable-next-line:no-any
-        const scanResultsStub = ('converted results' as any) as ScanResult[];
         setupNewBrowserPageCall(url);
         setupPageScanCall(axeResultsStub);
-        setupLogScanResultsCall(axeResultsStub, scanResultsStub);
         setupBrowserPageCloseCall();
-        setupResultConvertCall(axeResultsStub, scanResultsStub);
 
         await scanner.scan(url);
 
@@ -90,24 +79,10 @@ describe('Scanner', () => {
             .verifiable(Times.once());
     }
 
-    function setupLogScanResultsCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
-        contextMock.setup(cm => cm.log(axeResults)).verifiable(Times.once());
-        contextMock.setup(cm => cm.log(scanResults)).verifiable(Times.once());
-    }
-
-    function setupResultConvertCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
-        resultConverterMock
-            .setup(rcm => rcm.convert(axeResults))
-            .returns(() => scanResults)
-            .verifiable(Times.once());
-    }
-
     function verifyMocks(): void {
         pageMock.verifyAll();
         browserMock.verifyAll();
         axePuppeteerFactoryMock.verifyAll();
         axePuppeteerMock.verifyAll();
-        contextMock.verifyAll();
-        resultConverterMock.verifyAll();
     }
 });

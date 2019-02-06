@@ -1,19 +1,13 @@
-import { Context } from '@azure/functions';
+import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
-import { ResultConverter } from './result-converter';
 
 export class Scanner {
-    constructor(
-        private readonly puppeteer: typeof Puppeteer,
-        private readonly axePuppeteerFactory: AxePuppeteerFactory,
-        private readonly context: Context,
-        private readonly resultConverter: ResultConverter,
-    ) {}
+    constructor(private readonly puppeteer: typeof Puppeteer, private readonly axePuppeteerFactory: AxePuppeteerFactory) {}
 
-    public async scan(url: string): Promise<void> {
+    public async scan(url: string): Promise<AxeResults> {
         const browser = await this.puppeteer.launch({
             headless: true,
             timeout: 15000,
@@ -26,12 +20,10 @@ export class Scanner {
         await page.goto(url);
         const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createInstance(page);
         const axeResults = await axePuppeteer.analyze();
-        this.context.log(axeResults);
-
-        const results = this.resultConverter.convert(axeResults);
-        this.context.log(results);
 
         await page.close();
         await browser.close();
+
+        return axeResults;
     }
 }
