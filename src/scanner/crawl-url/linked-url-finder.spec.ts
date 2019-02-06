@@ -4,6 +4,8 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { LinkedUrlFinder } from './linked-url-finder';
 import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
+//tslint:disable no-unsafe-any
+
 describe('LinkUrlFinder', () => {
     let simpleCrawlerMock: IMock<SimpleCrawlerTyped>;
     let contextStub: Context;
@@ -19,13 +21,16 @@ describe('LinkUrlFinder', () => {
         simpleCrawlerMock.setup(sc => (sc.interval = It.isValue(1000)));
         simpleCrawlerMock.setup(sc => sc.start()).verifiable(Times.once());
         setupCrawlerListeners();
-        //tslint:disable-next-line: no-object-literal-type-assertion no-any no-empty
+        //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
         contextStub = { bindings: {}, log: (() => {}) as any } as Context;
     });
 
     it('setup should work with params', () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+
+        //tslint:disable-next-line: no-floating-promises
         testSubject.find(contextStub);
+
         expect(fetchConditionCallback).not.toBeNull();
         expect(completeCallback).not.toBeNull();
         simpleCrawlerMock.verifyAll();
@@ -34,21 +39,30 @@ describe('LinkUrlFinder', () => {
         'should return true for valid fetch condition for url %o',
         (testcase: string) => {
             const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+
+            //tslint:disable-next-line: no-floating-promises
             newObj.find(contextStub);
+
             expect(fetchConditionCallback(testcase)).toBe(true);
         },
     );
     test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
         const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+
+        //tslint:disable-next-line: no-floating-promises
         newObj.find(contextStub);
+
         expect(fetchConditionCallback(testcase)).toBe(false);
     });
 
     it('should complete when no urls to scan', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+
         const completePromise = testSubject.find(contextStub);
         setupCompleteCallback();
+
         completeCallback();
+
         simpleCrawlerMock.verifyAll();
         expect(contextStub.bindings.outputQueueItem).toEqual([]);
         await expect(completePromise).resolves.toBeUndefined();
@@ -60,7 +74,9 @@ describe('LinkUrlFinder', () => {
         fetchCompleteCallback(createQueueItem('https://www.something.com'));
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
         setupCompleteCallback();
+
         completeCallback();
+
         simpleCrawlerMock.verifyAll();
         expect(contextStub.bindings.outputQueueItem).toEqual(['https://www.something.com', 'https://www.abcd.com']);
         await expect(completePromise).resolves.toBeUndefined();
