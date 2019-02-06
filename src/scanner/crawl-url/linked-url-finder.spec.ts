@@ -2,12 +2,13 @@ import { Context } from '@azure/functions';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { LinkedUrlFinder } from './linked-url-finder';
-import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
+import { CrawlRequest, QueueItem, ScanRequest, SimpleCrawlerTyped } from './simple-crawler';
 
 //tslint:disable no-unsafe-any
 
 describe('LinkUrlFinder', () => {
     let simpleCrawlerMock: IMock<SimpleCrawlerTyped>;
+    let crawlRequest: CrawlRequest;
     let contextStub: Context;
     const scanUrl = 'https://www.bing.com';
     let completeCallback: Function;
@@ -23,10 +24,16 @@ describe('LinkUrlFinder', () => {
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
         contextStub = { bindings: {}, log: (() => {}) as any } as Context;
+        crawlRequest = {
+            id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
+            name: 'Azure',
+            baseUrl: 'https://azure.microsoft.com/',
+            serviceTreeId: '7b566547-5e77-428b-853b-059300addeda',
+        };
     });
 
     it('setup should work with params', () => {
-        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
         //tslint:disable-next-line: no-floating-promises
         testSubject.find(contextStub);
@@ -38,7 +45,7 @@ describe('LinkUrlFinder', () => {
     test.each([createQueueItem('https://www.bing.com'), createQueueItem('https://www.bing.com/abc.html')])(
         'should return true for valid fetch condition for url %o',
         (testcase: string) => {
-            const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+            const newObj = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
             //tslint:disable-next-line: no-floating-promises
             newObj.find(contextStub);
@@ -47,7 +54,7 @@ describe('LinkUrlFinder', () => {
         },
     );
     test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
-        const newObj = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const newObj = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
         //tslint:disable-next-line: no-floating-promises
         newObj.find(contextStub);
@@ -56,7 +63,7 @@ describe('LinkUrlFinder', () => {
     });
 
     it('should complete when no urls to scan', async () => {
-        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
         const completePromise = testSubject.find(contextStub);
         setupCompleteCallback();
@@ -69,7 +76,7 @@ describe('LinkUrlFinder', () => {
     });
 
     it('should complete when all urls are scanned', async () => {
-        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object);
+        const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
         const completePromise = testSubject.find(contextStub);
         fetchCompleteCallback(createQueueItem('https://www.something.com'));
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
@@ -78,7 +85,7 @@ describe('LinkUrlFinder', () => {
         completeCallback();
 
         simpleCrawlerMock.verifyAll();
-        expect(contextStub.bindings.outputQueueItem).toEqual(['https://www.something.com', 'https://www.abcd.com']);
+        expect(contextStub.bindings.outputQueueItem).toEqual(getScanRequestData());
         await expect(completePromise).resolves.toBeUndefined();
     });
 
@@ -91,6 +98,24 @@ describe('LinkUrlFinder', () => {
     function setupCompleteCallback(): void {
         simpleCrawlerMock.setup(sc => sc.stop()).verifiable();
         simpleCrawlerMock.setup(sc => sc.initialURL).returns(() => scanUrl);
+    }
+    function getScanRequestData(): ScanRequest[] {
+        return [
+            {
+                id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
+                name: 'Azure',
+                baseUrl: 'https://azure.microsoft.com/',
+                scanUrl: 'https://www.something.com',
+                serviceTreeId: '7b566547-5e77-428b-853b-059300addeda',
+            },
+            {
+                id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
+                name: 'Azure',
+                baseUrl: 'https://azure.microsoft.com/',
+                scanUrl: 'https://www.abcd.com',
+                serviceTreeId: '7b566547-5e77-428b-853b-059300addeda',
+            },
+        ] as ScanRequest[];
     }
     function getNotAllowedUrls(): QueueItem[] {
         return [
