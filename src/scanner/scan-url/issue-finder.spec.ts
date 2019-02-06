@@ -27,7 +27,7 @@ describe('IssueFinder', () => {
     it('scan, covert and save ', async () => {
         const axeResultsStub = getAxeResultsStub();
         // tslint:disable-next-line:no-any
-        scanResultsStub = ([] as any) as ScanResult[];
+        scanResultsStub = (['abc'] as any) as ScanResult[];
         setupContextCall();
         setupScannerCall(axeResultsStub);
         setupResultConvertCall(axeResultsStub, scanResultsStub);
@@ -48,8 +48,8 @@ describe('IssueFinder', () => {
     function setupContextCall(): void {
         // tslint:disable-next-line:no-any no-empty
         logMock = Mock.ofInstance((data: any) => {});
-        logMock.setup(lm => lm('axe results count 0.')).verifiable(Times.once());
-        logMock.setup(lm => lm('converted results count 0.')).verifiable(Times.once());
+        logMock.setup(lm => lm('axe results count 1.')).verifiable(Times.once());
+        logMock.setup(lm => lm('converted results count 1.')).verifiable(Times.once());
         contextStub.log = logMock.object as Logger;
     }
 
@@ -68,6 +68,6 @@ describe('IssueFinder', () => {
 
     function getAxeResultsStub(): AxeResults {
         // tslint:disable-next-line:no-any
-        return ({ violations: [] } as any) as AxeResults;
+        return ({ violations: ['abc'] } as any) as AxeResults;
     }
 });
