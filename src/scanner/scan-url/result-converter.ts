@@ -15,15 +15,8 @@ export class ResultConverter {
         return results;
     }
 
-    private generateScanResultId(
-        url: string,
-        fullyQualifiedLogicalName: string,
-        snippet: string,
-        ruleId: string,
-        fingerprints: {},
-    ): string {
+    private generateScanResultId(url: string, fullyQualifiedLogicalName: string, snippet: string, ruleId: string): string {
         const properties: string[] = [url, fullyQualifiedLogicalName, snippet, ruleId];
-        Object.keys(fingerprints).forEach((key: keyof object) => properties.push(`${key}:${fingerprints[key]}`));
         const hashSeed: string = properties.join('|').toLowerCase();
 
         return this.sha256.update(hashSeed).digest('hex');
@@ -32,9 +25,10 @@ export class ResultConverter {
     private convertResults(axeResult: Result, nodes: NodeResult[], level: ResultLevel, url: string, timestamp: string): ScanResult[] {
         return nodes.map((node: NodeResult) => {
             const selector = node.target.join(';');
+            const resultId: string = this.generateScanResultId(url, selector, node.html, axeResult.id);
 
-            const scanResult: ScanResult = {
-                id: '',
+            return {
+                id: resultId,
                 result: {
                     ruleId: axeResult.id,
                     level: level,
@@ -53,12 +47,8 @@ export class ResultConverter {
                             fullyQualifiedLogicalName: selector,
                         },
                     ],
-                    fingerprints: {},
                 },
             };
-            scanResult.id = this.generateScanResultId(url, selector, node.html, axeResult.id, scanResult.result.fingerprints);
-
-            return scanResult;
         });
     }
 }

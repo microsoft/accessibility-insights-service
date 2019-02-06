@@ -33,15 +33,20 @@ describe('conver', () => {
 
     function setupHashFunction(): void {
         const expectedHashSeed1: string = 'test url|#class1;#class2|test html1|test rule id1';
+        const expectedHashSeed2: string = 'test url|#class3;#class4|test html2|test rule id2';
         sha256Mock
             .setup(b => b.update(It.isValue(expectedHashSeed1)))
+            .returns(() => returnedHashMock.object)
+            .verifiable(Times.once());
+        sha256Mock
+            .setup(b => b.update(It.isValue(expectedHashSeed2)))
             .returns(() => returnedHashMock.object)
             .verifiable(Times.once());
 
         returnedHashMock
             .setup(b => b.digest(It.isValue('hex')))
             .returns(() => 'scan result id')
-            .verifiable(Times.once());
+            .verifiable(Times.exactly(2));
     }
 
     function buildAxeResult(): AxeResults {
@@ -59,6 +64,24 @@ describe('conver', () => {
                             html: 'test html1',
                             impact: 'minor',
                             target: ['#class1', '#class2'],
+                            any: [],
+                            all: [],
+                            none: [],
+                        },
+                    ],
+                },
+                {
+                    id: 'test rule id2',
+                    impact: 'minor',
+                    description: 'test description',
+                    help: 'test help',
+                    helpUrl: 'test help url',
+                    tags: [],
+                    nodes: [
+                        {
+                            html: 'test html2',
+                            impact: 'minor',
+                            target: ['#class3', '#class4'],
                             any: [],
                             all: [],
                             none: [],
@@ -97,7 +120,28 @@ describe('conver', () => {
                             fullyQualifiedLogicalName: '#class1;#class2',
                         },
                     ],
-                    fingerprints: {},
+                },
+            },
+            {
+                id: 'scan result id',
+                result: {
+                    ruleId: 'test rule id2',
+                    level: ResultLevel.error,
+                    locations: [
+                        {
+                            physicalLocation: {
+                                fileLocation: {
+                                    uri: testUrl,
+                                },
+                                region: {
+                                    snippet: {
+                                        text: 'test html2',
+                                    },
+                                },
+                            },
+                            fullyQualifiedLogicalName: '#class3;#class4',
+                        },
+                    ],
                 },
             },
         ];

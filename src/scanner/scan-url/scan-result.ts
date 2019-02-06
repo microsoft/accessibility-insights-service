@@ -23,7 +23,6 @@ export interface Result {
     ruleId: string;
     level: ResultLevel;
     locations: Location[];
-    fingerprints: {};
 }
 
 export interface ScanResult {
