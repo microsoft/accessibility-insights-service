@@ -2,7 +2,7 @@ const shellJs = require('shelljs');
 
 module.exports = {
     echoCommentBanner: function(comment) {
-        shellJs.echo(`##############  ${comment}  ##############\n\n`);
+        shellJs.echo(`\n\n##############  ${comment}  ##############\n\n`);
     },
     executeCommand: function(command, config = { doNotThrow: false, doNotLogCommand: false }) {
         const process = shellJs.exec(command);

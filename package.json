@@ -6,6 +6,7 @@
     "scripts": {
         "build-image": "node src/scanner/dev-scripts/build-function-image.js",
         "run-func": "node src/scanner/dev-scripts/run-function.js",
+        "deploy-prod": "node src/scanner/dev-scripts/deploy-function-to-prod.js",
         "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist src/scanner/dist",
@@ -38,6 +39,7 @@
         "copy-webpack-plugin": "^4.6.0",
         "copyfiles": "^2.1.0",
         "fork-ts-checker-webpack-plugin": "^0.5.2",
+        "inquirer": "^6.2.2",
         "jest": "^23.6.0",
         "jest-circus": "^23.5.0",
         "jest-junit": "^6.1.0",
