@@ -12,7 +12,7 @@
         "clean": "rimraf dist src/scanner/dist",
         "format": "npx prettier --config prettier.config.js --write \"**/*\"",
         "format-check": "npx prettier --config prettier.config.js --check \"**/*\"",
-        "lint": "tslint -c ./tslint.json -p ./tsconfig.json --force",
+        "lint": "tslint -c ./tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.json --force",
         "test": "jest --coverage --colors",
         "watch:build": "npm run build -- --watch",
