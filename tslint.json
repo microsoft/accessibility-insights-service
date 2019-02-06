@@ -13,8 +13,6 @@
         "typedef": [true, "call-signature", "property-declaration"],
         "trailing-comma": true,
         "interface-name": false,
-        //work around for this issue https://github.com/Microsoft/TypeScript/issues/13348
-        "no-reserved-keywords": false,
         "mocha-no-side-effect-code": [
             true,
             {
