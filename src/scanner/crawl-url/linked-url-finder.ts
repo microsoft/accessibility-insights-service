@@ -1,14 +1,14 @@
 import { Context } from '@azure/functions';
 import { IncomingMessage } from 'http';
 
-import { QueueItem, SimpleCrawlerTyped } from './simple-crawler';
+import { CrawlRequest, QueueItem, ScanRequest, SimpleCrawlerTyped } from './simple-crawler';
 
 export class LinkedUrlFinder {
-    constructor(private readonly crawlerInstance: SimpleCrawlerTyped) {}
+    constructor(private readonly crawlerInstance: SimpleCrawlerTyped, private readonly crawlRequest: CrawlRequest) {}
     public async find(context: Context): Promise<void> {
         return new Promise(resolve => {
             const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
-            const crawledUrls: string[] = [];
+            const crawledUrls: ScanRequest[] = [];
             this.crawlerInstance.maxDepth = 1;
             this.crawlerInstance.maxConcurrency = 5;
             this.crawlerInstance.interval = 1000;
@@ -33,7 +33,7 @@ export class LinkedUrlFinder {
 
             this.crawlerInstance.on('fetchcomplete', (queueItem: QueueItem, responseBuffer: string | Buffer, response: IncomingMessage) => {
                 context.log('fetchcomplete  for url %s', queueItem.url);
-                crawledUrls.push(queueItem.url);
+                crawledUrls.push(this.createScanRequest(queueItem.url));
             });
 
             this.crawlerInstance.on('complete', () => {
@@ -48,5 +48,14 @@ export class LinkedUrlFinder {
 
             context.log('Scanner started.....');
         });
+    }
+    private createScanRequest(url: string): ScanRequest {
+        return {
+            id: this.crawlRequest.id,
+            name: this.crawlRequest.name,
+            baseUrl: this.crawlRequest.baseUrl,
+            scanUrl: url,
+            serviceTreeId: this.crawlRequest.serviceTreeId,
+        };
     }
 }

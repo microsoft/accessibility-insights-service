@@ -26,3 +26,10 @@ export interface CrawlRequest {
     baseUrl: string;
     serviceTreeId: string;
 }
+export interface ScanRequest {
+    id: string;
+    name: string;
+    baseUrl: string;
+    scanUrl: string;
+    serviceTreeId: string;
+}
