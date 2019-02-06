@@ -31,15 +31,22 @@ describe('IssueFinder', () => {
 
     it('scan, covert and save ', async () => {
         const axeResultsMock = getPromisableDynamicMock(Mock.ofType<AxeResults>());
+        axeResultsMock
+            .setup(arm => arm.violations)
+            .returns(() => {
+                return [];
+            })
+            .verifiable();
         // tslint:disable-next-line:no-any
-        scanResultsStub = ('converted results' as any) as ScanResult[];
+        scanResultsStub = ([] as any) as ScanResult[];
         setupContextCall(axeResultsMock.object, scanResultsStub);
         setupScannerCall(axeResultsMock.object);
         setupResultConvertCall(axeResultsMock.object, scanResultsStub);
 
         await issueFinder.findIssues(url);
 
-        verifyMocksAndStub();
+        expect(contextStub.bindings.scanIssues).toEqual(JSON.stringify(scanResultsStub));
+        verifyMocks();
     });
 
     function setupResultConvertCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
@@ -52,8 +59,8 @@ describe('IssueFinder', () => {
     function setupContextCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
         // tslint:disable-next-line:no-any no-empty
         logMock = Mock.ofInstance((data: any) => {});
-        logMock.setup(lm => lm(axeResults)).verifiable(Times.once());
-        logMock.setup(lm => lm(scanResults)).verifiable(Times.once());
+        logMock.setup(lm => lm('axe results count 0.')).verifiable(Times.once());
+        logMock.setup(lm => lm('converted results count 0.')).verifiable(Times.once());
         contextStub.log = logMock.object as Logger;
     }
 
@@ -64,10 +71,9 @@ describe('IssueFinder', () => {
             .verifiable(Times.once());
     }
 
-    function verifyMocksAndStub(): void {
+    function verifyMocks(): void {
         scannerMock.verifyAll();
         resultConverterMock.verifyAll();
         logMock.verifyAll();
-        expect(contextStub.bindings.scanIssues).toEqual(JSON.stringify(scanResultsStub));
     }
 });

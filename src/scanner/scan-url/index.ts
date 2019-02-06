@@ -9,6 +9,11 @@ import { Scanner } from './scanner';
 
 export async function run(context: Context, url: string): Promise<void> {
     context.log(`starting scan ${url}`);
-    await new IssueFinder(new Scanner(Puppeteer, new AxePuppeteerFactory()), new ResultConverter(shaJs('sha256')), context).findIssues(url);
+    const issueFinder: IssueFinder = new IssueFinder(
+        new Scanner(Puppeteer, new AxePuppeteerFactory()),
+        new ResultConverter(shaJs('sha256')),
+        context,
+    );
+    await issueFinder.findIssues(url);
     context.log(`successfully scanned ${url}`);
 }

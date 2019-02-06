@@ -9,9 +9,9 @@ export class IssueFinder {
 
     public async findIssues(url: string): Promise<void> {
         const axeResults: AxeResults = await this.scanner.scan(url);
-        this.context.log(axeResults);
+        this.context.log(`axe results count ${axeResults.violations.length}.`);
         const scanResults: ScanResult[] = this.resultConverter.convert(axeResults);
-        this.context.log(scanResults);
+        this.context.log(`converted results count ${scanResults.length}.`);
         this.context.bindings.scanIssues = JSON.stringify(scanResults);
     }
 }
