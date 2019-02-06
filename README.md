@@ -74,19 +74,11 @@
     for more information on how to create the azure function.
     Set AzureWebJobsStorage setting as the storage account connection string under App Settings of your Azure function.
 -   Create a Container registry in your azure subscription. Refer https://docs.microsoft.com/en-us/azure/container-registry/ for more information.
--   Build Docker image
+-   Build & deploy Docker image
 
     ```bash
-       npm run cbuild
-       npm run build-image
-    ```
+       npm run deploy-prod
 
--   Deploy to container image to production
-
-    ```bash
-      docker login <docker-id> // Login Server name under Access keys section of your azure container registry
-      docker tag scanner <docker-id>/scanner
-      docker push <docker-id>/scanner
     ```
 
 ## Testing
