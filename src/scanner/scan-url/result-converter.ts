@@ -1,9 +1,9 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
-import { Hash } from 'crypto';
+import { HashIdGenerator } from './hash-id-generator';
 import { ResultLevel, ScanResult } from './scan-result';
 
 export class ResultConverter {
-    public constructor(private readonly sha256: Hash) {}
+    public constructor(private readonly hashIdGenerator: HashIdGenerator) {}
 
     public convert(axeResults: AxeResults): ScanResult[] {
         const results: ScanResult[] = [];
@@ -15,17 +15,10 @@ export class ResultConverter {
         return results;
     }
 
-    private generateScanResultId(url: string, fullyQualifiedLogicalName: string, snippet: string, ruleId: string): string {
-        const properties: string[] = [url, fullyQualifiedLogicalName, snippet, ruleId];
-        const hashSeed: string = properties.join('|').toLowerCase();
-
-        return this.sha256.update(hashSeed).digest('hex');
-    }
-
     private convertResults(axeResult: Result, nodes: NodeResult[], level: ResultLevel, url: string, timestamp: string): ScanResult[] {
         return nodes.map((node: NodeResult) => {
             const selector = node.target.join(';');
-            const resultId: string = this.generateScanResultId(url, selector, node.html, axeResult.id);
+            const resultId: string = this.hashIdGenerator.generateHashId(url, selector, node.html, axeResult.id);
 
             return {
                 id: resultId,

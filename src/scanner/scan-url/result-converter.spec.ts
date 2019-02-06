@@ -1,24 +1,18 @@
 import { AxeResults } from 'axe-core';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 
-import { Hash } from 'crypto';
+import { HashIdGenerator } from './hash-id-generator';
 import { ResultConverter } from './result-converter';
 import { ResultLevel, ScanResult } from './scan-result';
 
-describe('conver', () => {
-    let sha256Mock: IMock<Hash>;
+describe('result conver', () => {
+    let hashIdGeneratorMock: IMock<HashIdGenerator>;
     let resultConverter: ResultConverter;
     const testUrl: string = 'test url';
-    let returnedHashMock: IMock<Hash>;
 
     beforeEach(() => {
-        sha256Mock = Mock.ofType<Hash>();
-        returnedHashMock = Mock.ofType<Hash>();
-        resultConverter = new ResultConverter(sha256Mock.object);
-    });
-
-    it('should create instance', () => {
-        expect(ResultConverter).not.toBeNull();
+        hashIdGeneratorMock = Mock.ofType<HashIdGenerator>();
+        resultConverter = new ResultConverter(hashIdGeneratorMock.object);
     });
 
     it('generate scan result', () => {
@@ -27,26 +21,18 @@ describe('conver', () => {
         const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
 
         expect(resultConverter.convert(axeResults)).toMatchObject(expectedConvertedResult);
-        sha256Mock.verifyAll();
-        returnedHashMock.verifyAll();
+        hashIdGeneratorMock.verifyAll();
     });
 
     function setupHashFunction(): void {
-        const expectedHashSeed1: string = 'test url|#class1;#class2|test html1|test rule id1';
-        const expectedHashSeed2: string = 'test url|#class3;#class4|test html2|test rule id2';
-        sha256Mock
-            .setup(b => b.update(It.isValue(expectedHashSeed1)))
-            .returns(() => returnedHashMock.object)
+        hashIdGeneratorMock
+            .setup(b => b.generateHashId('test url', '#class1;#class2', 'test html1', 'test rule id1'))
+            .returns(() => 'test id 1')
             .verifiable(Times.once());
-        sha256Mock
-            .setup(b => b.update(It.isValue(expectedHashSeed2)))
-            .returns(() => returnedHashMock.object)
+        hashIdGeneratorMock
+            .setup(b => b.generateHashId('test url', '#class3;#class4', 'test html2', 'test rule id2'))
+            .returns(() => 'test id 2')
             .verifiable(Times.once());
-
-        returnedHashMock
-            .setup(b => b.digest(It.isValue('hex')))
-            .returns(() => 'scan result id')
-            .verifiable(Times.exactly(2));
     }
 
     function buildAxeResult(): AxeResults {
@@ -89,7 +75,26 @@ describe('conver', () => {
                     ],
                 },
             ],
-            passes: [],
+            passes: [
+                {
+                    id: 'test rule id3',
+                    impact: 'minor',
+                    description: 'test description',
+                    help: 'test help',
+                    helpUrl: 'test help url',
+                    tags: [],
+                    nodes: [
+                        {
+                            html: 'test html3',
+                            impact: 'minor',
+                            target: ['#class5', '#class6'],
+                            any: [],
+                            all: [],
+                            none: [],
+                        },
+                    ],
+                },
+            ],
             incomplete: [],
             inapplicable: [],
             url: testUrl,
@@ -101,7 +106,7 @@ describe('conver', () => {
     function buildExpectedConvertedResult(): ScanResult[] {
         return [
             {
-                id: 'scan result id',
+                id: 'test id 1',
                 result: {
                     ruleId: 'test rule id1',
                     level: ResultLevel.error,
@@ -123,7 +128,7 @@ describe('conver', () => {
                 },
             },
             {
-                id: 'scan result id',
+                id: 'test id 2',
                 result: {
                     ruleId: 'test rule id2',
                     level: ResultLevel.error,
