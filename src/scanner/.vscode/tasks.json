@@ -4,33 +4,14 @@
         {
             "label": "run-dev-container",
             "type": "shell",
-            "command": "docker run -p 8080:80 --rm -it scanner-dev",
-            "isBackground": true,
-            "dependsOn": "build-dev-docker-image"
+            "command": "npm run run-func",
+            "dependsOn": "build-image"
         },
         {
-            "label": "build-dev-docker-image",
-            "command": "docker build -t scanner-dev -f dev.DockerFile .",
-            "options": {
-                "cwd": "dev-docker"
-            },
+            "label": "build-image",
+            "command": "npm run build-image",
             "type": "shell",
-            "dependsOn": ["build-base-docker-image"]
-        },
-        {
-            "label": "build-base-docker-image",
-            "command": "docker build -t scanner .",
-            "type": "shell",
-            "dependsOn": ["install-extensions"]
-        },
-        {
-            "label": "install-extensions",
-            "command": "func extensions install",
-            "type": "shell",
-            "options": {
-                "cwd": "dist"
-            },
-            "dependsOn": ["build"]
+            "dependsOn": "build"
         },
         {
             "label": "build",
