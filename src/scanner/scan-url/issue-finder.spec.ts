@@ -33,7 +33,7 @@ describe('IssueFinder', () => {
         const axeResultsMock = getPromisableDynamicMock(Mock.ofType<AxeResults>());
         // tslint:disable-next-line:no-any
         scanResultsStub = ('converted results' as any) as ScanResult[];
-        setupLogScanResultsCall(axeResultsMock.object, scanResultsStub);
+        setupContextCall(axeResultsMock.object, scanResultsStub);
         setupScannerCall(axeResultsMock.object);
         setupResultConvertCall(axeResultsMock.object, scanResultsStub);
 
@@ -49,7 +49,7 @@ describe('IssueFinder', () => {
             .verifiable(Times.once());
     }
 
-    function setupLogScanResultsCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
+    function setupContextCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
         // tslint:disable-next-line:no-any no-empty
         logMock = Mock.ofInstance((data: any) => {});
         logMock.setup(lm => lm(axeResults)).verifiable(Times.once());
