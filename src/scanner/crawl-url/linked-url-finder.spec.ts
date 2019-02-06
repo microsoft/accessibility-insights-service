@@ -102,18 +102,18 @@ describe('LinkUrlFinder', () => {
     function getScanRequestData(): ScanRequest[] {
         return [
             {
-                id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
-                name: 'Azure',
-                baseUrl: 'https://azure.microsoft.com/',
+                id: crawlRequest.id,
+                name: crawlRequest.name,
+                baseUrl: crawlRequest.baseUrl,
                 scanUrl: 'https://www.something.com',
-                serviceTreeId: '7b566547-5e77-428b-853b-059300addeda',
+                serviceTreeId: crawlRequest.serviceTreeId,
             },
             {
-                id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
-                name: 'Azure',
-                baseUrl: 'https://azure.microsoft.com/',
+                id: crawlRequest.id,
+                name: crawlRequest.name,
+                baseUrl: crawlRequest.baseUrl,
                 scanUrl: 'https://www.abcd.com',
-                serviceTreeId: '7b566547-5e77-428b-853b-059300addeda',
+                serviceTreeId: crawlRequest.serviceTreeId,
             },
         ] as ScanRequest[];
     }
