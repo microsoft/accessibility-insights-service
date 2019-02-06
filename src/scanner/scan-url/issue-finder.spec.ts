@@ -1,7 +1,6 @@
 import { Context, Logger } from '@azure/functions';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
-import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { IssueFinder } from './issue-finder';
 import { ResultConverter } from './result-converter';
 import { ScanResult } from './scan-result';
@@ -30,18 +29,12 @@ describe('IssueFinder', () => {
     });
 
     it('scan, covert and save ', async () => {
-        const axeResultsMock = getPromisableDynamicMock(Mock.ofType<AxeResults>());
-        axeResultsMock
-            .setup(arm => arm.violations)
-            .returns(() => {
-                return [];
-            })
-            .verifiable();
+        const axeResultsStub = getAxeResultsStub();
         // tslint:disable-next-line:no-any
         scanResultsStub = ([] as any) as ScanResult[];
-        setupContextCall(axeResultsMock.object, scanResultsStub);
-        setupScannerCall(axeResultsMock.object);
-        setupResultConvertCall(axeResultsMock.object, scanResultsStub);
+        setupContextCall();
+        setupScannerCall(axeResultsStub);
+        setupResultConvertCall(axeResultsStub, scanResultsStub);
 
         await issueFinder.findIssues(url);
 
@@ -56,7 +49,7 @@ describe('IssueFinder', () => {
             .verifiable(Times.once());
     }
 
-    function setupContextCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
+    function setupContextCall(): void {
         // tslint:disable-next-line:no-any no-empty
         logMock = Mock.ofInstance((data: any) => {});
         logMock.setup(lm => lm('axe results count 0.')).verifiable(Times.once());
@@ -75,5 +68,10 @@ describe('IssueFinder', () => {
         scannerMock.verifyAll();
         resultConverterMock.verifyAll();
         logMock.verifyAll();
+    }
+
+    function getAxeResultsStub(): AxeResults {
+        // tslint:disable-next-line:no-any
+        return ({ violations: [] } as any) as AxeResults;
     }
 });
