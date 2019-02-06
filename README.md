@@ -67,7 +67,18 @@
 
 -   Perform trigger operations for the corresponding azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
 
-### 7. Build & deploy to production
+### 7. Commands to run before check in
+
+-   Run the below command to build, test, check file format styling & tslint issues
+    ```bash
+    npm run precheckin
+    ```
+-   If the above command failed for formatting issues, run the below command to format all files
+    ```bash
+    npm run format
+    ```
+
+### 8. Build & deploy to production
 
 -   If you already have azure function created in azure & have container registry setup, go to last two steps.
 -   Create the azure function you are trying to deploy to. Refer https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-linux-custom-image

@@ -14,6 +14,7 @@
         "format-check": "npx prettier --config prettier.config.js --check \"**/*\"",
         "lint": "tslint -c ./tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.json --force",
+        "precheckin": "npm-run-all --serial format lint test build",
         "test": "jest --coverage --colors",
         "watch:build": "npm run build -- --watch",
         "watch:test": "jest --watch --coverage false --colors",
