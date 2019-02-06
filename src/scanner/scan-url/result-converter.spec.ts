@@ -3,7 +3,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 
 import { Hash } from 'crypto';
 import { ResultConverter } from './result-converter';
-import { Product, ProductType, ResultLevel, ScanResult, SourceName } from './scan-result';
+import { ResultLevel, ScanResult } from './scan-result';
 
 describe('conver', () => {
     let sha256Mock: IMock<Hash>;
@@ -26,37 +26,22 @@ describe('conver', () => {
         const axeResults: AxeResults = buildAxeResult();
         const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
 
-        expect(resultConverter.convert(axeResults, buildFakeProductInfo(testUrl))).toMatchObject(expectedConvertedResult);
+        expect(resultConverter.convert(axeResults)).toMatchObject(expectedConvertedResult);
         sha256Mock.verifyAll();
         returnedHashMock.verifyAll();
     });
 
     function setupHashFunction(): void {
-        const expectedHashSeed1: string = 'test url|#class1;#class2|test html1|test rule id1|value0/v1:clientscanneremulator';
-        const expectedHashSeed2: string = 'test url|#class3;#class4|test html2|test rule id2|value0/v1:clientscanneremulator';
+        const expectedHashSeed1: string = 'test url|#class1;#class2|test html1|test rule id1';
         sha256Mock
             .setup(b => b.update(It.isValue(expectedHashSeed1)))
             .returns(() => returnedHashMock.object)
             .verifiable(Times.once());
-        sha256Mock
-            .setup(b => b.update(It.isValue(expectedHashSeed2)))
-            .returns(() => returnedHashMock.object)
-            .verifiable(Times.once());
+
         returnedHashMock
             .setup(b => b.digest(It.isValue('hex')))
             .returns(() => 'scan result id')
-            .verifiable(Times.exactly(2));
-    }
-
-    function buildFakeProductInfo(url: string): Product {
-        return {
-            type: ProductType.web,
-            id: 'product id',
-            serviceTreeId: 'serviceTree id',
-            name: 'product name',
-            baseUrl: url,
-            version: 'product version',
-        };
+            .verifiable(Times.once());
     }
 
     function buildAxeResult(): AxeResults {
@@ -81,29 +66,10 @@ describe('conver', () => {
                     ],
                 },
             ],
-            passes: [
-                {
-                    id: 'test rule id2',
-                    impact: 'minor',
-                    description: 'test description',
-                    help: 'test help',
-                    helpUrl: 'test help url',
-                    tags: [],
-                    nodes: [
-                        {
-                            html: 'test html2',
-                            impact: 'minor',
-                            target: ['#class3', '#class4'],
-                            any: [],
-                            all: [],
-                            none: [],
-                        },
-                    ],
-                },
-            ],
+            passes: [],
             incomplete: [],
             inapplicable: [],
-            url: 'test url',
+            url: testUrl,
             timestamp: 'test timestamp',
         };
     }
@@ -113,91 +79,6 @@ describe('conver', () => {
         return [
             {
                 id: 'scan result id',
-                lastUpdated: 'test timestamp',
-                productId: 'product id',
-                tool: {
-                    name: 'KerosWebAgent',
-                    fullName: 'KerosWebAgent',
-                    version: '1.0.0',
-                    semanticVersion: '1.0.0',
-                },
-                run: {
-                    version: '1.0.0',
-                    product: {
-                        type: ProductType.web,
-                        id: 'product id',
-                        serviceTreeId: 'serviceTree id',
-                        name: 'product name',
-                        baseUrl: 'test url',
-                        version: 'product version',
-                    },
-                    scanInfo: {
-                        totalResultCount: 2,
-                        passedResultCount: 1,
-                        failedResultCount: 1,
-                    },
-                    source: {
-                        name: SourceName.accessibility,
-                    },
-                    pipeline: {
-                        name: 'analytics',
-                    },
-                },
-                result: {
-                    ruleId: 'test rule id2',
-                    level: ResultLevel.pass,
-                    locations: [
-                        {
-                            physicalLocation: {
-                                fileLocation: {
-                                    uri: 'test url',
-                                },
-                                region: {
-                                    snippet: {
-                                        text: 'test html2',
-                                    },
-                                },
-                            },
-                            fullyQualifiedLogicalName: '#class3;#class4',
-                        },
-                    ],
-                    fingerprints: {
-                        'value0/v1': 'ClientScannerEmulator',
-                    },
-                },
-            },
-            {
-                id: 'scan result id',
-                lastUpdated: 'test timestamp',
-                productId: 'product id',
-                tool: {
-                    name: 'KerosWebAgent',
-                    fullName: 'KerosWebAgent',
-                    version: '1.0.0',
-                    semanticVersion: '1.0.0',
-                },
-                run: {
-                    version: '1.0.0',
-                    product: {
-                        type: ProductType.web,
-                        id: 'product id',
-                        serviceTreeId: 'serviceTree id',
-                        name: 'product name',
-                        baseUrl: 'test url',
-                        version: 'product version',
-                    },
-                    scanInfo: {
-                        totalResultCount: 2,
-                        passedResultCount: 1,
-                        failedResultCount: 1,
-                    },
-                    source: {
-                        name: SourceName.accessibility,
-                    },
-                    pipeline: {
-                        name: 'analytics',
-                    },
-                },
                 result: {
                     ruleId: 'test rule id1',
                     level: ResultLevel.error,
@@ -205,7 +86,7 @@ describe('conver', () => {
                         {
                             physicalLocation: {
                                 fileLocation: {
-                                    uri: 'test url',
+                                    uri: testUrl,
                                 },
                                 region: {
                                     snippet: {
@@ -216,9 +97,7 @@ describe('conver', () => {
                             fullyQualifiedLogicalName: '#class1;#class2',
                         },
                     ],
-                    fingerprints: {
-                        'value0/v1': 'ClientScannerEmulator',
-                    },
+                    fingerprints: {},
                 },
             },
         ];

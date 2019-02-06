@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { ResultConverter } from './result-converter';
-import { Product, ProductType, ScanResult } from './scan-result';
+import { ScanResult } from './scan-result';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
@@ -97,20 +97,9 @@ describe('Scanner', () => {
 
     function setupResultConvertCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
         resultConverterMock
-            .setup(rcm => rcm.convert(axeResults, buildProductInfo()))
+            .setup(rcm => rcm.convert(axeResults))
             .returns(() => scanResults)
             .verifiable(Times.once());
-    }
-
-    function buildProductInfo(): Product {
-        return {
-            type: ProductType.web,
-            id: 'product id',
-            serviceTreeId: 'serviceTree id',
-            name: 'product name',
-            baseUrl: 'some url',
-            version: 'product version',
-        };
     }
 
     function verifyMocks(): void {

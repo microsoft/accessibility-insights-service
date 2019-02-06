@@ -4,7 +4,6 @@ import * as Puppeteer from 'puppeteer';
 
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
 import { ResultConverter } from './result-converter';
-import { Product, ProductType } from './scan-result';
 
 export class Scanner {
     constructor(
@@ -29,21 +28,10 @@ export class Scanner {
         const axeResults = await axePuppeteer.analyze();
         this.context.log(axeResults);
 
-        const results = this.resultConverter.convert(axeResults, this.buildFakeProductInfo(url));
+        const results = this.resultConverter.convert(axeResults);
         this.context.log(results);
 
         await page.close();
         await browser.close();
-    }
-
-    private buildFakeProductInfo(url: string): Product {
-        return {
-            type: ProductType.web,
-            id: 'product id',
-            serviceTreeId: 'serviceTree id',
-            name: 'product name',
-            baseUrl: url,
-            version: 'product version',
-        };
     }
 }
