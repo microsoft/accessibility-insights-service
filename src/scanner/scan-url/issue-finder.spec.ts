@@ -69,5 +69,5 @@ describe('IssueFinder', () => {
         resultConverterMock.verifyAll();
         logMock.verifyAll();
         expect(contextStub.bindings.scanIssues).toEqual(JSON.stringify(scanResultsStub));
-     }
+    }
 });
