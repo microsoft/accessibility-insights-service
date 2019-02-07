@@ -5,14 +5,14 @@
             "name": "url",
             "type": "queueTrigger",
             "direction": "in",
-            "queueName": "scan-url-queue",
+            "queueName": "scanrequest",
             "connection": "AzureWebJobsStorage"
         },
         {
             "name": "scanIssues",
             "type": "cosmosDB",
-            "databaseName": "scanner-database",
-            "collectionName": "issues-collection",
+            "databaseName": "scanner",
+            "collectionName": "a11yIssues",
             "createIfNotExists": true,
             "connectionStringSetting": "COSMOSDB_Connection",
             "direction": "out"

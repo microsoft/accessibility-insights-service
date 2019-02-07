@@ -9,15 +9,15 @@
         {
             "type": "cosmosDB",
             "name": "scanRequest",
-            "databaseName": "scanner-database",
-            "collectionName": "sites-to-scan",
+            "databaseName": "scanner",
+            "collectionName": "webPagesToScan",
             "connectionStringSetting": "COSMOSDB_Connection",
             "direction": "in"
         },
         {
             "type": "queue",
             "name": "outputQueueItem",
-            "queueName": "crawl-url-queue",
+            "queueName": "crawlrequest",
             "connection": "AzureWebJobsStorage",
             "direction": "out"
         }

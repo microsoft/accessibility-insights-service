@@ -4,13 +4,13 @@
             "name": "crawlRequest",
             "type": "queueTrigger",
             "direction": "in",
-            "queueName": "crawl-url-queue",
+            "queueName": "crawlrequest",
             "connection": "AzureWebJobsStorage"
         },
         {
             "type": "queue",
             "name": "outputQueueItem",
-            "queueName": "scan-url-queue",
+            "queueName": "scanrequest",
             "connection": "AzureWebJobsStorage",
             "direction": "out"
         }
