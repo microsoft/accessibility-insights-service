@@ -1,5 +1,5 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
-import { ScanRequest } from '../crawl-url/simple-crawler';
+import { ScanRequest } from '../common/data-contract';
 import { HashIdGenerator } from './hash-id-generator';
 import { ResultLevel, ScanResult } from './scan-result';
 

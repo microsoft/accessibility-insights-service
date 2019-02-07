@@ -1,7 +1,7 @@
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 
-import { ScanRequest } from '../crawl-url/simple-crawler';
+import { ScanRequest } from '../common/data-contract';
 import { HashIdGenerator } from './hash-id-generator';
 import { ResultConverter } from './result-converter';
 import { Product, ResultLevel, ScanResult } from './scan-result';

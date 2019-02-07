@@ -1,6 +1,6 @@
 import { Context } from '@azure/functions';
 import { AxeResults } from 'axe-core';
-import { ScanRequest } from '../crawl-url/simple-crawler';
+import { ScanRequest } from '../common/data-contract';
 import { ResultConverter } from './result-converter';
 import { ScanResult } from './scan-result';
 import { Scanner } from './scanner';

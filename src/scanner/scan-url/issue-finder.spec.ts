@@ -1,7 +1,7 @@
 import { Context, Logger } from '@azure/functions';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanRequest } from '../crawl-url/simple-crawler';
+import { ScanRequest } from '../common/data-contract';
 import { IssueFinder } from './issue-finder';
 import { ResultConverter } from './result-converter';
 import { ScanResult } from './scan-result';
@@ -34,7 +34,7 @@ describe('IssueFinder', () => {
     it('scan, covert and save ', async () => {
         const axeResultsStub = getAxeResultsStub();
         // tslint:disable-next-line:no-any
-        scanResultsStub = (['abc'] as any) as ScanResult[];
+        scanResultsStub = (['test stub scan result'] as any) as ScanResult[];
         setupContextCall();
         setupScannerCall(axeResultsStub);
         setupResultConvertCall(axeResultsStub, scanResultsStub);
@@ -75,6 +75,6 @@ describe('IssueFinder', () => {
 
     function getAxeResultsStub(): AxeResults {
         // tslint:disable-next-line:no-any
-        return ({ violations: ['abc'] } as any) as AxeResults;
+        return ({ violations: ['test stub axe result'] } as any) as AxeResults;
     }
 });

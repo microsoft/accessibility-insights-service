@@ -1,7 +1,8 @@
 import { Context } from '@azure/functions';
 import { IncomingMessage } from 'http';
 
-import { CrawlRequest, QueueItem, ScanRequest, SimpleCrawlerTyped } from './simple-crawler';
+import { ScanRequest } from '../common/data-contract';
+import { CrawlRequest, QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 export class LinkedUrlFinder {
     constructor(private readonly crawlerInstance: SimpleCrawlerTyped, private readonly crawlRequest: CrawlRequest) {}
