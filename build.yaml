@@ -51,3 +51,25 @@ steps:
           summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
           failIfCoverageEmpty: true
       displayName: publish code coverage
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run build-image
+      displayName: build docker image
+
+    - task: Docker@1
+      inputs:
+          azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
+          azureContainerRegistry: $(azureContainerRegistryName).azurecr.io
+          command: login
+      displayName: Container registry login
+      condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+
+    - script: |
+          docker tag scanner $(azureContainerRegistryName).azurecr.io/$(imageName)
+          docker tag scanner $(azureContainerRegistryName).azurecr.io/$(imageName):$(Build.BuildId)
+          docker push $(azureContainerRegistryName).azurecr.io/$(imageName)
+          docker push $(azureContainerRegistryName).azurecr.io/$(imageName):$(Build.BuildId)
+      displayName: 'Push image to container registry'
+      condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
