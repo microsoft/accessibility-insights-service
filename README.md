@@ -43,7 +43,7 @@
     You can do this by either of the below two options.
     -   Press F5. (Make sure the correct launch task is selected from the drop down that appears).
     -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Attach to JavaScript Functions" from the list that appears.
--   Perform trigger operation to trigger an azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
+-   Perform trigger operation to trigger an azure function. For eg, create a message in scanrequest azure queue to trigger scan-url function
 
 ### 6. Build & deploy locally from command line
 
@@ -65,7 +65,7 @@
        npm run run-func
     ```
 
--   Perform trigger operations for the corresponding azure function. For eg, create a message in scan-url-queue azure queue to trigger scan-url function
+-   Perform trigger operations for the corresponding azure function. For eg, create a message in scanrequest azure queue to trigger scan-url function
 
 ### 7. Commands to run before check in
 
