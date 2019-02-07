@@ -1,14 +1,22 @@
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 
+import { ScanRequest } from '../common/data-contract';
 import { HashIdGenerator } from './hash-id-generator';
 import { ResultConverter } from './result-converter';
-import { ResultLevel, ScanResult } from './scan-result';
+import { Product, ResultLevel, ScanResult } from './scan-result';
 
 describe('ResultConverter', () => {
     let hashIdGeneratorMock: IMock<HashIdGenerator>;
     let resultConverter: ResultConverter;
-    const testUrl: string = 'test url';
+    const testScanUrl: string = 'test scan url';
+    const request: ScanRequest = {
+        id: 'test product id',
+        name: 'test name',
+        baseUrl: 'test base url',
+        scanUrl: testScanUrl,
+        serviceTreeId: 'test service tree id',
+    };
 
     beforeEach(() => {
         hashIdGeneratorMock = Mock.ofType<HashIdGenerator>();
@@ -20,17 +28,17 @@ describe('ResultConverter', () => {
         const axeResults: AxeResults = buildAxeResult();
         const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
 
-        expect(resultConverter.convert(axeResults)).toMatchObject(expectedConvertedResult);
+        expect(resultConverter.convert(axeResults, request)).toMatchObject(expectedConvertedResult);
         hashIdGeneratorMock.verifyAll();
     });
 
     function setupHashFunction(): void {
         hashIdGeneratorMock
-            .setup(b => b.generateHashId('test url', '#class1;#class2', 'test html1', 'test rule id1'))
+            .setup(b => b.generateHashId(testScanUrl, '#class1;#class2', 'test html1', 'test rule id1'))
             .returns(() => 'test id 1')
             .verifiable(Times.once());
         hashIdGeneratorMock
-            .setup(b => b.generateHashId('test url', '#class3;#class4', 'test html2', 'test rule id2'))
+            .setup(b => b.generateHashId(testScanUrl, '#class3;#class4', 'test html2', 'test rule id2'))
             .returns(() => 'test id 2')
             .verifiable(Times.once());
     }
@@ -97,13 +105,20 @@ describe('ResultConverter', () => {
             ],
             incomplete: [],
             inapplicable: [],
-            url: testUrl,
+            url: testScanUrl,
             timestamp: 'test timestamp',
         };
     }
 
     // tslint:disable-next-line:max-func-body-length
     function buildExpectedConvertedResult(): ScanResult[] {
+        const productInfo: Product = {
+            id: 'test product id',
+            name: 'test name',
+            baseUrl: 'test base url',
+            serviceTreeId: 'test service tree id',
+        };
+
         return [
             {
                 id: 'test id 1',
@@ -114,7 +129,7 @@ describe('ResultConverter', () => {
                         {
                             physicalLocation: {
                                 fileLocation: {
-                                    uri: testUrl,
+                                    uri: testScanUrl,
                                 },
                                 region: {
                                     snippet: {
@@ -126,6 +141,7 @@ describe('ResultConverter', () => {
                         },
                     ],
                 },
+                product: productInfo,
             },
             {
                 id: 'test id 2',
@@ -136,7 +152,7 @@ describe('ResultConverter', () => {
                         {
                             physicalLocation: {
                                 fileLocation: {
-                                    uri: testUrl,
+                                    uri: testScanUrl,
                                 },
                                 region: {
                                     snippet: {
@@ -148,6 +164,7 @@ describe('ResultConverter', () => {
                         },
                     ],
                 },
+                product: productInfo,
             },
         ];
     }

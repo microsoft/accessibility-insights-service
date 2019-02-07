@@ -25,7 +25,15 @@ export interface Result {
     locations: Location[];
 }
 
+export interface Product {
+    id: string;
+    name: string;
+    baseUrl: string;
+    serviceTreeId: string;
+}
+
 export interface ScanResult {
     id: string;
     result: Result;
+    product: Product;
 }

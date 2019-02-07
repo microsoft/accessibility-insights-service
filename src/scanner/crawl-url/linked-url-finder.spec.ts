@@ -1,8 +1,9 @@
 import { Context } from '@azure/functions';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
+import { ScanRequest } from '../common/data-contract';
 import { LinkedUrlFinder } from './linked-url-finder';
-import { CrawlRequest, QueueItem, ScanRequest, SimpleCrawlerTyped } from './simple-crawler';
+import { CrawlRequest, QueueItem, SimpleCrawlerTyped } from './simple-crawler';
 
 //tslint:disable no-unsafe-any
 

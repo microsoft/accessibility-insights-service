@@ -1,6 +1,7 @@
 import { Context, Logger } from '@azure/functions';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
+import { ScanRequest } from '../common/data-contract';
 import { IssueFinder } from './issue-finder';
 import { ResultConverter } from './result-converter';
 import { ScanResult } from './scan-result';
@@ -11,7 +12,13 @@ describe('IssueFinder', () => {
     let resultConverterMock: IMock<ResultConverter>;
     let contextStub: Context;
     let issueFinder: IssueFinder;
-    const url: string = 'some url';
+    const request: ScanRequest = {
+        id: 'test product id',
+        name: 'test name',
+        baseUrl: 'test base url',
+        scanUrl: 'test scan url',
+        serviceTreeId: 'test service tree id',
+    };
     let scanResultsStub: ScanResult[];
     // tslint:disable-next-line:no-any
     let logMock: IMock<(data: any) => void>;
@@ -27,12 +34,12 @@ describe('IssueFinder', () => {
     it('scan, covert and save ', async () => {
         const axeResultsStub = getAxeResultsStub();
         // tslint:disable-next-line:no-any
-        scanResultsStub = (['abc'] as any) as ScanResult[];
+        scanResultsStub = (['test stub scan result'] as any) as ScanResult[];
         setupContextCall();
         setupScannerCall(axeResultsStub);
         setupResultConvertCall(axeResultsStub, scanResultsStub);
 
-        await issueFinder.findIssues(url);
+        await issueFinder.findIssues(request);
 
         expect(contextStub.bindings.scanIssues).toEqual(JSON.stringify(scanResultsStub));
         verifyMocks();
@@ -40,7 +47,7 @@ describe('IssueFinder', () => {
 
     function setupResultConvertCall(axeResults: AxeResults, scanResults: ScanResult[]): void {
         resultConverterMock
-            .setup(rcm => rcm.convert(axeResults))
+            .setup(rcm => rcm.convert(axeResults, request))
             .returns(() => scanResults)
             .verifiable(Times.once());
     }
@@ -55,7 +62,7 @@ describe('IssueFinder', () => {
 
     function setupScannerCall(axeResults: AxeResults): void {
         scannerMock
-            .setup(async rcm => rcm.scan(url))
+            .setup(async rcm => rcm.scan(request.scanUrl))
             .returns(async () => Promise.resolve(axeResults))
             .verifiable(Times.once());
     }
@@ -68,6 +75,6 @@ describe('IssueFinder', () => {
 
     function getAxeResultsStub(): AxeResults {
         // tslint:disable-next-line:no-any
-        return ({ violations: ['abc'] } as any) as AxeResults;
+        return ({ violations: ['test stub axe result'] } as any) as AxeResults;
     }
 });
