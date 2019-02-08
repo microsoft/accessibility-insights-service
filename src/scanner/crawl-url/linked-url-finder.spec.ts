@@ -16,7 +16,7 @@ describe('LinkUrlFinder', () => {
     let completeCallback: Function;
     let fetchCompleteCallback: Function;
     let fetchConditionCallback: Function;
-    let contentTypeResponseMock: IMock<IncomingMessage>;
+    let contentTypeResponseStub: IncomingMessage;
 
     beforeEach(() => {
         simpleCrawlerMock = Mock.ofType<SimpleCrawlerTyped>(undefined, MockBehavior.Strict);
@@ -24,7 +24,6 @@ describe('LinkUrlFinder', () => {
         simpleCrawlerMock.setup(sc => (sc.maxConcurrency = It.isValue(5)));
         simpleCrawlerMock.setup(sc => (sc.interval = It.isValue(1000)));
         simpleCrawlerMock.setup(sc => sc.start()).verifiable(Times.once());
-        contentTypeResponseMock = Mock.ofType<IncomingMessage>();
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
         contextStub = { bindings: {}, log: (() => {}) as any } as Context;
@@ -82,11 +81,9 @@ describe('LinkUrlFinder', () => {
     it('should complete when all urls are scanned', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
         const completePromise = testSubject.find(contextStub);
-        setupHtmlContentTypeMock();
-        fetchCompleteCallback(createQueueItem('https://www.something.com'), undefined, contentTypeResponseMock.object);
-        fetchCompleteCallback(createQueueItem('https://www.abcd.com'), undefined, contentTypeResponseMock.object);
-        setupXmlContentTypeMock();
-        fetchCompleteCallback(createQueueItem('https://www.xyz.com'), undefined, contentTypeResponseMock.object);
+        setupSupportContentType('https://www.something.com');
+        setupSupportContentType('https://www.abcd.com');
+        setupUnSupportContentType('https://www.xyz.com');
         setupCompleteCallback();
 
         completeCallback();
@@ -96,6 +93,16 @@ describe('LinkUrlFinder', () => {
         await expect(completePromise).resolves.toBeUndefined();
     });
 
+    function setupSupportContentType(url: string): void {
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        contentTypeResponseStub = { headers: { 'content-type': 'text/html; charset=utf-8' } } as IncomingMessage;
+        fetchCompleteCallback(createQueueItem(url), undefined, contentTypeResponseStub);
+    }
+    function setupUnSupportContentType(url: string): void {
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        contentTypeResponseStub = { headers: { 'content-type': 'text/xml; charset=utf-8' } } as IncomingMessage;
+        fetchCompleteCallback(createQueueItem(url), undefined, contentTypeResponseStub);
+    }
     function createQueueItem(pathUrl: string): QueueItem {
         return {
             path: pathUrl,
@@ -164,24 +171,6 @@ describe('LinkUrlFinder', () => {
             .setup(sc => sc.addFetchCondition(It.isAny()))
             .callback(callback => {
                 fetchConditionCallback = callback;
-            });
-    }
-    function setupXmlContentTypeMock(): void {
-        // tslint:disable-next-line:no-any
-        contentTypeResponseMock
-            .setup(res => res.headers)
-            .returns(() => {
-                // tslint:disable-next-line:no-any
-                return { 'content-type': 'text/xml; charset=utf-8' } as any;
-            });
-    }
-    function setupHtmlContentTypeMock(): void {
-        // tslint:disable-next-line:no-any
-        contentTypeResponseMock
-            .setup(res => res.headers)
-            .returns(() => {
-                // tslint:disable-next-line:no-any
-                return { 'content-type': 'text/html; charset=utf-8' } as any;
             });
     }
 });
