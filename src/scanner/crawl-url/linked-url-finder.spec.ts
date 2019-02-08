@@ -27,7 +27,7 @@ describe('LinkUrlFinder', () => {
         contentTypeResponseMock = Mock.ofType<IncomingMessage>();
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
-        contextStub = { bindings: {}, log: (() => { }) as any } as Context;
+        contextStub = { bindings: {}, log: (() => {}) as any } as Context;
         crawlRequest = {
             id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
             name: 'Azure',
