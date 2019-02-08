@@ -1,4 +1,5 @@
 import { Context } from '@azure/functions';
+import { IncomingMessage } from 'http';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { ScanRequest } from '../common/data-contract';
@@ -15,6 +16,7 @@ describe('LinkUrlFinder', () => {
     let completeCallback: Function;
     let fetchCompleteCallback: Function;
     let fetchConditionCallback: Function;
+    let contentTypeResponseMock: IMock<IncomingMessage>;
 
     beforeEach(() => {
         simpleCrawlerMock = Mock.ofType<SimpleCrawlerTyped>(undefined, MockBehavior.Strict);
@@ -22,6 +24,7 @@ describe('LinkUrlFinder', () => {
         simpleCrawlerMock.setup(sc => (sc.maxConcurrency = It.isValue(5)));
         simpleCrawlerMock.setup(sc => (sc.interval = It.isValue(1000)));
         simpleCrawlerMock.setup(sc => sc.start()).verifiable(Times.once());
+        contentTypeResponseMock = Mock.ofType<IncomingMessage>();
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
         contextStub = { bindings: {}, log: (() => {}) as any } as Context;
@@ -79,8 +82,21 @@ describe('LinkUrlFinder', () => {
     it('should complete when all urls are scanned', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
         const completePromise = testSubject.find(contextStub);
-        fetchCompleteCallback(createQueueItem('https://www.something.com'));
-        fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
+        // tslint:disable-next-line:no-any
+        contentTypeResponseMock
+            .setup(res => res.headers)
+            .returns(() => {
+                return { 'content-type': 'text/html; charset=utf-8' } as any;
+            });
+        fetchCompleteCallback(createQueueItem('https://www.something.com'), undefined, contentTypeResponseMock.object);
+        fetchCompleteCallback(createQueueItem('https://www.abcd.com'), undefined, contentTypeResponseMock.object);
+        // tslint:disable-next-line:no-any
+        contentTypeResponseMock
+            .setup(res => res.headers)
+            .returns(() => {
+                return { 'content-type': 'text/xml; charset=utf-8' } as any;
+            });
+        fetchCompleteCallback(createQueueItem('https://www.xyz.com'), undefined, contentTypeResponseMock.object);
         setupCompleteCallback();
 
         completeCallback();
@@ -136,6 +152,7 @@ describe('LinkUrlFinder', () => {
             createQueueItem('https://www.bing.com/abc.zip'),
             createQueueItem('https://www.bing.com/abc.war'),
             createQueueItem('https://www.bing.com/abc.rar'),
+            createQueueItem('https://www.bing.com/abc.svg'),
         ];
     }
     function setupCrawlerListeners(): void {
