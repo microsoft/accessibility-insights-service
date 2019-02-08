@@ -8,7 +8,8 @@ export class LinkedUrlFinder {
     constructor(private readonly crawlerInstance: SimpleCrawlerTyped, private readonly crawlRequest: CrawlRequest) {}
     public async find(context: Context): Promise<void> {
         return new Promise(resolve => {
-            const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
+            const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
+            const IGNORED_CONTENT_TYPE = /^((text\/xml))/gim;
             const crawledUrls: ScanRequest[] = [];
             this.crawlerInstance.maxDepth = 1;
             this.crawlerInstance.maxConcurrency = 5;
@@ -33,8 +34,11 @@ export class LinkedUrlFinder {
             });
 
             this.crawlerInstance.on('fetchcomplete', (queueItem: QueueItem, responseBuffer: string | Buffer, response: IncomingMessage) => {
-                context.log('fetchcomplete  for url %s', queueItem.url);
-                crawledUrls.push(this.createScanRequest(queueItem.url));
+                const contentType: string = response.headers['content-type'];
+                context.log('fetchcomplete  for url %s with contentType %s', queueItem.url, contentType);
+                if (contentType.match(IGNORED_CONTENT_TYPE) === null) {
+                    crawledUrls.push(this.createScanRequest(queueItem.url));
+                }
             });
 
             this.crawlerInstance.on('complete', () => {

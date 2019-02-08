@@ -1,4 +1,5 @@
 import { Context } from '@azure/functions';
+import { IncomingMessage } from 'http';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { ScanRequest } from '../common/data-contract';
@@ -15,6 +16,7 @@ describe('LinkUrlFinder', () => {
     let completeCallback: Function;
     let fetchCompleteCallback: Function;
     let fetchConditionCallback: Function;
+    let contentTypeResponseStub: IncomingMessage;
 
     beforeEach(() => {
         simpleCrawlerMock = Mock.ofType<SimpleCrawlerTyped>(undefined, MockBehavior.Strict);
@@ -79,8 +81,9 @@ describe('LinkUrlFinder', () => {
     it('should complete when all urls are scanned', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
         const completePromise = testSubject.find(contextStub);
-        fetchCompleteCallback(createQueueItem('https://www.something.com'));
-        fetchCompleteCallback(createQueueItem('https://www.abcd.com'));
+        setupSupportContentType('https://www.something.com');
+        setupSupportContentType('https://www.abcd.com');
+        setupUnSupportContentType('https://www.xyz.com');
         setupCompleteCallback();
 
         completeCallback();
@@ -90,6 +93,16 @@ describe('LinkUrlFinder', () => {
         await expect(completePromise).resolves.toBeUndefined();
     });
 
+    function setupSupportContentType(url: string): void {
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        contentTypeResponseStub = { headers: { 'content-type': 'text/html; charset=utf-8' } } as IncomingMessage;
+        fetchCompleteCallback(createQueueItem(url), undefined, contentTypeResponseStub);
+    }
+    function setupUnSupportContentType(url: string): void {
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        contentTypeResponseStub = { headers: { 'content-type': 'text/xml; charset=utf-8' } } as IncomingMessage;
+        fetchCompleteCallback(createQueueItem(url), undefined, contentTypeResponseStub);
+    }
     function createQueueItem(pathUrl: string): QueueItem {
         return {
             path: pathUrl,
@@ -136,6 +149,7 @@ describe('LinkUrlFinder', () => {
             createQueueItem('https://www.bing.com/abc.zip'),
             createQueueItem('https://www.bing.com/abc.war'),
             createQueueItem('https://www.bing.com/abc.rar'),
+            createQueueItem('https://www.bing.com/abc.svg'),
         ];
     }
     function setupCrawlerListeners(): void {
