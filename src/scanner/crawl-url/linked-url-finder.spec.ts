@@ -82,22 +82,10 @@ describe('LinkUrlFinder', () => {
     it('should complete when all urls are scanned', async () => {
         const testSubject = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
         const completePromise = testSubject.find(contextStub);
-        // tslint:disable-next-line:no-any
-        contentTypeResponseMock
-            .setup(res => res.headers)
-            .returns(() => {
-                // tslint:disable-next-line:no-any
-                return { 'content-type': 'text/html; charset=utf-8' } as any;
-            });
+        setupHtmlContentTypeMock();
         fetchCompleteCallback(createQueueItem('https://www.something.com'), undefined, contentTypeResponseMock.object);
         fetchCompleteCallback(createQueueItem('https://www.abcd.com'), undefined, contentTypeResponseMock.object);
-        // tslint:disable-next-line:no-any
-        contentTypeResponseMock
-            .setup(res => res.headers)
-            .returns(() => {
-                // tslint:disable-next-line:no-any
-                return { 'content-type': 'text/xml; charset=utf-8' } as any;
-            });
+        setupXmlContentTypeMock();
         fetchCompleteCallback(createQueueItem('https://www.xyz.com'), undefined, contentTypeResponseMock.object);
         setupCompleteCallback();
 
@@ -176,6 +164,24 @@ describe('LinkUrlFinder', () => {
             .setup(sc => sc.addFetchCondition(It.isAny()))
             .callback(callback => {
                 fetchConditionCallback = callback;
+            });
+    }
+    function setupXmlContentTypeMock(): void {
+        // tslint:disable-next-line:no-any
+        contentTypeResponseMock
+            .setup(res => res.headers)
+            .returns(() => {
+                // tslint:disable-next-line:no-any
+                return { 'content-type': 'text/xml; charset=utf-8' } as any;
+            });
+    }
+    function setupHtmlContentTypeMock(): void {
+        // tslint:disable-next-line:no-any
+        contentTypeResponseMock
+            .setup(res => res.headers)
+            .returns(() => {
+                // tslint:disable-next-line:no-any
+                return { 'content-type': 'text/html; charset=utf-8' } as any;
             });
     }
 });
