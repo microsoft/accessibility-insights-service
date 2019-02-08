@@ -29,8 +29,14 @@ steps:
     - task: Npm@1
       inputs:
           command: custom
-          customCommand: run cbuild
-      displayName: clean build
+          customCommand: run clean
+      displayName: clean
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run build -- --env.version=$(Build.BuildId)
+      displayName: build
 
     - task: Npm@1
       inputs:
@@ -64,7 +70,7 @@ steps:
           azureContainerRegistry: $(azureContainerRegistryName).azurecr.io
           command: login
       displayName: Container registry login
-      condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+      condition: and(succeeded(), in(variables['publishImage'], 'true'))
 
     - script: |
           docker tag scanner $(azureContainerRegistryName).azurecr.io/$(imageName)
@@ -72,4 +78,4 @@ steps:
           docker push $(azureContainerRegistryName).azurecr.io/$(imageName)
           docker push $(azureContainerRegistryName).azurecr.io/$(imageName):$(Build.BuildId)
       displayName: 'Push image to container registry'
-      condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+      condition: and(succeeded(), in(variables['publishImage'], 'true'))

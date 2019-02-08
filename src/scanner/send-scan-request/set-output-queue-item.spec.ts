@@ -1,6 +1,8 @@
 import { Context } from '@azure/functions';
-import { run } from './index';
+
 import { ScanRequest, WebSite } from './scan-request';
+import { setOutputQueueItem } from './set-output-queue-item';
+
 describe('SendScanRequest', () => {
     let contextStub: Context;
     let testData: ScanRequest[];
@@ -19,7 +21,7 @@ describe('SendScanRequest', () => {
     it('should send crawl requests', async () => {
         const websites = getWebSitesData();
         //tslint:disable-next-line: no-floating-promises
-        run(contextStub, undefined, testData);
+        setOutputQueueItem(contextStub, testData);
 
         expect(contextStub.bindings.outputQueueItem).toEqual(websites);
     });
