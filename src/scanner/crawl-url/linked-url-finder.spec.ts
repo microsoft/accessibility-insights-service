@@ -27,7 +27,7 @@ describe('LinkUrlFinder', () => {
         contentTypeResponseMock = Mock.ofType<IncomingMessage>();
         setupCrawlerListeners();
         //tslint:disable-next-line: no-object-literal-type-assertion no-empty no-any
-        contextStub = { bindings: {}, log: (() => {}) as any } as Context;
+        contextStub = { bindings: {}, log: (() => { }) as any } as Context;
         crawlRequest = {
             id: '25714f70-ada0-45ff-bfd8-e8a9d5a330ba',
             name: 'Azure',
@@ -86,6 +86,7 @@ describe('LinkUrlFinder', () => {
         contentTypeResponseMock
             .setup(res => res.headers)
             .returns(() => {
+                // tslint:disable-next-line:no-any
                 return { 'content-type': 'text/html; charset=utf-8' } as any;
             });
         fetchCompleteCallback(createQueueItem('https://www.something.com'), undefined, contentTypeResponseMock.object);
@@ -94,6 +95,7 @@ describe('LinkUrlFinder', () => {
         contentTypeResponseMock
             .setup(res => res.headers)
             .returns(() => {
+                // tslint:disable-next-line:no-any
                 return { 'content-type': 'text/xml; charset=utf-8' } as any;
             });
         fetchCompleteCallback(createQueueItem('https://www.xyz.com'), undefined, contentTypeResponseMock.object);
