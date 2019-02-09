@@ -4,7 +4,7 @@
         "queues": {
             "maxPollingInterval": "00:00:10",
             "visibilityTimeout": "00:00:30",
-            "batchSize": 5
+            "batchSize": 1
         }
     }
 }
