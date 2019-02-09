@@ -54,13 +54,14 @@ describe('Scanner', () => {
         await scanner.scan(url);
 
         verifyMocks();
-    }, 20000);
+    });
 
     function setupNewBrowserPageCall(url: string): void {
         pageMock = getPromisableDynamicMock(pageMock);
         browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
-        pageMock.setup(async p => p.goto(url)).verifiable(Times.once());
+
         pageMock.setup(async p => p.setBypassCSP(true)).verifiable(Times.once());
+        pageMock.setup(async p => p.goto(url, { waitUntil: ['load', 'networkidle0'] })).verifiable(Times.once());
     }
 
     function setupBrowserPageCloseCall(): void {

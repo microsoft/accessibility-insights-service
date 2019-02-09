@@ -17,7 +17,7 @@ export class Scanner {
         const page = await browser.newPage();
         await page.setBypassCSP(true);
 
-        await page.goto(url);
+        await page.goto(url, { waitUntil: ['load', 'networkidle0'] });
         const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createInstance(page);
         const axeResults = await axePuppeteer.analyze();
 
