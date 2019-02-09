@@ -4,7 +4,7 @@
             "name": "sendTrigger",
             "type": "timerTrigger",
             "direction": "in",
-            "schedule": "0 */60 * * * *"
+            "schedule": "0 0 * * * *"
         },
         {
             "type": "cosmosDB",
