@@ -1,42 +1,27 @@
 import { AxeResults } from 'axe-core';
-import { AxePuppeteer } from 'axe-puppeteer';
-import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { AxePuppeteerFactory } from './axe-puppeteer-factory';
+import { Browser } from './browser/browser';
+import { BrowserFactory } from './browser/browser-factory';
+import { Page } from './browser/page';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
-    let puppeteerMock: IMock<typeof Puppeteer>;
-    let browserMock: IMock<Puppeteer.Browser>;
-    let pageMock: IMock<Puppeteer.Page>;
+    let browserFactoryMock: IMock<BrowserFactory>;
+    let browserMock: IMock<Browser>;
+    let pageMock: IMock<Page>;
     let scanner: Scanner;
-    let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
-    let axePuppeteerMock: IMock<AxePuppeteer>;
 
     beforeEach(() => {
-        browserMock = Mock.ofType<Puppeteer.Browser>();
-        puppeteerMock = Mock.ofType<typeof Puppeteer>();
-        axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
-        scanner = new Scanner(puppeteerMock.object, axePuppeteerFactoryMock.object);
-        pageMock = Mock.ofType<Puppeteer.Page>();
-        axePuppeteerMock = Mock.ofType<AxePuppeteer>();
-
+        browserMock = Mock.ofType<Browser>();
         browserMock = getPromisableDynamicMock(browserMock);
 
-        puppeteerMock
-            .setup(async p =>
-                p.launch({
-                    headless: true,
-                    timeout: 15000,
-                    args: ['--no-sandbox', '--disable-setuid-sandbox'],
-                }),
-            )
-            .returns(async () => {
-                return Promise.resolve(browserMock.object);
-            });
-        jest.setTimeout(20000);
+        browserFactoryMock = Mock.ofType<BrowserFactory>();
+        scanner = new Scanner(browserFactoryMock.object);
+
+        pageMock = Mock.ofType<Page>();
+        pageMock = getPromisableDynamicMock(pageMock);
     });
 
     it('should create instance', () => {
@@ -57,25 +42,20 @@ describe('Scanner', () => {
     });
 
     function setupNewBrowserPageCall(url: string): void {
-        pageMock = getPromisableDynamicMock(pageMock);
+        browserFactoryMock.setup(async f => f.createInstance()).returns(async () => Promise.resolve(browserMock.object));
         browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
 
-        pageMock.setup(async p => p.setBypassCSP(true)).verifiable(Times.once());
-        pageMock.setup(async p => p.goto(url, { waitUntil: ['load', 'networkidle0'] })).verifiable(Times.once());
+        pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
+        pageMock.setup(async p => p.goto(url)).verifiable(Times.once());
     }
 
     function setupBrowserPageCloseCall(): void {
         browserMock.setup(async b => b.close()).verifiable();
-        pageMock.setup(async p => p.close()).verifiable(Times.once());
     }
 
     function setupPageScanCall(axeResults: AxeResults): void {
-        axePuppeteerFactoryMock
-            .setup(apfm => apfm.createInstance(pageMock.object))
-            .returns(() => axePuppeteerMock.object)
-            .verifiable(Times.once());
-        axePuppeteerMock
-            .setup(async apum => apum.analyze())
+        pageMock
+            .setup(async p => p.scanForA11yIssues())
             .returns(async () => Promise.resolve(axeResults))
             .verifiable(Times.once());
     }
@@ -83,7 +63,5 @@ describe('Scanner', () => {
     function verifyMocks(): void {
         pageMock.verifyAll();
         browserMock.verifyAll();
-        axePuppeteerFactoryMock.verifyAll();
-        axePuppeteerMock.verifyAll();
     }
 });

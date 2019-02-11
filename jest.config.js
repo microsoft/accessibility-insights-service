@@ -6,7 +6,7 @@ module.exports = {
         },
     },
     moduleDirectories: ['node_modules'],
-    moduleFileExtensions: ['ts', 'js'],
+    moduleFileExtensions: ['ts', 'js', 'json'],
     testPathIgnorePatterns: [],
     // This ensures that failures in beforeAll/beforeEach result in dependent tests not trying to run.
     // See https://github.com/facebook/jest/issues/2713
