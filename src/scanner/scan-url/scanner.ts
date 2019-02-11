@@ -1,27 +1,20 @@
 import { AxeResults } from 'axe-core';
-import { AxePuppeteer } from 'axe-puppeteer';
-import * as Puppeteer from 'puppeteer';
 
-import { AxePuppeteerFactory } from './axe-puppeteer-factory';
+import { BrowserFactory } from './browser/browser-factory';
 
 export class Scanner {
-    constructor(private readonly puppeteer: typeof Puppeteer, private readonly axePuppeteerFactory: AxePuppeteerFactory) {}
+    constructor(private readonly browserFactory: BrowserFactory) {}
 
     public async scan(url: string): Promise<AxeResults> {
-        const browser = await this.puppeteer.launch({
-            headless: true,
-            timeout: 15000,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
+        const browser = await this.browserFactory.createInstance();
 
         const page = await browser.newPage();
-        await page.setBypassCSP(true);
+        await page.enableBypassCSP();
 
-        await page.goto(url, { waitUntil: ['load', 'networkidle0'] });
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createInstance(page);
-        const axeResults = await axePuppeteer.analyze();
+        await page.goto(url);
 
-        await page.close();
+        const axeResults = await page.scanForA11yIssues();
+
         await browser.close();
 
         return axeResults;

@@ -6,6 +6,7 @@ import * as shaJs from 'sha.js';
 import { createTelemetryClient } from '../common/create-telemetry-client';
 import { ScanRequest } from '../common/data-contract';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
+import { BrowserFactory } from './browser/browser-factory';
 import { HashIdGenerator } from './hash-id-generator';
 import { IssueFinder } from './issue-finder';
 import { ResultConverter } from './result-converter';
@@ -16,7 +17,7 @@ export async function run(context: Context, scanRequest: ScanRequest): Promise<v
 
     context.log('starting scan-', scanRequest);
     const issueFinder: IssueFinder = new IssueFinder(
-        new Scanner(Puppeteer, new AxePuppeteerFactory()),
+        new Scanner(new BrowserFactory(Puppeteer, new AxePuppeteerFactory())),
         new ResultConverter(new HashIdGenerator(shaJs('sha256'))),
         context,
     );
