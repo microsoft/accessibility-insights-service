@@ -18,7 +18,7 @@ export async function run(context: Context, scanRequest: ScanRequest): Promise<v
     context.log('starting scan-', scanRequest);
     const issueFinder: IssueFinder = new IssueFinder(
         new Scanner(new BrowserFactory(Puppeteer, new AxePuppeteerFactory())),
-        new ResultConverter(new HashIdGenerator(shaJs('sha256'))),
+        new ResultConverter(new HashIdGenerator(shaJs)),
         context,
     );
     await issueFinder.findIssues(scanRequest);
