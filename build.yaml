@@ -12,41 +12,47 @@ steps:
       inputs:
           command: custom
           customCommand: ci
+          workingDir: 'src/scanner'
       displayName: 'install dependencies'
 
     - task: Npm@1
       inputs:
           command: custom
           customCommand: run lint
+          workingDir: 'src/scanner'
       displayName: run linter
 
     - task: Npm@1
       inputs:
           command: custom
           customCommand: run format-check
+          workingDir: 'src/scanner'
       displayName: check code formatting
 
     - task: Npm@1
       inputs:
           command: custom
           customCommand: run clean
+          workingDir: 'src/scanner'
       displayName: clean
 
     - task: Npm@1
       inputs:
           command: custom
           customCommand: run build -- --env.version=$(Build.BuildId)
+          workingDir: 'src/scanner'
       displayName: build
 
     - task: Npm@1
       inputs:
           command: custom
           customCommand: run test -- --ci
+          workingDir: 'src/scanner'
       displayName: run unit tests
 
     - task: PublishTestResults@2
       inputs:
-          testResultsFiles: $(System.DefaultWorkingDirectory)/test-results/unit/junit.xml
+          testResultsFiles: $(System.DefaultWorkingDirectory)/src/scanner/test-results/unit/junit.xml
           testRunTitle: unit tests
       condition: always()
       displayName: publish unit test results
@@ -54,7 +60,7 @@ steps:
     - task: PublishCodeCoverageResults@1
       inputs:
           codeCoverageTool: Cobertura
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
+          summaryFileLocation: $(System.DefaultWorkingDirectory)/src/scanner/test-results/unit/coverage/cobertura-coverage.xml
           failIfCoverageEmpty: true
       displayName: publish code coverage
 
@@ -62,6 +68,7 @@ steps:
       inputs:
           command: custom
           customCommand: run build-image
+          workingDir: 'src/scanner'
       displayName: build docker image
 
     - task: Docker@1
