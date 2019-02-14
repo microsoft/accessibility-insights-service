@@ -5,8 +5,8 @@
             "path": "../"
         },
         {
-            "name": "scanner",
-            "path": "../src/scanner"
+            "name": "scanner-function",
+            "path": "../packages/scanner-function"
         }
     ],
     "settings": {
