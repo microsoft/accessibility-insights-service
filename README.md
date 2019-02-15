@@ -13,39 +13,24 @@
     cd accessibility-insights-service
     ```
 
-### 2. Install Azure Function core tools
+### 2. Install package specific dependencies
 
--   Follow the instructions in https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local to install azure cli tools for building, running & deploying azure functions
+-   Goto the package (under /packages) that you will be working on & follow the readme file under that package.
 
 ### 3. Install packages
 
 -   Install the packages
     ```bash
     npm install
+    npm run bootstrap
     ```
 
-### 4. Create dev.DockerFile file for local deployment
-
--   Create dev.DockerFile under src\scanner\dev-docker from the dev.template.DockerFile which is under the same folder. **DO NOT checkin this file**.
-    -   From src\scanner\dev-docker, clone dev.template.DockerFile & rename it to dev.DockerFile under the same directory.
-    -   Get the secrets mentioned in the json from azure portal.
-        -   For eg, AzureWebJobsStorage, go to the storage account you want to use in portal.
-        -   Click on access keys from the left tab.
-        -   Copy one of the connection strings.
-        -   Paste it as the value for AzureWebJobsStorage in the local.settings.json
-
-### 5. Build & deploy locally from vscode
+### 4. Working from from vscode
 
 -   Open workspace.code-workspace from .vscode\ folder under root directory.
 -   On opening the workspace, it will suggest you to install the recommended extensions. Install them.
--   Go to a azure function project (eg, scanner) & open a file, say index.ts
--   Execute "Attach to JavaScript Functions" launch task. This build the project & deploys azure function locally.
-    You can do this by either of the below two options.
-    -   Press F5. (Make sure the correct launch task is selected from the drop down that appears).
-    -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Attach to JavaScript Functions" from the list that appears.
--   Perform trigger operation to trigger an azure function. For eg, create a message in scanrequest azure queue to trigger scan-url function
 
-### 6. Build & deploy locally from command line
+### 5. Build from command line
 
 -   Build project
 
@@ -53,21 +38,7 @@
        npm run build
     ```
 
--   Build container image
-
-    ```bash
-      npm run build-image
-    ```
-
--   Deploy locally (goto the function folder you want to deploy. in this case, scanner function project is used)
-
-    ```bash
-       npm run run-func
-    ```
-
--   Perform trigger operations for the corresponding azure function. For eg, create a message in scanrequest azure queue to trigger scan-url function
-
-### 7. Commands to run before check in
+### 6. Commands to run before check in
 
 -   Run the below command to build, test, check file format styling & tslint issues
     ```bash
@@ -76,20 +47,6 @@
 -   If the above command failed for formatting issues, run the below command to format all files
     ```bash
     npm run format
-    ```
-
-### 8. Build & deploy to production
-
--   If you already have azure function created in azure & have container registry setup, go to last two steps.
--   Create the azure function you are trying to deploy to. Refer https://docs.microsoft.com/en-us/azure/azure-functions/functions-create-function-linux-custom-image
-    for more information on how to create the azure function.
-    Set AzureWebJobsStorage setting as the storage account connection string under App Settings of your Azure function.
--   Create a Container registry in your azure subscription. Refer https://docs.microsoft.com/en-us/azure/container-registry/ for more information.
--   Build & deploy Docker image
-
-    ```bash
-       npm run deploy-prod
-
     ```
 
 ## Testing
@@ -111,7 +68,7 @@
 
 ### 3. Run test in watch mode
 
--   You can run tests whenever source code is modified in watch mode.
+-   Goto the package you want to watch for. You can run tests whenever source code is modified in watch mode.
 
     ```bash
           npm run watch:test
