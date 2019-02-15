@@ -10,7 +10,6 @@
         "noUnusedLocals": true,
         "resolveJsonModule": true
     },
-    "include": ["src/**/*.ts"],
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,
         "useWebpackText": true

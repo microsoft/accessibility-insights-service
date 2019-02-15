@@ -1,70 +1,33 @@
 {
     "name": "accessibility-insights-service",
-    "version": "1.0.0",
+    "private": true,
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
-    "main": "index.js",
-    "scripts": {
-        "build-image": "node src/scanner/dev-scripts/build-function-image.js",
-        "run-func": "node src/scanner/dev-scripts/run-function.js",
-        "deploy-prod": "node src/scanner/dev-scripts/deploy-function-to-prod.js",
-        "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
-        "cbuild": "npm-run-all --serial clean build",
-        "clean": "rimraf dist src/scanner/dist",
-        "format": "npx prettier --config prettier.config.js --write \"**/*\"",
-        "format-check": "npx prettier --config prettier.config.js --check \"**/*\"",
-        "lint": "tslint -c ./tslint.json -p ./tsconfig.json",
-        "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.json --force",
-        "precheckin": "npm-run-all --serial format lint test build",
-        "test": "jest --coverage --colors",
-        "watch:build": "npm run build -- --watch",
-        "watch:test": "jest --watch --coverage false --colors",
-        "watch:lint": "npx watch \"npm run lint\" ./src",
-        "watch": "npm-run-all --parallel watch:build watch:test watch:lint"
-    },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "scripts": {
+        "bootstrap": "npx lerna bootstrap",
+        "clean": "npx lerna run clean",
+        "cbuild": "npx lerna run cbuild",
+        "build": "npx lerna run build",
+        "test": "npx lerna run test",
+        "lint": "npx lerna run lint",
+        "precheckin": "npm-run-all --serial format lint build test",
+        "format": "npx prettier --write \"**/*\"",
+        "format-check": "npx prettier --check \"**/*\""
     },
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/functions": "^1.0.1-beta2",
-        "@types/jest": "^23.3.13",
-        "@types/puppeteer": "^1.12.0",
-        "@types/shelljs": "^0.8.2",
-        "azure-functions-core-tools": "2.4.290",
-        "copy-webpack-plugin": "^4.6.0",
-        "copyfiles": "^2.1.0",
-        "fork-ts-checker-webpack-plugin": "^0.5.2",
-        "inquirer": "^6.2.2",
-        "jest": "^23.6.0",
-        "jest-circus": "^23.5.0",
-        "jest-junit": "^6.1.0",
+        "lerna": "^3.13.0",
         "npm-run-all": "^4.1.5",
-        "npm-watch": "^0.6.0",
-        "prettier": "1.16.1",
-        "rimraf": "^2.6.3",
-        "shelljs": "^0.8.3",
-        "ts-jest": "^23.10.5",
-        "ts-loader": "^5.3.3",
-        "tslint": "5.12.1",
-        "tslint-microsoft-contrib": "6.0.0",
-        "typemoq": "^2.1.0",
-        "typescript": "^3.2.4",
-        "webpack": "^4.29.0",
-        "webpack-cli": "^3.2.1",
-        "webpack-node-externals": "^1.7.2"
-    },
-    "dependencies": {
-        "@types/sha.js": "^2.4.0",
-        "applicationinsights": "^1.1.0",
-        "axe-puppeteer": "^1.0.0",
-        "puppeteer": "^1.12.2",
-        "sha.js": "^2.4.11",
-        "simplecrawler": "^1.1.6"
+        "prettier": "1.16.4",
+        "tslint": "^5.12.1",
+        "tslint-microsoft-contrib": "^6.0.0",
+        "typescript": "^3.3.3"
     }
 }

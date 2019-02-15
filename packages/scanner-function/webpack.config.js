@@ -7,14 +7,15 @@ var nodeExternals = require('webpack-node-externals');
 
 module.exports = env => {
     const version = env ? env.version : 'dev';
+    console.log(`Building for version : ${version}`);
 
     return {
         devtool: 'cheap-source-map',
         externals: [nodeExternals()],
         entry: {
-            'scan-url': path.resolve('./src/scanner/scan-url/index.ts'),
-            'crawl-url': path.resolve('./src/scanner/crawl-url/index.ts'),
-            'send-scan-request': path.resolve('./src/scanner/send-scan-request/index.ts'),
+            'scan-url': path.resolve('./scan-url/index.ts'),
+            'crawl-url': path.resolve('./crawl-url/index.ts'),
+            'send-scan-request': path.resolve('./send-scan-request/index.ts'),
         },
         mode: 'development',
         module: {
@@ -39,7 +40,7 @@ module.exports = env => {
             __dirname: false,
         },
         output: {
-            path: path.resolve('./src/scanner/dist'),
+            path: path.resolve('./dist'),
             filename: '[name]/index.js',
             libraryTarget: 'commonjs2',
         },
@@ -50,11 +51,11 @@ module.exports = env => {
             new ForkTsCheckerWebpackPlugin(),
             new copyWebpackPlugin([
                 {
-                    from: 'src/scanner/host.json',
+                    from: 'host.json',
                     to: 'host.json',
                 },
                 {
-                    context: 'src/scanner',
+                    context: './',
                     from: '**/function.json',
                     to: '',
                     ignore: ['dist/**'],
