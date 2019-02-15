@@ -7,6 +7,7 @@ var nodeExternals = require('webpack-node-externals');
 
 module.exports = env => {
     const version = env ? env.version : 'dev';
+    console.log(`Building for version : ${version}`);
 
     return {
         devtool: 'cheap-source-map',

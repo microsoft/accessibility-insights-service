@@ -1,5 +1,6 @@
 module.exports = {
     clearMocks: true,
+    displayName: 'scanner-function unit tests',
     globals: {
         'ts-jest': {
             tsConfig: '<rootDir>/tsconfig.json',
