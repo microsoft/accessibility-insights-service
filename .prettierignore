@@ -11,5 +11,7 @@ test-results/
 **/obj/
 **/bin/
 **/*.dat
+**/*.sh
+**/*.pbix
 dist/
 **/*.code-workspace
