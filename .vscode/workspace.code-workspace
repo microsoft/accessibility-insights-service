@@ -2,11 +2,15 @@
     "folders": [
         {
             "name": "root",
-            "path": "../"
+            "path": "../",
         },
         {
             "name": "scanner-function",
             "path": "../packages/scanner-function"
+        },
+        {
+            "name": "scanner",
+            "path": "../packages/scanner"
         }
     ],
     "settings": {
@@ -14,10 +18,15 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
-        "tslint.autoFixOnSave": true,
-        "tslint.configFile": "tslint.json"
+        "tslint.jsEnable": true,
+        "editor.codeActionsOnSave": {
+            "source.fixAll.tslint": true
+        },
+        "shellformat.effectLanguages": [
+            "shellscript"
+        ]
     },
     "extensions": {
-        "recommendations": ["eg2.tslint", "esbenp.prettier-vscode", "rbbit.typescript-hero"]
+        "recommendations": ["ms-vscode.vscode-typescript-tslint-plugin", "esbenp.prettier-vscode", "rbbit.typescript-hero", "foxundermoon.shell-format"]
     }
 }
