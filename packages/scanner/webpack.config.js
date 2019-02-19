@@ -3,6 +3,7 @@ const webpack = require('webpack');
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = env => {
     const version = env ? env.version : 'dev';
@@ -10,8 +11,9 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
+        externals: [nodeExternals()],
         entry: {
-            index: path.resolve('./index.ts'),
+            ['scan-url']: path.resolve('./tasks/scan/index.ts'),
         },
         mode: 'development',
         module: {
@@ -37,7 +39,7 @@ module.exports = env => {
         },
         output: {
             path: path.resolve('./dist'),
-            filename: '[name]/index.js',
+            filename: '[name]/[name].js',
             libraryTarget: 'commonjs2',
         },
         plugins: [
