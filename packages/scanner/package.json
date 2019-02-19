@@ -1,0 +1,31 @@
+{
+    "name": "scanner",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "webpack --config ./webpack.config.js --config-name scanner --colors --progress",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {
+        "copy-webpack-plugin": "^4.6.0",
+        "fork-ts-checker-webpack-plugin": "^0.5.2",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^2.6.3",
+        "ts-loader": "^5.3.3",
+        "webpack": "^4.29.4",
+        "webpack-cli": "^3.2.3"
+    }
+}
