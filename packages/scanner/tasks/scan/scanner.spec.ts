@@ -7,6 +7,8 @@ import { BrowserFactory } from './browser/browser-factory';
 import { Page } from './browser/page';
 import { Scanner } from './scanner';
 
+// tslint:disable: no-any
+
 describe('Scanner', () => {
     let browserFactoryMock: IMock<BrowserFactory>;
     let browserMock: IMock<Browser>;
@@ -41,8 +43,23 @@ describe('Scanner', () => {
         verifyMocks();
     });
 
-    function setupNewBrowserPageCall(url: string): void {
+    it('should close browser if exception occurs', async () => {
+        const url = 'some url';
+        const exceptionMessage: any = 'test error message';
+        setupBrowserCreationCall();
+        browserMock.setup(async b => b.newPage()).returns(async () => Promise.reject(exceptionMessage));
+
+        await expect(scanner.scan(url)).rejects.toEqual(exceptionMessage);
+
+        browserMock.verify(async b => b.close(), Times.once());
+    });
+
+    function setupBrowserCreationCall(): void {
         browserFactoryMock.setup(async f => f.createInstance()).returns(async () => Promise.resolve(browserMock.object));
+    }
+
+    function setupNewBrowserPageCall(url: string): void {
+        setupBrowserCreationCall();
         browserMock.setup(async b => b.newPage()).returns(async () => Promise.resolve(pageMock.object));
 
         pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
