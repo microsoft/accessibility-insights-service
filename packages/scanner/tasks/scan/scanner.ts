@@ -8,15 +8,15 @@ export class Scanner {
     public async scan(url: string): Promise<AxeResults> {
         const browser = await this.browserFactory.createInstance();
 
-        const page = await browser.newPage();
-        await page.enableBypassCSP();
+        try {
+            const page = await browser.newPage();
+            await page.enableBypassCSP();
 
-        await page.goto(url);
+            await page.goto(url);
 
-        const axeResults = await page.scanForA11yIssues();
-
-        await browser.close();
-
-        return axeResults;
+            return await page.scanForA11yIssues();
+        } finally {
+            await browser.close();
+        }
     }
 }
