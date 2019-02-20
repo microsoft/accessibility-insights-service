@@ -52,6 +52,7 @@ module.exports = env => {
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },
+                // We copy this for dev setup, so that we don't have to pass chromePath argument to the task
                 {
                     context: './',
                     from: 'node_modules/puppeteer/.local-chromium',
