@@ -7,6 +7,7 @@ import { BrowserFactory } from './browser-factory';
 describe('BrowserFactory', () => {
     let puppeteerMock: IMock<typeof Puppeteer>;
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
+    const chromePathStub = 'chrome path';
 
     beforeEach(() => {
         puppeteerMock = Mock.ofType<typeof Puppeteer>();
@@ -14,7 +15,7 @@ describe('BrowserFactory', () => {
     });
 
     it('should create instance', async () => {
-        const testSubject = new BrowserFactory(puppeteerMock.object, axePuppeteerFactoryMock.object);
+        const testSubject = new BrowserFactory(puppeteerMock.object, chromePathStub, axePuppeteerFactoryMock.object);
         const puppeteerBrowserMock = Mock.ofType<Puppeteer.Browser>();
         const browser = await testSubject.createInstance();
 
@@ -23,6 +24,7 @@ describe('BrowserFactory', () => {
                 p.launch({
                     headless: true,
                     timeout: 15000,
+                    executablePath: chromePathStub,
                     args: ['--disable-dev-shm-usage'],
                 }),
             )

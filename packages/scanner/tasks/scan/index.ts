@@ -6,7 +6,9 @@ import { BrowserFactory } from './browser/browser-factory';
 import { runTask, ScanConfig } from './run-task';
 import { Scanner } from './scanner';
 
-const scanner = new Scanner(new BrowserFactory(puppeteer, new AxePuppeteerFactory()));
+const scannerConfig = argv as Arguments<ScanConfig>;
+
+const scanner = new Scanner(new BrowserFactory(puppeteer, scannerConfig.chromePath, new AxePuppeteerFactory()));
 
 // tslint:disable-next-line: no-floating-promises
-runTask(argv as Arguments<ScanConfig>, scanner, process);
+runTask(scannerConfig, scanner, process);

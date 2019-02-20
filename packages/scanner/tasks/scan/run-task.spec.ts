@@ -8,6 +8,7 @@ import { Scanner } from './scanner';
 describe('RunTask', () => {
     let scannerMock: IMock<Scanner>;
     let processStub: NodeJS.Process;
+    const argsStub: ScanConfig = { scanUrl: 'some url', chromePath: 'chrome path' };
 
     beforeEach(() => {
         scannerMock = Mock.ofType(Scanner);
@@ -15,8 +16,6 @@ describe('RunTask', () => {
     });
 
     it('should invoke scan with the given args', async () => {
-        const argsStub: ScanConfig = { scanUrl: 'some url' };
-
         scannerMock
             .setup(async s => s.scan(argsStub.scanUrl))
             .returns(async () => Promise.resolve('scan results stub data' as any))
@@ -29,7 +28,6 @@ describe('RunTask', () => {
     });
 
     it('should set exit code on failure', async () => {
-        const argsStub: ScanConfig = { scanUrl: 'some url' };
         const failingReason: any = 'scan failed';
         scannerMock
             .setup(async s => s.scan(argsStub.scanUrl))

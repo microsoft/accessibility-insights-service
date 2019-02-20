@@ -2,6 +2,7 @@ import { Scanner } from './scanner';
 
 export interface ScanConfig {
     scanUrl: string;
+    chromePath: string;
 }
 
 export async function runTask(config: ScanConfig, scanner: Scanner, nodeProcess: NodeJS.Process): Promise<void> {
