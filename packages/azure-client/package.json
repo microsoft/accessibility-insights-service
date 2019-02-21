@@ -1,0 +1,39 @@
+{
+    "name": "azure-client",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "tsc",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors",
+        "watch:build": "npm run build -- -w"
+    },
+    "main": "dist/index.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/azure-client#readme",
+    "dependencies": {
+        "@azure/cosmos": "^2.1.2"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.6",
+        "@types/node": "^11.9.4",
+        "jest": "^24.1.0",
+        "jest-circus": "^24.1.0",
+        "jest-junit": "^6.3.0",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^24.0.0",
+        "typemoq": "^2.1.0"
+    }
+}

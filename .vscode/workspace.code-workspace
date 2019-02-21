@@ -11,7 +11,12 @@
         {
             "name": "scanner",
             "path": "../packages/scanner"
+        },
+        {
+            "name": "azure-client",
+            "path": "../packages/azure-client"
         }
+
     ],
     "settings": {
         "editor.formatOnSave": true,
@@ -24,7 +29,12 @@
         },
         "shellformat.effectLanguages": [
             "shellscript"
-        ]
+        ],
+        "files.exclude": {
+            "**/node_modules/": true,
+            "**/packages/": true,
+            "**/.git": true
+        }
     },
     "extensions": {
         "recommendations": ["ms-vscode.vscode-typescript-tslint-plugin", "esbenp.prettier-vscode", "rbbit.typescript-hero", "foxundermoon.shell-format"]

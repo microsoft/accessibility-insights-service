@@ -8,7 +8,9 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
-        "resolveJsonModule": true
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "declaration": true
     },
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,
