@@ -1,0 +1,25 @@
+{
+    "bindings": [
+        {
+            "name": "sendTrigger",
+            "type": "timerTrigger",
+            "direction": "in",
+            "schedule": "0 0 * * * *"
+        },
+        {
+            "type": "cosmosDB",
+            "name": "scanRequest",
+            "databaseName": "scanner",
+            "collectionName": "webPagesToScan",
+            "connectionStringSetting": "COSMOSDB_Connection",
+            "direction": "in"
+        },
+        {
+            "type": "queue",
+            "name": "outputQueueItem",
+            "queueName": "crawlrequest",
+            "connection": "AzureWebJobsStorage",
+            "direction": "out"
+        }
+    ]
+}

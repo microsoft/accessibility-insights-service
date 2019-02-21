@@ -1,7 +1,0 @@
-{
-    "azureFunctions.deploySubpath": "./dist",
-    "azureFunctions.projectRuntime": "~2",
-    "azureFunctions.projectLanguage": "JavaScript",
-    "azureFunctions.templateFilter": "Verified",
-    "tslint.configFile": "../../tslint.json"
-}

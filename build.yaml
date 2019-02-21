@@ -12,7 +12,13 @@ steps:
       inputs:
           command: custom
           customCommand: ci
-      displayName: 'install dependencies'
+      displayName: 'install root dependencies'
+
+    - task: Npm@1
+      inputs:
+          command: custom
+          customCommand: run bootstrap -- --ci
+      displayName: 'install packages dependencies'
 
     - task: Npm@1
       inputs:
@@ -35,7 +41,8 @@ steps:
     - task: Npm@1
       inputs:
           command: custom
-          customCommand: run build -- --env.version=$(Build.BuildId)
+          # 1st '--' denotes args for root npm; 2nd '--' denotes args for lerna; 3rd '--' denots args for the sub project npm script
+          customCommand: run build -- -- -- --env.version=$(Build.BuildId)
       displayName: build
 
     - task: Npm@1
@@ -46,7 +53,7 @@ steps:
 
     - task: PublishTestResults@2
       inputs:
-          testResultsFiles: $(System.DefaultWorkingDirectory)/test-results/unit/junit.xml
+          testResultsFiles: '**/test-results/unit/junit.xml'
           testRunTitle: unit tests
       condition: always()
       displayName: publish unit test results
@@ -54,7 +61,7 @@ steps:
     - task: PublishCodeCoverageResults@1
       inputs:
           codeCoverageTool: Cobertura
-          summaryFileLocation: $(System.DefaultWorkingDirectory)/test-results/unit/coverage/cobertura-coverage.xml
+          summaryFileLocation: '**/test-results/unit/coverage/cobertura-coverage.xml'
           failIfCoverageEmpty: true
       displayName: publish code coverage
 
@@ -62,7 +69,8 @@ steps:
       inputs:
           command: custom
           customCommand: run build-image
-      displayName: build docker image
+          workingDir: 'packages/scanner-function'
+      displayName: build scanner function docker image
 
     - task: Docker@1
       inputs:
