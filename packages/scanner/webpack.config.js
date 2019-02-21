@@ -5,13 +5,17 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
+const externalDeps = nodeExternals({
+    whitelist: ['azure-client'],
+});
+
 module.exports = env => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
 
     return {
         devtool: 'cheap-source-map',
-        externals: [nodeExternals()],
+        externals: [externalDeps],
         entry: {
             ['scan-url']: path.resolve('./tasks/scan/index.ts'),
         },

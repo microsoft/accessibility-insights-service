@@ -1,44 +1,38 @@
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 
+import { AxeResults } from 'axe-core';
 import { runTask, ScanConfig } from './run-task';
-import { Scanner } from './scanner';
+import { TaskSteps } from './task-steps';
 
-// tslint:disable: no-any no-object-literal-type-assertion
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
 
 describe('RunTask', () => {
-    let scannerMock: IMock<Scanner>;
+    let taskStepsMock: IMock<TaskSteps>;
     let processStub: NodeJS.Process;
+    const argsStub: ScanConfig = undefined;
+    let axeResultsStub: AxeResults;
 
     beforeEach(() => {
-        scannerMock = Mock.ofType(Scanner);
+        axeResultsStub = 'stub axe results' as any;
+        taskStepsMock = Mock.ofType(TaskSteps);
         processStub = {} as NodeJS.Process;
     });
 
-    it('should invoke scan with the given args', async () => {
-        const argsStub: ScanConfig = { scanUrl: 'some url' };
-
-        scannerMock
-            .setup(async s => s.scan(argsStub.scanUrl))
-            .returns(async () => Promise.resolve('scan results stub data' as any))
-            .verifiable();
-
-        await runTask(argsStub, scannerMock.object, processStub);
+    it('should invoke all task steps', async () => {
+        taskStepsMock.setup(async t => t.scanForA11yIssues()).returns(async () => Promise.resolve(axeResultsStub));
+        taskStepsMock.setup(async t => t.storeIssues(axeResultsStub)).returns(async () => Promise.resolve(undefined));
+        await runTask(argsStub, taskStepsMock.object, processStub);
 
         expect(processStub.exitCode).not.toBeDefined();
-        scannerMock.verifyAll();
+        taskStepsMock.verifyAll();
     });
 
     it('should set exit code on failure', async () => {
-        const argsStub: ScanConfig = { scanUrl: 'some url' };
-        const failingReason: any = 'scan failed';
-        scannerMock
-            .setup(async s => s.scan(argsStub.scanUrl))
-            .returns(async () => Promise.reject(failingReason))
-            .verifiable();
+        const failureMessage = 'stub error message';
+        taskStepsMock.setup(async t => t.scanForA11yIssues()).returns(async () => Promise.reject(failureMessage));
 
-        await expect(runTask(argsStub, scannerMock.object, processStub)).resolves.toEqual(undefined);
-
+        await expect(runTask(argsStub, taskStepsMock.object, processStub)).resolves.toEqual(undefined);
+        taskStepsMock.verify(async t => t.storeIssues(It.isAny()), Times.never());
         expect(processStub.exitCode).toBe(1);
-        scannerMock.verifyAll();
     });
 });

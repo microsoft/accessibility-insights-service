@@ -19,7 +19,7 @@
     "bugs": {
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/scanner#readme",
     "devDependencies": {
         "@types/jest": "^24.0.5",
         "@types/puppeteer": "^1.12.1",
@@ -39,8 +39,12 @@
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
+        "@azure/cosmos": "^2.1.2",
+        "@types/sha.js": "^2.4.0",
         "axe-puppeteer": "^1.0.0",
+        "azure-client": "^1.0.0",
         "puppeteer": "^1.12.2",
+        "sha.js": "^2.4.11",
         "yargs": "^13.2.1"
     }
 }

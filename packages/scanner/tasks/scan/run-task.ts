@@ -1,20 +1,20 @@
-import { Scanner } from './scanner';
+import { TaskSteps } from './task-steps';
 
 export interface ScanConfig {
+    serviceTreeId: string;
+    baseUrl: string;
+    name: string;
+    id: string;
     scanUrl: string;
 }
 
-export async function runTask(config: ScanConfig, scanner: Scanner, nodeProcess: NodeJS.Process): Promise<void> {
-    return invokeScan(config, scanner).catch(e => {
+export async function runTask(config: ScanConfig, taskSteps: TaskSteps, nodeProcess: NodeJS.Process): Promise<void> {
+    console.log('Invoking scan for config - ', config);
+    try {
+        const scanResults = await taskSteps.scanForA11yIssues();
+        await taskSteps.storeIssues(scanResults);
+    } catch (e) {
         console.error(e);
         nodeProcess.exitCode = 1;
-    });
-}
-
-async function invokeScan(config: ScanConfig, scanner: Scanner): Promise<void> {
-    console.log('Invoking scan for config - ', config);
-
-    const results = await scanner.scan(config.scanUrl);
-
-    console.log(`successfully scanned url ${config.scanUrl}. Scan results - `, results);
+    }
 }
