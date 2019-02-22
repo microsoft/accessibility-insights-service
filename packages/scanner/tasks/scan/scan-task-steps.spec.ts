@@ -1,18 +1,17 @@
-import { ScanConfig } from './run-task';
-
-import { Scanner } from './scanner';
-
 import { AxeResults } from 'axe-core';
 import { CosmosClientWrapper } from 'azure-client';
 import { IMock, Mock } from 'typemoq';
+
 import { ResultConverter } from './result-converter';
 import { ScanResult } from './scan-result';
-import { TaskSteps } from './task-steps';
+import { ScanConfig } from './scan-task-runner';
+import { ScanTaskSteps } from './scan-task-steps';
+import { Scanner } from './scanner';
 
 // tslint:disable: no-unsafe-any no-any
 
-describe('TaskSteps', () => {
-    let testSubject: TaskSteps;
+describe(ScanTaskSteps, () => {
+    let testSubject: ScanTaskSteps;
     let scannerMock: IMock<Scanner>;
     let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
     let resultConverterMock: IMock<ResultConverter>;
@@ -28,7 +27,7 @@ describe('TaskSteps', () => {
         scannerMock = Mock.ofType(Scanner);
         cosmosClientWrapperMock = Mock.ofType(CosmosClientWrapper);
         resultConverterMock = Mock.ofType(ResultConverter);
-        testSubject = new TaskSteps(scanConfigStub, scannerMock.object, cosmosClientWrapperMock.object, resultConverterMock.object);
+        testSubject = new ScanTaskSteps(scanConfigStub, scannerMock.object, cosmosClientWrapperMock.object, resultConverterMock.object);
     });
 
     it('should invoke scan', async () => {

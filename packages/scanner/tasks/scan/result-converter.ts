@@ -1,7 +1,8 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
+
 import { HashIdGenerator } from './hash-id-generator';
-import { ScanConfig } from './run-task';
 import { ResultLevel, ScanResult } from './scan-result';
+import { ScanConfig } from './scan-task-runner';
 
 export class ResultConverter {
     public constructor(private readonly hashIdGenerator: HashIdGenerator) {}

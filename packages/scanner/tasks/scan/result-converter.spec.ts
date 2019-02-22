@@ -3,8 +3,8 @@ import { IMock, Mock, Times } from 'typemoq';
 
 import { HashIdGenerator } from './hash-id-generator';
 import { ResultConverter } from './result-converter';
-import { ScanConfig } from './run-task';
 import { Product, ResultLevel, ScanResult } from './scan-result';
+import { ScanConfig } from './scan-task-runner';
 
 describe('ResultConverter', () => {
     let hashIdGeneratorMock: IMock<HashIdGenerator>;

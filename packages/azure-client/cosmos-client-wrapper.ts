@@ -1,4 +1,5 @@
 import * as cosmos from '@azure/cosmos';
+
 export class CosmosClientWrapper {
     constructor(private readonly client: cosmos.CosmosClient) {}
 
@@ -13,8 +14,8 @@ export class CosmosClientWrapper {
         );
     }
 
-    private async getCollection(cosmosDb: cosmos.Database, name: string): Promise<cosmos.Container> {
-        const response = await cosmosDb.containers.createIfNotExists({ id: name });
+    private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
+        const response = await cosmosDb.containers.createIfNotExists({ id: collectionName });
 
         return response.container;
     }

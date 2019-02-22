@@ -1,12 +1,11 @@
-import { ScanConfig } from './run-task';
-
-import { Scanner } from './scanner';
-
 import { AxeResults } from 'axe-core';
 import { CosmosClientWrapper } from 'azure-client';
-import { ResultConverter } from './result-converter';
 
-export class TaskSteps {
+import { ResultConverter } from './result-converter';
+import { ScanConfig } from './scan-task-runner';
+import { Scanner } from './scanner';
+
+export class ScanTaskSteps {
     constructor(
         private readonly config: ScanConfig,
         private readonly scanner: Scanner,
