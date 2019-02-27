@@ -11,6 +11,10 @@
         {
             "name": "scanner",
             "path": "../packages/scanner"
+        },
+        {
+            "name": "crawler",
+            "path": "../packages/crawler"
         }
     ],
     "settings": {
