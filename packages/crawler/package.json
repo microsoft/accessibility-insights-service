@@ -41,6 +41,7 @@
     },
     "dependencies": {
         "redis": "^2.8.0",
-        "headless-chrome-crawler": "^1.8.0"
+        "headless-chrome-crawler": "^1.8.0",
+        "yargs": "^13.2.1"
     }
 }
