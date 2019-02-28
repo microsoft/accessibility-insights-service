@@ -2,7 +2,7 @@ import { IMock, It, Mock } from 'typemoq';
 import { createCrawlerRequestOptions, getNotAllowedUrls, getPromisableDynamicMock } from '../../test-utilities/common-mock-methods';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerFactory } from './hc-crawler-factory';
-import { CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult, HCCrawlerError } from './hc-crawler-types';
+import { CrawlerError, CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
 import { LinkExplorer } from './link-explorer';
 
@@ -18,7 +18,7 @@ describe('LinkExplorer', () => {
     const invalidUrl = 'https://www.xyzxyz.com';
     let onSuccessFunc: (result: CrawlerResult) => void;
     let preRequestFunc: (options: CrawlerRequestOptions) => boolean;
-    let onErrorFunc: (error: HCCrawlerError) => void;
+    let onErrorFunc: (error: CrawlerError) => void;
     let requestStartEventCallback: (options: CrawlerRequestOptions) => void;
     let requestFinishedEventCallback: (options: CrawlerRequestOptions) => void;
     let requestSkippedEventCallback: (options: CrawlerRequestOptions) => void;
@@ -161,7 +161,6 @@ describe('LinkExplorer', () => {
                 retryCount: 1,
                 retryDelay: 0,
                 timeout: 0,
-                jQuery: false,
                 skipDuplicates: true,
                 depthPriority: false,
                 obeyRobotsTxt: false,

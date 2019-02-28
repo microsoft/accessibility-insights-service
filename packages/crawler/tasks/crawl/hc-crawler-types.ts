@@ -17,7 +17,7 @@ export interface CrawlerRequestResponse {
     headers: CrawlResponseHeader;
 }
 
-export interface HCCrawlerError {
+export interface CrawlerError {
     options: CrawlerRequestOptions;
     depth: number;
     previousUrl: string;
@@ -35,7 +35,6 @@ export interface CrawlerResultOptions {
     retryCount: number;
     retryDelay: number;
     timeout: number;
-    jQuery: boolean;
     skipDuplicates: boolean;
     depthPriority: boolean;
     obeyRobotsTxt: boolean;

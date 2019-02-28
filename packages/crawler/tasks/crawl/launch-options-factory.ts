@@ -1,5 +1,5 @@
 import * as url from 'url';
-import { CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult, HCCrawlerError } from './hc-crawler-types';
+import { CrawlerError, CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult } from './hc-crawler-types';
 
 export class LaunchOptionsFactory {
     public create(crawlUrl: string): CrawlerLaunchOptions {
@@ -21,7 +21,7 @@ export class LaunchOptionsFactory {
             onSuccess: (result: CrawlerResult) => {
                 console.log(`onSuccess -> ${result.options.url}`);
             },
-            onError: (error: HCCrawlerError) => {
+            onError: (error: CrawlerError) => {
                 console.log(`onErros() recevied -> ${error}`);
             },
         };
