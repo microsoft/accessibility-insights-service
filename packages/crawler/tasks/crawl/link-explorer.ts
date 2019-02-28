@@ -1,6 +1,6 @@
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerFactory } from './hc-crawler-factory';
-import { HCCrawlerRequestOptions } from './hc-crawler-types';
+import { CrawlerRequestOptions } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
 
 export class LinkExplorer {
@@ -28,14 +28,14 @@ export class LinkExplorer {
     }
 
     private listenOncrawlerEvents(crawler: HCCrawlerTyped): void {
-        crawler.on('requeststarted', (options: HCCrawlerRequestOptions) => {
+        crawler.on('requeststarted', (options: CrawlerRequestOptions) => {
             console.log(`Crawl Request started for url ${options.url}`);
         });
-        crawler.on('requestfinished', (options: HCCrawlerRequestOptions) => {
+        crawler.on('requestfinished', (options: CrawlerRequestOptions) => {
             console.log(`Crawl Request finished for url ${options.url}`);
             this.crawlUrlCount = this.crawlUrlCount + 1;
         });
-        crawler.on('requestskipped', (options: HCCrawlerRequestOptions) => {
+        crawler.on('requestskipped', (options: CrawlerRequestOptions) => {
             console.log(`Crawl Request Skipped for url ${options.url}`);
         });
         crawler.on('requestfailed', (error: Error) => {

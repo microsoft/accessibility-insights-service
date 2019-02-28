@@ -1,17 +1,14 @@
 import { Arguments, argv } from 'yargs';
-import { ExploreRequest } from './hc-crawler';
+import { CrawlEntryPoint } from './crawl-entry-point';
+import { CrawlRunner } from './crawl-runner';
 import { HCCrawlerFactory } from './hc-crawler-factory';
 import { LaunchOptionsFactory } from './launch-options-factory';
+import { LinkExplorerRequest } from './link-explore-request';
 import { LinkExplorer } from './link-explorer';
-const args = argv as Arguments<ExploreRequest>;
+const crawlConfig = argv as Arguments<LinkExplorerRequest>;
 const linkExplorer = new LinkExplorer(new HCCrawlerFactory(), new LaunchOptionsFactory());
-// tslint:disable-next-line:no-require-imports no-var-requires
-linkExplorer
-    .exploreLinks(args.baseUrl)
-    .then(result => {
-        console.log(`successfully explored links from url ${args.baseUrl}`);
-    })
-    .catch(e => {
-        console.error('Link explorer caught an error ', e);
-        process.exitCode = 1;
-    });
+const crawlRunner = new CrawlRunner(crawlConfig, linkExplorer);
+const crawlEntryPoint = new CrawlEntryPoint(crawlRunner, process);
+
+// tslint:disable-next-line: no-floating-promises
+crawlEntryPoint.run();

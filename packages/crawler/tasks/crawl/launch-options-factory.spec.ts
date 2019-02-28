@@ -1,5 +1,7 @@
-import { HCCrawlerLaunchOptions } from './hc-crawler-types';
+import { getNotAllowedUrls } from '../../test-utilities/common-mock-methods';
+import { CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
+
 describe('LaunchOptionsFactory', () => {
     let testSubject: LaunchOptionsFactory;
     beforeEach(() => {
@@ -8,11 +10,23 @@ describe('LaunchOptionsFactory', () => {
 
     it('should create an instance', () => {
         const url = 'https://www.microsoft.com/device/surface';
-        const options: HCCrawlerLaunchOptions = testSubject.create(url);
-        expect(options.maxDepth).toEqual(1);
-        expect(options.maxConcurrency).toEqual(5);
-        expect(options.allowedDomains).toEqual(['www.microsoft.com']);
-        expect(options.obeyRobotsTxt).toEqual(false);
-        expect(options.retryCount).toEqual(1);
+        const options: CrawlerLaunchOptions = testSubject.create(url);
+        expect(options).toMatchObject({
+            maxDepth: 1,
+            maxConcurrency: 5,
+            allowedDomains: ['www.microsoft.com'],
+            obeyRobotsTxt: false,
+            retryCount: 1,
+        });
+    });
+
+    test.each(getNotAllowedUrls())('should reject the unsupprted urls preRequest %o', async (preRequestUrl: string) => {
+        const options: CrawlerLaunchOptions = testSubject.create(preRequestUrl);
+
+        const reqOptions: CrawlerRequestOptions = {
+            url: preRequestUrl,
+        };
+        const shouldProceeed: boolean = options.preRequest(reqOptions);
+        expect(shouldProceeed).toEqual(false);
     });
 });

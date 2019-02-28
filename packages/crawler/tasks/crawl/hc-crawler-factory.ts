@@ -1,8 +1,8 @@
 import { HCCrawler, HCCrawlerTyped } from './hc-crawler';
-import { HCCrawlerLaunchOptions } from './hc-crawler-types';
+import { CrawlerLaunchOptions } from './hc-crawler-types';
 
 export class HCCrawlerFactory {
-    public async createInstance(options: HCCrawlerLaunchOptions): Promise<HCCrawlerTyped> {
+    public async createInstance(options: CrawlerLaunchOptions): Promise<HCCrawlerTyped> {
         return HCCrawler.launch(options);
     }
 }

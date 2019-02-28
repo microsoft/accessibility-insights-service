@@ -1,7 +1,8 @@
 import { IMock, It, Mock } from 'typemoq';
+import { createCrawlerRequestOptions, getNotAllowedUrls, getPromisableDynamicMock } from '../../test-utilities/common-mock-methods';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerFactory } from './hc-crawler-factory';
-import { HCCrawlerError, HCCrawlerLaunchOptions, HCCrawlerRequestOptions, HCCrawlerResult } from './hc-crawler-types';
+import { CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult, HCCrawlerError } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
 import { LinkExplorer } from './link-explorer';
 
@@ -12,17 +13,16 @@ describe('LinkExplorer', () => {
     let launchOptionsFactoryMock: IMock<LaunchOptionsFactory>;
     let crawlerMock: IMock<HCCrawlerTyped>;
     let linkExplorer: LinkExplorer;
-    let launchOptionsStub: HCCrawlerLaunchOptions;
+    let launchOptionsStub: CrawlerLaunchOptions;
     const testUrl = 'https://www.microsoft.com';
-    const invalidUrl = 'https://www.asasassasa.com';
-    let onSuccessFunc: (result: HCCrawlerResult) => void;
-    let preRequestFunc: (options: HCCrawlerRequestOptions) => boolean;
+    const invalidUrl = 'https://www.xyzxyz.com';
+    let onSuccessFunc: (result: CrawlerResult) => void;
+    let preRequestFunc: (options: CrawlerRequestOptions) => boolean;
     let onErrorFunc: (error: HCCrawlerError) => void;
-    let requestStartEventCallback: (options: HCCrawlerRequestOptions) => void;
-    let requestFinishedEventCallback: (options: HCCrawlerRequestOptions) => void;
-    let requestSkippedEventCallback: (options: HCCrawlerRequestOptions) => void;
+    let requestStartEventCallback: (options: CrawlerRequestOptions) => void;
+    let requestFinishedEventCallback: (options: CrawlerRequestOptions) => void;
+    let requestSkippedEventCallback: (options: CrawlerRequestOptions) => void;
     let requestFailedEventCallback: (error: Error) => void;
-    //let createCrawlerPromise: Promise<HCCrawlerTyped>;
 
     beforeEach(() => {
         crawlerFactoryMock = Mock.ofType<HCCrawlerFactory>();
@@ -31,7 +31,6 @@ describe('LinkExplorer', () => {
         crawlerMock = Mock.ofType<HCCrawlerTyped>();
         crawlerMock.setup(async cm => cm.onIdle()).returns(async () => Promise.resolve());
         crawlerMock.setup(async cm => cm.close()).returns(async () => Promise.resolve());
-        //createCrawlerPromise = Promise.resolve(crawlerMock.object);
 
         crawlerMock = getPromisableDynamicMock(crawlerMock);
         launchOptionsStub = new LaunchOptionsFactory().create(testUrl);
@@ -46,7 +45,7 @@ describe('LinkExplorer', () => {
     });
 
     it('should explore link from valid url', async () => {
-        const reqOptions: HCCrawlerRequestOptions = createRequestOptions(testUrl);
+        const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(testUrl);
         setUpCrawlerQueueForValidUrl(testUrl, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(testUrl);
 
@@ -58,7 +57,7 @@ describe('LinkExplorer', () => {
     });
 
     it('should throw error for an non existing web portal', async () => {
-        const reqOptions: HCCrawlerRequestOptions = createRequestOptions(testUrl);
+        const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(testUrl);
         setUpCrawlerQueueForInValidUrl(invalidUrl, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(invalidUrl);
 
@@ -71,7 +70,7 @@ describe('LinkExplorer', () => {
     });
 
     test.each(getNotAllowedUrls())('should not explore link from unsupported urls %o', async (urlToExplore: string) => {
-        const reqOptions: HCCrawlerRequestOptions = createRequestOptions(urlToExplore);
+        const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(urlToExplore);
         setUpCrawlerQueueForSkipUrl(urlToExplore, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(urlToExplore);
 
@@ -81,7 +80,7 @@ describe('LinkExplorer', () => {
         await expect(explorerPromise).rejects.toEqual(errorMessage);
     });
 
-    function setUpCrawlerQueueForValidUrl(url: string, reqOptions: HCCrawlerRequestOptions): void {
+    function setUpCrawlerQueueForValidUrl(url: string, reqOptions: CrawlerRequestOptions): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
@@ -92,7 +91,7 @@ describe('LinkExplorer', () => {
             });
     }
 
-    function setUpCrawlerQueueForSkipUrl(url: string, reqOptions: HCCrawlerRequestOptions): void {
+    function setUpCrawlerQueueForSkipUrl(url: string, reqOptions: CrawlerRequestOptions): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
@@ -103,7 +102,7 @@ describe('LinkExplorer', () => {
             });
     }
 
-    function setUpCrawlerQueueForInValidUrl(url: string, reqOptions: HCCrawlerRequestOptions): void {
+    function setUpCrawlerQueueForInValidUrl(url: string, reqOptions: CrawlerRequestOptions): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
@@ -151,13 +150,7 @@ describe('LinkExplorer', () => {
             });
     }
 
-    function createRequestOptions(requestUrl: string): HCCrawlerRequestOptions {
-        return {
-            url: requestUrl,
-        };
-    }
-
-    function createCrawlResult(requestUrl: string): HCCrawlerResult {
+    function createCrawlResult(requestUrl: string): CrawlerResult {
         return {
             depth: 1,
             options: {
@@ -179,35 +172,5 @@ describe('LinkExplorer', () => {
             response: undefined,
             links: [],
         };
-    }
-
-    function getPromisableDynamicMock<T>(mock: IMock<T>): IMock<T> {
-        // workaround for issue https://github.com/florinn/typemoq/issues/70
-
-        // tslint:disable-next-line:no-any no-unsafe-any
-        mock.setup((x: any) => x.then).returns(() => undefined);
-
-        return mock;
-    }
-    function getNotAllowedUrls(): string[] {
-        return [
-            'https://www.bing.com/abc.pdf',
-            'https://www.bing.com/abc.js',
-            'https://www.bing.com/abc.css',
-            'https://www.bing.com/abc.png',
-            'https://www.bing.com/abc.jpg',
-            'https://www.bing.com/abc.jpeg',
-            'https://www.bing.com/abc.gif',
-            'https://www.bing.com/abc.json',
-            'https://www.bing.com/abc.xml',
-            'https://www.bing.com/abc.exe',
-            'https://www.bing.com/abc.dmg',
-            'https://www.bing.com/abc.ico',
-            'https://www.bing.com/abc.txt',
-            'https://www.bing.com/abc.zip',
-            'https://www.bing.com/abc.war',
-            'https://www.bing.com/abc.rar',
-            'https://www.bing.com/abc.svg',
-        ];
     }
 });

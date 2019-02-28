@@ -1,34 +1,34 @@
-export interface HCCrawlerRequestOptions {
+export interface CrawlerRequestOptions {
     url: string;
 }
 
-export interface HCCrawlerResult {
-    options: HCCrawlerResultOptions;
+export interface CrawlerResult {
+    options: CrawlerResultOptions;
     depth: number;
     previousUrl: string;
-    response: HCCrawlerRequestResponse;
+    response: CrawlerRequestResponse;
     links?: string[];
 }
 
-export interface HCCrawlerRequestResponse {
+export interface CrawlerRequestResponse {
     ok: boolean;
     status: number;
     url: string;
-    headers: HCResponseHeader;
+    headers: CrawlResponseHeader;
 }
 
 export interface HCCrawlerError {
-    options: HCCrawlerRequestOptions;
+    options: CrawlerRequestOptions;
     depth: number;
     previousUrl: string;
 }
 
-export interface HCResponseHeader {
+export interface CrawlResponseHeader {
     'content-type': string;
     'content-encoding': string;
 }
 
-export interface HCCrawlerResultOptions {
+export interface CrawlerResultOptions {
     maxDepth: number;
     priority: number;
     delay: number;
@@ -44,13 +44,13 @@ export interface HCCrawlerResultOptions {
     url: string;
 }
 
-export interface HCCrawlerLaunchOptions {
+export interface CrawlerLaunchOptions {
     maxDepth: number;
     maxConcurrency: number;
     obeyRobotsTxt: boolean;
     allowedDomains: string[];
     retryCount: number;
-    preRequest(options: HCCrawlerRequestOptions): boolean;
-    onSuccess(result: HCCrawlerResult): void;
+    preRequest(options: CrawlerRequestOptions): boolean;
+    onSuccess(result: CrawlerResult): void;
     onError(error: HCCrawlerError): void;
 }

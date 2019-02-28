@@ -1,8 +1,8 @@
 import * as url from 'url';
-import { HCCrawlerError, HCCrawlerLaunchOptions, HCCrawlerRequestOptions, HCCrawlerResult } from './hc-crawler-types';
+import { CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult, HCCrawlerError } from './hc-crawler-types';
 
 export class LaunchOptionsFactory {
-    public create(crawlUrl: string): HCCrawlerLaunchOptions {
+    public create(crawlUrl: string): CrawlerLaunchOptions {
         const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
 
         return {
@@ -11,14 +11,14 @@ export class LaunchOptionsFactory {
             obeyRobotsTxt: false,
             allowedDomains: [url.parse(crawlUrl).hostname],
             retryCount: 1,
-            preRequest: (options: HCCrawlerRequestOptions) => {
+            preRequest: (options: CrawlerRequestOptions) => {
                 if (options.url.indexOf('https://login.microsoftonline.com/') !== -1) {
                     return false;
                 }
 
                 return options.url.match(IGNORED_EXTENSIONS) === null;
             },
-            onSuccess: (result: HCCrawlerResult) => {
+            onSuccess: (result: CrawlerResult) => {
                 console.log(`onSuccess -> ${result.options.url}`);
             },
             onError: (error: HCCrawlerError) => {

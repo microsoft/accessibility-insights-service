@@ -40,7 +40,6 @@
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
-        "redis": "^2.8.0",
         "headless-chrome-crawler": "^1.8.0",
         "yargs": "^13.2.1"
     }
