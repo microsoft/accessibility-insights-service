@@ -2,7 +2,7 @@ import { IMock, It, Mock } from 'typemoq';
 import { createCrawlerRequestOptions, getNotAllowedUrls, getPromisableDynamicMock } from '../../test-utilities/common-mock-methods';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerFactory } from './hc-crawler-factory';
-import { CrawlerError, CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResult } from './hc-crawler-types';
+import { CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
 import { LinkExplorer } from './link-explorer';
 
@@ -16,9 +16,6 @@ describe('LinkExplorer', () => {
     let launchOptionsStub: CrawlerLaunchOptions;
     const testUrl = 'https://www.microsoft.com';
     const invalidUrl = 'https://www.xyzxyz.com';
-    let onSuccessFunc: (result: CrawlerResult) => void;
-    let preRequestFunc: (options: CrawlerRequestOptions) => boolean;
-    let onErrorFunc: (error: CrawlerError) => void;
     let requestStartEventCallback: (options: CrawlerRequestOptions) => void;
     let requestFinishedEventCallback: (options: CrawlerRequestOptions) => void;
     let requestSkippedEventCallback: (options: CrawlerRequestOptions) => void;
@@ -48,11 +45,6 @@ describe('LinkExplorer', () => {
         const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(testUrl);
         setUpCrawlerQueueForValidUrl(testUrl, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(testUrl);
-
-        const shouldProceeed: boolean = preRequestFunc(reqOptions);
-        onSuccessFunc(createCrawlResult(testUrl));
-
-        expect(shouldProceeed).toEqual(true);
         await expect(explorerPromise).resolves.toBeUndefined();
     });
 
@@ -61,10 +53,6 @@ describe('LinkExplorer', () => {
         setUpCrawlerQueueForInValidUrl(invalidUrl, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(invalidUrl);
 
-        const shouldProceeed: boolean = preRequestFunc(reqOptions);
-        onErrorFunc({ options: undefined, depth: 1, previousUrl: invalidUrl });
-
-        expect(shouldProceeed).toEqual(true);
         const errorMessage = `Explorer did not explore any links originated from ${invalidUrl}`;
         await expect(explorerPromise).rejects.toEqual(errorMessage);
     });
@@ -74,9 +62,7 @@ describe('LinkExplorer', () => {
         setUpCrawlerQueueForSkipUrl(urlToExplore, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(urlToExplore);
 
-        const shouldProceeed: boolean = preRequestFunc(reqOptions);
         const errorMessage = `Explorer did not explore any links originated from ${urlToExplore}`;
-        expect(shouldProceeed).toEqual(false);
         await expect(explorerPromise).rejects.toEqual(errorMessage);
     });
 
@@ -123,9 +109,6 @@ describe('LinkExplorer', () => {
             .returns(() => {
                 return launchOptionsStub;
             });
-        onSuccessFunc = launchOptionsStub.onSuccess;
-        onErrorFunc = launchOptionsStub.onError;
-        preRequestFunc = launchOptionsStub.preRequest;
     }
     function setUpCrawleEventrCallback(): void {
         crawlerMock
@@ -148,28 +131,5 @@ describe('LinkExplorer', () => {
             .callback((eventName, callback) => {
                 requestSkippedEventCallback = callback;
             });
-    }
-
-    function createCrawlResult(requestUrl: string): CrawlerResult {
-        return {
-            depth: 1,
-            options: {
-                url: testUrl,
-                maxDepth: 1,
-                priority: 1,
-                delay: 0,
-                retryCount: 1,
-                retryDelay: 0,
-                timeout: 0,
-                skipDuplicates: true,
-                depthPriority: false,
-                obeyRobotsTxt: false,
-                followSitemapXml: false,
-                skipRequestedRedirect: true,
-            },
-            previousUrl: undefined,
-            response: undefined,
-            links: [],
-        };
     }
 });

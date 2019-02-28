@@ -29,4 +29,14 @@ describe('LaunchOptionsFactory', () => {
         const shouldProceeed: boolean = options.preRequest(reqOptions);
         expect(shouldProceeed).toEqual(false);
     });
+
+    it('should reject crawling for login page', () => {
+        const loginUrl = 'https://login.microsoftonline.com/abc/xyz';
+        const options: CrawlerLaunchOptions = testSubject.create(loginUrl);
+        const reqOptions: CrawlerRequestOptions = {
+            url: loginUrl,
+        };
+        const shouldProceeed: boolean = options.preRequest(reqOptions);
+        expect(shouldProceeed).toEqual(false);
+    });
 });
