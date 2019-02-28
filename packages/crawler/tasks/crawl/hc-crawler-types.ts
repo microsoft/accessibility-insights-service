@@ -51,5 +51,5 @@ export interface CrawlerLaunchOptions {
     retryCount: number;
     preRequest(options: CrawlerRequestOptions): boolean;
     onSuccess(result: CrawlerResult): void;
-    onError(error: HCCrawlerError): void;
+    onError(error: CrawlerError): void;
 }
