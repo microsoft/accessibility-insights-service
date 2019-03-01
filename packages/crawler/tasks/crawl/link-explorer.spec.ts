@@ -1,5 +1,10 @@
 import { IMock, It, Mock } from 'typemoq';
-import { createCrawlerRequestOptions, getNotAllowedUrls, getPromisableDynamicMock } from '../../test-utilities/common-mock-methods';
+import {
+    createCrawlerRequestOptions,
+    createCrawlResult,
+    getNotAllowedUrls,
+    getPromisableDynamicMock,
+} from '../../test-utilities/common-mock-methods';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerFactory } from './hc-crawler-factory';
 import { CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
@@ -16,11 +21,6 @@ describe('LinkExplorer', () => {
     let launchOptionsStub: CrawlerLaunchOptions;
     const testUrl = 'https://www.microsoft.com';
     const invalidUrl = 'https://www.xyzxyz.com';
-    let requestStartEventCallback: (options: CrawlerRequestOptions) => void;
-    let requestFinishedEventCallback: (options: CrawlerRequestOptions) => void;
-    let requestSkippedEventCallback: (options: CrawlerRequestOptions) => void;
-    let requestFailedEventCallback: (error: Error) => void;
-
     beforeEach(() => {
         crawlerFactoryMock = Mock.ofType<HCCrawlerFactory>();
         launchOptionsFactoryMock = Mock.ofType<LaunchOptionsFactory>();
@@ -34,7 +34,6 @@ describe('LinkExplorer', () => {
         linkExplorer = new LinkExplorer(crawlerFactoryMock.object, launchOptionsFactoryMock.object);
         setUpLaunchOptions();
         setUpCrawlerMockCreation();
-        setUpCrawleEventrCallback();
     });
 
     it('should create instance', () => {
@@ -43,57 +42,66 @@ describe('LinkExplorer', () => {
 
     it('should explore link from valid url', async () => {
         const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(testUrl);
-        setUpCrawlerQueueForValidUrl(testUrl, reqOptions);
-        const explorerPromise = linkExplorer.exploreLinks(testUrl);
-        await expect(explorerPromise).resolves.toBeUndefined();
+        setUpCrawlerQueueForValidUrl(testUrl, launchOptionsStub, reqOptions);
+        const exploreLinks: string[] = await linkExplorer.exploreLinks(testUrl);
+        expect(exploreLinks.length).toBeGreaterThan(0);
+        crawlerMock.verifyAll();
     });
 
     it('should throw error for an non existing web portal', async () => {
-        const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(testUrl);
-        setUpCrawlerQueueForInValidUrl(invalidUrl, reqOptions);
+        const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(invalidUrl);
+        setUpCrawlerQueueForInValidUrl(invalidUrl, launchOptionsStub, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(invalidUrl);
 
         const errorMessage = `Explorer did not explore any links originated from ${invalidUrl}`;
-        await expect(explorerPromise).rejects.toEqual(errorMessage);
+        await expect(explorerPromise).rejects.toEqual(new Error(errorMessage));
+        crawlerMock.verifyAll();
     });
 
     test.each(getNotAllowedUrls())('should not explore link from unsupported urls %o', async (urlToExplore: string) => {
         const reqOptions: CrawlerRequestOptions = createCrawlerRequestOptions(urlToExplore);
-        setUpCrawlerQueueForSkipUrl(urlToExplore, reqOptions);
+        setUpCrawlerQueueForSkipUrl(urlToExplore, launchOptionsStub, reqOptions);
         const explorerPromise = linkExplorer.exploreLinks(urlToExplore);
-
         const errorMessage = `Explorer did not explore any links originated from ${urlToExplore}`;
-        await expect(explorerPromise).rejects.toEqual(errorMessage);
+        await expect(explorerPromise).rejects.toEqual(new Error(errorMessage));
+        crawlerMock.verifyAll();
     });
 
-    function setUpCrawlerQueueForValidUrl(url: string, reqOptions: CrawlerRequestOptions): void {
+    function setUpCrawlerQueueForValidUrl(
+        url: string,
+        launchOptions: CrawlerLaunchOptions,
+        crawlerReqOptions: CrawlerRequestOptions,
+    ): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
-                requestStartEventCallback(reqOptions);
-                requestFinishedEventCallback(reqOptions);
+                launchOptions.preRequest(crawlerReqOptions);
+                launchOptions.onSuccess(createCrawlResult(url));
                 // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
     }
 
-    function setUpCrawlerQueueForSkipUrl(url: string, reqOptions: CrawlerRequestOptions): void {
+    function setUpCrawlerQueueForSkipUrl(url: string, launchOptions: CrawlerLaunchOptions, reqOptions: CrawlerRequestOptions): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
-                requestStartEventCallback(reqOptions);
-                requestSkippedEventCallback(reqOptions);
+                launchOptions.preRequest(reqOptions);
                 // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
     }
 
-    function setUpCrawlerQueueForInValidUrl(url: string, reqOptions: CrawlerRequestOptions): void {
+    function setUpCrawlerQueueForInValidUrl(
+        url: string,
+        launchOptions: CrawlerLaunchOptions,
+        crawlerReqOptions: CrawlerRequestOptions,
+    ): void {
         crawlerMock
             .setup(async cm => cm.queue(url))
             .returns(async () => {
-                requestStartEventCallback(reqOptions);
-                requestFailedEventCallback(new Error());
+                launchOptions.preRequest(crawlerReqOptions);
+                launchOptions.onError({ options: crawlerReqOptions, depth: 1, previousUrl: url });
                 // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
@@ -108,28 +116,6 @@ describe('LinkExplorer', () => {
             .setup(x => x.create(It.isAny()))
             .returns(() => {
                 return launchOptionsStub;
-            });
-    }
-    function setUpCrawleEventrCallback(): void {
-        crawlerMock
-            .setup(cm => cm.on('requestfailed', It.isAny()))
-            .callback((eventName, callback) => {
-                requestFailedEventCallback = callback;
-            });
-        crawlerMock
-            .setup(cm => cm.on('requestfinished', It.isAny()))
-            .callback((eventName, callback) => {
-                requestFinishedEventCallback = callback;
-            });
-        crawlerMock
-            .setup(cm => cm.on('requeststarted', It.isAny()))
-            .callback((eventName, callback) => {
-                requestStartEventCallback = callback;
-            });
-        crawlerMock
-            .setup(cm => cm.on('requestskipped', It.isAny()))
-            .callback((eventName, callback) => {
-                requestSkippedEventCallback = callback;
             });
     }
 });

@@ -4,6 +4,7 @@ import { CrawlerError, CrawlerLaunchOptions, CrawlerRequestOptions, CrawlerResul
 export class LaunchOptionsFactory {
     public create(crawlUrl: string): CrawlerLaunchOptions {
         const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
+        const foundUrls: string[] = [];
 
         return {
             maxDepth: 1,
@@ -19,11 +20,13 @@ export class LaunchOptionsFactory {
                 return options.url.match(IGNORED_EXTENSIONS) === null;
             },
             onSuccess: (result: CrawlerResult) => {
+                foundUrls.push(result.options.url);
                 console.log(`onSuccess -> ${result.options.url}`);
             },
             onError: (error: CrawlerError) => {
                 console.log(`onErros() recevied -> ${error}`);
             },
+            foundUrls: foundUrls,
         };
     }
 }

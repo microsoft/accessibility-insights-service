@@ -1,5 +1,5 @@
 import { IMock } from 'typemoq';
-import { CrawlerRequestOptions } from '../tasks/crawl/hc-crawler-types';
+import { CrawlerRequestOptions, CrawlerResult } from '../tasks/crawl/hc-crawler-types';
 
 export function getNotAllowedUrls(): string[] {
     return [
@@ -36,4 +36,27 @@ export function getPromisableDynamicMock<T>(mock: IMock<T>): IMock<T> {
     mock.setup((x: any) => x.then).returns(() => undefined);
 
     return mock;
+}
+
+export function createCrawlResult(requestUrl: string): CrawlerResult {
+    return {
+        depth: 1,
+        options: {
+            url: requestUrl,
+            maxDepth: 1,
+            priority: 1,
+            delay: 0,
+            retryCount: 1,
+            retryDelay: 0,
+            timeout: 0,
+            skipDuplicates: true,
+            depthPriority: false,
+            obeyRobotsTxt: false,
+            followSitemapXml: false,
+            skipRequestedRedirect: true,
+        },
+        previousUrl: undefined,
+        response: undefined,
+        links: [],
+    };
 }

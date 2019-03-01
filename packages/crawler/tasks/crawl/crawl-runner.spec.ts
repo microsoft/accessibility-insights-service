@@ -18,7 +18,7 @@ describe(CrawlRunner, () => {
     it('should invoke link explorer', async () => {
         linkExplorerStrictMock
             .setup(async s => s.exploreLinks(It.isAny()))
-            .returns(async () => Promise.resolve())
+            .returns(async () => Promise.resolve([]))
             .verifiable();
         await testSubject.run();
 

@@ -49,6 +49,7 @@ export interface CrawlerLaunchOptions {
     obeyRobotsTxt: boolean;
     allowedDomains: string[];
     retryCount: number;
+    foundUrls: string[];
     preRequest(options: CrawlerRequestOptions): boolean;
     onSuccess(result: CrawlerResult): void;
     onError(error: CrawlerError): void;

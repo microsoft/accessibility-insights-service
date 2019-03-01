@@ -1,4 +1,4 @@
-import { getNotAllowedUrls } from '../../test-utilities/common-mock-methods';
+import { createCrawlResult, getNotAllowedUrls } from '../../test-utilities/common-mock-methods';
 import { CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 import { LaunchOptionsFactory } from './launch-options-factory';
 
@@ -38,5 +38,12 @@ describe('LaunchOptionsFactory', () => {
         };
         const shouldProceeed: boolean = options.preRequest(reqOptions);
         expect(shouldProceeed).toEqual(false);
+    });
+
+    it('should call success of valid url', () => {
+        const url = 'https://www.microsoft.com/device/surface';
+        const options: CrawlerLaunchOptions = testSubject.create(url);
+
+        options.onSuccess(createCrawlResult(url));
     });
 });
