@@ -7,7 +7,7 @@ describe('LinkExplorer Integration', () => {
         const linkExplorer = new LinkExplorer(new HCCrawlerFactory(), new LaunchOptionsFactory());
         const explreLinks: string[] = await linkExplorer.exploreLinks('https://www.microsoft.com/en-us/');
         expect(explreLinks.length).toBeGreaterThan(0);
-    });
+    }, 10000);
 
     it('Crawling an invalid url', async () => {
         const urlToExplore = 'https://www.xyzxyz.com/';
