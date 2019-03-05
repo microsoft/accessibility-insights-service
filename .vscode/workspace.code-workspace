@@ -19,8 +19,11 @@
         {
             "name": "crawler",
             "path": "../packages/crawler"
+        },
+        {
+            "name": "job-manager",
+            "path": "../packages/job-manager"
         }
-
     ],
     "settings": {
         "editor.formatOnSave": true,
