@@ -1,10 +1,15 @@
+import * as _ from 'lodash';
 import { VError } from 'verror';
-import './4env';
+import { config } from './4env';
 import { Batch } from './batch/batch';
 import { batchConfig } from './batch/batch-config';
+import { JobTaskExecutionResult, JobTaskState } from './batch/job-task';
 import { Queue } from './storage/queue';
 import { storageConfig } from './storage/storage-config';
-import { JobTaskState, JobTaskExecutionResult } from './batch/job-task';
+
+if (!_.isNil(config.parsed)) {
+    console.log(JSON.stringify(config.parsed, undefined, 2));
+}
 
 (async () => {
     const queue = new Queue(storageConfig);
@@ -23,6 +28,6 @@ import { JobTaskState, JobTaskExecutionResult } from './batch/job-task';
             await queue.deleteMessage(message);
         }
     });
-})().catch(error => {
+})().catch((error: Error) => {
     console.error(new VError(error, 'An error occurred while processing job.'));
 });

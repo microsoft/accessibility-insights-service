@@ -4,7 +4,7 @@ describe(JobTask, () => {
     let jobTask: JobTask;
 
     it('id should include correlation value', () => {
-        const correlationId = `correlationId_${Math.random()}`;
+        const correlationId = `correlationId_${new Date().valueOf()}`;
         jobTask = new JobTask(correlationId);
 
         expect(jobTask.correlationId).toEqual(correlationId);

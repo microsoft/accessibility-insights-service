@@ -4,7 +4,7 @@ describe(BatchConfig, () => {
     let batchConfig: BatchConfig;
 
     it('return value of AZ_BATCH_ACCOUNT_KEY environment variable', () => {
-        const value: string = `value-${Math.random}`;
+        const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_ACCOUNT_KEY = value;
         batchConfig = new BatchConfig();
 
@@ -12,7 +12,7 @@ describe(BatchConfig, () => {
     });
 
     it('return value of AZ_BATCH_ACCOUNT_NAME environment variable', () => {
-        const value: string = `value-${Math.random}`;
+        const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_ACCOUNT_NAME = value;
         batchConfig = new BatchConfig();
 
@@ -20,7 +20,7 @@ describe(BatchConfig, () => {
     });
 
     it('return value of AZ_BATCH_ACCOUNT_URL environment variable', () => {
-        const value: string = `value-${Math.random}`;
+        const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_ACCOUNT_URL = value;
         batchConfig = new BatchConfig();
 
@@ -28,7 +28,7 @@ describe(BatchConfig, () => {
     });
 
     it('return value of AZ_BATCH_POOL_ID environment variable', () => {
-        const value: string = `value-${Math.random}`;
+        const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_POOL_ID = value;
         batchConfig = new BatchConfig();
 
@@ -36,14 +36,10 @@ describe(BatchConfig, () => {
     });
 
     it('decode AZ_BATCH_TASK_PARAMETER environment variable', () => {
-        const value: string = `value-${Math.random}`;
+        const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_TASK_PARAMETER = Buffer.from(value).toString('base64');
         batchConfig = new BatchConfig();
 
         expect(batchConfig.taskParameter).toEqual(value);
-    });
-
-    it('return null if AZ_BATCH_TASK_PARAMETER environment variable is empty', () => {
-        expect(batchConfig.taskParameter).toBeNull;
     });
 });

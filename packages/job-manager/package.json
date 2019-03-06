@@ -23,6 +23,7 @@
     "devDependencies": {
         "@types/dotenv": "^6.1.0",
         "@types/jest": "^24.0.6",
+        "@types/lodash": "^4.14.122",
         "@types/node": "^11.9.4",
         "@types/verror": "^1.10.3",
         "copy-webpack-plugin": "^4.6.0",
@@ -43,6 +44,7 @@
     "dependencies": {
         "azure-batch": "^6.0.0",
         "azure-storage": "^2.10.2",
-        "dotenv": "^6.2.0"
+        "dotenv": "^6.2.0",
+        "lodash": "^4.17.11"
     }
 }

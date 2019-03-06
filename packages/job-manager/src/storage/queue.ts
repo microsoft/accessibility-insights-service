@@ -1,17 +1,18 @@
 import * as azure from 'azure-storage';
+import * as _ from 'lodash';
 import { VError } from 'verror';
-import { StorageConfig } from './storage-config';
 import { Message } from './message';
+import { StorageConfig } from './storage-config';
 
 export class Queue {
     public readonly scanQueue: string = this.config.scanQueue;
 
     constructor(private readonly config: StorageConfig, private readonly queueClient?: azure.QueueService) {
-        if (!queueClient) {
-            queueClient = azure
+        if (_.isNil(this.queueClient)) {
+            this.queueClient = azure
                 .createQueueService(this.config.accountName, this.config.accountKey)
                 .withFilter(new azure.ExponentialRetryPolicyFilter());
-            queueClient.messageEncoder = new azure.QueueMessageEncoder.TextBase64QueueMessageEncoder();
+            this.queueClient.messageEncoder = new azure.QueueMessageEncoder.TextBase64QueueMessageEncoder();
         }
     }
 
@@ -20,9 +21,9 @@ export class Queue {
         const messages: Message[] = [];
 
         return this.getQueueMessages(queue).then(serverMessages => {
-            serverMessages.forEach(serverMessage => {
+            serverMessages.forEach(async serverMessage => {
                 if (serverMessage.dequeueCount > maxDequeueCount) {
-                    this.moveToDeadQueue(queue, serverMessage);
+                    await this.moveToDeadQueue(queue, serverMessage);
                     console.log(
                         `[${new Date().toJSON()}] Message ${
                             serverMessage.messageId
@@ -39,7 +40,8 @@ export class Queue {
 
     public async moveToDeadQueue(originQueue: string, queueMessage: azure.QueueService.QueueMessageResult): Promise<void> {
         const targetQueue = `${originQueue}-dead`;
-        return this.createQueueMessage(targetQueue, JSON.stringify(queueMessage.messageText)).then(() =>
+
+        return this.createQueueMessage(targetQueue, JSON.stringify(queueMessage.messageText)).then(async () =>
             this.deleteQueueMessage(originQueue, queueMessage.messageId, queueMessage.popReceipt),
         );
     }
@@ -55,10 +57,10 @@ export class Queue {
         };
 
         return this.ensureQueueExists(queue).then(
-            () =>
+            async () =>
                 new Promise<azure.QueueService.QueueMessageResult[]>((resolve, reject) => {
                     this.queueClient.getMessages(this.config.scanQueue, requestOptions, (error, serverMessages) => {
-                        if (!error) {
+                        if (_.isNil(error)) {
                             resolve(serverMessages);
                         } else {
                             reject(new VError(error, `An error occurred while retrieving messages from queue ${this.config.scanQueue}`));
@@ -70,10 +72,10 @@ export class Queue {
 
     public async createQueueMessage(queue: string, message: string): Promise<void> {
         return this.ensureQueueExists(queue).then(
-            () =>
+            async () =>
                 new Promise<void>((resolve, reject) => {
                     this.queueClient.createMessage(queue, message, error => {
-                        if (!error) {
+                        if (_.isNil(error)) {
                             resolve();
                         } else {
                             reject(new VError(error, `An error occurred while adding new message into queue ${queue}.`));
@@ -85,10 +87,10 @@ export class Queue {
 
     public async deleteQueueMessage(queue: string, messageId: string, popReceipt: string): Promise<void> {
         return this.ensureQueueExists(queue).then(
-            () =>
+            async () =>
                 new Promise<void>((resolve, reject) => {
                     this.queueClient.deleteMessage(queue, messageId, popReceipt, error => {
-                        if (!error) {
+                        if (_.isNil(error)) {
                             resolve();
                         } else {
                             reject(new VError(error, `An error occurred while deleting message ${messageId} from queue ${queue}.`));
@@ -101,7 +103,7 @@ export class Queue {
     public async ensureQueueExists(queue: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             this.queueClient.createQueueIfNotExists(queue, error => {
-                if (!error) {
+                if (_.isNil(error)) {
                     resolve();
                 } else {
                     reject(new VError(error, `An error occurred while creating new queue ${queue}.`));

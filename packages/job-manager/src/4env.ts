@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv';
-import { VError } from 'verror';
+import * as _ from 'lodash';
 
-const config = dotenv.config();
-if (config.error) {
-    throw new VError(`An error occurred while loading the config file .env ${config.error}`);
+export let config = dotenv.config();
+
+if (!_.isNil(config) && !_.isNil(config.error)) {
+    console.log(`[${new Date().toJSON()}] Warning: An error occurred while loading the config file. ${config.error}`);
 }

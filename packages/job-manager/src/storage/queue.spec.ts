@@ -1,7 +1,8 @@
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
 import { QueueService } from 'azure-storage';
-import { IMock, Mock, It } from 'typemoq';
-import { StorageConfig } from './storage-config';
+import { IMock, It, Mock } from 'typemoq';
 import { Queue } from './queue';
+import { StorageConfig } from './storage-config';
 
 let config: StorageConfig;
 let queue: Queue;
@@ -17,7 +18,7 @@ function beforeEachSuit(): void {
 }
 
 describe('getMessages()', () => {
-    beforeEach(() => beforeEachSuit());
+    beforeEach(beforeEachSuit);
 
     it('get queue messages with low dequeue count', async () => {
         const queueMessageResults = [
@@ -48,13 +49,13 @@ describe('getMessages()', () => {
             .callback((q, c) => {
                 callback = c;
             })
-            .returns(() => callback(null));
+            .returns(() => callback(undefined));
         queueServiceMock
             .setup(o => o.createMessage(`${config.scanQueue}-dead`, It.isAny(), It.isAny()))
             .callback((q, m, c) => {
                 callback = c;
             })
-            .returns(() => callback(null))
+            .returns(() => callback(undefined))
             .verifiable();
         queueServiceMock
             .setup(o => o.deleteMessage(config.scanQueue, queueMessageResults[1].messageId, queueMessageResults[1].popReceipt, It.isAny()))
@@ -62,14 +63,14 @@ describe('getMessages()', () => {
                 callback = c;
             })
             .returns(() => {
-                callback(null);
+                callback(undefined);
             });
         queueServiceMock
             .setup(o => o.getMessages(config.scanQueue, It.isAny(), It.isAny()))
             .callback((q, r, c) => {
                 callback2 = c;
             })
-            .returns(() => callback2(null, queueMessageResults))
+            .returns(() => callback2(undefined, queueMessageResults))
             .verifiable();
         queue = new Queue(config, queueServiceMock.object);
         const queueMessageResultActual = await queue.getMessages();
@@ -80,7 +81,7 @@ describe('getMessages()', () => {
 });
 
 describe('deleteMessage()', () => {
-    beforeEach(() => beforeEachSuit());
+    beforeEach(beforeEachSuit);
 
     it('delete queue message by id', async () => {
         const message = {
@@ -94,14 +95,14 @@ describe('deleteMessage()', () => {
             .callback((q, c) => {
                 callback = c;
             })
-            .returns(() => callback(null))
+            .returns(() => callback(undefined))
             .verifiable();
         queueServiceMock
             .setup(o => o.deleteMessage(config.scanQueue, message.messageId, message.popReceipt, It.isAny()))
             .callback((q, m, r, c) => {
                 callback = c;
             })
-            .returns(() => callback(null))
+            .returns(() => callback(undefined))
             .verifiable();
         queue = new Queue(config, queueServiceMock.object);
         await queue.deleteMessage(message);

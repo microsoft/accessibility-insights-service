@@ -1,26 +1,28 @@
+// tslint:disable: no-submodule-imports
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
-import { CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
+import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
+import * as crypto from 'crypto';
+import * as _ from 'lodash';
 import { VError } from 'verror';
+import { Message } from '../storage/message';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
-import { Message } from '../storage/message';
 import { TaskParameterBuilder } from './task-parameter-builder';
-import * as crypto from 'crypto';
 
 export class Batch {
-    public readonly jobTasks: Map<string, JobTask> = new Map();
+    private readonly jobTasks: Map<string, JobTask> = new Map();
 
     public constructor(
         private readonly config: BatchConfig,
         private readonly taskParameterBuilder?: TaskParameterBuilder,
         private readonly batchClient?: ServiceClient.BatchServiceClient,
     ) {
-        if (!taskParameterBuilder) {
-            taskParameterBuilder = new TaskParameterBuilder(config.taskParameter);
+        if (_.isNil(taskParameterBuilder)) {
+            this.taskParameterBuilder = new TaskParameterBuilder(config.taskParameter);
         }
 
-        if (!batchClient) {
-            batchClient = new ServiceClient.BatchServiceClient(
+        if (_.isNil(batchClient)) {
+            this.batchClient = new ServiceClient.BatchServiceClient(
                 new SharedKeyCredentials(config.accountName, config.accountKey),
                 config.accountUrl,
             );
@@ -36,7 +38,7 @@ export class Batch {
                     throw new VError(`The job ${serviceJobId} is not active and cannot be use to run new tasks.`);
                 }
             })
-            .catch(async error => {
+            .catch(async (error: BatchError) => {
                 if (error.code === 'JobNotFound') {
                     if (addJobIdIndexOnCreate) {
                         serviceJobId = `${jobId}_${crypto.randomBytes(5).toString('hex')}`;
@@ -53,7 +55,7 @@ export class Batch {
                     await this.batchClient.job.add(jobAddParameter);
                     console.log(`[${new Date().toJSON()}] New job ${serviceJobId} created.`);
                 } else {
-                    throw new VError(error, `An error occurred while retrieving state of ${jobId} job.`);
+                    throw new VError(error as Error, `An error occurred while retrieving state of ${jobId} job.`);
                 }
             });
 
@@ -93,6 +95,7 @@ export class Batch {
 
     public async waitJob(jobId: string, pullIntervalMilliseconds: number = 10000): Promise<void> {
         console.log(`[${new Date().toJSON()}] Waiting for job ${jobId} to complete.`);
+
         return new Promise(async (resolve, reject) => {
             const taskListOptions = {
                 filter: `state ne '${JobTaskState.completed}'`,
@@ -109,10 +112,11 @@ export class Batch {
                             console.log(`[${new Date().toJSON()}] Job ${jobId} in progress with ${result.length} pending tasks.`);
                         }
                     })
-                    .catch(error => {
+                    .catch((error: Error) => {
                         clearInterval(timerId);
                         reject(new VError(error, `An error occurred while retrieving the task list for the job ${jobId}`));
                     });
+                // tslint:disable-next-line: align
             }, pullIntervalMilliseconds);
         });
     }
@@ -121,7 +125,7 @@ export class Batch {
         const cloudTaskListResult = await this.batchClient.task.list(jobId);
         this.setTasksState(cloudTaskListResult);
         let nextLink = cloudTaskListResult.odatanextLink;
-        while (nextLink) {
+        while (!_.isNil(nextLink)) {
             nextLink = await this.getTasksStateNext(nextLink);
         }
 
@@ -129,17 +133,17 @@ export class Batch {
     }
 
     private async getTasksStateNext(nextPageLink: string): Promise<string> {
-        if (nextPageLink) {
+        if (!_.isNil(nextPageLink)) {
             const cloudTaskListResult = await this.batchClient.task.listNext(nextPageLink);
             this.setTasksState(cloudTaskListResult);
 
             return cloudTaskListResult.odatanextLink;
         }
 
-        return null;
+        return undefined;
     }
 
-    private setTasksState(cloudTaskList: ServiceClient.BatchServiceModels.CloudTaskListResult) {
+    private setTasksState(cloudTaskList: ServiceClient.BatchServiceModels.CloudTaskListResult): void {
         cloudTaskList.forEach(task => {
             if (this.jobTasks.has(task.id)) {
                 this.jobTasks.get(task.id).state = task.state;

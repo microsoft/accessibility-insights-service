@@ -24,7 +24,7 @@ export class JobTask {
     constructor(public correlationId: string = '') {
         const maxLength = 64;
         const prefix = `job_${this.correlationId}_`;
-        let size = Math.min(Math.floor((maxLength - prefix.length) / 2), 10);
+        const size = Math.min(Math.floor((maxLength - prefix.length) / 2), 10);
         if (size < 0) {
             throw new VError(
                 `The correlationId string value is too long. Maximum length is ${maxLength - (prefix.length - this.correlationId.length)}`,

@@ -1,3 +1,6 @@
+// tslint:disable: no-unsafe-any
+import * as _ from 'lodash';
+
 export class ScanMessage {
     public id: string;
     public name: string;
@@ -6,7 +9,7 @@ export class ScanMessage {
     public serviceTreeId: string;
 
     constructor(messageText?: string) {
-        if (messageText) {
+        if (!_.isNil(messageText)) {
             const scanMessage = JSON.parse(messageText);
             this.id = scanMessage.id;
             this.name = scanMessage.name;

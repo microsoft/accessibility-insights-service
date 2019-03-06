@@ -1,4 +1,5 @@
-import { ResourceFile, EnvironmentSetting } from "azure-batch/lib/models";
+// tslint:disable: no-submodule-imports no-unsafe-any no-any
+import { EnvironmentSetting, ResourceFile } from 'azure-batch/lib/models';
 
 export class TaskParameterBuilder {
     public readonly resourceFiles?: ResourceFile[];
@@ -13,6 +14,6 @@ export class TaskParameterBuilder {
     }
 
     public getCommandLine(data: any): string {
-        return this.commandLineTemplate.replace(/%(\w*)%/g, (match, key) => data.hasOwnProperty(key) ? data[key] : '');
+        return this.commandLineTemplate.replace(/%(\w*)%/g, (match, key) => (data.hasOwnProperty(key) ? data[key] : ''));
     }
 }
