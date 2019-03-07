@@ -1,0 +1,82 @@
+{
+    "id": "url-scan-schedule",
+    "displayName": null,
+    "schedule": {
+        "startWindow": null,
+        "recurrenceInterval": null
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "displayName": null,
+        "usesTaskDependencies": false,
+        "onAllTasksComplete": "noaction",
+        "onTaskFailure": "noaction",
+        "constraints": {
+            "maxWallClockTime": null,
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "url-scan-job-manager-task",
+            "commandLine": "/bin/bash -c 'npm ci --production && nodejs index.js'",
+            "resourceFiles": [
+                {
+                    "httpUrl": "",
+                    "blobPrefix": null,
+                    "filePath": "index.js",
+                    "fileMode": null
+                },
+                {
+                    "httpUrl": "",
+                    "blobPrefix": null,
+                    "filePath": "package-lock.json",
+                    "fileMode": null
+                },
+                {
+                    "httpUrl": "",
+                    "blobPrefix": null,
+                    "filePath": "package.json",
+                    "fileMode": null
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": null,
+                "retentionTime": "PT168H",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "username": null,
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": false
+        },
+        "commonEnvironmentSettings": [
+            {
+                "name": "AZ_BATCH_ACCOUNT_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "scanrequest"
+            },
+            {
+                "name": "AZURE_STORAGE_ACCOUNT",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_ACCESS_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZ_BATCH_TASK_PARAMETER",
+                "value": ""
+            }
+        ],
+        "poolInfo": {
+            "poolId": "url-scan-pool"
+        }
+    }
+}
