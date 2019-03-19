@@ -13,3 +13,16 @@ echo "Installing node"
 #copied from https://github.com/nodesource/distributions/blob/master/README.md
 curl -sL https://deb.nodesource.com/setup_10.x | bash -
 apt-get install -y nodejs
+echo "Install node_modules on shared location $AZ_BATCH_NODE_SHARED_DIR"
+JOB_MANAGER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-job-manager
+SCANNER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-scanner
+mkdir $JOB_MANAGER_SHARED_LOCATION
+mkdir $SCANNER_SHARED_LOCATION
+cp batch-job-manager/package.json $JOB_MANAGER_SHARED_LOCATION
+cp batch-scanner/package.json $SCANNER_SHARED_LOCATION
+cd $JOB_MANAGER_SHARED_LOCATION
+echo "Installing job manager dependencies"
+npm install
+cd $SCANNER_SHARED_LOCATION
+echo "Installing scanner dependencies"
+npm install
