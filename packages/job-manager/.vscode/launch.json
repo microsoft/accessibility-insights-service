@@ -5,13 +5,16 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch job-manager",
+            "name": "Start debugging job-manager",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/src/index.ts",
-            "preLaunchTask": "tsc"
+            "preLaunchTask": "tsc",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "args": []
         },
         {
             "name": "Debug current unit test file",

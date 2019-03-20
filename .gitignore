@@ -1,6 +1,7 @@
 node_modules/
 dist/
 test-results/
+out/
 
 **/.secrets
 **/local.settings.json

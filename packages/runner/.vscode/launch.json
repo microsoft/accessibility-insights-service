@@ -5,16 +5,20 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start debugging crawler",
+            "name": "Start debugging runner",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/tasks/crawl/index.ts",
-            "preLaunchTask": "tsc",
+            "program": "${workspaceFolder}/src/index.ts",
+            //"preLaunchTask": "tsc",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "args": ["--baseUrl=\"https://support.microsoft.com/en-us\""]
+            "args": [
+                "--baseUrl=\"https://support.microsoft.com/en-us\"",
+                "--scanUrl=\"https://support.microsoft.com/en-us\"",
+                "--id=\"f81e98aa-d7c9-46a0-829f-9c4d67eb3405\""
+            ]
         },
         {
             "name": "Debug current unit test file",
