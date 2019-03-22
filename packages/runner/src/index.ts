@@ -1,5 +1,6 @@
 // tslint:disable: no-import-side-effect
 import * as _ from 'lodash';
+import 'reflect-metadata';
 import { VError } from 'verror';
 import { Arguments, argv } from 'yargs';
 import { config } from './4env';

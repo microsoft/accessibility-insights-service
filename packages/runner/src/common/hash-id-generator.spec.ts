@@ -19,7 +19,7 @@ describe('HashIdGenerator', () => {
         hashIdGenerator = new HashIdGenerator(shaJsMock.object);
     });
 
-    it('should generate same hash everytime without stubbing', () => {
+    it('should generate same hash every time without stubbing', () => {
         hashIdGenerator = new HashIdGenerator(shaJs);
         const hash1 = hashIdGenerator.generateHashId('u1', 'f1', 's1', 'r1');
         const hash2 = hashIdGenerator.generateHashId('u1', 'f1', 's1', 'r1');

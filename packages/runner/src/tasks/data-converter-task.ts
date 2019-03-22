@@ -1,20 +1,25 @@
-import { AxeResults } from 'axe-core';
+import { ResultConverter } from '../axe-converter/result-converter';
+import { IssueScanResults } from '../axe-converter/scan-result';
+import { AxeScanResults } from '../scanner/axe-scan-results';
 import { PageScanResult } from '../storage/page-scan-result';
 import { PageScanResultConverter } from '../storage/page-scan-result-converter';
-import { ResultConverter } from '../storage/result-converter';
 import { ScanMetadata } from '../storage/scan-metadata';
-import { ScanResult } from '../storage/scan-result';
 
 export class DataConverterTask {
-    public toScanResultsModel(axeResults: AxeResults, scanMetadata: ScanMetadata): ScanResult[] {
-        const resultConverter = new ResultConverter();
+    public toScanResultsModel(axeScanResults: AxeScanResults, scanMetadata: ScanMetadata): IssueScanResults {
+        if (axeScanResults.error === undefined) {
+            const resultConverter = new ResultConverter();
+            const scanResults = resultConverter.convert(axeScanResults.results, scanMetadata);
 
-        return resultConverter.convert(axeResults, scanMetadata);
+            return { results: scanResults };
+        } else {
+            return { results: [], error: axeScanResults.error };
+        }
     }
 
-    public toPageScanResultModel(scanResults: ScanResult[], scanMetadata: ScanMetadata): PageScanResult {
+    public toPageScanResultModel(issueScanResults: IssueScanResults, scanMetadata: ScanMetadata): PageScanResult {
         const pageScanResultConverter = new PageScanResultConverter();
 
-        return pageScanResultConverter.convert(scanResults, scanMetadata, undefined);
+        return pageScanResultConverter.convert(issueScanResults, scanMetadata);
     }
 }

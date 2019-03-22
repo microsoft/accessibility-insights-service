@@ -48,6 +48,9 @@
         },
         "cSpell.words": [
             "cout",
+            "coutd",
+            "injectable",
+            "inversify",
             "upsert"
         ]
     },

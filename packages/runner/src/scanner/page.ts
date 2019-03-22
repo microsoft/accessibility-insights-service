@@ -1,12 +1,19 @@
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
+import { inject, optional } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { AxePuppeteerFactory } from './axe-puppeteer-factory';
+
+export type AxePuppeteerFactory = (page: Puppeteer.Page) => AxePuppeteer;
+
+const axePuppeteerFactoryImpl = (page: Puppeteer.Page) => new AxePuppeteer(page);
 
 export class Page {
     private page: Puppeteer.Page;
 
-    constructor(private readonly browser: Puppeteer.Browser, private readonly axePuppeteerFactory: AxePuppeteerFactory) {}
+    constructor(
+        @inject('Browser') private readonly browser: Puppeteer.Browser,
+        @inject(axePuppeteerFactoryImpl) @optional() private readonly axePuppeteerFactory: AxePuppeteerFactory = axePuppeteerFactoryImpl,
+    ) {}
 
     public async create(): Promise<void> {
         this.page = await this.browser.newPage();
@@ -29,7 +36,7 @@ export class Page {
     }
 
     public async scanForA11yIssues(): Promise<AxeResults> {
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createInstance(this.page);
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory(this.page);
 
         return axePuppeteer.analyze();
     }

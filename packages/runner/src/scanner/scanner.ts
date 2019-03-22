@@ -1,11 +1,12 @@
+import { inject } from 'inversify';
 import { VError } from 'verror';
-import { AxeScanResult } from './axe-scan-result';
+import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 
 export class Scanner {
-    constructor(private readonly page: Page) {}
+    constructor(@inject(Page) private readonly page: Page) {}
 
-    public async scan(url: string): Promise<AxeScanResult> {
+    public async scan(url: string): Promise<AxeScanResults> {
         try {
             cout(`[scanner] Starting accessibility scanning of URL ${url}.`);
 
@@ -14,7 +15,6 @@ export class Scanner {
             await this.page.goto(url);
 
             const result = await this.page.scanForA11yIssues();
-            cout(`[scanner] Accessibility scanning of URL ${url} completed.`);
 
             return { results: result };
         } catch (error) {
@@ -24,6 +24,7 @@ export class Scanner {
             return { error: errorExt.message };
         } finally {
             await this.page.close();
+            cout(`[scanner] Accessibility scanning of URL ${url} completed.`);
         }
     }
 }

@@ -1,6 +1,8 @@
 import * as Puppeteer from 'puppeteer';
 
 export class WebDriver {
+    public browser: Puppeteer.Browser;
+
     constructor(private readonly puppeteer: typeof Puppeteer = Puppeteer) {}
 
     public async launch(): Promise<Puppeteer.Browser> {
@@ -13,6 +15,7 @@ export class WebDriver {
 
         // TODO remove context
         runnerContext.browser = result;
+        this.browser = result;
 
         return result;
     }

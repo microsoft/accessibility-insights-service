@@ -1,16 +1,16 @@
 import * as sha256 from 'sha.js';
+import { IssueScanResults } from '../axe-converter/scan-result';
 import { HashIdGenerator } from '../common/hash-id-generator';
 import { PageScanResult, RunState, ScanResultLevel } from './page-scan-result';
 import { ScanMetadata } from './scan-metadata';
-import { ScanResult } from './scan-result';
 
 export class PageScanResultConverter {
     public constructor(private readonly hashIdGenerator: HashIdGenerator = new HashIdGenerator(sha256)) {}
 
-    public convert(scanResults: ScanResult[], scanMetadata: ScanMetadata, error: Error): PageScanResult {
+    public convert(issueScanResults: IssueScanResults, scanMetadata: ScanMetadata): PageScanResult {
         const id = this.hashIdGenerator.generateLinkResultId(scanMetadata.baseUrl, scanMetadata.scanUrl);
-        const runState = error === undefined ? RunState.completed : RunState.failed;
-        const scanResultIds = scanResults.map(i => i.id);
+        const runState = issueScanResults.error === undefined ? RunState.completed : RunState.failed;
+        const scanResultIds = issueScanResults.results.map(i => i.id);
         const lastRunTime = new Date().toJSON();
 
         if (runState === RunState.completed) {
@@ -22,7 +22,7 @@ export class PageScanResultConverter {
                 scan: {
                     result: {
                         lastRunTime: lastRunTime,
-                        level: scanResults.length === 0 ? ScanResultLevel.pass : ScanResultLevel.fail,
+                        level: issueScanResults.results.length === 0 ? ScanResultLevel.pass : ScanResultLevel.fail,
                         issues: scanResultIds,
                     },
                     run: {

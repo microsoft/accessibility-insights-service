@@ -1,18 +1,31 @@
-// tslint:disable: no-any no-unsafe-any
+// tslint:disable: no-any no-unsafe-any no-require-imports
 declare global {
     const runnerContext: RunnerContext;
     function cout(message?: any, ...optionalParams: any[]): void;
+    function coutd(message?: any, ...optionalParams: any[]): void;
 }
 
 const node = global as any;
-node.cout = (message?: any, ...optionalParams: any[]) => {
+node.cout = (message?: any, ...optionalParams: any[]): void => {
     process.stdout.write(`[${new Date().toJSON()}] `);
-    if (optionalParams.length > 0) {
-        console.log(message, optionalParams);
+    let out: any;
+    if (typeof message === 'string') {
+        out = message;
     } else {
-        console.log(message);
+        const util = require('util');
+        out = util.inspect(message, { depth: undefined });
+    }
+    if (optionalParams.length > 0) {
+        console.log(out, optionalParams);
+    } else {
+        console.log(out);
     }
 };
-node.runnerContext = {};
+
+node.coutd = node.runnerContext = (message?: any, ...optionalParams: any[]): void => {
+    if (/--debug|--inspect/.test(process.execArgv.join(' '))) {
+        node.cout(message, ...optionalParams);
+    }
+};
 
 export {};

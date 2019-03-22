@@ -11,7 +11,7 @@
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/src/index.ts",
-            //"preLaunchTask": "tsc",
+            // "preLaunchTask": "tsc",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "args": [

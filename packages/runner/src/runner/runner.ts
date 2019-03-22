@@ -1,4 +1,5 @@
 import { Browser } from 'puppeteer';
+import { container } from '../inversify.config';
 import { ScanMetadata } from '../storage/scan-metadata';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataConverterTask } from '../tasks/data-converter-task';
@@ -7,10 +8,14 @@ import { StorageTask } from '../tasks/storage-tasks';
 import { WebDriverTask } from '../tasks/web-driver-task';
 
 export class Runner {
+    private readonly crawlerTasks = container.get<CrawlerTask>(CrawlerTask);
+    private readonly webDriverTasks = container.get<WebDriverTask>(WebDriverTask);
+    private readonly scannerTasks = container.get<ScannerTask>(ScannerTask);
+
     constructor(
-        private readonly webDriverTasks: WebDriverTask = new WebDriverTask(),
-        private readonly crawlerTasks: CrawlerTask = new CrawlerTask(),
-        private readonly scannerTasks: ScannerTask = new ScannerTask(),
+        //private readonly webDriverTasks: WebDriverTask = new WebDriverTask(),
+        //private readonly crawlerTasks: CrawlerTask = new CrawlerTask(),
+        // private readonly scannerTasks: ScannerTask = new ScannerTask(),
         private readonly storageTasks: StorageTask = new StorageTask(),
         private readonly dataConverterTask: DataConverterTask = new DataConverterTask(),
     ) {}
@@ -29,18 +34,15 @@ export class Runner {
             };
 
             browser = await this.webDriverTasks.launch();
-            const crawlerResult = await this.crawlerTasks.crawl(request.scanUrl, browser);
-            console.log(crawlerResult); // TODO remove
 
-            const axeResults = await this.scannerTasks.scan(request.scanUrl);
-            console.log(axeResults); // TODO remove
+            const crawlerScanResults = await this.crawlerTasks.crawl(request.scanUrl, browser);
+            coutd({ object: 'crawlerScanResults', value: crawlerScanResults });
 
-            const scanResults = this.dataConverterTask.toScanResultsModel(axeResults, scanMetadata);
-            console.log(scanResults); // TODO remove
+            const axeScanResults = await this.scannerTasks.scan(request.scanUrl);
+            const issueScanResults = this.dataConverterTask.toScanResultsModel(axeScanResults, scanMetadata);
+            await this.storageTasks.storeResults(issueScanResults.results);
 
-            await this.storageTasks.storeResults(scanResults);
-
-            const pageScanResult = this.dataConverterTask.toPageScanResultModel(scanResults, scanMetadata);
+            const pageScanResult = this.dataConverterTask.toPageScanResultModel(issueScanResults, scanMetadata);
             await this.storageTasks.storeResult(pageScanResult);
         } finally {
             await this.webDriverTasks.close(browser);
