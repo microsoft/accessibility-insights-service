@@ -13,6 +13,13 @@
             "queueName": "scanrequest",
             "connection": "AzureWebJobsStorage",
             "direction": "out"
+        },
+        {
+            "type": "queue",
+            "name": "outputReportQueueItem",
+            "queueName": "reportrequest",
+            "connection": "AzureWebJobsStorage",
+            "direction": "out"
         }
     ]
 }

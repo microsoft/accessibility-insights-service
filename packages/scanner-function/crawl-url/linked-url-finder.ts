@@ -47,6 +47,7 @@ export class LinkedUrlFinder {
                 context.log('resolving promise');
                 context.log('Crawler sending scan-urls ->', crawledUrls);
                 context.bindings.outputQueueItem = crawledUrls;
+                context.bindings.outputReportQueueItem = crawledUrls;
                 resolve();
             });
 
