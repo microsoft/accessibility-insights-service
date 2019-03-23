@@ -23,6 +23,10 @@
         {
             "name": "job-manager",
             "path": "../packages/job-manager"
+        },
+        {
+            "name": "json-compressor",
+            "path": "../packages/tools/json-compressor"
         }
     ],
     "settings": {
