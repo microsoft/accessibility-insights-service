@@ -14,8 +14,6 @@ export class WebDriverTask {
     }
 
     public async close(browser: Browser): Promise<void> {
-        if (browser !== undefined) {
-            await this.webDriver.close(browser);
-        }
+        await this.webDriver.close(browser);
     }
 }

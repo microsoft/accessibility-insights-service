@@ -1,36 +1,35 @@
-import { IMock, It, Mock, Times } from 'typemoq';
-
 import { Hash } from 'crypto';
-import * as shaJs from 'sha.js';
-import { HashIdGenerator } from './hash-id-generator';
+import * as sha256 from 'sha.js';
+import { IMock, It, Mock, Times } from 'typemoq';
+import { HashGenerator } from './hash-generator';
 
-describe('HashIdGenerator', () => {
+describe('HashGenerator', () => {
     let sha256Mock: IMock<Hash>;
-    let shaJsMock: IMock<typeof shaJs>;
+    let shaJsMock: IMock<typeof sha256>;
     let returnedHashMock: IMock<Hash>;
-    let hashIdGenerator: HashIdGenerator;
+    let hashGenerator: HashGenerator;
 
     beforeEach(() => {
         sha256Mock = Mock.ofType<Hash>();
-        shaJsMock = Mock.ofType<typeof shaJs>();
+        shaJsMock = Mock.ofType<typeof sha256>();
         returnedHashMock = Mock.ofType<Hash>();
 
         shaJsMock.setup(s => s('sha256')).returns(() => sha256Mock.object);
-        hashIdGenerator = new HashIdGenerator(shaJsMock.object);
+        hashGenerator = new HashGenerator(shaJsMock.object);
     });
 
     it('should generate same hash every time without stubbing', () => {
-        hashIdGenerator = new HashIdGenerator(shaJs);
-        const hash1 = hashIdGenerator.generateHashId('u1', 'f1', 's1', 'r1');
-        const hash2 = hashIdGenerator.generateHashId('u1', 'f1', 's1', 'r1');
+        hashGenerator = new HashGenerator(sha256);
+        const hash1 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');
+        const hash2 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');
 
         expect(hash1).toEqual(hash2);
     });
 
     it('should generate different hash if input is different without stubbing', () => {
-        hashIdGenerator = new HashIdGenerator(shaJs);
-        const hash1 = hashIdGenerator.generateHashId('u1', 'f1', 's1', 'r1');
-        const hash2 = hashIdGenerator.generateHashId('u1', 'f1', 's2', 'r1');
+        hashGenerator = new HashGenerator(sha256);
+        const hash1 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');
+        const hash2 = hashGenerator.generateBase64Hash('u1', 'f1', 's2', 'r1');
 
         expect(hash1).not.toEqual(hash2);
     });
@@ -41,7 +40,7 @@ describe('HashIdGenerator', () => {
 
         setupHashFunction(expectedId, expectedHashSeed);
 
-        expect(hashIdGenerator.generateHashId('a', 'b', 'c', 'd')).toBe(expectedId);
+        expect(hashGenerator.generateBase64Hash('a', 'b', 'c', 'd')).toBe(expectedId);
         sha256Mock.verifyAll();
         returnedHashMock.verifyAll();
     });

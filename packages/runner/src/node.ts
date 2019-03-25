@@ -1,11 +1,14 @@
 // tslint:disable: no-any no-unsafe-any no-require-imports
 declare global {
-    const runnerContext: RunnerContext;
     function cout(message?: any, ...optionalParams: any[]): void;
     function coutd(message?: any, ...optionalParams: any[]): void;
+    const isDebug: boolean;
 }
 
 const node = global as any;
+
+node.isDebug = /--debug|--inspect/.test(process.execArgv.join(' '));
+
 node.cout = (message?: any, ...optionalParams: any[]): void => {
     process.stdout.write(`[${new Date().toJSON()}] `);
     let out: any;
@@ -23,7 +26,7 @@ node.cout = (message?: any, ...optionalParams: any[]): void => {
 };
 
 node.coutd = node.runnerContext = (message?: any, ...optionalParams: any[]): void => {
-    if (/--debug|--inspect/.test(process.execArgv.join(' '))) {
+    if (node.isDebug) {
         node.cout(message, ...optionalParams);
     }
 };

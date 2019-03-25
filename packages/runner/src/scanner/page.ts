@@ -1,6 +1,6 @@
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
-import { inject, optional } from 'inversify';
+import { inject } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 
 export type AxePuppeteerFactory = (page: Puppeteer.Page) => AxePuppeteer;
@@ -11,12 +11,12 @@ export class Page {
     private page: Puppeteer.Page;
 
     constructor(
-        @inject('Browser') private readonly browser: Puppeteer.Browser,
-        @inject(axePuppeteerFactoryImpl) @optional() private readonly axePuppeteerFactory: AxePuppeteerFactory = axePuppeteerFactoryImpl,
+        @inject('Factory<Browser>') private readonly browserFactory: () => Puppeteer.Browser,
+        private readonly axePuppeteerFactory: AxePuppeteerFactory = axePuppeteerFactoryImpl,
     ) {}
 
     public async create(): Promise<void> {
-        this.page = await this.browser.newPage();
+        this.page = await this.browserFactory().newPage();
     }
 
     public async enableBypassCSP(): Promise<void> {
@@ -28,6 +28,7 @@ export class Page {
         const waitForNetworkLoadPromise = this.page.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
         await gotoUrlPromise;
+
         try {
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
@@ -42,6 +43,8 @@ export class Page {
     }
 
     public async close(): Promise<void> {
-        await this.page.close();
+        if (this.page !== undefined) {
+            await this.page.close();
+        }
     }
 }

@@ -1,8 +1,7 @@
 import * as dotenv from 'dotenv';
-import * as _ from 'lodash';
 
 export let config = dotenv.config();
 
-if (!_.isNil(config) && !_.isNil(config.error)) {
+if (config !== undefined && config.error !== undefined) {
     console.log(`Warning: An error occurred while loading the config file. ${config.error}`);
 }

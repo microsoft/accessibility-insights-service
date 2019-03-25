@@ -1,15 +1,24 @@
-import { ResultConverter } from '../axe-converter/result-converter';
-import { IssueScanResults } from '../axe-converter/scan-result';
+import { inject } from 'inversify';
+import { ScanMetadata } from '../common-types/scan-metadata';
+import { LinkResultConverter } from '../converters/link-result-converter';
+import { PageScanResultConverter } from '../converters/page-scan-result-converter';
+import { ScanResultConverter } from '../converters/scan-result-converter';
+import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { AxeScanResults } from '../scanner/axe-scan-results';
-import { PageScanResult } from '../storage/page-scan-result';
-import { PageScanResultConverter } from '../storage/page-scan-result-converter';
-import { ScanMetadata } from '../storage/scan-metadata';
+import { PageScanResult } from '../storage-documents/page-scan-result';
+import { IssueScanResults } from '../storage-documents/scan-result';
+import { WebsitePage } from '../storage-documents/website-page';
 
 export class DataConverterTask {
+    constructor(
+        @inject(ScanResultConverter) private readonly scanResultConverter: ScanResultConverter,
+        @inject(PageScanResultConverter) private readonly pageScanResultConverter: PageScanResultConverter,
+        @inject(LinkResultConverter) private readonly linkResultConverter: LinkResultConverter,
+    ) {}
+
     public toScanResultsModel(axeScanResults: AxeScanResults, scanMetadata: ScanMetadata): IssueScanResults {
         if (axeScanResults.error === undefined) {
-            const resultConverter = new ResultConverter();
-            const scanResults = resultConverter.convert(axeScanResults.results, scanMetadata);
+            const scanResults = this.scanResultConverter.convert(axeScanResults.results, scanMetadata);
 
             return { results: scanResults };
         } else {
@@ -17,9 +26,20 @@ export class DataConverterTask {
         }
     }
 
-    public toPageScanResultModel(issueScanResults: IssueScanResults, scanMetadata: ScanMetadata): PageScanResult {
-        const pageScanResultConverter = new PageScanResultConverter();
+    public toLinkResultModel(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
+        if (crawlerScanResults.error !== undefined) {
+            return [];
+        }
 
-        return pageScanResultConverter.convert(issueScanResults, scanMetadata);
+        return this.linkResultConverter.convert(crawlerScanResults, scanMetadata, runTime);
+    }
+
+    public toPageScanResultModel(
+        crawlerScanResults: CrawlerScanResults,
+        issueScanResults: IssueScanResults,
+        scanMetadata: ScanMetadata,
+        runTime: Date,
+    ): PageScanResult {
+        return this.pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
     }
 }

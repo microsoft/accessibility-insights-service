@@ -1,9 +1,9 @@
 import * as cosmos from '@azure/cosmos';
-import * as _ from 'lodash';
+import { inject, optional } from 'inversify';
 
 export class CosmosClientWrapper {
-    constructor(private readonly client?: cosmos.CosmosClient) {
-        if (_.isNil(client)) {
+    constructor(@inject(cosmos.CosmosClient) @optional() private readonly client?: cosmos.CosmosClient) {
+        if (client === undefined) {
             const endpoint = process.env.AZURE_COSMOS_DB_URL;
             const masterKey = process.env.AZURE_COSMOS_DB_KEY;
             this.client = new cosmos.CosmosClient({ endpoint, auth: { masterKey } });
@@ -27,9 +27,9 @@ export class CosmosClientWrapper {
         return response.container;
     }
 
-    private async getDatabase(dbId: string): Promise<cosmos.Database> {
-        const { database: db } = await this.client.databases.createIfNotExists({ id: dbId });
+    private async getDatabase(databaseId: string): Promise<cosmos.Database> {
+        const response = await this.client.databases.createIfNotExists({ id: databaseId });
 
-        return db;
+        return response.database;
     }
 }

@@ -21,6 +21,7 @@ export interface CrawlerScanResult {
     scanUrl: string;
     depth: number;
     links?: string[];
+    error?: Error;
 }
 
 export interface CrawlerRequestResponse {
@@ -30,7 +31,7 @@ export interface CrawlerRequestResponse {
     headers: CrawlResponseHeader;
 }
 
-export interface CrawlerError {
+export interface CrawlerError extends Error {
     options: CrawlerRequestOptions;
     depth: number;
     previousUrl: string;

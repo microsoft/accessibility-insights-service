@@ -1,4 +1,3 @@
-import * as _ from 'lodash';
 import * as node_url from 'url';
 import { JSONLineExporter } from './hc-crawler';
 import {
@@ -23,11 +22,14 @@ export class HCCrawlerOptionsFactory {
         const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
         const scanResult: CrawlerScanResult[] = [];
         const allowedDomain = node_url.parse(url).hostname;
+        const exporter = isDebug
+            ? new JSONLineExporter({
+                  file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
+              })
+            : undefined;
 
         return {
-            exporter: new JSONLineExporter({
-                file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
-            }),
+            exporter: exporter,
             maxDepth: 1,
             maxConcurrency: 1,
             obeyRobotsTxt: false,
@@ -44,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             },
             onSuccess: (result: CrawlerResult) => {
                 const links = new Set();
-                if (!_.isNil(result.links)) {
+                if (result.links !== undefined) {
                     result.links.forEach(link => {
                         if (node_url.parse(link).hostname === allowedDomain) {
                             links.add(link);
@@ -61,6 +63,13 @@ export class HCCrawlerOptionsFactory {
                 cout(`[hc-crawl] Total links found ${links.size}`);
             },
             onError: (error: CrawlerError) => {
+                scanResult.push({
+                    baseUrl: url,
+                    scanUrl: error.options.url,
+                    depth: error.depth,
+                    links: undefined,
+                    error: error,
+                });
                 cout(`[hc-crawl] Error processing URL ${url}`);
                 cout(error);
             },

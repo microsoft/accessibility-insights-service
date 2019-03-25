@@ -6,24 +6,20 @@ export class WebDriver {
     constructor(private readonly puppeteer: typeof Puppeteer = Puppeteer) {}
 
     public async launch(): Promise<Puppeteer.Browser> {
-        const result = await this.puppeteer.launch({
+        this.browser = await this.puppeteer.launch({
             headless: true,
             timeout: 15000,
             args: ['--disable-dev-shm-usage'],
         });
-        cout('[web-driver] Browser instance has started.');
+        cout('[web-driver] Browser instance is started.');
 
-        // TODO remove context
-        runnerContext.browser = result;
-        this.browser = result;
-
-        return result;
+        return this.browser;
     }
 
     public async close(browser: Puppeteer.Browser): Promise<void> {
-        const result = browser.close();
-        cout('[web-driver] Browser instance has terminated.');
-
-        return result;
+        if (this.browser !== undefined) {
+            await browser.close();
+            cout('[web-driver] Browser instance has stopped.');
+        }
     }
 }

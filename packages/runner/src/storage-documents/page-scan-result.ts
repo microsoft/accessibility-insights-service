@@ -1,5 +1,4 @@
 export enum RunState {
-    ready = 'ready',
     completed = 'completed',
     failed = 'failed',
 }
@@ -10,24 +9,31 @@ export enum ScanResultLevel {
 }
 
 export interface ScanResult {
-    lastRunTime: string;
+    runTime: string;
     level: ScanResultLevel;
     issues: string[];
 }
 
+export interface CrawlResult {
+    runTime: string;
+    links: string[];
+}
+
 export interface RunResult {
-    lastRunTime: string;
+    runTime: string;
     state: RunState;
     error?: string;
+}
+
+export interface Result<T> {
+    result?: T;
+    run: RunResult;
 }
 
 export interface PageScanResult {
     id: string;
     websiteId: string;
     url: string;
-    depth: number;
-    scan: {
-        result?: ScanResult;
-        run: RunResult;
-    };
+    crawl: Result<CrawlResult>;
+    scan: Result<ScanResult>;
 }
