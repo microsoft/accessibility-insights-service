@@ -21,7 +21,7 @@ export class PageScanResultConverter {
 
         return {
             id: id,
-            websiteId: scanMetadata.id,
+            websiteId: scanMetadata.websiteId,
             url: scanMetadata.scanUrl,
             crawl: crawlResult,
             scan: scanResult,

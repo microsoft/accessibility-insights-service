@@ -1,6 +1,6 @@
 export interface ScanMetadata {
-    id: string;
-    name: string;
+    websiteId: string;
+    websiteName: string;
     baseUrl: string;
     scanUrl: string;
     serviceTreeId: string;

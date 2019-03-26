@@ -46,8 +46,8 @@ export class ScanResultConverter {
                     ],
                 },
                 product: {
-                    id: scanConfig.id,
-                    name: scanConfig.name,
+                    id: scanConfig.websiteId,
+                    name: scanConfig.websiteName,
                     baseUrl: scanConfig.baseUrl,
                     serviceTreeId: scanConfig.serviceTreeId,
                 },

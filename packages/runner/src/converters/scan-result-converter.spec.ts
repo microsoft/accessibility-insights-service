@@ -10,8 +10,8 @@ describe('ResultConverter', () => {
     let resultConverter: ScanResultConverter;
     const testScanUrl: string = 'test scan url';
     const request: ScanMetadata = {
-        id: 'test product id',
-        name: 'test name',
+        websiteId: 'test product id',
+        websiteName: 'test name',
         baseUrl: 'test base url',
         scanUrl: testScanUrl,
         serviceTreeId: 'test service tree id',

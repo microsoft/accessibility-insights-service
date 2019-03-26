@@ -16,7 +16,7 @@ export class LinkResultConverter {
                 const websitePage = {
                     id: id,
                     page: {
-                        websiteId: scanMetadata.id,
+                        websiteId: scanMetadata.websiteId,
                         url: link,
                         lastSeen: runTime.toJSON(),
                     },

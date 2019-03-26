@@ -1,7 +1,7 @@
 // tslint:disable: no-import-side-effect
 import 'reflect-metadata';
 import { VError } from 'verror';
-import { Arguments, argv } from 'yargs';
+import { Arguments, argv, demandOption } from 'yargs';
 import { config } from './4env';
 import { ScanMetadata } from './common-types/scan-metadata';
 import { container } from './inversify.config';
@@ -13,6 +13,7 @@ if (config.parsed !== undefined) {
     console.log(JSON.stringify(config.parsed, undefined, 2));
 }
 
+demandOption(['websiteId', 'websiteName', 'baseUrl', 'scanUrl', 'serviceTreeId']);
 const scanMetadata = argv as Arguments<ScanMetadata>;
 cout('[Runner] Scan parameters:', scanMetadata);
 
@@ -21,4 +22,5 @@ cout('[Runner] Scan parameters:', scanMetadata);
     await runner.run(scanMetadata);
 })().catch((error: Error) => {
     cout(new VError(error, 'An error occurred while executing runner.'));
+    process.exit(1);
 });

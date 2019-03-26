@@ -15,9 +15,11 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "args": [
-                "--baseUrl=\"https://support.microsoft.com/en-us\"",
+                "--websiteId=\"f81e98aa-d7c9-46a0-829f-9c4d67eb3405\"",
+                "--websiteName=\"MSFT Support\"",
+                "--baseUrl=\"https://support.microsoft.com/\"",
                 "--scanUrl=\"https://support.microsoft.com/en-us\"",
-                "--id=\"f81e98aa-d7c9-46a0-829f-9c4d67eb3405\""
+                "--serviceTreeId=\"ec7b0c88-0e85-4ff7-8179-267615decc67\""
             ]
         },
         {
