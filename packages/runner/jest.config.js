@@ -8,7 +8,7 @@ module.exports = {
     },
     moduleDirectories: ['node_modules'],
     moduleFileExtensions: ['ts', 'js', 'json'],
-    testPathIgnorePatterns: [],
+    testPathIgnorePatterns: ['node_modules'],
     // This ensures that failures in beforeAll/beforeEach result in dependent tests not trying to run.
     // See https://github.com/facebook/jest/issues/2713
     testRunner: 'jest-circus/runner',
