@@ -1,3 +1,6 @@
+// tslint:disable: no-import-side-effect
+import 'reflect-metadata';
+
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadata } from '../common-types/scan-metadata';
@@ -6,10 +9,10 @@ import { Product, ResultLevel, ScanResult } from '../storage-documents/scan-resu
 import { ScanResultConverter } from './scan-result-converter';
 
 describe('ResultConverter', () => {
-    let hashIdGeneratorMock: IMock<HashGenerator>;
+    let hashGeneratorMock: IMock<HashGenerator>;
     let resultConverter: ScanResultConverter;
     const testScanUrl: string = 'test scan url';
-    const request: ScanMetadata = {
+    const scanMetadata: ScanMetadata = {
         websiteId: 'test product id',
         websiteName: 'test name',
         baseUrl: 'test base url',
@@ -18,8 +21,8 @@ describe('ResultConverter', () => {
     };
 
     beforeEach(() => {
-        hashIdGeneratorMock = Mock.ofType<HashGenerator>();
-        resultConverter = new ScanResultConverter(hashIdGeneratorMock.object);
+        hashGeneratorMock = Mock.ofType<HashGenerator>();
+        resultConverter = new ScanResultConverter(hashGeneratorMock.object);
     });
 
     it('generate scan result', () => {
@@ -27,16 +30,16 @@ describe('ResultConverter', () => {
         const axeResults: AxeResults = buildAxeResult();
         const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
 
-        expect(resultConverter.convert(axeResults, request)).toMatchObject(expectedConvertedResult);
-        hashIdGeneratorMock.verifyAll();
+        expect(resultConverter.convert(axeResults, scanMetadata)).toMatchObject(expectedConvertedResult);
+        hashGeneratorMock.verifyAll();
     });
 
     function setupHashFunction(): void {
-        hashIdGeneratorMock
+        hashGeneratorMock
             .setup(b => b.generateBase64Hash(testScanUrl, '#class1;#class2', 'test html1', 'test rule id1'))
             .returns(() => 'test id 1')
             .verifiable(Times.once());
-        hashIdGeneratorMock
+        hashGeneratorMock
             .setup(b => b.generateBase64Hash(testScanUrl, '#class3;#class4', 'test html2', 'test rule id2'))
             .returns(() => 'test id 2')
             .verifiable(Times.once());

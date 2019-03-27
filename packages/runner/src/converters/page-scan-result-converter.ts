@@ -59,9 +59,10 @@ export class PageScanResultConverter {
 
     private createScanResult(issueScanResults: IssueScanResults, runTime: Date): Result<ScanResult> {
         const runState = issueScanResults.error === undefined ? RunState.completed : RunState.failed;
-        const scanResultIds = issueScanResults.results.map(result => result.id);
 
         if (runState === RunState.completed) {
+            const scanResultIds = issueScanResults.results.map(result => result.id);
+
             return {
                 result: {
                     runTime: runTime.toJSON(),
