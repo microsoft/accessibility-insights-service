@@ -1,10 +1,10 @@
 // tslint:disable: no-import-side-effect
-import 'reflect-metadata';
+import { container } from './inversify.config';
+
 import { VError } from 'verror';
 import { Arguments, argv, demandOption } from 'yargs';
 import { config } from './4env';
 import { ScanMetadata } from './common-types/scan-metadata';
-import { container } from './inversify.config';
 import './node';
 import { Runner } from './runner/runner';
 
