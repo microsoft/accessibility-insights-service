@@ -1,6 +1,5 @@
 // tslint:disable: no-import-side-effect
 import 'reflect-metadata';
-import '../node';
 
 import { HashGenerator } from '../common/hash-generator';
 import { IMock, Mock, Times } from 'typemoq';
@@ -51,8 +50,6 @@ describe('PageScanResultConverter', () => {
 
         const result = pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
 
-        cout(result);
-
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();
     });
@@ -68,8 +65,6 @@ describe('PageScanResultConverter', () => {
         expectedResult.scan = { run: { runTime: runTime.toJSON(), state: RunState.failed, error: 'crawl error' } };
 
         const result = pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
-
-        cout(result);
 
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();
