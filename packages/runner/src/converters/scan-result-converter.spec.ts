@@ -5,7 +5,7 @@ import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadata } from '../common-types/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
-import { Product, ResultLevel, ScanResult } from '../storage-documents/scan-result';
+import { Product, ResultLevel, ScanResult } from '../storage-documents/issue-scan-result';
 import { ScanResultConverter } from './scan-result-converter';
 
 describe('ResultConverter', () => {

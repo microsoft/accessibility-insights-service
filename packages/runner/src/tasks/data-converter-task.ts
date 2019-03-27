@@ -6,7 +6,7 @@ import { ScanResultConverter } from '../converters/scan-result-converter';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { PageScanResult } from '../storage-documents/page-scan-result';
-import { IssueScanResults } from '../storage-documents/scan-result';
+import { IssueScanResults } from '../storage-documents/issue-scan-result';
 import { WebsitePage } from '../storage-documents/website-page';
 
 export class DataConverterTask {

@@ -3,7 +3,7 @@ import { ScanMetadata } from '../common-types/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { CrawlResult, PageScanResult, Result, RunState, ScanResult, ScanResultLevel } from '../storage-documents/page-scan-result';
-import { IssueScanResults } from '../storage-documents/scan-result';
+import { IssueScanResults } from '../storage-documents/issue-scan-result';
 
 export class PageScanResultConverter {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}

@@ -1,13 +1,13 @@
 // tslint:disable: no-import-side-effect
 import 'reflect-metadata';
 
-import { HashGenerator } from '../common/hash-generator';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadata } from '../common-types/scan-metadata';
-import { PageScanResultConverter } from './page-scan-result-converter';
+import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ResultLevel, Product, IssueScanResults } from '../storage-documents/scan-result';
 import { PageScanResult, RunState, ScanResultLevel } from '../storage-documents/page-scan-result';
+import { IssueScanResults, Product, ResultLevel } from '../storage-documents/issue-scan-result';
+import { PageScanResultConverter } from './page-scan-result-converter';
 
 describe('PageScanResultConverter', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
