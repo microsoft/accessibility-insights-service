@@ -1,4 +1,4 @@
-import { ScanLevel, RunState } from './states';
+import { RunState, ScanLevel } from './states';
 
 export enum WebsiteScanState {
     completed = 'completed',

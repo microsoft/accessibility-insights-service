@@ -1,11 +1,10 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
+import { ScanMetadata } from '../common/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { CrawlResult, PageScanResult, Result } from '../documents/page-scan-result';
-import { ScanLevel, RunState } from '../documents/states';
-import { ScanResult } from '../documents/page-scan-result';
 import { IssueScanResults } from '../documents/issue-scan-result';
+import { CrawlResult, PageScanResult, Result, ScanResult } from '../documents/page-scan-result';
+import { RunState, ScanLevel } from '../documents/states';
 
 export class PageScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}

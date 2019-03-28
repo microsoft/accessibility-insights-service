@@ -4,11 +4,11 @@ import 'reflect-metadata';
 import '../node';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
-import { WebsiteFactory } from './website-factory';
+import { ScanMetadata } from '../common/scan-metadata';
 import { RunState, ScanLevel } from '../documents/states';
 import { WebsiteScanState } from '../documents/website';
+import { WebsiteFactory } from './website-factory';
 
 describe('WebsiteFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;

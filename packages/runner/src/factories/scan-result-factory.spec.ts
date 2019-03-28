@@ -3,8 +3,8 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
+import { ScanMetadata } from '../common/scan-metadata';
 import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
 import { ScanResultFactory } from './scan-result-factory';
 
