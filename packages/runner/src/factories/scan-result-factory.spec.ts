@@ -3,14 +3,14 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
-import { Product, ResultLevel, ScanResult } from '../storage-documents/issue-scan-result';
-import { ScanResultConverter } from './scan-result-converter';
+import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { ScanResultFactory } from './scan-result-factory';
 
-describe('ResultConverter', () => {
+describe('ScanResultFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
-    let resultConverter: ScanResultConverter;
+    let scanResultFactory: ScanResultFactory;
     const testScanUrl: string = 'test scan url';
     const scanMetadata: ScanMetadata = {
         websiteId: 'test product id',
@@ -22,7 +22,7 @@ describe('ResultConverter', () => {
 
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
-        resultConverter = new ScanResultConverter(hashGeneratorMock.object);
+        scanResultFactory = new ScanResultFactory(hashGeneratorMock.object);
     });
 
     it('generate scan result', () => {
@@ -30,7 +30,7 @@ describe('ResultConverter', () => {
         const axeResults: AxeResults = buildAxeResult();
         const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
 
-        expect(resultConverter.convert(axeResults, scanMetadata)).toMatchObject(expectedConvertedResult);
+        expect(scanResultFactory.create(axeResults, scanMetadata)).toMatchObject(expectedConvertedResult);
         hashGeneratorMock.verifyAll();
     });
 

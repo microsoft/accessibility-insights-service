@@ -1,16 +1,8 @@
-export enum RunState {
-    completed = 'completed',
-    failed = 'failed',
-}
-
-export enum ScanResultLevel {
-    pass = 'pass',
-    fail = 'fail',
-}
+import { ScanLevel, RunState } from './states';
 
 export interface ScanResult {
     runTime: string;
-    level: ScanResultLevel;
+    level: ScanLevel;
     issues: string[];
 }
 
@@ -30,6 +22,13 @@ export interface Result<T> {
     run: RunResult;
 }
 
+/**
+ * Describes the website page single scan result.
+ * Intended to be used as a website page scan snapshot for a single scan run.
+ *
+ * The new db document will be created on each website page scan.
+ * The db document id is composed of a website base URL, a page URL, and scan timestamp in Unix format.
+ */
 export interface PageScanResult {
     id: string;
     websiteId: string;

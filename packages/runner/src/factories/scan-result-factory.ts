@@ -1,13 +1,13 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
-import { ResultLevel, ScanResult } from '../storage-documents/issue-scan-result';
+import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
 
-export class ScanResultConverter {
+export class ScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public convert(axeResults: AxeResults, scanConfig: ScanMetadata): ScanResult[] {
+    public create(axeResults: AxeResults, scanConfig: ScanMetadata): ScanResult[] {
         const results: ScanResult[] = [];
 
         axeResults.violations.forEach((axeResult: Result) => {

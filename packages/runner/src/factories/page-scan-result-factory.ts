@@ -1,14 +1,16 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { CrawlResult, PageScanResult, Result, RunState, ScanResult, ScanResultLevel } from '../storage-documents/page-scan-result';
-import { IssueScanResults } from '../storage-documents/issue-scan-result';
+import { CrawlResult, PageScanResult, Result } from '../documents/page-scan-result';
+import { ScanLevel, RunState } from '../documents/states';
+import { ScanResult } from '../documents/page-scan-result';
+import { IssueScanResults } from '../documents/issue-scan-result';
 
-export class PageScanResultConverter {
+export class PageScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public convertToPageResult(
+    public create(
         crawlerScanResults: CrawlerScanResults,
         issueScanResults: IssueScanResults,
         scanMetadata: ScanMetadata,
@@ -66,7 +68,7 @@ export class PageScanResultConverter {
             return {
                 result: {
                     runTime: runTime.toJSON(),
-                    level: issueScanResults.results.length === 0 ? ScanResultLevel.pass : ScanResultLevel.fail,
+                    level: issueScanResults.results.length === 0 ? ScanLevel.pass : ScanLevel.fail,
                     issues: scanResultIds,
                 },
                 run: {

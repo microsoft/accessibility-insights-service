@@ -2,15 +2,15 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { WebsitePage } from '../storage-documents/website-page';
-import { LinkResultConverter } from '../types';
+import { WebsitePage } from '../documents/website-page';
+import { WebsitePageFactory } from './website-page-factory';
 
-describe('LinkResultConverter', () => {
+describe('WebsitePageFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
-    let linkResultConverter: LinkResultConverter;
+    let websitePageFactory: WebsitePageFactory;
     const scanMetadata: ScanMetadata = {
         websiteId: 'websiteId',
         websiteName: 'websiteName',
@@ -22,15 +22,15 @@ describe('LinkResultConverter', () => {
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
         setupHashGenerator();
-        linkResultConverter = new LinkResultConverter(hashGeneratorMock.object);
+        websitePageFactory = new WebsitePageFactory(hashGeneratorMock.object);
     });
 
-    it('convert when scan url result provided', () => {
+    it('create when scan url result provided', () => {
         const runTime = new Date();
         const crawlerScanResults = createCrawlerScanResults();
         const expectedResult = createWebsitePageResult(runTime);
 
-        const result = linkResultConverter.convert(crawlerScanResults, scanMetadata, runTime);
+        const result = websitePageFactory.create(crawlerScanResults, scanMetadata, runTime);
 
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();

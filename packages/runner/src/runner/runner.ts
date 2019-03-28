@@ -1,8 +1,8 @@
 import { inject } from 'inversify';
 import { Browser } from 'puppeteer';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { CrawlerTask } from '../tasks/crawler-task';
-import { DataConverterTask } from '../tasks/data-converter-task';
+import { DataFactoryTask } from '../tasks/data-factory-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
@@ -13,7 +13,7 @@ export class Runner {
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(ScannerTask) private readonly scannerTask: ScannerTask,
         @inject(StorageTask) private readonly storageTask: StorageTask,
-        @inject(DataConverterTask) private readonly dataConverterTask: DataConverterTask,
+        @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
     ) {}
 
     public async run(scanMetadata: ScanMetadata): Promise<void> {
@@ -23,19 +23,14 @@ export class Runner {
         try {
             browser = await this.webDriverTask.launch();
             const crawlerScanResults = await this.crawlerTask.crawl(scanMetadata.scanUrl, browser);
-            const websitePages = this.dataConverterTask.toLinkResultModel(crawlerScanResults, scanMetadata, runTime);
+            const websitePages = this.dataFactoryTask.toLinkResultModel(crawlerScanResults, scanMetadata, runTime);
             await this.storageTask.storeResults(websitePages);
 
             const axeScanResults = await this.scannerTask.scan(scanMetadata.scanUrl);
-            const issueScanResults = this.dataConverterTask.toScanResultsModel(axeScanResults, scanMetadata);
+            const issueScanResults = this.dataFactoryTask.toScanResultsModel(axeScanResults, scanMetadata);
             await this.storageTask.storeResults(issueScanResults.results);
 
-            const pageScanResult = this.dataConverterTask.toPageScanResultModel(
-                crawlerScanResults,
-                issueScanResults,
-                scanMetadata,
-                runTime,
-            );
+            const pageScanResult = this.dataFactoryTask.toPageScanResultModel(crawlerScanResults, issueScanResults, scanMetadata, runTime);
             await this.storageTask.storeResult(pageScanResult);
         } finally {
             await this.webDriverTask.close(browser);

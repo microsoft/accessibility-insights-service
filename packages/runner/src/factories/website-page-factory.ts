@@ -1,13 +1,13 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { WebsitePage } from '../storage-documents/website-page';
+import { WebsitePage } from '../documents/website-page';
 
-export class LinkResultConverter {
+export class WebsitePageFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public convert(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
+    public create(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
         const websitePages = new Map<string, WebsitePage>();
         crawlerScanResults.results.map(result => {
             result.links.map(link => {

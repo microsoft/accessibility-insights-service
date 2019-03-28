@@ -2,16 +2,17 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common-types/scan-metadata';
+import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { PageScanResult, RunState, ScanResultLevel } from '../storage-documents/page-scan-result';
-import { IssueScanResults, Product, ResultLevel } from '../storage-documents/issue-scan-result';
-import { PageScanResultConverter } from './page-scan-result-converter';
+import { ScanLevel, RunState } from '../documents/states';
+import { PageScanResult } from '../documents/page-scan-result';
+import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
+import { PageScanResultFactory } from './page-scan-result-factory';
 
-describe('PageScanResultConverter', () => {
+describe('PageScanResultFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
-    let pageScanResultConverter: PageScanResultConverter;
+    let pageScanResultFactory: PageScanResultFactory;
     const scanMetadata: ScanMetadata = {
         websiteId: 'websiteId',
         websiteName: 'websiteName',
@@ -22,7 +23,7 @@ describe('PageScanResultConverter', () => {
 
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
-        pageScanResultConverter = new PageScanResultConverter(hashGeneratorMock.object);
+        pageScanResultFactory = new PageScanResultFactory(hashGeneratorMock.object);
     });
 
     it('create success scan and crawl result', () => {
@@ -32,7 +33,7 @@ describe('PageScanResultConverter', () => {
         const issueScanResults = createIssueScanResults();
         const expectedResult = createPageScanResult(runTime);
 
-        const result = pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
+        const result = pageScanResultFactory.create(crawlerScanResults, issueScanResults, scanMetadata, runTime);
 
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();
@@ -48,7 +49,7 @@ describe('PageScanResultConverter', () => {
         const expectedResult = createPageScanResult(runTime);
         expectedResult.crawl = { run: { runTime: runTime.toJSON(), state: RunState.failed, error: 'crawl error' } };
 
-        const result = pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
+        const result = pageScanResultFactory.create(crawlerScanResults, issueScanResults, scanMetadata, runTime);
 
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();
@@ -64,7 +65,7 @@ describe('PageScanResultConverter', () => {
         const expectedResult = createPageScanResult(runTime);
         expectedResult.scan = { run: { runTime: runTime.toJSON(), state: RunState.failed, error: 'crawl error' } };
 
-        const result = pageScanResultConverter.convertToPageResult(crawlerScanResults, issueScanResults, scanMetadata, runTime);
+        const result = pageScanResultFactory.create(crawlerScanResults, issueScanResults, scanMetadata, runTime);
 
         expect(result).toEqual(expectedResult);
         hashGeneratorMock.verifyAll();
@@ -87,7 +88,7 @@ describe('PageScanResultConverter', () => {
                 run: { runTime: runTime.toJSON(), state: RunState.completed },
             },
             scan: {
-                result: { runTime: runTime.toJSON(), level: ScanResultLevel.fail, issues: ['test id 1', 'test id 2'] },
+                result: { runTime: runTime.toJSON(), level: ScanLevel.fail, issues: ['test id 1', 'test id 2'] },
                 run: { runTime: runTime.toJSON(), state: RunState.completed },
             },
         };
