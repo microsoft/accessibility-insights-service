@@ -1,7 +1,7 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
+import { ScanMetadata } from '../common/scan-metadata';
 import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
 
 export class ScanResultFactory {

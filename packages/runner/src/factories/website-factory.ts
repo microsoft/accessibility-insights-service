@@ -1,9 +1,9 @@
-import { Website, WebsiteScanState, WebsitePageScanResult } from '../documents/website';
-import { ScanMetadata } from '../common/scan-metadata';
 import { inject } from 'inversify';
-import { RunState, ScanLevel } from '../documents/states';
-import { PageScanResult } from '../documents/page-scan-result';
 import { HashGenerator } from '../common/hash-generator';
+import { ScanMetadata } from '../common/scan-metadata';
+import { PageScanResult } from '../documents/page-scan-result';
+import { RunState, ScanLevel } from '../documents/states';
+import { Website, WebsitePageScanResult, WebsiteScanState } from '../documents/website';
 
 export class WebsiteFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
@@ -22,6 +22,7 @@ export class WebsiteFactory {
         website.scanResult.lastUpdated = runTime.toJSON();
         website.scanResult.scanState = scanState;
         website.scanResult.level = websiteScanLevel;
+
         return website;
     }
 

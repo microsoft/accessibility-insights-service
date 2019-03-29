@@ -2,12 +2,12 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
+import { ScanMetadata } from '../common/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ScanLevel, RunState } from '../documents/states';
-import { PageScanResult } from '../documents/page-scan-result';
 import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
+import { PageScanResult } from '../documents/page-scan-result';
+import { RunState, ScanLevel } from '../documents/states';
 import { PageScanResultFactory } from './page-scan-result-factory';
 
 describe('PageScanResultFactory', () => {
