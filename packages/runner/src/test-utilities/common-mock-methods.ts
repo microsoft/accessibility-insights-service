@@ -64,3 +64,10 @@ export function createCrawlResult(requestUrl: string): CrawlerResult {
 export function createCrawlerRequestResponse(requestUrl: string): CrawlerRequestResponse {
     return { ok: true, status: 200, url: requestUrl, headers: undefined };
 }
+
+export function defineGlobalVariables(): void {
+    // tslint:disable-next-line:no-any
+    (global as any).isDebug = false;
+    // tslint:disable-next-line:no-any no-empty
+    (global as any).cout = () => {};
+}

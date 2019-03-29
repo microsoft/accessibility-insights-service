@@ -2,6 +2,7 @@ import { IMock, It, Mock } from 'typemoq';
 import {
     createCrawlerRequestOptions,
     createCrawlResult,
+    defineGlobalVariables,
     getNotAllowedUrls,
     getPromisableDynamicMock,
 } from '../test-utilities/common-mock-methods';
@@ -20,10 +21,7 @@ describe('LinkExplorer', () => {
     const testUrl = 'https://www.microsoft.com';
     const invalidUrl = 'https://www.xyzxyz.com';
     beforeEach(() => {
-        // tslint:disable-next-line:no-any
-        (global as any).isDebug = false;
-        // tslint:disable-next-line:no-any no-empty
-        (global as any).cout = () => {};
+        defineGlobalVariables();
         crawlerMock = Mock.ofType<HCCrawlerTyped>();
         crawlerMock.setup(async cm => cm.onIdle()).returns(async () => Promise.resolve());
         crawlerMock.setup(async cm => cm.close()).returns(async () => Promise.resolve());
