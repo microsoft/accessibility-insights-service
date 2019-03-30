@@ -1,7 +1,7 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
 
 export class ScanResultFactory {
@@ -22,7 +22,7 @@ export class ScanResultFactory {
             const selector = node.target.join(';');
 
             // preserve preserve order for the hash compatibility
-            const resultId: string = this.hashGenerator.generateBase64Hash(scanConfig.scanUrl, selector, node.html, axeResult.id);
+            const resultId: string = this.hashGenerator.getScanResultDocumentId(scanConfig.scanUrl, selector, node.html, axeResult.id);
 
             return {
                 id: resultId,

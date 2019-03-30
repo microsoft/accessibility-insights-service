@@ -1,3 +1,5 @@
+import { StorageDocument } from './storage-document';
+
 export enum ResultLevel {
     error = 'error',
     pass = 'pass',
@@ -32,8 +34,10 @@ export interface Product {
     serviceTreeId: string;
 }
 
-export interface ScanResult {
-    id: string;
+/**
+ * Descries the accessibility scan issue.
+ */
+export interface ScanResult extends StorageDocument {
     result: Result;
     product: Product;
 }

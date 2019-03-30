@@ -1,4 +1,4 @@
-import { createCrawlResult, defineGlobalVariables, getNotAllowedUrls } from '../test-utilities/common-mock-methods';
+import { createCrawlResult, getNotAllowedUrls } from '../test-utilities/common-mock-methods';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 
@@ -6,7 +6,6 @@ describe('LaunchOptionsFactory', () => {
     let testSubject: HCCrawlerOptionsFactory;
     let browserWSEndPoint: string;
     beforeEach(() => {
-        defineGlobalVariables();
         testSubject = new HCCrawlerOptionsFactory();
         browserWSEndPoint = 'ws://localhost';
     });

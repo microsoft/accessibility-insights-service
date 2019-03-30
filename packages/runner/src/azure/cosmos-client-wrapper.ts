@@ -1,5 +1,8 @@
 import * as cosmos from '@azure/cosmos';
 import { inject, optional } from 'inversify';
+import { CosmosOperationResponse } from './cosmos-operation-response';
+import { Activator } from '../common/activator';
+import { Resource } from '@azure/cosmos';
 
 export class CosmosClientWrapper {
     constructor(@inject(cosmos.CosmosClient) @optional() private readonly client?: cosmos.CosmosClient) {
@@ -10,15 +13,72 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async upsertItems<T>(dbName: string, collectionName: string, items: T[]): Promise<void> {
-        const db = await this.getDatabase(dbName);
-        const collection = await this.getCollection(db, collectionName);
+    public async upsertItems<T>(items: T[], dbName: string, collectionName: string): Promise<void> {
+        const container = await this.getContainer(dbName, collectionName);
 
         await Promise.all(
             items.map(async item => {
-                await collection.items.upsert(item);
+                await container.items.upsert(item);
             }),
         );
+    }
+
+    public async upsertItem<T>(item: T, dbName: string, collectionName: string): Promise<CosmosOperationResponse<T>> {
+        const container = await this.getContainer(dbName, collectionName);
+        try {
+            const options =
+                (<Resource>(<unknown>item))._etag !== undefined
+                    ? {
+                          accessCondition: { type: 'IfMatch', condition: (<Resource>(<unknown>item))._etag },
+                      }
+                    : undefined;
+
+            const response = await container.items.upsert(item, options);
+            const itemT = this.convert<T>(response.body);
+
+            return {
+                item: itemT,
+                statusCode: 200,
+            };
+        } catch (error) {
+            if ((<cosmos.ErrorResponse>error).code !== undefined) {
+                return {
+                    response: (<cosmos.ErrorResponse>error).body,
+                    statusCode: (<cosmos.ErrorResponse>error).code,
+                };
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    public async readItem<T>(id: string, dbName: string, collectionName: string): Promise<CosmosOperationResponse<T>> {
+        const container = await this.getContainer(dbName, collectionName);
+
+        try {
+            const response = await container.item(id).read();
+            const itemT = this.convert<T>(response.body);
+
+            return {
+                item: itemT,
+                statusCode: 200,
+            };
+        } catch (error) {
+            if ((<cosmos.ErrorResponse>error).code !== undefined) {
+                return {
+                    response: (<cosmos.ErrorResponse>error).body,
+                    statusCode: (<cosmos.ErrorResponse>error).code,
+                };
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    private async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {
+        const db = await this.getDatabase(dbName);
+
+        return this.getCollection(db, collectionName);
     }
 
     private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
@@ -31,5 +91,11 @@ export class CosmosClientWrapper {
         const response = await this.client.databases.createIfNotExists({ id: databaseId });
 
         return response.database;
+    }
+
+    private convert<T>(source: any): T {
+        const activator = new Activator();
+
+        return activator.convert<T>(source);
     }
 }

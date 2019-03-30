@@ -4,7 +4,7 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
 import { ScanResultFactory } from './scan-result-factory';
 
@@ -36,11 +36,11 @@ describe('ScanResultFactory', () => {
 
     function setupHashFunction(): void {
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(testScanUrl, '#class1;#class2', 'test html1', 'test rule id1'))
+            .setup(b => b.getScanResultDocumentId(testScanUrl, '#class1;#class2', 'test html1', 'test rule id1'))
             .returns(() => 'test id 1')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(testScanUrl, '#class3;#class4', 'test html2', 'test rule id2'))
+            .setup(b => b.getScanResultDocumentId(testScanUrl, '#class3;#class4', 'test html2', 'test rule id2'))
             .returns(() => 'test id 2')
             .verifiable(Times.once());
     }

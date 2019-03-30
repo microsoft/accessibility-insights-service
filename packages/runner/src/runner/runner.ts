@@ -1,11 +1,12 @@
 import { inject } from 'inversify';
 import { Browser } from 'puppeteer';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
+import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
 
 export class Runner {
     constructor(
@@ -14,6 +15,7 @@ export class Runner {
         @inject(ScannerTask) private readonly scannerTask: ScannerTask,
         @inject(StorageTask) private readonly storageTask: StorageTask,
         @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
+        @inject(WebsiteStateUpdaterTask) private readonly websiteStateUpdaterTask: WebsiteStateUpdaterTask,
     ) {}
 
     public async run(scanMetadata: ScanMetadata): Promise<void> {
@@ -21,17 +23,29 @@ export class Runner {
         const runTime = new Date();
 
         try {
+            // start new web driver process
             browser = await this.webDriverTask.launch();
+            // scan website page for next level pages references
             const crawlerScanResults = await this.crawlerTask.crawl(scanMetadata.scanUrl, browser);
-            const websitePages = this.dataFactoryTask.toLinkResultModel(crawlerScanResults, scanMetadata, runTime);
+            // convert pages references to a storage model
+            const websitePages = this.dataFactoryTask.toWebsitePagesModel(crawlerScanResults, scanMetadata, runTime);
+            // store pages references model in a storage
             await this.storageTask.storeResults(websitePages);
 
+            // scan website page for accessibility issues
             const axeScanResults = await this.scannerTask.scan(scanMetadata.scanUrl);
+            // convert accessibility issues to a storage model
             const issueScanResults = this.dataFactoryTask.toScanResultsModel(axeScanResults, scanMetadata);
+            // store accessibility issues model in a storage
             await this.storageTask.storeResults(issueScanResults.results);
 
+            // convert scan results to a page scan history storage model
             const pageScanResult = this.dataFactoryTask.toPageScanResultModel(crawlerScanResults, issueScanResults, scanMetadata, runTime);
+            // store page scan history model in a storage
             await this.storageTask.storeResult(pageScanResult);
+
+            // update website root scan state document with last page scan result
+            await this.websiteStateUpdaterTask.update(pageScanResult, scanMetadata, runTime);
         } finally {
             await this.webDriverTask.close(browser);
         }

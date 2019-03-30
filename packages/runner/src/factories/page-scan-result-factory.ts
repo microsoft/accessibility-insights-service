@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { CrawlResult, PageScanResult, Result, ScanResult } from '../documents/page-scan-result';
@@ -16,7 +16,7 @@ export class PageScanResultFactory {
         runTime: Date,
     ): PageScanResult {
         // preserve parameters order for the hash compatibility
-        const id = this.hashGenerator.generateBase64Hash(scanMetadata.baseUrl, scanMetadata.scanUrl, runTime.valueOf().toString());
+        const id = this.hashGenerator.getPageScanResultDocumentId(scanMetadata.baseUrl, scanMetadata.scanUrl, runTime.valueOf());
         const crawlResult = this.createCrawlResult(scanMetadata.scanUrl, crawlerScanResults, runTime);
         const scanResult = this.createScanResult(issueScanResults, runTime);
 

@@ -1,6 +1,6 @@
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { Website, WebsitePageScanResult, WebsiteScanState } from '../documents/website';
@@ -8,46 +8,63 @@ import { Website, WebsitePageScanResult, WebsiteScanState } from '../documents/w
 export class WebsiteFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public update(website: Website, pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Website {
-        const scanIndex = website.lastPageScans.findIndex(scan => scan.id === pageScanResult.id);
+    public createWebsiteDocumentId(baseUrl: string): string {
+        // preserve parameters order for the hash compatibility
+        return this.hashGenerator.getWebsiteDocumentId(baseUrl);
+    }
+
+    public update(sourceWebsite: Website, pageScanResult: PageScanResult, runTime: Date): Website {
+        const websitePageId = this.hashGenerator.getWebsitePageDocumentId(sourceWebsite.baseUrl, pageScanResult.url);
+        const pageScanIndex = sourceWebsite.lastPageScans.findIndex(scan => scan.pageId === websitePageId);
         const pageScanLevel = this.getPageScanLevel(pageScanResult);
-        if (scanIndex > -1) {
-            website.lastPageScans[scanIndex].lastUpdated = runTime.toJSON();
-            website.lastPageScans[scanIndex].level = pageScanLevel;
-            website.lastPageScans[scanIndex].runState = pageScanResult.scan.run.state;
+        if (pageScanIndex > -1) {
+            sourceWebsite.lastPageScans[pageScanIndex].lastUpdated = runTime.toJSON();
+            sourceWebsite.lastPageScans[pageScanIndex].level = pageScanLevel;
+            sourceWebsite.lastPageScans[pageScanIndex].runState = pageScanResult.scan.run.state;
+        } else {
+            const websitePageScanResult = {
+                id: pageScanResult.id,
+                pageId: websitePageId,
+                url: pageScanResult.url,
+                lastUpdated: runTime.toJSON(),
+                level: pageScanLevel,
+                runState: pageScanResult.scan.run.state,
+            };
+            sourceWebsite.lastPageScans.push(websitePageScanResult);
         }
 
-        const scanState = this.getWebsiteScanState(website.lastPageScans);
-        const websiteScanLevel = this.getWebsiteScanLevel(website.lastPageScans);
-        website.scanResult.lastUpdated = runTime.toJSON();
-        website.scanResult.scanState = scanState;
-        website.scanResult.level = websiteScanLevel;
+        const scanState = this.getWebsiteScanState(sourceWebsite.lastPageScans);
+        const websiteScanLevel = this.getWebsiteScanLevel(sourceWebsite.lastPageScans);
+        sourceWebsite.scanResult.lastUpdated = runTime.toJSON();
+        sourceWebsite.scanResult.scanState = scanState;
+        sourceWebsite.scanResult.level = websiteScanLevel;
 
-        return website;
+        return sourceWebsite;
     }
 
     public create(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Website {
-        // preserve parameters order for the hash compatibility
-        const id = this.hashGenerator.generateBase64Hash(scanMetadata.baseUrl);
-        const scanLevel = this.getPageScanLevel(pageScanResult);
+        const websiteDocumentId = this.hashGenerator.getWebsiteDocumentId(scanMetadata.baseUrl);
+        const websitePageId = this.hashGenerator.getWebsitePageDocumentId(scanMetadata.baseUrl, pageScanResult.url);
+        const pageScanLevel = this.getPageScanLevel(pageScanResult);
         const websitePageScanResult = {
             id: pageScanResult.id,
+            pageId: websitePageId,
             url: pageScanResult.url,
             lastUpdated: runTime.toJSON(),
-            level: scanLevel,
+            level: pageScanLevel,
             runState: pageScanResult.scan.run.state,
         };
         const scanState = this.getWebsiteScanState([websitePageScanResult]);
 
         return {
-            id: id,
+            id: websiteDocumentId,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
             scanResult: {
                 lastUpdated: runTime.toJSON(),
-                level: scanLevel,
+                level: pageScanLevel,
                 scanState: scanState,
             },
             lastPageScans: [websitePageScanResult],

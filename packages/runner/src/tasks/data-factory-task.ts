@@ -1,20 +1,31 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common/scan-metadata';
-import { WebsitePageFactory } from '../factories/website-page-factory';
+import { ScanMetadata } from '../types/scan-metadata';
+import { CrawlerScanResults } from '../crawler/crawler-scan-results';
+import { IssueScanResults } from '../documents/issue-scan-result';
+import { PageScanResult } from '../documents/page-scan-result';
+import { Website } from '../documents/website';
+import { WebsitePage } from '../documents/website-page';
 import { PageScanResultFactory } from '../factories/page-scan-result-factory';
 import { ScanResultFactory } from '../factories/scan-result-factory';
-import { CrawlerScanResults } from '../crawler/crawler-scan-results';
+import { WebsiteFactory } from '../factories/website-factory';
+import { WebsitePageFactory } from '../factories/website-page-factory';
 import { AxeScanResults } from '../scanner/axe-scan-results';
-import { PageScanResult } from '../documents/page-scan-result';
-import { IssueScanResults } from '../documents/issue-scan-result';
-import { WebsitePage } from '../documents/website-page';
 
 export class DataFactoryTask {
     constructor(
         @inject(ScanResultFactory) private readonly scanResultFactory: ScanResultFactory,
         @inject(PageScanResultFactory) private readonly pageScanResultFactory: PageScanResultFactory,
-        @inject(WebsitePageFactory) private readonly linkResultFactory: WebsitePageFactory,
+        @inject(WebsitePageFactory) private readonly websitePageFactory: WebsitePageFactory,
+        @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
     ) {}
+
+    public toWebsiteModel(sourceWebsite: Website, pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Website {
+        if (sourceWebsite !== undefined) {
+            return this.websiteFactory.update(sourceWebsite, pageScanResult, runTime);
+        } else {
+            return this.websiteFactory.create(pageScanResult, scanMetadata, runTime);
+        }
+    }
 
     public toScanResultsModel(axeScanResults: AxeScanResults, scanMetadata: ScanMetadata): IssueScanResults {
         if (axeScanResults.error === undefined) {
@@ -26,12 +37,12 @@ export class DataFactoryTask {
         }
     }
 
-    public toLinkResultModel(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
+    public toWebsitePagesModel(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
         if (crawlerScanResults.error !== undefined) {
             return [];
         }
 
-        return this.linkResultFactory.create(crawlerScanResults, scanMetadata, runTime);
+        return this.websitePageFactory.create(crawlerScanResults, scanMetadata, runTime);
     }
 
     public toPageScanResultModel(

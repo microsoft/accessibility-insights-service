@@ -3,7 +3,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
 import { PageScanResult } from '../documents/page-scan-result';
@@ -73,7 +73,7 @@ describe('PageScanResultFactory', () => {
 
     function setupHashGenerator(runTime: Date): void {
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, scanMetadata.scanUrl, runTime.valueOf().toString()))
+            .setup(b => b.getPageScanResultDocumentId(scanMetadata.baseUrl, scanMetadata.scanUrl, runTime.valueOf()))
             .returns(() => 'baseUrl-scanUrl-1-hash-1')
             .verifiable(Times.once());
     }

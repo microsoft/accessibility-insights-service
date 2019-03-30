@@ -1,4 +1,5 @@
 // export types to support dependency injection
+// skip export if binding directly
 export { HCCrawlerOptionsFactory } from './crawler/hc-crawler-options-factory';
 export { CrawlerTask } from './tasks/crawler-task';
 export { WebDriverTask } from './tasks/web-driver-task';
@@ -14,3 +15,5 @@ export { StorageTask } from './tasks/storage-task';
 export { CosmosClientWrapper } from './azure/cosmos-client-wrapper';
 export { Runner } from './runner/runner';
 export { WebsitePageFactory } from './factories/website-page-factory';
+export { WebsiteFactory } from './factories/website-factory';
+export { WebsiteStateUpdaterTask } from './tasks/website-state-updater-task';

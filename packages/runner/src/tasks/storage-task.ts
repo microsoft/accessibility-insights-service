@@ -5,10 +5,10 @@ export class StorageTask {
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
     public async storeResults<T>(results: T[]): Promise<void> {
-        await this.storageClient.storeResults(results);
+        await this.storageClient.writeDocuments<T>(results);
     }
 
     public async storeResult<T>(result: T): Promise<void> {
-        await this.storageClient.storeResults([result]);
+        await this.storageClient.writeDocument<T>(result);
     }
 }

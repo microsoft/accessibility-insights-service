@@ -1,8 +1,9 @@
-import { AxeResults } from 'axe-core';
-// tslint:disable-next-line:no-import-side-effect
+// tslint:disable:no-import-side-effect
 import 'reflect-metadata';
+import '../test-utilities/common-mock-methods';
+
+import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
-import { defineGlobalVariables } from '../test-utilities/common-mock-methods';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory, Page } from './page';
 import { Scanner } from './scanner';
@@ -15,7 +16,6 @@ describe('Scanner', () => {
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
 
     beforeEach(() => {
-        defineGlobalVariables();
         axeBrowserFactoryMock = Mock.ofType();
         pageMock = Mock.ofType2<Page>(Page, [axeBrowserFactoryMock.object]);
         scanner = new Scanner(pageMock.object);

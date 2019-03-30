@@ -1,5 +1,5 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { WebsitePage } from '../documents/website-page';
@@ -12,7 +12,7 @@ export class WebsitePageFactory {
         crawlerScanResults.results.map(result => {
             result.links.map(link => {
                 // preserve parameters order for the hash compatibility
-                const id = this.hashGenerator.generateBase64Hash(scanMetadata.baseUrl, link);
+                const id = this.hashGenerator.getWebsitePageDocumentId(scanMetadata.baseUrl, link);
                 const websitePage = {
                     id: id,
                     page: {

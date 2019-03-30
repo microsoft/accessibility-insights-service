@@ -1,4 +1,5 @@
 import { ScanLevel, RunState } from './states';
+import { StorageDocument } from './storage-document';
 
 export interface ScanResult {
     runTime: string;
@@ -29,8 +30,7 @@ export interface Result<T> {
  * The new db document will be created on each website page scan.
  * The db document id is composed of a website base URL, a page URL, and scan timestamp in Unix format.
  */
-export interface PageScanResult {
-    id: string;
+export interface PageScanResult extends StorageDocument {
     websiteId: string;
     url: string;
     crawl: Result<CrawlResult>;

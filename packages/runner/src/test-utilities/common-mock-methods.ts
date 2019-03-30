@@ -1,3 +1,4 @@
+// tslint:disable:no-any no-empty no-unsafe-any
 import { IMock } from 'typemoq';
 import { CrawlerRequestOptions, CrawlerRequestResponse, CrawlerResult } from '../crawler/hc-crawler-types';
 
@@ -31,8 +32,6 @@ export function createCrawlerRequestOptions(requestUrl: string): CrawlerRequestO
 
 export function getPromisableDynamicMock<T>(mock: IMock<T>): IMock<T> {
     // workaround for issue https://github.com/florinn/typemoq/issues/70
-
-    // tslint:disable-next-line:no-any no-unsafe-any
     mock.setup((x: any) => x.then).returns(() => undefined);
 
     return mock;
@@ -65,9 +64,5 @@ export function createCrawlerRequestResponse(requestUrl: string): CrawlerRequest
     return { ok: true, status: 200, url: requestUrl, headers: undefined };
 }
 
-export function defineGlobalVariables(): void {
-    // tslint:disable-next-line:no-any
-    (global as any).isDebug = false;
-    // tslint:disable-next-line:no-any no-empty
-    (global as any).cout = () => {};
-}
+(global as any).isDebug = false;
+(global as any).cout = () => {};

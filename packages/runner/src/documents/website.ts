@@ -1,4 +1,5 @@
 import { RunState, ScanLevel } from './states';
+import { StorageDocument } from './storage-document';
 
 export enum WebsiteScanState {
     completed = 'completed',
@@ -7,6 +8,7 @@ export enum WebsiteScanState {
 
 export interface WebsitePageScanResult {
     id: string;
+    pageId: string;
     url: string;
     lastUpdated: string;
     level?: ScanLevel;
@@ -14,11 +16,10 @@ export interface WebsitePageScanResult {
 }
 
 /**
- * Describe website scan state.
+ * Describes the website scan state.
  * The document includes the last page scan results snapshot.
  */
-export interface Website {
-    id: string;
+export interface Website extends StorageDocument {
     websiteId: string;
     name: string;
     baseUrl: string;

@@ -2,7 +2,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../common/scan-metadata';
+import { ScanMetadata } from '../types/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { WebsitePage } from '../documents/website-page';
@@ -38,27 +38,27 @@ describe('WebsitePageFactory', () => {
 
     function setupHashGenerator(): void {
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-1-link-1'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-1'))
             .returns(() => 'baseUrl-scanUrl-1-hash-1')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-1-link-2'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-2'))
             .returns(() => 'baseUrl-scanUrl-1-hash-2')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-1-link-3'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-3'))
             .returns(() => 'baseUrl-scanUrl-1-hash-3')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-2-link-1'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-1'))
             .returns(() => 'baseUrl-scanUrl-2-hash-1')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-2-link-2'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-2'))
             .returns(() => 'baseUrl-scanUrl-2-hash-2')
             .verifiable(Times.once());
         hashGeneratorMock
-            .setup(b => b.generateBase64Hash(scanMetadata.baseUrl, 'scanUrl-2-link-3'))
+            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-3'))
             .returns(() => 'baseUrl-scanUrl-2-hash-3')
             .verifiable(Times.once());
     }
