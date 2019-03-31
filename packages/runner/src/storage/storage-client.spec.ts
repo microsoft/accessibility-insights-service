@@ -11,9 +11,15 @@ type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any
 
 const dbName = 'dbName';
 const collectionName = 'collectionName';
+
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let storageClient: StorageClient;
 let operationCallbackMock: IMock<OperationCallback>;
+let retryOptions = {
+    timeoutMilliseconds: 1000,
+    intervalMilliseconds: 200,
+    retryingOnStatusCodes: [412 /* PreconditionFailed */],
+};
 
 beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
@@ -21,7 +27,68 @@ beforeEach(() => {
     storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName);
 });
 
-describe('tryExecuteOperation()', () => {
+describe('StorageClient.tryExecuteOperation()', () => {
+    it('invoke operation callback with timeout', async () => {
+        const item = {
+            value: 'value',
+        };
+        const expectedResult = {
+            item: item,
+            statusCode: 500,
+        };
+        operationCallbackMock
+            .setup(o => o('arg1', 'arg2'))
+            .returns(async () =>
+                Promise.resolve({
+                    statusCode: 500,
+                    item: item,
+                }),
+            )
+            .verifiable(Times.atLeast(5));
+
+        const resultPromise = storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
+
+        await expect(resultPromise).rejects.toEqual(expectedResult);
+        operationCallbackMock.verifyAll();
+    });
+
+    it('invoke operation callback with retry', async () => {
+        const item = {
+            value: 'value',
+        };
+        const expectedResult = {
+            item: item,
+            statusCode: 200,
+        };
+
+        let retryCout = 0;
+        let statusCode = 200;
+        operationCallbackMock
+            .setup(o => o('arg1', 'arg2'))
+            .callback((...args: any[]) => {
+                if (retryCout === 0) {
+                    statusCode = 412;
+                } else if (retryCout === 1) {
+                    statusCode = 500;
+                } else {
+                    statusCode = 200;
+                }
+                retryCout++;
+            })
+            .returns(async () =>
+                Promise.resolve({
+                    statusCode: statusCode,
+                    item: item,
+                }),
+            )
+            .verifiable(Times.exactly(3));
+
+        const result = await storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
+
+        expect(result).toEqual(expectedResult);
+        operationCallbackMock.verifyAll();
+    });
+
     it('invoke operation callback', async () => {
         const item = {
             value: 'value',
@@ -35,7 +102,7 @@ describe('tryExecuteOperation()', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.tryExecuteOperation(operationCallbackMock.object, 1, 1, 'arg1', 'arg2');
+        const result = await storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
 
         expect(result).toEqual(expectedResult);
         operationCallbackMock.verifyAll();

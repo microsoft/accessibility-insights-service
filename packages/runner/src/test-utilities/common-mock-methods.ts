@@ -1,6 +1,7 @@
-// tslint:disable:no-any no-empty no-unsafe-any
+// tslint:disable:no-any no-empty no-unsafe-any no-import-side-effect
 import { IMock } from 'typemoq';
 import { CrawlerRequestOptions, CrawlerRequestResponse, CrawlerResult } from '../crawler/hc-crawler-types';
+import '../node';
 
 export function getNotAllowedUrls(): string[] {
     return [
@@ -63,6 +64,3 @@ export function createCrawlResult(requestUrl: string): CrawlerResult {
 export function createCrawlerRequestResponse(requestUrl: string): CrawlerRequestResponse {
     return { ok: true, status: 200, url: requestUrl, headers: undefined };
 }
-
-(global as any).isDebug = false;
-(global as any).cout = () => {};

@@ -6,7 +6,10 @@ export enum WebsiteScanState {
     completedWithError = 'completedWithError',
 }
 
-export interface WebsitePageScanResult {
+/**
+ * Describes the website page last scan result.
+ */
+export interface Page {
     id: string;
     pageId: string;
     url: string;
@@ -16,18 +19,17 @@ export interface WebsitePageScanResult {
 }
 
 /**
- * Describes the website scan state.
- * The document includes the last page scan results snapshot.
+ * Describes the website last scan state.
  */
 export interface Website extends StorageDocument {
     websiteId: string;
     name: string;
     baseUrl: string;
     serviceTreeId: string;
-    scanResult: {
+    lastScanResult: {
         lastUpdated: string;
         level?: ScanLevel;
         scanState: WebsiteScanState;
     };
-    lastPageScans: WebsitePageScanResult[];
+    lastPageScanResults: Page[];
 }

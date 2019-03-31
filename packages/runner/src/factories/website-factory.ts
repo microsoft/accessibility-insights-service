@@ -3,7 +3,7 @@ import { HashGenerator } from '../common/hash-generator';
 import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
-import { Website, WebsitePageScanResult, WebsiteScanState } from '../documents/website';
+import { Website, Page, WebsiteScanState } from '../documents/website';
 
 export class WebsiteFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
@@ -15,14 +15,14 @@ export class WebsiteFactory {
 
     public update(sourceWebsite: Website, pageScanResult: PageScanResult, runTime: Date): Website {
         const websitePageId = this.hashGenerator.getWebsitePageDocumentId(sourceWebsite.baseUrl, pageScanResult.url);
-        const pageScanIndex = sourceWebsite.lastPageScans.findIndex(scan => scan.pageId === websitePageId);
+        const pageScanIndex = sourceWebsite.lastPageScanResults.findIndex(scan => scan.pageId === websitePageId);
         const pageScanLevel = this.getPageScanLevel(pageScanResult);
         if (pageScanIndex > -1) {
-            sourceWebsite.lastPageScans[pageScanIndex].lastUpdated = runTime.toJSON();
-            sourceWebsite.lastPageScans[pageScanIndex].level = pageScanLevel;
-            sourceWebsite.lastPageScans[pageScanIndex].runState = pageScanResult.scan.run.state;
+            sourceWebsite.lastPageScanResults[pageScanIndex].lastUpdated = runTime.toJSON();
+            sourceWebsite.lastPageScanResults[pageScanIndex].level = pageScanLevel;
+            sourceWebsite.lastPageScanResults[pageScanIndex].runState = pageScanResult.scan.run.state;
         } else {
-            const websitePageScanResult = {
+            const lastPageScanResult = {
                 id: pageScanResult.id,
                 pageId: websitePageId,
                 url: pageScanResult.url,
@@ -30,14 +30,14 @@ export class WebsiteFactory {
                 level: pageScanLevel,
                 runState: pageScanResult.scan.run.state,
             };
-            sourceWebsite.lastPageScans.push(websitePageScanResult);
+            sourceWebsite.lastPageScanResults.push(lastPageScanResult);
         }
 
-        const scanState = this.getWebsiteScanState(sourceWebsite.lastPageScans);
-        const websiteScanLevel = this.getWebsiteScanLevel(sourceWebsite.lastPageScans);
-        sourceWebsite.scanResult.lastUpdated = runTime.toJSON();
-        sourceWebsite.scanResult.scanState = scanState;
-        sourceWebsite.scanResult.level = websiteScanLevel;
+        const scanState = this.getWebsiteScanState(sourceWebsite.lastPageScanResults);
+        const websiteScanLevel = this.getWebsiteScanLevel(sourceWebsite.lastPageScanResults);
+        sourceWebsite.lastScanResult.lastUpdated = runTime.toJSON();
+        sourceWebsite.lastScanResult.scanState = scanState;
+        sourceWebsite.lastScanResult.level = websiteScanLevel;
 
         return sourceWebsite;
     }
@@ -46,7 +46,7 @@ export class WebsiteFactory {
         const websiteDocumentId = this.hashGenerator.getWebsiteDocumentId(scanMetadata.baseUrl);
         const websitePageId = this.hashGenerator.getWebsitePageDocumentId(scanMetadata.baseUrl, pageScanResult.url);
         const pageScanLevel = this.getPageScanLevel(pageScanResult);
-        const websitePageScanResult = {
+        const lastPageScanResult = {
             id: pageScanResult.id,
             pageId: websitePageId,
             url: pageScanResult.url,
@@ -54,7 +54,7 @@ export class WebsiteFactory {
             level: pageScanLevel,
             runState: pageScanResult.scan.run.state,
         };
-        const scanState = this.getWebsiteScanState([websitePageScanResult]);
+        const scanState = this.getWebsiteScanState([lastPageScanResult]);
 
         return {
             id: websiteDocumentId,
@@ -62,22 +62,22 @@ export class WebsiteFactory {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: {
+            lastScanResult: {
                 lastUpdated: runTime.toJSON(),
                 level: pageScanLevel,
                 scanState: scanState,
             },
-            lastPageScans: [websitePageScanResult],
+            lastPageScanResults: [lastPageScanResult],
         };
     }
 
-    private getWebsiteScanState(websitePageScanResult: WebsitePageScanResult[]): WebsiteScanState {
+    private getWebsiteScanState(websitePageScanResult: Page[]): WebsiteScanState {
         return websitePageScanResult.some(result => result.runState === RunState.failed)
             ? WebsiteScanState.completedWithError
             : WebsiteScanState.completed;
     }
 
-    private getWebsiteScanLevel(websitePageScanResult: WebsitePageScanResult[]): ScanLevel {
+    private getWebsiteScanLevel(websitePageScanResult: Page[]): ScanLevel {
         return websitePageScanResult.some(result => result.level === ScanLevel.fail) ? ScanLevel.fail : ScanLevel.pass;
     }
 

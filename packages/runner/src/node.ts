@@ -11,6 +11,7 @@ node.isDebug = /--debug|--inspect/.test(process.execArgv.join(' '));
 
 node.cout = (message?: any, ...optionalParams: any[]): void => {
     process.stdout.write(`[${new Date().toJSON()}] `);
+
     let out: any;
     if (typeof message === 'string') {
         out = message;
@@ -18,6 +19,7 @@ node.cout = (message?: any, ...optionalParams: any[]): void => {
         const util = require('util');
         out = util.inspect(message, { depth: undefined });
     }
+
     if (optionalParams.length > 0) {
         console.log(out, optionalParams);
     } else {
