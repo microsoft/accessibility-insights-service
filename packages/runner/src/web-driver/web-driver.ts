@@ -16,9 +16,9 @@ export class WebDriver {
         return this.browser;
     }
 
-    public async close(browser: Puppeteer.Browser): Promise<void> {
+    public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await browser.close();
+            await this.browser.close();
             cout('[web-driver] Browser instance has stopped.');
         }
     }

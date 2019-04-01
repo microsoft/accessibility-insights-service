@@ -11,11 +11,11 @@ import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
 export class Runner {
     constructor(
         @inject(CrawlerTask) private readonly crawlerTask: CrawlerTask,
-        @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(ScannerTask) private readonly scannerTask: ScannerTask,
-        @inject(StorageTask) private readonly storageTask: StorageTask,
-        @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
         @inject(WebsiteStateUpdaterTask) private readonly websiteStateUpdaterTask: WebsiteStateUpdaterTask,
+        @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
+        @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
+        @inject(StorageTask) private readonly storageTask: StorageTask,
     ) {}
 
     public async run(scanMetadata: ScanMetadata): Promise<void> {
@@ -47,7 +47,7 @@ export class Runner {
             // update website root scan state document with last page scan result
             await this.websiteStateUpdaterTask.update(pageScanResult, scanMetadata, runTime);
         } finally {
-            await this.webDriverTask.close(browser);
+            await this.webDriverTask.close();
         }
     }
 }

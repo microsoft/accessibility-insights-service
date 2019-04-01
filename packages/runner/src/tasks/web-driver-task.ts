@@ -13,7 +13,7 @@ export class WebDriverTask {
         return this.webDriver.launch();
     }
 
-    public async close(browser: Browser): Promise<void> {
-        await this.webDriver.close(browser);
+    public async close(): Promise<void> {
+        await this.webDriver.close();
     }
 }

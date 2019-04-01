@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
 import { Browser } from 'puppeteer';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
+import { HCCrawlerTyped, HCCrawler } from '../crawler/hc-crawler';
 import { HCCrawlerOptionsFactory } from '../crawler/hc-crawler-options-factory';
 import { CrawlerConnectOptions } from '../crawler/hc-crawler-types';
 import { LinkExplorer } from '../crawler/link-explorer';

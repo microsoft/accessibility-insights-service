@@ -18,6 +18,34 @@ describe('HashGenerator', () => {
         hashGenerator = new HashGenerator(shaJsMock.object);
     });
 
+    it('generate WebsitePageDocumentId', () => {
+        hashGenerator = new HashGenerator(sha256);
+        const id = hashGenerator.getWebsitePageDocumentId('baseUrl', 'url');
+        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'url');
+        expect(id).toEqual(expectedId);
+    });
+
+    it('generate WebsiteDocumentId', () => {
+        hashGenerator = new HashGenerator(sha256);
+        const id = hashGenerator.getWebsiteDocumentId('baseUrl');
+        const expectedId = hashGenerator.generateBase64Hash('baseUrl');
+        expect(id).toEqual(expectedId);
+    });
+
+    it('generate ScanResultDocumentId', () => {
+        hashGenerator = new HashGenerator(sha256);
+        const id = hashGenerator.getScanResultDocumentId('scanUrl', 'selector', 'html', 'resultId');
+        const expectedId = hashGenerator.generateBase64Hash('scanUrl', 'selector', 'html', 'resultId');
+        expect(id).toEqual(expectedId);
+    });
+
+    it('generate PageScanResultDocumentId', () => {
+        hashGenerator = new HashGenerator(sha256);
+        const id = hashGenerator.getPageScanResultDocumentId('baseUrl', 'url', 123456789);
+        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'url', '123456789');
+        expect(id).toEqual(expectedId);
+    });
+
     it('should generate same hash every time without stubbing', () => {
         hashGenerator = new HashGenerator(sha256);
         const hash1 = hashGenerator.generateBase64Hash('u1', 'f1', 's1', 'r1');

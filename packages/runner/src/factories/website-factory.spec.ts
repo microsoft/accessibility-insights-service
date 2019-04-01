@@ -40,8 +40,8 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: new Date().toJSON(), level: ScanLevel.fail, scanState: WebsiteScanState.completed },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: new Date().toJSON(), level: ScanLevel.fail, scanState: WebsiteScanState.completed },
+            lastPageScanResults: [
                 {
                     id: 'page-scan-1-id',
                     pageId: 'page-1-id',
@@ -85,13 +85,13 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completedWithError },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completedWithError },
+            lastPageScanResults: [
                 {
                     id: 'page-scan-1-id',
                     pageId: 'page-1-id',
                     url: 'page-1-url',
-                    lastUpdated: sourceWebsite.lastPageScans[0].lastUpdated,
+                    lastUpdated: sourceWebsite.lastPageScanResults[0].lastUpdated,
                     level: ScanLevel.pass,
                     runState: RunState.completed,
                 },
@@ -118,8 +118,8 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: new Date().toJSON(), level: ScanLevel.fail, scanState: WebsiteScanState.completed },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: new Date().toJSON(), level: ScanLevel.fail, scanState: WebsiteScanState.completed },
+            lastPageScanResults: [
                 {
                     id: 'page-scan-1-id',
                     pageId: 'page-1-id',
@@ -168,13 +168,13 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completed },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completed },
+            lastPageScanResults: [
                 {
                     id: 'page-scan-1-id',
                     pageId: 'page-1-id',
                     url: 'page-1-url',
-                    lastUpdated: sourceWebsite.lastPageScans[0].lastUpdated,
+                    lastUpdated: sourceWebsite.lastPageScanResults[0].lastUpdated,
                     level: ScanLevel.pass,
                     runState: RunState.completed,
                 },
@@ -220,8 +220,8 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: runTime.toJSON(), scanState: WebsiteScanState.completedWithError },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: runTime.toJSON(), scanState: WebsiteScanState.completedWithError },
+            lastPageScanResults: [
                 {
                     id: pageScanResult.id,
                     pageId: 'page-2-id',
@@ -269,8 +269,8 @@ describe('WebsiteFactory', () => {
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
             serviceTreeId: scanMetadata.serviceTreeId,
-            scanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completed },
-            lastPageScans: [
+            lastScanResult: { lastUpdated: runTime.toJSON(), level: ScanLevel.pass, scanState: WebsiteScanState.completed },
+            lastPageScanResults: [
                 {
                     id: pageScanResult.id,
                     pageId: 'page-2-id',

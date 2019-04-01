@@ -5,13 +5,17 @@ import { Website } from '../documents/website';
 import { WebsiteFactory } from '../factories/website-factory';
 import { StorageClient } from '../storage/storage-client';
 import { VError } from 'verror';
+import { RetryOptions } from '../storage/retry-options';
 
 export class WebsiteStateUpdaterTask {
     constructor(
         @inject(StorageClient) private readonly storageClient: StorageClient,
         @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
-        private readonly timeoutMilliseconds: number = 15000,
-        private readonly intervalMilliseconds: number = 1000,
+        private readonly retryOptions: RetryOptions = {
+            timeoutMilliseconds: 15000,
+            intervalMilliseconds: 500,
+            retryingOnStatusCodes: [412 /* PreconditionFailed */],
+        },
     ) {}
 
     public async update(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
@@ -20,8 +24,7 @@ export class WebsiteStateUpdaterTask {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(pageScanResult1, scanMetadata1, runTime1);
                 return await this.storageClient.writeDocument<Website>(targetWebsiteItem);
             },
-            this.timeoutMilliseconds,
-            this.intervalMilliseconds,
+            this.retryOptions,
             pageScanResult,
             scanMetadata,
             runTime,
