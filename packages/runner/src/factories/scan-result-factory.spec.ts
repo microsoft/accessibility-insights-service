@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect max-func-body-length
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
@@ -112,7 +112,6 @@ describe('ScanResultFactory', () => {
         };
     }
 
-    // tslint:disable-next-line:max-func-body-length
     function buildExpectedConvertedResult(): ScanResult[] {
         const productInfo: Product = {
             id: 'test product id',

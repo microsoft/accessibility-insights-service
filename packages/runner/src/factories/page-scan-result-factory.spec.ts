@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect max-func-body-length
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
@@ -113,7 +113,6 @@ describe('PageScanResultFactory', () => {
         };
     }
 
-    // tslint:disable-next-line:max-func-body-length
     function createIssueScanResults(): IssueScanResults {
         const productInfo: Product = {
             id: 'test product id',

@@ -1,3 +1,4 @@
+//tslint:disable no-unsafe-any no-floating-promises
 import { IMock, It, Mock } from 'typemoq';
 import {
     createCrawlerRequestOptions,
@@ -10,8 +11,6 @@ import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 import { LinkExplorer } from './link-explorer';
-
-//tslint:disable no-unsafe-any
 
 describe('LinkExplorer', () => {
     let crawlerMock: IMock<HCCrawlerTyped>;
@@ -67,7 +66,6 @@ describe('LinkExplorer', () => {
             .returns(async () => {
                 launchOptions.preRequest(crawlerReqOptions);
                 launchOptions.onSuccess(createCrawlResult(url));
-                // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
     }
@@ -77,7 +75,6 @@ describe('LinkExplorer', () => {
             .setup(async cm => cm.queue(url))
             .returns(async () => {
                 launchOptions.preRequest(reqOptions);
-                // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
     }
@@ -92,7 +89,6 @@ describe('LinkExplorer', () => {
             .returns(async () => {
                 launchOptions.preRequest(crawlerReqOptions);
                 launchOptions.onError({ options: crawlerReqOptions, depth: 1, previousUrl: url, name: It.isAny(), message: It.isAny() });
-                // tslint:disable-next-line: no-floating-promises
                 Promise.resolve();
             });
     }

@@ -1,7 +1,6 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect no-any
 import 'reflect-metadata';
 
-// tslint:disable: no-any
 import * as cosmos from '@azure/cosmos';
 import { IMock, Mock } from 'typemoq';
 import { StorageDocument } from '../documents/storage-document';

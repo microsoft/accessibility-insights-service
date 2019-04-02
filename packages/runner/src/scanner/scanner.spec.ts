@@ -1,4 +1,4 @@
-// tslint:disable:no-import-side-effect
+// tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
@@ -7,8 +7,6 @@ import { IMock, Mock, Times } from 'typemoq';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory, Page } from './page';
 import { Scanner } from './scanner';
-
-// tslint:disable: no-any
 
 describe('Scanner', () => {
     let pageMock: IMock<Page>;
@@ -27,7 +25,6 @@ describe('Scanner', () => {
 
     it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
-        // tslint:disable-next-line:no-any
         const axeResultsStub = ('axe results' as any) as AxeResults;
         setupNewPageCall(url);
         setupPageScanCall(axeResultsStub);

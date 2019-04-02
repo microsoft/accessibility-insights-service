@@ -1,4 +1,4 @@
-// tslint:disable:no-import-side-effect
+// tslint:disable:no-import-side-effect no-unnecessary-class
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
@@ -8,7 +8,6 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
 
-// tslint:disable-next-line: no-unnecessary-class
 class PuppeteerPageMock {}
 
 class PuppeteerBrowserMock {

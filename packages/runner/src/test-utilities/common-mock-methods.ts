@@ -1,7 +1,8 @@
 // tslint:disable:no-any no-empty no-unsafe-any no-import-side-effect
+import '../node';
+
 import { IMock } from 'typemoq';
 import { CrawlerRequestOptions, CrawlerRequestResponse, CrawlerResult } from '../crawler/hc-crawler-types';
-import '../node';
 
 export function getNotAllowedUrls(): string[] {
     return [
