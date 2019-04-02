@@ -4,8 +4,8 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../types/scan-metadata';
 import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { ScanMetadata } from '../types/scan-metadata';
 import { ScanResultFactory } from './scan-result-factory';
 
 describe('ScanResultFactory', () => {

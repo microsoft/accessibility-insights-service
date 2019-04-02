@@ -1,5 +1,4 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { PageScanResult } from '../documents/page-scan-result';
@@ -10,6 +9,7 @@ import { ScanResultFactory } from '../factories/scan-result-factory';
 import { WebsiteFactory } from '../factories/website-factory';
 import { WebsitePageFactory } from '../factories/website-page-factory';
 import { AxeScanResults } from '../scanner/axe-scan-results';
+import { ScanMetadata } from '../types/scan-metadata';
 
 export class DataFactoryTask {
     constructor(

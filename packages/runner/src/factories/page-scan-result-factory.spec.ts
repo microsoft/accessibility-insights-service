@@ -3,11 +3,11 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
+import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResultFactory } from './page-scan-result-factory';
 
 describe('PageScanResultFactory', () => {

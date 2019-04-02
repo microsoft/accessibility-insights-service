@@ -1,8 +1,7 @@
 import * as cosmos from '@azure/cosmos';
 import { inject, optional } from 'inversify';
-import { CosmosOperationResponse } from './cosmos-operation-response';
 import { Activator } from '../common/activator';
-import { Resource } from '@azure/cosmos';
+import { CosmosOperationResponse } from './cosmos-operation-response';
 
 export class CosmosClientWrapper {
     constructor(@inject(cosmos.CosmosClient) @optional() private readonly client?: cosmos.CosmosClient) {
@@ -27,9 +26,9 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
         try {
             const options =
-                (<Resource>(<unknown>item))._etag !== undefined
+                (<cosmos.Resource>(<unknown>item))._etag !== undefined
                     ? {
-                          accessCondition: { type: 'IfMatch', condition: (<Resource>(<unknown>item))._etag },
+                          accessCondition: { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag },
                       }
                     : undefined;
 
@@ -93,6 +92,7 @@ export class CosmosClientWrapper {
         return response.database;
     }
 
+    // tslint:disable-next-line: no-any
     private convert<T>(source: any): T {
         const activator = new Activator();
 

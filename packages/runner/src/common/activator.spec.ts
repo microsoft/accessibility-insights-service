@@ -1,7 +1,7 @@
 import { Activator, DynamicObject } from './activator';
 
 class TypedClass {
-    value: string;
+    public value: string;
 }
 
 describe('Activator', () => {

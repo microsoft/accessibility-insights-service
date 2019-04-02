@@ -3,9 +3,9 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../types/scan-metadata';
 import { RunState, ScanLevel } from '../documents/states';
 import { WebsiteScanState } from '../documents/website';
+import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteFactory } from './website-factory';
 
 describe('WebsiteFactory', () => {

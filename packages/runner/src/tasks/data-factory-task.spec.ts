@@ -1,20 +1,20 @@
 // tslint:disable: no-import-side-effect
 import 'reflect-metadata';
 
-import { IMock, Mock, Times, It } from 'typemoq';
-import { ScanResultFactory } from '../factories/scan-result-factory';
-import { PageScanResultFactory } from '../factories/page-scan-result-factory';
-import { WebsitePageFactory } from '../factories/website-page-factory';
-import { WebsiteFactory } from '../factories/website-factory';
-import { DataFactoryTask } from './data-factory-task';
-import { PageScanResult } from '../documents/page-scan-result';
-import { ScanMetadata } from '../types/scan-metadata';
-import { Website } from '../documents/website';
-import { AxeScanResults } from '../scanner/axe-scan-results';
-import { ScanResult, IssueScanResults } from '../documents/issue-scan-result';
 import { AxeResults } from 'axe-core';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
+import { IssueScanResults, ScanResult } from '../documents/issue-scan-result';
+import { PageScanResult } from '../documents/page-scan-result';
+import { Website } from '../documents/website';
 import { WebsitePage } from '../documents/website-page';
+import { PageScanResultFactory } from '../factories/page-scan-result-factory';
+import { ScanResultFactory } from '../factories/scan-result-factory';
+import { WebsiteFactory } from '../factories/website-factory';
+import { WebsitePageFactory } from '../factories/website-page-factory';
+import { AxeScanResults } from '../scanner/axe-scan-results';
+import { ScanMetadata } from '../types/scan-metadata';
+import { DataFactoryTask } from './data-factory-task';
 
 let scanResultFactoryMock: IMock<ScanResultFactory>;
 let pageScanResultFactoryMock: IMock<PageScanResultFactory>;

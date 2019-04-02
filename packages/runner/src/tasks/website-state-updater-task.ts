@@ -1,11 +1,11 @@
 import { inject } from 'inversify';
-import { ScanMetadata } from '../types/scan-metadata';
+import { VError } from 'verror';
 import { PageScanResult } from '../documents/page-scan-result';
 import { Website } from '../documents/website';
 import { WebsiteFactory } from '../factories/website-factory';
-import { StorageClient } from '../storage/storage-client';
-import { VError } from 'verror';
 import { RetryOptions } from '../storage/retry-options';
+import { StorageClient } from '../storage/storage-client';
+import { ScanMetadata } from '../types/scan-metadata';
 
 export class WebsiteStateUpdaterTask {
     constructor(
@@ -22,7 +22,7 @@ export class WebsiteStateUpdaterTask {
         await this.storageClient.tryExecuteOperation(
             async (scanResult, metadata, timestamp) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
-                return await this.storageClient.writeDocument<Website>(targetWebsiteItem);
+                return this.storageClient.writeDocument<Website>(targetWebsiteItem);
             },
             this.retryOptions,
             pageScanResult,

@@ -4,8 +4,8 @@ import 'reflect-metadata';
 // tslint:disable: no-any
 import * as cosmos from '@azure/cosmos';
 import { IMock, Mock } from 'typemoq';
-import { CosmosClientWrapper } from './cosmos-client-wrapper';
 import { StorageDocument } from '../documents/storage-document';
+import { CosmosClientWrapper } from './cosmos-client-wrapper';
 
 describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;

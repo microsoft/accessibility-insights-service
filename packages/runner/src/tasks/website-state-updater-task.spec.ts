@@ -2,19 +2,19 @@
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
-import { IMock, Mock, Times, It } from 'typemoq';
-import { StorageClient } from '../storage/storage-client';
-import { WebsiteFactory } from '../factories/website-factory';
-import { RetryOptions } from '../storage/retry-options';
-import { ScanMetadata } from '../types/scan-metadata';
-import { Website } from '../documents/website';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosOperationResponse } from '../azure/cosmos-operation-response';
 import { PageScanResult } from '../documents/page-scan-result';
+import { Website } from '../documents/website';
+import { WebsiteFactory } from '../factories/website-factory';
+import { RetryOptions } from '../storage/retry-options';
+import { StorageClient } from '../storage/storage-client';
+import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteStateUpdaterTask } from './website-state-updater-task';
 
 let storageClientMock: IMock<StorageClient>;
 let websiteFactoryMock: IMock<WebsiteFactory>;
-let retryOptions: RetryOptions = {
+const retryOptions: RetryOptions = {
     timeoutMilliseconds: 15000,
     intervalMilliseconds: 500,
     retryingOnStatusCodes: [412 /* PreconditionFailed */],

@@ -1,8 +1,8 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../types/scan-metadata';
 import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { ScanMetadata } from '../types/scan-metadata';
 
 export class ScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}

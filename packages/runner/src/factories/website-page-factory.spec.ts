@@ -2,10 +2,10 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadata } from '../types/scan-metadata';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { WebsitePage } from '../documents/website-page';
+import { ScanMetadata } from '../types/scan-metadata';
 import { WebsitePageFactory } from './website-page-factory';
 
 describe('WebsitePageFactory', () => {

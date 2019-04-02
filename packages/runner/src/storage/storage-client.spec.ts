@@ -2,10 +2,10 @@
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
-import { CosmosClientWrapper } from '../azure/cosmos-client-wrapper';
 import { IMock, Mock, Times } from 'typemoq';
-import { StorageClient } from './storage-client';
+import { CosmosClientWrapper } from '../azure/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure/cosmos-operation-response';
+import { StorageClient } from './storage-client';
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 
@@ -15,7 +15,7 @@ const collectionName = 'collectionName';
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let storageClient: StorageClient;
 let operationCallbackMock: IMock<OperationCallback>;
-let retryOptions = {
+const retryOptions = {
     timeoutMilliseconds: 1000,
     intervalMilliseconds: 200,
     retryingOnStatusCodes: [412 /* PreconditionFailed */],

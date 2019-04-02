@@ -1,12 +1,12 @@
 import { inject } from 'inversify';
 import { Browser } from 'puppeteer';
-import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
+import { ScanMetadata } from '../types/scan-metadata';
 
 export class Runner {
     constructor(

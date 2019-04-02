@@ -4,9 +4,9 @@ import { container } from './inversify.config';
 import { VError } from 'verror';
 import { Arguments, argv, demandOption } from 'yargs';
 import { config } from './4env';
-import { ScanMetadata } from './types/scan-metadata';
 import './node';
 import { Runner } from './runner/runner';
+import { ScanMetadata } from './types/scan-metadata';
 
 if (config.parsed !== undefined) {
     console.log('[Runner] Config based environment variables:');

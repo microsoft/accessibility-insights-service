@@ -2,8 +2,8 @@
 import '../test-utilities/common-mock-methods';
 
 import * as Puppeteer from 'puppeteer';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { WebDriver } from './web-driver';
-import { IMock, Mock, It, Times } from 'typemoq';
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
 

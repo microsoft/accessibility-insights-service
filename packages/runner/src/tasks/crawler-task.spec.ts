@@ -3,11 +3,11 @@ import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
+import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
 import { HCCrawlerOptionsFactory } from '../crawler/hc-crawler-options-factory';
-import { LinkExplorerFactory, CrawlerTask } from './crawler-task';
 import { CrawlerConnectOptions } from '../crawler/hc-crawler-types';
-import { HCCrawlerTyped, HCCrawler } from '../crawler/hc-crawler';
 import { LinkExplorer } from '../crawler/link-explorer';
+import { CrawlerTask, LinkExplorerFactory } from './crawler-task';
 
 type HCCrawlerConnect = (options: CrawlerConnectOptions) => Promise<HCCrawlerTyped>;
 

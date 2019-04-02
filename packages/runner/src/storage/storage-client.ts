@@ -1,7 +1,7 @@
 import { inject } from 'inversify';
+import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure/cosmos-operation-response';
-import { VError } from 'verror';
 import { RetryOptions } from './retry-options';
 
 export class StorageClient {
@@ -12,11 +12,11 @@ export class StorageClient {
     ) {}
 
     public async readDocument<T>(documentId: string): Promise<CosmosOperationResponse<T>> {
-        return await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName);
+        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName);
     }
 
     public async writeDocument<T>(document: T): Promise<CosmosOperationResponse<T>> {
-        return await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName);
+        return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName);
     }
 
     public async writeDocuments<T>(documents: T[]): Promise<void> {

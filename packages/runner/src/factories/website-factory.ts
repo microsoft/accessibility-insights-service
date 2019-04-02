@@ -1,9 +1,9 @@
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
-import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
-import { Website, Page, WebsiteScanState } from '../documents/website';
+import { Page, Website, WebsiteScanState } from '../documents/website';
+import { ScanMetadata } from '../types/scan-metadata';
 
 export class WebsiteFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}

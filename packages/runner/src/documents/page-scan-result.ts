@@ -1,4 +1,4 @@
-import { ScanLevel, RunState } from './states';
+import { RunState, ScanLevel } from './states';
 import { StorageDocument } from './storage-document';
 
 export interface ScanResult {

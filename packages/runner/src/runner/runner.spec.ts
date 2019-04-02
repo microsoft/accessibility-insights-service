@@ -1,21 +1,21 @@
 // tslint:disable: no-import-side-effect
 import 'reflect-metadata';
 
-import { IMock, Mock, Times, It } from 'typemoq';
-import { CrawlerTask } from '../tasks/crawler-task';
-import { WebDriverTask } from '../tasks/web-driver-task';
-import { ScannerTask } from '../tasks/scanner-task';
-import { StorageTask } from '../tasks/storage-task';
-import { DataFactoryTask } from '../tasks/data-factory-task';
-import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
 import { Browser } from 'puppeteer';
-import { ScanMetadata } from '../types/scan-metadata';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { WebsitePage } from '../documents/website-page';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState } from '../documents/states';
+import { WebsitePage } from '../documents/website-page';
+import { AxeScanResults } from '../scanner/axe-scan-results';
+import { CrawlerTask } from '../tasks/crawler-task';
+import { DataFactoryTask } from '../tasks/data-factory-task';
+import { ScannerTask } from '../tasks/scanner-task';
+import { StorageTask } from '../tasks/storage-task';
+import { WebDriverTask } from '../tasks/web-driver-task';
+import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
+import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
 let runner: Runner;
