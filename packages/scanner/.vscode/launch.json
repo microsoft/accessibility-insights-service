@@ -5,6 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Start debugging scanner",
+            "type": "node",
+            "request": "launch",
+            "outFiles": ["${workspaceFolder}/out/**/*.js"],
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/tasks/scan/index.ts",
+            "preLaunchTask": "tsc",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "args": [
+                "--id='16102814-97ff-4674-b27e-169c6fd1c9cf'",
+                "--name='Surface'",
+                "--baseUrl='https://www.microsoft.com/surface/en-us'",
+                "--scanUrl='https://www.microsoft.com/en-us/surface'",
+                "--serviceTreeId='NA'"
+            ]
+        },
+        {
             "name": "Debug current unit test file",
             "type": "node",
             "request": "launch",

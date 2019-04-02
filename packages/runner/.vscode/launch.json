@@ -5,16 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start debugging crawler",
+            "name": "Start debugging runner",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/out/**/*.js"],
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/tasks/crawl/index.ts",
-            "preLaunchTask": "tsc",
+            "program": "${workspaceFolder}/src/index.ts",
+            // "preLaunchTask": "tsc",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "args": ["--baseUrl=\"https://support.microsoft.com/en-us\""]
+            "args": [
+                "--websiteId=\"f81e98aa-d7c9-46a0-829f-9c4d67eb3405\"",
+                "--websiteName=\"MSFT Support\"",
+                "--baseUrl=\"https://support.microsoft.com/\"",
+                "--scanUrl=\"https://support.microsoft.com/en-us\"",
+                "--serviceTreeId=\"ec7b0c88-0e85-4ff7-8179-267615decc67\""
+            ]
         },
         {
             "name": "Debug current unit test file",
@@ -24,7 +30,7 @@
                 "--inspect-brk",
                 "${workspaceRoot}/node_modules/jest/bin/jest.js",
                 "--runInBand",
-                "${relativeFile}",
+                "${fileBasename}",
                 "--coverage",
                 "false"
             ],

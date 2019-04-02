@@ -27,6 +27,10 @@
         {
             "name": "json-compressor",
             "path": "../packages/tools/json-compressor"
+        },
+        {
+            "name": "runner",
+            "path": "../packages/runner"
         }
     ],
     "settings": {
@@ -45,7 +49,15 @@
             "**/node_modules/": true,
             "**/packages/": true,
             "**/.git": true
-        }
+        },
+        "cSpell.words": [
+            "cout",
+            "coutd",
+            "etag",
+            "injectable",
+            "inversify",
+            "upsert"
+        ]
     },
     "extensions": {
         "recommendations": ["ms-vscode.vscode-typescript-tslint-plugin", "esbenp.prettier-vscode", "rbbit.typescript-hero", "foxundermoon.shell-format"]
