@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect no-object-literal-type-assertion
 import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
@@ -45,7 +45,7 @@ describe('CrawlerTask', () => {
             .returns(() => <CrawlerConnectOptions>(<unknown>crawlerConnectOptions))
             .verifiable(Times.once());
         hcCrawlerConnectMock
-            .setup(o => o(<CrawlerConnectOptions>(<unknown>crawlerConnectOptions)))
+            .setup(async o => o(<CrawlerConnectOptions>(<unknown>crawlerConnectOptions)))
             .returns(async () => Promise.resolve(hcCrawlerTyped))
             .verifiable(Times.once());
         linkExplorerFactoryMock
@@ -53,8 +53,8 @@ describe('CrawlerTask', () => {
             .returns(() => linkExplorerMock.object)
             .verifiable(Times.once());
         linkExplorerMock
-            .setup(o => o.exploreLinks('url'))
-            .returns(() => Promise.resolve(linkExplorerResult))
+            .setup(async o => o.exploreLinks('url'))
+            .returns(async () => Promise.resolve(linkExplorerResult))
             .verifiable(Times.once());
 
         const result = await crawlerTask.crawl('url', <Puppeteer.Browser>(<unknown>browserMock));

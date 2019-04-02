@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect no-object-literal-type-assertion no-unsafe-any
 import 'reflect-metadata';
 
 import { Browser } from 'puppeteer';
@@ -109,11 +109,11 @@ beforeEach(() => {
 describe('runner', () => {
     it('run scan workflow', async () => {
         webDriverTaskMock
-            .setup(o => o.launch())
+            .setup(async o => o.launch())
             .returns(async () => Promise.resolve(browser))
             .verifiable(Times.once());
         webDriverTaskMock
-            .setup(o => o.close())
+            .setup(async o => o.close())
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
@@ -131,30 +131,30 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         storageTaskMock
-            .setup(o => o.storeResult(pageScanResult))
+            .setup(async o => o.storeResult(pageScanResult))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(o => o.storeResults(websitePages))
+            .setup(async o => o.storeResults(websitePages))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(o => o.storeResults(issueScanResults.results))
+            .setup(async o => o.storeResults(issueScanResults.results))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
         crawlerTaskMock
-            .setup(o => o.crawl(scanMetadata.scanUrl, browser))
+            .setup(async o => o.crawl(scanMetadata.scanUrl, browser))
             .returns(async () => Promise.resolve(crawlerScanResults))
             .verifiable(Times.once());
 
         scannerTaskMock
-            .setup(o => o.scan(scanMetadata.scanUrl))
+            .setup(async o => o.scan(scanMetadata.scanUrl))
             .returns(async () => Promise.resolve(axeScanResults))
             .verifiable(Times.once());
 
         websiteStateUpdaterTaskMock
-            .setup(o => o.update(pageScanResult, scanMetadata, It.isAny()))
+            .setup(async o => o.update(pageScanResult, scanMetadata, It.isAny()))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 

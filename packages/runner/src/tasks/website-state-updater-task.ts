@@ -20,8 +20,9 @@ export class WebsiteStateUpdaterTask {
 
     public async update(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
         await this.storageClient.tryExecuteOperation(
-            async (scanResult, metadata, timestamp) => {
+            async (scanResult: PageScanResult, metadata: ScanMetadata, timestamp: Date) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
+
                 return this.storageClient.writeDocument<Website>(targetWebsiteItem);
             },
             this.retryOptions,
@@ -44,10 +45,11 @@ export class WebsiteStateUpdaterTask {
             targetWebsiteItem = this.websiteFactory.create(pageScanResult, scanMetadata, runTime);
         } else {
             throw new VError(
-                sourceWebsiteItem.response,
                 `An error occurred while retrieving website document. Id: ${websiteDocumentId} URL: ${
                     scanMetadata.baseUrl
-                }. Unexpected response status code: ${sourceWebsiteItem.statusCode}.`,
+                }. Unexpected response status code: ${sourceWebsiteItem.statusCode}. Server response: ${JSON.stringify(
+                    sourceWebsiteItem.response,
+                )}`,
             );
         }
 

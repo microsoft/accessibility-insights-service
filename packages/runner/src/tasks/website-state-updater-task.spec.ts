@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect no-object-literal-type-assertion no-unsafe-any
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
@@ -26,16 +26,18 @@ const scanMetadata: ScanMetadata = {
     scanUrl: 'scanMetadata-scanUrl',
     serviceTreeId: 'serviceTreeId',
 };
-const pageScanResult = <PageScanResult>(<unknown>{ type: 'PageScanResult' });
+let pageScanResult: PageScanResult;
 let websiteStateUpdaterTask: WebsiteStateUpdaterTask;
 
 beforeEach(() => {
     storageClientMock = Mock.ofType<StorageClient>();
     websiteFactoryMock = Mock.ofType<WebsiteFactory>();
 
+    pageScanResult = <PageScanResult>(<unknown>{ type: 'PageScanResult' });
+
     let targetWebsiteServerItem: Website;
     storageClientMock
-        .setup(o => o.writeDocument<Website>(It.isAny()))
+        .setup(async o => o.writeDocument<Website>(It.isAny()))
         .callback(item => {
             targetWebsiteServerItem = item;
         })
@@ -60,7 +62,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteCreatedItem = <Website>(<unknown>{ type: 'Website', operation: 'created' });
         const websiteServerItem = createWebsiteServerItem(404);
         storageClientMock
-            .setup(o => o.readDocument<Website>('websiteDocumentId'))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId'))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock
@@ -83,7 +85,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteUpdatedItem = <Website>(<unknown>{ type: 'Website', operation: 'updated' });
         const websiteServerItem = createWebsiteServerItem(200);
         storageClientMock
-            .setup(o => o.readDocument<Website>('websiteDocumentId'))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId'))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock
@@ -103,11 +105,11 @@ describe('WebsiteStateUpdaterTask', () => {
     });
 });
 
-function setupTryExecuteOperationCallback(): Promise<CosmosOperationResponse<Website>> {
+async function setupTryExecuteOperationCallback(): Promise<CosmosOperationResponse<Website>> {
     return new Promise(async (resolve, reject) => {
         let operationResult: CosmosOperationResponse<Website>;
         storageClientMock
-            .setup(o => o.tryExecuteOperation(It.isAny(), retryOptions, pageScanResult, scanMetadata, It.isAny()))
+            .setup(async o => o.tryExecuteOperation(It.isAny(), retryOptions, pageScanResult, scanMetadata, It.isAny()))
             .callback(async (operation, options, scanResult, metadata, timestamp) => {
                 try {
                     operationResult = await operation(scanResult, metadata, timestamp);

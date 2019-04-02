@@ -1,4 +1,4 @@
-// tslint:disable:no-import-side-effect
+// tslint:disable:no-import-side-effect no-unsafe-any
 import '../test-utilities/common-mock-methods';
 
 import * as Puppeteer from 'puppeteer';
@@ -9,8 +9,9 @@ type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.
 
 class PuppeteerBrowserMock {
     public isClosed: boolean;
-    public close(): Promise<void> {
+    public async close(): Promise<void> {
         this.isClosed = true;
+
         return Promise.resolve();
     }
 }
@@ -24,7 +25,7 @@ beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerLaunchMock
-        .setup(o => o(It.isAny()))
+        .setup(async o => o(It.isAny()))
         .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
         .verifiable(Times.once());
 

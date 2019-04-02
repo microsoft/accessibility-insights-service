@@ -1,3 +1,4 @@
+// tslint:disable: no-any
 import { inject } from 'inversify';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure/cosmos-client-wrapper';
@@ -41,6 +42,7 @@ export class StorageClient {
                 ...retryOptions.retryingOnStatusCodes,
             ];
             const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
+            // tslint:disable-next-line: no-constant-condition
             while (true) {
                 try {
                     const operationResponse = await operation(...args);
@@ -63,11 +65,12 @@ export class StorageClient {
                         );
                     }
                 } catch (error) {
-                    reject(new VError(error, 'An error occurred while executing storage operation.'));
+                    reject(new VError(<Error>error, 'An error occurred while executing storage operation.'));
 
                     break;
                 }
 
+                // tslint:disable-next-line: no-string-based-set-timeout
                 await new Promise(r => setTimeout(r, retryOptions.intervalMilliseconds));
             }
         });

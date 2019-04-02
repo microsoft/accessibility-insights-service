@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect
+// tslint:disable: no-import-side-effect no-any
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
@@ -37,7 +37,7 @@ describe('StorageClient.tryExecuteOperation()', () => {
             statusCode: 500,
         };
         operationCallbackMock
-            .setup(o => o('arg1', 'arg2'))
+            .setup(async o => o('arg1', 'arg2'))
             .returns(async () =>
                 Promise.resolve({
                     statusCode: 500,
@@ -61,19 +61,19 @@ describe('StorageClient.tryExecuteOperation()', () => {
             statusCode: 200,
         };
 
-        let retryCout = 0;
+        let retryCount = 0;
         let statusCode = 200;
         operationCallbackMock
-            .setup(o => o('arg1', 'arg2'))
+            .setup(async o => o('arg1', 'arg2'))
             .callback((...args: any[]) => {
-                if (retryCout === 0) {
+                if (retryCount === 0) {
                     statusCode = 412;
-                } else if (retryCout === 1) {
+                } else if (retryCount === 1) {
                     statusCode = 500;
                 } else {
                     statusCode = 200;
                 }
-                retryCout++;
+                retryCount = retryCount + 1;
             })
             .returns(async () =>
                 Promise.resolve({
@@ -98,7 +98,7 @@ describe('StorageClient.tryExecuteOperation()', () => {
             statusCode: 200,
         };
         operationCallbackMock
-            .setup(o => o('arg1', 'arg2'))
+            .setup(async o => o('arg1', 'arg2'))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
@@ -120,7 +120,7 @@ describe('StorageClient', () => {
             },
         ];
         cosmosClientWrapperMock
-            .setup(o => o.upsertItems(items, dbName, collectionName))
+            .setup(async o => o.upsertItems(items, dbName, collectionName))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
@@ -138,7 +138,7 @@ describe('StorageClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(o => o.upsertItem(item, dbName, collectionName))
+            .setup(async o => o.upsertItem(item, dbName, collectionName))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
@@ -157,7 +157,7 @@ describe('StorageClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(o => o.readItem('id', dbName, collectionName))
+            .setup(async o => o.readItem('id', dbName, collectionName))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 

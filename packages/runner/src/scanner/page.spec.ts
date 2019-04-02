@@ -8,13 +8,14 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
 
+// tslint:disable-next-line: no-unnecessary-class
 class PuppeteerPageMock {}
 
 class PuppeteerBrowserMock {
-    constructor(public readonly page: PuppeteerPageMock = new PuppeteerPageMock()) {}
+    constructor(public readonly puppeteerPage: PuppeteerPageMock = new PuppeteerPageMock()) {}
 
-    public newPage(): Promise<Puppeteer.Page> {
-        return Promise.resolve(<Puppeteer.Page>(<unknown>this.page));
+    public async newPage(): Promise<Puppeteer.Page> {
+        return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
     }
 }
 
@@ -40,8 +41,8 @@ describe('Page', () => {
     it('should analyze accessibility issues', async () => {
         const axeResults: AxeResults = <AxeResults>(<unknown>{ type: 'AxeResults' });
         axePuppeteerMock
-            .setup(o => o.analyze())
-            .returns(() => Promise.resolve(axeResults))
+            .setup(async o => o.analyze())
+            .returns(async () => Promise.resolve(axeResults))
             .verifiable(Times.once());
         axePuppeteerFactoryMock
             .setup(o => o(page.puppeteerPage))
@@ -57,7 +58,7 @@ describe('Page', () => {
 
     it('should create new browser page', async () => {
         await page.create();
-        expect(page.puppeteerPage).toEqual(puppeteerBrowserMock.page);
+        expect(page.puppeteerPage).toEqual(puppeteerBrowserMock.puppeteerPage);
         puppeteerBrowserFactory.verifyAll();
     });
 });
