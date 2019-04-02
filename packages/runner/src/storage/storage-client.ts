@@ -32,14 +32,14 @@ export class StorageClient {
         },
         ...args: any[]
     ): Promise<CosmosOperationResponse<T>> {
-        const transientStatusCodes = [
-            429 /* TooManyRequests */,
-            449 /* RetryWith */,
-            500 /* InternalServerError */,
-            503 /* ServiceUnavailable */,
-            ...retryOptions.retryingOnStatusCodes,
-        ];
         return new Promise(async (resolve, reject) => {
+            const transientStatusCodes = [
+                429 /* TooManyRequests */,
+                449 /* RetryWith */,
+                500 /* InternalServerError */,
+                503 /* ServiceUnavailable */,
+                ...retryOptions.retryingOnStatusCodes,
+            ];
             const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
             while (true) {
                 try {

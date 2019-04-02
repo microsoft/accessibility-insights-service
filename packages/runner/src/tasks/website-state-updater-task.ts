@@ -20,8 +20,8 @@ export class WebsiteStateUpdaterTask {
 
     public async update(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
         await this.storageClient.tryExecuteOperation(
-            async (pageScanResult1, scanMetadata1, runTime1) => {
-                const targetWebsiteItem = await this.getWebsiteItemToUpdate(pageScanResult1, scanMetadata1, runTime1);
+            async (scanResult, metadata, timestamp) => {
+                const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
                 return await this.storageClient.writeDocument<Website>(targetWebsiteItem);
             },
             this.retryOptions,
@@ -34,7 +34,6 @@ export class WebsiteStateUpdaterTask {
     private async getWebsiteItemToUpdate(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<Website> {
         let targetWebsiteItem: Website;
         const websiteDocumentId = this.websiteFactory.createWebsiteDocumentId(scanMetadata.baseUrl);
-
         const sourceWebsiteItem = await this.storageClient.readDocument<Website>(websiteDocumentId);
 
         if (sourceWebsiteItem.statusCode === 200) {

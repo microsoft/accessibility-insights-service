@@ -4,28 +4,29 @@ import { inject } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 
 export type AxePuppeteerFactory = (page: Puppeteer.Page) => AxePuppeteer;
+export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 
 const axePuppeteerFactoryImpl = (page: Puppeteer.Page) => new AxePuppeteer(page);
 
 export class Page {
-    private page: Puppeteer.Page;
+    public puppeteerPage: Puppeteer.Page;
 
     constructor(
-        @inject('Factory<Browser>') private readonly browserFactory: () => Puppeteer.Browser,
+        @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
         private readonly axePuppeteerFactory: AxePuppeteerFactory = axePuppeteerFactoryImpl,
     ) {}
 
     public async create(): Promise<void> {
-        this.page = await this.browserFactory().newPage();
+        this.puppeteerPage = await this.browserFactory().newPage();
     }
 
     public async enableBypassCSP(): Promise<void> {
-        return this.page.setBypassCSP(true);
+        return this.puppeteerPage.setBypassCSP(true);
     }
 
     public async goto(url: string): Promise<void> {
-        const gotoUrlPromise = this.page.goto(url, { waitUntil: ['load'] });
-        const waitForNetworkLoadPromise = this.page.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
+        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
+        const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
         await gotoUrlPromise;
 
@@ -37,14 +38,14 @@ export class Page {
     }
 
     public async scanForA11yIssues(): Promise<AxeResults> {
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory(this.page);
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory(this.puppeteerPage);
 
         return axePuppeteer.analyze();
     }
 
     public async close(): Promise<void> {
-        if (this.page !== undefined) {
-            await this.page.close();
+        if (this.puppeteerPage !== undefined) {
+            await this.puppeteerPage.close();
         }
     }
 }
