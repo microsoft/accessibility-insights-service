@@ -25,6 +25,10 @@
             "path": "../packages/job-manager"
         },
         {
+            "name": "json-compressor",
+            "path": "../packages/tools/json-compressor"
+        },
+        {
             "name": "runner",
             "path": "../packages/runner"
         }
