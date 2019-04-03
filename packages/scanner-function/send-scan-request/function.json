@@ -17,7 +17,7 @@
         {
             "type": "queue",
             "name": "outputQueueItem",
-            "queueName": "crawlrequest",
+            "queueName": "scanrequest",
             "connection": "AzureWebJobsStorage",
             "direction": "out"
         }
