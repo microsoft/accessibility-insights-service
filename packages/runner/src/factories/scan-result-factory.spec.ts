@@ -5,6 +5,7 @@ import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
 import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanResultFactory } from './scan-result-factory';
 
@@ -123,6 +124,7 @@ describe('ScanResultFactory', () => {
         return [
             {
                 id: 'test id 1',
+                itemType: ItemType.issueScanResult,
                 result: {
                     ruleId: 'test rule id1',
                     level: ResultLevel.error,
@@ -146,6 +148,7 @@ describe('ScanResultFactory', () => {
             },
             {
                 id: 'test id 2',
+                itemType: ItemType.issueScanResult,
                 result: {
                     ruleId: 'test rule id2',
                     level: ResultLevel.error,

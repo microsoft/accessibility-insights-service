@@ -3,6 +3,7 @@ import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
 import { IMock, Mock } from 'typemoq';
+import { ItemType } from '../documents/item-type';
 import { StorageDocument } from '../documents/storage-document';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
 
@@ -72,6 +73,7 @@ describe('CosmosClientWrapper', () => {
         it('upsert item with failed response', async () => {
             const item = {
                 id: 'id-1',
+                itemType: ItemType.page,
                 propA: 'propA',
             };
             const expectedResult = {
@@ -94,6 +96,7 @@ describe('CosmosClientWrapper', () => {
         it('upsert item with etag condition with success', async () => {
             const item = {
                 id: 'id-1',
+                itemType: ItemType.page,
                 propA: 'propA',
                 _etag: 'etag-1',
             };
@@ -124,6 +127,7 @@ describe('CosmosClientWrapper', () => {
         it('upsert item without etag condition with success', async () => {
             const item = {
                 id: 'id-1',
+                itemType: ItemType.page,
                 propA: 'propA',
             };
             const responseItem = {
@@ -200,7 +204,7 @@ describe('CosmosClientWrapper', () => {
 
     function setupVerifiableGetOrCreateCollectionCall(): void {
         collectionsMock
-            .setup(async d => d.createIfNotExists({ id: collectionName }))
+            .setup(async d => d.createIfNotExists({ id: collectionName }, { offerThroughput: 10000 }))
             .returns(async () => Promise.resolve({ container: collectionMock.object }))
             .verifiable();
     }

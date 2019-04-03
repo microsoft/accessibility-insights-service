@@ -3,6 +3,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
+import { ItemType } from '../documents/item-type';
 import { RunState, ScanLevel } from '../documents/states';
 import { WebsiteScanState } from '../documents/website';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -36,6 +37,7 @@ describe('WebsiteFactory', () => {
         const runTime = new Date();
         const sourceWebsite = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
@@ -63,6 +65,7 @@ describe('WebsiteFactory', () => {
 
         const pageScanResult = {
             id: 'page-scan-2-id',
+            itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: 'page-2-url',
             crawl: {
@@ -81,6 +84,7 @@ describe('WebsiteFactory', () => {
 
         const expectedResult = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
@@ -114,6 +118,7 @@ describe('WebsiteFactory', () => {
         const runTime = new Date();
         const sourceWebsite = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
@@ -141,6 +146,7 @@ describe('WebsiteFactory', () => {
 
         const pageScanResult = {
             id: 'page-scan-2-id',
+            itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: 'page-2-url',
             crawl: {
@@ -164,6 +170,7 @@ describe('WebsiteFactory', () => {
 
         const expectedResult = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
@@ -198,6 +205,7 @@ describe('WebsiteFactory', () => {
         const runTime = new Date();
         const pageScanResult = {
             id: 'page-scan-2-id',
+            itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: 'page-2-url',
             crawl: {
@@ -216,6 +224,7 @@ describe('WebsiteFactory', () => {
 
         const expectedResult = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,
@@ -242,6 +251,7 @@ describe('WebsiteFactory', () => {
         const runTime = new Date();
         const pageScanResult = {
             id: 'page-scan-2-id',
+            itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: 'page-2-url',
             crawl: {
@@ -265,6 +275,7 @@ describe('WebsiteFactory', () => {
 
         const expectedResult = {
             id: 'baseUrl-hash-id',
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,

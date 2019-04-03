@@ -5,6 +5,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
+import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -81,6 +82,7 @@ describe('PageScanResultFactory', () => {
     function createPageScanResult(runTime: Date): PageScanResult {
         return {
             id: 'baseUrl-scanUrl-1-hash-1',
+            itemType: ItemType.pageScanResult,
             websiteId: 'websiteId',
             url: 'scanMetadata-scanUrl',
             crawl: {
@@ -125,6 +127,7 @@ describe('PageScanResultFactory', () => {
             results: [
                 {
                     id: 'test id 1',
+                    itemType: ItemType.issueScanResult,
                     result: {
                         ruleId: 'test rule id1',
                         level: ResultLevel.error,
@@ -148,6 +151,7 @@ describe('PageScanResultFactory', () => {
                 },
                 {
                     id: 'test id 2',
+                    itemType: ItemType.issueScanResult,
                     result: {
                         ruleId: 'test rule id2',
                         level: ResultLevel.error,

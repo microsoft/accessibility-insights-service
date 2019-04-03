@@ -2,6 +2,7 @@ import { AxeResults, NodeResult, Result } from 'axe-core';
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
 import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 
 export class ScanResultFactory {
@@ -26,6 +27,7 @@ export class ScanResultFactory {
 
             return {
                 id: resultId,
+                itemType: ItemType.issueScanResult,
                 result: {
                     ruleId: axeResult.id,
                     level: level,

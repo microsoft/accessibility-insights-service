@@ -2,6 +2,7 @@ import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
+import { ItemType } from '../documents/item-type';
 import { CrawlResult, PageScanResult, Result, ScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -22,6 +23,7 @@ export class PageScanResultFactory {
 
         return {
             id: id,
+            itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: scanMetadata.scanUrl,
             crawl: crawlResult,

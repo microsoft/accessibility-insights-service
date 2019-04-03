@@ -1,6 +1,7 @@
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
+import { ItemType } from '../documents/item-type';
 import { WebsitePage } from '../documents/website-page';
 import { ScanMetadata } from '../types/scan-metadata';
 
@@ -15,6 +16,7 @@ export class WebsitePageFactory {
                 const id = this.hashGenerator.getWebsitePageDocumentId(scanMetadata.baseUrl, link);
                 const websitePage = {
                     id: id,
+                    itemType: ItemType.page,
                     page: {
                         websiteId: scanMetadata.websiteId,
                         url: link,
