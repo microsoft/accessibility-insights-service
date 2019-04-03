@@ -19,7 +19,6 @@ describe('SendScanRequest', () => {
     });
 
     it('should send crawl requests', async () => {
-        const websites = getWebSitesData();
         //tslint:disable-next-line: no-floating-promises
         setOutputQueueItem(contextStub, testData);
 
