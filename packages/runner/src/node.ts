@@ -2,12 +2,15 @@
 declare global {
     function cout(message?: any, ...optionalParams: any[]): void;
     function coutd(message?: any, ...optionalParams: any[]): void;
+    function cause(value: any): Error | { info: { [key: string]: any } };
     const isDebug: boolean;
 }
 
 const node = global as any;
 
 node.isDebug = /--debug|--inspect/.test(process.execArgv.join(' '));
+
+node.cause = (error: any): Error | { info: { [key: string]: any } } => (error instanceof Error ? error : { info: { error: error } });
 
 node.cout = (message?: any, ...optionalParams: any[]): void => {
     process.stdout.write(`[${new Date().toJSON()}] `);
@@ -32,5 +35,9 @@ node.coutd = node.runnerContext = (message?: any, ...optionalParams: any[]): voi
         node.cout(message, ...optionalParams);
     }
 };
+
+process.on('unhandledRejection', (reason, promise) => {
+    node.cout('Unhandled rejection', { reason: reason, promise: promise });
+});
 
 export {};

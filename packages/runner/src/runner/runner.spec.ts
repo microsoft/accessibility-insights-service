@@ -5,6 +5,7 @@ import { Browser } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
+import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState } from '../documents/states';
 import { WebsitePage } from '../documents/website-page';
@@ -42,6 +43,7 @@ const issueScanResults: IssueScanResults = {
 const websitePages: WebsitePage[] = [
     {
         id: 'id',
+        itemType: ItemType.page,
         page: {
             websiteId: 'websiteId',
             url: 'url',
@@ -51,6 +53,7 @@ const websitePages: WebsitePage[] = [
 ];
 const pageScanResult: PageScanResult = {
     id: 'id',
+    itemType: ItemType.pageScanResult,
     websiteId: 'websiteId',
     url: 'url',
     crawl: {
