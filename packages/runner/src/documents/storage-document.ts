@@ -1,9 +1,14 @@
 export interface StorageDocument {
-    /** Required. User settable property.
+    /** Required.
      * Unique name that identifies the item, that is, no two items share the same ID within a database.
      * The id must not exceed 255 characters.
      */
     id: string;
+
+    /** Required.
+     * Name that identifies the item type.
+     */
+    itemType: string;
 
     /** System generated property.
      * The resource ID (_rid) is a unique identifier that is also hierarchical per the resource stack on the resource model.

@@ -65,7 +65,7 @@ export class StorageClient {
                         );
                     }
                 } catch (error) {
-                    reject(new VError(<Error>error, 'An error occurred while executing storage operation.'));
+                    reject(new VError(cause(error), 'An error occurred while executing storage operation.'));
 
                     break;
                 }

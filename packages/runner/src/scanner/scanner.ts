@@ -18,7 +18,7 @@ export class Scanner {
 
             return { results: result };
         } catch (error) {
-            const errorExt = new VError(<Error>error, `An error occurred while scanning website page ${url}.`);
+            const errorExt = new VError(cause(error), `An error occurred while scanning website page ${url}.`);
             cout(`[scanner] ${errorExt}`);
 
             return { error: errorExt.message };
