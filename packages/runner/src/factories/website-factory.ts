@@ -1,5 +1,6 @@
 import { inject } from 'inversify';
 import { HashGenerator } from '../common/hash-generator';
+import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { Page, Website, WebsiteScanState } from '../documents/website';
@@ -58,6 +59,7 @@ export class WebsiteFactory {
 
         return {
             id: websiteDocumentId,
+            itemType: ItemType.website,
             websiteId: scanMetadata.websiteId,
             name: scanMetadata.websiteName,
             baseUrl: scanMetadata.baseUrl,

@@ -4,6 +4,7 @@ import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { HashGenerator } from '../common/hash-generator';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
+import { ItemType } from '../documents/item-type';
 import { WebsitePage } from '../documents/website-page';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsitePageFactory } from './website-page-factory';
@@ -86,26 +87,32 @@ describe('WebsitePageFactory', () => {
         return [
             {
                 id: 'baseUrl-scanUrl-1-hash-1',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-1', lastSeen: runTime.toJSON() },
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-2',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-2', lastSeen: runTime.toJSON() },
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-3',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-3', lastSeen: runTime.toJSON() },
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-1',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-1', lastSeen: runTime.toJSON() },
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-2',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-2', lastSeen: runTime.toJSON() },
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-3',
+                itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-3', lastSeen: runTime.toJSON() },
             },
         ];
