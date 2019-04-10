@@ -35,6 +35,10 @@
         {
             "name": "axis-storage",
             "path": "../packages/axis-storage"
+        },
+        {
+            "name": "scan-request-sender",
+            "path": "../packages/scan-request-sender"
         }
     ],
     "settings": {
