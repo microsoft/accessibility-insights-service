@@ -1,11 +1,11 @@
 import { CosmosClientWrapper, Queue, StorageClient, storageConfig } from 'axis-storage';
 import { VError } from 'verror';
 // tslint:disable: no-import-side-effect
+// tslint:disable: no-unsafe-any
 import './node';
 import { WebSite } from './request-type/website';
 import { ScanRequestSender } from './sender/request-sender';
 import { SeedSource } from './source/seed-source';
-// tslint:disable-next-line: no-unsafe-any
 const storageClient = new StorageClient(new CosmosClientWrapper(), 'scanner', 'webPagesToScan');
 const source = new SeedSource(storageClient);
 const sender: ScanRequestSender = new ScanRequestSender(new Queue(storageConfig));

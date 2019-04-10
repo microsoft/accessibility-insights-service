@@ -1,5 +1,6 @@
 import { Queue, storageConfig } from 'axis-storage';
 import { WebSite } from '../request-type/website';
+// tslint:disable: no-unsafe-any
 export class ScanRequestSender {
     constructor(private readonly queue: Queue) {}
     public async sendRequestToScan(websites: WebSite[]): Promise<void> {
