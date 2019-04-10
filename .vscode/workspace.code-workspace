@@ -2,7 +2,7 @@
     "folders": [
         {
             "name": "root",
-            "path": "../",
+            "path": "../"
         },
         {
             "name": "scanner-function",
@@ -31,6 +31,10 @@
         {
             "name": "runner",
             "path": "../packages/runner"
+        },
+        {
+            "name": "axis-storage",
+            "path": "../packages/axis-storage"
         }
     ],
     "settings": {
