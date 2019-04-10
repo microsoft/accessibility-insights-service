@@ -1,3 +1,4 @@
+// tslint:disable: no-unsafe-any
 import { StorageClient } from 'axis-storage';
 import { ScanRequest, WebSite } from '../request-type/website';
 

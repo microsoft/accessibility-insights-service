@@ -2,7 +2,7 @@ import { Queue } from 'axis-storage';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { WebSite } from '../request-type/website';
 import { ScanRequestSender } from './request-sender';
-
+// tslint:disable: no-unsafe-any
 describe('Scan request Sender', () => {
     let queueMock: IMock<Queue>;
     let testSubject: ScanRequestSender;
