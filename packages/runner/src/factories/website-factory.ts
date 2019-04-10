@@ -39,6 +39,9 @@ export class WebsiteFactory {
         sourceWebsite.lastScanResult.lastUpdated = runTime.toJSON();
         sourceWebsite.lastScanResult.scanState = scanState;
         sourceWebsite.lastScanResult.level = websiteScanLevel;
+        if (sourceWebsite.itemType === undefined) {
+            sourceWebsite.itemType = ItemType.website;
+        }
 
         return sourceWebsite;
     }
