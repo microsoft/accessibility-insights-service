@@ -3,6 +3,7 @@ import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
 import * as crypto from 'crypto';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import { VError } from 'verror';
 import { Message } from '../storage/message';
 import { BatchConfig } from './batch-config';
@@ -10,8 +11,8 @@ import { JobTask, JobTaskState } from './job-task';
 import { TaskParameterBuilder } from './task-parameter-builder';
 
 export class Batch {
+    private static readonly MAX_TASK_DURATION: number = 10;
     private readonly jobTasks: Map<string, JobTask> = new Map();
-
     public constructor(
         private readonly config: BatchConfig,
         private readonly taskParameterBuilder?: TaskParameterBuilder,
@@ -162,6 +163,7 @@ export class Batch {
             commandLine: commandLine,
             resourceFiles: this.taskParameterBuilder.resourceFiles,
             environmentSettings: this.taskParameterBuilder.environmentSettings,
+            constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }) },
         };
     }
 }
