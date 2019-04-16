@@ -9,6 +9,7 @@ describe(JobTask, () => {
 
         expect(jobTask.correlationId).toEqual(correlationId);
         expect(jobTask.id).toContain(correlationId);
+        expect(jobTask.id.startsWith('task_')).toBe(true);
     });
 
     it('id should not exceed the maximum length', () => {

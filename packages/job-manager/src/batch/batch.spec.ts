@@ -3,6 +3,7 @@ import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import BatchServiceClient from 'azure-batch/lib/batchServiceClient';
 import { CloudTaskListResult, TaskAddParameter, TaskExecutionInformation } from 'azure-batch/lib/models';
 import { Job, Task } from 'azure-batch/lib/operations';
+import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Message } from '../storage/message';
 import { Batch } from './batch';
@@ -211,6 +212,11 @@ describe('createTasks()', () => {
                 error: 'error',
             },
         ];
+        const expectedTaskConstraints: ServiceClient.BatchServiceModels.TaskConstraints = {
+            maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }),
+        };
+
+        let actualTaskConstraints;
         let i = 0;
         taskMock
             .setup(async o => o.addCollection(jobId, It.isAny()))
@@ -218,6 +224,7 @@ describe('createTasks()', () => {
                 taskAddParameters.forEach((taskAddParameter: TaskAddParameter) => {
                     taskAddCollectionResult.value[i].taskId = taskAddParameter.id;
                     jobTasksExpected[i++].id = taskAddParameter.id;
+                    actualTaskConstraints = taskAddParameter.constraints;
                 }),
             )
             .returns(async () => Promise.resolve(taskAddCollectionResult))
@@ -227,6 +234,7 @@ describe('createTasks()', () => {
         const tasksActual = await batch.createTasks(jobId, messages);
 
         expect(tasksActual).toEqual(jobTasksExpected);
+        expect(expectedTaskConstraints).toEqual(actualTaskConstraints);
         taskMock.verifyAll();
     });
 });

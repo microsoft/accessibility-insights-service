@@ -23,7 +23,7 @@ export class JobTask {
 
     constructor(public correlationId: string = '') {
         const maxLength = 64;
-        const prefix = `job_${this.correlationId}_`;
+        const prefix = `task_${this.correlationId}_`;
         const size = Math.min(Math.floor((maxLength - prefix.length) / 2), 10);
         if (size < 0) {
             throw new VError(
