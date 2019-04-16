@@ -11,7 +11,7 @@ import { JobTask, JobTaskState } from './job-task';
 import { TaskParameterBuilder } from './task-parameter-builder';
 
 export class Batch {
-    private static readonly MAX_TASK_DURATION: number = 10;
+    public static readonly MAX_TASK_DURATION: number = 10;
     private readonly jobTasks: Map<string, JobTask> = new Map();
     public constructor(
         private readonly config: BatchConfig,
