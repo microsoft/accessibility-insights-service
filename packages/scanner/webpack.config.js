@@ -15,7 +15,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: [nodeExternals({modulesFromFile: true})],
+        externals: [nodeExternals({ modulesFromFile: true })],
         entry: {
             ['scan-url']: path.resolve('./tasks/scan/index.ts'),
         },
