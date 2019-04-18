@@ -2,6 +2,7 @@
 .github
 .prettierignore
 LICENSE
+yarn.lock
 
 **/*.code-workspace
 **/Dockerfile
