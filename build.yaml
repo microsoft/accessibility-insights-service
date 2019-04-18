@@ -8,47 +8,30 @@ steps:
           versionSpec: 10.x
       displayName: 'Use Node 10.x'
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: ci
-      displayName: 'install root dependencies'
+    - script: |
+          yarn install --frozen-lockfile
+      displayName: 'install dependencies'
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run bootstrap -- --ci
-      displayName: 'install packages dependencies'
-
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run lint
+    - script: |
+          yarn lint
       displayName: run linter
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run format-check
+    - script: |
+          yarn format-check
       displayName: check code formatting
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run clean
+    - script: |
+          yarn clean
       displayName: clean
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          # 1st '--' denotes args for root npm; 2nd '--' denotes args for lerna; 3rd '--' denots args for the sub project npm script
-          customCommand: run build -- -- -- --env.version=$(Build.BuildId)
+    - script: |
+          # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
+          yarn build -- -- --env.version=$(Build.BuildId)
       displayName: build
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run test -- --ci
+    - script: |
+          # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
+          yarn test -- -- --ci
       displayName: run unit tests
 
     - task: PublishTestResults@2
@@ -65,10 +48,8 @@ steps:
           failIfCoverageEmpty: true
       displayName: publish code coverage
 
-    - task: Npm@1
-      inputs:
-          command: custom
-          customCommand: run build-image
+    - script: |
+          yarn build-image
           workingDir: 'packages/scanner-function'
       displayName: build scanner function docker image
 
