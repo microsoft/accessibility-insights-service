@@ -50,7 +50,7 @@ steps:
 
     - script: |
           yarn build-image
-          workingDir: 'packages/scanner-function'
+      workingDirectory: 'packages/scanner-function'
       displayName: build scanner function docker image
 
     - task: Docker@1
