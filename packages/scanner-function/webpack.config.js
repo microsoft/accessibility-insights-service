@@ -61,7 +61,11 @@ module.exports = env => {
                     ignore: ['dist/**'],
                 },
                 {
-                    from: 'package*.json',
+                    from: 'package.json',
+                    to: '',
+                },
+                {
+                    from: '../../yarn.lock',
                     to: '',
                 },
             ]),
