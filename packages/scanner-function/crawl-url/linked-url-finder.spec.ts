@@ -47,7 +47,7 @@ describe('LinkUrlFinder', () => {
     });
     test.each([createQueueItem('https://www.bing.com'), createQueueItem('https://www.bing.com/abc.html')])(
         'should return true for valid fetch condition for url %o',
-        (testcase: string) => {
+        (testcase: QueueItem) => {
             const newObj = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
             //tslint:disable-next-line: no-floating-promises
@@ -56,7 +56,7 @@ describe('LinkUrlFinder', () => {
             expect(fetchConditionCallback(testcase)).toBe(true);
         },
     );
-    test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: string) => {
+    test.each(getNotAllowedUrls())('should return false for invalid fetch condition for url %o', (testcase: QueueItem) => {
         const newObj = new LinkedUrlFinder(simpleCrawlerMock.object, crawlRequest);
 
         //tslint:disable-next-line: no-floating-promises

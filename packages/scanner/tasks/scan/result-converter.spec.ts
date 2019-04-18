@@ -44,6 +44,7 @@ describe('ResultConverter', () => {
     }
 
     function buildAxeResult(): AxeResults {
+        // tslint:disable-next-line: no-object-literal-type-assertion
         return {
             violations: [
                 {
@@ -107,7 +108,7 @@ describe('ResultConverter', () => {
             inapplicable: [],
             url: testScanUrl,
             timestamp: 'test timestamp',
-        };
+        } as AxeResults;
     }
 
     // tslint:disable-next-line:max-func-body-length

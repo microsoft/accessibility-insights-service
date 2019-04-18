@@ -12,7 +12,7 @@
         "cbuild": "npx lerna run cbuild",
         "build": "npx lerna run build",
         "test": "npx lerna run test",
-        "lint": "npx lerna run lint",
+        "lint": "npx lerna run lint --stream",
         "precheckin": "npm-run-all --serial format lint build test",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\""
