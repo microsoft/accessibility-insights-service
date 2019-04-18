@@ -1,6 +1,7 @@
 // tslint:disable: no-import-side-effect no-object-literal-type-assertion no-unsafe-any
 import 'reflect-metadata';
 
+import { AxeResults } from 'axe-core';
 import { Browser } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
@@ -69,6 +70,7 @@ const pageScanResult: PageScanResult = {
         },
     },
 };
+// tslint:disable-next-line: mocha-no-side-effect-code
 const axeScanResults: AxeScanResults = {
     results: {
         url: 'url',
@@ -96,7 +98,7 @@ const axeScanResults: AxeScanResults = {
         violations: [],
         incomplete: [],
         inapplicable: [],
-    },
+    } as AxeResults,
 };
 
 beforeEach(() => {
