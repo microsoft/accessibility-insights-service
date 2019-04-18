@@ -1,0 +1,44 @@
+{
+    "name": "logger",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "main": "index.js",
+    "scripts": {
+        "build": "tsc && echo",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "dependencies": {
+        "applicationinsights": "^1.3.1",
+        "inversify": "^5.0.1",
+        "lodash": "^4.17.11",
+        "reflect-metadata": "^0.1.13"
+    },
+    "devDependencies": {
+        "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.123",
+        "@types/node": "^11.13.4",
+        "jest": "^24.7.1",
+        "jest-circus": "^24.7.1",
+        "jest-junit": "^6.3.0",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^24.0.2",
+        "tslint": "^5.12.1",
+        "tslint-microsoft-contrib": "^6.0.0",
+        "typemoq": "^2.1.0",
+        "typescript": "^3.4.3"
+    }
+}
