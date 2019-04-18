@@ -29,6 +29,10 @@
             "path": "../packages/tools/json-compressor"
         },
         {
+            "name": "logger",
+            "path": "../packages/logger"
+        },
+        {
             "name": "runner",
             "path": "../packages/runner"
         },
