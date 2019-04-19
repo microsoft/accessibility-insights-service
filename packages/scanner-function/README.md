@@ -19,9 +19,9 @@
 
 ### 3. Install packages
 
--   Install the packages
+-   We use yarn for dependencies management. You can install it from [here](https://yarnpkg.com/en/docs/install).
     ```bash
-    npm install
+    yarn install
     ```
 
 ### 4. Create dev.DockerFile file for local deployment
@@ -50,19 +50,19 @@
 -   Build project
 
     ```bash
-       npm run build
+       yarn build
     ```
 
 -   Build container image
 
     ```bash
-      npm run build-image
+      yarn build-image
     ```
 
 -   Deploy locally
 
     ```bash
-       npm run run-func
+       yarn run-func
     ```
 
 -   Perform trigger operations for the corresponding azure function. For eg, create a message in scanrequest azure queue to trigger scan-url function
@@ -71,11 +71,11 @@
 
 -   Run the below command to build, test, check file format styling & tslint issues
     ```bash
-    npm run precheckin
+    yarn precheckin
     ```
 -   If the above command failed for formatting issues, run the below command to format all files
     ```bash
-    npm run format
+    yarn format
     ```
 
 ### 8. Build & deploy to production
@@ -88,7 +88,7 @@
 -   Build & deploy Docker image
 
     ```bash
-       npm run deploy-prod
+       yarn deploy-prod
 
     ```
 
@@ -98,7 +98,7 @@
 
 -   Run the below command
     ```bash
-          npm test
+          yarn test
     ```
 
 ### 2. Run current test file from vscode
@@ -114,7 +114,7 @@
 -   You can run tests whenever source code is modified in watch mode.
 
     ```bash
-          npm run watch:test
+          yarn watch:test
     ```
 
 # Contributing

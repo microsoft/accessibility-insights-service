@@ -19,10 +19,9 @@
 
 ### 3. Install packages
 
--   Install the packages
+-   We use yarn for dependencies management. You can install it from [here](https://yarnpkg.com/en/docs/install).
     ```bash
-    npm install
-    npm run bootstrap
+    yarn install
     ```
 
 ### 4. Working from from vscode
@@ -35,18 +34,18 @@
 -   Build project
 
     ```bash
-       npm run build
+       yarn build
     ```
 
 ### 6. Commands to run before check in
 
 -   Run the below command to build, test, check file format styling & tslint issues
     ```bash
-    npm run precheckin
+    yarn precheckin
     ```
 -   If the above command failed for formatting issues, run the below command to format all files
     ```bash
-    npm run format
+    yarn format
     ```
 
 ## Testing
@@ -55,7 +54,7 @@
 
 -   Run the below command
     ```bash
-          npm test
+          yarn test
     ```
 
 ### 2. Run current test file from vscode
@@ -71,7 +70,7 @@
 -   Goto the package you want to watch for. You can run tests whenever source code is modified in watch mode.
 
     ```bash
-          npm run watch:test
+          yarn watch:test
     ```
 
 # Contributing
