@@ -60,7 +60,10 @@
         "files.exclude": {
             "**/node_modules/": true,
             "**/packages/": true,
-            "**/.git": true
+            "**/.git": true,
+            "**/dist": true,
+            "**/out": true,
+            "**/test-results": true
         },
         "cSpell.words": [
             "cout",
