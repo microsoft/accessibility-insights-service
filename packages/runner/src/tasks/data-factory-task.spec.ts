@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect no-unsafe-any
+// tslint:disable: no-unsafe-any
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
