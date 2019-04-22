@@ -29,6 +29,10 @@
             "path": "../packages/tools/json-compressor"
         },
         {
+            "name": "logger",
+            "path": "../packages/logger"
+        },
+        {
             "name": "runner",
             "path": "../packages/runner"
         },
@@ -56,7 +60,10 @@
         "files.exclude": {
             "**/node_modules/": true,
             "**/packages/": true,
-            "**/.git": true
+            "**/.git": true,
+            "**/dist": true,
+            "**/out": true,
+            "**/test-results": true
         },
         "cSpell.words": [
             "cout",
@@ -69,5 +76,24 @@
     },
     "extensions": {
         "recommendations": ["ms-vscode.vscode-typescript-tslint-plugin", "esbenp.prettier-vscode", "rbbit.typescript-hero", "foxundermoon.shell-format"]
+    },
+    "launch": {
+        // Use IntelliSense to learn about possible attributes.
+        // Hover to view descriptions of existing attributes.
+        // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "type": "node",
+                "request": "launch",
+                "name": "Debug current unit test file",
+                "program": "${workspaceFolder:root}/node_modules/jest/bin/jest",
+                // ${relativeFile} returns path with back slash. jest can't find the file if we use back slash. So, just passing file name instead
+                "args": ["${fileBasename}", "--runInBand", "--coverage=false"],
+                "console": "integratedTerminal",
+                "internalConsoleOptions": "neverOpen",
+                "cwd": "${fileDirname}"
+            }
+        ]
     }
 }

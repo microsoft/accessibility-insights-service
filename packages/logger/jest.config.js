@@ -1,6 +1,6 @@
 module.exports = {
     clearMocks: true,
-    displayName: 'azure-client unit tests',
+    displayName: 'logger unit tests',
     globals: {
         'ts-jest': {
             tsConfig: '<rootDir>/tsconfig.json',

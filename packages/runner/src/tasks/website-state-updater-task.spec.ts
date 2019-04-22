@@ -2,13 +2,11 @@
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
+import { CosmosOperationResponse, RetryOptions, StorageClient } from 'axis-storage';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { CosmosOperationResponse } from '../azure/cosmos-operation-response';
 import { PageScanResult } from '../documents/page-scan-result';
 import { Website } from '../documents/website';
 import { WebsiteFactory } from '../factories/website-factory';
-import { RetryOptions } from '../storage/retry-options';
-import { StorageClient } from '../storage/storage-client';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteStateUpdaterTask } from './website-state-updater-task';
 

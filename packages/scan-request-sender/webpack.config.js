@@ -5,10 +5,6 @@ const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 
-const externalDeps = nodeExternals({
-    whitelist: ['axis-storage'],
-});
-
 module.exports = env => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
@@ -60,7 +56,6 @@ module.exports = env => {
             ]),
         ],
         resolve: {
-            modules: [path.resolve(__dirname, 'node_modules')],
             extensions: ['.ts', '.js', '.json'],
         },
         target: 'node',

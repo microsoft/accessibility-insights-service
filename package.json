@@ -8,11 +8,11 @@
     },
     "scripts": {
         "bootstrap": "npx lerna bootstrap",
-        "clean": "npx lerna run clean",
-        "cbuild": "npx lerna run cbuild",
-        "build": "npx lerna run build",
+        "clean": "npx lerna run clean --stream",
+        "cbuild": "npx lerna run cbuild --stream",
+        "build": "npx lerna run build --stream",
         "test": "npx lerna run test",
-        "lint": "npx lerna run lint",
+        "lint": "npx lerna run lint --stream",
         "precheckin": "npm-run-all --serial format lint build test",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\""
@@ -23,11 +23,17 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "devDependencies": {
-        "lerna": "^3.13.0",
+        "lerna": "^3.13.3",
         "npm-run-all": "^4.1.5",
         "prettier": "1.16.4",
         "tslint": "^5.12.1",
         "tslint-microsoft-contrib": "^6.0.0",
         "typescript": "^3.3.3"
+    },
+    "workspaces": {
+        "packages": [
+            "packages/*",
+            "packages/tools/*"
+        ]
     }
 }

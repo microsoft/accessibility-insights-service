@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect max-func-body-length
+// tslint:disable: max-func-body-length
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
@@ -47,6 +47,7 @@ describe('ScanResultFactory', () => {
     }
 
     function buildAxeResult(): AxeResults {
+        // tslint:disable-next-line: no-object-literal-type-assertion
         return {
             violations: [
                 {
@@ -110,7 +111,7 @@ describe('ScanResultFactory', () => {
             inapplicable: [],
             url: testScanUrl,
             timestamp: 'test timestamp',
-        };
+        } as AxeResults;
     }
 
     function buildExpectedConvertedResult(): ScanResult[] {
