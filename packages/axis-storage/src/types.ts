@@ -5,3 +5,4 @@ export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-respons
 export { Message } from './azure-queue/message';
 export { ScanMessage } from './azure-queue/scan-message';
 export { Queue } from './azure-queue/queue';
+export { RetryOptions } from './storage/retry-options';
