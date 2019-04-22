@@ -8,9 +8,9 @@
     },
     "scripts": {
         "bootstrap": "npx lerna bootstrap",
-        "clean": "npx lerna run clean",
-        "cbuild": "npx lerna run cbuild",
-        "build": "npx lerna run build",
+        "clean": "npx lerna run clean --stream",
+        "cbuild": "npx lerna run cbuild --stream",
+        "build": "npx lerna run build --stream",
         "test": "npx lerna run test",
         "lint": "npx lerna run lint --stream",
         "precheckin": "npm-run-all --serial format lint build test",
