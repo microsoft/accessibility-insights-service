@@ -5,9 +5,9 @@
         "await-promise": true,
         "completed-docs": false,
         "export-name": false,
-        "import-name": false, // crashes on import "reflect-metadata" - https://github.com/Microsoft/tslint-microsoft-contrib/issues/667
         "newline-per-chained-call": false,
         "no-implicit-dependencies": [true, "dev"],
+        "no-import-side-effect": [true, { "ignore-module": "reflect-metadata" }],
         "no-parameter-properties": false,
         "no-relative-imports": false,
         "prefer-type-cast": false,

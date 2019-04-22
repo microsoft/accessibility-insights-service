@@ -1,9 +1,17 @@
-import * as appInsights from 'applicationinsights';
+import { inject, injectable } from 'inversify';
+import 'reflect-metadata';
 
-export class TelemetryClient {
+import * as appInsights from 'applicationinsights';
+import { loggerTypes } from './logger-types';
+
+@injectable()
+export class Logger {
     private initialized: boolean = false;
 
-    constructor(private readonly appInsightsObject: typeof appInsights, private readonly currentProcess: typeof process) {}
+    constructor(
+        @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
+        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
+    ) {}
 
     public setup(baseProperties: { [key: string]: string }): void {
         if (this.initialized === true) {
