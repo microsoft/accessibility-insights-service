@@ -1,10 +1,6 @@
 {
     "folders": [
         {
-            "name": "root",
-            "path": "../"
-        },
-        {
             "name": "scanner-function",
             "path": "../packages/scanner-function"
         },
@@ -43,7 +39,11 @@
         {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
-        }
+        },
+        {
+            "name": "root",
+            "path": "../",
+        },
     ],
     "settings": {
         "editor.formatOnSave": true,
@@ -54,9 +54,7 @@
         "editor.codeActionsOnSave": {
             "source.fixAll.tslint": true
         },
-        "shellformat.effectLanguages": [
-            "shellscript"
-        ],
+        "shellformat.effectLanguages": ["shellscript"],
         "files.exclude": {
             "**/node_modules/": true,
             "**/packages/": true,
@@ -65,17 +63,15 @@
             "**/out": true,
             "**/test-results": true
         },
-        "cSpell.words": [
-            "cout",
-            "coutd",
-            "etag",
-            "injectable",
-            "inversify",
-            "upsert"
-        ]
+        "cSpell.words": ["cout", "coutd", "etag", "injectable", "inversify", "upsert"]
     },
     "extensions": {
-        "recommendations": ["ms-vscode.vscode-typescript-tslint-plugin", "esbenp.prettier-vscode", "rbbit.typescript-hero", "foxundermoon.shell-format"]
+        "recommendations": [
+            "ms-vscode.vscode-typescript-tslint-plugin",
+            "esbenp.prettier-vscode",
+            "rbbit.typescript-hero",
+            "foxundermoon.shell-format"
+        ]
     },
     "launch": {
         // Use IntelliSense to learn about possible attributes.
