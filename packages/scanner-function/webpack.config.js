@@ -11,7 +11,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: [nodeExternals()],
+        externals: [nodeExternals({ modulesFromFile: true })],
         entry: {
             'scan-url': path.resolve('./scan-url/index.ts'),
             'crawl-url': path.resolve('./crawl-url/index.ts'),
@@ -61,13 +61,16 @@ module.exports = env => {
                     ignore: ['dist/**'],
                 },
                 {
-                    from: 'package*.json',
+                    from: 'package.json',
+                    to: '',
+                },
+                {
+                    from: '../../yarn.lock',
                     to: '',
                 },
             ]),
         ],
         resolve: {
-            modules: [path.resolve(__dirname, 'node_modules')],
             extensions: ['.ts', '.js', '.json'],
         },
         target: 'node',

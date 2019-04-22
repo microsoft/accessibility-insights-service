@@ -21,22 +21,6 @@
                 "--scanUrl='https://www.microsoft.com/en-us/surface'",
                 "--serviceTreeId='NA'"
             ]
-        },
-        {
-            "name": "Debug current unit test file",
-            "type": "node",
-            "request": "launch",
-            "runtimeArgs": [
-                "--inspect-brk",
-                "${workspaceRoot}/node_modules/jest/bin/jest.js",
-                "--runInBand",
-                "${relativeFile}",
-                "--coverage",
-                "false"
-            ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "port": 9229
         }
     ]
 }

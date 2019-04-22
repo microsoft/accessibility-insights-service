@@ -47,6 +47,8 @@
         "azure-batch": "^6.0.0",
         "azure-storage": "^2.10.2",
         "dotenv": "^6.2.0",
-        "lodash": "^4.17.11"
+        "lodash": "^4.17.11",
+        "moment": "^2.22.2",
+        "verror": "^1.10.0"
     }
 }
