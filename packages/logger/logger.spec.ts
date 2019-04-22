@@ -1,13 +1,13 @@
 import * as appInsights from 'applicationinsights';
 import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { TelemetryClient } from './logger';
+import { Logger } from './logger';
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
 
-describe(TelemetryClient, () => {
+describe(Logger, () => {
     let appInsightsMock: IMock<typeof appInsights>;
     let appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
-    let testSubject: TelemetryClient;
+    let testSubject: Logger;
     let appInsightsTelemetryClientMock: IMock<appInsights.TelemetryClient>;
     let processStub: typeof process;
     let envVariables: {
@@ -45,7 +45,7 @@ describe(TelemetryClient, () => {
             .returns(() => appInsightsTelemetryClientMock.object)
             .verifiable(Times.atLeastOnce());
 
-        testSubject = new TelemetryClient(appInsightsMock.object, processStub);
+        testSubject = new Logger(appInsightsMock.object, processStub);
     });
 
     describe('setup', () => {
