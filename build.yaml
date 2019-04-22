@@ -13,10 +13,6 @@ steps:
       displayName: 'install dependencies'
 
     - script: |
-          yarn lint
-      displayName: run linter
-
-    - script: |
           yarn format-check
       displayName: check code formatting
 
@@ -28,6 +24,10 @@ steps:
           # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
           yarn build -- -- --env.version=$(Build.BuildId)
       displayName: build
+
+    - script: |
+          yarn lint
+      displayName: run linter
 
     - script: |
           # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
