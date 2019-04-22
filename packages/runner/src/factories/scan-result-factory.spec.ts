@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect max-func-body-length
+// tslint:disable: max-func-body-length
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';

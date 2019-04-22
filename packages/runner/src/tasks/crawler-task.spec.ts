@@ -1,4 +1,4 @@
-// tslint:disable: no-import-side-effect no-object-literal-type-assertion
+// tslint:disable: no-object-literal-type-assertion
 import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
