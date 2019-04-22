@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import * as appInsights from 'applicationinsights';
 import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';

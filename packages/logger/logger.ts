@@ -1,5 +1,4 @@
 import { inject, injectable } from 'inversify';
-import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
 import { loggerTypes } from './logger-types';

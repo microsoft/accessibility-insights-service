@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import * as appInsights from 'applicationinsights';
 import { Container } from 'inversify';
 import { Logger } from './logger';
