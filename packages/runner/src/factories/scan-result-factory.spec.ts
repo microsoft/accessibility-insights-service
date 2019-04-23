@@ -2,8 +2,8 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { HashGenerator } from 'axis-storage';
 import { IMock, Mock, Times } from 'typemoq';
-import { HashGenerator } from '../common/hash-generator';
 import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';

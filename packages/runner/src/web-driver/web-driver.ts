@@ -1,5 +1,7 @@
+import { injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 
+@injectable()
 export class WebDriver {
     public browser: Puppeteer.Browser;
 

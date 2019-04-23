@@ -1,13 +1,18 @@
 import * as azure from 'azure-storage';
+import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { VError } from 'verror';
 import { Message } from './message';
 import { StorageConfig } from './storage-config';
 
+@injectable()
 export class Queue {
     public readonly scanQueue: string = this.config.scanQueue;
 
-    constructor(private readonly config: StorageConfig, private readonly queueClient?: azure.QueueService) {
+    constructor(
+        @inject(StorageConfig) private readonly config: StorageConfig,
+        @inject(azure.QueueService) private readonly queueClient?: azure.QueueService,
+    ) {
         if (_.isNil(this.queueClient)) {
             this.queueClient = azure
                 .createQueueService(this.config.accountName, this.config.accountKey)

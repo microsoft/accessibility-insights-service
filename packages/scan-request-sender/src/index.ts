@@ -1,4 +1,5 @@
-import { CosmosClientWrapper, Queue, StorageClient, storageConfig } from 'axis-storage';
+import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
+
 import { VError } from 'verror';
 // tslint:disable: no-import-side-effect
 // tslint:disable: no-unsafe-any
@@ -6,9 +7,10 @@ import './node';
 import { WebSite } from './request-type/website';
 import { ScanRequestSender } from './sender/request-sender';
 import { SeedSource } from './source/seed-source';
-const storageClient = new StorageClient(new CosmosClientWrapper(), 'scanner', 'webPagesToScan');
-const source = new SeedSource(storageClient);
-const sender: ScanRequestSender = new ScanRequestSender(new Queue(storageConfig));
+
+const container = setupScanRequestSenderContainer();
+const source = container.get(SeedSource);
+const sender: ScanRequestSender = container.get(ScanRequestSender);
 
 (async () => {
     const websitesToScan: WebSite[] = await source.getWebSites();

@@ -1,9 +1,11 @@
 // tslint:disable: no-unsafe-any
 import { StorageClient } from 'axis-storage';
+import { inject, injectable } from 'inversify';
 import { ScanRequest, WebSite } from '../request-type/website';
 
+@injectable()
 export class SeedSource {
-    constructor(private readonly storageClient: StorageClient) {}
+    constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
     public async getWebSites(): Promise<WebSite[]> {
         const sourceRequest = await this.storageClient.readAllDocument<ScanRequest>();
 

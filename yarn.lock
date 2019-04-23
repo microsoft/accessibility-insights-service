@@ -1034,20 +1034,6 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
-"@types/inversify-binding-decorators@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/inversify-binding-decorators/-/inversify-binding-decorators-2.0.0.tgz#6c248f0e5e87f4dafee9d79cc4ae7f757e3eea86"
-  integrity sha1-bCSPDl6H9Nr+6decxK5/dX4+6oY=
-  dependencies:
-    inversify-binding-decorators "*"
-
-"@types/inversify@^2.0.33":
-  version "2.0.33"
-  resolved "https://registry.yarnpkg.com/@types/inversify/-/inversify-2.0.33.tgz#0770dae2299aaee57803f75235e64a99b74f6de0"
-  integrity sha1-B3Da4imaruV4A/dSNeZKmbdPbeA=
-  dependencies:
-    inversify "*"
-
 "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.0.tgz#1eb8c033e98cf4e1a4cedcaf8bcafe8cb7591e85"
@@ -4161,12 +4147,7 @@ invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-inversify-binding-decorators@*, inversify-binding-decorators@^4.0.0:
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/inversify-binding-decorators/-/inversify-binding-decorators-4.0.0.tgz#c4d1ac50d7d6531f465ee7894e92031f7471c865"
-  integrity sha512-r8au/oH3vS7ttHj0RivAznwElySeRohLfg8lvOSzbrX6abf/8ik8ptk49XbzdShgrnalvl7CM6MjcskfM7MMqQ==
-
-inversify@*, inversify@^5.0.1:
+inversify@^5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/inversify/-/inversify-5.0.1.tgz#500d709b1434896ce5a0d58915c4a4210e34fb6e"
   integrity sha512-Ieh06s48WnEYGcqHepdsJUIJUXpwH5o5vodAX+DK2JA/gjy4EbEcQZxw+uFfzysmKjiLXGYwNG3qDZsKVMcINQ==

@@ -1,4 +1,4 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
@@ -11,6 +11,7 @@ export type LinkExplorerFactory = (crawler: HCCrawlerTyped, connectOptions: Craw
 const linkExplorerFactoryImpl = (crawler: HCCrawlerTyped, connectOptions: CrawlerConnectOptions): LinkExplorer =>
     new LinkExplorer(crawler, connectOptions);
 
+@injectable()
 export class CrawlerTask {
     constructor(
         @inject(HCCrawlerOptionsFactory) private readonly hcCrawlerOptionsFactory: HCCrawlerOptionsFactory,

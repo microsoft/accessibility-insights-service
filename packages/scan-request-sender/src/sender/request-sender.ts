@@ -1,12 +1,14 @@
-import { Queue, storageConfig } from 'axis-storage';
+import { Queue, StorageConfig } from 'axis-storage';
+import { inject, injectable } from 'inversify';
 import { WebSite } from '../request-type/website';
-// tslint:disable: no-unsafe-any
+
+@injectable()
 export class ScanRequestSender {
-    constructor(private readonly queue: Queue) {}
+    constructor(@inject(Queue) private readonly queue: Queue, @inject(StorageConfig) private readonly storageConfig: StorageConfig) {}
     public async sendRequestToScan(websites: WebSite[]): Promise<void> {
         await Promise.all(
             websites.map(async message => {
-                await this.queue.createQueueMessage(storageConfig.scanQueue, JSON.stringify(message));
+                await this.queue.createQueueMessage(this.storageConfig.scanQueue, JSON.stringify(message));
             }),
         );
     }

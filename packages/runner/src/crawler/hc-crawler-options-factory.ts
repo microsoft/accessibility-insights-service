@@ -1,3 +1,4 @@
+import { injectable } from 'inversify';
 import * as node_url from 'url';
 import { JSONLineExporter } from './hc-crawler';
 import {
@@ -9,6 +10,7 @@ import {
     CrawlerScanResult,
 } from './hc-crawler-types';
 
+@injectable()
 export class HCCrawlerOptionsFactory {
     public createConnectOptions(url: string, browserWSEndpoint: string): CrawlerConnectOptions {
         const launchOptions = this.createLaunchOptions(url);

@@ -1,4 +1,6 @@
-import { Queue } from 'axis-storage';
+import 'reflect-metadata';
+
+import { Queue, StorageConfig } from 'axis-storage';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { WebSite } from '../request-type/website';
 import { ScanRequestSender } from './request-sender';
@@ -12,7 +14,7 @@ describe('Scan request Sender', () => {
             .setup(async q => q.createQueueMessage(It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(2));
-        testSubject = new ScanRequestSender(queueMock.object);
+        testSubject = new ScanRequestSender(queueMock.object, new StorageConfig());
     });
     it('send scan request', () => {
         // tslint:disable-next-line: no-floating-promises

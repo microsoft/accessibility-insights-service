@@ -1,5 +1,5 @@
 // tslint:disable: no-import-side-effect
-import { container } from './inversify.config';
+import { setupRunnerContainer } from './setup-runner-container';
 
 import { VError } from 'verror';
 import { Arguments, argv, demandOption } from 'yargs';
@@ -18,6 +18,7 @@ const scanMetadata = argv as Arguments<ScanMetadata>;
 cout('[Runner] Scan parameters:', scanMetadata);
 
 (async () => {
+    const container = setupRunnerContainer();
     const runner = container.get<Runner>(Runner);
     await runner.run(scanMetadata);
 })().catch(error => {

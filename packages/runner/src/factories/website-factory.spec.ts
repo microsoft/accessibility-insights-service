@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
+import { HashGenerator } from 'axis-storage';
 import { IMock, Mock, Times } from 'typemoq';
-import { HashGenerator } from '../common/hash-generator';
 import { ItemType } from '../documents/item-type';
 import { RunState, ScanLevel } from '../documents/states';
 import { WebsiteScanState } from '../documents/website';

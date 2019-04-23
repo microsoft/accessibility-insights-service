@@ -1,6 +1,6 @@
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
 
 export type AxePuppeteerFactory = (page: Puppeteer.Page) => AxePuppeteer;
@@ -8,6 +8,7 @@ export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 
 const axePuppeteerFactoryImpl = (page: Puppeteer.Page) => new AxePuppeteer(page);
 
+@injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
 

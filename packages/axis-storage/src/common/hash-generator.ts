@@ -1,5 +1,7 @@
+import { injectable } from 'inversify';
 import * as sha256 from 'sha.js';
 
+@injectable()
 export class HashGenerator {
     public constructor(private readonly sha: typeof sha256 = sha256) {}
 

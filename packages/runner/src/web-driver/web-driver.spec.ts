@@ -1,4 +1,5 @@
 // tslint:disable:no-import-side-effect no-unsafe-any
+import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
 import * as Puppeteer from 'puppeteer';
