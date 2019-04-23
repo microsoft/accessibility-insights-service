@@ -1,5 +1,7 @@
+import { injectable } from 'inversify';
 import * as _ from 'lodash';
 
+@injectable()
 export class BatchConfig {
     public readonly accountKey: string = process.env.AZ_BATCH_ACCOUNT_KEY;
     public readonly accountName: string = process.env.AZ_BATCH_ACCOUNT_NAME;

@@ -1,4 +1,6 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
+import 'reflect-metadata';
+
 import { Message } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import BatchServiceClient from 'azure-batch/lib/batchServiceClient';
@@ -26,10 +28,10 @@ function beforeEachSuit(): void {
         accountName: '',
         accountUrl: '',
         poolId: 'poolId',
-        taskParameter: '',
+        taskParameter: JSON.stringify({ foo: 'bar' }),
     };
     sharedKeyCredentialsMock = Mock.ofType2(SharedKeyCredentials, ['accountName', 'accountKey']);
-    taskParameterBuilderMock = Mock.ofType2(TaskParameterBuilder, ['{}']);
+    taskParameterBuilderMock = Mock.ofType2(TaskParameterBuilder, [config]);
     batchClient = new BatchServiceClient(sharedKeyCredentialsMock.object, 'accountUrl');
     jobMock = Mock.ofType();
     taskMock = Mock.ofType();

@@ -1,8 +1,9 @@
 // tslint:disable: no-submodule-imports
 import { Message } from 'axis-storage';
-import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
+import { ServiceClient } from 'azure-batch';
 import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
 import * as crypto from 'crypto';
+import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { VError } from 'verror';
@@ -10,25 +11,15 @@ import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { TaskParameterBuilder } from './task-parameter-builder';
 
+@injectable()
 export class Batch {
     public static readonly MAX_TASK_DURATION: number = 10;
     private readonly jobTasks: Map<string, JobTask> = new Map();
     public constructor(
-        private readonly config: BatchConfig,
-        private readonly taskParameterBuilder?: TaskParameterBuilder,
-        private readonly batchClient?: ServiceClient.BatchServiceClient,
-    ) {
-        if (_.isNil(taskParameterBuilder)) {
-            this.taskParameterBuilder = new TaskParameterBuilder(config.taskParameter);
-        }
-
-        if (_.isNil(batchClient)) {
-            this.batchClient = new ServiceClient.BatchServiceClient(
-                new SharedKeyCredentials(config.accountName, config.accountKey),
-                config.accountUrl,
-            );
-        }
-    }
+        @inject(BatchConfig) private readonly config: BatchConfig,
+        @inject(TaskParameterBuilder) private readonly taskParameterBuilder: TaskParameterBuilder,
+        @inject(ServiceClient.BatchServiceClient) private readonly batchClient: ServiceClient.BatchServiceClient,
+    ) {}
 
     public async createJobIfNotExists(jobId: string, addJobIdIndexOnCreate: boolean = false): Promise<string> {
         let serviceJobId = jobId;
