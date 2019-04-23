@@ -1,0 +1,21 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccountName": {
+      "value": "allyblobstorage"
+    },
+    "jobManagerContainerName": {
+      "value": "batch-job-manager-script"
+    },
+    "poolScriptContainerName": {
+      "value": "batch-pool-startup-script"
+    },
+    "runnerContainerName": {
+      "value": "batch-runner-script"
+    },
+    "scanRequestContainerName": {
+      "value": "batch-scan-request-sender-script"
+    }
+  }
+}

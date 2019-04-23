@@ -1,0 +1,97 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "batchAccount_name": {
+            "defaultValue": "axisbatch",
+            "type": "String",
+            "metadata": {
+                "description": "Batch Account Name"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The location in which the Azure Storage resources should be deployed."
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Batch/batchAccounts",
+            "apiVersion": "2017-09-01",
+            "name": "[parameters('batchAccount_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "poolAllocationMode": "BatchService"
+            }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts/pools",
+            "apiVersion": "2017-09-01",
+            "name": "[concat(parameters('batchAccount_name'), '/scan-request-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "properties": {
+                "displayName": "scan-request-pool",
+                "vmSize": "STANDARD_A1",
+                "interNodeCommunication": "Disabled",
+                "maxTasksPerNode": 1,
+                "taskSchedulingPolicy": {
+                    "nodeFillType": "Spread"
+                },
+                "deploymentConfiguration": {
+                    "virtualMachineConfiguration": {
+                        "imageReference": {
+                            "publisher": "Canonical",
+                            "offer": "UbuntuServer",
+                            "sku": "16.04-LTS",
+                            "version": "latest"
+                        },
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                    }
+                },
+                "scaleSettings": {
+                    "fixedScale": {
+                        "targetDedicatedNodes": 2,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts/pools",
+            "apiVersion": "2017-09-01",
+            "name": "[concat(parameters('batchAccount_name'), '/url-scan-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "properties": {
+                "vmSize": "STANDARD_A1",
+                "interNodeCommunication": "Disabled",
+                "maxTasksPerNode": 1,
+                "taskSchedulingPolicy": {
+                    "nodeFillType": "Spread"
+                },
+                "deploymentConfiguration": {
+                    "virtualMachineConfiguration": {
+                        "imageReference": {
+                            "publisher": "Canonical",
+                            "offer": "UbuntuServer",
+                            "sku": "16.04-LTS",
+                            "version": "latest"
+                        },
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                    }
+                },
+                "scaleSettings": {
+                    "fixedScale": {
+                        "targetDedicatedNodes": 3,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
+                    }
+                }
+            }
+        }
+    ]
+}
