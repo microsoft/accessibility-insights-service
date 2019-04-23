@@ -19,3 +19,4 @@ dist/
 **/config/
 **/*.env
 out/
+**/*.ps1
