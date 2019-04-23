@@ -1,16 +1,11 @@
 import * as cosmos from '@azure/cosmos';
-import { inject, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Activator } from '../common/activator';
 import { CosmosOperationResponse } from './cosmos-operation-response';
 
+@injectable()
 export class CosmosClientWrapper {
-    constructor(@inject(cosmos.CosmosClient) @optional() private readonly client?: cosmos.CosmosClient) {
-        if (client === undefined) {
-            const endpoint = process.env.AZURE_COSMOS_DB_URL;
-            const masterKey = process.env.AZURE_COSMOS_DB_KEY;
-            this.client = new cosmos.CosmosClient({ endpoint, auth: { masterKey } });
-        }
-    }
+    constructor(@inject(cosmos.CosmosClient) private readonly client: cosmos.CosmosClient) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);

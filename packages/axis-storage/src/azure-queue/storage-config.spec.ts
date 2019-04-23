@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { StorageConfig } from './storage-config';
 
 describe(StorageConfig, () => {

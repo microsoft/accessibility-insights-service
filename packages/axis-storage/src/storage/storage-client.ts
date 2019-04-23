@@ -1,5 +1,4 @@
 // tslint:disable: no-any
-import { inject } from 'inversify';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
@@ -7,9 +6,9 @@ import { RetryOptions } from './retry-options';
 
 export class StorageClient {
     constructor(
-        @inject(CosmosClientWrapper) private readonly cosmosClientWrapper: CosmosClientWrapper,
-        private readonly dbName = 'scanner',
-        private readonly collectionName = 'a11yIssues',
+        private readonly cosmosClientWrapper: CosmosClientWrapper,
+        private readonly dbName: string,
+        private readonly collectionName: string,
     ) {}
 
     public async readDocument<T>(documentId: string): Promise<CosmosOperationResponse<T>> {

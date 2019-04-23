@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { CosmosOperationResponse, StorageClient } from 'axis-storage';
 import { IMock, Mock, Times } from 'typemoq';
 // tslint:disable: no-import-side-effect no-any

@@ -1,5 +1,5 @@
-import { inject } from 'inversify';
-import { HashGenerator } from '../common/hash-generator';
+import { HashGenerator } from 'axis-storage';
+import { inject, injectable } from 'inversify';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
@@ -7,6 +7,7 @@ import { CrawlResult, PageScanResult, Result, ScanResult } from '../documents/pa
 import { RunState, ScanLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 
+@injectable()
 export class PageScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 

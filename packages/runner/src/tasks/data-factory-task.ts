@@ -1,4 +1,4 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { PageScanResult } from '../documents/page-scan-result';
@@ -11,6 +11,7 @@ import { WebsitePageFactory } from '../factories/website-page-factory';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanMetadata } from '../types/scan-metadata';
 
+@injectable()
 export class DataFactoryTask {
     constructor(
         @inject(ScanResultFactory) private readonly scanResultFactory: ScanResultFactory,

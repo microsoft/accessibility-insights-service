@@ -1,8 +1,9 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { VError } from 'verror';
 import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 
+@injectable()
 export class Scanner {
     constructor(@inject(Page) private readonly page: Page) {}
 

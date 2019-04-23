@@ -1,10 +1,11 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
-import { inject } from 'inversify';
-import { HashGenerator } from '../common/hash-generator';
+import { HashGenerator } from 'axis-storage';
+import { inject, injectable } from 'inversify';
 import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 
+@injectable()
 export class ScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 

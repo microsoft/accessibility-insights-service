@@ -22,8 +22,6 @@
     },
     "homepage": "https://github.com/manishsat/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/inversify": "^2.0.33",
-        "@types/inversify-binding-decorators": "^2.0.0",
         "@types/jest": "^24.0.11",
         "@types/lodash": "^4.14.123",
         "@types/verror": "^1.10.3",
@@ -51,8 +49,8 @@
         "azure-storage": "^2.10.2",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
-        "inversify-binding-decorators": "^4.0.0",
         "lodash": "^4.17.11",
+        "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "verror": "^1.10.0"

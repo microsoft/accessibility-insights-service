@@ -1,7 +1,8 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
 import { WebDriver } from '../web-driver/web-driver';
 
+@injectable()
 export class WebDriverTask {
     private readonly webDriver: WebDriver;
 

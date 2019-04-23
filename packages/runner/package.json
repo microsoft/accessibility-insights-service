@@ -22,8 +22,6 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/dotenv": "^6.1.0",
-        "@types/inversify": "^2.0.33",
-        "@types/inversify-binding-decorators": "^2.0.0",
         "@types/jest": "^24.0.11",
         "@types/lodash": "^4.14.123",
         "@types/node": "^11.9.4",
@@ -56,7 +54,6 @@
         "dotenv": "^6.2.0",
         "headless-chrome-crawler": "^1.8.0",
         "inversify": "^5.0.1",
-        "inversify-binding-decorators": "^4.0.0",
         "puppeteer": "^1.12.2",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",

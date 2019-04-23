@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { createCrawlResult, getNotAllowedUrls } from '../test-utilities/common-mock-methods';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';

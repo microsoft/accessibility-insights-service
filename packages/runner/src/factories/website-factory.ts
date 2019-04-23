@@ -1,11 +1,12 @@
-import { inject } from 'inversify';
-import { HashGenerator } from '../common/hash-generator';
+import { HashGenerator } from 'axis-storage';
+import { inject, injectable } from 'inversify';
 import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { Page, Website, WebsiteScanState } from '../documents/website';
 import { ScanMetadata } from '../types/scan-metadata';
 
+@injectable()
 export class WebsiteFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
