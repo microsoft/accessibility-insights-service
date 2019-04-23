@@ -1,11 +1,11 @@
 // tslint:disable: no-submodule-imports
+import { Message } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
 import * as crypto from 'crypto';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { VError } from 'verror';
-import { Message } from '../storage/message';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { TaskParameterBuilder } from './task-parameter-builder';

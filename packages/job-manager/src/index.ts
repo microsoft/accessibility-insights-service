@@ -1,11 +1,10 @@
+import { Queue, storageConfig } from 'axis-storage';
 import * as _ from 'lodash';
 import { VError } from 'verror';
 import { config } from './4env';
 import { Batch } from './batch/batch';
 import { batchConfig } from './batch/batch-config';
 import { JobTaskExecutionResult, JobTaskState } from './batch/job-task';
-import { Queue } from './storage/queue';
-import { storageConfig } from './storage/storage-config';
 
 if (!_.isNil(config.parsed)) {
     console.log(JSON.stringify(config.parsed, undefined, 2));

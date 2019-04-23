@@ -1,11 +1,11 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
+import { Message } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import BatchServiceClient from 'azure-batch/lib/batchServiceClient';
 import { CloudTaskListResult, TaskAddParameter, TaskExecutionInformation } from 'azure-batch/lib/models';
 import { Job, Task } from 'azure-batch/lib/operations';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { Message } from '../storage/message';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
 import { JobTaskExecutionResult, JobTaskState } from './job-task';
