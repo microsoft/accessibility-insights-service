@@ -3,7 +3,6 @@ import * as _ from 'lodash';
 import { VError } from 'verror';
 import { config } from './4env';
 import { Batch } from './batch/batch';
-import { batchConfig } from './batch/batch-config';
 import { JobTaskExecutionResult, JobTaskState } from './batch/job-task';
 import { setupJobManagerContainer } from './setup-job-manager-container';
 
@@ -17,7 +16,7 @@ if (!_.isNil(config.parsed)) {
     const queue = container.get(Queue);
     const scanMessages = await queue.getMessages();
 
-    const batch = new Batch(batchConfig);
+    const batch = container.get(Batch);
     const jobId = await batch.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true);
     await batch.createTasks(jobId, scanMessages);
 

@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { BatchConfig } from './batch-config';
 
 describe(BatchConfig, () => {

@@ -1,7 +1,17 @@
+import 'reflect-metadata';
+
+import { IMock, Mock } from 'typemoq';
+import { BatchConfig } from './batch-config';
 import { TaskParameterBuilder } from './task-parameter-builder';
 
 describe(TaskParameterBuilder, () => {
-    let taskParameterBuilder: TaskParameterBuilder;
+    let batchConfigMock: IMock<BatchConfig>;
+    let taskParameter: string;
+    beforeEach(() => {
+        batchConfigMock = Mock.ofType(BatchConfig);
+
+        batchConfigMock.setup(b => b.taskParameter).returns(() => taskParameter);
+    });
 
     it('build command line', () => {
         const parameter = {
@@ -9,8 +19,8 @@ describe(TaskParameterBuilder, () => {
         };
         const data = { arg1: 'val1', arg2: 'val2', arg3: 'val3', arg4: 'val4' };
 
-        taskParameterBuilder = new TaskParameterBuilder(JSON.stringify(parameter));
-        const commandLine = taskParameterBuilder.getCommandLine(data);
+        const testSubject = createTaskParameterBuilder(parameter);
+        const commandLine = testSubject.getCommandLine(data);
 
         expect(commandLine).toEqual('--arg1:val1 --arg2:val2 --arg3:val3');
     });
@@ -32,10 +42,16 @@ describe(TaskParameterBuilder, () => {
             commandLineTemplate: 'commandLineTemplate',
         };
 
-        taskParameterBuilder = new TaskParameterBuilder(JSON.stringify(parameter));
+        const testSubject = createTaskParameterBuilder(parameter);
 
-        expect(taskParameterBuilder.resourceFiles).toEqual(parameter.resourceFiles);
-        expect(taskParameterBuilder.environmentSettings).toEqual(parameter.environmentSettings);
-        expect(taskParameterBuilder.commandLineTemplate).toEqual(parameter.commandLineTemplate);
+        expect(testSubject.resourceFiles).toEqual(parameter.resourceFiles);
+        expect(testSubject.environmentSettings).toEqual(parameter.environmentSettings);
+        expect(testSubject.commandLineTemplate).toEqual(parameter.commandLineTemplate);
     });
+
+    function createTaskParameterBuilder(taskParameterJsonObj: object): TaskParameterBuilder {
+        taskParameter = JSON.stringify(taskParameterJsonObj);
+
+        return new TaskParameterBuilder(batchConfigMock.object);
+    }
 });
