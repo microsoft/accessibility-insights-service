@@ -253,10 +253,10 @@ describe(Logger, () => {
         });
     });
 
-    describe('trackException2', () => {
+    describe('trackExceptionAny', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.trackException2(new Error('test error'), 'error message');
+                testSubject.trackExceptionAny(new Error('test error'), 'error message');
             }).toThrowError('Logger not setup');
         });
 
@@ -271,7 +271,7 @@ describe(Logger, () => {
                 m.setup(c => c.trackException(new VError(underlyingError, errorMessage))).verifiable(Times.once()),
             );
 
-            testSubject.trackException2(underlyingError, errorMessage);
+            testSubject.trackExceptionAny(underlyingError, errorMessage);
 
             verifyMocks();
         });
@@ -287,7 +287,7 @@ describe(Logger, () => {
                 m.setup(c => c.trackException(new VError({ info: { error: underlyingError } }, errorMessage))).verifiable(Times.once()),
             );
 
-            testSubject.trackException2(underlyingError, errorMessage);
+            testSubject.trackExceptionAny(underlyingError, errorMessage);
 
             verifyMocks();
         });

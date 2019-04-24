@@ -63,7 +63,7 @@ export class Logger {
     }
 
     // tslint:disable-next-line: no-any
-    public trackException2(underlyingErrorData: any | Error, message: string): void {
+    public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
         const parsedErrorObject = underlyingErrorData instanceof Error ? underlyingErrorData : { info: { error: underlyingErrorData } };
 
         this.trackException(new VError(parsedErrorObject, message));
