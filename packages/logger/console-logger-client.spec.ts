@@ -14,7 +14,7 @@ describe(ConsoleLoggerClient, () => {
     let consoleMock: IMock<typeof console>;
 
     beforeEach(() => {
-        processStub = { execArgv: ['--test', '--console'] } as typeof process;
+        processStub = { execArgv: ['--test'] } as typeof process;
 
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
@@ -23,7 +23,7 @@ describe(ConsoleLoggerClient, () => {
 
     describe('console not enabled', () => {
         it('donot log', () => {
-            processStub = { execArgv: ['--test', '--console23'] } as typeof process;
+            processStub = { execArgv: ['--test', '--no-CONSOLE'] } as typeof process;
             consoleMock = Mock.ofInstance({ log: () => {} } as typeof console, MockBehavior.Strict);
             testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);
 
@@ -38,17 +38,6 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackMetric', () => {
-        it('--console param is case insensitive', () => {
-            processStub = { execArgv: ['--test', '--CONSOLE'] } as typeof process;
-            testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);
-
-            testSubject.setup(null);
-
-            testSubject.trackMetric('metric1', 1);
-
-            consoleMock.verify(c => c.log('[Metric] === metric1 - 1'), Times.once());
-        });
-
         it('log data', () => {
             testSubject.setup(null);
 

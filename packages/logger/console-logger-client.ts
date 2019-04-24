@@ -19,7 +19,7 @@ export class ConsoleLoggerClient implements LoggerClient {
     public setup(baseProperties?: { [key: string]: string }): void {
         this.baseProperties = baseProperties;
 
-        this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--console').length > 0;
+        this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--no-console').length === 0;
     }
 
     public trackMetric(name: string, value: number): void {
