@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "batchAccount_name": {
-            "value": "axisbatch"
+            "value": "a11yaxisbatch"
         }
     }
 }

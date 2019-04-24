@@ -1,10 +1,13 @@
 <#
  .SYNOPSIS
     Deploys a template to Azure
+
  .DESCRIPTION
     Deploys an Azure Resource Manager template
+
  .PARAMETER subscriptionName
     The subscription name where the template will be deployed.
+
  .PARAMETER resourceGroupLocation
     Optional, a resource group location. If specified, will try to create a new resource group in this location. If not specified, assumes resource group is existing.
 

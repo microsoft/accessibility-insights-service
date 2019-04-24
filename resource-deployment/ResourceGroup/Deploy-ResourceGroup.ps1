@@ -59,7 +59,6 @@ Function DeployResourceGroup
     $ErrorActionPreference = "Stop"
 
     # Register RPs
-    # Register RPs
     $resourceProviders = @();
     If($resourceProviders.length) {
         Write-Host "Registering resource providers"

@@ -4,7 +4,7 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "axiscosmos",
+            "defaultValue": "allyaxiscosmos",
             "metadata": {
                 "description": "The name of your CosmosDB account"
             }

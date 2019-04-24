@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "batchAccount_name": {
-            "defaultValue": "axisbatch",
+            "defaultValue": "a11yaxisbatch",
             "type": "String",
             "metadata": {
                 "description": "Batch Account Name"
