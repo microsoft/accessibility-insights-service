@@ -1,65 +1,84 @@
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 
-import * as appInsights from 'applicationinsights';
-import { loggerTypes } from './logger-types';
+import { VError } from 'verror';
+import { LoggerClient } from './logger-client';
+
+export enum LogLevel {
+    info,
+    warn,
+    verbose,
+    error,
+}
 
 @injectable()
 export class Logger {
     private initialized: boolean = false;
+    private isDebugEnabled: boolean = false;
 
-    constructor(
-        @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
-        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
-    ) {}
+    constructor(private readonly loggerClients: LoggerClient[], private readonly currentProcess: typeof process) {}
 
-    public setup(baseProperties: { [key: string]: string }): void {
+    public setup(baseProperties?: { [key: string]: string }): void {
         if (this.initialized === true) {
             return;
         }
 
-        this.appInsightsObject
-            .setup()
-            .setAutoCollectConsole(false)
-            .setAutoCollectExceptions(true)
-            .setAutoCollectRequests(false);
+        this.invokeLoggerClient(client => client.setup(baseProperties));
 
-        // this should be set after calling setup
-        this.appInsightsObject.defaultClient.commonProperties = {
-            batchPoolId: this.currentProcess.env.AZ_BATCH_POOL_ID,
-            batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
-            batchTaskId: this.currentProcess.env.AZ_BATCH_TASK_ID,
-            batchNodeId: this.currentProcess.env.AZ_BATCH_NODE_ID,
-            ...baseProperties,
-        };
+        this.isDebugEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
 
-        this.appInsightsObject.start();
         this.initialized = true;
     }
 
     public trackMetric(name: string, value: number = 1): void {
         this.ensureInitialized();
 
-        this.appInsightsObject.defaultClient.trackMetric({ name: name, value: value });
+        this.invokeLoggerClient(client => client.trackMetric(name, value));
     }
 
     public trackEvent(name: string, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
-        this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: properties });
+        this.invokeLoggerClient(client => client.trackEvent(name, properties));
     }
 
-    public trackTrace(message: string, severity: appInsights.Contracts.SeverityLevel, properties?: { [name: string]: string }): void {
+    public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
-        this.appInsightsObject.defaultClient.trackTrace({ message: message, severity: severity, properties: properties });
+        this.invokeLoggerClient(client => client.log(message, logLevel, properties));
     }
 
-    public trackInfoTrace(message: string, properties?: { [name: string]: string }): void {
-        this.trackTrace(message, appInsights.Contracts.SeverityLevel.Information, properties);
+    public logInfo(message: string, properties?: { [name: string]: string }): void {
+        this.log(message, LogLevel.info, properties);
+    }
+
+    public logVerbose(message: string, properties?: { [name: string]: string }): void {
+        if (this.isDebugEnabled) {
+            this.log(message, LogLevel.verbose, properties);
+        }
+    }
+
+    public trackException(error: Error): void {
+        this.ensureInitialized();
+        this.invokeLoggerClient(client => client.trackException(error));
+    }
+
+    // tslint:disable-next-line: no-any
+    public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
+        const parsedErrorObject = underlyingErrorData instanceof Error ? underlyingErrorData : { info: { error: underlyingErrorData } };
+
+        this.trackException(new VError(parsedErrorObject, message));
     }
 
     public flush(): void {
-        this.appInsightsObject.defaultClient.flush();
+        this.ensureInitialized();
+
+        this.invokeLoggerClient(client => client.flush());
+    }
+
+    private invokeLoggerClient(action: (loggerClient: LoggerClient) => void): void {
+        this.loggerClients.forEach(client => {
+            action(client);
+        });
     }
 
     private ensureInitialized(): void {
@@ -67,6 +86,6 @@ export class Logger {
             return;
         }
 
-        throw new Error('Telemetry client not setup');
+        throw new Error('Logger not setup');
     }
 }
