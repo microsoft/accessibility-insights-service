@@ -38,10 +38,15 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackMetric', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.trackMetric('metric1', 1);
-            }).toThrowError('ConsoleLoggerClient not setup');
+        it('--console param is case insensitive', () => {
+            processStub = { execArgv: ['--test', '--CONSOLE'] } as typeof process;
+            testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);
+
+            testSubject.setup(null);
+
+            testSubject.trackMetric('metric1', 1);
+
+            consoleMock.verify(c => c.log('[Metric] === metric1 - 1'), Times.once());
         });
 
         it('log data', () => {
@@ -64,12 +69,6 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackEvent', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.trackEvent('metric1');
-            }).toThrowError('ConsoleLoggerClient not setup');
-        });
-
         it('log data without properties', () => {
             testSubject.setup(null);
 
@@ -102,12 +101,6 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('log', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.log('trace', LogLevel.info);
-            }).toThrowError('ConsoleLoggerClient not setup');
-        });
-
         it('log data without properties', () => {
             testSubject.setup(null);
 
@@ -140,12 +133,6 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackException', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.trackException(new Error('error1'));
-            }).toThrowError('ConsoleLoggerClient not setup');
-        });
-
         it('log data without properties', () => {
             testSubject.setup(null);
             const error = new Error('error1');

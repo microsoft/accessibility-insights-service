@@ -7,18 +7,12 @@ import { loggerTypes } from './logger-types';
 
 @injectable()
 export class AppInsightsLoggerClient implements LoggerClient {
-    private initialized: boolean = false;
-
     constructor(
         @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
     public setup(baseProperties?: { [key: string]: string }): void {
-        if (this.initialized === true) {
-            return;
-        }
-
         this.appInsightsObject
             .setup()
             .setAutoCollectConsole(false)
@@ -35,24 +29,17 @@ export class AppInsightsLoggerClient implements LoggerClient {
         };
 
         this.appInsightsObject.start();
-        this.initialized = true;
     }
 
     public trackMetric(name: string, value: number): void {
-        this.ensureInitialized();
-
         this.appInsightsObject.defaultClient.trackMetric({ name: name, value: value });
     }
 
     public trackEvent(name: string, properties?: { [name: string]: string }): void {
-        this.ensureInitialized();
-
         this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: properties });
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
-        this.ensureInitialized();
-
         const severity = this.getAppInsightsSeverityLevel(logLevel);
 
         this.appInsightsObject.defaultClient.trackTrace({ message: message, severity: severity, properties: properties });
@@ -83,13 +70,5 @@ export class AppInsightsLoggerClient implements LoggerClient {
             default:
                 throw new Error(`unknown log level ${logLevel}`);
         }
-    }
-
-    private ensureInitialized(): void {
-        if (this.initialized === true) {
-            return;
-        }
-
-        throw new Error('Telemetry client not setup');
     }
 }

@@ -61,15 +61,6 @@ describe(AppInsightsLoggerClient, () => {
             verifyMocks();
         });
 
-        it('does not initialize more than once', () => {
-            setupCallsForTelemetrySetup();
-
-            testSubject.setup(null);
-            testSubject.setup(null);
-
-            verifyMocks();
-        });
-
         it('initializes with additional common properties', () => {
             const additionalCommonProps = { foo: 'bar' };
             setupCallsForTelemetrySetup(additionalCommonProps);
@@ -81,12 +72,6 @@ describe(AppInsightsLoggerClient, () => {
     });
 
     describe('trackMetric', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.trackMetric('metric1', 1);
-            }).toThrowError('Telemetry client not setup');
-        });
-
         it('when value passed', () => {
             setupCallsForTelemetrySetup();
             testSubject.setup(null);
@@ -100,12 +85,6 @@ describe(AppInsightsLoggerClient, () => {
         });
     });
     describe('trackEvent', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.trackEvent('event1', { foo: 'bar' });
-            }).toThrowError('Telemetry client not setup');
-        });
-
         it('when properties not passed', () => {
             setupCallsForTelemetrySetup();
             testSubject.setup(null);
@@ -134,12 +113,6 @@ describe(AppInsightsLoggerClient, () => {
     });
 
     describe('log', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.log('trace1', LogLevel.info);
-            }).toThrowError('Telemetry client not setup');
-        });
-
         it('when properties not passed', () => {
             setupCallsForTelemetrySetup();
             testSubject.setup(null);

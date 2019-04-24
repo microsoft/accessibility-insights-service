@@ -178,6 +178,18 @@ describe(Logger, () => {
     });
 
     describe('logVerbose', () => {
+        it('--debug is case insensitive', () => {
+            processStub.execArgv = ['--t', '--DEBUG'];
+            setupCallsForTelemetrySetup();
+            testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.verbose, undefined)).verifiable(Times.once()));
+
+            testSubject.logVerbose('event1');
+
+            verifyMocks();
+        });
+
         describe('in debug mode', () => {
             beforeEach(() => {
                 processStub.execArgv = ['--t', '--debug'];
@@ -185,6 +197,7 @@ describe(Logger, () => {
                 setupCallsForTelemetrySetup();
                 testSubject.setup();
             });
+
             it('when properties not passed', () => {
                 invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.verbose, undefined)).verifiable(Times.once()));
 

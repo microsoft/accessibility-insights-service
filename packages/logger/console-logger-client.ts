@@ -8,7 +8,6 @@ import { loggerTypes } from './logger-types';
 
 @injectable()
 export class ConsoleLoggerClient implements LoggerClient {
-    private initialized: boolean = false;
     private isconsoleLogEnabled: boolean;
     private baseProperties?: { [key: string]: string };
 
@@ -18,41 +17,29 @@ export class ConsoleLoggerClient implements LoggerClient {
     ) {}
 
     public setup(baseProperties?: { [key: string]: string }): void {
-        if (this.initialized === true) {
-            return;
-        }
         this.baseProperties = baseProperties;
 
-        this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg === '--console').length > 0;
-        this.initialized = true;
+        this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--console').length > 0;
     }
 
     public trackMetric(name: string, value: number): void {
-        this.ensureInitialized();
-
         this.executeInDebugMode(() => {
             this.logInConsole(`[Metric]${this.getPrintablePropertiesString()}`, `${name} - ${value}`);
         });
     }
 
     public trackEvent(name: string, properties?: { [name: string]: string }): void {
-        this.ensureInitialized();
-
         this.executeInDebugMode(() => {
             this.logInConsole(`[Event]${this.getPrintablePropertiesString(properties)}`, name);
         });
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
-        this.ensureInitialized();
-
         this.executeInDebugMode(() => {
             this.logInConsole(`[Trace][${LogLevel[logLevel]}]${this.getPrintablePropertiesString(properties)}`, message);
         });
     }
     public trackException(error: Error): void {
-        this.ensureInitialized();
-
         this.executeInDebugMode(() => {
             this.logInConsole(`[Exception]${this.getPrintablePropertiesString()}`, this.getPrintableString(error));
         });
@@ -82,13 +69,5 @@ export class ConsoleLoggerClient implements LoggerClient {
 
     private logInConsole(tag: string, content: string): void {
         this.consoleObject.log(`${tag} === ${content}`);
-    }
-
-    private ensureInitialized(): void {
-        if (this.initialized === true) {
-            return;
-        }
-
-        throw new Error('ConsoleLoggerClient not setup');
     }
 }
