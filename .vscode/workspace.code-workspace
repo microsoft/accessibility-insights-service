@@ -43,6 +43,9 @@
         {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
+        },
+        {
+            "path": "../packages/resource-deployment"
         }
     ],
     "settings": {

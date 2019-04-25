@@ -16,6 +16,15 @@
         },
         "scanRequestContainerName": {
             "value": "batch-scan-request-sender-script"
+        },
+        "storageAccountSku": {
+            "value": "Standard_RAGRS"
+        },
+        "storageAccountKind": {
+            "value": "StorageV2"
+        },
+        "storageAccountTier": {
+            "value": "Standard"
         }
     }
 }
