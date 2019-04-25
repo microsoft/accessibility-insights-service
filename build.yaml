@@ -51,14 +51,13 @@ steps:
       displayName: 'Install Coverage Report Generator'
 
     - script: |
-          dotnet ReportGenerator/tools/netcoreapp2.0/ReportGenerator.dll "-reports:$(Build.SourcesDirectory)/**/test-results/**/cobertura-coverage.xml" "-targetdir:$(Build.SourcesDirectory)/merged-coverage" "-reporttypes:Cobertura;HtmlInline_AzurePipelines"
+          dotnet ReportGenerator/tools/netcoreapp2.0/ReportGenerator.dll "-reports:$(Build.SourcesDirectory)/**/test-results/**/cobertura-coverage.xml" "-targetdir:$(Build.SourcesDirectory)/merged-coverage" "-reporttypes:Cobertura"
       displayName: 'Merge code coverage data'
 
     - task: PublishCodeCoverageResults@1
       inputs:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(Build.SourcesDirectory)/merged-coverage/Cobertura.xml'
-          reportDirectory: '$(Build.SourcesDirectory)/merged-coverage'
       displayName: publish code coverage
 
     - script: |
