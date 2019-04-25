@@ -57,6 +57,10 @@ export class Logger {
         }
     }
 
+    public logWarn(message: string, properties?: { [name: string]: string }): void {
+        this.log(message, LogLevel.warn, properties);
+    }
+
     public trackException(error: Error): void {
         this.ensureInitialized();
         this.invokeLoggerClient(client => client.trackException(error));

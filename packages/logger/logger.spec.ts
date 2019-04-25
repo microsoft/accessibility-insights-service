@@ -149,7 +149,7 @@ describe(Logger, () => {
     describe('logInfo', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.logInfo('trace1');
+                testSubject.logInfo('info1');
             }).toThrowError('Logger not setup');
         });
 
@@ -157,9 +157,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.info, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('info1', LogLevel.info, undefined)).verifiable(Times.once()));
 
-            testSubject.logInfo('event1');
+            testSubject.logInfo('info1');
 
             verifyMocks();
         });
@@ -169,9 +169,40 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.info, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('info1', LogLevel.info, properties)).verifiable(Times.once()));
 
-            testSubject.logInfo('event1', properties);
+            testSubject.logInfo('info1', properties);
+
+            verifyMocks();
+        });
+    });
+
+    describe('logWarn', () => {
+        it('throw if called before setup', () => {
+            expect(() => {
+                testSubject.logWarn('warn1');
+            }).toThrowError('Logger not setup');
+        });
+
+        it('when properties not passed', () => {
+            setupCallsForTelemetrySetup();
+            testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('warn1', LogLevel.warn, undefined)).verifiable(Times.once()));
+
+            testSubject.logWarn('warn1');
+
+            verifyMocks();
+        });
+
+        it('when properties passed', () => {
+            const properties = { foo: 'bar' };
+            setupCallsForTelemetrySetup();
+            testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('warn1', LogLevel.warn, properties)).verifiable(Times.once()));
+
+            testSubject.logWarn('warn1', properties);
 
             verifyMocks();
         });

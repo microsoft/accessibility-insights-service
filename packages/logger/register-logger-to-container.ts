@@ -1,5 +1,7 @@
 import * as appInsights from 'applicationinsights';
+import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
+import * as argv from 'yargs';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { Logger } from './logger';
@@ -17,6 +19,8 @@ export function registerLoggerToContainer(container: Container): void {
         .toSelf()
         .inSingletonScope();
 
+    container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
+    container.bind(loggerTypes.Argv).toConstantValue(argv);
     container.bind(loggerTypes.console).toConstantValue(console);
 
     container

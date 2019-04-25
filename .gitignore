@@ -8,3 +8,5 @@ out/
 **/dev.DockerFile
 **/.env
 **/.prod
+
+yarn-error.log
