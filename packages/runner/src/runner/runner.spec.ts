@@ -10,6 +10,7 @@ import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
 import { RunState } from '../documents/states';
 import { WebsitePage } from '../documents/website-page';
+import { ScanMetadataConfig } from '../scan-metadata-config';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
@@ -101,6 +102,8 @@ const axeScanResults: AxeScanResults = {
     } as AxeResults,
 };
 
+let scanMetadataConfig: IMock<ScanMetadataConfig>;
+
 beforeEach(() => {
     browser = <Browser>{};
     crawlerTaskMock = Mock.ofType<CrawlerTask>();
@@ -109,6 +112,9 @@ beforeEach(() => {
     storageTaskMock = Mock.ofType<StorageTask>();
     dataFactoryTaskMock = Mock.ofType<DataFactoryTask>();
     websiteStateUpdaterTaskMock = Mock.ofType<WebsiteStateUpdaterTask>();
+    scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
+
+    scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
 });
 
 describe('runner', () => {
@@ -170,9 +176,10 @@ describe('runner', () => {
             dataFactoryTaskMock.object,
             webDriverTaskMock.object,
             storageTaskMock.object,
+            scanMetadataConfig.object,
         );
 
-        await runner.run(scanMetadata);
+        await runner.run();
 
         crawlerTaskMock.verifyAll();
         scannerTaskMock.verifyAll();

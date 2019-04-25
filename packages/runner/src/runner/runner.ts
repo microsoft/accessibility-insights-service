@@ -1,12 +1,12 @@
 import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
+import { ScanMetadataConfig } from '../scan-metadata-config';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
-import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()
 export class Runner {
@@ -17,11 +17,13 @@ export class Runner {
         @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(StorageTask) private readonly storageTask: StorageTask,
+        @inject(ScanMetadataConfig) private readonly scanMetatadataConfig: ScanMetadataConfig,
     ) {}
 
-    public async run(scanMetadata: ScanMetadata): Promise<void> {
+    public async run(): Promise<void> {
         let browser: Browser;
         const runTime = new Date();
+        const scanMetadata = this.scanMetatadataConfig.getConfig();
 
         try {
             // start new web driver process

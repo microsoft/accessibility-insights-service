@@ -2,11 +2,13 @@ import 'reflect-metadata';
 
 import { CosmosClientWrapper, registerAxisStorageToContainer, StorageClient } from 'axis-storage';
 import * as inversify from 'inversify';
+import { registerLoggerToContainer } from 'logger';
 import { Browser } from 'puppeteer';
 import { WebDriver } from './web-driver/web-driver';
 
 export function setupRunnerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
+    registerLoggerToContainer(container);
     registerAxisStorageToContainer(container);
 
     container.bind(StorageClient).toDynamicValue(context => {
