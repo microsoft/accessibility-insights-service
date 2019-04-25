@@ -29,6 +29,10 @@
             "path": "../packages/scan-request-sender"
         },
         {
+
+            "path": "../packages/resource-deployment"
+        },
+        {
             "name": "root",
             "path": "../",
         },
