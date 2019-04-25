@@ -49,7 +49,6 @@
         "azure-storage": "^2.10.2",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
-        "inversify-binding-decorators": "^4.0.0",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0"
     }

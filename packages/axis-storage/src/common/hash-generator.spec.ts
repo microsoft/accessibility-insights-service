@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { Hash } from 'crypto';
 import * as sha256 from 'sha.js';
 import { IMock, It, Mock, Times } from 'typemoq';

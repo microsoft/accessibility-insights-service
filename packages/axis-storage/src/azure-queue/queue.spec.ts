@@ -1,4 +1,6 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
+import 'reflect-metadata';
+
 import { QueueService } from 'azure-storage';
 import { IMock, It, Mock } from 'typemoq';
 import { Queue } from './queue';

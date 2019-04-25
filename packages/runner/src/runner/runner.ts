@@ -1,4 +1,4 @@
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
@@ -8,6 +8,7 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 import { WebsiteStateUpdaterTask } from '../tasks/website-state-updater-task';
 import { ScanMetadata } from '../types/scan-metadata';
 
+@injectable()
 export class Runner {
     constructor(
         @inject(CrawlerTask) private readonly crawlerTask: CrawlerTask,

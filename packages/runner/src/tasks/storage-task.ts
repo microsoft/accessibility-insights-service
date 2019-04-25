@@ -1,6 +1,7 @@
 import { StorageClient } from 'axis-storage';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 
+@injectable()
 export class StorageTask {
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 

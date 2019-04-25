@@ -1,4 +1,6 @@
 //tslint:disable no-unsafe-any no-floating-promises
+import 'reflect-metadata';
+
 import { IMock, It, Mock } from 'typemoq';
 import {
     createCrawlerRequestOptions,
