@@ -15,14 +15,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 2. Install Azure-Cli
 
-#### 2.1 Windows users
-
--   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-windows?view=azure-cli-latest
-
-#### 2.2 Mac users
-
--   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-macos?view=azure-cli-latest
-    
+-   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
 ### 3. Login to azure-cli
 
@@ -33,15 +26,16 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 ### 4. Create Azure Resource Group
 
 -   Run below command to get supported locations and choose where you want to deploy resources
+
     ```bash
     az account list-locations
     ```
+
     Create Resource Group
 
--  ```bash
-    az group create --subscription <subscriptionId> --name <resourceGroupName> --location <resourceGroupLocation>
+-   ```bash
+     az group create --subscription <subscriptionId> --name <resourceGroupName> --location <resourceGroupLocation>
     ```
-
 
 ### 5. Deploy Storage Account
 
@@ -50,15 +44,16 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     ```
 
 ### 6. Deploy Batch Account
+
 -   ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./Batch-Account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
     ```
 
 ### 7. Deploy CosmosDB
+
 -   ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./Cosmos-DB/cosmos-db.template.json" --parameters "./Cosmos-DB/cosmos-db.parameters.json"
     ```
-
 
 ### 4. Login to Azure portal to verify the Resources are being created
 
