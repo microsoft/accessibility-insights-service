@@ -123,7 +123,7 @@ describe(BaseEntryPoint, () => {
                 testSubject.customActionToBeInvoked = () => {
                     throw error;
                 };
-                loggerMock.setup(l => l.trackExceptionAny(error, 'Error occured while executing job')).verifiable();
+                loggerMock.setup(l => l.trackExceptionAny(error, 'Error occurred while executing job')).verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
 
