@@ -4,22 +4,21 @@ import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 
 export abstract class BaseEntryPoint {
-    constructor(private readonly setupContainer: () => Container) {}
+    constructor(private readonly container: Container) {}
 
     public async start(): Promise<void> {
         let loggerInitialized = false;
         let logger: Logger;
 
         try {
-            const container = this.setupContainer();
-            const dotEnvConfig: DotenvConfigOutput = container.get(loggerTypes.DotEnvConfig);
-            logger = container.get(Logger);
+            const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
+            logger = this.container.get(Logger);
 
             logger.setup();
             loggerInitialized = true;
             this.verifyDotEnvParsing(dotEnvConfig, logger);
 
-            await this.invokeCustomActionWithLogging(container, logger);
+            await this.invokeCustomActionWithLogging(this.container, logger);
         } catch (error) {
             if (loggerInitialized === false) {
                 console.log('Unable to setup logger', error);
@@ -39,7 +38,7 @@ export abstract class BaseEntryPoint {
         try {
             await this.runCustomAction(container);
         } catch (error) {
-            logger.trackExceptionAny(error, 'Error occured while executing job');
+            logger.trackExceptionAny(error, 'Error occurred while executing job');
             throw error;
         }
     }

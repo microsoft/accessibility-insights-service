@@ -24,27 +24,19 @@ describe(BaseEntryPoint, () => {
     }
 
     let testSubject: TestEntryPoint;
-    let setupContainerMock: IMock<() => Container>;
     let loggerMock: IMock<Logger>;
     let dotEnvConfigStub: DotenvConfigOutput;
     let containerMock: IMock<Container>;
 
     beforeEach(() => {
-        setupContainerMock = Mock.ofInstance(() => {
-            return undefined;
-        });
         loggerMock = Mock.ofType(Logger);
         dotEnvConfigStub = {};
         containerMock = Mock.ofType(Container);
 
-        testSubject = new TestEntryPoint(setupContainerMock.object);
+        testSubject = new TestEntryPoint(containerMock.object);
     });
 
     describe('start', () => {
-        beforeEach(() => {
-            setupContainerSetupCall();
-        });
-
         it('verifies dotenv is loaded first', async () => {
             const errorMsg = 'dotEnvLoadedFirst';
             containerMock
@@ -109,7 +101,7 @@ describe(BaseEntryPoint, () => {
             });
         });
 
-        describe('runCusomAction', () => {
+        describe('runCustomAction', () => {
             beforeEach(() => {
                 setupContainerForDotEnvConfig();
                 setupContainerForLogger();
@@ -143,7 +135,6 @@ describe(BaseEntryPoint, () => {
 
     function verifyMocks(): void {
         loggerMock.verifyAll();
-        setupContainerMock.verifyAll();
         containerMock.verifyAll();
     }
 
@@ -177,12 +168,5 @@ describe(BaseEntryPoint, () => {
 
     function setupLoggerSetupCall(): void {
         loggerMock.setup(l => l.setup()).verifiable();
-    }
-
-    function setupContainerSetupCall(): void {
-        setupContainerMock
-            .setup(s => s())
-            .returns(() => containerMock.object)
-            .verifiable();
     }
 });
