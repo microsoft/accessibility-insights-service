@@ -15,6 +15,7 @@ module.exports = {
         '^.+\\.(ts)$': 'ts-jest',
     },
     testMatch: ['**/*.spec.[tj]s'],
+    testPathIgnorePatterns: ['/dist/', '/out/'],
     verbose: true,
     coverageDirectory: '<rootDir>/test-results/unit/coverage',
     coverageReporters: ['json', 'lcov', 'text', 'cobertura'],
