@@ -36,7 +36,8 @@ steps:
 
     - task: PublishTestResults@2
       inputs:
-          testResultsFiles: '**/test-results/unit/junit.xml'
+          testResultsFiles: 'packages/**/test-results/unit/junit.xml'
+          searchFolder: '$(Build.SourcesDirectory)'
           testRunTitle: unit tests
       condition: always()
       displayName: publish unit test results
@@ -51,7 +52,7 @@ steps:
       displayName: 'Install Coverage Report Generator'
 
     - script: |
-          dotnet ReportGenerator/tools/netcoreapp2.0/ReportGenerator.dll "-reports:$(Build.SourcesDirectory)/**/test-results/**/cobertura-coverage.xml" "-targetdir:$(Build.SourcesDirectory)/merged-coverage" "-reporttypes:Cobertura"
+          dotnet ReportGenerator/tools/netcoreapp2.0/ReportGenerator.dll "-reports:$(Build.SourcesDirectory)/packages/**/test-results/**/cobertura-coverage.xml" "-targetdir:$(Build.SourcesDirectory)/merged-coverage" "-reporttypes:Cobertura"
       displayName: 'Merge code coverage data'
 
     - task: PublishCodeCoverageResults@1
