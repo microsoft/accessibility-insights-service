@@ -14,9 +14,21 @@ module.exports = {
     transform: {
         '^.+\\.(ts)$': 'ts-jest',
     },
-    testMatch: ['**/*.spec.ts'],
+    testMatch: ['**/*.spec.[tj]s'],
     verbose: true,
     coverageDirectory: '<rootDir>/test-results/unit/coverage',
     coverageReporters: ['json', 'lcov', 'text', 'cobertura'],
+    collectCoverageFrom: [
+        '<rootDir>/**/*.js',
+        '<rootDir>/**/*.ts',
+        '!<rootDir>/dist/**',
+        '!<rootDir>/out/**',
+        '!<rootDir>/**/jest.config.js',
+        '!<rootDir>/**/prettier.config.js',
+        '!<rootDir>/**/webpack.config.js',
+        '!<rootDir>/**/node_modules/**',
+        '!<rootDir>/**/test-results/**',
+    ],
     reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
+    testEnvironment: 'node',
 };
