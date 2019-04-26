@@ -2,6 +2,7 @@
 import 'reflect-metadata';
 
 import { QueueService } from 'azure-storage';
+import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import { Queue } from './queue';
 import { StorageConfig } from './storage-config';
@@ -9,6 +10,7 @@ import { StorageConfig } from './storage-config';
 let config: StorageConfig;
 let queue: Queue;
 let queueServiceMock: IMock<QueueService>;
+let loggerMock: IMock<Logger>;
 
 function beforeEachSuit(): void {
     config = {
@@ -17,6 +19,7 @@ function beforeEachSuit(): void {
         scanQueue: 'queue-1',
     };
     queueServiceMock = Mock.ofType();
+    loggerMock = Mock.ofType(Logger);
 }
 
 describe('getMessages()', () => {
@@ -74,7 +77,7 @@ describe('getMessages()', () => {
             })
             .returns(() => callback2(undefined, queueMessageResults))
             .verifiable();
-        queue = new Queue(config, queueServiceMock.object);
+        queue = new Queue(config, queueServiceMock.object, loggerMock.object);
         const queueMessageResultActual = await queue.getMessages();
 
         expect(queueMessageResultActual).toEqual(queueMessageResult);
@@ -106,7 +109,7 @@ describe('deleteMessage()', () => {
             })
             .returns(() => callback(undefined))
             .verifiable();
-        queue = new Queue(config, queueServiceMock.object);
+        queue = new Queue(config, queueServiceMock.object, loggerMock.object);
         await queue.deleteMessage(message);
 
         queueServiceMock.verifyAll();
