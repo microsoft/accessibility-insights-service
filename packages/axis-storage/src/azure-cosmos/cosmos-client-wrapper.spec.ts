@@ -61,10 +61,10 @@ describe('CosmosClientWrapper', () => {
             };
             collectionMock.setup(c => c.item(responseItem.id)).returns(() => itemMock.object);
             itemMock
-                .setup(async i => i.read({ partitionKey: 'partKey' }))
+                .setup(async i => i.read({ partitionKey: partitoningKey }))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, 'partKey');
+            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitoningKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -187,6 +187,18 @@ describe('CosmosClientWrapper', () => {
             verifyMocks();
         });
 
+        it('should upsert list of items with partition key', async () => {
+            const items = [1, 2, 3];
+            const options = { partitionKey: partitoningKey };
+            items.map(item => {
+                return setupVerifiableUpsertItemCallWithOptions(item, options);
+            });
+
+            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
+
+            verifyMocks();
+        });
+
         it('should fail if one of the items failed to upsert', async () => {
             const items = [1, 2];
             setupVerifiableUpsertItemCall(items[0]);
@@ -237,6 +249,12 @@ describe('CosmosClientWrapper', () => {
 
     function setupVerifiableUpsertItemCall(item: any): void {
         itemsMock.setup(async i => i.upsert(item)).returns(async () => Promise.resolve({ body: 'stored data' as any, item: undefined }));
+    }
+
+    function setupVerifiableUpsertItemCallWithOptions(item: any, options: any): void {
+        itemsMock
+            .setup(async i => i.upsert(item, options))
+            .returns(async () => Promise.resolve({ body: 'stored data' as any, item: undefined }));
     }
 
     function setupVerifiableRejectedUpsertItemCall(item: any): void {
