@@ -1,4 +1,6 @@
 // tslint:disable: no-any
+import { Logger } from 'logger';
+import * as util from 'util';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
@@ -9,6 +11,7 @@ export class StorageClient {
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,
         private readonly collectionName: string,
+        private readonly logger: Logger,
     ) {}
 
     public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
@@ -51,24 +54,28 @@ export class StorageClient {
                     const operationResponse = await operation(...args);
 
                     if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
-                        cout(`[storage-client] Operation completed. Response status code ${operationResponse.statusCode}.`);
+                        this.logger.logInfo(`[storage-client] Operation completed. Response status code ${operationResponse.statusCode}.`);
                         resolve(operationResponse);
 
                         break;
                     } else if (Date.now() > timeoutTimestamp) {
-                        cout(`[storage-client] Operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
+                        this.logger.logWarn(`[storage-client] Operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
                         reject(operationResponse);
 
                         break;
                     } else {
-                        cout(
+                        this.logger.logInfo(
                             `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${
                                 operationResponse.statusCode
                             }.`,
                         );
                     }
                 } catch (error) {
-                    reject(new VError(cause(error), 'An error occurred while executing storage operation.'));
+                    const customErrorMessage = 'An error occurred while executing storage operation';
+                    const customError =
+                        error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)} - ${util.inspect(error)}`;
+
+                    reject(customError);
 
                     break;
                 }

@@ -3,7 +3,6 @@ const webpack = require('webpack');
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
-const nodeExternals = require('webpack-node-externals');
 
 module.exports = env => {
     const version = env ? env.version : 'dev';
@@ -11,7 +10,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: [nodeExternals({ modulesFromFile: true })],
+        externals: ['yargs', 'azure-batch'],
         entry: {
             ['job-manager']: path.resolve('./src/index.ts'),
         },

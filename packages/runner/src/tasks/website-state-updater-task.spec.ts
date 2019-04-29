@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
 import { CosmosOperationResponse, RetryOptions, StorageClient } from 'axis-storage';
+import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { PageScanResult } from '../documents/page-scan-result';
 import { Website } from '../documents/website';
@@ -26,6 +27,7 @@ const scanMetadata: ScanMetadata = {
 };
 let pageScanResult: PageScanResult;
 let websiteStateUpdaterTask: WebsiteStateUpdaterTask;
+let loggerMock: IMock<Logger>;
 
 beforeEach(() => {
     storageClientMock = Mock.ofType<StorageClient>();
@@ -47,7 +49,14 @@ beforeEach(() => {
         .returns(() => 'websiteDocumentId')
         .verifiable(Times.once());
 
-    websiteStateUpdaterTask = new WebsiteStateUpdaterTask(storageClientMock.object, websiteFactoryMock.object, retryOptions);
+    loggerMock = Mock.ofType(Logger);
+
+    websiteStateUpdaterTask = new WebsiteStateUpdaterTask(
+        storageClientMock.object,
+        websiteFactoryMock.object,
+        loggerMock.object,
+        retryOptions,
+    );
 });
 
 afterEach(() => {

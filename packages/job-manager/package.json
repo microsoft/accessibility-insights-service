@@ -40,8 +40,7 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.4.3",
         "webpack": "^4.29.4",
-        "webpack-cli": "^3.2.3",
-        "webpack-node-externals": "^1.7.2"
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "axis-storage": "1.0.0",

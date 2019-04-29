@@ -208,6 +208,37 @@ describe(Logger, () => {
         });
     });
 
+    describe('logError', () => {
+        it('throw if called before setup', () => {
+            expect(() => {
+                testSubject.logError('error1');
+            }).toThrowError('Logger not setup');
+        });
+
+        it('when properties not passed', () => {
+            setupCallsForTelemetrySetup();
+            testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('error1', LogLevel.error, undefined)).verifiable(Times.once()));
+
+            testSubject.logError('error1');
+
+            verifyMocks();
+        });
+
+        it('when properties passed', () => {
+            const properties = { foo: 'bar' };
+            setupCallsForTelemetrySetup();
+            testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('error1', LogLevel.error, properties)).verifiable(Times.once()));
+
+            testSubject.logError('error1', properties);
+
+            verifyMocks();
+        });
+    });
+
     describe('logVerbose', () => {
         it('--debug is case insensitive', () => {
             processStub.execArgv = ['--t', '--DEBUG'];

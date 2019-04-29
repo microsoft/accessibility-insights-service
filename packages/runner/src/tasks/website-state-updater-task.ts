@@ -1,5 +1,6 @@
 import { RetryOptions, StorageClient } from 'axis-storage';
 import { inject, injectable } from 'inversify';
+import { Logger } from 'logger';
 import { VError } from 'verror';
 import { PageScanResult } from '../documents/page-scan-result';
 import { Website } from '../documents/website';
@@ -11,6 +12,7 @@ export class WebsiteStateUpdaterTask {
     constructor(
         @inject(StorageClient) private readonly storageClient: StorageClient,
         @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
+        @inject(Logger) private readonly logger: Logger,
         private readonly retryOptions: RetryOptions = {
             timeoutMilliseconds: 15000,
             intervalMilliseconds: 500,
@@ -38,10 +40,14 @@ export class WebsiteStateUpdaterTask {
         const sourceWebsiteItem = await this.storageClient.readDocument<Website>(websiteDocumentId);
 
         if (sourceWebsiteItem.statusCode === 200) {
-            cout(`[website-state-updater-task] Update website document. Id: ${websiteDocumentId}, URL: ${scanMetadata.baseUrl}.`);
+            this.logger.logInfo(
+                `[website-state-updater-task] Update website document. Id: ${websiteDocumentId}, URL: ${scanMetadata.baseUrl}.`,
+            );
             targetWebsiteItem = this.websiteFactory.update(sourceWebsiteItem.item, pageScanResult, runTime);
         } else if (sourceWebsiteItem.statusCode === 404) {
-            cout(`[website-state-updater-task] Create new website document. Id: ${websiteDocumentId}, URL ${scanMetadata.baseUrl}.`);
+            this.logger.logInfo(
+                `[website-state-updater-task] Create new website document. Id: ${websiteDocumentId}, URL ${scanMetadata.baseUrl}.`,
+            );
             targetWebsiteItem = this.websiteFactory.create(pageScanResult, scanMetadata, runTime);
         } else {
             throw new VError(

@@ -1,9 +1,11 @@
+import 'reflect-metadata';
+
 import * as azureCosmos from '@azure/cosmos';
 import * as azureStorage from 'azure-storage';
 import { Container } from 'inversify';
 import * as _ from 'lodash';
+import { registerLoggerToContainer } from 'logger';
 import * as prettyFormat from 'pretty-format';
-import 'reflect-metadata';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -23,6 +25,7 @@ describe(registerAxisStorageToContainer, () => {
 
     beforeEach(() => {
         container = new Container();
+        registerLoggerToContainer(container);
 
         process.env.AZURE_STORAGE_ACCOUNT = storageAccount;
         process.env.AZURE_STORAGE_ACCESS_KEY = storageAccessKey;

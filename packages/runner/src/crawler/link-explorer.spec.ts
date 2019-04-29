@@ -1,6 +1,7 @@
 //tslint:disable no-unsafe-any no-floating-promises
 import 'reflect-metadata';
 
+import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import {
     createCrawlerRequestOptions,
@@ -18,6 +19,8 @@ describe('LinkExplorer', () => {
     let crawlerMock: IMock<HCCrawlerTyped>;
     let linkExplorer: LinkExplorer;
     let launchOptionsStub: CrawlerLaunchOptions;
+    let loggerMock: IMock<Logger>;
+    let processMock: IMock<typeof process>;
     const testUrl = 'https://www.microsoft.com';
     const invalidUrl = 'https://www.xyzxyz.com';
     beforeEach(() => {
@@ -26,8 +29,10 @@ describe('LinkExplorer', () => {
         crawlerMock.setup(async cm => cm.close()).returns(async () => Promise.resolve());
 
         crawlerMock = getPromisableDynamicMock(crawlerMock);
-        launchOptionsStub = new HCCrawlerOptionsFactory().createConnectOptions(testUrl, It.isAny());
-        linkExplorer = new LinkExplorer(crawlerMock.object, launchOptionsStub);
+        loggerMock = Mock.ofType(Logger);
+        processMock = Mock.ofInstance(process);
+        launchOptionsStub = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object).createConnectOptions(testUrl, It.isAny());
+        linkExplorer = new LinkExplorer(crawlerMock.object, launchOptionsStub, loggerMock.object);
     });
 
     it('should create instance', () => {

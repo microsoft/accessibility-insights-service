@@ -1,20 +1,23 @@
 // tslint:disable: no-import-side-effect no-any
 import 'reflect-metadata';
+
+import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
-import '../node';
 import { StorageClient } from './storage-client';
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 
 const dbName = 'dbName';
 const collectionName = 'collectionName';
+const partitionKey = 'partKey';
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let storageClient: StorageClient;
 let operationCallbackMock: IMock<OperationCallback>;
-const partitionKey = 'partKey';
+let loggerMock: IMock<Logger>;
+
 const retryOptions = {
     timeoutMilliseconds: 1000,
     intervalMilliseconds: 200,
@@ -24,7 +27,8 @@ const retryOptions = {
 beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
     operationCallbackMock = Mock.ofType<OperationCallback>();
-    storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName);
+    loggerMock = Mock.ofType(Logger);
+    storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
 });
 
 describe('StorageClient.tryExecuteOperation()', () => {
