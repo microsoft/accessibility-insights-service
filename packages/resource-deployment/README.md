@@ -40,19 +40,19 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 ### 5. Deploy Storage Account
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./Blob-Storage/blob-storage.template.json" --parameters "./Blob-Storage/blob-storage.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./blob-storage/blob-storage.template.json" --parameters "./blob-storage/blob-storage.parameters.json"
     ```
 
 ### 6. Deploy Batch Account
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./Batch-Account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./batch-account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
     ```
 
 ### 7. Deploy CosmosDB
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./Cosmos-DB/cosmos-db.template.json" --parameters "./Cosmos-DB/cosmos-db.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./cosmos-db/cosmos-db.template.json" --parameters "./cosmos-db/cosmos-db.parameters.json"
     ```
 
 ### 4. Login to Azure portal to verify the Resources are being created
