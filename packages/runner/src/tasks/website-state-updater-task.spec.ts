@@ -35,7 +35,7 @@ beforeEach(() => {
 
     let targetWebsiteServerItem: Website;
     storageClientMock
-        .setup(async o => o.writeDocument<Website>(It.isAny()))
+        .setup(async o => o.writeDocument<Website>(It.isAny(), scanMetadata.websiteId))
         .callback(item => {
             targetWebsiteServerItem = item;
         })

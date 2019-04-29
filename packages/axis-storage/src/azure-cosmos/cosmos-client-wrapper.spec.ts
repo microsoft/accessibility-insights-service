@@ -16,6 +16,7 @@ describe('CosmosClientWrapper', () => {
     let collectionsMock: IMock<cosmos.Containers>;
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
+    const partitoningKey = 'partKey';
 
     const dbName = 'stub db';
     const collectionName = 'stub collection';
@@ -28,7 +29,7 @@ describe('CosmosClientWrapper', () => {
     });
 
     describe('readItem()', () => {
-        it('read item with failed response', async () => {
+        it('read item with failed response ', async () => {
             const expectedResult = {
                 response: 'NotFound',
                 statusCode: 404,
@@ -38,9 +39,9 @@ describe('CosmosClientWrapper', () => {
                 code: 404,
             };
             collectionMock.setup(c => c.item('id')).returns(() => itemMock.object);
-            itemMock.setup(async i => i.read()).returns(async () => Promise.reject(responseError));
+            itemMock.setup(async i => i.read({ partitionKey: partitoningKey })).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readItem('id', dbName, collectionName);
+            const result = await testSubject.readItem('id', dbName, collectionName, partitoningKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -59,7 +60,32 @@ describe('CosmosClientWrapper', () => {
                 statusCode: 200,
             };
             collectionMock.setup(c => c.item(responseItem.id)).returns(() => itemMock.object);
-            itemMock.setup(async i => i.read()).returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
+            itemMock
+                .setup(async i => i.read({ partitionKey: 'partKey' }))
+                .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
+
+            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, 'partKey');
+
+            expect(result).toEqual(expectedResult);
+            itemMock.verifyAll();
+            verifyMocks();
+        });
+
+        it('read item with success with no partition key', async () => {
+            const responseItem = {
+                id: 'id-1',
+                propA: 'propA',
+                _etag: 'etag-1',
+                _ts: 123456789,
+            };
+            const expectedResult = {
+                item: responseItem,
+                statusCode: 200,
+            };
+            collectionMock.setup(c => c.item(responseItem.id)).returns(() => itemMock.object);
+            itemMock
+                .setup(async i => i.read(undefined))
+                .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName);
 
@@ -214,7 +240,7 @@ describe('CosmosClientWrapper', () => {
     }
 
     function setupVerifiableRejectedUpsertItemCall(item: any): void {
-        itemsMock.setup(async i => i.upsert(item)).returns(async () => Promise.reject('unable to store item'));
+        itemsMock.setup(async i => i.upsert(item, undefined)).returns(async () => Promise.reject('unable to store item'));
     }
 });
 

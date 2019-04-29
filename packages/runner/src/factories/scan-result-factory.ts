@@ -54,6 +54,7 @@ export class ScanResultFactory {
                     baseUrl: scanConfig.baseUrl,
                     serviceTreeId: scanConfig.serviceTreeId,
                 },
+                partitionKey: scanConfig.websiteId,
             };
         });
     }

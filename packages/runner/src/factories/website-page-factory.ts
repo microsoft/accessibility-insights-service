@@ -23,6 +23,7 @@ export class WebsitePageFactory {
                         url: link,
                         lastSeen: runTime.toJSON(),
                     },
+                    partitionKey: scanMetadata.websiteId,
                 };
 
                 websitePages.set(id, websitePage);

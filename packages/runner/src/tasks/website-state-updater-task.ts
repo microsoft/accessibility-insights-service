@@ -23,7 +23,7 @@ export class WebsiteStateUpdaterTask {
             async (scanResult: PageScanResult, metadata: ScanMetadata, timestamp: Date) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
 
-                return this.storageClient.writeDocument<Website>(targetWebsiteItem);
+                return this.storageClient.writeDocument<Website>(targetWebsiteItem, scanMetadata.websiteId);
             },
             this.retryOptions,
             pageScanResult,

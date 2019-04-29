@@ -11,20 +11,20 @@ export class StorageClient {
         private readonly collectionName: string,
     ) {}
 
-    public async readDocument<T>(documentId: string): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName);
+    public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);
     }
 
     public async readAllDocument<T>(): Promise<CosmosOperationResponse<T[]>> {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
-    public async writeDocument<T>(document: T): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName);
+    public async writeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, partitionKey);
     }
 
-    public async writeDocuments<T>(documents: T[]): Promise<void> {
-        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName);
+    public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
+        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, partitionKey);
     }
 
     public async tryExecuteOperation<T>(
