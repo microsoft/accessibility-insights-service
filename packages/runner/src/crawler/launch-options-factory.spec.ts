@@ -1,5 +1,7 @@
 import 'reflect-metadata';
 
+import { Logger } from 'logger';
+import { IMock, Mock } from 'typemoq';
 import { createCrawlResult, getNotAllowedUrls } from '../test-utilities/common-mock-methods';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
@@ -7,8 +9,12 @@ import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } fr
 describe('LaunchOptionsFactory', () => {
     let testSubject: HCCrawlerOptionsFactory;
     let browserWSEndPoint: string;
+    let loggerMock: IMock<Logger>;
+    let processMock: IMock<typeof process>;
     beforeEach(() => {
-        testSubject = new HCCrawlerOptionsFactory();
+        loggerMock = Mock.ofType(Logger);
+        processMock = Mock.ofInstance(process);
+        testSubject = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object);
         browserWSEndPoint = 'ws://localhost';
     });
 
