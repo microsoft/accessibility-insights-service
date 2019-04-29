@@ -30,13 +30,12 @@ steps:
       displayName: run linter
 
     - script: |
-          # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
-          yarn test -- -- --ci
+          yarn test --ci --coverage
       displayName: run unit tests
 
     - task: PublishTestResults@2
       inputs:
-          testResultsFiles: 'packages/**/test-results/unit/junit.xml'
+          testResultsFiles: 'test-results/unit/junit.xml'
           searchFolder: '$(Build.SourcesDirectory)'
           testRunTitle: unit tests
       condition: always()
@@ -45,20 +44,10 @@ steps:
     - task: NuGetToolInstaller@0
       displayName: 'Install NuGet'
 
-    - task: NuGetCommand@2
-      inputs:
-          command: custom
-          arguments: 'install  ReportGenerator -ExcludeVersion'
-      displayName: 'Install Coverage Report Generator'
-
-    - script: |
-          dotnet ReportGenerator/tools/netcoreapp2.0/ReportGenerator.dll "-reports:$(Build.SourcesDirectory)/packages/**/test-results/**/cobertura-coverage.xml" "-targetdir:$(Build.SourcesDirectory)/merged-coverage" "-reporttypes:Cobertura"
-      displayName: 'Merge code coverage data'
-
     - task: PublishCodeCoverageResults@1
       inputs:
           codeCoverageTool: Cobertura
-          summaryFileLocation: '$(Build.SourcesDirectory)/merged-coverage/Cobertura.xml'
+          summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
       displayName: publish code coverage
 
     - script: |
