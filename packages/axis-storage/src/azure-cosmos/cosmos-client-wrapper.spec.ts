@@ -189,9 +189,9 @@ describe('CosmosClientWrapper', () => {
 
         it('should upsert list of items with partition key', async () => {
             const items = [1, 2, 3];
-            const options = { partitionKey: partitoningKey };
+            const options: cosmos.RequestOptions = { partitionKey: partitoningKey };
             items.map(item => {
-                return setupVerifiableUpsertItemCallWithOptions(item, options);
+                setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
             await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
@@ -251,7 +251,7 @@ describe('CosmosClientWrapper', () => {
         itemsMock.setup(async i => i.upsert(item)).returns(async () => Promise.resolve({ body: 'stored data' as any, item: undefined }));
     }
 
-    function setupVerifiableUpsertItemCallWithOptions(item: any, options: any): void {
+    function setupVerifiableUpsertItemCallWithOptions(item: any, options: cosmos.RequestOptions): void {
         itemsMock
             .setup(async i => i.upsert(item, options))
             .returns(async () => Promise.resolve({ body: 'stored data' as any, item: undefined }));
