@@ -1,15 +1,16 @@
 import { inject, injectable } from 'inversify';
-import { VError } from 'verror';
+import { Logger } from 'logger';
+import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 
 @injectable()
 export class Scanner {
-    constructor(@inject(Page) private readonly page: Page) {}
+    constructor(@inject(Page) private readonly page: Page, @inject(Logger) private readonly logger: Logger) {}
 
     public async scan(url: string): Promise<AxeScanResults> {
         try {
-            cout(`[scanner] Starting accessibility scanning of URL ${url}.`);
+            this.logger.logInfo(`[scanner] Starting accessibility scanning of URL ${url}.`);
 
             await this.page.create();
             await this.page.enableBypassCSP();
@@ -19,13 +20,12 @@ export class Scanner {
 
             return { results: result };
         } catch (error) {
-            const errorExt = new VError(cause(error), `An error occurred while scanning website page ${url}.`);
-            cout(`[scanner] ${errorExt}`);
+            this.logger.trackExceptionAny(error, `[scanner] An error occurred while scanning website page ${url}.`);
 
-            return { error: errorExt.message };
+            return { error: util.inspect(error) };
         } finally {
             await this.page.close();
-            cout(`[scanner] Accessibility scanning of URL ${url} completed.`);
+            this.logger.logInfo(`[scanner] Accessibility scanning of URL ${url} completed.`);
         }
     }
 }

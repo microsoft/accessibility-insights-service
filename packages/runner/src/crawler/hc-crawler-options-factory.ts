@@ -1,4 +1,5 @@
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { Logger, loggerTypes } from 'logger';
 import * as node_url from 'url';
 import { JSONLineExporter } from './hc-crawler';
 import {
@@ -12,6 +13,11 @@ import {
 
 @injectable()
 export class HCCrawlerOptionsFactory {
+    constructor(
+        @inject(Logger) private readonly logger: Logger,
+        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
+    ) {}
+
     public createConnectOptions(url: string, browserWSEndpoint: string): CrawlerConnectOptions {
         const launchOptions = this.createLaunchOptions(url);
         const connectOptions = launchOptions as CrawlerConnectOptions;
@@ -19,12 +25,11 @@ export class HCCrawlerOptionsFactory {
 
         return connectOptions;
     }
-
     public createLaunchOptions(url: string): CrawlerLaunchOptions {
         const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
         const scanResult: CrawlerScanResult[] = [];
         const allowedDomain = node_url.parse(url).hostname;
-        const exporter = isDebug
+        const exporter = this.isDebug()
             ? new JSONLineExporter({
                   file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
               })
@@ -42,7 +47,7 @@ export class HCCrawlerOptionsFactory {
                 if (options.url.indexOf('https://login.microsoftonline.com/') !== -1 || options.url.match(IGNORED_EXTENSIONS) !== null) {
                     processUrl = false;
                 }
-                cout(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
+                this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
 
                 return processUrl;
             },
@@ -52,7 +57,7 @@ export class HCCrawlerOptionsFactory {
                     result.links.forEach(link => {
                         if (node_url.parse(link).hostname === allowedDomain) {
                             links.add(link);
-                            cout(`[hc-crawl] Found link ${link}`);
+                            this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
                     });
                 }
@@ -62,7 +67,7 @@ export class HCCrawlerOptionsFactory {
                     depth: result.depth,
                     links: Array.from(links),
                 });
-                cout(`[hc-crawl] Total links found ${links.size}`);
+                this.logger.logInfo(`[hc-crawl] Total links found ${links.size}`);
             },
             onError: (error: CrawlerError) => {
                 scanResult.push({
@@ -72,10 +77,13 @@ export class HCCrawlerOptionsFactory {
                     links: undefined,
                     error: error,
                 });
-                cout(`[hc-crawl] Error processing URL ${url}`);
-                cout(error);
+                this.logger.logError(`[hc-crawl] Error processing URL ${url} - error - ${JSON.stringify(error)}`);
             },
             scanResult: scanResult,
         };
+    }
+
+    private isDebug(): boolean {
+        return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
     }
 }

@@ -1,6 +1,7 @@
 import * as azure from 'azure-storage';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import { Logger } from 'logger';
 import { VError } from 'verror';
 import { Message } from './message';
 import { StorageConfig } from './storage-config';
@@ -11,15 +12,9 @@ export class Queue {
 
     constructor(
         @inject(StorageConfig) private readonly config: StorageConfig,
-        @inject(azure.QueueService) private readonly queueClient?: azure.QueueService,
-    ) {
-        if (_.isNil(this.queueClient)) {
-            this.queueClient = azure
-                .createQueueService(this.config.accountName, this.config.accountKey)
-                .withFilter(new azure.ExponentialRetryPolicyFilter());
-            this.queueClient.messageEncoder = new azure.QueueMessageEncoder.TextBase64QueueMessageEncoder();
-        }
-    }
+        @inject(azure.QueueService) private readonly queueClient: azure.QueueService,
+        @inject(Logger) private readonly logger: Logger,
+    ) {}
 
     public async getMessages(queue: string = this.scanQueue): Promise<Message[]> {
         const maxDequeueCount = 2;
@@ -29,8 +24,8 @@ export class Queue {
             serverMessages.forEach(async serverMessage => {
                 if (serverMessage.dequeueCount > maxDequeueCount) {
                     await this.moveToDeadQueue(queue, serverMessage);
-                    console.log(
-                        `[${new Date().toJSON()}] Message ${
+                    this.logger.logWarn(
+                        `[Queue] Message ${
                             serverMessage.messageId
                         } exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
                     );

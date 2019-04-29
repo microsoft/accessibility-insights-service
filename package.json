@@ -11,7 +11,7 @@
         "clean": "npx lerna run clean --stream",
         "cbuild": "npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
-        "test": "npx lerna run test",
+        "test": "npx jest",
         "lint": "npx lerna run lint --stream",
         "precheckin": "npm-run-all --serial format lint build test",
         "format": "npx prettier --write \"**/*\"",

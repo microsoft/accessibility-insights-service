@@ -1,21 +1,26 @@
+import { Logger } from 'logger';
 import { CrawlerScanResults } from './crawler-scan-results';
 import { HCCrawlerTyped } from './hc-crawler';
 import { CrawlerLaunchOptions, CrawlerScanResult } from './hc-crawler-types';
 
 export class LinkExplorer {
-    constructor(private readonly crawler: HCCrawlerTyped, private readonly crawlerOptions: CrawlerLaunchOptions) {}
+    constructor(
+        private readonly crawler: HCCrawlerTyped,
+        private readonly crawlerOptions: CrawlerLaunchOptions,
+        private readonly logger: Logger,
+    ) {}
 
     public async exploreLinks(url: string): Promise<CrawlerScanResults> {
-        cout(`[crawler] Starting scanning URL ${url}.`);
+        this.logger.logInfo(`[crawler] Starting scanning URL ${url}.`);
         await this.crawler.queue(url);
         await this.crawler.onIdle(); // Resolved when no queue item is left
         await this.crawler.disconnect();
-        cout(`[crawler] Scanning of URL ${url} completed.`);
+        this.logger.logInfo(`[crawler] Scanning of URL ${url} completed.`);
 
         const scanResult = this.crawlerOptions.scanResult;
         const aggregateError = this.aggregateErrors(scanResult);
         if (aggregateError !== undefined) {
-            cout(`[crawler] ${aggregateError}`);
+            this.logger.logInfo(`[crawler] ${aggregateError}`);
         }
 
         return { results: scanResult, error: aggregateError };

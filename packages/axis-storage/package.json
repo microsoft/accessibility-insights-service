@@ -40,8 +40,7 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.4.3",
         "webpack": "^4.29.4",
-        "webpack-cli": "^3.2.3",
-        "webpack-node-externals": "^1.7.2"
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "@azure/cosmos": "^2.1.2",
@@ -50,6 +49,7 @@
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.11",
+        "logger": "1.0.0",
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",

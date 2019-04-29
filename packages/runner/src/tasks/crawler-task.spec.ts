@@ -1,6 +1,7 @@
 // tslint:disable: no-object-literal-type-assertion
 import 'reflect-metadata';
 
+import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
@@ -24,6 +25,7 @@ let hcCrawlerConnectMock: IMock<HCCrawlerConnect>;
 let hcCrawlerTyped: HCCrawlerTyped;
 let linkExplorerMock: IMock<LinkExplorer>;
 let crawlerTask: CrawlerTask;
+let loggerMock: IMock<Logger>;
 
 beforeEach(() => {
     browserMock = new BrowserMock();
@@ -33,7 +35,8 @@ beforeEach(() => {
     hcCrawlerConnectMock = Mock.ofType<HCCrawlerConnect>();
     linkExplorerMock = Mock.ofType<LinkExplorer>();
     HCCrawler.connect = hcCrawlerConnectMock.object;
-    crawlerTask = new CrawlerTask(hcCrawlerOptionsFactoryMock.object, linkExplorerFactoryMock.object);
+    loggerMock = Mock.ofType(Logger);
+    crawlerTask = new CrawlerTask(hcCrawlerOptionsFactoryMock.object, loggerMock.object, linkExplorerFactoryMock.object);
 });
 
 describe('CrawlerTask', () => {
@@ -49,7 +52,7 @@ describe('CrawlerTask', () => {
             .returns(async () => Promise.resolve(hcCrawlerTyped))
             .verifiable(Times.once());
         linkExplorerFactoryMock
-            .setup(o => o(hcCrawlerTyped, <CrawlerConnectOptions>(<unknown>crawlerConnectOptions)))
+            .setup(o => o(hcCrawlerTyped, <CrawlerConnectOptions>(<unknown>crawlerConnectOptions), loggerMock.object))
             .returns(() => linkExplorerMock.object)
             .verifiable(Times.once());
         linkExplorerMock

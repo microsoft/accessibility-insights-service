@@ -2,6 +2,7 @@
 import 'reflect-metadata';
 import '../test-utilities/common-mock-methods';
 
+import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { WebDriver } from './web-driver';
@@ -19,6 +20,7 @@ class PuppeteerBrowserMock {
 
 let testSubject: WebDriver;
 let puppeteer: typeof Puppeteer;
+let loggerMock: IMock<Logger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 
@@ -32,8 +34,8 @@ beforeEach(() => {
 
     puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
-
-    testSubject = new WebDriver(puppeteer);
+    loggerMock = Mock.ofType(Logger);
+    testSubject = new WebDriver(loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
