@@ -28,7 +28,7 @@ npm install yargs@13.2.1 azure-batch@6.0.0
 
 cd $RUNNER_SHARED_LOCATION
 echo "Installing runner dependencies"
-npm install yargs@13.2.1 puppeteer@1.12.2
+npm install yargs@13.2.1 puppeteer@1.12.2 axe-core@3.2.2 axe-puppeteer@1.0.0
 
 cd $SCAN_REQUEST_SENDER_SHARED_LOCATION
 echo "Installing scan request sender dependencies"
