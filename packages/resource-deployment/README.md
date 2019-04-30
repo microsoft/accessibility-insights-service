@@ -46,8 +46,6 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 ### 6. Create Queue in Storage Account
 
 -   Default storage account name is 'a11yaxisstorage' if you have changed it please specify accordingly
-
-
     ```bash
     az storage queue create --name scanrequest --account-name a11yaxisstorage
     ```
