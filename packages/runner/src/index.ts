@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { RunnerEntryPoint } from './runner-entry-point';
 import { setupRunnerContainer } from './setup-runner-container';
 
