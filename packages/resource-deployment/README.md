@@ -43,25 +43,34 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     az group deployment create  --resource-group <resourceGroupName> --template-file "./blob-storage/blob-storage.template.json" --parameters "./blob-storage/blob-storage.parameters.json"
     ```
 
-### 6. Deploy Batch Account
+### 6. Create Queue in Storage Account
+
+-   Default storage account name is 'a11yaxisstorage' if you have changed it please specify accordingly
+
+
+    ```bash
+    az storage queue create --name scanrequest --account-name a11yaxisstorage
+    ```
+
+### 7. Deploy Batch Account
 
 -   ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./batch-account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
     ```
 
-### 7. Deploy CosmosDB
+### 8. Deploy CosmosDB
 
 -   ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./cosmos-db/cosmos-db.template.json" --parameters "./cosmos-db/cosmos-db.parameters.json"
     ```
 
-### 8. Deploy AppInsights
+### 9. Deploy AppInsights
 
 -   ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./app-insights/app-insights.template.json" --parameters "./app-insights/app-insights.parameters.json"
     ```
 
-### 9. Login to Azure portal to verify the Resources are being created
+### 10. Login to Azure portal to verify the Resources are being created
 
 -   Resource Group is created
 -   And all the resources are deployed under the resource group.
