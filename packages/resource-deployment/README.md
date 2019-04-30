@@ -55,7 +55,13 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     az group deployment create  --resource-group <resourceGroupName> --template-file "./cosmos-db/cosmos-db.template.json" --parameters "./cosmos-db/cosmos-db.parameters.json"
     ```
 
-### 4. Login to Azure portal to verify the Resources are being created
+### 8. Deploy AppInsights
+
+-   ```bash
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./app-insights/app-insights.template.json" --parameters "./app-insights/app-insights.parameters.json"
+    ```
+
+### 9. Login to Azure portal to verify the Resources are being created
 
 -   Resource Group is created
 -   And all the resources are deployed under the resource group.
