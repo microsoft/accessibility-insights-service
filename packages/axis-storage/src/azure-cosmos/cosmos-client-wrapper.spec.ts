@@ -178,11 +178,48 @@ describe('CosmosClientWrapper', () => {
     });
 
     describe('upsertItems()', () => {
-        it('should upsert list of items', async () => {
-            const items = [1, 2, 3];
-            items.map(i => setupVerifiableUpsertItemCall);
+        it('should upsert list of items with partition key and etag', async () => {
+            const items = [
+                {
+                    id: 'id-1',
+                    itemType: ItemType.page,
+                    propA: 'propA',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-2',
+                    itemType: ItemType.page,
+                    propA: 'propB',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-3',
+                    itemType: ItemType.page,
+                    propA: 'propC',
+                    _etag: '1',
+                },
+            ];
+            const options: cosmos.RequestOptions = {
+                partitionKey: partitoningKey,
+                accessCondition: { type: 'IfMatch', condition: '1' },
+            };
+            items.map(item => {
+                setupVerifiableUpsertItemCallWithOptions(item, options);
+            });
 
-            await testSubject.upsertItems(items, dbName, collectionName);
+            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
+
+            verifyMocks();
+        });
+
+        it('should upsert list of items with partition key', async () => {
+            const items = [1, 2, 3];
+            const options: cosmos.RequestOptions = { partitionKey: partitoningKey };
+            items.map(item => {
+                setupVerifiableUpsertItemCallWithOptions(item, options);
+            });
+
+            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
 
             verifyMocks();
         });

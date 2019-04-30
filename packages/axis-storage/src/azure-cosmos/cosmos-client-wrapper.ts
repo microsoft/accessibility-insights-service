@@ -75,7 +75,7 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            const options: cosmos.RequestOptions = partKey !== undefined ? { partitionKey: partKey } : undefined;
+            const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partKey);
             const response = await container.item(id).read(options);
             const itemT = this.convert<T>(response.body);
 
@@ -121,12 +121,10 @@ export class CosmosClientWrapper {
     }
 
     private getOptions<T>(item: T, partitionKey: string): cosmos.RequestOptions {
-        let requestOpts: cosmos.RequestOptions;
-        if (partitionKey !== undefined) {
-            requestOpts = { partitionKey: partitionKey };
-        }
+        let requestOpts: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
+
         const accessCondition = { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag };
-        if ((<cosmos.Resource>(<unknown>item))._etag !== undefined) {
+        if (item !== undefined && (<cosmos.Resource>(<unknown>item))._etag !== undefined) {
             if (requestOpts !== undefined) {
                 requestOpts.accessCondition = accessCondition;
             } else {
@@ -134,6 +132,15 @@ export class CosmosClientWrapper {
                     accessCondition: accessCondition,
                 };
             }
+        }
+
+        return requestOpts;
+    }
+
+    private getRequestOptionsWithPartitionKey(partitionKey?: string): cosmos.RequestOptions {
+        let requestOpts: cosmos.RequestOptions;
+        if (partitionKey !== undefined) {
+            requestOpts = { partitionKey: partitionKey };
         }
 
         return requestOpts;
