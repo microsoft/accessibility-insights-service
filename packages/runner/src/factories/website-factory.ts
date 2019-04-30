@@ -8,6 +8,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()
 export class WebsiteFactory {
+    private readonly websiteRootPartition = 'website';
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
     public createWebsiteDocumentId(baseUrl: string): string {
@@ -74,6 +75,7 @@ export class WebsiteFactory {
                 scanState: scanState,
             },
             lastPageScanResults: [lastPageScanResult],
+            partitionKey: this.websiteRootPartition,
         };
     }
 

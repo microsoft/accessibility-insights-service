@@ -7,27 +7,25 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 export class CosmosClientWrapper {
     constructor(@inject(cosmos.CosmosClient) private readonly client: cosmos.CosmosClient) {}
 
-    public async upsertItems<T>(items: T[], dbName: string, collectionName: string): Promise<void> {
+    public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
 
         await Promise.all(
             items.map(async item => {
-                await container.items.upsert(item);
+                await container.items.upsert(item, this.getOptions(item, partitionKey));
             }),
         );
     }
 
-    public async upsertItem<T>(item: T, dbName: string, collectionName: string): Promise<CosmosOperationResponse<T>> {
+    public async upsertItem<T>(
+        item: T,
+        dbName: string,
+        collectionName: string,
+        partitionKey?: string,
+    ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
         try {
-            const options =
-                (<cosmos.Resource>(<unknown>item))._etag !== undefined
-                    ? {
-                          accessCondition: { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag },
-                      }
-                    : undefined;
-
-            const response = await container.items.upsert(item, options);
+            const response = await container.items.upsert(item, this.getOptions(item, partitionKey));
             const itemT = this.convert<T>(response.body);
 
             return {
@@ -73,11 +71,12 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async readItem<T>(id: string, dbName: string, collectionName: string): Promise<CosmosOperationResponse<T>> {
+    public async readItem<T>(id: string, dbName: string, collectionName: string, partKey?: string): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            const response = await container.item(id).read();
+            const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partKey);
+            const response = await container.item(id).read(options);
             const itemT = this.convert<T>(response.body);
 
             return {
@@ -119,5 +118,31 @@ export class CosmosClientWrapper {
         const activator = new Activator();
 
         return activator.convert<T>(source);
+    }
+
+    private getOptions<T>(item: T, partitionKey: string): cosmos.RequestOptions {
+        let requestOpts: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
+
+        const accessCondition = { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag };
+        if (item !== undefined && (<cosmos.Resource>(<unknown>item))._etag !== undefined) {
+            if (requestOpts !== undefined) {
+                requestOpts.accessCondition = accessCondition;
+            } else {
+                requestOpts = {
+                    accessCondition: accessCondition,
+                };
+            }
+        }
+
+        return requestOpts;
+    }
+
+    private getRequestOptionsWithPartitionKey(partitionKey?: string): cosmos.RequestOptions {
+        let requestOpts: cosmos.RequestOptions;
+        if (partitionKey !== undefined) {
+            requestOpts = { partitionKey: partitionKey };
+        }
+
+        return requestOpts;
     }
 }

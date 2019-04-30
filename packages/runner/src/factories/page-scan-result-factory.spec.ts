@@ -11,16 +11,17 @@ import { RunState, ScanLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResultFactory } from './page-scan-result-factory';
 
+const scanMetadata: ScanMetadata = {
+    websiteId: 'websiteId',
+    websiteName: 'websiteName',
+    baseUrl: 'scanMetadata-baseUrl',
+    scanUrl: 'scanMetadata-scanUrl',
+    serviceTreeId: 'serviceTreeId',
+};
+
 describe('PageScanResultFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
     let pageScanResultFactory: PageScanResultFactory;
-    const scanMetadata: ScanMetadata = {
-        websiteId: 'websiteId',
-        websiteName: 'websiteName',
-        baseUrl: 'scanMetadata-baseUrl',
-        scanUrl: 'scanMetadata-scanUrl',
-        serviceTreeId: 'serviceTreeId',
-    };
 
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
@@ -93,6 +94,7 @@ describe('PageScanResultFactory', () => {
                 result: { runTime: runTime.toJSON(), level: ScanLevel.fail, issues: ['test id 1', 'test id 2'] },
                 run: { runTime: runTime.toJSON(), state: RunState.completed },
             },
+            partitionKey: scanMetadata.websiteId,
         };
     }
 
@@ -148,6 +150,7 @@ describe('PageScanResultFactory', () => {
                         ],
                     },
                     product: productInfo,
+                    partitionKey: scanMetadata.websiteId,
                 },
                 {
                     id: 'test id 2',
@@ -172,6 +175,7 @@ describe('PageScanResultFactory', () => {
                         ],
                     },
                     product: productInfo,
+                    partitionKey: scanMetadata.websiteId,
                 },
             ],
         };

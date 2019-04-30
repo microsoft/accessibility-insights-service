@@ -11,11 +11,13 @@ type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any
 
 const dbName = 'dbName';
 const collectionName = 'collectionName';
+const partitionKey = 'partKey';
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let storageClient: StorageClient;
 let operationCallbackMock: IMock<OperationCallback>;
 let loggerMock: IMock<Logger>;
+
 const retryOptions = {
     timeoutMilliseconds: 1000,
     intervalMilliseconds: 200,
@@ -122,11 +124,11 @@ describe('StorageClient', () => {
             },
         ];
         cosmosClientWrapperMock
-            .setup(async o => o.upsertItems(items, dbName, collectionName))
+            .setup(async o => o.upsertItems(items, dbName, collectionName, partitionKey))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
-        await storageClient.writeDocuments(items);
+        await storageClient.writeDocuments(items, partitionKey);
 
         cosmosClientWrapperMock.verifyAll();
     });
@@ -140,11 +142,11 @@ describe('StorageClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(async o => o.upsertItem(item, dbName, collectionName))
+            .setup(async o => o.upsertItem(item, dbName, collectionName, partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.writeDocument(item);
+        const result = await storageClient.writeDocument(item, partitionKey);
 
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();
@@ -159,11 +161,11 @@ describe('StorageClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(async o => o.readItem('id', dbName, collectionName))
+            .setup(async o => o.readItem('id', dbName, collectionName, partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.readDocument('id');
+        const result = await storageClient.readDocument('id', partitionKey);
 
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();

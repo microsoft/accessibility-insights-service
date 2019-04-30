@@ -9,17 +9,18 @@ import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanResultFactory } from './scan-result-factory';
 
+const testScanUrl: string = 'test scan url';
+const scanMetadata: ScanMetadata = {
+    websiteId: 'test product id',
+    websiteName: 'test name',
+    baseUrl: 'test base url',
+    scanUrl: testScanUrl,
+    serviceTreeId: 'test service tree id',
+};
+
 describe('ScanResultFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
     let scanResultFactory: ScanResultFactory;
-    const testScanUrl: string = 'test scan url';
-    const scanMetadata: ScanMetadata = {
-        websiteId: 'test product id',
-        websiteName: 'test name',
-        baseUrl: 'test base url',
-        scanUrl: testScanUrl,
-        serviceTreeId: 'test service tree id',
-    };
 
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
@@ -146,6 +147,7 @@ describe('ScanResultFactory', () => {
                     ],
                 },
                 product: productInfo,
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'test id 2',
@@ -170,6 +172,7 @@ describe('ScanResultFactory', () => {
                     ],
                 },
                 product: productInfo,
+                partitionKey: scanMetadata.websiteId,
             },
         ];
     }

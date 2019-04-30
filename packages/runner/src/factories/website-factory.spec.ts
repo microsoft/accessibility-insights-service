@@ -8,6 +8,8 @@ import { WebsiteScanState } from '../documents/website';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteFactory } from './website-factory';
 
+const websiteRootPartition = 'website';
+
 describe('WebsiteFactory', () => {
     let hashGeneratorMock: IMock<HashGenerator>;
     let websiteFactory: WebsiteFactory;
@@ -60,6 +62,7 @@ describe('WebsiteFactory', () => {
                     runState: RunState.completed,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const pageScanResult = {
@@ -79,6 +82,7 @@ describe('WebsiteFactory', () => {
                     state: RunState.failed,
                 },
             },
+            partitionKey: scanMetadata.websiteId,
         };
 
         const expectedResult = {
@@ -106,6 +110,7 @@ describe('WebsiteFactory', () => {
                     runState: RunState.failed,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const result = websiteFactory.update(sourceWebsite, pageScanResult, runTime);
@@ -141,6 +146,7 @@ describe('WebsiteFactory', () => {
                     runState: RunState.completed,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const pageScanResult = {
@@ -165,6 +171,7 @@ describe('WebsiteFactory', () => {
                     state: RunState.completed,
                 },
             },
+            partitionKey: scanMetadata.websiteId,
         };
 
         const expectedResult = {
@@ -193,6 +200,7 @@ describe('WebsiteFactory', () => {
                     runState: RunState.completed,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const result = websiteFactory.update(sourceWebsite, pageScanResult, runTime);
@@ -219,6 +227,7 @@ describe('WebsiteFactory', () => {
                     state: RunState.failed,
                 },
             },
+            partitionKey: scanMetadata.websiteId,
         };
 
         const expectedResult = {
@@ -238,6 +247,7 @@ describe('WebsiteFactory', () => {
                     runState: pageScanResult.scan.run.state,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const result = websiteFactory.create(pageScanResult, scanMetadata, runTime);
@@ -270,6 +280,7 @@ describe('WebsiteFactory', () => {
                     state: RunState.completed,
                 },
             },
+            partitionKey: scanMetadata.websiteId,
         };
 
         const expectedResult = {
@@ -290,6 +301,7 @@ describe('WebsiteFactory', () => {
                     runState: pageScanResult.scan.run.state,
                 },
             ],
+            partitionKey: websiteRootPartition,
         };
 
         const result = websiteFactory.create(pageScanResult, scanMetadata, runTime);
