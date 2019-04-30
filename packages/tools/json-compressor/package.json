@@ -12,11 +12,22 @@
     "bugs": {
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
+    "scripts": {
+        "build": "tsc && echo",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist",
+        "lint": "tslint -c ../../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors --passWithNoTests"
+    },
     "devDependencies": {
         "@types/node": "^11.11.5",
         "@types/yargs": "^12.0.10",
         "ts-jest": "^24.0.2",
         "tslint": "5.12.1",
         "tslint-microsoft-contrib": "6.0.0"
+    },
+    "dependencies": {
+        "yargs": "^13.2.1"
     }
 }

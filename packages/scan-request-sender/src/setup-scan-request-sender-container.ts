@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { CosmosClientWrapper, registerAxisStorageToContainer, StorageClient } from 'axis-storage';
 import { Container } from 'inversify';
 import { Logger, registerLoggerToContainer } from 'logger';
