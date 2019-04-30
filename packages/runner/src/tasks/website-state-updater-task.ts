@@ -7,6 +7,7 @@ import { Website } from '../documents/website';
 import { WebsiteFactory } from '../factories/website-factory';
 import { ScanMetadata } from '../types/scan-metadata';
 
+const websiteRootPartitionKey = 'website';
 @injectable()
 export class WebsiteStateUpdaterTask {
     constructor(
@@ -25,7 +26,7 @@ export class WebsiteStateUpdaterTask {
             async (scanResult: PageScanResult, metadata: ScanMetadata, timestamp: Date) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
 
-                return this.storageClient.writeDocument<Website>(targetWebsiteItem, scanMetadata.websiteId);
+                return this.storageClient.writeDocument<Website>(targetWebsiteItem, websiteRootPartitionKey);
             },
             this.retryOptions,
             pageScanResult,
@@ -37,7 +38,7 @@ export class WebsiteStateUpdaterTask {
     private async getWebsiteItemToUpdate(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<Website> {
         let targetWebsiteItem: Website;
         const websiteDocumentId = this.websiteFactory.createWebsiteDocumentId(scanMetadata.baseUrl);
-        const sourceWebsiteItem = await this.storageClient.readDocument<Website>(websiteDocumentId);
+        const sourceWebsiteItem = await this.storageClient.readDocument<Website>(websiteDocumentId, websiteRootPartitionKey);
 
         if (sourceWebsiteItem.statusCode === 200) {
             this.logger.logInfo(

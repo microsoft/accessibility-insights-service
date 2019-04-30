@@ -136,9 +136,6 @@ export class CosmosClientWrapper {
             }
         }
 
-        // cout('[Runner] Partition key:');
-        // cout(requestOpts.partitionKey);
-
         return requestOpts;
     }
 }
