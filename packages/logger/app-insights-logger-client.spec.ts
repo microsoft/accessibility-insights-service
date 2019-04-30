@@ -4,6 +4,7 @@ import * as appInsights from 'applicationinsights';
 import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
@@ -62,7 +63,7 @@ describe(AppInsightsLoggerClient, () => {
         });
 
         it('initializes with additional common properties', () => {
-            const additionalCommonProps = { foo: 'bar' };
+            const additionalCommonProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             setupCallsForTelemetrySetup(additionalCommonProps);
 
             testSubject.setup(additionalCommonProps);

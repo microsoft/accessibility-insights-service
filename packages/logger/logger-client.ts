@@ -1,7 +1,8 @@
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
 export interface LoggerClient {
-    setup(baseProperties?: { [key: string]: string }): void;
+    setup(baseProperties?: BaseTelemetryProperties): void;
 
     trackMetric(name: string, value: number): void;
 
