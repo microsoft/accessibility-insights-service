@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
 
 import { ScanRequestEntryPoint } from './scan-request-entry-point';

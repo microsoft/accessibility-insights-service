@@ -1,3 +1,5 @@
+import 'reflect-metadata';
+
 import { JobManagerEntryPoint } from './job-manager-entry-point';
 import { setupJobManagerContainer } from './setup-job-manager-container';
 

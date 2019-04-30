@@ -1,5 +1,3 @@
-import 'reflect-metadata';
-
 import { registerAxisStorageToContainer } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import * as inversify from 'inversify';
