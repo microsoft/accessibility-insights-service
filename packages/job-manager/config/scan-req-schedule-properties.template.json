@@ -1,0 +1,68 @@
+{
+    "id": "scan-req-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT2H"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "usesTaskDependencies": false,
+        "onAllTasksComplete": "noaction",
+        "onTaskFailure": "noaction",
+        "constraints": {
+            "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "scan-req-sender-task",
+            "commandLine": "/bin/bash -c \"nodejs sender.js\"",
+            "resourceFiles": [
+                {
+                    "httpUrl": "",
+                    "filePath": "sender.js",
+                }
+            ],
+            "environmentSettings": [
+                {
+                    "name": "AZ_BATCH_ACCOUNT_KEY",
+                    "value": ""
+                },
+                {
+                    "name": "AZURE_STORAGE_SCAN_QUEUE",
+                    "value": "scanrequest"
+                },
+                {
+                    "name": "AZURE_STORAGE_ACCESS_KEY",
+                    "value": ""
+                },
+                {
+                    "name": "AZURE_COSMOS_DB_URL",
+                    "value": ""
+                },
+                {
+                    "name": "AZURE_COSMOS_DB_KEY",
+                    "value": ""
+                },
+                {
+                    "name": "AZURE_STORAGE_ACCOUNT",
+                    "value": ""
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+                "retentionTime": "P7D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": true
+        },
+        "poolInfo": {
+            "poolId": "scan-request-pool"
+        }
+    }
+}
