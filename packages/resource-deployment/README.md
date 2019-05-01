@@ -40,7 +40,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 ### 5. Deploy Storage Account
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./blob-storage/blob-storage.template.json" --parameters "./blob-storage/blob-storage.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./templates/blob-storage/blob-storage.template.json" --parameters "./templates/blob-storage/blob-storage.parameters.json"
     ```
 
 ### 6. Create Queue in Storage Account
@@ -55,19 +55,19 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 -   Update batch-account.parameters.json parameter file with SAS URL to the pool VMs startup script and (optional) name of the new batch account. Run the following command to deploy Azure batch account:
 
     ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./batch-account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./templates/batch-account/batch-account.template.json" --parameters "./templates/batch-account/batch-account.parameters.json"
     ```
 
 ### 8. Deploy CosmosDB
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./cosmos-db/cosmos-db.template.json" --parameters "./cosmos-db/cosmos-db.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./templates/cosmos-db/cosmos-db.template.json" --parameters "./templates/cosmos-db/cosmos-db.parameters.json"
     ```
 
 ### 9. Deploy AppInsights
 
 -   ```bash
-    az group deployment create  --resource-group <resourceGroupName> --template-file "./app-insights/app-insights.template.json" --parameters "./app-insights/app-insights.parameters.json"
+    az group deployment create  --resource-group <resourceGroupName> --template-file "./templates/app-insights/app-insights.template.json" --parameters "./templates/app-insights/app-insights.parameters.json"
     ```
 
 ### 10. Login to Azure portal to verify the Resources are being created
