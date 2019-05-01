@@ -17,5 +17,8 @@ test-results/
 dist/
 **/*.code-workspace
 **/*.env
+**/*.secrets
+**/*.secrets.template
+**/yarn-error.log
 out/
 **/.env.*

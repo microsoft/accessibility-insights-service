@@ -75,6 +75,14 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 -   Resource Group is created
 -   And all the resources are deployed under the resource group.
 
+### 11. Copy resource files to blob
+
+-   Create .secrets file from [./dev-scripts/.secrets.template](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/dev-scripts/.secrets.template) & add the required secrets to the file.
+-   Run the below command from bash shell
+    ```bash
+    ./dev-scripts/upload-files-to-blob.sh
+    ```
+
 # Contributing
 
 This project welcomes contributions and suggestions. Most contributions require you to agree to a

@@ -8,5 +8,6 @@ out/
 **/dev.DockerFile
 **/.env
 **/.prod
+**/.secrets
 
 yarn-error.log
