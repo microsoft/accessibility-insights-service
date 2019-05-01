@@ -18,13 +18,13 @@
             "resourceFiles": [
                 {
                     "httpUrl": "",
-                    "filePath": "sender.js",
+                    "filePath": "sender.js"
                 }
             ],
             "environmentSettings": [
                 {
-                    "name":"APPINSIGHTS_INSTRUMENTATIONKEY",
-                    "value":""
+                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                    "value": ""
                 },
                 {
                     "name": "AZ_BATCH_ACCOUNT_KEY",

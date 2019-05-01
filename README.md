@@ -77,16 +77,23 @@
 
 ### Azure Resources
 
--   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy Azure resources for Accessibility Insights Service
+-   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy required Azure resources.
 
 ### Service Binaries
 
--   Under provisioned Azure Storage service create following Blob containers to store service binaries:
+-   Under provisioned Azure Storage service create following Blob containers to store binaries:
 
     ```
+        batch-pool-startup-script
         batch-job-manager-script
         batch-scan-request-sender-script
         batch-runner-script
+    ```
+
+-   Under the **batch-pool-startup-script** Blob container upload following files from the [resource-deployment](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment) package:
+
+    ```
+        pool-startup.sh
     ```
 
 -   Under the **batch-job-manager-script** Blob container upload following files from the [job-manager](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/job-manager) package build output:
@@ -94,6 +101,7 @@
     ```
         index.js
         job-manager.js
+        package.json
         run-job-manager.sh
     ```
 
@@ -102,6 +110,7 @@
     ```
         index.js
         job-manager.js
+        package.json
         run-job-manager.sh
     ```
 
@@ -109,6 +118,7 @@
 
     ```
         runner.js
+        package.json
         start-runner.sh
     ```
 
@@ -116,7 +126,7 @@
 
 #### Setup _url-scan-schedule_ job schedule
 
--   Update the local copy of [.env.az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/.env.az-batch-task-parameter.template.json) template file by adding the following data:
+-   Update the local copy of [env-var--az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/env-var--az-batch-task-parameter.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -125,15 +135,15 @@
 
     The SAS URL can be generated from Azure portal blade under each file within Blob container.
 
--   Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). RUn the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
+-   Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). Run the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
 
     ```
-        node index.js --jsonFile .env.az-batch-task-parameter.template.json
+        node index.js --jsonFile env-var--az-batch-task-parameter.template.json
     ```
 
-    Preserve the _.env.az-batch-task-parameter.template.base64.txt_ result file for the next step.
+    Preserve the _env-var--az-batch-task-parameter.template.base64.txt_ output file for the next step.
 
--   Update the local copy of [url-scan-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/url-scan-schedule-properties.template.json) template file by adding the following data:
+-   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/url-scan-schedule.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -142,18 +152,60 @@
           the step above.
     ```
 
--   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule.template.json_ template file and paste it into Azure portal JSON editor window.
 
 #### Setup _scan-req-schedule_ job schedule
 
--   Update the local copy of [scan-req-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/scan-req-schedule-properties.template.json) template file by adding the following data:
+-   Update the local copy of [scan-req-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/scan-req-schedule.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section
     ```
 
--   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _scan-req-schedule.template.json_ template file and paste it into Azure portal JSON editor window.
+
+#### Setup _url-scan-pool_ VMs pool
+
+-   Login within Azure CLI into Azure subscription and Batch Account
+
+    ```
+        az login
+        az batch account login --name <accountName> --resource-group <resourceGroup>
+    ```
+
+-   Update the local copy of [url-scan-pool.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/url-scan-pool.template.json) template file by adding the following data:
+
+    ```
+        ⋅ The SAS URL for each resource file under resourceFiles section
+    ```
+
+-   Within Azure CLI run the following command to create VMs pool using template from the step above:
+
+    ```
+        az batch pool create --account-name <accountName> --json-file ./url-scan-pool.template.json
+    ```
+
+#### Setup _scan-request-pool_ VMs pool
+
+-   Login within Azure CLI into Azure subscription and Batch Account
+
+    ```
+        az login
+        az batch account login --name <accountName> --resource-group <resourceGroup>
+    ```
+
+-   Update the local copy of [scan-request-pool.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/scan-request-pool.template.json) template file by adding the following data:
+
+    ```
+        ⋅ The SAS URL for each resource file under resourceFiles section
+    ```
+
+-   Within Azure CLI run the following command to create VMs pool using template from the step above:
+
+    ```
+        az batch pool create --account-name <accountName> --json-file ./scan-request-pool.template.json
+    ```
 
 # Contributing
 

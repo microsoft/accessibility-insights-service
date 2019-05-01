@@ -1,0 +1,53 @@
+{
+    "id": "scan-request-pool",
+    "vmSize": "standard_a1",
+    "virtualMachineConfiguration": {
+        "imageReference": {
+            "publisher": "Canonical",
+            "offer": "UbuntuServer",
+            "sku": "16.04-LTS",
+            "version": "latest"
+        },
+        "nodeAgentSKUId": "batch.node.ubuntu 16.04"
+    },
+    "resizeTimeout": "PT15M",
+    "currentDedicatedNodes": 2,
+    "currentLowPriorityNodes": 0,
+    "targetDedicatedNodes": 2,
+    "targetLowPriorityNodes": 0,
+    "enableAutoScale": false,
+    "enableInterNodeCommunication": false,
+    "startTask": {
+        "commandLine": "/bin/bash -c pool-startup.sh",
+        "resourceFiles": [
+            {
+                "httpUrl": "",
+                "filePath": "pool-startup.sh"
+            },
+            {
+                "httpUrl": "",
+                "filePath": "batch-job-manager/package.json"
+            },
+            {
+                "httpUrl": "",
+                "filePath": "batch-runner/package.json"
+            },
+            {
+                "httpUrl": "",
+                "filePath": "batch-scan-request-sender/package.json"
+            }
+        ],
+        "userIdentity": {
+            "autoUser": {
+                "scope": "pool",
+                "elevationLevel": "admin"
+            }
+        },
+        "maxTaskRetryCount": 0,
+        "waitForSuccess": true
+    },
+    "maxTasksPerNode": 1,
+    "taskSchedulingPolicy": {
+        "nodeFillType": "Pack"
+    }
+}
