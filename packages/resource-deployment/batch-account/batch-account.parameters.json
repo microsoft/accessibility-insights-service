@@ -4,6 +4,9 @@
     "parameters": {
         "batchAccount_name": {
             "value": "a11yaxisbatch"
+        },
+        "pool-startup-script-sas-url": {
+            "value": ""
         }
     }
 }

@@ -16,6 +16,6 @@ test-results/
 **/*.pbix
 dist/
 **/*.code-workspace
-**/config/
 **/*.env
 out/
+**/.env.*

@@ -52,7 +52,9 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 7. Deploy Batch Account
 
--   ```bash
+-   Update batch-account.parameters.json parameter file with SAS URL to the pool VMs startup script and (optional) name of the new batch account. Run the following command to deploy Azure batch account:
+
+    ```bash
     az group deployment create  --resource-group <resourceGroupName> --template-file "./batch-account/batch-account.template.json" --parameters "./Batch-Account/batch-account.parameters.json"
     ```
 

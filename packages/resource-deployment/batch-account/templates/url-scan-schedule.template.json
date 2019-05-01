@@ -1,51 +1,34 @@
 {
     "id": "url-scan-schedule",
-    "displayName": null,
     "schedule": {
-        "startWindow": null,
-        "recurrenceInterval": null
+        "recurrenceInterval": "PT10M"
     },
     "jobSpecification": {
         "priority": 0,
-        "displayName": null,
-        "usesTaskDependencies": false,
-        "onAllTasksComplete": "noaction",
-        "onTaskFailure": "noaction",
         "constraints": {
-            "maxWallClockTime": null,
+            "maxWallClockTime": "P1D",
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {
             "id": "url-scan-job-manager-task",
-            "commandLine": "/bin/bash -c 'npm ci --production && nodejs index.js'",
+            "commandLine": "/bin/bash -c run-job-manager.sh",
             "resourceFiles": [
                 {
                     "httpUrl": "",
-                    "blobPrefix": null,
-                    "filePath": "index.js",
-                    "fileMode": null
+                    "filePath": "run-job-manager.sh"
                 },
                 {
                     "httpUrl": "",
-                    "blobPrefix": null,
-                    "filePath": "package-lock.json",
-                    "fileMode": null
-                },
-                {
-                    "httpUrl": "",
-                    "blobPrefix": null,
-                    "filePath": "package.json",
-                    "fileMode": null
+                    "filePath": "job-manager.js"
                 }
             ],
             "constraints": {
-                "maxWallClockTime": null,
-                "retentionTime": "PT168H",
+                "maxWallClockTime": "P1D",
+                "retentionTime": "P7D",
                 "maxTaskRetryCount": 0
             },
             "killJobOnCompletion": true,
             "userIdentity": {
-                "username": null,
                 "autoUser": {
                     "scope": "task",
                     "elevationLevel": "nonadmin"
@@ -54,6 +37,10 @@
             "runExclusive": false
         },
         "commonEnvironmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": ""
+            },
             {
                 "name": "AZ_BATCH_ACCOUNT_KEY",
                 "value": ""
