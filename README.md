@@ -113,33 +113,46 @@
     ```
 
 ### Azure Batch Account
+
 #### Setup _url-scan-schedule_ job schedule
+
 - Update the local copy of [.env.az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/.env.az-batch-task-parameter.template.json) template file by adding the following data:
+
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ AZURE_COSMOS_DB_URL and AZURE_COSMOS_DB_KEY values
     ```
+
     The SAS URL can be generated from Azure portal blade under each file within Blob container.
-- Encode template file to base64 using provided encoder [tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor):
+
+- Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). RUn the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
+
     ```
         node index.js --jsonFile .env.az-batch-task-parameter.template.json
     ```
+
     Preserve the _.env.az-batch-task-parameter.template.base64.txt_ result file for the next step.
 
 - Update the local copy of [url-scan-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/url-scan-schedule-properties.template.json) template file by adding the following data:
+
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section. Set the value of
-          AZ_BATCH_TASK_PARAMETER parameter to the base64 encoded string from the step above.
+          AZ_BATCH_TASK_PARAMETER parameter to the base64 encoded string from
+          the step above.
     ```
+
 - Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
 
 #### Setup _scan-req-schedule_ job schedule
+
 - Update the local copy of [scan-req-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/scan-req-schedule-properties.template.json) template file by adding the following data:
+
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section
     ```
+
 - Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
 
 # Contributing
