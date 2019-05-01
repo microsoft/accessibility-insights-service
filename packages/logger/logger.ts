@@ -1,6 +1,7 @@
 import { injectable } from 'inversify';
 
 import { VError } from 'verror';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
 
 export enum LogLevel {
@@ -17,7 +18,7 @@ export class Logger {
 
     constructor(private readonly loggerClients: LoggerClient[], private readonly currentProcess: typeof process) {}
 
-    public setup(baseProperties?: { [key: string]: string }): void {
+    public setup(baseProperties?: BaseTelemetryProperties): void {
         if (this.initialized === true) {
             return;
         }

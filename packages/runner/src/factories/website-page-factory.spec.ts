@@ -88,31 +88,37 @@ describe('WebsitePageFactory', () => {
                 id: 'baseUrl-scanUrl-1-hash-1',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-1', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-2',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-2', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-3',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-1-link-3', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-1',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-1', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-2',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-2', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-3',
                 itemType: ItemType.page,
                 page: { websiteId: 'websiteId', url: 'scanUrl-2-link-3', lastSeen: runTime.toJSON() },
+                partitionKey: scanMetadata.websiteId,
             },
         ];
     }

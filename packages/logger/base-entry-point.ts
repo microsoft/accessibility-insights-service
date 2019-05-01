@@ -1,5 +1,6 @@
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 
@@ -14,7 +15,7 @@ export abstract class BaseEntryPoint {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
             logger = this.container.get(Logger);
 
-            logger.setup();
+            logger.setup(this.getTelemetryBaseProperties());
             loggerInitialized = true;
             this.verifyDotEnvParsing(dotEnvConfig, logger);
 
@@ -31,6 +32,8 @@ export abstract class BaseEntryPoint {
             }
         }
     }
+
+    protected abstract getTelemetryBaseProperties(): BaseTelemetryProperties;
 
     protected abstract async runCustomAction(container: Container): Promise<void>;
 

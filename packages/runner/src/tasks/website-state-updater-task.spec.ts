@@ -28,6 +28,7 @@ const scanMetadata: ScanMetadata = {
 let pageScanResult: PageScanResult;
 let websiteStateUpdaterTask: WebsiteStateUpdaterTask;
 let loggerMock: IMock<Logger>;
+const websitePartitioningKey = 'website';
 
 beforeEach(() => {
     storageClientMock = Mock.ofType<StorageClient>();
@@ -37,7 +38,7 @@ beforeEach(() => {
 
     let targetWebsiteServerItem: Website;
     storageClientMock
-        .setup(async o => o.writeDocument<Website>(It.isAny()))
+        .setup(async o => o.writeDocument<Website>(It.isAny(), websitePartitioningKey))
         .callback(item => {
             targetWebsiteServerItem = item;
         })
@@ -69,7 +70,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteCreatedItem = <Website>(<unknown>{ type: 'Website', operation: 'created' });
         const websiteServerItem = createWebsiteServerItem(404);
         storageClientMock
-            .setup(async o => o.readDocument<Website>('websiteDocumentId'))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock
@@ -92,7 +93,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteUpdatedItem = <Website>(<unknown>{ type: 'Website', operation: 'updated' });
         const websiteServerItem = createWebsiteServerItem(200);
         storageClientMock
-            .setup(async o => o.readDocument<Website>('websiteDocumentId'))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock

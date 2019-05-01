@@ -1,10 +1,16 @@
 import { Queue } from 'axis-storage';
 import { Container } from 'inversify';
-import { BaseEntryPoint } from 'logger';
+import { BaseEntryPoint, BaseTelemetryProperties } from 'logger';
 import { Batch } from './batch/batch';
 import { JobTaskExecutionResult, JobTaskState } from './batch/job-task';
 
 export class JobManagerEntryPoint extends BaseEntryPoint {
+    protected getTelemetryBaseProperties(): BaseTelemetryProperties {
+        return {
+            source: 'jobManager',
+        };
+    }
+
     protected async runCustomAction(container: Container): Promise<void> {
         const queue = container.get(Queue);
         const scanMessages = await queue.getMessages();

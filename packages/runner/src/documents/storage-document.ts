@@ -10,6 +10,11 @@ export interface StorageDocument {
      */
     itemType: string;
 
+    /**
+     * Partition key used to store the document
+     */
+    partitionKey: string;
+
     /** System generated property.
      * The resource ID (_rid) is a unique identifier that is also hierarchical per the resource stack on the resource model.
      * It is used internally for placement and navigation of the item resource.

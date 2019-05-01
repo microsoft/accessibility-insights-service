@@ -29,6 +29,7 @@ export class PageScanResultFactory {
             url: scanMetadata.scanUrl,
             crawl: crawlResult,
             scan: scanResult,
+            partitionKey: scanMetadata.websiteId,
         };
     }
 

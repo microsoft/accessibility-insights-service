@@ -2,6 +2,7 @@ import { inject, injectable } from 'inversify';
 
 import * as _ from 'lodash';
 import * as utils from 'util';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
@@ -16,7 +17,7 @@ export class ConsoleLoggerClient implements LoggerClient {
         @inject(loggerTypes.console) private readonly consoleObject: typeof console,
     ) {}
 
-    public setup(baseProperties?: { [key: string]: string }): void {
+    public setup(baseProperties?: BaseTelemetryProperties): void {
         this.baseProperties = baseProperties;
 
         this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--no-console').length === 0;

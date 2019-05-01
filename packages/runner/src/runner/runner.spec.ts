@@ -51,6 +51,7 @@ const websitePages: WebsitePage[] = [
             url: 'url',
             lastSeen: 'lastSeen4',
         },
+        partitionKey: scanMetadata.websiteId,
     },
 ];
 const pageScanResult: PageScanResult = {
@@ -70,6 +71,7 @@ const pageScanResult: PageScanResult = {
             state: RunState.completed,
         },
     },
+    partitionKey: scanMetadata.websiteId,
 };
 // tslint:disable-next-line: mocha-no-side-effect-code
 const axeScanResults: AxeScanResults = {
@@ -142,15 +144,15 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         storageTaskMock
-            .setup(async o => o.storeResult(pageScanResult))
+            .setup(async o => o.storeResult(pageScanResult, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(async o => o.storeResults(websitePages))
+            .setup(async o => o.storeResults(websitePages, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(async o => o.storeResults(issueScanResults.results))
+            .setup(async o => o.storeResults(issueScanResults.results, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 

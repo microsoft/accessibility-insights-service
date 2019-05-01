@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { LogLevel } from './logger';
 
@@ -47,7 +48,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with base properties with circular reference', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             (baseProps as any).y = baseProps;
             testSubject.setup(baseProps);
 
@@ -67,7 +68,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with base properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             testSubject.setup(baseProps);
 
             testSubject.trackEvent('event1');
@@ -76,7 +77,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with event properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
 
@@ -99,7 +100,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with base properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             testSubject.setup(baseProps);
 
             testSubject.log('trace1', LogLevel.warn);
@@ -108,7 +109,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with event properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             testSubject.setup(baseProps);
             const traceProps = { eventProp1: 'prop value' };
 
@@ -132,7 +133,7 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with base properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             testSubject.setup(baseProps);
             const error = new Error('error1');
 
