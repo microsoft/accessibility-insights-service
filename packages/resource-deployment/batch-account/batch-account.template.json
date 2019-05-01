@@ -15,6 +15,12 @@
             "metadata": {
                 "description": "The location in which the Azure Storage resources should be deployed."
             }
+        },
+        "pool-startup-script-sas-url": {
+            "type": "string",
+            "metadata": {
+                "description": "The SAS URL of the VM startup script."
+            }
         }
     },
     "variables": {},
@@ -58,6 +64,23 @@
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
+                },
+                "startTask": {
+                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "resourceFiles": [
+                        {
+                            "blobSource": "[parameters('pool-startup-script-sas-url')]",
+                            "filePath": "pool-startup.sh"
+                        }
+                    ],
+                    "userIdentity": {
+                        "autoUser": {
+                            "scope": "Pool",
+                            "elevationLevel": "Admin"
+                        }
+                    },
+                    "maxTaskRetryCount": 0,
+                    "waitForSuccess": true
                 }
             }
         },
@@ -90,6 +113,23 @@
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
+                },
+                "startTask": {
+                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "resourceFiles": [
+                        {
+                            "blobSource": "[parameters('pool-startup-script-sas-url')]",
+                            "filePath": "pool-startup.sh"
+                        }
+                    ],
+                    "userIdentity": {
+                        "autoUser": {
+                            "scope": "Pool",
+                            "elevationLevel": "Admin"
+                        }
+                    },
+                    "maxTaskRetryCount": 0,
+                    "waitForSuccess": true
                 }
             }
         }
