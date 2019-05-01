@@ -5,21 +5,14 @@
     },
     "jobSpecification": {
         "priority": 0,
-        "usesTaskDependencies": false,
-        "onAllTasksComplete": "noaction",
-        "onTaskFailure": "noaction",
         "constraints": {
-            "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+            "maxWallClockTime": "P1D",
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {
             "id": "url-scan-job-manager-task",
             "commandLine": "/bin/bash -c run-job-manager.sh",
             "resourceFiles": [
-                {
-                    "httpUrl": "",
-                    "filePath": "index.js"
-                },
                 {
                     "httpUrl": "",
                     "filePath": "run-job-manager.sh"
@@ -30,7 +23,7 @@
                 }
             ],
             "constraints": {
-                "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+                "maxWallClockTime": "P1D",
                 "retentionTime": "P7D",
                 "maxTaskRetryCount": 0
             },

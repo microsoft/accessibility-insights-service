@@ -5,11 +5,8 @@
     },
     "jobSpecification": {
         "priority": 0,
-        "usesTaskDependencies": false,
-        "onAllTasksComplete": "noaction",
-        "onTaskFailure": "noaction",
         "constraints": {
-            "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+            "maxWallClockTime": "PT1H",
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {
@@ -21,38 +18,8 @@
                     "filePath": "sender.js"
                 }
             ],
-            "environmentSettings": [
-                {
-                    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                    "value": ""
-                },
-                {
-                    "name": "AZ_BATCH_ACCOUNT_KEY",
-                    "value": ""
-                },
-                {
-                    "name": "AZURE_STORAGE_SCAN_QUEUE",
-                    "value": "scanrequest"
-                },
-                {
-                    "name": "AZURE_STORAGE_ACCESS_KEY",
-                    "value": ""
-                },
-                {
-                    "name": "AZURE_COSMOS_DB_URL",
-                    "value": ""
-                },
-                {
-                    "name": "AZURE_COSMOS_DB_KEY",
-                    "value": ""
-                },
-                {
-                    "name": "AZURE_STORAGE_ACCOUNT",
-                    "value": ""
-                }
-            ],
             "constraints": {
-                "maxWallClockTime": "P10675199DT2H48M5.4775807S",
+                "maxWallClockTime": "PT1H",
                 "retentionTime": "P7D",
                 "maxTaskRetryCount": 0
             },
@@ -65,6 +32,36 @@
             },
             "runExclusive": true
         },
+        "environmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": ""
+            },
+            {
+                "name": "AZ_BATCH_ACCOUNT_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "scanrequest"
+            },
+            {
+                "name": "AZURE_STORAGE_ACCESS_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_COSMOS_DB_URL",
+                "value": ""
+            },
+            {
+                "name": "AZURE_COSMOS_DB_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_ACCOUNT",
+                "value": ""
+            }
+        ],
         "poolInfo": {
             "poolId": "scan-request-pool"
         }

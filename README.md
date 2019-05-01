@@ -138,7 +138,17 @@
           the step above.
     ```
 
--   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Login into Azure Batch account using Azure CLI:
+
+    ```
+        az batch account login --name <accountName> --resource-group <resourceGroup>
+    ```
+
+-   Deploy job schedule using Azure CLI:
+
+    ```
+        az batch job-schedule create --json-file ./url-scan-schedule.template.json
+    ```
 
 #### Setup _scan-req-schedule_ job schedule
 
@@ -149,7 +159,17 @@
         ⋅ The values under commonEnvironmentSettings section
     ```
 
--   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _scan-req-schedule.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Login into Azure Batch account using Azure CLI (if not done previously):
+
+    ```
+        az batch account login --name <accountName> --resource-group <resourceGroup>
+    ```
+
+-   Deploy job schedule using Azure CLI:
+
+    ```
+        az batch job-schedule create --json-file ./scan-req-schedule.template.json
+    ```
 
 # Contributing
 
