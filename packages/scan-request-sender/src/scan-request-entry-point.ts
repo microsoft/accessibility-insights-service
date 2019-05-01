@@ -1,10 +1,13 @@
 import { Container } from 'inversify';
-import { BaseEntryPoint, Logger } from 'logger';
+import { BaseEntryPoint, BaseTelemetryProperties, Logger } from 'logger';
 import { WebSite } from './request-type/website';
 import { ScanRequestSender } from './sender/request-sender';
 import { SeedSource } from './source/seed-source';
 
 export class ScanRequestEntryPoint extends BaseEntryPoint {
+    protected getTelemetryBaseProperties(): BaseTelemetryProperties {
+        return { source: 'scanRequestSender' };
+    }
     protected async runCustomAction(container: Container): Promise<void> {
         const source = container.get(SeedSource);
         const logger = container.get(Logger);

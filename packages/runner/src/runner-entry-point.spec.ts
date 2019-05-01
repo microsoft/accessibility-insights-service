@@ -1,14 +1,20 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
+import { BaseTelemetryProperties } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { RunnerEntryPoint } from './runner-entry-point';
 import { Runner } from './runner/runner';
+// tslint:disable: no-object-literal-type-assertion
 
 describe(RunnerEntryPoint, () => {
     class TestRunnerEntryPoint extends RunnerEntryPoint {
         public async invokeRunCustomAction(container: Container): Promise<void> {
             await this.runCustomAction(container);
+        }
+
+        public invokeGetTelemetryBaseProperties(): BaseTelemetryProperties {
+            return this.getTelemetryBaseProperties();
         }
     }
 
@@ -34,5 +40,11 @@ describe(RunnerEntryPoint, () => {
         await expect(testSubject.invokeRunCustomAction(containerMock.object)).resolves.toBeUndefined();
 
         runnerMock.verifyAll();
+    });
+
+    describe('getTelemetryBaseProperties', () => {
+        it('returns data with source property', () => {
+            expect(testSubject.invokeGetTelemetryBaseProperties()).toEqual({ source: 'runner' } as BaseTelemetryProperties);
+        });
     });
 });

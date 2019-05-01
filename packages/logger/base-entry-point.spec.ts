@@ -5,15 +5,20 @@ import { Container } from 'inversify';
 import * as _ from 'lodash';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { BaseEntryPoint } from './base-entry-point';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 // tslint:disable: no-unsafe-any
 
 describe(BaseEntryPoint, () => {
     class TestEntryPoint extends BaseEntryPoint {
+        public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
         public customActionInvoked = false;
 
         public customActionToBeInvoked: () => void;
+        protected getTelemetryBaseProperties(): BaseTelemetryProperties {
+            return this.baseTelemetryProperties;
+        }
 
         protected async runCustomAction(): Promise<void> {
             if (!_.isNil(this.customActionToBeInvoked)) {
@@ -59,7 +64,7 @@ describe(BaseEntryPoint, () => {
             setupContainerForDotEnvConfig();
             setupContainerForLogger();
             loggerMock
-                .setup(l => l.setup())
+                .setup(l => l.setup(testSubject.baseTelemetryProperties))
                 .returns(() => {
                     throw errorMsg;
                 });
@@ -167,6 +172,6 @@ describe(BaseEntryPoint, () => {
     }
 
     function setupLoggerSetupCall(): void {
-        loggerMock.setup(l => l.setup()).verifiable();
+        loggerMock.setup(l => l.setup(testSubject.baseTelemetryProperties)).verifiable();
     }
 });

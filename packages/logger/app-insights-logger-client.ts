@@ -1,6 +1,7 @@
 import { inject, injectable } from 'inversify';
 
 import * as appInsights from 'applicationinsights';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
@@ -12,7 +13,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public setup(baseProperties?: { [key: string]: string }): void {
+    public setup(baseProperties?: BaseTelemetryProperties): void {
         this.appInsightsObject
             .setup()
             .setAutoCollectConsole(false)

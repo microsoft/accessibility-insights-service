@@ -3,6 +3,7 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { Logger, LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
@@ -33,7 +34,7 @@ describe(Logger, () => {
         });
 
         it('does not initialize more than once', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
 
             setupCallsForTelemetrySetup(baseProps);
 
@@ -44,7 +45,7 @@ describe(Logger, () => {
         });
 
         it('initializes with additional common properties', () => {
-            const baseProps = { foo: 'bar' };
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
 
             setupCallsForTelemetrySetup(baseProps);
 
@@ -377,7 +378,7 @@ describe(Logger, () => {
         loggerClient2Mock.verifyAll();
     }
 
-    function setupCallsForTelemetrySetup(additionalCommonProps?: { [key: string]: string }): void {
+    function setupCallsForTelemetrySetup(additionalCommonProps?: BaseTelemetryProperties): void {
         invokeAllLoggerClientMocks(m => m.setup(c => c.setup(additionalCommonProps)).verifiable(Times.once()));
     }
 
