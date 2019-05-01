@@ -1,6 +1,6 @@
 // tslint:disable: no-import-side-effect no-object-literal-type-assertion no-unsafe-any
 import 'reflect-metadata';
-import '../test-utilities/common-mock-methods';
+import '../../test-utilities/common-mock-methods';
 
 import { CosmosOperationResponse, RetryOptions, StorageClient } from 'axis-storage';
 import { Logger } from 'logger';
