@@ -23,6 +23,10 @@
             ],
             "environmentSettings": [
                 {
+                    "name":"APPINSIGHTS_INSTRUMENTATIONKEY",
+                    "value":""
+                },
+                {
                     "name": "AZ_BATCH_ACCOUNT_KEY",
                     "value": ""
                 },
