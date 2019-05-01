@@ -18,15 +18,15 @@
             "resourceFiles": [
                 {
                     "httpUrl": "",
-                    "filePath": "index.js",
+                    "filePath": "index.js"
                 },
                 {
                     "httpUrl": "",
-                    "filePath": "run-job-manager.sh",
+                    "filePath": "run-job-manager.sh"
                 },
                 {
                     "httpUrl": "",
-                    "filePath": "job-manager.js",
+                    "filePath": "job-manager.js"
                 }
             ],
             "constraints": {
