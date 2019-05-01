@@ -8,7 +8,7 @@ import {
     createCrawlResult,
     getNotAllowedUrls,
     getPromisableDynamicMock,
-} from '../test-utilities/common-mock-methods';
+} from '../../test-utilities/common-mock-methods';
 import { CrawlerScanResults } from './crawler-scan-results';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';

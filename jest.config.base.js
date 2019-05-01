@@ -29,6 +29,8 @@ module.exports = {
         '!<rootDir>/**/webpack.config.js',
         '!<rootDir>/**/node_modules/**',
         '!<rootDir>/**/test-results/**',
+        '!<rootDir>/**/test-utilities/**',
+        '!<rootDir>/**/dev-scripts/**',
     ],
     reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
     testEnvironment: 'node',
