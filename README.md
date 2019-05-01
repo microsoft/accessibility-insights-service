@@ -77,11 +77,11 @@
 
 ### Azure Resources
 
-- Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy Azure resources for Accessibility Insights Service
+-   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy Azure resources for Accessibility Insights Service
 
 ### Service Binaries
 
-- Under provisioned Azure Storage service create following Blob containers to store service binaries:
+-   Under provisioned Azure Storage service create following Blob containers to store service binaries:
 
     ```
         batch-job-manager-script
@@ -89,7 +89,7 @@
         batch-runner-script
     ```
 
-- Under the **batch-job-manager-script** Blob container upload following files from the [job-manager](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/job-manager) package build output:
+-   Under the **batch-job-manager-script** Blob container upload following files from the [job-manager](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/job-manager) package build output:
 
     ```
         index.js
@@ -97,7 +97,7 @@
         run-job-manager.sh
     ```
 
-- Under the **batch-scan-request-sender-script** Blob container upload following files from the [scan-request-sender](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/scan-request-sender) package build output:
+-   Under the **batch-scan-request-sender-script** Blob container upload following files from the [scan-request-sender](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/scan-request-sender) package build output:
 
     ```
         index.js
@@ -105,7 +105,7 @@
         run-job-manager.sh
     ```
 
-- Under the **batch-runner-script** Blob container upload following files from the [runner](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/runner) package build output:
+-   Under the **batch-runner-script** Blob container upload following files from the [runner](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/runner) package build output:
 
     ```
         runner.js
@@ -116,7 +116,7 @@
 
 #### Setup _url-scan-schedule_ job schedule
 
-- Update the local copy of [.env.az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/.env.az-batch-task-parameter.template.json) template file by adding the following data:
+-   Update the local copy of [.env.az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/.env.az-batch-task-parameter.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -125,7 +125,7 @@
 
     The SAS URL can be generated from Azure portal blade under each file within Blob container.
 
-- Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). RUn the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
+-   Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). RUn the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
 
     ```
         node index.js --jsonFile .env.az-batch-task-parameter.template.json
@@ -133,7 +133,7 @@
 
     Preserve the _.env.az-batch-task-parameter.template.base64.txt_ result file for the next step.
 
-- Update the local copy of [url-scan-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/url-scan-schedule-properties.template.json) template file by adding the following data:
+-   Update the local copy of [url-scan-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/url-scan-schedule-properties.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -142,18 +142,18 @@
           the step above.
     ```
 
-- Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
 
 #### Setup _scan-req-schedule_ job schedule
 
-- Update the local copy of [scan-req-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/scan-req-schedule-properties.template.json) template file by adding the following data:
+-   Update the local copy of [scan-req-schedule-properties.template.json](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/job-manager/config/scan-req-schedule-properties.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section
     ```
 
-- Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
+-   Under Azure Portal within Batch Account add a new job schedule using JSON editor by copy the content of the edited _url-scan-schedule-properties.template.json_ template file and paste it into Azure portal JSON editor window.
 
 # Contributing
 
