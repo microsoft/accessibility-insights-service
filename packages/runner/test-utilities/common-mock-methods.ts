@@ -1,5 +1,5 @@
 import { IMock } from 'typemoq';
-import { CrawlerRequestOptions, CrawlerResult } from '../src/crawler/hc-crawler-types';
+import { CrawlerRequestOptions, CrawlerRequestResponse, CrawlerResult } from '../src/crawler/hc-crawler-types';
 
 export function getNotAllowedUrls(): string[] {
     return [
@@ -56,7 +56,11 @@ export function createCrawlResult(requestUrl: string): CrawlerResult {
             skipRequestedRedirect: true,
         },
         previousUrl: undefined,
-        response: undefined,
+        response: createCrawlerRequestResponse(requestUrl),
         links: [],
     };
+}
+
+export function createCrawlerRequestResponse(requestUrl: string): CrawlerRequestResponse {
+    return { ok: true, status: 200, url: requestUrl, headers: undefined };
 }

@@ -1,6 +1,6 @@
 // tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
-import '../test-utilities/common-mock-methods';
+import '../../test-utilities/common-mock-methods';
 
 import { AxeResults } from 'axe-core';
 import { Logger } from 'logger';

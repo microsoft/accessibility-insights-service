@@ -1,0 +1,69 @@
+{
+    "id": "scan-req-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT2H"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "constraints": {
+            "maxWallClockTime": "PT1H",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "scan-req-sender-task",
+            "commandLine": "/bin/bash -c \"nodejs sender.js\"",
+            "resourceFiles": [
+                {
+                    "httpUrl": "",
+                    "filePath": "sender.js"
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": "PT1H",
+                "retentionTime": "P7D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": true
+        },
+        "environmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": ""
+            },
+            {
+                "name": "AZ_BATCH_ACCOUNT_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "scanrequest"
+            },
+            {
+                "name": "AZURE_STORAGE_ACCESS_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_COSMOS_DB_URL",
+                "value": ""
+            },
+            {
+                "name": "AZURE_COSMOS_DB_KEY",
+                "value": ""
+            },
+            {
+                "name": "AZURE_STORAGE_ACCOUNT",
+                "value": ""
+            }
+        ],
+        "poolInfo": {
+            "poolId": "scan-request-pool"
+        }
+    }
+}

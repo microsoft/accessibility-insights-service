@@ -2,7 +2,7 @@ import 'reflect-metadata';
 
 import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
-import { createCrawlResult, getNotAllowedUrls } from '../test-utilities/common-mock-methods';
+import { createCrawlResult, getNotAllowedUrls } from '../../test-utilities/common-mock-methods';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 
