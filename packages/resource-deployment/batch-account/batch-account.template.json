@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "batchAccount_name": {
-            "defaultValue": "a11yaxisbatch",
+            "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
             "type": "String",
             "metadata": {
                 "description": "Batch Account Name"
@@ -67,12 +67,6 @@
                 },
                 "startTask": {
                     "commandLine": "/bin/bash -c pool-startup.sh",
-                    "resourceFiles": [
-                        {
-                            "blobSource": "[parameters('pool-startup-script-sas-url')]",
-                            "filePath": "pool-startup.sh"
-                        }
-                    ],
                     "userIdentity": {
                         "autoUser": {
                             "scope": "Pool",
@@ -116,12 +110,6 @@
                 },
                 "startTask": {
                     "commandLine": "/bin/bash -c pool-startup.sh",
-                    "resourceFiles": [
-                        {
-                            "blobSource": "[parameters('pool-startup-script-sas-url')]",
-                            "filePath": "pool-startup.sh"
-                        }
-                    ],
                     "userIdentity": {
                         "autoUser": {
                             "scope": "Pool",

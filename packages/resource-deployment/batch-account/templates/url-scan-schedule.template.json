@@ -14,11 +14,11 @@
             "commandLine": "/bin/bash -c run-job-manager.sh",
             "resourceFiles": [
                 {
-                    "httpUrl": "",
+                    "blobSource": "",
                     "filePath": "run-job-manager.sh"
                 },
                 {
-                    "httpUrl": "",
+                    "blobSource": "",
                     "filePath": "job-manager.js"
                 }
             ],
