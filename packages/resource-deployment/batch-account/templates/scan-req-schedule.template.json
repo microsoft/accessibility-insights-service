@@ -11,11 +11,15 @@
         },
         "jobManagerTask": {
             "id": "scan-req-sender-task",
-            "commandLine": "/bin/bash -c \"nodejs sender.js\"",
+            "commandLine": "/bin/bash -c run-scan-request-sender.sh",
             "resourceFiles": [
                 {
-                    "httpUrl": "",
+                    "blobSource": "",
                     "filePath": "sender.js"
+                },
+                {
+                    "blobSource": "",
+                    "filePath": "run-scan-request-sender.sh"
                 }
             ],
             "constraints": {
@@ -32,7 +36,7 @@
             },
             "runExclusive": true
         },
-        "environmentSettings": [
+        "commonEnvironmentSettings": [
             {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                 "value": ""

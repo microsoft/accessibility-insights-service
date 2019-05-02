@@ -4,7 +4,7 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "allyaxiscosmos",
+            "defaultValue": "[concat('allycosmos',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The name of your CosmosDB account"
             }
