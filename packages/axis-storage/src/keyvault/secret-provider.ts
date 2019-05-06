@@ -5,7 +5,7 @@ import { loggerTypes } from 'logger';
 import { AzureKeyVaultClientFactory } from './azure-keyvault-client-factory';
 
 @injectable()
-export class KeyVaultClientWrapper {
+export class SecretProvider {
     private keyVaultClientPromise: Promise<azureKeyVault.KeyVaultClient>;
 
     constructor(

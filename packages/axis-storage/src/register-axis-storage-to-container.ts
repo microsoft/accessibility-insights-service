@@ -8,7 +8,7 @@ import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
 import { CredentialsFactory } from './credentials/credentials-factory';
 import { AzureKeyVaultClientFactory } from './keyvault/azure-keyvault-client-factory';
-import { KeyVaultClientWrapper } from './keyvault/keyvault-client-wrapper';
+import { SecretProvider } from './keyvault/secret-provider';
 
 export function registerAxisStorageToContainer(container: Container): void {
     container
@@ -34,7 +34,7 @@ export function registerAxisStorageToContainer(container: Container): void {
     container.bind(Queue).toSelf();
     container.bind(CredentialsFactory).toSelf();
     container.bind(AzureKeyVaultClientFactory).toSelf();
-    container.bind(KeyVaultClientWrapper).toSelf();
+    container.bind(SecretProvider).toSelf();
 }
 
 function registerAzureCosmosClient(container: Container): void {

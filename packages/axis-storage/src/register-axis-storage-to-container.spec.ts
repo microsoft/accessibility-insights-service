@@ -11,7 +11,7 @@ import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import { KeyVaultClientWrapper } from './keyvault/keyvault-client-wrapper';
+import { SecretProvider } from './keyvault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
 
 // tslint:disable: no-any no-unsafe-any
@@ -48,7 +48,7 @@ describe(registerAxisStorageToContainer, () => {
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
-        verifyNonSingletonDependencyResolution(KeyVaultClientWrapper);
+        verifyNonSingletonDependencyResolution(SecretProvider);
     });
 
     it('verify Azure QueueService resolution', () => {

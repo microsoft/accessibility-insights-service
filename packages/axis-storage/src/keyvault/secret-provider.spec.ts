@@ -4,12 +4,12 @@ import * as azureKeyVault from 'azure-keyvault';
 import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { AzureKeyVaultClientFactory } from './azure-keyvault-client-factory';
-import { KeyVaultClientWrapper } from './keyvault-client-wrapper';
+import { SecretProvider } from './secret-provider';
 
-describe(KeyVaultClientWrapper, () => {
+describe(SecretProvider, () => {
     let azureKeyVaultClient: IMock<azureKeyVault.KeyVaultClient>;
     let azureKeyVaultClientFactory: IMock<AzureKeyVaultClientFactory>;
-    let testSubject: KeyVaultClientWrapper;
+    let testSubject: SecretProvider;
     let processStub: typeof process;
     const keyVaultUrl = 'keyvault url';
 
@@ -24,7 +24,7 @@ describe(KeyVaultClientWrapper, () => {
         getPromisableDynamicMock(azureKeyVaultClient);
 
         azureKeyVaultClientFactory.setup(async a => a.getClient()).returns(async () => Promise.resolve(azureKeyVaultClient.object));
-        testSubject = new KeyVaultClientWrapper(azureKeyVaultClientFactory.object, processStub);
+        testSubject = new SecretProvider(azureKeyVaultClientFactory.object, processStub);
     });
 
     it('gets secret', async () => {
