@@ -8,7 +8,7 @@
     },
     "scripts": {
         "bootstrap": "npx lerna bootstrap",
-        "clean": "npx lerna run clean --stream",
+        "clean": "npx lerna run clean --stream && rimraf dist test-results",
         "cbuild": "npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
         "test": "npx jest",
