@@ -1,11 +1,15 @@
 import * as cosmos from '@azure/cosmos';
 import { inject, injectable } from 'inversify';
+import * as _ from 'lodash';
 import { Activator } from '../common/activator';
+import { CosmosClientFactory } from './cosmos-client-factory';
 import { CosmosOperationResponse } from './cosmos-operation-response';
 
 @injectable()
 export class CosmosClientWrapper {
-    constructor(@inject(cosmos.CosmosClient) private readonly client: cosmos.CosmosClient) {}
+    private cosmosClientPromise: Promise<cosmos.CosmosClient>;
+
+    constructor(@inject(CosmosClientFactory) private readonly cosmosClientFactory: CosmosClientFactory) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
@@ -108,7 +112,8 @@ export class CosmosClientWrapper {
     }
 
     private async getDatabase(databaseId: string): Promise<cosmos.Database> {
-        const response = await this.client.databases.createIfNotExists({ id: databaseId });
+        const client = await this.getClient();
+        const response = await client.databases.createIfNotExists({ id: databaseId });
 
         return response.database;
     }
@@ -144,5 +149,13 @@ export class CosmosClientWrapper {
         }
 
         return requestOpts;
+    }
+
+    private async getClient(): Promise<cosmos.CosmosClient> {
+        if (_.isNil(this.cosmosClientPromise)) {
+            this.cosmosClientPromise = this.cosmosClientFactory.createClient();
+        }
+
+        return this.cosmosClientPromise;
     }
 }

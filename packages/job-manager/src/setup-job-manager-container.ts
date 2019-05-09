@@ -1,13 +1,14 @@
-import { registerAxisStorageToContainer } from 'axis-storage';
+import { registerAxisStorageToContainer, secretNames, SecretProvider } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
-import * as inversify from 'inversify';
-import { registerLoggerToContainer } from 'logger';
+import { Container, interfaces } from 'inversify';
+import { createInstanceIfNil, registerLoggerToContainer } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
 import { TaskParameterBuilder } from './batch/task-parameter-builder';
+import { BatchServiceClientProvider, jobManagerIocTypeNames } from './job-manager-ioc-types';
 
-export function setupJobManagerContainer(): inversify.Container {
-    const container = new inversify.Container();
+export function setupJobManagerContainer(): Container {
+    const container = new Container();
     registerLoggerToContainer(container);
     registerAxisStorageToContainer(container);
 
@@ -21,7 +22,7 @@ export function setupJobManagerContainer(): inversify.Container {
         .toSelf()
         .inSingletonScope();
 
-    setupAzureBatchServiceClient(container);
+    setupAzureBatchServiceClientProvider(container);
 
     container
         .bind(Batch)
@@ -31,13 +32,24 @@ export function setupJobManagerContainer(): inversify.Container {
     return container;
 }
 
-function setupAzureBatchServiceClient(container: inversify.Container): void {
-    container.bind(ServiceClient.BatchServiceClient).toDynamicValue(context => {
-        const batchConfig = context.container.get(BatchConfig);
+function setupAzureBatchServiceClientProvider(container: Container): void {
+    let singletonBatchServiceClientPromise: Promise<ServiceClient.BatchServiceClient>;
 
-        return new ServiceClient.BatchServiceClient(
-            new SharedKeyCredentials(batchConfig.accountName, batchConfig.accountKey),
-            batchConfig.accountUrl,
-        );
-    });
+    container.bind(jobManagerIocTypeNames.BatchServiceClientProvider).toProvider(
+        (context: interfaces.Context): BatchServiceClientProvider => {
+            return async () => {
+                singletonBatchServiceClientPromise = createInstanceIfNil(singletonBatchServiceClientPromise, async () => {
+                    const batchConfig = context.container.get(BatchConfig);
+                    const secretProvider = context.container.get(SecretProvider);
+
+                    return new ServiceClient.BatchServiceClient(
+                        new SharedKeyCredentials(batchConfig.accountName, await secretProvider.getSecret(secretNames.batchAccountKey)),
+                        batchConfig.accountUrl,
+                    );
+                });
+
+                return singletonBatchServiceClientPromise;
+            };
+        },
+    );
 }

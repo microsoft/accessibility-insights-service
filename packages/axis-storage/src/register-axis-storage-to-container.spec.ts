@@ -1,16 +1,19 @@
 import 'reflect-metadata';
 
-import * as azureCosmos from '@azure/cosmos';
-import * as azureStorage from 'azure-storage';
-import { Container } from 'inversify';
+import { KeyVaultClient } from 'azure-keyvault';
+import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
+import * as msrestAzure from 'ms-rest-azure';
 import * as prettyFormat from 'pretty-format';
+import { GlobalMock, GlobalScope, IGlobalMock, IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
+import { AzureKeyvaultClientProvider, AzureQueueServiceProvider, Credentials, CredentialsProvider, iocTypeNames } from './ioc-types';
+import { secretNames } from './keyvault/secret-names';
 import { SecretProvider } from './keyvault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
 
@@ -18,29 +21,21 @@ import { registerAxisStorageToContainer } from './register-axis-storage-to-conta
 
 describe(registerAxisStorageToContainer, () => {
     let container: Container;
-    const dbUrl = 'test-cosmos-db-url';
-    const dbKey = 'test-cosmos-db-key';
-    const storageAccount = 'test-storage-account';
-    // tslint:disable-next-line: mocha-no-side-effect-code
-    const storageAccessKey = btoa('test-access-key');
 
     beforeEach(() => {
         container = new Container();
         registerLoggerToContainer(container);
 
-        process.env.AZURE_STORAGE_ACCOUNT = storageAccount;
-        process.env.AZURE_STORAGE_ACCESS_KEY = storageAccessKey;
         process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-        process.env.AZURE_COSMOS_DB_URL = dbUrl;
-        process.env.AZURE_COSMOS_DB_KEY = dbKey;
     });
 
-    it('verify singleton resolution', () => {
+    it('verify singleton resolution', async () => {
         registerAxisStorageToContainer(container);
 
         verifySingletonDependencyResolution(HashGenerator);
         verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
+        verifySingletonDependencyResolution(SecretProvider);
     });
 
     it('verify non-singleton resolution', () => {
@@ -48,33 +43,122 @@ describe(registerAxisStorageToContainer, () => {
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
-        verifyNonSingletonDependencyResolution(SecretProvider);
     });
 
-    it('verify Azure QueueService resolution', () => {
-        registerAxisStorageToContainer(container);
+    describe('QueueServiceProvider', () => {
+        const storageAccountName = 'test-storage-account-name';
+        // tslint:disable-next-line: mocha-no-side-effect-code
+        const storageAccountKey = Buffer.from('test-storage-account-key').toString('base64');
+        let secretProviderMock: IMock<SecretProvider>;
+        let queueServiceProvider: AzureQueueServiceProvider;
 
-        verifyNonSingletonDependencyResolution(azureStorage.QueueService);
+        beforeEach(() => {
+            secretProviderMock = Mock.ofType(SecretProvider);
 
-        const queueService = container.get(azureStorage.QueueService);
+            secretProviderMock.setup(async s => s.getSecret(secretNames.storageAccountName)).returns(async () => storageAccountName);
+            secretProviderMock.setup(async s => s.getSecret(secretNames.storageAccountKey)).returns(async () => storageAccountKey);
+            registerAxisStorageToContainer(container);
+            stubBinding(SecretProvider, secretProviderMock.object);
 
-        const jsonString = prettyFormat(queueService);
-        expect(jsonString.indexOf(storageAccount) > 0).toBe(true);
-        expect(jsonString.indexOf(storageAccessKey) > 0).toBe(true);
+            queueServiceProvider = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
+        });
+
+        it('verify Azure QueueService resolution', async () => {
+            const queueService = await queueServiceProvider();
+
+            const jsonString = prettyFormat(queueService);
+            expect(jsonString.indexOf(storageAccountName) > 0).toBe(true);
+            expect(jsonString.indexOf(storageAccountKey) > 0).toBe(true);
+        });
+
+        it('creates singleton queueService instance', async () => {
+            const queueService1Promise = queueServiceProvider();
+            const queueService2Promise = queueServiceProvider();
+
+            expect(await queueService1Promise).toBe(await queueService2Promise);
+        });
     });
 
-    it('verify Azure CosmosClient resolution', () => {
-        registerAxisStorageToContainer(container);
+    describe('CredentialsProvider', () => {
+        let globalLoginWithMSIMock: IGlobalMock<typeof msrestAzure.loginWithMSI>;
+        let credentialsStub: msrestAzure.ApplicationTokenCredentials;
+        beforeEach(() => {
+            globalLoginWithMSIMock = GlobalMock.ofInstance(msrestAzure.loginWithMSI, 'loginWithMSI', msrestAzure);
+            credentialsStub = 'credentails' as any;
 
-        verifyNonSingletonDependencyResolution(azureCosmos.CosmosClient);
+            globalLoginWithMSIMock.setup(async l => l()).returns(async () => credentialsStub);
+        });
 
-        const cosmosClient = container.get(azureCosmos.CosmosClient);
+        it('gets credentails', async () => {
+            let credsPromise: Promise<Credentials>;
 
-        const jsonString = prettyFormat(cosmosClient);
+            GlobalScope.using(globalLoginWithMSIMock).with(() => {
+                registerAxisStorageToContainer(container);
 
-        expect(jsonString.indexOf(dbKey) > 0).toBe(true);
-        expect(jsonString.indexOf(dbUrl) > 0).toBe(true);
+                const credentailsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                credsPromise = credentailsProvider();
+            });
+
+            await expect(credsPromise).resolves.toBe(credentialsStub);
+        });
+
+        it('gets singleton credentails', async () => {
+            let credsPromise1: Promise<Credentials>;
+            let credsPromise2: Promise<Credentials>;
+
+            GlobalScope.using(globalLoginWithMSIMock).with(() => {
+                registerAxisStorageToContainer(container);
+
+                const credentailsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                const credentailsProvider2 = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                credsPromise1 = credentailsProvider();
+                credsPromise2 = credentailsProvider2();
+            });
+
+            await expect(credsPromise1).resolves.toBe(credentialsStub);
+            await expect(credsPromise2).resolves.toBe(credentialsStub);
+            globalLoginWithMSIMock.verify(async l => l(), Times.once());
+        });
     });
+
+    describe('AzureKeyvaultClientProvider', () => {
+        let credentialsStub: msrestAzure.ApplicationTokenCredentials;
+        let credentialsProviderStub: CredentialsProvider;
+        credentialsStub = 'credentails' as any;
+
+        beforeEach(() => {
+            credentialsStub = 'credentails' as any;
+            credentialsProviderStub = async () => credentialsStub;
+
+            registerAxisStorageToContainer(container);
+            container.unbind(iocTypeNames.CredentialsProvider);
+            container.bind(iocTypeNames.CredentialsProvider).toProvider(() => credentialsProviderStub);
+        });
+
+        it('gets KeyVaultClient', async () => {
+            let keyvaultClient: KeyVaultClient;
+
+            const keyvaultClientProvider = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
+            keyvaultClient = await keyvaultClientProvider();
+
+            expect(keyvaultClient).toBeInstanceOf(KeyVaultClient);
+        });
+
+        it('gets singleton KeyVaultClient', async () => {
+            const keyvaultClientProvider1 = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
+            const keyvaultClientProvider2 = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
+
+            const keyvaultClient1Promise = keyvaultClientProvider1();
+            const keyvaultClient2Promise = keyvaultClientProvider2();
+
+            expect(await keyvaultClient1Promise).toBe(await keyvaultClient2Promise);
+        });
+    });
+
+    function stubBinding(bindingName: interfaces.ServiceIdentifier<any>, value: any): void {
+        container.unbind(bindingName);
+        container.bind(bindingName).toDynamicValue(() => value);
+    }
 
     function verifySingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();

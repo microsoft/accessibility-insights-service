@@ -7,6 +7,7 @@ import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { VError } from 'verror';
+import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manager-ioc-types';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { TaskParameterBuilder } from './task-parameter-builder';
@@ -18,12 +19,14 @@ export class Batch {
     public constructor(
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(TaskParameterBuilder) private readonly taskParameterBuilder: TaskParameterBuilder,
-        @inject(ServiceClient.BatchServiceClient) private readonly batchClient: ServiceClient.BatchServiceClient,
+        @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
     ) {}
 
     public async createJobIfNotExists(jobId: string, addJobIdIndexOnCreate: boolean = false): Promise<string> {
         let serviceJobId = jobId;
-        await this.batchClient.job
+        const client = await this.batchClientProvider();
+
+        await client.job
             .get(serviceJobId)
             .then(cloudJob => {
                 if (cloudJob.state !== 'active') {
@@ -44,7 +47,7 @@ export class Batch {
                         onAllTasksComplete: 'terminateJob',
                     };
 
-                    await this.batchClient.job.add(jobAddParameter);
+                    await client.job.add(jobAddParameter);
                     console.log(`[${new Date().toJSON()}] New job ${serviceJobId} created.`);
                 } else {
                     throw new VError(error as Error, `An error occurred while retrieving state of ${jobId} job.`);
@@ -65,7 +68,8 @@ export class Batch {
         });
 
         if (taskAddParameters.length > 0) {
-            const taskAddCollectionResult = await this.batchClient.task.addCollection(jobId, taskAddParameters);
+            const client = await this.batchClientProvider();
+            const taskAddCollectionResult = await client.task.addCollection(jobId, taskAddParameters);
             taskAddCollectionResult.value.forEach(taskAddResult => {
                 if (/success/i.test(taskAddResult.status)) {
                     this.jobTasks.get(taskAddResult.taskId).state = JobTaskState.queued;
@@ -87,13 +91,14 @@ export class Batch {
 
     public async waitJob(jobId: string, pullIntervalMilliseconds: number = 10000): Promise<void> {
         console.log(`[${new Date().toJSON()}] Waiting for job ${jobId} to complete.`);
+        const client = await this.batchClientProvider();
 
         return new Promise(async (resolve, reject) => {
             const taskListOptions = {
                 filter: `state ne '${JobTaskState.completed}'`,
             };
             const timerId = setInterval(async () => {
-                await this.batchClient.task
+                await client.task
                     .list(jobId, { taskListOptions: taskListOptions })
                     .then(async (result: CloudTaskListResult) => {
                         if (result.length === 0 || (result.length === 1 && result[0].id === process.env.AZ_BATCH_TASK_ID)) {
@@ -114,7 +119,8 @@ export class Batch {
     }
 
     public async getCreatedTasksState(jobId: string): Promise<JobTask[]> {
-        const cloudTaskListResult = await this.batchClient.task.list(jobId);
+        const client = await this.batchClientProvider();
+        const cloudTaskListResult = await client.task.list(jobId);
         this.setTasksState(cloudTaskListResult);
         let nextLink = cloudTaskListResult.odatanextLink;
         while (!_.isNil(nextLink)) {
@@ -126,7 +132,8 @@ export class Batch {
 
     private async getTasksStateNext(nextPageLink: string): Promise<string> {
         if (!_.isNil(nextPageLink)) {
-            const cloudTaskListResult = await this.batchClient.task.listNext(nextPageLink);
+            const client = await this.batchClientProvider();
+            const cloudTaskListResult = await client.task.listNext(nextPageLink);
             this.setTasksState(cloudTaskListResult);
 
             return cloudTaskListResult.odatanextLink;
