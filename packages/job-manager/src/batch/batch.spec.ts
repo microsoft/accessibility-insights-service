@@ -6,6 +6,7 @@ import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import BatchServiceClient from 'azure-batch/lib/batchServiceClient';
 import { CloudTaskListResult, TaskAddParameter, TaskExecutionInformation } from 'azure-batch/lib/models';
 import { Job, Task } from 'azure-batch/lib/operations';
+import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { BatchServiceClientProvider } from '../job-manager-ioc-types';
@@ -23,6 +24,7 @@ let taskParameterBuilderMock: IMock<TaskParameterBuilder>;
 let jobMock: IMock<Job>;
 let taskMock: IMock<Task>;
 let batchServiceClientProviderStub: BatchServiceClientProvider;
+let loggerMock: IMock<Logger>;
 
 function beforeEachSuit(): void {
     config = {
@@ -38,7 +40,7 @@ function beforeEachSuit(): void {
     taskMock = Mock.ofType();
     batchClient.job = jobMock.object;
     batchClient.task = taskMock.object;
-
+    loggerMock = Mock.ofType(Logger);
     batchServiceClientProviderStub = async () => batchClient;
 }
 
@@ -50,7 +52,7 @@ describe('waitJob()', () => {
             .setup(async o => o.list(jobId, It.isAny()))
             .returns(async () => Promise.reject('error'))
             .verifiable();
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
 
         await expect(batch.waitJob(jobId, 200)).rejects.toThrowError();
         taskMock.verifyAll();
@@ -82,7 +84,7 @@ describe('waitJob()', () => {
             .returns(async () => Promise.resolve(cloudTaskListResult.filter(r => r.state !== JobTaskState.completed)))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         await batch.waitJob(jobId, 200);
 
         taskMock.verify(async o => o.list(jobId, It.isAny()), Times.atLeast(3));
@@ -151,7 +153,7 @@ describe('getCreatedTasksState()', () => {
             .verifiable();
         taskMock.setup(async o => o.addCollection(jobId, It.isAny())).returns(async () => Promise.resolve({ value: [] }));
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         const jobTask = await batch.createTasks(jobId, messages);
         cloudTaskListResultFirst[0].id = jobTask[0].id;
         cloudTaskListResultNext[0].id = jobTask[1].id;
@@ -170,7 +172,7 @@ describe('createTasks()', () => {
 
     it('create no new tasks when no messages provided', async () => {
         const messages: Message[] = [];
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         const tasksActual = await batch.createTasks(jobId, messages);
 
         expect(tasksActual.length).toBe(0);
@@ -235,7 +237,7 @@ describe('createTasks()', () => {
             .returns(async () => Promise.resolve(taskAddCollectionResult))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         const tasksActual = await batch.createTasks(jobId, messages);
 
         expect(tasksActual).toEqual(jobTasksExpected);
@@ -261,7 +263,7 @@ describe('createJobIfNotExists()', () => {
             .callback(parameter => (jobAddParameter = parameter))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         const jobIdActual = await batch.createJobIfNotExists(jobId);
 
         expect(jobIdActual.startsWith(jobId)).toBeTruthy();
@@ -278,7 +280,7 @@ describe('createJobIfNotExists()', () => {
             .returns(async () => Promise.reject(error))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         await expect(batch.createJobIfNotExists(jobId)).rejects.toThrowError(/error occurred/);
         jobMock.verifyAll();
     });
@@ -292,7 +294,7 @@ describe('createJobIfNotExists()', () => {
             .returns(async () => Promise.resolve(cloudJob))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         await expect(batch.createJobIfNotExists(jobId)).resolves.toEqual(jobId);
         jobMock.verifyAll();
     });
@@ -306,7 +308,7 @@ describe('createJobIfNotExists()', () => {
             .returns(async () => Promise.resolve(cloudJob))
             .verifiable();
 
-        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub);
+        batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         await expect(batch.createJobIfNotExists(jobId)).rejects.toThrowError(/not active/);
         jobMock.verifyAll();
     });

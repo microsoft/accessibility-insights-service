@@ -5,6 +5,7 @@ import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/l
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import { Logger } from 'logger';
 import * as moment from 'moment';
 import { VError } from 'verror';
 import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manager-ioc-types';
@@ -20,6 +21,7 @@ export class Batch {
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(TaskParameterBuilder) private readonly taskParameterBuilder: TaskParameterBuilder,
         @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async createJobIfNotExists(jobId: string, addJobIdIndexOnCreate: boolean = false): Promise<string> {
@@ -48,7 +50,7 @@ export class Batch {
                     };
 
                     await client.job.add(jobAddParameter);
-                    console.log(`[${new Date().toJSON()}] New job ${serviceJobId} created.`);
+                    this.logger.logInfo(`New job ${serviceJobId} created.`);
                 } else {
                     throw new VError(error as Error, `An error occurred while retrieving state of ${jobId} job.`);
                 }
@@ -73,24 +75,22 @@ export class Batch {
             taskAddCollectionResult.value.forEach(taskAddResult => {
                 if (/success/i.test(taskAddResult.status)) {
                     this.jobTasks.get(taskAddResult.taskId).state = JobTaskState.queued;
-                    console.log(`[${new Date().toJSON()}] New task ${taskAddResult.taskId} added to the job ${jobId}.`);
+                    this.logger.logInfo(`New task ${taskAddResult.taskId} added to the job ${jobId}.`);
                 } else {
                     this.jobTasks.get(taskAddResult.taskId).state = JobTaskState.failed;
                     this.jobTasks.get(taskAddResult.taskId).error = taskAddResult.error.message.value;
-                    console.log(
-                        `[${new Date().toJSON()}] An error occurred while adding new task ${taskAddResult.taskId} to the job ${jobId}.`,
-                    );
+                    this.logger.logError(`An error occurred while adding new task ${taskAddResult.taskId} to the job ${jobId}.`);
                 }
             });
         } else {
-            console.log(`[${new Date().toJSON()}] No new tasks added to the job ${jobId}.`);
+            this.logger.logInfo(`No new tasks added to the job ${jobId}.`);
         }
 
         return Array.from(this.jobTasks.values());
     }
 
     public async waitJob(jobId: string, pullIntervalMilliseconds: number = 10000): Promise<void> {
-        console.log(`[${new Date().toJSON()}] Waiting for job ${jobId} to complete.`);
+        this.logger.logInfo(`Waiting for job ${jobId} to complete.`);
         const client = await this.batchClientProvider();
 
         return new Promise(async (resolve, reject) => {
@@ -103,10 +103,10 @@ export class Batch {
                     .then(async (result: CloudTaskListResult) => {
                         if (result.length === 0 || (result.length === 1 && result[0].id === process.env.AZ_BATCH_TASK_ID)) {
                             clearInterval(timerId);
-                            console.log(`[${new Date().toJSON()}] Job ${jobId} completed.`);
+                            this.logger.logInfo(`Job ${jobId} completed.`);
                             resolve();
                         } else {
-                            console.log(`[${new Date().toJSON()}] Job ${jobId} in progress with ${result.length} pending tasks.`);
+                            this.logger.logInfo(`Job ${jobId} in progress with ${result.length} pending tasks.`);
                         }
                     })
                     .catch((error: Error) => {
@@ -147,7 +147,7 @@ export class Batch {
             if (this.jobTasks.has(task.id)) {
                 this.jobTasks.get(task.id).state = task.state;
                 this.jobTasks.get(task.id).result = task.executionInfo.result;
-                console.log(`[${new Date().toJSON()}] Task ${task.id} completed with ${task.executionInfo.result}`);
+                this.logger.logInfo(`Task ${task.id} completed with ${task.executionInfo.result}`);
             }
         });
     }

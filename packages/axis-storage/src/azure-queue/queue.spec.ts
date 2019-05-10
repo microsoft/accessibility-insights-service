@@ -86,8 +86,6 @@ describe(Queue, () => {
 
             expect(queueMessageResultActual).toEqual(queueMessageResult);
 
-            console.log('in test completed');
-
             queueServiceMock.verifyAll();
         });
     });
