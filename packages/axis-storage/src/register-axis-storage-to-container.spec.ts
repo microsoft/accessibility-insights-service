@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 
+import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from 'azure-keyvault';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
@@ -12,7 +13,14 @@ import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import { AzureKeyvaultClientProvider, AzureQueueServiceProvider, Credentials, CredentialsProvider, iocTypeNames } from './ioc-types';
+import {
+    AzureKeyvaultClientProvider,
+    AzureQueueServiceProvider,
+    CosmosClientProvider,
+    Credentials,
+    CredentialsProvider,
+    iocTypeNames,
+} from './ioc-types';
 import { secretNames } from './keyvault/secret-names';
 import { SecretProvider } from './keyvault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
@@ -50,7 +58,6 @@ describe(registerAxisStorageToContainer, () => {
         // tslint:disable-next-line: mocha-no-side-effect-code
         const storageAccountKey = Buffer.from('test-storage-account-key').toString('base64');
         let secretProviderMock: IMock<SecretProvider>;
-        let queueServiceProvider: AzureQueueServiceProvider;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
@@ -59,11 +66,10 @@ describe(registerAxisStorageToContainer, () => {
             secretProviderMock.setup(async s => s.getSecret(secretNames.storageAccountKey)).returns(async () => storageAccountKey);
             registerAxisStorageToContainer(container);
             stubBinding(SecretProvider, secretProviderMock.object);
-
-            queueServiceProvider = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
         });
 
         it('verify Azure QueueService resolution', async () => {
+            const queueServiceProvider = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
             const queueService = await queueServiceProvider();
 
             const jsonString = prettyFormat(queueService);
@@ -72,8 +78,10 @@ describe(registerAxisStorageToContainer, () => {
         });
 
         it('creates singleton queueService instance', async () => {
-            const queueService1Promise = queueServiceProvider();
-            const queueService2Promise = queueServiceProvider();
+            const queueServiceProvider1 = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
+            const queueServiceProvider2 = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
+            const queueService1Promise = queueServiceProvider1();
+            const queueService2Promise = queueServiceProvider2();
 
             expect(await queueService1Promise).toBe(await queueService2Promise);
         });
@@ -152,6 +160,38 @@ describe(registerAxisStorageToContainer, () => {
             const keyvaultClient2Promise = keyvaultClientProvider2();
 
             expect(await keyvaultClient1Promise).toBe(await keyvaultClient2Promise);
+        });
+    });
+
+    describe('CosmosClientProvider', () => {
+        let secretProviderMock: IMock<SecretProvider>;
+        const cosmosDbUrl = 'db url';
+        const cosmosDbKey = 'db key';
+        beforeEach(() => {
+            secretProviderMock = Mock.ofType(SecretProvider);
+
+            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbUrl)).returns(async () => Promise.resolve(cosmosDbUrl));
+            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).returns(async () => Promise.resolve(cosmosDbKey));
+
+            registerAxisStorageToContainer(container);
+            stubBinding(SecretProvider, secretProviderMock.object);
+        });
+
+        it('verify CosmosClientProvider resolution', async () => {
+            const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
+            const cosmosClient = await cosmosClientProvider();
+
+            expect(cosmosClient).toBeInstanceOf(CosmosClient);
+        });
+
+        it('creates singleton queueService instance', async () => {
+            const cosmosClientProvider1 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
+            const cosmosClientProvider2 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
+
+            const cosmosClient1Promise = cosmosClientProvider1();
+            const cosmosClient2Promise = cosmosClientProvider2();
+
+            expect(await cosmosClient1Promise).toBe(await cosmosClient2Promise);
         });
     });
 

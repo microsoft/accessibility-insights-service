@@ -1,16 +1,22 @@
+import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from 'azure-keyvault';
 import { createQueueService, ExponentialRetryPolicyFilter, QueueMessageEncoder, QueueService } from 'azure-storage';
 import { Container, interfaces } from 'inversify';
-import { isNil } from 'lodash';
 import { createInstanceIfNil } from 'logger';
 import * as msrestAzure from 'ms-rest-azure';
-import { CosmosClientFactory } from './azure-cosmos/cosmos-client-factory';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import { AzureKeyvaultClientProvider, AzureQueueServiceProvider, Credentials, CredentialsProvider, iocTypeNames } from './ioc-types';
+import {
+    AzureKeyvaultClientProvider,
+    AzureQueueServiceProvider,
+    CosmosClientProvider,
+    Credentials,
+    CredentialsProvider,
+    iocTypeNames,
+} from './ioc-types';
 import { secretNames } from './keyvault/secret-names';
 import { SecretProvider } from './keyvault/secret-provider';
 
@@ -38,7 +44,7 @@ export function registerAxisStorageToContainer(container: Container): void {
         .toSelf()
         .inSingletonScope();
 
-    container.bind(CosmosClientFactory).toSelf();
+    setupCosmosClientProvider(container);
 
     container.bind(CosmosClientWrapper).toSelf();
 
@@ -102,6 +108,26 @@ function setupAzureQueueServiceProvider(container: interfaces.Container): void {
                 });
 
                 return singletonQueueServicePromise;
+            };
+        },
+    );
+}
+
+function setupCosmosClientProvider(container: interfaces.Container): void {
+    let singletonCosmosClient: Promise<CosmosClient>;
+
+    container.bind(iocTypeNames.CosmosClientProvider).toProvider(
+        (context: interfaces.Context): CosmosClientProvider => {
+            return async () => {
+                singletonCosmosClient = createInstanceIfNil(singletonCosmosClient, async () => {
+                    const secretProvider = context.container.get(SecretProvider);
+                    const endpoint = await secretProvider.getSecret(secretNames.cosmosDbUrl);
+                    const masterKey = await secretProvider.getSecret(secretNames.cosmosDbKey);
+
+                    return new CosmosClient({ endpoint, auth: { masterKey } });
+                });
+
+                return singletonCosmosClient;
             };
         },
     );

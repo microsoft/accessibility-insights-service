@@ -2,16 +2,16 @@
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
+import { CosmosClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { ItemType } from '../test-utilities/test-document-types/item-type';
 import { StorageDocument } from '../test-utilities/test-document-types/storage-document';
-import { CosmosClientFactory } from './cosmos-client-factory';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
 
 describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;
-    let cosmosClientFactoryMock: IMock<CosmosClientFactory>;
+    let cosmosClientProviderStub: CosmosClientProvider;
     let cosmosClientMock: IMock<cosmos.CosmosClient>;
     let databasesMock: IMock<cosmos.Databases>;
     let dbMock: IMock<cosmos.Database>;
@@ -28,7 +28,7 @@ describe('CosmosClientWrapper', () => {
         setupCosmosMocks();
         setupVerifiableGetOrCreateDbCall();
         setupVerifiableGetOrCreateCollectionCall();
-        testSubject = new CosmosClientWrapper(cosmosClientFactoryMock.object);
+        testSubject = new CosmosClientWrapper(cosmosClientProviderStub);
     });
 
     describe('readItem()', () => {
@@ -248,19 +248,6 @@ describe('CosmosClientWrapper', () => {
 
             verifyMocks();
         });
-
-        it('uses same instance of cosmos client', async () => {
-            const items = [1, 2, 3];
-            const options: cosmos.RequestOptions = { partitionKey: partitoningKey };
-            items.map(item => {
-                setupVerifiableUpsertItemCallWithOptions(item, options);
-            });
-
-            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
-            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
-
-            cosmosClientFactoryMock.verify(async c => c.createClient(), Times.once());
-        });
     });
 
     function setupCosmosMocks(): void {
@@ -271,14 +258,13 @@ describe('CosmosClientWrapper', () => {
         collectionsMock = Mock.ofType(cosmos.Containers);
         itemsMock = Mock.ofType(cosmos.Items);
         itemMock = Mock.ofType(cosmos.Item);
-        cosmosClientFactoryMock = Mock.ofType(CosmosClientFactory);
+        cosmosClientProviderStub = async () => cosmosClientMock.object;
 
         collectionMock.setup(c => c.items).returns(() => itemsMock.object);
         dbMock.setup(d => d.containers).returns(() => collectionsMock.object);
         cosmosClientMock.setup(c => c.databases).returns(() => databasesMock.object);
 
         getPromisableDynamicMock(cosmosClientMock);
-        cosmosClientFactoryMock.setup(async c => c.createClient()).returns(async () => Promise.resolve(cosmosClientMock.object));
     }
 
     function verifyMocks(): void {

@@ -1,3 +1,4 @@
+import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from 'azure-keyvault';
 import { QueueService } from 'azure-storage';
 import * as msrestAzure from 'ms-rest-azure';
@@ -8,8 +9,10 @@ export const iocTypeNames = {
     AzureKeyvaultClientProvider: 'AzureKeyvaultClientProvider',
     CredentialsProvider: 'CredentialsProvider',
     AzureQueueServiceProvider: 'AzureQueueServiceProvider',
+    CosmosClientProvider: 'CosmosClientProvider',
 };
 
 export type AzureKeyvaultClientProvider = () => Promise<KeyVaultClient>;
 export type CredentialsProvider = () => Promise<Credentials>;
 export type AzureQueueServiceProvider = () => Promise<QueueService>;
+export type CosmosClientProvider = () => Promise<CosmosClient>;
