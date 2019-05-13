@@ -70,7 +70,13 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./app-insights/app-insights.template.json" --parameters "./app-insights/app-insights.parameters.json"
     ```
 
-### 10. Login to Azure portal to verify the Resources are being created
+### 10. Deploy Key Vault
+
+-   ```bash
+    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./key-vault/key-vault.template.json" --parameters "./key-vault/key-vault.parameters.json"
+    ```
+
+### 11. Login to Azure portal to verify the Resources are being created
 
 -   Resource Group is created
 -   And all the resources are deployed under the resource group.

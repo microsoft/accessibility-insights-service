@@ -9,6 +9,12 @@
                 "description": "Batch Account Name"
             }
         },
+        "keyVault_name": {
+            "type": "String",
+            "metadata": {
+                "description": "The key vault name."
+            }
+        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
@@ -31,7 +37,11 @@
             "name": "[parameters('batchAccount_name')]",
             "location": "[parameters('location')]",
             "properties": {
-                "poolAllocationMode": "BatchService"
+                "poolAllocationMode": "UserSubscription",
+                "keyVaultReference": {
+                    "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault_name'))]",
+                    "url": "[concat('https://', parameters('keyVault_name'), '.vault.azure.net/')]"
+                }
             }
         },
         {
@@ -40,7 +50,6 @@
             "name": "[concat(parameters('batchAccount_name'), '/scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
             "properties": {
-                "displayName": "scan-request-pool",
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
