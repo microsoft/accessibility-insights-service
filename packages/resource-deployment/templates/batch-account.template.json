@@ -2,14 +2,14 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "batchAccount_name": {
+        "batchAccount": {
             "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
             "type": "String",
             "metadata": {
                 "description": "Batch Account Name"
             }
         },
-        "keyVault_name": {
+        "keyVault": {
             "type": "String",
             "metadata": {
                 "description": "The key vault name."
@@ -34,21 +34,21 @@
         {
             "type": "Microsoft.Batch/batchAccounts",
             "apiVersion": "2017-09-01",
-            "name": "[parameters('batchAccount_name')]",
+            "name": "[parameters('batchAccount')]",
             "location": "[parameters('location')]",
             "properties": {
                 "poolAllocationMode": "UserSubscription",
                 "keyVaultReference": {
-                    "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault_name'))]",
-                    "url": "[concat('https://', parameters('keyVault_name'), '.vault.azure.net/')]"
+                    "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
+                    "url": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]"
                 }
             }
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2017-09-01",
-            "name": "[concat(parameters('batchAccount_name'), '/scan-request-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
@@ -90,8 +90,8 @@
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2017-09-01",
-            "name": "[concat(parameters('batchAccount_name'), '/url-scan-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
