@@ -62,7 +62,8 @@
             "ms-vscode.vscode-typescript-tslint-plugin",
             "esbenp.prettier-vscode",
             "rbbit.typescript-hero",
-            "foxundermoon.shell-format"
+            "foxundermoon.shell-format",
+            "rogalmic.bash-debug"
         ]
     },
     "launch": {
