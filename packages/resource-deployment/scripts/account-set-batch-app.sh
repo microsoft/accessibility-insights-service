@@ -16,12 +16,12 @@ fi
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
-echo "Validating the Microsoft.Batch provider registration on '$subscription' Azure subscription"
+echo "Validating Microsoft.Batch provider registration on '$subscription' Azure subscription"
 batchProviderRegistrationState=$(az provider show --namespace Microsoft.Batch --query "registrationState" -o tsv)
 
-# Register the Microsoft.Batch provider on Azure subscription
+# Register Microsoft.Batch provider on Azure subscription
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "Registering the Microsoft.Batch provider on '$subscription' Azure subscription"
+    echo "Registering Microsoft.Batch provider on '$subscription' Azure subscription"
     az provider register --namespace Microsoft.Batch
 
     # Wait for the registration to complete
@@ -39,17 +39,18 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
 fi
 
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "ERROR: Unable to register the Microsoft.Batch provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
+    echo "ERROR: Unable to register Microsoft.Batch provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
 fi
 
 # Allow Azure Batch service to access the subscription
 #   Microsoft Azure Batch application: ddbf3205-c6bd-46ae-8127-60eb93363864
 #   MicrosoftAzureBatch application: 1f84fc1f-927a-4d75-b1ba-6aa7707dd5b5
+
 echo "Granting Azure Batch API access to the '$subscription' Azure subscription"
 az role assignment create --assignee 1f84fc1f-927a-4d75-b1ba-6aa7707dd5b5 --role contributor 1> /dev/null
 az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
 
-# Add an access policy to the Key Vault to allow access by the Batch service
+# Add an access policy to the key vault to allow access by the Batch service
 echo "Granting Azure Batch API access to the '$keyVault' key vault"
 az keyvault set-policy --resource-group $resourceGroup --name $keyVault \
     --spn ddbf3205-c6bd-46ae-8127-60eb93363864 \

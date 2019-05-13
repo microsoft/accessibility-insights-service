@@ -3,13 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "batchAccount_name": {
-            "value": "maxlbatchtwo"
+            "value": ""
         },
         "keyVault_name": {
-            "value": "maxl-key-vault-two"
+            "value": ""
         },
         "pool-startup-script-sas-url": {
-            "value": "https://localhost"
+            "value": ""
         }
     }
 }

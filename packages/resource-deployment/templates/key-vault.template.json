@@ -29,7 +29,7 @@
                 "accessPolicies": [],
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": false,
-                "enabledForTemplateDeployment": true
+                "enabledForTemplateDeployment": false
             }
         }
     ]

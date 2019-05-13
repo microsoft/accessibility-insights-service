@@ -30,7 +30,7 @@ Prerequisites:
     exit 0
 fi
 
-# Login to Azure if reqired
+# Login to Azure if required
 az account show 1> /dev/null
 if [ $? != 0 ]; then
     az login
@@ -40,11 +40,11 @@ fi
 echo "Switching to '$subscription' Azure subscription"
 az account set --subscription $subscription
 
-# Configure the Azure subscription account to support Batch in user subscription mode
+# Configure Azure subscription account to support Batch in user subscription mode
 source ${0%/*}/account-set-batch-app.sh
 
 echo "Creating '$account' Azure Batch account"
-# az group deployment create --resource-group $resourceGroup --template-file $batchTemplateFile --parameters $batchTemplateParametersFile 1> /dev/null
+az group deployment create --resource-group $resourceGroup --template-file $batchTemplateFile --parameters $batchTemplateParametersFile 1> /dev/null
 
 # Login into '$account' Azure Batch account
 echo "Logging into '$account' Azure Batch account"
