@@ -14,15 +14,15 @@ import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
 import {
-    AzureKeyvaultClientProvider,
+    AzureKeyVaultClientProvider,
     AzureQueueServiceProvider,
     CosmosClientProvider,
     Credentials,
     CredentialsProvider,
     iocTypeNames,
 } from './ioc-types';
-import { secretNames } from './keyvault/secret-names';
-import { SecretProvider } from './keyvault/secret-provider';
+import { secretNames } from './key-vault/secret-names';
+import { SecretProvider } from './key-vault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
 
 // tslint:disable: no-any no-unsafe-any
@@ -146,15 +146,15 @@ describe(registerAxisStorageToContainer, () => {
         it('gets KeyVaultClient', async () => {
             let keyvaultClient: KeyVaultClient;
 
-            const keyvaultClientProvider = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
+            const keyvaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
             keyvaultClient = await keyvaultClientProvider();
 
             expect(keyvaultClient).toBeInstanceOf(KeyVaultClient);
         });
 
         it('gets singleton KeyVaultClient', async () => {
-            const keyvaultClientProvider1 = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
-            const keyvaultClientProvider2 = container.get<AzureKeyvaultClientProvider>(iocTypeNames.AzureKeyvaultClientProvider);
+            const keyvaultClientProvider1 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
+            const keyvaultClientProvider2 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
 
             const keyvaultClient1Promise = keyvaultClientProvider1();
             const keyvaultClient2Promise = keyvaultClientProvider2();

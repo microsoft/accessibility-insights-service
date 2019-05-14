@@ -10,15 +10,15 @@ import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
 import {
-    AzureKeyvaultClientProvider,
+    AzureKeyVaultClientProvider,
     AzureQueueServiceProvider,
     CosmosClientProvider,
     Credentials,
     CredentialsProvider,
     iocTypeNames,
 } from './ioc-types';
-import { secretNames } from './keyvault/secret-names';
-import { SecretProvider } from './keyvault/secret-provider';
+import { secretNames } from './key-vault/secret-names';
+import { SecretProvider } from './key-vault/secret-provider';
 
 export function registerAxisStorageToContainer(container: Container): void {
     container
@@ -32,7 +32,7 @@ export function registerAxisStorageToContainer(container: Container): void {
         .inSingletonScope();
 
     setupCredentailsProvider(container);
-    setupAzureKeyvaultClientProvider(container);
+    setupAzureKeyVaultClientProvider(container);
 
     container
         .bind(SecretProvider)
@@ -53,20 +53,20 @@ export function registerAxisStorageToContainer(container: Container): void {
     container.bind(Queue).toSelf();
 }
 
-function setupAzureKeyvaultClientProvider(container: interfaces.Container): void {
-    let singletonKeyvaultClientPromise: Promise<KeyVaultClient>;
+function setupAzureKeyVaultClientProvider(container: interfaces.Container): void {
+    let singletonKeyVaultClientPromise: Promise<KeyVaultClient>;
 
-    container.bind(iocTypeNames.AzureKeyvaultClientProvider).toProvider(
-        (context: interfaces.Context): AzureKeyvaultClientProvider => {
+    container.bind(iocTypeNames.AzureKeyVaultClientProvider).toProvider(
+        (context: interfaces.Context): AzureKeyVaultClientProvider => {
             return async () => {
-                singletonKeyvaultClientPromise = createInstanceIfNil(singletonKeyvaultClientPromise, async () => {
+                singletonKeyVaultClientPromise = createInstanceIfNil(singletonKeyVaultClientPromise, async () => {
                     const credentialsProvider = context.container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
                     const credentials = await credentialsProvider();
 
                     return new KeyVaultClient(credentials);
                 });
 
-                return singletonKeyvaultClientPromise;
+                return singletonKeyVaultClientPromise;
             };
         },
     );

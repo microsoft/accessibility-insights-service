@@ -2,16 +2,16 @@ import 'reflect-metadata';
 
 import { KeyVaultClient } from 'azure-keyvault';
 import { IMock, Mock } from 'typemoq';
-import { AzureKeyvaultClientProvider } from '../ioc-types';
+import { AzureKeyVaultClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { SecretProvider } from './secret-provider';
 
 describe(SecretProvider, () => {
     let azureKeyVaultClient: IMock<KeyVaultClient>;
-    let azureKeyVaultClientProviderStub: AzureKeyvaultClientProvider;
+    let azureKeyVaultClientProviderStub: AzureKeyVaultClientProvider;
     let testSubject: SecretProvider;
     let processStub: typeof process;
-    const keyVaultUrl = 'keyvault url';
+    const keyVaultUrl = 'key vault url';
 
     beforeEach(() => {
         processStub = ({

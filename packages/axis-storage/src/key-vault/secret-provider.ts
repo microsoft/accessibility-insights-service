@@ -1,11 +1,11 @@
 import { inject, injectable } from 'inversify';
 import { loggerTypes } from 'logger';
-import { AzureKeyvaultClientProvider, iocTypeNames } from '../ioc-types';
+import { AzureKeyVaultClientProvider, iocTypeNames } from '../ioc-types';
 
 @injectable()
 export class SecretProvider {
     constructor(
-        @inject(iocTypeNames.AzureKeyvaultClientProvider) private readonly keyVaultClientProvider: AzureKeyvaultClientProvider,
+        @inject(iocTypeNames.AzureKeyVaultClientProvider) private readonly keyVaultClientProvider: AzureKeyVaultClientProvider,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
