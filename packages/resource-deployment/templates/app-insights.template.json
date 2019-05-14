@@ -3,8 +3,11 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "appInsightsName": {
-            "defaultValue": "[concat('allyInsight',toLower(uniqueString(resourceGroup().id)))]",
-            "type": "string"
+            "type": "string",
+            "defaultValue": "[concat('allyinsights',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The Application Insights resource name."
+            }
         },
         "location": {
             "type": "string",

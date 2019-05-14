@@ -112,7 +112,7 @@
 
 #### Setup _url-scan-schedule_ job schedule
 
--   Update the local copy of [env-var--az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/env-var--az-batch-task-parameter.template.json) template file by adding the following data:
+-   Update the local copy of [env-var--az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/env-var--az-batch-task-parameter.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -129,7 +129,7 @@
 
     Preserve the _env-var--az-batch-task-parameter.template.base64.txt_ output file for the next step.
 
--   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/url-scan-schedule.template.json) template file by adding the following data:
+-   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/url-scan-schedule.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
@@ -152,7 +152,7 @@
 
 #### Setup _scan-req-schedule_ job schedule
 
--   Update the local copy of [scan-req-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/batch-account/templates/scan-req-schedule.template.json) template file by adding the following data:
+-   Update the local copy of [scan-req-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/scan-req-schedule.template.json) template file by adding the following data:
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section

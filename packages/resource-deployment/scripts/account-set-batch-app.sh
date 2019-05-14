@@ -2,17 +2,6 @@
 
 # The script will configure the default Azure subscription account to support Batch user subscription mode
 
-if [[ -z $resourceGroup ]] || [[ -z $keyVault ]]; then
-    echo \
-"
-The $0 script expects following variables to be defined:
-
-    resourceGroup - Azure resource group name
-    keyVault - Azure key vault name
-"
-    exit 1
-fi
-
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
@@ -43,15 +32,8 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
 fi
 
 # Allow Azure Batch service to access the subscription
-#   Microsoft Azure Batch application: ddbf3205-c6bd-46ae-8127-60eb93363864
-#   MicrosoftAzureBatch application: 1f84fc1f-927a-4d75-b1ba-6aa7707dd5b5
+#   Name: Microsoft Azure Batch
+#   Application ID: ddbf3205-c6bd-46ae-8127-60eb93363864
 
-echo "Granting Azure Batch API access to the '$subscription' Azure subscription"
-az role assignment create --assignee 1f84fc1f-927a-4d75-b1ba-6aa7707dd5b5 --role contributor 1> /dev/null
+echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
 az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
-
-# Add an access policy to the key vault to allow access by the Batch service
-echo "Granting Azure Batch API access to the '$keyVault' key vault"
-az keyvault set-policy --resource-group $resourceGroup --name $keyVault \
-    --spn ddbf3205-c6bd-46ae-8127-60eb93363864 \
-    --secret-permissions delete get list set 1> /dev/null

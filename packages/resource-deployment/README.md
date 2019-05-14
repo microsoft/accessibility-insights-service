@@ -40,7 +40,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 ### 5. Deploy Storage Account
 
 -   ```bash
-    az group deployment create  --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./blob-storage/blob-storage.template.json" --parameters "./blob-storage/blob-storage.parameters.json"
+    az group deployment create  --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/blob-storage.template.json" --parameters "./templates/blob-storage.parameters.json"
     ```
 
 ### 6. Create Queue in Storage Account
@@ -52,31 +52,25 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 7. Deploy Batch Account
 
--   Update batch-account.parameters.json parameter file with SAS URL to the pool VMs startup script and (optional) name of the new batch account. Run the following command to deploy Azure batch account:
+-   Update ./templates/batch-account.parameters.json resource manager parameter file with SAS URL to the pool VMs startup script. Run the following command to deploy Azure Batch account:
 
     ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./batch-account/batch-account.template.json" --parameters "./batch-account/batch-account.parameters.json"
+    ./scripts/batch-account-create.sh -s <subscriptionId> -r <resourceGroupName>
     ```
 
 ### 8. Deploy CosmosDB
 
 -   ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./cosmos-db/cosmos-db.template.json" --parameters "./cosmos-db/cosmos-db.parameters.json"
+    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/cosmos-db.template.json" --parameters "./templates/cosmos-db.parameters.json"
     ```
 
 ### 9. Deploy AppInsights
 
 -   ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./app-insights/app-insights.template.json" --parameters "./app-insights/app-insights.parameters.json"
+    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/app-insights.template.json"
     ```
 
-### 10. Deploy Key Vault
-
--   ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./key-vault/key-vault.template.json" --parameters "./key-vault/key-vault.parameters.json"
-    ```
-
-### 11. Login to Azure portal to verify the Resources are being created
+### 10. Login to Azure portal to verify the Resources are being created
 
 -   Resource Group is created
 -   And all the resources are deployed under the resource group.

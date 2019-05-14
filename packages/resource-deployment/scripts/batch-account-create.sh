@@ -1,32 +1,28 @@
 #!/bin/bash
 set -eo pipefail
 
-# This script will deploy Azure Batch account in user subscription mode and
-# enable managed identity for Azure on Batch pools
+# This script will deploy Azure Batch account in user subscription mode
+# and enable managed identity for Azure on Batch pools
 
 # Set default ARM Batch account template files
 batchTemplateFile="./templates/batch-account.template.json"
 batchTemplateParametersFile="./templates/batch-account.parameters.json"
 
 # Read script arguments
-while getopts "s:r:k:t:p:" option; do
+while getopts "s:r:t:p:" option; do
 case $option in
     s) subscription=${OPTARG};;
     r) resourceGroup=${OPTARG};;
-    k) keyVault=${OPTARG};;
     t) batchTemplateFile=${OPTARG};;
     p) batchTemplateParametersFile=${OPTARG};;
 esac
 done
 
 # Print script usage help
-if [[ -z $subscription ]] || [[ -z $resourceGroup ]]  || [[ -z $keyVault ]]; then
+if [[ -z $subscription ]] || [[ -z $resourceGroup ]]; then
     echo \
 "
-Usage: $0 -s <subscription> -r <resource group> -k <key vault> [-t <batch template file>] [-p <batch template parameters file>]
-
-Prerequisites:
-    Azure Key Vault
+Usage: $0 -s <subscription> -r <resource group> [-t <batch template file>] [-p <batch template parameters file>]
 "
     exit 0
 fi
@@ -41,7 +37,7 @@ fi
 echo "Switching to '$subscription' Azure subscription"
 az account set --subscription $subscription
 
-# Configure Azure subscription account to support Batch in user subscription mode
+# Configure Azure subscription account to support Batch account in user subscription mode
 source ${0%/*}/account-set-batch-app.sh
 
 # Deploy Azure Batch account using resource manager template
@@ -53,20 +49,19 @@ resources=$(az group deployment create \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-# Get batch account name
-re="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Batch/batchAccounts/(.[^/]+)"
+# Get key vault and batch account resources
+batchAccountRegEx="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Batch/batchAccounts/(.[^/]+)"
+keyVaultRegEx="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.KeyVault/vaults/(.[^/]+)"
 for resource in $resources
 do
-    if [[ $resource =~ $re ]]; then
+    if [[ $resource =~ $batchAccountRegEx ]]; then
         account="${BASH_REMATCH[1]}"
-        break
+    fi
+    
+    if [[ $resource =~ $keyVaultRegEx ]]; then
+        keyVault="${BASH_REMATCH[1]}"
     fi
 done
-
-if [[ -z $account ]]; then
-    echo "ERROR: The $batchTemplateFile ARM template deployment return no Batch account resource id."
-fi
-
 echo "The '$account' Azure Batch account deployed successfully"
 
 # Login into Azure Batch account
