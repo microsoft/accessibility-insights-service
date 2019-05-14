@@ -1,13 +1,14 @@
-import { registerAxisStorageToContainer } from 'axis-storage';
+import { registerAxisStorageToContainer, secretNames, SecretProvider } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
-import * as inversify from 'inversify';
-import { registerLoggerToContainer } from 'logger';
+import { Container, interfaces } from 'inversify';
+import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
 import { TaskParameterBuilder } from './batch/task-parameter-builder';
+import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
-export function setupJobManagerContainer(): inversify.Container {
-    const container = new inversify.Container();
+export function setupJobManagerContainer(): Container {
+    const container = new Container();
     registerLoggerToContainer(container);
     registerAxisStorageToContainer(container);
 
@@ -21,7 +22,7 @@ export function setupJobManagerContainer(): inversify.Container {
         .toSelf()
         .inSingletonScope();
 
-    setupAzureBatchServiceClient(container);
+    setupSingletonAzureBatchServiceClientProvider(container);
 
     container
         .bind(Batch)
@@ -31,12 +32,13 @@ export function setupJobManagerContainer(): inversify.Container {
     return container;
 }
 
-function setupAzureBatchServiceClient(container: inversify.Container): void {
-    container.bind(ServiceClient.BatchServiceClient).toDynamicValue(context => {
+function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
+    setupSingletonProvider(jobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
         const batchConfig = context.container.get(BatchConfig);
+        const secretProvider = context.container.get(SecretProvider);
 
         return new ServiceClient.BatchServiceClient(
-            new SharedKeyCredentials(batchConfig.accountName, batchConfig.accountKey),
+            new SharedKeyCredentials(batchConfig.accountName, await secretProvider.getSecret(secretNames.batchAccountKey)),
             batchConfig.accountUrl,
         );
     });

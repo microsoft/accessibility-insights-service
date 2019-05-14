@@ -24,12 +24,12 @@ mkdir $SCAN_REQUEST_SENDER_SHARED_LOCATION
 
 cd $JOB_MANAGER_SHARED_LOCATION
 echo "Installing job manager dependencies"
-npm install yargs@13.2.1 azure-batch@6.0.0
+npm install yargs@13.2.1 azure-batch@6.0.0 ms-rest-azure@2.6.0 azure-keyvault@3.0.4
 
 cd $RUNNER_SHARED_LOCATION
 echo "Installing runner dependencies"
-npm install yargs@13.2.1 puppeteer@1.12.2 axe-core@3.2.2 axe-puppeteer@1.0.0
+npm install yargs@13.2.1 puppeteer@1.12.2 axe-core@3.2.2 axe-puppeteer@1.0.0 ms-rest-azure@2.6.0 azure-keyvault@3.0.4
 
 cd $SCAN_REQUEST_SENDER_SHARED_LOCATION
 echo "Installing scan request sender dependencies"
-npm install yargs@13.2.1
+npm install yargs@13.2.1 ms-rest-azure@2.6.0 azure-keyvault@3.0.4

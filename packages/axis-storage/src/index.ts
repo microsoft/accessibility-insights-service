@@ -8,3 +8,5 @@ export { Queue } from './azure-queue/queue';
 export { RetryOptions } from './storage/retry-options';
 export { registerAxisStorageToContainer } from './register-axis-storage-to-container';
 export { StorageConfig } from './azure-queue/storage-config';
+export { secretNames } from './key-vault/secret-names';
+export { SecretProvider } from './key-vault/secret-provider';

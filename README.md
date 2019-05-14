@@ -116,7 +116,7 @@
 
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
-        ⋅ AZURE_COSMOS_DB_URL and AZURE_COSMOS_DB_KEY values
+        ⋅ KEY_VAULT_URL value
     ```
 
     The SAS URL can be generated from Azure portal blade under each file within Blob container.

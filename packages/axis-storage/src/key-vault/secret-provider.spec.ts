@@ -1,17 +1,17 @@
 import 'reflect-metadata';
 
-import * as azureKeyVault from 'azure-keyvault';
+import { KeyVaultClient } from 'azure-keyvault';
 import { IMock, Mock } from 'typemoq';
+import { AzureKeyVaultClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { AzureKeyVaultClientFactory } from './azure-keyvault-client-factory';
 import { SecretProvider } from './secret-provider';
 
 describe(SecretProvider, () => {
-    let azureKeyVaultClient: IMock<azureKeyVault.KeyVaultClient>;
-    let azureKeyVaultClientFactory: IMock<AzureKeyVaultClientFactory>;
+    let azureKeyVaultClient: IMock<KeyVaultClient>;
+    let azureKeyVaultClientProviderStub: AzureKeyVaultClientProvider;
     let testSubject: SecretProvider;
     let processStub: typeof process;
-    const keyVaultUrl = 'keyvault url';
+    const keyVaultUrl = 'key vault url';
 
     beforeEach(() => {
         processStub = ({
@@ -19,12 +19,13 @@ describe(SecretProvider, () => {
                 KEY_VAULT_URL: keyVaultUrl,
             },
         } as unknown) as typeof process;
-        azureKeyVaultClientFactory = Mock.ofType(AzureKeyVaultClientFactory);
-        azureKeyVaultClient = Mock.ofType<azureKeyVault.KeyVaultClient>();
+
+        azureKeyVaultClient = Mock.ofType<KeyVaultClient>();
         getPromisableDynamicMock(azureKeyVaultClient);
 
-        azureKeyVaultClientFactory.setup(async a => a.getClient()).returns(async () => Promise.resolve(azureKeyVaultClient.object));
-        testSubject = new SecretProvider(azureKeyVaultClientFactory.object, processStub);
+        azureKeyVaultClientProviderStub = async () => azureKeyVaultClient.object;
+
+        testSubject = new SecretProvider(azureKeyVaultClientProviderStub, processStub);
     });
 
     it('gets secret', async () => {

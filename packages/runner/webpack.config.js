@@ -10,7 +10,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer'],
+        externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer', 'ms-rest-azure', 'azure-keyvault'],
         entry: {
             ['runner']: path.resolve('./src/index.ts'),
         },

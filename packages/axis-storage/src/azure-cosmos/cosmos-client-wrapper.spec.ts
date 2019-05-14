@@ -3,12 +3,15 @@ import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
 import { IMock, Mock } from 'typemoq';
+import { CosmosClientProvider } from '../ioc-types';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { ItemType } from '../test-utilities/test-document-types/item-type';
 import { StorageDocument } from '../test-utilities/test-document-types/storage-document';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
 
 describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;
+    let cosmosClientProviderStub: CosmosClientProvider;
     let cosmosClientMock: IMock<cosmos.CosmosClient>;
     let databasesMock: IMock<cosmos.Databases>;
     let dbMock: IMock<cosmos.Database>;
@@ -25,7 +28,7 @@ describe('CosmosClientWrapper', () => {
         setupCosmosMocks();
         setupVerifiableGetOrCreateDbCall();
         setupVerifiableGetOrCreateCollectionCall();
-        testSubject = new CosmosClientWrapper(cosmosClientMock.object);
+        testSubject = new CosmosClientWrapper(cosmosClientProviderStub);
     });
 
     describe('readItem()', () => {
@@ -255,10 +258,13 @@ describe('CosmosClientWrapper', () => {
         collectionsMock = Mock.ofType(cosmos.Containers);
         itemsMock = Mock.ofType(cosmos.Items);
         itemMock = Mock.ofType(cosmos.Item);
+        cosmosClientProviderStub = async () => cosmosClientMock.object;
 
         collectionMock.setup(c => c.items).returns(() => itemsMock.object);
         dbMock.setup(d => d.containers).returns(() => collectionsMock.object);
         cosmosClientMock.setup(c => c.databases).returns(() => databasesMock.object);
+
+        getPromisableDynamicMock(cosmosClientMock);
     }
 
     function verifyMocks(): void {
