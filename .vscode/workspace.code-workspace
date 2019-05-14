@@ -63,7 +63,8 @@
             "esbenp.prettier-vscode",
             "rbbit.typescript-hero",
             "foxundermoon.shell-format",
-            "rogalmic.bash-debug"
+            "rogalmic.bash-debug",
+            "streetsidesoftware.code-spell-checker"
         ]
     },
     "launch": {
