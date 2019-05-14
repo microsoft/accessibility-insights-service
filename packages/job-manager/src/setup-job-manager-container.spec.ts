@@ -13,11 +13,7 @@ describe(setupJobManagerContainer, () => {
     const batchAccountName = 'test-batch-account-name';
 
     beforeEach(() => {
-        process.env.AZURE_STORAGE_ACCOUNT = 'test-storage-account';
-        process.env.AZURE_STORAGE_ACCESS_KEY = Buffer.from('test-access-key').toString('base64');
         process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-        process.env.AZURE_COSMOS_DB_URL = 'test-cosmos-db-url';
-        process.env.AZURE_COSMOS_DB_KEY = 'test-cosmos-db-key';
 
         process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
         process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
