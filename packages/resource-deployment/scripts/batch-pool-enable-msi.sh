@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # The script will enable system-assigned managed identity on Batch pool VMSS
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # This script will grant permissions to the managed identity to access key vault
 

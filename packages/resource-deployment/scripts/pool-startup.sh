@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 echo "Installing curl"
 apt-get update && apt-get install -y curl

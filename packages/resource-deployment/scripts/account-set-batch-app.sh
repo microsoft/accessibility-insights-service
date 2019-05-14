@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 # The script will configure the default Azure subscription account to support Batch user subscription mode
 
