@@ -1,11 +1,11 @@
 import { registerAxisStorageToContainer, secretNames, SecretProvider } from 'axis-storage';
 import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
 import { Container, interfaces } from 'inversify';
-import { createInstanceIfNil, registerLoggerToContainer } from 'logger';
+import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
 import { TaskParameterBuilder } from './batch/task-parameter-builder';
-import { BatchServiceClientProvider, jobManagerIocTypeNames } from './job-manager-ioc-types';
+import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
 export function setupJobManagerContainer(): Container {
     const container = new Container();
@@ -22,7 +22,7 @@ export function setupJobManagerContainer(): Container {
         .toSelf()
         .inSingletonScope();
 
-    setupAzureBatchServiceClientProvider(container);
+    setupSingletonAzureBatchServiceClientProvider(container);
 
     container
         .bind(Batch)
@@ -32,24 +32,14 @@ export function setupJobManagerContainer(): Container {
     return container;
 }
 
-function setupAzureBatchServiceClientProvider(container: Container): void {
-    let singletonBatchServiceClientPromise: Promise<ServiceClient.BatchServiceClient>;
+function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
+    setupSingletonProvider(jobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
+        const batchConfig = context.container.get(BatchConfig);
+        const secretProvider = context.container.get(SecretProvider);
 
-    container.bind(jobManagerIocTypeNames.BatchServiceClientProvider).toProvider(
-        (context: interfaces.Context): BatchServiceClientProvider => {
-            return async () => {
-                singletonBatchServiceClientPromise = createInstanceIfNil(singletonBatchServiceClientPromise, async () => {
-                    const batchConfig = context.container.get(BatchConfig);
-                    const secretProvider = context.container.get(SecretProvider);
-
-                    return new ServiceClient.BatchServiceClient(
-                        new SharedKeyCredentials(batchConfig.accountName, await secretProvider.getSecret(secretNames.batchAccountKey)),
-                        batchConfig.accountUrl,
-                    );
-                });
-
-                return singletonBatchServiceClientPromise;
-            };
-        },
-    );
+        return new ServiceClient.BatchServiceClient(
+            new SharedKeyCredentials(batchConfig.accountName, await secretProvider.getSecret(secretNames.batchAccountKey)),
+            batchConfig.accountUrl,
+        );
+    });
 }

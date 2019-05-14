@@ -92,35 +92,35 @@ describe(registerAxisStorageToContainer, () => {
         let credentialsStub: msrestAzure.ApplicationTokenCredentials;
         beforeEach(() => {
             globalLoginWithMSIMock = GlobalMock.ofInstance(msrestAzure.loginWithMSI, 'loginWithMSI', msrestAzure);
-            credentialsStub = 'credentails' as any;
+            credentialsStub = 'credentials' as any;
 
             globalLoginWithMSIMock.setup(async l => l()).returns(async () => credentialsStub);
         });
 
-        it('gets credentails', async () => {
+        it('gets credentials', async () => {
             let credsPromise: Promise<Credentials>;
 
             GlobalScope.using(globalLoginWithMSIMock).with(() => {
                 registerAxisStorageToContainer(container);
 
-                const credentailsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                credsPromise = credentailsProvider();
+                const credentialsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                credsPromise = credentialsProvider();
             });
 
             await expect(credsPromise).resolves.toBe(credentialsStub);
         });
 
-        it('gets singleton credentails', async () => {
+        it('gets singleton credentials', async () => {
             let credsPromise1: Promise<Credentials>;
             let credsPromise2: Promise<Credentials>;
 
             GlobalScope.using(globalLoginWithMSIMock).with(() => {
                 registerAxisStorageToContainer(container);
 
-                const credentailsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                const credentailsProvider2 = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                credsPromise1 = credentailsProvider();
-                credsPromise2 = credentailsProvider2();
+                const credentialsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                const credentialsProvider2 = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
+                credsPromise1 = credentialsProvider();
+                credsPromise2 = credentialsProvider2();
             });
 
             await expect(credsPromise1).resolves.toBe(credentialsStub);
@@ -129,13 +129,13 @@ describe(registerAxisStorageToContainer, () => {
         });
     });
 
-    describe('AzureKeyvaultClientProvider', () => {
+    describe('AzureKeyVaultClientProvider', () => {
         let credentialsStub: msrestAzure.ApplicationTokenCredentials;
         let credentialsProviderStub: CredentialsProvider;
-        credentialsStub = 'credentails' as any;
+        credentialsStub = 'credentials' as any;
 
         beforeEach(() => {
-            credentialsStub = 'credentails' as any;
+            credentialsStub = 'credentials' as any;
             credentialsProviderStub = async () => credentialsStub;
 
             registerAxisStorageToContainer(container);
@@ -144,22 +144,22 @@ describe(registerAxisStorageToContainer, () => {
         });
 
         it('gets KeyVaultClient', async () => {
-            let keyvaultClient: KeyVaultClient;
+            let keyVaultClient: KeyVaultClient;
 
-            const keyvaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
-            keyvaultClient = await keyvaultClientProvider();
+            const keyVaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
+            keyVaultClient = await keyVaultClientProvider();
 
-            expect(keyvaultClient).toBeInstanceOf(KeyVaultClient);
+            expect(keyVaultClient).toBeInstanceOf(KeyVaultClient);
         });
 
         it('gets singleton KeyVaultClient', async () => {
-            const keyvaultClientProvider1 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
-            const keyvaultClientProvider2 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
+            const keyVaultClientProvider1 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
+            const keyVaultClientProvider2 = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
 
-            const keyvaultClient1Promise = keyvaultClientProvider1();
-            const keyvaultClient2Promise = keyvaultClientProvider2();
+            const keyVaultClient1Promise = keyVaultClientProvider1();
+            const keyVaultClient2Promise = keyVaultClientProvider2();
 
-            expect(await keyvaultClient1Promise).toBe(await keyvaultClient2Promise);
+            expect(await keyVaultClient1Promise).toBe(await keyVaultClient2Promise);
         });
     });
 

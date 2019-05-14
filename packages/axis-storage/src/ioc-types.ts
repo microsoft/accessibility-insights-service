@@ -6,7 +6,7 @@ import * as msrestAzure from 'ms-rest-azure';
 export type Credentials = msrestAzure.MSIVmTokenCredentials | msrestAzure.ApplicationTokenCredentials;
 
 export const iocTypeNames = {
-    AzureKeyVaultClientProvider: 'AzureKeyvaultClientProvider',
+    AzureKeyVaultClientProvider: 'AzureKeyVaultClientProvider',
     CredentialsProvider: 'CredentialsProvider',
     AzureQueueServiceProvider: 'AzureQueueServiceProvider',
     CosmosClientProvider: 'CosmosClientProvider',
