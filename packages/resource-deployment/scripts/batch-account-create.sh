@@ -78,4 +78,7 @@ for pool in $pools
 do
     . "${0%/*}/batch-pool-enable-msi.sh"
     . "${0%/*}/key-vault-enable-msi.sh"
+
+    echo "Granting contributor access to the resource group '$resourceGroup' for managed identity '$systemAssignedIdentity'"
+    az role assignment create --role "Contributor"  --resource-group $resourceGroup --assignee-object-id $systemAssignedIdentity
 done
