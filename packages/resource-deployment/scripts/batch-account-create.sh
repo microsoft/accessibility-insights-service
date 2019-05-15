@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1090
 set -eo pipefail
 
 # This script will deploy Azure Batch account in user subscription mode
@@ -28,8 +29,7 @@ Usage: $0 -s <subscription> -r <resource group> [-t <batch template file>] [-p <
 fi
 
 # Login to Azure if required
-az account show 1> /dev/null
-if [ $? != 0 ]; then
+if ! az account show 1> /dev/null; then
     az login
 fi
 
@@ -38,7 +38,7 @@ echo "Switching to '$subscription' Azure subscription"
 az account set --subscription $subscription
 
 # Configure Azure subscription account to support Batch account in user subscription mode
-source ${0%/*}/account-set-batch-app.sh
+. "${0%/*}/account-set-batch-app.sh"
 
 # Deploy Azure Batch account using resource manager template
 echo "Deploying Azure Batch account"
@@ -48,6 +48,10 @@ resources=$(az group deployment create \
     --parameters $batchTemplateParametersFile \
     --query "properties.outputResources[].id" \
     -o tsv)
+
+export pool
+export keyVault
+export systemAssignedIdentity
 
 # Get key vault and batch account resources
 batchAccountRegEx="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Batch/batchAccounts/(.[^/]+)"
@@ -68,12 +72,10 @@ echo "The '$account' Azure Batch account deployed successfully"
 echo "Logging into '$account' Azure Batch account"
 az batch account login --name $account --resource-group $resourceGroup
 
-export systemAssignedIdentity
-
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
 for pool in $pools
 do
-    source ${0%/*}/batch-pool-enable-msi.sh
-    source ${0%/*}/key-vault-enable-msi.sh
+    . "${0%/*}/batch-pool-enable-msi.sh"
+    . "${0%/*}/key-vault-enable-msi.sh"
 done
