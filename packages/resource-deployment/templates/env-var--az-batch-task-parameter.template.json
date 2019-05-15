@@ -15,11 +15,7 @@
             "value": ""
         },
         {
-            "name": "AZURE_COSMOS_DB_URL",
-            "value": ""
-        },
-        {
-            "name": "AZURE_COSMOS_DB_KEY",
+            "name": "KEY_VAULT_URL",
             "value": ""
         }
     ],

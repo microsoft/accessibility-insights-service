@@ -42,19 +42,11 @@
                 "value": ""
             },
             {
-                "name": "AZ_BATCH_ACCOUNT_KEY",
-                "value": ""
-            },
-            {
                 "name": "AZURE_STORAGE_SCAN_QUEUE",
                 "value": "scanrequest"
             },
             {
-                "name": "AZURE_STORAGE_ACCOUNT",
-                "value": ""
-            },
-            {
-                "name": "AZURE_STORAGE_ACCESS_KEY",
+                "name": "KEY_VAULT_URL",
                 "value": ""
             },
             {
