@@ -1673,6 +1673,14 @@ azure-functions-core-tools@2.4.290:
     tmp "0.0.33"
     unzipper "0.9.7"
 
+azure-keyvault@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/azure-keyvault/-/azure-keyvault-3.0.4.tgz#b7733d8f58d99a66f9ae766451556eb3b058dae5"
+  integrity sha1-t3M9j1jZmmb5rnZkUVVus7BY2uU=
+  dependencies:
+    ms-rest "^2.3.2"
+    ms-rest-azure "^2.5.5"
+
 azure-storage@^2.10.2:
   version "2.10.3"
   resolved "https://registry.yarnpkg.com/azure-storage/-/azure-storage-2.10.3.tgz#c5966bf929d87587d78f6847040ea9a4b1d4a50a"
@@ -5700,7 +5708,7 @@ move-concurrently@^1.0.1:
     rimraf "^2.5.4"
     run-queue "^1.0.3"
 
-ms-rest-azure@^2.5.6:
+ms-rest-azure@^2.5.5, ms-rest-azure@^2.5.6, ms-rest-azure@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/ms-rest-azure/-/ms-rest-azure-2.6.0.tgz#2098efec529eecfa0c6e215b69143abcaba12140"
   integrity sha512-J6386a9krZ4VtU7CRt+Ypgo9RGf8+d3gjMBkH7zbkM4zzkhbbMOYiPRaZ+bHZcfihkKLlktTgA6rjshTjF329A==

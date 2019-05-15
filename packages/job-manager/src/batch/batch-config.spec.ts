@@ -5,14 +5,6 @@ import { BatchConfig } from './batch-config';
 describe(BatchConfig, () => {
     let batchConfig: BatchConfig;
 
-    it('return value of AZ_BATCH_ACCOUNT_KEY environment variable', () => {
-        const value: string = `value-${new Date().valueOf()}`;
-        process.env.AZ_BATCH_ACCOUNT_KEY = value;
-        batchConfig = new BatchConfig();
-
-        expect(batchConfig.accountKey).toEqual(value);
-    });
-
     it('return value of AZ_BATCH_ACCOUNT_NAME environment variable', () => {
         const value: string = `value-${new Date().valueOf()}`;
         process.env.AZ_BATCH_ACCOUNT_NAME = value;

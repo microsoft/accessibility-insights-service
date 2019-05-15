@@ -10,7 +10,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs'],
+        externals: ['yargs', 'ms-rest-azure', 'azure-keyvault'],
         entry: {
             ['sender']: path.resolve('./src/index.ts'),
         },
@@ -38,7 +38,7 @@ module.exports = env => {
         },
         output: {
             path: path.resolve('./dist'),
-            filename: '[name]/[name].js',
+            filename: '[name].js',
             libraryTarget: 'commonjs2',
         },
         plugins: [
@@ -48,7 +48,7 @@ module.exports = env => {
             new ForkTsCheckerWebpackPlugin(),
             new copyWebpackPlugin([
                 {
-                    context: './',
+                    context: './run-script',
                     from: '**/*.sh',
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
