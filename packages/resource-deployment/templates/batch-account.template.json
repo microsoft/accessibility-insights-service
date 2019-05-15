@@ -2,11 +2,18 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "batchAccount_name": {
-            "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
+        "batchAccount": {
             "type": "String",
+            "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "Batch Account Name"
+            }
+        },
+        "keyVault": {
+            "type": "String",
+            "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The key vault name."
             }
         },
         "location": {
@@ -26,21 +33,50 @@
     "variables": {},
     "resources": [
         {
-            "type": "Microsoft.Batch/batchAccounts",
-            "apiVersion": "2017-09-01",
-            "name": "[parameters('batchAccount_name')]",
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2016-10-01",
+            "name": "[parameters('keyVault')]",
             "location": "[parameters('location')]",
             "properties": {
-                "poolAllocationMode": "BatchService"
+                "sku": {
+                    "family": "A",
+                    "name": "standard"
+                },
+                "tenantId": "[subscription().tenantId]",
+                "accessPolicies": [
+                    {
+                        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+                        "objectId": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
+                        "permissions": {
+                            "secrets": ["delete", "get", "list", "set"]
+                        }
+                    }
+                ],
+                "enabledForDeployment": true,
+                "enabledForDiskEncryption": false,
+                "enabledForTemplateDeployment": false
+            }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts",
+            "apiVersion": "2017-09-01",
+            "name": "[parameters('batchAccount')]",
+            "dependsOn": ["[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]"],
+            "location": "[parameters('location')]",
+            "properties": {
+                "poolAllocationMode": "UserSubscription",
+                "keyVaultReference": {
+                    "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
+                    "url": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]"
+                }
             }
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2017-09-01",
-            "name": "[concat(parameters('batchAccount_name'), '/scan-request-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "displayName": "scan-request-pool",
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
@@ -81,8 +117,8 @@
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2017-09-01",
-            "name": "[concat(parameters('batchAccount_name'), '/url-scan-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount_name'))]"],
+            "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
