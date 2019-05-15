@@ -3,13 +3,18 @@ set -eo pipefail
 
 # This script will grant permissions to the managed identity to access key vault
 
+# Read script arguments
+while getopts "k:i:" option; do
+case $option in
+    k) keyVault=${OPTARG};;
+    i) systemAssignedIdentity=${OPTARG};;
+esac
+done
+
 if [[ -z $keyVault ]] || [[ -z $systemAssignedIdentity ]]; then
     echo \
 "
-The $0 script expects following variables to be defined:
-
-    keyVault - Azure key vault name
-    systemAssignedIdentity - Azure system-assigned managed identity Id
+Usage: $0 -k <key vault> -i <system-assigned managed identity Id>
 "
     exit 1
 fi

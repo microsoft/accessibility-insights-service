@@ -68,8 +68,6 @@ echo "The '$account' Azure Batch account deployed successfully"
 echo "Logging into '$account' Azure Batch account"
 az batch account login --name $account --resource-group $resourceGroup
 
-export vmssResourceGroup
-export vmssName
 export systemAssignedIdentity
 
 # Enable managed identity on Batch pools

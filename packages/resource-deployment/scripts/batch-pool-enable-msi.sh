@@ -3,14 +3,19 @@ set -eo pipefail
 
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
+# Read script arguments
+while getopts "r:a:p:" option; do
+case $option in
+    r) resourceGroup=${OPTARG};;
+    a) account=${OPTARG};;
+    p) pool=${OPTARG};;
+esac
+done
+
 if [[ -z $resourceGroup ]] || [[ -z $account ]] || [[ -z $pool ]]; then
     echo \
 "
-The $0 script expects following variables to be defined:
-
-    resourceGroup - Azure resource group name
-    account - Azure Batch account name
-    pool - Azure Batch pool name
+Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
 "
     exit 1
 fi
