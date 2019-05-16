@@ -1,12 +1,12 @@
+import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { inject, injectable } from 'inversify';
-import * as msRestAzure from 'ms-rest-azure';
 import { iocTypeNames } from '../ioc-types';
 
-export type Credentials = msRestAzure.MSIVmTokenCredentials | msRestAzure.ApplicationTokenCredentials;
+export type Credentials = msRestNodeAuth.MSIVmTokenCredentials | msRestNodeAuth.ApplicationTokenCredentials;
 
 @injectable()
 export class CredentialsProvider {
-    constructor(@inject(iocTypeNames.msRestAzure) private readonly msrestAzureObj: typeof msRestAzure) {}
+    constructor(@inject(iocTypeNames.msRestAzure) private readonly msrestAzureObj: typeof msRestNodeAuth) {}
 
     public async getCredentialsForKeyVault(): Promise<Credentials> {
         // referred https://azure.microsoft.com/en-us/resources/samples/app-service-msi-keyvault-node/
@@ -14,6 +14,6 @@ export class CredentialsProvider {
     }
 
     private async getCredentialsForResource(resource: string): Promise<Credentials> {
-        return this.msrestAzureObj.loginWithMSI({ resource });
+        return this.msrestAzureObj.loginWithVmMSI({ resource });
     }
 }

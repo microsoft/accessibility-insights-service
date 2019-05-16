@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 
 import { CosmosClient } from '@azure/cosmos';
-import { KeyVaultClient } from 'azure-keyvault';
+import { KeyVaultClient } from '@azure/keyvault';
+import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
-import * as msrestAzure from 'ms-rest-azure';
-import * as prettyFormat from 'pretty-format';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -14,11 +14,10 @@ import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AzureKeyVaultClientProvider, AzureQueueServiceProvider, CosmosClientProvider, iocTypeNames } from './ioc-types';
+import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
-
 // tslint:disable: no-any no-unsafe-any
 
 describe(registerAxisStorageToContainer, () => {
@@ -39,6 +38,10 @@ describe(registerAxisStorageToContainer, () => {
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
         verifySingletonDependencyResolution(CredentialsProvider);
+
+        verifySingletonDependencyResolutionWithValue(iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
+        verifySingletonDependencyResolutionWithValue(iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
+        verifySingletonDependencyResolutionWithValue(iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
     });
 
     it('verify non-singleton resolution', () => {
@@ -48,7 +51,7 @@ describe(registerAxisStorageToContainer, () => {
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
     });
 
-    describe('QueueServiceProvider', () => {
+    describe('QueueServiceURLProvider', () => {
         const storageAccountName = 'test-storage-account-name';
         // tslint:disable-next-line: mocha-no-side-effect-code
         const storageAccountKey = Buffer.from('test-storage-account-key').toString('base64');
@@ -57,42 +60,50 @@ describe(registerAxisStorageToContainer, () => {
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
-            secretProviderMock.setup(async s => s.getSecret(secretNames.storageAccountName)).returns(async () => storageAccountName);
-            secretProviderMock.setup(async s => s.getSecret(secretNames.storageAccountKey)).returns(async () => storageAccountKey);
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountName))
+                .returns(async () => storageAccountName)
+                .verifiable(Times.once());
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
+                .verifiable(Times.once());
+
             registerAxisStorageToContainer(container);
             stubBinding(SecretProvider, secretProviderMock.object);
         });
 
-        it('verify Azure QueueService resolution', async () => {
-            const queueServiceProvider = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
-            const queueService = await queueServiceProvider();
+        afterEach(() => {
+            secretProviderMock.verifyAll();
+        });
 
-            const jsonString = prettyFormat(queueService);
-            expect(jsonString.indexOf(storageAccountName) > 0).toBe(true);
-            expect(jsonString.indexOf(storageAccountKey) > 0).toBe(true);
+        it('verify Azure QueueService resolution', async () => {
+            const queueServiceURLProvider = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
+            const queueServiceURL = await queueServiceURLProvider();
+
+            expect(queueServiceURL.url).toBe(`https://${storageAccountName}.queue.core.windows.net`);
         });
 
         it('creates singleton queueService instance', async () => {
-            const queueServiceProvider1 = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
-            const queueServiceProvider2 = container.get<AzureQueueServiceProvider>(iocTypeNames.AzureQueueServiceProvider);
-            const queueService1Promise = queueServiceProvider1();
-            const queueService2Promise = queueServiceProvider2();
+            const queueServiceURLProvider1 = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
+            const queueServiceURLProvider2 = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
+            const queueServiceURL1Promise = queueServiceURLProvider1();
+            const queueServiceURL2Promise = queueServiceURLProvider2();
 
-            expect(await queueService1Promise).toBe(await queueService2Promise);
+            expect(await queueServiceURL1Promise).toBe(await queueServiceURL2Promise);
         });
     });
 
     describe('AzureKeyVaultClientProvider', () => {
-        let credentialsStub: msrestAzure.ApplicationTokenCredentials;
-        credentialsStub = 'credentials' as any;
+        let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
         let credentialsProviderMock: IMock<CredentialsProvider>;
 
         beforeEach(() => {
-            credentialsStub = 'credentials' as any;
+            credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
             credentialsProviderMock = Mock.ofType(CredentialsProvider);
             registerAxisStorageToContainer(container);
-            container.unbind(CredentialsProvider);
-            container.bind(CredentialsProvider).toConstantValue(credentialsProviderMock.object);
+
+            stubBinding(CredentialsProvider, credentialsProviderMock.object);
 
             credentialsProviderMock
                 .setup(async c => c.getCredentialsForKeyVault())
@@ -162,6 +173,11 @@ describe(registerAxisStorageToContainer, () => {
     function verifySingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).toBe(container.get(key));
+    }
+
+    function verifySingletonDependencyResolutionWithValue(key: any, value: any): void {
+        expect(container.get(key)).toBe(value);
+        verifySingletonDependencyResolution(key);
     }
 
     function verifyNonSingletonDependencyResolution(key: any): void {

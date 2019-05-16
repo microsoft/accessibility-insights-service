@@ -1,9 +1,8 @@
-import * as azureStorage from 'azure-storage';
+import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
-import { VError } from 'verror';
-import { AzureQueueServiceProvider, iocTypeNames } from '../ioc-types';
+import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
 import { StorageConfig } from './storage-config';
 
@@ -13,7 +12,10 @@ export class Queue {
 
     constructor(
         @inject(StorageConfig) private readonly config: StorageConfig,
-        @inject(iocTypeNames.AzureQueueServiceProvider) private readonly queueClientProvider: AzureQueueServiceProvider,
+        @inject(iocTypeNames.QueueServiceURLProvider) private readonly queueServiceURLProvider: QueueServiceURLProvider,
+        @inject(iocTypeNames.QueueURLProvider) private readonly queueURLProvider: QueueURLProvider,
+        @inject(iocTypeNames.MessagesURLProvider) private readonly messagesURLProvider: MessagesURLProvider,
+        @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
@@ -21,11 +23,16 @@ export class Queue {
         const maxDequeueCount = 2;
         const messages: Message[] = [];
 
-        const serverMessages = await this.getQueueMessages(queue);
+        const queueURL = await this.getQueueURL(queue);
+        const deadQueueURL = await this.getQueueURL(`${queue}-dead`);
 
+        await this.ensureQueueExists(queueURL);
+        await this.ensureQueueExists(deadQueueURL);
+
+        const serverMessages = await this.getQueueMessages(queueURL);
         for (const serverMessage of serverMessages) {
             if (serverMessage.dequeueCount > maxDequeueCount) {
-                await this.moveToDeadQueue(queue, serverMessage);
+                await this.moveToDeadQueue(queueURL, deadQueueURL, serverMessage);
 
                 this.logger.logWarn(
                     `[Queue] Message ${
@@ -40,81 +47,74 @@ export class Queue {
         return messages;
     }
 
-    public async moveToDeadQueue(originQueue: string, queueMessage: azureStorage.QueueService.QueueMessageResult): Promise<void> {
-        const targetQueue = `${originQueue}-dead`;
-
-        await this.createQueueMessage(targetQueue, JSON.stringify(queueMessage.messageText));
-        await this.deleteQueueMessage(originQueue, queueMessage.messageId, queueMessage.popReceipt);
-    }
-
     public async deleteMessage(message: Message, queue: string = this.scanQueue): Promise<void> {
-        return this.deleteQueueMessage(queue, message.messageId, message.popReceipt);
+        const queueURL = await this.getQueueURL(queue);
+
+        return this.deleteQueueMessage(queueURL, message.messageId, message.popReceipt);
     }
 
-    public async getQueueMessages(queue: string): Promise<azureStorage.QueueService.QueueMessageResult[]> {
-        const requestOptions = {
-            numOfMessages: 32, // Maximum number of messages to retrieve from queue: 32
-            visibilityTimeout: 300, // Message visibility timeout in seconds
+    public async createMessage(queue: string, message: unknown): Promise<void> {
+        const queueURL = await this.getQueueURL(queue);
+        await this.ensureQueueExists(queueURL);
+
+        await this.createQueueMessage(queueURL, message);
+    }
+
+    private async ensureQueueExists(queueURL: QueueURL): Promise<void> {
+        try {
+            await queueURL.getProperties(Aborter.none);
+        } catch {
+            await queueURL.create(Aborter.none);
+        }
+    }
+
+    private async deleteQueueMessage(queueURL: QueueURL, messageId: string, popReceipt: string): Promise<void> {
+        const messagesURL = this.getMessagesURL(queueURL);
+        const messageIdURL = this.getMessageIdURL(messagesURL, messageId);
+
+        await messageIdURL.delete(Aborter.none, popReceipt);
+    }
+
+    private async getQueueMessages(queueURL: QueueURL): Promise<Models.DequeuedMessageItem[]> {
+        const requestOptions: Models.MessagesDequeueOptionalParams = {
+            numberOfMessages: 32, // Maximum number of messages to retrieve from queue: 32
+            visibilitytimeout: 300, // Message visibility timeout in seconds
         };
 
-        await this.ensureQueueExists(queue);
+        await this.ensureQueueExists(queueURL);
 
-        const client = await this.queueClientProvider();
+        const messagesURL = this.getMessagesURL(queueURL);
 
-        return new Promise<azureStorage.QueueService.QueueMessageResult[]>((resolve, reject) => {
-            client.getMessages(this.config.scanQueue, requestOptions, (error, serverMessages) => {
-                if (_.isNil(error)) {
-                    resolve(serverMessages);
-                } else {
-                    reject(new VError(error, `An error occurred while retrieving messages from queue ${this.config.scanQueue}`));
-                }
-            });
-        });
+        const response = await messagesURL.dequeue(Aborter.none, requestOptions);
+
+        return response.dequeuedMessageItems;
     }
 
-    public async createQueueMessage(queue: string, message: string): Promise<void> {
-        await this.ensureQueueExists(queue);
+    private async moveToDeadQueue(
+        originQueueURL: QueueURL,
+        deadQueueURL: QueueURL,
+        queueMessage: Models.DequeuedMessageItem,
+    ): Promise<void> {
+        await this.createQueueMessage(deadQueueURL, queueMessage.messageText);
+        await this.deleteQueueMessage(originQueueURL, queueMessage.messageId, queueMessage.popReceipt);
+    }
+    private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<void> {
+        const messagesURL = this.getMessagesURL(queueURL);
 
-        const client = await this.queueClientProvider();
-
-        return new Promise<void>((resolve, reject) => {
-            client.createMessage(queue, message, error => {
-                if (_.isNil(error)) {
-                    resolve();
-                } else {
-                    reject(new VError(error, `An error occurred while adding new message into queue ${queue}.`));
-                }
-            });
-        });
+        await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
     }
 
-    public async deleteQueueMessage(queue: string, messageId: string, popReceipt: string): Promise<void> {
-        await this.ensureQueueExists(queue);
-
-        const client = await this.queueClientProvider();
-
-        return new Promise((resolve, reject) => {
-            client.deleteMessage(queue, messageId, popReceipt, error => {
-                if (_.isNil(error)) {
-                    resolve();
-                } else {
-                    reject(new VError(error, `An error occurred while deleting message ${messageId} from queue ${queue}.`));
-                }
-            });
-        });
+    private getMessagesURL(queueURL: QueueURL): MessagesURL {
+        return this.messagesURLProvider(queueURL);
     }
 
-    public async ensureQueueExists(queue: string): Promise<void> {
-        const client = await this.queueClientProvider();
+    private getMessageIdURL(messageURL: MessagesURL, messageId: string): MessageIdURL {
+        return this.messageIdURLProvider(messageURL, messageId);
+    }
 
-        return new Promise<void>((resolve, reject) => {
-            client.createQueueIfNotExists(queue, error => {
-                if (_.isNil(error)) {
-                    resolve();
-                } else {
-                    reject(new VError(error, `An error occurred while creating new queue ${queue}.`));
-                }
-            });
-        });
+    private async getQueueURL(queueName: string): Promise<QueueURL> {
+        const serviceURL = await this.queueServiceURLProvider();
+
+        return this.queueURLProvider(serviceURL, queueName);
     }
 }
