@@ -7,7 +7,6 @@ set -eo pipefail
 
 # Set default ARM Batch account template files
 batchTemplateFile="./templates/batch-account.template.json"
-batchTemplateParametersFile="./templates/batch-account.parameters.json"
 
 # Read script arguments
 while getopts "s:r:t:p:" option; do
@@ -15,7 +14,6 @@ case $option in
     s) subscription=${OPTARG};;
     r) resourceGroup=${OPTARG};;
     t) batchTemplateFile=${OPTARG};;
-    p) batchTemplateParametersFile=${OPTARG};;
 esac
 done
 
@@ -45,7 +43,6 @@ echo "Deploying Azure Batch account"
 resources=$(az group deployment create \
     --resource-group $resourceGroup \
     --template-file $batchTemplateFile \
-    --parameters $batchTemplateParametersFile \
     --query "properties.outputResources[].id" \
     -o tsv)
 
