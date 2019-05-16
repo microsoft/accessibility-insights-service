@@ -7,20 +7,14 @@ import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
 import * as msrestAzure from 'ms-rest-azure';
 import * as prettyFormat from 'pretty-format';
-import { GlobalMock, GlobalScope, IGlobalMock, IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import {
-    AzureKeyVaultClientProvider,
-    AzureQueueServiceProvider,
-    CosmosClientProvider,
-    Credentials,
-    CredentialsProvider,
-    iocTypeNames,
-} from './ioc-types';
+import { CredentialsProvider } from './credentials/credentials-provider';
+import { AzureKeyVaultClientProvider, AzureQueueServiceProvider, CosmosClientProvider, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
@@ -44,6 +38,7 @@ describe(registerAxisStorageToContainer, () => {
         verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
+        verifySingletonDependencyResolution(CredentialsProvider);
     });
 
     it('verify non-singleton resolution', () => {
@@ -87,60 +82,22 @@ describe(registerAxisStorageToContainer, () => {
         });
     });
 
-    describe('CredentialsProvider', () => {
-        let globalLoginWithMSIMock: IGlobalMock<typeof msrestAzure.loginWithMSI>;
-        let credentialsStub: msrestAzure.ApplicationTokenCredentials;
-        beforeEach(() => {
-            globalLoginWithMSIMock = GlobalMock.ofInstance(msrestAzure.loginWithMSI, 'loginWithMSI', msrestAzure);
-            credentialsStub = 'credentials' as any;
-
-            globalLoginWithMSIMock.setup(async l => l()).returns(async () => credentialsStub);
-        });
-
-        it('gets credentials', async () => {
-            let credsPromise: Promise<Credentials>;
-
-            GlobalScope.using(globalLoginWithMSIMock).with(() => {
-                registerAxisStorageToContainer(container);
-
-                const credentialsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                credsPromise = credentialsProvider();
-            });
-
-            await expect(credsPromise).resolves.toBe(credentialsStub);
-        });
-
-        it('gets singleton credentials', async () => {
-            let credsPromise1: Promise<Credentials>;
-            let credsPromise2: Promise<Credentials>;
-
-            GlobalScope.using(globalLoginWithMSIMock).with(() => {
-                registerAxisStorageToContainer(container);
-
-                const credentialsProvider = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                const credentialsProvider2 = container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-                credsPromise1 = credentialsProvider();
-                credsPromise2 = credentialsProvider2();
-            });
-
-            await expect(credsPromise1).resolves.toBe(credentialsStub);
-            await expect(credsPromise2).resolves.toBe(credentialsStub);
-            globalLoginWithMSIMock.verify(async l => l(), Times.once());
-        });
-    });
-
     describe('AzureKeyVaultClientProvider', () => {
         let credentialsStub: msrestAzure.ApplicationTokenCredentials;
-        let credentialsProviderStub: CredentialsProvider;
         credentialsStub = 'credentials' as any;
+        let credentialsProviderMock: IMock<CredentialsProvider>;
 
         beforeEach(() => {
             credentialsStub = 'credentials' as any;
-            credentialsProviderStub = async () => credentialsStub;
-
+            credentialsProviderMock = Mock.ofType(CredentialsProvider);
             registerAxisStorageToContainer(container);
-            container.unbind(iocTypeNames.CredentialsProvider);
-            container.bind(iocTypeNames.CredentialsProvider).toProvider(() => credentialsProviderStub);
+            container.unbind(CredentialsProvider);
+            container.bind(CredentialsProvider).toConstantValue(credentialsProviderMock.object);
+
+            credentialsProviderMock
+                .setup(async c => c.getCredentialsForKeyVault())
+                .returns(async () => Promise.resolve(credentialsStub))
+                .verifiable(Times.once());
         });
 
         it('gets KeyVaultClient', async () => {
@@ -150,6 +107,7 @@ describe(registerAxisStorageToContainer, () => {
             keyVaultClient = await keyVaultClientProvider();
 
             expect(keyVaultClient).toBeInstanceOf(KeyVaultClient);
+            credentialsProviderMock.verifyAll();
         });
 
         it('gets singleton KeyVaultClient', async () => {
@@ -160,6 +118,7 @@ describe(registerAxisStorageToContainer, () => {
             const keyVaultClient2Promise = keyVaultClientProvider2();
 
             expect(await keyVaultClient1Promise).toBe(await keyVaultClient2Promise);
+            credentialsProviderMock.verifyAll();
         });
     });
 
