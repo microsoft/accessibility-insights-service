@@ -9,7 +9,8 @@ import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import { Credentials, CredentialsProvider, iocTypeNames } from './ioc-types';
+import { CredentialsProvider } from './credentials/credentials-provider';
+import { iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 
@@ -24,7 +25,12 @@ export function registerAxisStorageToContainer(container: Container): void {
         .toSelf()
         .inSingletonScope();
 
-    setupSingletonCredentialsProvider(container);
+    container.bind(iocTypeNames.msRestAzure).toConstantValue(msrestAzure);
+    container
+        .bind(CredentialsProvider)
+        .toSelf()
+        .inSingletonScope();
+
     setupSingletonAzureKeyVaultClientProvider(container);
 
     container
@@ -48,16 +54,10 @@ export function registerAxisStorageToContainer(container: Container): void {
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async context => {
-        const credentialsProvider = context.container.get<CredentialsProvider>(iocTypeNames.CredentialsProvider);
-        const credentials = await credentialsProvider();
+        const credentialsProvider = context.container.get<CredentialsProvider>(CredentialsProvider);
+        const credentials = await credentialsProvider.getCredentialsForKeyVault();
 
         return new KeyVaultClient(credentials);
-    });
-}
-
-function setupSingletonCredentialsProvider(container: interfaces.Container): void {
-    setupSingletonProvider<Credentials>(iocTypeNames.CredentialsProvider, container, async context => {
-        return msrestAzure.loginWithMSI();
     });
 }
 
