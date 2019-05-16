@@ -36,8 +36,8 @@ fi
 #   Name: Microsoft Azure Batch
 #   Application ID: ddbf3205-c6bd-46ae-8127-60eb93363864
 #   Object ID: f520d84c-3fd3-4cc8-88d4-2ed25b00d27a
-principalId=$(az role assignment list --query "[?principalId=='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'].principalId" -o tsv)
-if [[ -z $principalId ]]; then
+principalId=$(az role assignment list --query "[?principalId=='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'].roleDefinitionName" -o tsv)
+if [[ $principalId != "Contributor" ]]; then
     echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
     az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
 fi
