@@ -3,14 +3,14 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "batchAccount": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "Batch Account Name"
             }
         },
         "keyVault": {
-            "type": "String",
+            "type": "string",
             "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The key vault name."
@@ -23,10 +23,11 @@
                 "description": "The location in which the Azure Storage resources should be deployed."
             }
         },
-        "pool-startup-script-sas-url": {
+        "storage_account_name": {
             "type": "string",
+            "defaultValue": "[concat('allystorage',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
-                "description": "The SAS URL of the VM startup script."
+                "description": "Storage account name."
             }
         }
     },
@@ -59,11 +60,14 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts",
-            "apiVersion": "2017-09-01",
+            "apiVersion": "2018-12-01",
             "name": "[parameters('batchAccount')]",
             "dependsOn": ["[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]"],
             "location": "[parameters('location')]",
             "properties": {
+                "autoStorage": {
+                    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name'))]"
+                },
                 "poolAllocationMode": "UserSubscription",
                 "keyVaultReference": {
                     "id": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVault'))]",
@@ -73,7 +77,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2017-09-01",
+            "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -103,6 +107,11 @@
                 },
                 "startTask": {
                     "commandLine": "/bin/bash -c pool-startup.sh",
+                    "resourceFiles": [
+                        {
+                            "autoStorageContainerName": "batch-pool-startup-script"
+                        }
+                    ],
                     "userIdentity": {
                         "autoUser": {
                             "scope": "Pool",
@@ -116,7 +125,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2017-09-01",
+            "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -146,6 +155,11 @@
                 },
                 "startTask": {
                     "commandLine": "/bin/bash -c pool-startup.sh",
+                    "resourceFiles": [
+                        {
+                            "autoStorageContainerName": "batch-pool-startup-script"
+                        }
+                    ],
                     "userIdentity": {
                         "autoUser": {
                             "scope": "Pool",
