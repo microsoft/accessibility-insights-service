@@ -21,4 +21,4 @@ fi
 
 # Grant permissions to the managed identity
 echo "Granting '$systemAssignedIdentity' managed identity permissions to '$keyVault' key vault"
-az keyvault set-policy --name $keyVault --object-id $systemAssignedIdentity --secret-permissions get list 1> /dev/null
+az keyvault set-policy --name "$keyVault" --object-id "$systemAssignedIdentity" --secret-permissions get list 1> /dev/null

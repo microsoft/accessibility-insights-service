@@ -15,7 +15,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     az provider register --namespace Microsoft.Batch
 
     # Wait for the registration to complete
-    end=$(($SECONDS+300))
+    end=$((SECONDS+300))
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         sleep 10
@@ -25,7 +25,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
             break
         fi
     done
-    echo ""
+    echo " Registered"
 fi
 
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
@@ -35,6 +35,9 @@ fi
 # Allow Azure Batch service to access the subscription
 #   Name: Microsoft Azure Batch
 #   Application ID: ddbf3205-c6bd-46ae-8127-60eb93363864
-
-echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
-az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
+#   Object ID: f520d84c-3fd3-4cc8-88d4-2ed25b00d27a
+roleDefinitionName=$(az role assignment list --query "[?principalId=='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'].roleDefinitionName" -o tsv)
+if [[ $roleDefinitionName != "Contributor" ]]; then
+    echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
+    az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
+fi
