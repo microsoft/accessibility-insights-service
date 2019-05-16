@@ -22,7 +22,7 @@ fi
 
 # Validate Azure Batch account for the user subscription pool allocation mode
 echo "Validating '$account' Azure Batch account configuration"
-poolAllocationMode=$(az batch account show --name $account --resource-group $resourceGroup --query "poolAllocationMode" -o tsv)
+poolAllocationMode=$(az batch account show --name "$account" --resource-group "$resourceGroup" --query "poolAllocationMode" -o tsv)
 
 if [[ $poolAllocationMode != "UserSubscription" ]]; then
     echo "ERROR: The '$account' Azure Batch account with '$poolAllocationMode' pool allocation mode is not supported."
@@ -42,7 +42,7 @@ fi
 
 # Enable system-assigned managed identity on a VMSS
 echo "Enabling system-assigned managed identity on /resourceGroups/$vmssResourceGroup/providers/Microsoft.Compute/virtualMachineScaleSets/$vmssName"
-systemAssignedIdentity=$(az vmss identity assign --name $vmssName --resource-group $vmssResourceGroup --query systemAssignedIdentity -o tsv)
+systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
 
 echo \
 "Batch pool VMSS configuration:

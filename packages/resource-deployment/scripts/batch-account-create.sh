@@ -35,7 +35,7 @@ fi
 
 # Set default Azure subscription
 echo "Switching to '$subscription' Azure subscription"
-az account set --subscription $subscription
+az account set --subscription "$subscription"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"
@@ -43,9 +43,9 @@ az account set --subscription $subscription
 # Deploy Azure Batch account using resource manager template
 echo "Deploying Azure Batch account"
 resources=$(az group deployment create \
-    --resource-group $resourceGroup \
-    --template-file $batchTemplateFile \
-    --parameters $batchTemplateParametersFile \
+    --resource-group "$resourceGroup" \
+    --template-file "$batchTemplateFile" \
+    --parameters "$batchTemplateParametersFile" \
     --query "properties.outputResources[].id" \
     -o tsv)
 
@@ -70,7 +70,7 @@ echo "The '$account' Azure Batch account deployed successfully"
 
 # Login into Azure Batch account
 echo "Logging into '$account' Azure Batch account"
-az batch account login --name $account --resource-group $resourceGroup
+az batch account login --name "$account" --resource-group "$resourceGroup"
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
@@ -80,5 +80,5 @@ do
     . "${0%/*}/key-vault-enable-msi.sh"
 
     echo "Granting contributor access to the resource group '$resourceGroup' for managed identity '$systemAssignedIdentity'"
-    az role assignment create --role "Contributor"  --resource-group $resourceGroup --assignee-object-id $systemAssignedIdentity
+    az role assignment create --role "Contributor"  --resource-group "$resourceGroup" --assignee-object-id "$systemAssignedIdentity" 1> /dev/null
 done
