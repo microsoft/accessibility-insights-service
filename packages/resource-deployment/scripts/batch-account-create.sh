@@ -79,6 +79,7 @@ do
     . "${0%/*}/batch-pool-enable-msi.sh"
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    echo "Granting contributor access to the resource group '$resourceGroup' for managed identity '$systemAssignedIdentity'"
+    # Enable VMSS access to resource group that contains external Azure services Batch tasks depend on
+    echo "Granting access to the resource group '$resourceGroup' for managed identity '$systemAssignedIdentity'"
     az role assignment create --role "Contributor"  --resource-group "$resourceGroup" --assignee-object-id "$systemAssignedIdentity" 1> /dev/null
 done
