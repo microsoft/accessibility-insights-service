@@ -23,7 +23,7 @@
                 "description": "The location in which the Azure Storage resources should be deployed."
             }
         },
-        "storage_account_name": {
+        "storageAccountName": {
             "type": "string",
             "defaultValue": "[concat('allystorage',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
@@ -66,7 +66,7 @@
             "location": "[parameters('location')]",
             "properties": {
                 "autoStorage": {
-                    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storage_account_name'))]"
+                    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
                 },
                 "poolAllocationMode": "UserSubscription",
                 "keyVaultReference": {
