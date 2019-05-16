@@ -6,13 +6,13 @@ set -eo pipefail
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
-echo "Validating Microsoft.AAD provider registration on '$subscription' Azure subscription"
-batchProviderRegistrationState=$(az provider show --namespace Microsoft.AAD --query "registrationState" -o tsv)
+echo "Validating Microsoft.Batch provider registration on '$subscription' Azure subscription"
+batchProviderRegistrationState=$(az provider show --namespace Microsoft.Batch --query "registrationState" -o tsv)
 
-# Register Microsoft.AAD provider on Azure subscription
+# Register Microsoft.Batch provider on Azure subscription
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "Registering Microsoft.AAD provider on '$subscription' Azure subscription"
-    az provider register --namespace Microsoft.AAD
+    echo "Registering Microsoft.Batch provider on '$subscription' Azure subscription"
+    az provider register --namespace Microsoft.Batch
 
     # Wait for the registration to complete
     end=$((SECONDS+300))
@@ -20,7 +20,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     while [ $SECONDS -le $end ]; do
         sleep 10
         printf "."
-        batchProviderRegistrationState=$(az provider show --namespace Microsoft.AAD --query "registrationState" -o tsv)
+        batchProviderRegistrationState=$(az provider show --namespace Microsoft.Batch --query "registrationState" -o tsv)
         if [[ $batchProviderRegistrationState == "Registered" ]]; then
             break
         fi
@@ -29,7 +29,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
 fi
 
 if [[ $batchProviderRegistrationState != "Registered" ]]; then
-    echo "ERROR: Unable to register Microsoft.AAD provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
+    echo "ERROR: Unable to register Microsoft.Batch provider on '$subscription' Azure subscription. Check Azure subscription resource providers state."
 fi
 
 # Allow Azure Batch service to access the subscription
