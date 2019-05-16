@@ -9,6 +9,7 @@ export class CredentialsProvider {
     constructor(@inject(iocTypeNames.msRestAzure) private readonly msrestAzureObj: typeof msRestAzure) {}
 
     public async getCredentialsForKeyVault(): Promise<Credentials> {
+        // referred https://azure.microsoft.com/en-us/resources/samples/app-service-msi-keyvault-node/
         return this.getCredentialsForResource('https://vault.azure.net');
     }
 
