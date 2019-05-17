@@ -117,6 +117,7 @@
     ```
         ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ KEY_VAULT_URL value
+        ⋅ APPINSIGHTS_INSTRUMENTATIONKEY value
     ```
 
     The SAS URL can be generated from Azure portal blade under each file within Blob container.
@@ -132,7 +133,6 @@
 -   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/url-scan-schedule.template.json) template file by adding the following data:
 
     ```
-        ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section. Set the value of
           AZ_BATCH_TASK_PARAMETER parameter to the base64 encoded string from
           the step above.
@@ -155,7 +155,6 @@
 -   Update the local copy of [scan-req-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/scan-req-schedule.template.json) template file by adding the following data:
 
     ```
-        ⋅ The SAS URL for each resource file under resourceFiles section
         ⋅ The values under commonEnvironmentSettings section
     ```
 

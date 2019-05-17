@@ -98,6 +98,7 @@ export class Queue {
         await this.createQueueMessage(deadQueueURL, queueMessage.messageText);
         await this.deleteQueueMessage(originQueueURL, queueMessage.messageId, queueMessage.popReceipt);
     }
+
     private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<void> {
         const messagesURL = this.getMessagesURL(queueURL);
 
