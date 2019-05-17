@@ -285,7 +285,12 @@ describe('CosmosClientWrapper', () => {
 
     function setupVerifiableGetOrCreateCollectionCall(): void {
         collectionsMock
-            .setup(async d => d.createIfNotExists({ id: collectionName }, { offerThroughput: 10000 }))
+            .setup(async d =>
+                d.createIfNotExists(
+                    { id: collectionName },
+                    { offerThroughput: 10000, partitionKey: CosmosClientWrapper.PARTITIONKEY_NAME },
+                ),
+            )
             .returns(async () => Promise.resolve({ container: collectionMock.object }))
             .verifiable();
     }
