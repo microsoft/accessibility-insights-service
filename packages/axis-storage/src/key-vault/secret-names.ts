@@ -3,5 +3,4 @@ export const secretNames = {
     cosmosDbKey: 'cosmosDbKey',
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
-    batchAccountKey: 'batchAccountKey',
 };

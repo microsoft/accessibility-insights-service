@@ -8,7 +8,7 @@ export class ScanRequestSender {
     public async sendRequestToScan(websites: WebSite[]): Promise<void> {
         await Promise.all(
             websites.map(async message => {
-                await this.queue.createQueueMessage(this.storageConfig.scanQueue, JSON.stringify(message));
+                await this.queue.createMessage(this.storageConfig.scanQueue, message);
             }),
         );
     }

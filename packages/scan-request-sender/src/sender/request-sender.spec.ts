@@ -1,24 +1,37 @@
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'axis-storage';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { WebSite } from '../request-type/website';
 import { ScanRequestSender } from './request-sender';
 // tslint:disable: no-unsafe-any
 describe('Scan request Sender', () => {
     let queueMock: IMock<Queue>;
     let testSubject: ScanRequestSender;
+    let storageConfigStub: StorageConfig;
     beforeEach(() => {
+        storageConfigStub = {
+            scanQueue: 'test-scan-queue',
+        };
+
         queueMock = Mock.ofType<Queue>();
-        queueMock
-            .setup(async q => q.createQueueMessage(It.isAny(), It.isAny()))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
-        testSubject = new ScanRequestSender(queueMock.object, new StorageConfig());
+
+        testSubject = new ScanRequestSender(queueMock.object, storageConfigStub);
     });
-    it('send scan request', () => {
+    it('send scan request', async () => {
+        const websitesData = getWebSitesData();
+
         // tslint:disable-next-line: no-floating-promises
-        testSubject.sendRequestToScan(getWebSitesData());
+        websitesData.forEach(website => {
+            queueMock
+                .setup(async q => q.createMessage(storageConfigStub.scanQueue, website))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+        });
+
+        await testSubject.sendRequestToScan(websitesData);
+
+        queueMock.verifyAll();
     });
 
     function getWebSitesData(): WebSite[] {

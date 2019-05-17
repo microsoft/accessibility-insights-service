@@ -1,7 +1,5 @@
-// tslint:disable: no-submodule-imports
+import { BatchServiceModels } from '@azure/batch';
 import { Message } from 'axis-storage';
-import { ServiceClient } from 'azure-batch';
-import { BatchError, CloudTaskListResult, TaskAddParameter } from 'azure-batch/lib/models';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -35,18 +33,18 @@ export class Batch {
                     throw new VError(`The job ${serviceJobId} is not active and cannot be use to run new tasks.`);
                 }
             })
-            .catch(async (error: BatchError) => {
+            .catch(async (error: BatchServiceModels.BatchError) => {
                 if (error.code === 'JobNotFound') {
                     if (addJobIdIndexOnCreate) {
                         serviceJobId = `${jobId}_${crypto.randomBytes(5).toString('hex')}`;
                     }
 
-                    const jobAddParameter = {
+                    const jobAddParameter: BatchServiceModels.JobAddParameter = {
                         id: serviceJobId,
                         poolInfo: {
                             poolId: this.config.poolId,
                         },
-                        onAllTasksComplete: 'terminateJob',
+                        onAllTasksComplete: 'terminatejob',
                     };
 
                     await client.job.add(jobAddParameter);
@@ -60,7 +58,7 @@ export class Batch {
     }
 
     public async createTasks(jobId: string, messages: Message[]): Promise<JobTask[]> {
-        const taskAddParameters: TaskAddParameter[] = [];
+        const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
 
         messages.forEach(message => {
             const jobTask = new JobTask(message.messageId);
@@ -100,7 +98,7 @@ export class Batch {
             const timerId = setInterval(async () => {
                 await client.task
                     .list(jobId, { taskListOptions: taskListOptions })
-                    .then(async (result: CloudTaskListResult) => {
+                    .then(async (result: BatchServiceModels.CloudTaskListResult) => {
                         if (result.length === 0 || (result.length === 1 && result[0].id === process.env.AZ_BATCH_TASK_ID)) {
                             clearInterval(timerId);
                             this.logger.logInfo(`Job ${jobId} completed.`);
@@ -142,7 +140,7 @@ export class Batch {
         return undefined;
     }
 
-    private setTasksState(cloudTaskList: ServiceClient.BatchServiceModels.CloudTaskListResult): void {
+    private setTasksState(cloudTaskList: BatchServiceModels.CloudTaskListResult): void {
         cloudTaskList.forEach(task => {
             if (this.jobTasks.has(task.id)) {
                 this.jobTasks.get(task.id).state = task.state;
@@ -152,7 +150,7 @@ export class Batch {
         });
     }
 
-    private getTaskAddParameter(jobTaskId: string, messageText: string): TaskAddParameter {
+    private getTaskAddParameter(jobTaskId: string, messageText: string): BatchServiceModels.TaskAddParameter {
         const message = JSON.parse(messageText);
         const commandLine = this.taskParameterBuilder.getCommandLine(message);
 
@@ -161,7 +159,7 @@ export class Batch {
             commandLine: commandLine,
             resourceFiles: this.taskParameterBuilder.resourceFiles,
             environmentSettings: this.taskParameterBuilder.environmentSettings,
-            constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }) },
+            constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }).toISOString() },
         };
     }
 }
