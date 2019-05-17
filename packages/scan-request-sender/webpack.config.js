@@ -10,7 +10,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'ms-rest-azure', 'azure-keyvault'],
+        externals: ['yargs'],
         entry: {
             ['sender']: path.resolve('./src/index.ts'),
         },
