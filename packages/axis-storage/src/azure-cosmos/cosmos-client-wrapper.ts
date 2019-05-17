@@ -7,7 +7,7 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 
 @injectable()
 export class CosmosClientWrapper {
-    public static readonly PARTIONKEY_NAME: string = '/partitionKey';
+    public static readonly PARTITIONKEY_NAME: string = '/partitionKey';
     constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
