@@ -1,11 +1,11 @@
 {
     "resourceFiles": [
         {
-            "httpUrl": "",
+            "blobSource": "",
             "filePath": "runner.js"
         },
         {
-            "httpUrl": "",
+            "blobSource": "",
             "filePath": "start-runner.sh"
         }
     ],

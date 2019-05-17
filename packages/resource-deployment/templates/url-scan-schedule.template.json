@@ -14,12 +14,7 @@
             "commandLine": "/bin/bash -c run-job-manager.sh",
             "resourceFiles": [
                 {
-                    "blobSource": "",
-                    "filePath": "run-job-manager.sh"
-                },
-                {
-                    "blobSource": "",
-                    "filePath": "job-manager.js"
+                    "autoStorageContainerName": "batch-job-manager-script"
                 }
             ],
             "constraints": {
