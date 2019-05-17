@@ -1,12 +1,12 @@
-// tslint:disable: no-submodule-imports no-unsafe-any no-any
-import { EnvironmentSetting, ResourceFile } from 'azure-batch/lib/models';
+import { BatchServiceModels } from '@azure/batch';
 import { inject, injectable } from 'inversify';
 import { BatchConfig } from './batch-config';
+// tslint:disable: no-unsafe-any no-any
 
 @injectable()
 export class TaskParameterBuilder {
-    public readonly resourceFiles?: ResourceFile[];
-    public readonly environmentSettings?: EnvironmentSetting[];
+    public readonly resourceFiles?: BatchServiceModels.ResourceFile[];
+    public readonly environmentSettings?: BatchServiceModels.EnvironmentSetting[];
     public readonly commandLineTemplate: string;
 
     constructor(@inject(BatchConfig) batchConfig: BatchConfig) {

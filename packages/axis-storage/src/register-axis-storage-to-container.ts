@@ -1,9 +1,9 @@
 import { CosmosClient } from '@azure/cosmos';
-import { KeyVaultClient } from 'azure-keyvault';
-import { createQueueService, ExponentialRetryPolicyFilter, QueueMessageEncoder, QueueService } from 'azure-storage';
+import { KeyVaultClient } from '@azure/keyvault';
+import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import { setupSingletonProvider } from 'logger';
-import * as msrestAzure from 'ms-rest-azure';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -25,7 +25,7 @@ export function registerAxisStorageToContainer(container: Container): void {
         .toSelf()
         .inSingletonScope();
 
-    container.bind(iocTypeNames.msRestAzure).toConstantValue(msrestAzure);
+    container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
     container
         .bind(CredentialsProvider)
         .toSelf()
@@ -47,30 +47,33 @@ export function registerAxisStorageToContainer(container: Container): void {
 
     container.bind(CosmosClientWrapper).toSelf();
 
-    setupSingletonAzureQueueServiceProvider(container);
+    container.bind(iocTypeNames.QueueURLProvider).toConstantValue(QueueURL.fromServiceURL);
+    container.bind(iocTypeNames.MessagesURLProvider).toConstantValue(MessagesURL.fromQueueURL);
+    container.bind(iocTypeNames.MessageIdURLProvider).toConstantValue(MessageIdURL.fromMessagesURL);
+
+    setupSingletonQueueServiceURLProvider(container);
 
     container.bind(Queue).toSelf();
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
     setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async context => {
-        const credentialsProvider = context.container.get<CredentialsProvider>(CredentialsProvider);
+        const credentialsProvider = context.container.get(CredentialsProvider);
         const credentials = await credentialsProvider.getCredentialsForKeyVault();
 
         return new KeyVaultClient(credentials);
     });
 }
 
-function setupSingletonAzureQueueServiceProvider(container: interfaces.Container): void {
-    setupSingletonProvider<QueueService>(iocTypeNames.AzureQueueServiceProvider, container, async context => {
+function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
+    setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
         const secretProvider = context.container.get(SecretProvider);
         const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
         const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        const sharedKeyCredential = new SharedKeyCredential(accountName, accountKey);
+        const pipeline = StorageURL.newPipeline(sharedKeyCredential);
 
-        const queueService = createQueueService(accountName, accountKey).withFilter(new ExponentialRetryPolicyFilter());
-        queueService.messageEncoder = new QueueMessageEncoder.TextBase64QueueMessageEncoder();
-
-        return queueService;
+        return new ServiceURL(`https://${accountName}.queue.core.windows.net`, pipeline);
     });
 }
 

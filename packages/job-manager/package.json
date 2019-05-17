@@ -43,13 +43,13 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
+        "@azure/batch": "^6.0.0",
+        "@azure/ms-rest-nodeauth": "^1.1.1",
         "axis-storage": "1.0.0",
-        "azure-batch": "^6.0.0",
-        "azure-storage": "^2.10.2",
-        "inversify": "^5.0.1",
-        "logger": "1.0.0",
         "dotenv": "^6.2.0",
+        "inversify": "^5.0.1",
         "lodash": "^4.17.11",
+        "logger": "1.0.0",
         "moment": "^2.22.2",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0"

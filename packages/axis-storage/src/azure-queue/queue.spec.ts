@@ -1,121 +1,222 @@
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-empty no-null-keyword
 import 'reflect-metadata';
 
-import { QueueService } from 'azure-storage';
+import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
 import { Logger } from 'logger';
-import { IMock, It, Mock } from 'typemoq';
-import { AzureQueueServiceProvider } from '../ioc-types';
+import { IMock, Mock, Times } from 'typemoq';
+import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { Message } from './message';
 import { Queue } from './queue';
 import { StorageConfig } from './storage-config';
 
 describe(Queue, () => {
     let config: StorageConfig;
-    let queue: Queue;
-    let queueServiceMock: IMock<QueueService>;
-    let queueServiceProviderStub: AzureQueueServiceProvider;
+    let testSubject: Queue;
+    let queueServiceURLProviderMock: IMock<QueueServiceURLProvider>;
+    let queueURLProviderMock: IMock<QueueURLProvider>;
+    let messagesURLProviderMock: IMock<MessagesURLProvider>;
+    let messageIdURLProviderMock: IMock<MessageIdURLProvider>;
     let loggerMock: IMock<Logger>;
+    let serviceURLMock: IMock<ServiceURL>;
+    let queueURLMock: IMock<QueueURL>;
+    let deadQueueURLMock: IMock<QueueURL>;
+    let messagesURLMock: IMock<MessagesURL>;
+    let deadMessagesURLMock: IMock<MessagesURL>;
+    let messageIdUrlMock: IMock<MessageIdURL>;
 
     beforeEach(() => {
         config = {
             scanQueue: 'queue-1',
         };
-        queueServiceMock = Mock.ofType();
+        queueServiceURLProviderMock = Mock.ofInstance((() => {}) as any);
+        queueURLProviderMock = Mock.ofInstance((() => {}) as any);
+        messagesURLProviderMock = Mock.ofInstance((() => {}) as any);
+        messageIdURLProviderMock = Mock.ofInstance((() => {}) as any);
 
-        getPromisableDynamicMock(queueServiceMock);
-        queueServiceProviderStub = async () => queueServiceMock.object;
-
+        serviceURLMock = Mock.ofType<ServiceURL>();
+        queueURLMock = Mock.ofType<QueueURL>();
+        deadQueueURLMock = Mock.ofType<QueueURL>();
+        messagesURLMock = Mock.ofType<MessagesURL>();
+        deadMessagesURLMock = Mock.ofType<MessagesURL>();
+        messageIdUrlMock = Mock.ofType<MessageIdURL>();
         loggerMock = Mock.ofType(Logger);
+
+        getPromisableDynamicMock(serviceURLMock);
+        getPromisableDynamicMock(queueURLMock);
+        getPromisableDynamicMock(deadQueueURLMock);
+        getPromisableDynamicMock(messagesURLMock);
+        getPromisableDynamicMock(deadMessagesURLMock);
+        getPromisableDynamicMock(messageIdUrlMock);
+
+        queueServiceURLProviderMock.setup(async q => q()).returns(async () => serviceURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, config.scanQueue)).returns(() => queueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${config.scanQueue}-dead`)).returns(() => deadQueueURLMock.object);
+        messagesURLProviderMock.setup(m => m(queueURLMock.object)).returns(() => messagesURLMock.object);
+        messagesURLProviderMock.setup(m => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
+
+        testSubject = new Queue(
+            config,
+            queueServiceURLProviderMock.object,
+            queueURLProviderMock.object,
+            messagesURLProviderMock.object,
+            messageIdURLProviderMock.object,
+            loggerMock.object,
+        );
     });
 
     describe('getMessages()', () => {
         it('get queue messages with low dequeue count', async () => {
-            const queueMessageResults = [
-                <QueueService.QueueMessageResult>{
-                    messageText: 'messageText-1',
-                    messageId: 'messageId-1',
-                    popReceipt: 'popReceipt-1',
-                    dequeueCount: 1,
-                },
-                <QueueService.QueueMessageResult>{
-                    messageText: 'messageText-2',
-                    messageId: 'messageId-2',
-                    popReceipt: 'popReceipt-2',
-                    dequeueCount: 3,
-                },
-            ];
-            const queueMessageResult = [
-                {
-                    messageText: 'messageText-1',
-                    messageId: 'messageId-1',
-                    popReceipt: 'popReceipt-1',
-                },
-            ];
+            const toBeDequeuedMessage = {
+                messageText: 'to be dequeued message text',
+                messageId: 'to be dequeued message id',
+                popReceipt: 'to be dequeued pop receipt',
+                dequeueCount: 3,
+            } as Models.DequeuedMessageItem;
+            const notDequeuedMessage = {
+                messageText: 'messageText-1',
+                messageId: 'messageId-1',
+                popReceipt: 'popReceipt-1',
+                dequeueCount: 1,
+            } as Models.DequeuedMessageItem;
+            const queueMessageResults = [notDequeuedMessage, toBeDequeuedMessage];
+            const actualQueueMessageResult = createMessagesFromServerMessages([notDequeuedMessage]);
 
-            queueServiceMock
-                .setup(o => o.createQueueIfNotExists(It.isAny(), It.isAny()))
-                .returns((q, c) => {
-                    return c(undefined);
-                });
+            setupQueueCreationCallWhenQueueExists();
 
-            queueServiceMock
-                .setup(o => o.createMessage(`${config.scanQueue}-dead`, It.isAny(), It.isAny()))
-                .returns((q, m, c) => {
-                    return c(undefined);
-                })
-                .verifiable();
+            setupVerifyCallToMoveMessageToDeadQueue(toBeDequeuedMessage);
 
-            queueServiceMock
-                .setup(o =>
-                    o.deleteMessage(config.scanQueue, queueMessageResults[1].messageId, queueMessageResults[1].popReceipt, It.isAny()),
-                )
-                .returns((q, m, r, c) => {
-                    return c(undefined);
-                })
-                .verifiable();
+            setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            queueServiceMock
-                .setup(o => o.getMessages(config.scanQueue, It.isAny(), It.isAny()))
-                .returns((q, r, c) => {
-                    return c(undefined, queueMessageResults);
-                })
-                .verifiable();
+            const queueMessageResultActual = await testSubject.getMessages();
 
-            queue = new Queue(config, queueServiceProviderStub, loggerMock.object);
-            const queueMessageResultActual = await queue.getMessages();
+            expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
-            expect(queueMessageResultActual).toEqual(queueMessageResult);
+            verifyAll();
+        });
 
-            queueServiceMock.verifyAll();
+        it('creates queue when not exists', async () => {
+            const message = {
+                messageText: 'messageText-1',
+                messageId: 'messageId-1',
+                popReceipt: 'popReceipt-1',
+                dequeueCount: 1,
+            } as Models.DequeuedMessageItem;
+            const queueMessageResults = [message];
+            const actualQueueMessageResult = createMessagesFromServerMessages([message]);
+
+            setupQueueCreationCallWhenQueueDoesNotExist();
+
+            setupVerifyCallForDequeueMessage(queueMessageResults);
+
+            const queueMessageResultActual = await testSubject.getMessages();
+
+            expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
+
+            verifyAll();
         });
     });
 
-    describe('deleteMessage()', () => {
+    describe('createMessage', () => {
+        it('creates message & queue', async () => {
+            const messageText = 'some message';
+
+            setupQueueCreationCallWhenQueueDoesNotExist();
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
+
+            await testSubject.createMessage(config.scanQueue, messageText);
+
+            verifyAll();
+        });
+
+        it('creates message when queue exists', async () => {
+            const messageText = 'some message';
+
+            setupQueueCreationCallWhenQueueExists();
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
+
+            await testSubject.createMessage(config.scanQueue, messageText);
+
+            verifyAll();
+        });
+    });
+
+    describe('deleteMessage', () => {
         it('delete queue message by id', async () => {
             const message = {
                 messageText: 'messageText-1',
                 messageId: 'messageId-1',
                 popReceipt: 'popReceipt-1',
-            };
-            let callback: (error: Error) => void;
-            queueServiceMock
-                .setup(o => o.createQueueIfNotExists(config.scanQueue, It.isAny()))
-                .callback((q, c) => {
-                    callback = c;
-                })
-                .returns(() => callback(undefined))
-                .verifiable();
-            queueServiceMock
-                .setup(o => o.deleteMessage(config.scanQueue, message.messageId, message.popReceipt, It.isAny()))
-                .callback((q, m, r, c) => {
-                    callback = c;
-                })
-                .returns(() => callback(undefined))
-                .verifiable();
-            queue = new Queue(config, queueServiceProviderStub, loggerMock.object);
-            await queue.deleteMessage(message);
+            } as Models.DequeuedMessageItem;
 
-            queueServiceMock.verifyAll();
+            setupVerifyCallToDeleteMessage(message);
+            await testSubject.deleteMessage(message);
+
+            verifyAll();
         });
     });
+
+    function setupQueueCreationCallWhenQueueExists(): void {
+        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
+        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
+    }
+
+    function setupQueueCreationCallWhenQueueDoesNotExist(): void {
+        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
+        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
+
+        queueURLMock.setup(async q => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
+        deadQueueURLMock.setup(async q => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
+    }
+
+    function setupVerifyCallToMoveMessageToDeadQueue(message: Models.DequeuedMessageItem): void {
+        setupVerifyCallToEnqueueMessage(deadMessagesURLMock, message.messageText);
+        setupVerifyCallToDeleteMessage(message);
+    }
+
+    function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string): void {
+        currentMessagesURLMock
+            .setup(async d => d.enqueue(Aborter.none, JSON.stringify(messageText)))
+            .returns(async () => null)
+            .verifiable(Times.once());
+    }
+
+    function setupVerifyCallForDequeueMessage(queueMessageResults: Models.DequeuedMessageItem[]): void {
+        messagesURLMock
+            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: 300 }))
+            .returns(async () =>
+                Promise.resolve({
+                    dequeuedMessageItems: queueMessageResults,
+                } as any),
+            )
+            .verifiable(Times.once());
+    }
+    function setupVerifyCallToDeleteMessage(message: Models.DequeuedMessageItem): void {
+        messageIdURLProviderMock.setup(m => m(messagesURLMock.object, message.messageId)).returns(() => messageIdUrlMock.object);
+
+        messageIdUrlMock
+            .setup(async m => m.delete(Aborter.none, message.popReceipt))
+            .returns(async => null)
+            .verifiable(Times.once());
+    }
+
+    function createMessagesFromServerMessages(serverMessages: Models.DequeuedMessageItem[]): Message[] {
+        return serverMessages.map(m => {
+            return new Message(m.messageText, m.messageId, m.popReceipt);
+        });
+    }
+
+    function verifyAll(): void {
+        queueServiceURLProviderMock.verifyAll();
+        queueURLProviderMock.verifyAll();
+        messagesURLProviderMock.verifyAll();
+        messageIdURLProviderMock.verifyAll();
+        loggerMock.verifyAll();
+        serviceURLMock.verifyAll();
+        queueURLMock.verifyAll();
+        deadQueueURLMock.verifyAll();
+        messagesURLMock.verifyAll();
+        deadMessagesURLMock.verifyAll();
+        messageIdUrlMock.verifyAll();
+    }
 });

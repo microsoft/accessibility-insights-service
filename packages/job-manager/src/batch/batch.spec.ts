@@ -1,11 +1,8 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
 import 'reflect-metadata';
 
+import { BatchServiceClient, BatchServiceModels, Job, Task } from '@azure/batch';
 import { Message } from 'axis-storage';
-import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
-import BatchServiceClient from 'azure-batch/lib/batchServiceClient';
-import { CloudTaskListResult, TaskAddParameter, TaskExecutionInformation } from 'azure-batch/lib/models';
-import { Job, Task } from 'azure-batch/lib/operations';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -18,8 +15,7 @@ import { TaskParameterBuilder } from './task-parameter-builder';
 const jobId = 'job-1';
 let batch: Batch;
 let config: BatchConfig;
-let batchClient: ServiceClient.BatchServiceClient;
-let sharedKeyCredentialsMock: IMock<SharedKeyCredentials>;
+let batchClientStub: BatchServiceClient;
 let taskParameterBuilderMock: IMock<TaskParameterBuilder>;
 let jobMock: IMock<Job>;
 let taskMock: IMock<Task>;
@@ -33,15 +29,16 @@ function beforeEachSuit(): void {
         poolId: 'poolId',
         taskParameter: JSON.stringify({ foo: 'bar' }),
     };
-    sharedKeyCredentialsMock = Mock.ofType2(SharedKeyCredentials, ['accountName', 'accountKey']);
     taskParameterBuilderMock = Mock.ofType2(TaskParameterBuilder, [config]);
-    batchClient = new BatchServiceClient(sharedKeyCredentialsMock.object, 'accountUrl');
     jobMock = Mock.ofType();
     taskMock = Mock.ofType();
-    batchClient.job = jobMock.object;
-    batchClient.task = taskMock.object;
+    batchClientStub = ({
+        job: jobMock.object,
+        task: taskMock.object,
+    } as unknown) as BatchServiceClient;
+
     loggerMock = Mock.ofType(Logger);
-    batchServiceClientProviderStub = async () => batchClient;
+    batchServiceClientProviderStub = async () => batchClientStub;
 }
 
 describe('waitJob()', () => {
@@ -59,12 +56,12 @@ describe('waitJob()', () => {
     });
 
     it('wait for all tasks to complete', async () => {
-        const cloudTaskListResult = <CloudTaskListResult>[];
+        const cloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
         for (let k = 1; k < 5; k++) {
             cloudTaskListResult.push({
                 id: `job-${k}`,
-                state: JobTaskState.queued,
-                executionInfo: <TaskExecutionInformation>{
+                state: 'preparing',
+                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
                     result: JobTaskExecutionResult.success,
                 },
             });
@@ -78,10 +75,10 @@ describe('waitJob()', () => {
             .callback((id, taskListOptions) => {
                 // the hosted task does not complete
                 if (i < cloudTaskListResult.length - 1) {
-                    cloudTaskListResult[i++].state = JobTaskState.completed;
+                    cloudTaskListResult[i++].state = 'completed';
                 }
             })
-            .returns(async () => Promise.resolve(cloudTaskListResult.filter(r => r.state !== JobTaskState.completed)))
+            .returns(async () => Promise.resolve(cloudTaskListResult.filter(r => r.state !== JobTaskState.completed) as any))
             .verifiable();
 
         batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
@@ -95,20 +92,20 @@ describe('getCreatedTasksState()', () => {
     beforeEach(beforeEachSuit);
 
     it('get created job tasks state with pagination', async () => {
-        const cloudTaskListResultFirst = <CloudTaskListResult>[];
+        const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
         cloudTaskListResultFirst.odatanextLink = 'nextPageLink';
         cloudTaskListResultFirst.push({
             id: 'job-1',
             state: JobTaskState.completed,
-            executionInfo: <TaskExecutionInformation>{
+            executionInfo: <BatchServiceModels.TaskExecutionInformation>{
                 result: JobTaskExecutionResult.success,
             },
         });
-        const cloudTaskListResultNext: CloudTaskListResult = <CloudTaskListResult>[];
+        const cloudTaskListResultNext: BatchServiceModels.CloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
         cloudTaskListResultNext.push({
             id: 'job-2',
             state: JobTaskState.completed,
-            executionInfo: <TaskExecutionInformation>{
+            executionInfo: <BatchServiceModels.TaskExecutionInformation>{
                 result: JobTaskExecutionResult.success,
             },
         });
@@ -141,17 +138,19 @@ describe('getCreatedTasksState()', () => {
             .setup(async o => o.list(jobId))
             .returns(async () => {
                 if (i++ === 0) {
-                    return Promise.resolve(cloudTaskListResultFirst);
+                    return Promise.resolve(cloudTaskListResultFirst as any);
                 } else {
-                    return Promise.resolve(<CloudTaskListResult>{});
+                    return Promise.resolve(<BatchServiceModels.CloudTaskListResult>{});
                 }
             })
             .verifiable();
         taskMock
             .setup(async o => o.listNext('nextPageLink'))
-            .returns(async () => Promise.resolve(cloudTaskListResultNext))
+            .returns(async () => Promise.resolve(cloudTaskListResultNext as BatchServiceModels.TaskListResponse))
             .verifiable();
-        taskMock.setup(async o => o.addCollection(jobId, It.isAny())).returns(async () => Promise.resolve({ value: [] }));
+        taskMock
+            .setup(async o => o.addCollection(jobId, It.isAny()))
+            .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
 
         batch = new Batch(config, taskParameterBuilderMock.object, batchServiceClientProviderStub, loggerMock.object);
         const jobTask = await batch.createTasks(jobId, messages);
@@ -205,7 +204,7 @@ describe('createTasks()', () => {
                     },
                 },
             ],
-        };
+        } as BatchServiceModels.TaskAddCollectionResponse;
         const jobTasksExpected = [
             {
                 id: '',
@@ -219,8 +218,8 @@ describe('createTasks()', () => {
                 error: 'error',
             },
         ];
-        const expectedTaskConstraints: ServiceClient.BatchServiceModels.TaskConstraints = {
-            maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }),
+        const expectedTaskConstraints: BatchServiceModels.TaskConstraints = {
+            maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }).toISOString(),
         };
 
         let actualTaskConstraints;
@@ -228,7 +227,7 @@ describe('createTasks()', () => {
         taskMock
             .setup(async o => o.addCollection(jobId, It.isAny()))
             .callback((id, taskAddParameters) =>
-                taskAddParameters.forEach((taskAddParameter: TaskAddParameter) => {
+                taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
                     taskAddCollectionResult.value[i].taskId = taskAddParameter.id;
                     jobTasksExpected[i++].id = taskAddParameter.id;
                     actualTaskConstraints = taskAddParameter.constraints;
@@ -288,7 +287,7 @@ describe('createJobIfNotExists()', () => {
     it('get existing active job', async () => {
         const cloudJob = {
             state: 'active',
-        };
+        } as BatchServiceModels.JobGetResponse;
         jobMock
             .setup(async o => o.get(jobId))
             .returns(async () => Promise.resolve(cloudJob))
@@ -302,7 +301,7 @@ describe('createJobIfNotExists()', () => {
     it('ignore existing non active job', async () => {
         const cloudJob = {
             state: 'completed',
-        };
+        } as BatchServiceModels.JobGetResponse;
         jobMock
             .setup(async o => o.get(jobId))
             .returns(async () => Promise.resolve(cloudJob))
