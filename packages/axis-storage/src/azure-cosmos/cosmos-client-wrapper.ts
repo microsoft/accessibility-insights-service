@@ -7,6 +7,7 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 
 @injectable()
 export class CosmosClientWrapper {
+    public static readonly PARTITIONKEY_NAME: string = '/partitionKey';
     constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
@@ -104,7 +105,10 @@ export class CosmosClientWrapper {
     }
 
     private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
-        const response = await cosmosDb.containers.createIfNotExists({ id: collectionName }, { offerThroughput: 10000 });
+        const response = await cosmosDb.containers.createIfNotExists(
+            { id: collectionName },
+            { offerThroughput: 10000, partitionKey: CosmosClientWrapper.PARTITIONKEY_NAME },
+        );
 
         return response.container;
     }
