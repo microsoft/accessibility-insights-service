@@ -25,7 +25,7 @@ mkdir $SCAN_REQUEST_SENDER_SHARED_LOCATION
 
 cd $JOB_MANAGER_SHARED_LOCATION
 echo "Installing job manager dependencies"
-npm install yargs@13.2.1 azure-batch@6.0.0
+npm install yargs@13.2.1
 
 cd $RUNNER_SHARED_LOCATION
 echo "Installing runner dependencies"

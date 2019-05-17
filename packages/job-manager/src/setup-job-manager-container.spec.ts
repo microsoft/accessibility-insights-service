@@ -1,9 +1,11 @@
 import 'reflect-metadata';
 
-import { Queue, secretNames, SecretProvider } from 'axis-storage';
-import { Container } from 'inversify';
+import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { CredentialsProvider, Queue, SecretProvider } from 'axis-storage';
+import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 import { Batch } from './batch/batch';
+
 import { BatchServiceClientProvider, jobManagerIocTypeNames } from './job-manager-ioc-types';
 import { setupJobManagerContainer } from './setup-job-manager-container';
 // tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
@@ -25,16 +27,20 @@ describe(setupJobManagerContainer, () => {
     describe('BatchServiceClient', () => {
         let secretProviderMock: IMock<SecretProvider>;
         let container: Container;
-        const batchAccountKey = 'test-batch-account-key';
+        let credentailsProviderMock: IMock<CredentialsProvider>;
+        let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
             container = setupJobManagerContainer();
+            credentailsProviderMock = Mock.ofType(CredentialsProvider);
+            credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
 
-            secretProviderMock.setup(async s => s.getSecret(secretNames.batchAccountKey)).returns(async () => batchAccountKey);
-            container.unbind(SecretProvider);
-            container.bind(SecretProvider).toDynamicValue(() => secretProviderMock.object);
+            credentailsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+
+            stubBinding(container, SecretProvider, secretProviderMock.object);
+            stubBinding(container, CredentialsProvider, credentailsProviderMock.object);
         });
 
         it('resolves BatchServiceClient', async () => {
@@ -42,10 +48,8 @@ describe(setupJobManagerContainer, () => {
 
             const batchServiceClient = await batchServiceClientProvider();
 
-            const credJsonString = JSON.stringify(batchServiceClient.credentials);
-            expect(batchServiceClient.batchUrl).toBe(batchAccountUrl);
-            expect(credJsonString.indexOf(batchAccountKey) >= 0).toBe(true);
-            expect(credJsonString.indexOf(batchAccountName) >= 0).toBe(true);
+            expect(batchServiceClient.credentials).toBe(credentialsStub);
+            expect((batchServiceClient as any).baseUri).toBe(batchAccountUrl);
         });
 
         it('resolves BatchServiceClient top singleton value', async () => {
@@ -75,5 +79,10 @@ describe(setupJobManagerContainer, () => {
     function verifyNonSingletonDependencyResolution(container: Container, key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).not.toBe(container.get(key));
+    }
+
+    function stubBinding(container: Container, bindingName: interfaces.ServiceIdentifier<any>, value: any): void {
+        container.unbind(bindingName);
+        container.bind(bindingName).toDynamicValue(() => value);
     }
 });

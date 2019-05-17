@@ -45,7 +45,7 @@
     "dependencies": {
         "@azure/cosmos": "^2.1.2",
         "@azure/keyvault": "^0.1.0",
-        "@azure/ms-rest-nodeauth": "^1.0.1",
+        "@azure/ms-rest-nodeauth": "^1.1.1",
         "@azure/storage-queue": "^10.1.0",
         "@types/sha.js": "^2.4.0",
         "dotenv": "^6.2.0",

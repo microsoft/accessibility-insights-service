@@ -1,7 +1,7 @@
-import { ServiceClient } from 'azure-batch';
+import { BatchServiceClient } from '@azure/batch';
 
 export const jobManagerIocTypeNames = {
     BatchServiceClientProvider: 'BatchServiceClientProvider',
 };
 
-export type BatchServiceClientProvider = () => Promise<ServiceClient.BatchServiceClient>;
+export type BatchServiceClientProvider = () => Promise<BatchServiceClient>;

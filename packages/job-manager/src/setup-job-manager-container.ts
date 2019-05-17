@@ -1,5 +1,5 @@
-import { registerAxisStorageToContainer, secretNames, SecretProvider } from 'axis-storage';
-import { ServiceClient, SharedKeyCredentials } from 'azure-batch';
+import { BatchServiceClient } from '@azure/batch';
+import { CredentialsProvider, registerAxisStorageToContainer } from 'axis-storage';
 import { Container, interfaces } from 'inversify';
 import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
 import { Batch } from './batch/batch';
@@ -35,11 +35,9 @@ export function setupJobManagerContainer(): Container {
 function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
     setupSingletonProvider(jobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
         const batchConfig = context.container.get(BatchConfig);
-        const secretProvider = context.container.get(SecretProvider);
+        const credentialProvider = context.container.get(CredentialsProvider);
 
-        return new ServiceClient.BatchServiceClient(
-            new SharedKeyCredentials(batchConfig.accountName, await secretProvider.getSecret(secretNames.batchAccountKey)),
-            batchConfig.accountUrl,
-        );
+        // tslint:disable-next-line:no-any
+        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), { baseUri: batchConfig.accountUrl });
     });
 }

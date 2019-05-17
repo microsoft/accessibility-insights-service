@@ -13,6 +13,12 @@ export class CredentialsProvider {
         return this.getCredentialsForResource('https://vault.azure.net');
     }
 
+    public async getCredentialsForBatch(): Promise<Credentials> {
+        // tslint:disable-next-line: max-line-length
+        // referred https://docs.microsoft.com/en-us/rest/api/batchservice/authenticate-requests-to-the-azure-batch-service#authentication-via-azure-ad
+        return this.getCredentialsForResource('https://batch.core.windows.net/');
+    }
+
     private async getCredentialsForResource(resource: string): Promise<Credentials> {
         return this.msrestAzureObj.loginWithVmMSI({ resource });
     }
