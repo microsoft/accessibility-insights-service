@@ -14,12 +14,7 @@
             "commandLine": "/bin/bash -c run-scan-request-sender.sh",
             "resourceFiles": [
                 {
-                    "blobSource": "",
-                    "filePath": "sender.js"
-                },
-                {
-                    "blobSource": "",
-                    "filePath": "run-scan-request-sender.sh"
+                    "autoStorageContainerName": "batch-scan-request-sender-script"
                 }
             ],
             "constraints": {
