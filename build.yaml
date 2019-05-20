@@ -49,24 +49,3 @@ steps:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
       displayName: publish code coverage
-
-    - script: |
-          yarn build-image
-      workingDirectory: 'packages/scanner-function'
-      displayName: build scanner function docker image
-
-    - task: Docker@1
-      inputs:
-          azureSubscriptionEndpoint: $(azureSubscriptionEndpoint)
-          azureContainerRegistry: $(azureContainerRegistryName).azurecr.io
-          command: login
-      displayName: Container registry login
-      condition: and(succeeded(), in(variables['publishImage'], 'true'))
-
-    - script: |
-          docker tag scanner $(azureContainerRegistryName).azurecr.io/$(imageName)
-          docker tag scanner $(azureContainerRegistryName).azurecr.io/$(imageName):$(Build.BuildId)
-          docker push $(azureContainerRegistryName).azurecr.io/$(imageName)
-          docker push $(azureContainerRegistryName).azurecr.io/$(imageName):$(Build.BuildId)
-      displayName: 'Push image to container registry'
-      condition: and(succeeded(), in(variables['publishImage'], 'true'))
