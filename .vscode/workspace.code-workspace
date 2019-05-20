@@ -1,10 +1,6 @@
 {
     "folders": [
         {
-            "name": "scanner-function",
-            "path": "../packages/scanner-function"
-        },
-        {
             "name": "job-manager",
             "path": "../packages/job-manager"
         },
