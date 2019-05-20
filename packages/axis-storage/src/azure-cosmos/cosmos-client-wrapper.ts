@@ -105,7 +105,10 @@ export class CosmosClientWrapper {
     }
 
     private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
-        const response = await cosmosDb.containers.createIfNotExists({ id: collectionName }, { offerThroughput: 10000 });
+        const response = await cosmosDb.containers.createIfNotExists(
+            { id: collectionName, partitionKey: { paths: [CosmosClientWrapper.PARTITIONKEY_NAME], kind: cosmos.PartitionKind.Hash } },
+            { offerThroughput: 10000 },
+        );
 
         return response.container;
     }
