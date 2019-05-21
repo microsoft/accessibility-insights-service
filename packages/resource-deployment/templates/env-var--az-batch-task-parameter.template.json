@@ -1,12 +1,7 @@
 {
     "resourceFiles": [
         {
-            "blobSource": "",
-            "filePath": "runner.js"
-        },
-        {
-            "blobSource": "",
-            "filePath": "start-runner.sh"
+            "autoStorageContainerName": "batch-runner-script"
         }
     ],
     "environmentSettings": [
