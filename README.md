@@ -112,30 +112,12 @@
 
 #### Setup _url-scan-schedule_ job schedule
 
--   Update the local copy of [env-var--az-batch-task-parameter.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/env-var--az-batch-task-parameter.template.json) template file by adding the following data:
-
-    ```
-        ⋅ The SAS URL for each resource file under resourceFiles section
-        ⋅ KEY_VAULT_URL value
-        ⋅ APPINSIGHTS_INSTRUMENTATIONKEY value
-    ```
-
-    The SAS URL can be generated from Azure portal blade under each file within Blob container.
-
--   Encode template file to base64 using provided [encoder tool](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor). Run the following command from the [tools/json-compressor](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/tools/json-compressor) package build output:
-
-    ```
-        node index.js --jsonFile env-var--az-batch-task-parameter.template.json
-    ```
-
-    Preserve the _env-var--az-batch-task-parameter.template.base64.txt_ output file for the next step.
-
 -   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/url-scan-schedule.template.json) template file by adding the following data:
 
     ```
-        ⋅ The values under commonEnvironmentSettings section. Set the value of
-          AZ_BATCH_TASK_PARAMETER parameter to the base64 encoded string from
-          the step above.
+        ⋅ The values under commonEnvironmentSettings section. Update the value for the environment settings like
+            ⋅ KEY_VAULT_URL (key vault url for the keyvault resource that was created for the batch account)
+            ⋅ APPINSIGHTS_INSTRUMENTATIONKEY (application insights instrumentation key to use for tracing & logging telemetry events)
     ```
 
 -   Login into Azure Batch account using Azure CLI:
