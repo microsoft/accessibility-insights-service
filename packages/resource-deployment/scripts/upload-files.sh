@@ -11,8 +11,10 @@ export includePattern="*[!*.map]"
 uploadFileBatch() {
     destinationContainer=$1
     pathToSource=$2
-    
-    az storage blob upload-batch --account-name "$account_name" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 
+    storageAccountName=$3
+    includePattern=$4
+
+    az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 
 }
 
 exitWithUsageInfo() {
@@ -37,10 +39,9 @@ if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]]; then
     exitWithUsageInfo
 fi
 
-export account_name=$storageAccountName
 echo "Uploading files to blobs"
 
-uploadFileBatch $jobManagerContainerName "$dropFolder/job-manager/dist"
-uploadFileBatch $runnerContainerName "$dropFolder/runner/dist"
-uploadFileBatch $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist"
-uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/scripts"
+uploadFileBatch $jobManagerContainerName "$dropFolder/job-manager/dist" "$storageAccountName" "$includePattern"
+uploadFileBatch $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
+uploadFileBatch $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
+uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/scripts" "$storageAccountName" "$includePattern"
