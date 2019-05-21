@@ -37,7 +37,6 @@ function setupSingletonAzureBatchServiceClientProvider(container: Container): vo
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
 
-        // tslint:disable-next-line:no-any
-        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), { baseUri: batchConfig.accountUrl });
+        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
     });
 }
