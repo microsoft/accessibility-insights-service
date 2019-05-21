@@ -49,3 +49,21 @@ steps:
           codeCoverageTool: Cobertura
           summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
       displayName: publish code coverage
+
+    - task: CopyFiles@2
+      inputs:
+          SourceFolder: packages
+          Contents: |
+              **/dist/**/*
+              resource-deployment/**/*
+              !**/node_modules/**/*
+              !**/.vscode/**/*
+              !**/*.md
+          TargetFolder: '$(Build.ArtifactStagingDirectory)'
+      displayName: 'Copy Files to staging directory'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+          pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+          artifactName: drop
+      displayName: 'Publish build artifacts'
