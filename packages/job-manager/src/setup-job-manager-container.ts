@@ -4,7 +4,7 @@ import { Container, interfaces } from 'inversify';
 import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
-import { TaskParameterBuilder } from './batch/task-parameter-builder';
+import { RunnerTaskConfig } from './batch/runner-task-config';
 import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
 export function setupJobManagerContainer(): Container {
@@ -18,7 +18,7 @@ export function setupJobManagerContainer(): Container {
         .inSingletonScope();
 
     container
-        .bind(TaskParameterBuilder)
+        .bind(RunnerTaskConfig)
         .toSelf()
         .inSingletonScope();
 

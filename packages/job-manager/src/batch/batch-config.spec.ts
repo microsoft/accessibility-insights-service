@@ -28,12 +28,4 @@ describe(BatchConfig, () => {
 
         expect(batchConfig.poolId).toEqual(value);
     });
-
-    it('decode AZ_BATCH_TASK_PARAMETER environment variable', () => {
-        const value: string = `value-${new Date().valueOf()}`;
-        process.env.AZ_BATCH_TASK_PARAMETER = Buffer.from(value).toString('base64');
-        batchConfig = new BatchConfig();
-
-        expect(batchConfig.taskParameter).toEqual(value);
-    });
 });

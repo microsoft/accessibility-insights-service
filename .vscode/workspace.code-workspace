@@ -5,10 +5,6 @@
             "path": "../packages/job-manager"
         },
         {
-            "name": "json-compressor",
-            "path": "../packages/tools/json-compressor"
-        },
-        {
             "name": "logger",
             "path": "../packages/logger"
         },
