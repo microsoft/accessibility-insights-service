@@ -1,3 +1,4 @@
+#!/bin/bash
 set -eo pipefail
 
 createCosmosCollection() {
@@ -9,7 +10,7 @@ createCosmosCollection() {
     echo "Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
     collectionExists=$(az cosmosdb collection exists --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
-    if [ $collectionExists = true ]; then
+    if [ "$collectionExists" = true ]; then
         echo "$collectionName already exists"
     else
         az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 10000
@@ -25,7 +26,7 @@ createCosmosDatabase() {
     echo "Checking if database '$dbName' exists in cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
     collectionExists=$(az cosmosdb database exists --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
-    if [ $collectionExists = true ]; then
+    if [ "$collectionExists" = true ]; then
         echo "$collectionName already exists"
     else
         az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName"
