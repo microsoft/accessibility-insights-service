@@ -37,7 +37,7 @@ createCosmosDatabase() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -c <cosmosAccountName> -r <resource group>
+Usage: $0 -a <cosmosAccountName> -r <resource group>
 "
     exit 1
 }
@@ -56,7 +56,7 @@ if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-dbName="scanner2"
+dbName="scanner"
 createCosmosDatabase "$dbName" "$cosmosAccountName" "$resourceGroupName"
 createCosmosCollection "a11yIssues" "$dbName" "$cosmosAccountName" "$resourceGroupName"
 createCosmosCollection "webPagesToScan" "$dbName" "$cosmosAccountName" "$resourceGroupName"
