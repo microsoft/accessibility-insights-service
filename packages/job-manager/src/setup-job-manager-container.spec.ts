@@ -49,7 +49,7 @@ describe(setupJobManagerContainer, () => {
             const batchServiceClient = await batchServiceClientProvider();
 
             expect(batchServiceClient.credentials).toBe(credentialsStub);
-            expect((batchServiceClient as any).baseUri).toBe(batchAccountUrl);
+            expect(batchServiceClient.batchUrl).toBe(batchAccountUrl);
         });
 
         it('resolves BatchServiceClient top singleton value', async () => {

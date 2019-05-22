@@ -4,7 +4,7 @@ import { Container, interfaces } from 'inversify';
 import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
-import { TaskParameterBuilder } from './batch/task-parameter-builder';
+import { RunnerTaskConfig } from './batch/runner-task-config';
 import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
 export function setupJobManagerContainer(): Container {
@@ -18,7 +18,7 @@ export function setupJobManagerContainer(): Container {
         .inSingletonScope();
 
     container
-        .bind(TaskParameterBuilder)
+        .bind(RunnerTaskConfig)
         .toSelf()
         .inSingletonScope();
 
@@ -37,7 +37,6 @@ function setupSingletonAzureBatchServiceClientProvider(container: Container): vo
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
 
-        // tslint:disable-next-line:no-any
-        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), { baseUri: batchConfig.accountUrl });
+        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
     });
 }
