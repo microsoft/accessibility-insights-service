@@ -35,7 +35,7 @@ function beforeEachSuit(): void {
 
     runnerTaskConfigMock = Mock.ofType(RunnerTaskConfig);
     runnerTaskConfigMock.setup(t => t.getEnvironmentSettings()).returns(() => taskEnvSettings);
-    runnerTaskConfigMock.setup(t => t.resourceFiles).returns(() => taskResourceFiles);
+    runnerTaskConfigMock.setup(t => t.getResourceFiles()).returns(() => taskResourceFiles);
 
     jobMock = Mock.ofType();
     taskMock = Mock.ofType();

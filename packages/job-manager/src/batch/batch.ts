@@ -157,7 +157,7 @@ export class Batch {
         return {
             id: jobTaskId,
             commandLine: commandLine,
-            resourceFiles: this.runnerTaskConfig.resourceFiles,
+            resourceFiles: this.runnerTaskConfig.getResourceFiles(),
             environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
             constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }).toISOString() },
         };

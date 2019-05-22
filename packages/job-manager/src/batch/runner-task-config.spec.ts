@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 
 import { RunnerTaskConfig } from './runner-task-config';
+import { BatchServiceModels } from '@azure/batch';
 // tslint:disable: no-object-literal-type-assertion
 
 describe(RunnerTaskConfig, () => {
@@ -8,12 +9,14 @@ describe(RunnerTaskConfig, () => {
     let processStub: NodeJS.Process;
     const appInsightsKey = 'app insights key1';
     const keyVaultUrl = 'key vault url1';
+    const runnerScriptContainerName = 'runner script container';
 
     beforeEach(() => {
         processStub = {
             env: {
                 APPINSIGHTS_INSTRUMENTATIONKEY: appInsightsKey,
                 KEY_VAULT_URL: keyVaultUrl,
+                RUNNER_SCRIPTS_CONTAINER_NAME: runnerScriptContainerName,
             } as NodeJS.ProcessEnv,
         } as NodeJS.Process;
 
@@ -29,11 +32,11 @@ describe(RunnerTaskConfig, () => {
     });
 
     it('returns resourceFiles', () => {
-        expect(testSubject.resourceFiles).toEqual([
+        expect(testSubject.getResourceFiles()).toEqual([
             {
-                autoStorageContainerName: 'batch-runner-script',
+                autoStorageContainerName: runnerScriptContainerName,
             },
-        ] as typeof testSubject.resourceFiles);
+        ] as BatchServiceModels.ResourceFile[]);
     });
 
     describe('environment settings', () => {

@@ -6,14 +6,9 @@ import { loggerTypes, StringUtils } from 'logger';
 
 @injectable()
 export class RunnerTaskConfig {
-    public readonly resourceFiles: BatchServiceModels.ResourceFile[] = [
-        {
-            autoStorageContainerName: 'batch-runner-script',
-        },
-    ];
-
     public readonly commandLineTemplate: string =
         '/bin/bash -c \'start-runner.sh "%id%" "%name%" "%baseUrl%" "%scanUrl%" "%serviceTreeId%"\'';
+    private resourceFiles: BatchServiceModels.ResourceFile[];
 
     private readonly environmentSettingsTemplate: BatchServiceModels.EnvironmentSetting[] = [
         {
@@ -51,5 +46,17 @@ export class RunnerTaskConfig {
         }
 
         return this.environmentSettings;
+    }
+
+    public getResourceFiles(): BatchServiceModels.ResourceFile[] {
+        if (isEmpty(this.resourceFiles)) {
+            this.resourceFiles = [
+                {
+                    autoStorageContainerName: this.currentProcess.env.RUNNER_SCRIPTS_CONTAINER_NAME,
+                },
+            ];
+        }
+
+        return this.resourceFiles;
     }
 }
