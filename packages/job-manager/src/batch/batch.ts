@@ -9,7 +9,7 @@ import { VError } from 'verror';
 import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manager-ioc-types';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
-import { TaskParameterBuilder } from './task-parameter-builder';
+import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
 export class Batch {
@@ -17,7 +17,7 @@ export class Batch {
     private readonly jobTasks: Map<string, JobTask> = new Map();
     public constructor(
         @inject(BatchConfig) private readonly config: BatchConfig,
-        @inject(TaskParameterBuilder) private readonly taskParameterBuilder: TaskParameterBuilder,
+        @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
         @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
@@ -152,13 +152,13 @@ export class Batch {
 
     private getTaskAddParameter(jobTaskId: string, messageText: string): BatchServiceModels.TaskAddParameter {
         const message = JSON.parse(messageText);
-        const commandLine = this.taskParameterBuilder.getCommandLine(message);
+        const commandLine = this.runnerTaskConfig.getCommandLine(message);
 
         return {
             id: jobTaskId,
             commandLine: commandLine,
-            resourceFiles: this.taskParameterBuilder.resourceFiles,
-            environmentSettings: this.taskParameterBuilder.environmentSettings,
+            resourceFiles: this.runnerTaskConfig.getResourceFiles(),
+            environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
             constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }).toISOString() },
         };
     }
