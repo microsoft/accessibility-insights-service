@@ -12,7 +12,7 @@ Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name>
 getLoggedInUserObjectId() {
     echo "getting logged in user's object id"
 
-    loggedInUserObjectId=$(az ad signed-in-user show --query objectId -o tsv)
+    loggedInUserObjectId=$(az ad signed-in-user show --query "objectId" -o tsv)
     if [[ -z $loggedInUserObjectId ]]; then
         echo "unable to get logged in user's object id"
         exit 1
@@ -25,7 +25,7 @@ grantWritePermissionToKeyVault() {
 
     echo "granting write permission to key vault $keyVaultName for logged in user"
 
-    az keyvault set-policy --name "$keyVaultName" --object-id "$objectId" --secret-permissions set >/dev/null
+    az keyvault set-policy --name "$keyVaultName" --object-id "$objectId" --secret-permissions set 1>/dev/null
 }
 
 revokePermissionsToKeyVault() {
@@ -33,7 +33,7 @@ revokePermissionsToKeyVault() {
     objectId=$2
 
     echo "revoking permission to key vault $keyVaultName for logged in user"
-    az keyvault delete-policy --name "$keyVaultName" --object-id "$objectId" >/dev/null
+    az keyvault delete-policy --name "$keyVaultName" --object-id "$objectId" 1>/dev/null
 }
 
 pushSecretToKeyVault() {
@@ -42,7 +42,7 @@ pushSecretToKeyVault() {
     secretValue=$3
 
     echo "adding secret for $secretName in key vault $keyVaultName"
-    az keyvault secret set --vault-name "$keyVaultName" --name "$secretName" --value "$secretValue" >/dev/null
+    az keyvault secret set --vault-name "$keyVaultName" --name "$secretName" --value "$secretValue" 1>/dev/null
 }
 
 getCosmosDbUrl() {
@@ -99,9 +99,9 @@ fi
 loggedInUserObjectId=""
 getLoggedInUserObjectId
 
-grantWritePermissionToKeyVault "$keyVaultName" "$loggedInUserObjectId"
-
 trap 'revokePermissionsToKeyVault "$keyVaultName" "$loggedInUserObjectId"' EXIT
+
+grantWritePermissionToKeyVault "$keyVaultName" "$loggedInUserObjectId"
 
 cosmosDbUrl=""
 getCosmosDbUrl "$cosmosAccountName" "$resourceGroupName"
