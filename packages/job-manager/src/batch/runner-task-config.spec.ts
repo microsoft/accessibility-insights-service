@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
-import { RunnerTaskConfig } from './runner-task-config';
 import { BatchServiceModels } from '@azure/batch';
+import { RunnerTaskConfig } from './runner-task-config';
 // tslint:disable: no-object-literal-type-assertion
 
 describe(RunnerTaskConfig, () => {
