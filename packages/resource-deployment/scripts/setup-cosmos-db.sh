@@ -1,4 +1,6 @@
 #!/bin/bash
+# shellcheck disable=SC1090
+
 set -eo pipefail
 
 export cosmosAccountName
@@ -9,7 +11,6 @@ createCosmosAccount() {
     resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName
-    # shellcheck disable=SC1090
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
 
     cosmosAccountName="$resourceName"
