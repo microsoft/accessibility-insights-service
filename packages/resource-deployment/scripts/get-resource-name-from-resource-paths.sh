@@ -24,6 +24,7 @@ if [[ -z $providerPath ]] || [[ -z $resourcePaths ]]; then
     exit 1
 fi
 
+shopt -s nocasematch
 providerPathRegEx="/providers/${providerPath}/(.[^/]+)"
 export resourceName=""
 
