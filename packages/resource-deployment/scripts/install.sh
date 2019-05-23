@@ -2,14 +2,6 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-exitWithUsageInfo() {
-    echo \
-        "
-Usage: $0 -r <resource group> -s <subscription name or id>
-"
-    exit 1
-}
-
 export resourceGroupName
 export subscription
 export location
@@ -18,6 +10,14 @@ export batchAccountName
 export keyVault
 export cosmosAccountName
 export dropFolder="${0%/*}/../../"
+
+exitWithUsageInfo() {
+    echo \
+        "
+Usage: $0 -r <resource group> -s <subscription name or id>
+"
+    exit 1
+}
 
 # Read script arguments
 while getopts "r:s:l:" option; do

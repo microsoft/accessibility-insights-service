@@ -1,6 +1,9 @@
 #!/bin/bash
 set -eo pipefail
 
+export cosmosAccountName
+export resourceGroupName
+
 createCosmosAccount() {
     resourceGroupName=$1
 
@@ -10,7 +13,7 @@ createCosmosAccount() {
     # shellcheck disable=SC1090
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
 
-    export cosmosAccountName="$resourceName"
+    cosmosAccountName="$resourceName"
 
     echo "cosmos account $cosmosAccountName created"
 }

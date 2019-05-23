@@ -3,9 +3,12 @@ set -eo pipefail
 
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
+export resourceGroupName
+export batchAccountName
+export pool
+
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
 "
     exit 1

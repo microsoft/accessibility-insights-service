@@ -17,8 +17,7 @@ createQueue() {
 }
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -s <storage account name>
 "
     exit 1

@@ -1,9 +1,11 @@
 #!/bin/bash
 set -eo pipefail
 
+export resourceGroupName
+export location
+
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -r <resource group> -l <location>
 "
     exit 1

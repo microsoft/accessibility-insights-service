@@ -4,8 +4,7 @@ set -eo pipefail
 # This script will grant permissions to the managed identity to access key vault
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -k <key vault> -i <system-assigned managed identity Id>
 "
     exit 1

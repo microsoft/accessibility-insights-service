@@ -5,13 +5,16 @@ set -eo pipefail
 # This script will deploy Azure Batch account in user subscription mode
 # and enable managed identity for Azure on Batch pools
 
+export keyVault
+export systemAssignedIdentity
+export batchAccountName
+
 # Set default ARM Batch account template files
 
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -r <resource group> [-t <batch template file (optional)>]
 "
     exit 1
@@ -49,11 +52,6 @@ resources=$(az group deployment create \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-export keyVault
-export systemAssignedIdentity
-export batchAccountName
-export pool
-
 # Get key vault and batch account resources
 export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.KeyVault/vaults" -r "$resources"
@@ -75,6 +73,7 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
+export pool
 for pool in $pools; do
     . "${0%/*}/batch-pool-enable-msi.sh"
     . "${0%/*}/key-vault-enable-msi.sh"

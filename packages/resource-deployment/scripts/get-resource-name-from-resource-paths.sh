@@ -2,8 +2,7 @@
 set -eo pipefail
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -p <provider path> -r <resource path array>
 "
     exit 1

@@ -7,8 +7,7 @@ export storageAccountName
 export cosmosAccountName
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name>
 "
     exit 1

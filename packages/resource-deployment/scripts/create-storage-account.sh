@@ -1,9 +1,10 @@
 #!/bin/bash
 # shellcheck disable=SC1090
 set -eo pipefail
+export storageAccountName
+
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -r <resource group>
 "
     exit 1
@@ -25,7 +26,7 @@ resources=$(az group deployment create --resource-group "$resourceGroupName" --t
 
 export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Storage/storageAccounts" -r "$resources"
-export storageAccountName="$resourceName"
+storageAccountName="$resourceName"
 
 if [[ -z $storageAccountName ]]; then
     echo "Unable to get storage account name"
