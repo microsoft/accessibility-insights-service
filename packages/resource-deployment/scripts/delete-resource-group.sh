@@ -12,12 +12,18 @@ deleteResourceGroup()  {
     local resourceGroupName=$1
     local response
 
-    response=$(az group delete --name "$resourceGroupName" --yes)
-    if [[ -z $response ]]; then
-        echo "$resourceGroupName - Resource group deleted."
+    response=$(az group exists --name "$resourceGroupName")
+
+    if [[ "$response" == true ]]; then
+        response=$(az group delete --name "$resourceGroupName" --yes)
+        if [[ -z $response ]]; then
+            echo "$resourceGroupName - Resource group deleted."
+        else
+            echo "Something went wrong. Response - $response"
+            exit 1
+        fi
     else
-        echo "Something went wrong. Response - $response"
-        exit 1
+        echo "$resourceGroupName - Does not exist."
     fi
 }
 
@@ -29,10 +35,4 @@ while getopts "r:" option; do
     esac
 done
 
-response=$(az group exists --name "$resourceGroupName")
-
-if [[ "$response" == true ]]; then
-    deleteResourceGroup "$resourceGroupName"
-else 
-    echo "$resourceGroupName - Does not exist."
-fi
+deleteResourceGroup "$resourceGroupName"
