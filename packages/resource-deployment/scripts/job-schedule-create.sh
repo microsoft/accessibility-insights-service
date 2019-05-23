@@ -7,9 +7,9 @@ urlScanScheduleJobName="url-scan-schedule"
 parsedUrlScanScheduleFileName="final_url-scan-schedule.template.json"
 
 adjustJob() {
-    jobName=$1
-    jobTemplate=$2
-    allJobsScheduleList=$3
+    local jobName=$1
+    local jobTemplate=$2
+    local allJobsScheduleList=$3
 
     if [[ ${allJobsScheduleList} == *$jobName* ]]; then
         echo "$jobName exists. Resetting job schedule"
