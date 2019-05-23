@@ -93,6 +93,8 @@ if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageA
     exitWithUsageInfo
 fi
 
+echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
+
 loggedInUserObjectId=""
 getLoggedInUserObjectId
 

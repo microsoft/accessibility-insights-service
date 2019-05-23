@@ -6,7 +6,7 @@ createCosmosAccount() {
 
     resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
-    resourceName=""
+    export resourceName
     # shellcheck disable=SC1090
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
 

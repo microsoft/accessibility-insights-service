@@ -31,6 +31,8 @@ if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
+echo "setting up batch account in resource group $resourceGroupName with template $batchTemplateFile"
+
 # Login to Azure if required
 if ! az account show 1>/dev/null; then
     az login
@@ -53,13 +55,10 @@ export batchAccountName
 export pool
 
 # Get key vault and batch account resources
-resourceName=""
-# shellcheck disable=SC1090
+export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.KeyVault/vaults" -r "$resources"
 keyVault="$resourceName"
 
-resourceName=""
-# shellcheck disable=SC1090
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Batch/batchAccounts" -r "$resources"
 batchAccountName="$resourceName"
 
@@ -84,3 +83,5 @@ for pool in $pools; do
     echo "Granting access to the resource group '$resourceGroupName' for managed identity '$systemAssignedIdentity'"
     az role assignment create --role "Contributor" --resource-group "$resourceGroupName" --assignee-object-id "$systemAssignedIdentity" 1>/dev/null
 done
+
+echo "Successfully setup batch account $batchAccountName with pools"

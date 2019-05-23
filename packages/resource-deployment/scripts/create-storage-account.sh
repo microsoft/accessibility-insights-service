@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1090
 set -eo pipefail
 exitWithUsageInfo() {
     echo \
@@ -22,8 +23,7 @@ fi
 echo "creating storage account under resource group $resourceGroupName"
 resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/blob-storage.template.json" --parameters "${0%/*}/../templates/blob-storage.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
-export resourceName=""
-# shellcheck disable=SC1090
+export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Storage/storageAccounts" -r "$resources"
 export storageAccountName="$resourceName"
 

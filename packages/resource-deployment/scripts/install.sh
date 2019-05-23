@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC1090
 set -eo pipefail
 
 exitWithUsageInfo() {
@@ -16,6 +17,7 @@ export storageAccountName
 export batchAccountName
 export keyVault
 export cosmosAccountName
+export dropFolder="${0%/*}/../../"
 
 # Read script arguments
 while getopts "r:s:l:" option; do
@@ -38,21 +40,16 @@ fi
 
 az account set --subscription "$subscription"
 
-# shellcheck disable=SC1090
 . "${0%/*}/create-resource-group.sh"
 
-# shellcheck disable=SC1090
 . "${0%/*}/create-storage-account.sh"
 
-# shellcheck disable=SC1090
 . "${0%/*}/create-queues.sh"
 
-# shellcheck disable=SC1090
 . "${0%/*}/setup-cosmos-db.sh"
 
-# shellcheck disable=SC1090
 . "${0%/*}/batch-account-create.sh"
-echo "Successfully setup batch account $batchAccountName with keyvault $keyVault"
 
-# shellcheck disable=SC1090
 . "${0%/*}/push-secrets-to-key-vault.sh"
+
+. "${0%/*}/upload-files.sh"
