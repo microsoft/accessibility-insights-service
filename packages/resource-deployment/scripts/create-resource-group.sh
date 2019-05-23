@@ -31,5 +31,5 @@ if [ "$resourceGroupExists" = false ]; then
 
     az group create --name "$resourceGroupName" --location "$location"
 else
-    echo "resource group $resourceGroupName already exists"
+    echo "Resource group $resourceGroupName already exists"
 fi

@@ -3,7 +3,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -p <provider path> -r <resource path array>
+Usage: $0 -p <provider path> -r <ARM line-separated resource strings>
 "
     exit 1
 }

@@ -21,7 +21,7 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-echo "creating storage account under resource group $resourceGroupName"
+echo "Creating storage account under resource group $resourceGroupName using ARM template"
 resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/blob-storage.template.json" --parameters "${0%/*}/../templates/blob-storage.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName
@@ -29,7 +29,7 @@ export resourceName
 storageAccountName="$resourceName"
 
 if [[ -z $storageAccountName ]]; then
-    echo "Unable to get storage account name"
+    echo "Unable to get storage account name from storage account creation response"
     exit 1
 fi
 

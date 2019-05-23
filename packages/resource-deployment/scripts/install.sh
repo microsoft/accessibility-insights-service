@@ -12,8 +12,7 @@ export cosmosAccountName
 export dropFolder="${0%/*}/../../"
 
 exitWithUsageInfo() {
-    echo \
-        "
+    echo "
 Usage: $0 -r <resource group> -s <subscription name or id>
 "
     exit 1

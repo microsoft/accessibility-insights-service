@@ -5,6 +5,8 @@ export keyVault
 export resourceGroupName
 export storageAccountName
 export cosmosAccountName
+export cosmosDbUrl
+export cosmosAccessKey
 
 exitWithUsageInfo() {
     echo "
@@ -24,7 +26,7 @@ getLoggedInUserObjectId() {
 }
 
 grantWritePermissionToKeyVault() {
-    objectId=$1
+    local objectId=$1
 
     echo "granting write permission to key vault $keyVault for logged in user for $objectId"
 
@@ -32,15 +34,15 @@ grantWritePermissionToKeyVault() {
 }
 
 revokePermissionsToKeyVault() {
-    objectId=$1
+    local objectId=$1
 
     echo "revoking permission to key vault $keyVault for logged in user"
     az keyvault delete-policy --name "$keyVault" --object-id "$objectId" 1>/dev/null
 }
 
 pushSecretToKeyVault() {
-    secretName=$1
-    secretValue=$2
+    local secretName=$1
+    local secretValue=$2
 
     echo "adding secret for $secretName in key vault $keyVault"
     az keyvault secret set --vault-name "$keyVault" --name "$secretName" --value "$secretValue" 1>/dev/null
@@ -94,23 +96,18 @@ fi
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 
-loggedInUserObjectId=""
 getLoggedInUserObjectId
 
 trap 'revokePermissionsToKeyVault "$loggedInUserObjectId"' EXIT
-
 grantWritePermissionToKeyVault "$loggedInUserObjectId"
 
-cosmosDbUrl=""
 getCosmosDbUrl
 pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
 
-cosmosAccessKey=""
 getCosmosAccessKey
 pushSecretToKeyVault "cosmosDbKey" "$cosmosAccessKey"
 
 pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
-storageAccountKey=""
 getStorageAccessKey
 pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"

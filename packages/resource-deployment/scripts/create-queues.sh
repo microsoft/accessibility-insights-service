@@ -1,9 +1,10 @@
 #!/bin/bash
 set -eo pipefail
 
+export storageAccountName
+
 createQueue() {
-    queue=$1
-    storageAccountName=$2
+    local queue=$1
 
     echo "Checking if queue $queue exists in storage account $storageAccountName"
     queueExists=$(az storage queue exists --name "$queue" --account-name "$storageAccountName" --query "exists")
@@ -36,5 +37,5 @@ if [[ -z $storageAccountName ]]; then
     exitWithUsageInfo
 fi
 
-createQueue "scanrequest" "$storageAccountName"
-createQueue "scanrequest-dead" "$storageAccountName"
+createQueue "scanrequest"
+createQueue "scanrequest-dead"
