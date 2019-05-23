@@ -34,7 +34,7 @@
         "commonEnvironmentSettings": [
             {
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
-                "value": "%TOKEN1%"
+                "value": "%APP_INSIGHTS_TOKEN%"
             },
             {
                 "name": "AZURE_STORAGE_SCAN_QUEUE",
@@ -42,7 +42,7 @@
             },
             {
                 "name": "KEY_VAULT_URL",
-                "value": "%TOKEN2%"
+                "value": "%KEY_VAULT_TOKEN%"
             },
             {
                 "name": "AZ_BATCH_TASK_PARAMETER",

@@ -2,9 +2,9 @@
 set -eo pipefail
 
 scanReqScheduleJobName="scan-req-schedule"
-scanReqScheduleFileName="final_scan-req-schedule.template.json"
+parsedScanReqScheduleFileName="final_scan-req-schedule.template.json"
 urlScanScheduleJobName="url-scan-schedule"
-urlScanScheduleFileName="final_url-scan-schedule.template.json"
+parsedUrlScanScheduleFileName="final_url-scan-schedule.template.json"
 
 adjustJob() {
     jobName=$1
@@ -45,12 +45,12 @@ if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInstru
     exitWithUsageInfo
 fi
 
-sed -e "s/%TOKEN1%/$appInstrumentationKey/" -e "s/%TOKEN2%/$keyVaultUrl/" "$templatesFolder/scan-req-schedule.template.json">"$scanReqScheduleFileName"
-sed -e "s/%TOKEN1%/$appInstrumentationKey/" -e "s/%TOKEN2%/$keyVaultUrl/" "$templatesFolder/url-scan-schedule.template.json">"$urlScanScheduleFileName"
+sed -e "s/%APP_INSIGHTS_TOKEN%/$appInstrumentationKey/" -e "s/%KEY_VAULT_TOKEN%/$keyVaultUrl/" "$templatesFolder/scan-req-schedule.template.json">"$parsedScanReqScheduleFileName"
+sed -e "s/%APP_INSIGHTS_TOKEN%/$appInstrumentationKey/" -e "s/%KEY_VAULT_TOKEN%/$keyVaultUrl/" "$templatesFolder/url-scan-schedule.template.json">"$parsedUrlScanScheduleFileName"
 
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
 allJobsScheduleList=$(az batch job-schedule list --query [*].id)
 
-adjustJob "$scanReqScheduleJobName" "$scanReqScheduleFileName" "$allJobsScheduleList"
-adjustJob "$urlScanScheduleJobName" "$urlScanScheduleFileName" "$allJobsScheduleList"
+adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
+adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
