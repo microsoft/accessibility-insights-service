@@ -21,17 +21,16 @@ adjustJob() {
 }
 
 exitWithUsageInfo() {
-    echo \
-        "
-Usage: $0 -n <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder>
-"
+    echo "
+        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder>
+    "
     exit 1
 }
 
 # Read script arguments
-while getopts "n:r:a:k:t:" option; do
+while getopts "b:r:a:k:t:" option; do
     case $option in
-    n) batchAccountName=${OPTARG} ;;
+    b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     a) appInstrumentationKey=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
@@ -50,7 +49,7 @@ sed -e "s/%APP_INSIGHTS_TOKEN%/$appInstrumentationKey/" -e "s/%KEY_VAULT_TOKEN%/
 
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-allJobsScheduleList=$(az batch job-schedule list --query [*].id)
+allJobsScheduleList=$(az batch job-schedule list --query "[*].id")
 
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
