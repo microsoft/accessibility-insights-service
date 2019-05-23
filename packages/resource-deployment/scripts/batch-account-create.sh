@@ -6,34 +6,35 @@ set -eo pipefail
 # and enable managed identity for Azure on Batch pools
 
 # Set default ARM Batch account template files
-batchTemplateFile="./templates/batch-account.template.json"
+
+batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
+
+exitWithUsageInfo() {
+    echo \
+        "
+Usage: $0 -r <resource group> [-t <batch template file (optional)>]
+"
+    exit 1
+}
 
 # Read script arguments
-while getopts "s:r:t:p:" option; do
-case $option in
-    s) subscription=${OPTARG};;
-    r) resourceGroup=${OPTARG};;
-    t) batchTemplateFile=${OPTARG};;
-esac
+while getopts "r:t:" option; do
+    case $option in
+    r) resourceGroupName=${OPTARG} ;;
+    t) batchTemplateFile=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
 done
 
 # Print script usage help
-if [[ -z $subscription ]] || [[ -z $resourceGroup ]]; then
-    echo \
-"
-Usage: $0 -s <subscription> -r <resource group> [-t <batch template file>] [-p <batch template parameters file>]
-"
-    exit 0
+if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
+    exitWithUsageInfo
 fi
 
 # Login to Azure if required
-if ! az account show 1> /dev/null; then
+if ! az account show 1>/dev/null; then
     az login
 fi
-
-# Set default Azure subscription
-echo "Switching to '$subscription' Azure subscription"
-az account set --subscription "$subscription"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"
@@ -41,42 +42,45 @@ az account set --subscription "$subscription"
 # Deploy Azure Batch account using resource manager template
 echo "Deploying Azure Batch account"
 resources=$(az group deployment create \
-    --resource-group "$resourceGroup" \
+    --resource-group "$resourceGroupName" \
     --template-file "$batchTemplateFile" \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-export pool
 export keyVault
 export systemAssignedIdentity
+export batchAccountName
+export pool
 
 # Get key vault and batch account resources
-batchAccountRegEx="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.Batch/batchAccounts/(.[^/]+)"
-keyVaultRegEx="^/subscriptions/$subscription/resourceGroups/$resourceGroup/providers/Microsoft.KeyVault/vaults/(.[^/]+)"
-for resource in $resources
-do
-    if [[ $resource =~ $batchAccountRegEx ]]; then
-        account="${BASH_REMATCH[1]}"
-    fi
-    
-    if [[ $resource =~ $keyVaultRegEx ]]; then
-        keyVault="${BASH_REMATCH[1]}"
-    fi
-done
-echo "The '$account' Azure Batch account deployed successfully"
+resourceName=""
+# shellcheck disable=SC1090
+. "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.KeyVault/vaults" -r "$resources"
+keyVault="$resourceName"
+
+resourceName=""
+# shellcheck disable=SC1090
+. "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Batch/batchAccounts" -r "$resources"
+batchAccountName="$resourceName"
+
+if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
+    echo "unable to get resource information from batch creation"
+    exit 1
+fi
+
+echo "The '$batchAccountName' Azure Batch account deployed successfully"
 
 # Login into Azure Batch account
-echo "Logging into '$account' Azure Batch account"
-az batch account login --name "$account" --resource-group "$resourceGroup"
+echo "Logging into '$batchAccountName' Azure Batch account"
+az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
-for pool in $pools
-do
+for pool in $pools; do
     . "${0%/*}/batch-pool-enable-msi.sh"
     . "${0%/*}/key-vault-enable-msi.sh"
 
     # Enable VMSS access to resource group that contains external Azure services Batch tasks depend on
-    echo "Granting access to the resource group '$resourceGroup' for managed identity '$systemAssignedIdentity'"
-    az role assignment create --role "Contributor"  --resource-group "$resourceGroup" --assignee-object-id "$systemAssignedIdentity" 1> /dev/null
+    echo "Granting access to the resource group '$resourceGroupName' for managed identity '$systemAssignedIdentity'"
+    az role assignment create --role "Contributor" --resource-group "$resourceGroupName" --assignee-object-id "$systemAssignedIdentity" 1>/dev/null
 done

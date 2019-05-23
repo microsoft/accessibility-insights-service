@@ -1,6 +1,11 @@
 #!/bin/bash
 set -eo pipefail
 
+export keyVault
+export resourceGroupName
+export storageAccountName
+export cosmosAccountName
+
 exitWithUsageInfo() {
     echo \
         "
@@ -20,35 +25,29 @@ getLoggedInUserObjectId() {
 }
 
 grantWritePermissionToKeyVault() {
-    keyVaultName=$1
-    objectId=$2
+    objectId=$1
 
-    echo "granting write permission to key vault $keyVaultName for logged in user"
+    echo "granting write permission to key vault $keyVault for logged in user for $objectId"
 
-    az keyvault set-policy --name "$keyVaultName" --object-id "$objectId" --secret-permissions set 1>/dev/null
+    az keyvault set-policy --name "$keyVault" --object-id "$objectId" --secret-permissions set 1>/dev/null
 }
 
 revokePermissionsToKeyVault() {
-    keyVaultName=$1
-    objectId=$2
+    objectId=$1
 
-    echo "revoking permission to key vault $keyVaultName for logged in user"
-    az keyvault delete-policy --name "$keyVaultName" --object-id "$objectId" 1>/dev/null
+    echo "revoking permission to key vault $keyVault for logged in user"
+    az keyvault delete-policy --name "$keyVault" --object-id "$objectId" 1>/dev/null
 }
 
 pushSecretToKeyVault() {
-    keyVaultName=$1
-    secretName=$2
-    secretValue=$3
+    secretName=$1
+    secretValue=$2
 
-    echo "adding secret for $secretName in key vault $keyVaultName"
-    az keyvault secret set --vault-name "$keyVaultName" --name "$secretName" --value "$secretValue" 1>/dev/null
+    echo "adding secret for $secretName in key vault $keyVault"
+    az keyvault secret set --vault-name "$keyVault" --name "$secretName" --value "$secretValue" 1>/dev/null
 }
 
 getCosmosDbUrl() {
-    cosmosAccountName=$1
-    resourceGroupName=$2
-
     cosmosDbUrl=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "documentEndpoint" -o tsv)
 
     if [[ -z $cosmosDbUrl ]]; then
@@ -58,8 +57,6 @@ getCosmosDbUrl() {
 }
 
 getCosmosAccessKey() {
-    cosmosAccountName=$1
-    resourceGroupName=$2
 
     cosmosAccessKey=$(az cosmosdb list-keys --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
 
@@ -70,8 +67,6 @@ getCosmosAccessKey() {
 }
 
 getStorageAccessKey() {
-    storageAccountName=$1
-
     storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
 
     if [[ -z $storageAccountKey ]]; then
@@ -86,33 +81,35 @@ while getopts "c:r:s:k:" option; do
     c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     s) storageAccountName=${OPTARG} ;;
-    k) keyVaultName=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVaultName ]]; then
+if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]]; then
+    echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault"
+
     exitWithUsageInfo
 fi
 
 loggedInUserObjectId=""
 getLoggedInUserObjectId
 
-trap 'revokePermissionsToKeyVault "$keyVaultName" "$loggedInUserObjectId"' EXIT
+trap 'revokePermissionsToKeyVault "$loggedInUserObjectId"' EXIT
 
-grantWritePermissionToKeyVault "$keyVaultName" "$loggedInUserObjectId"
+grantWritePermissionToKeyVault "$loggedInUserObjectId"
 
 cosmosDbUrl=""
-getCosmosDbUrl "$cosmosAccountName" "$resourceGroupName"
-pushSecretToKeyVault "$keyVaultName" "cosmosDbUrl" "$cosmosDbUrl"
+getCosmosDbUrl
+pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
 
 cosmosAccessKey=""
-getCosmosAccessKey "$cosmosAccountName" "$resourceGroupName"
-pushSecretToKeyVault "$keyVaultName" "cosmosDbKey" "$cosmosAccessKey"
+getCosmosAccessKey
+pushSecretToKeyVault "cosmosDbKey" "$cosmosAccessKey"
 
-pushSecretToKeyVault "$keyVaultName" "storageAccountName" "$storageAccountName"
+pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
 storageAccountKey=""
-getStorageAccessKey "$storageAccountName"
-pushSecretToKeyVault "$keyVaultName" "storageAccountKey" "$storageAccountKey"
+getStorageAccessKey
+pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"

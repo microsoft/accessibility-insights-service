@@ -1,6 +1,20 @@
 #!/bin/bash
 set -eo pipefail
 
+createCosmosAccount() {
+    resourceGroupName=$1
+
+    resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
+
+    resourceName=""
+    # shellcheck disable=SC1090
+    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
+
+    export cosmosAccountName="$resourceName"
+
+    echo "cosmos account $cosmosAccountName created"
+}
+
 createCosmosCollection() {
     collectionName=$1
     dbName=$2
@@ -37,24 +51,26 @@ createCosmosDatabase() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -a <cosmosAccountName> -r <resource group>
+Usage: $0 -r <resource group>
 "
     exit 1
 }
 
 # Read script arguments
-while getopts "a:r:" option; do
+while getopts "r:" option; do
     case $option in
-    a) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
+
+cosmosAccountName=""
+createCosmosAccount "$resourceGroupName"
 
 dbName="scanner"
 createCosmosDatabase "$dbName" "$cosmosAccountName" "$resourceGroupName"
