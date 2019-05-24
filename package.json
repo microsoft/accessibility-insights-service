@@ -15,7 +15,8 @@
         "lint": "npx lerna run lint --stream",
         "precheckin": "npm-run-all --serial format lint build test",
         "format": "npx prettier --write \"**/*\"",
-        "format-check": "npx prettier --check \"**/*\""
+        "format-check": "npx prettier --check \"**/*\"",
+        "copyright-check": "license-check-and-add"
     },
     "author": "Microsoft",
     "license": "MIT",
@@ -24,6 +25,7 @@
     },
     "devDependencies": {
         "lerna": "^3.13.3",
+        "license-check-and-add": "^2.3.6",
         "npm-run-all": "^4.1.5",
         "prettier": "1.16.4",
         "tslint": "^5.12.1",
@@ -34,5 +36,74 @@
         "packages": [
             "packages/*"
         ]
+    },
+    "license-check-and-add-config": {
+        "folder": "./",
+        "license": "copyright-header.txt",
+        "exact_paths_method": "EXCLUDE",
+        "exact_paths": [
+            "./.git",
+            "./.github",
+            "./.vscode",
+            "./node_modules",
+            "./test-results",
+            "./copyright-header.txt",
+            "./packages/job-manager/dist",
+            "./packages/job-manager/node_modules",
+            "./packages/job-manager/src/test-resources/",
+            "./packages/job-manager/test-results",
+            "./packages/logger/dist",
+            "./packages/logger/node_modules",
+            "./packages/logger/src/test-resources/",
+            "./packages/logger/test-results",
+            "./packages/logger/out",
+            "./packages/runner/dist",
+            "./packages/runner/node_modules",
+            "./packages/runner/src/test-resources/",
+            "./packages/runner/test-results",
+            "./packages/axis-storage/dist",
+            "./packages/axis-storage/node_modules",
+            "./packages/axis-storage/src/test-resources/",
+            "./packages/axis-storage/test-results",
+            "./packages/scan-request-sender/dist",
+            "./packages/scan-request-sender/node_modules",
+            "./packages/scan-request-sender/src/test-resources/",
+            "./packages/scan-request-sender/test-results",
+            "./packages/azure-client/dist",
+            "./packages/azure-client/node_modules",
+            "./packages/azure-client/src/test-resources/",
+            "./packages/azure-client/test-results",
+            "./packages/crawler/dist",
+            "./packages/crawler/node_modules",
+            "./packages/crawler/src/test-resources/",
+            "./packages/crawler/test-results"
+        ],
+        "file_type_method": "INCLUDE",
+        "file_types": [
+            ".ts",
+            ".d.ts",
+            ".js",
+            ".yaml",
+            ".md",
+            ".xml",
+            ".sh"
+        ],
+        "insert_license": false,
+        "license_formats": {
+            "yaml|npmrc|sh": {
+                "eachLine": {
+                    "prepend": "# "
+                }
+            },
+            "md": {
+                "prepend": "<!--",
+                "append": "-->"
+            },
+            "ts|d.ts|js": {
+                "eachLine": {
+                    "prepend": "// "
+                }
+            }
+        }
     }
 }
