@@ -33,11 +33,6 @@ while getopts "s:d:" option; do
     esac
 done
 
-if [[ -z $dropFolder ]]; then
-    dropFolder="${0%/*}/../../"
-    exitWithUsageInfo
-fi
-
 # Print script usage help
 if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]]; then
     exitWithUsageInfo
