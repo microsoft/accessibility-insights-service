@@ -88,7 +88,7 @@
             ".xml",
             ".sh"
         ],
-        "insert_license": true,
+        "insert_license": false,
         "license_formats": {
             "yaml|npmrc|sh": {
                 "eachLine": {
