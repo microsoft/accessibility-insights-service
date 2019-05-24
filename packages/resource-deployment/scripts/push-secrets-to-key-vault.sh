@@ -8,6 +8,9 @@ export cosmosAccountName
 export cosmosDbUrl
 export cosmosAccessKey
 
+export loggedInUserType
+export loggedInServicePrincipalName
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name>
@@ -15,29 +18,53 @@ Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name>
     exit 1
 }
 
-getLoggedInUserObjectId() {
-    echo "getting logged in user's object id"
+getLoggedInUserDetails() {
+    echo "getting logged in service principal id"
 
-    loggedInUserObjectId=$(az ad signed-in-user show --query "objectId" -o tsv)
-    if [[ -z $loggedInUserObjectId ]]; then
+    local loggedInUserDetails
+    loggedInUserDetails=$(az account show --query "[user.type, user.name]" -o tsv)
+
+    local pos=0
+    for detail in $loggedInUserDetails; do
+        if [[ $pos == 0 ]]; then
+            loggedInUserType=$detail
+        else
+            loggedInServicePrincipalName=$detail
+        fi
+        pos=$((pos + 1))
+    done
+
+    echo "logged in user account type - $loggedInUserType"
+    if [[ -z $loggedInServicePrincipalName ]]; then
         echo "unable to get logged in user's object id"
         exit 1
     fi
 }
 
 grantWritePermissionToKeyVault() {
-    local objectId=$1
+    echo "granting write permission to key vault $keyVault for logged in user"
 
-    echo "granting write permission to key vault $keyVault for logged in user for $objectId"
+    if [[ $loggedInUserType == "user" ]]; then
+        echo "setting write policy for user account"
+        az keyvault set-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" --secret-permissions set 1>/dev/null
+    else
+        echo "setting write policy for service principal"
+        az keyvault set-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" --secret-permissions set 1>/dev/null
+    fi
 
-    az keyvault set-policy --name "$keyVault" --object-id "$objectId" --secret-permissions set 1>/dev/null
 }
 
 revokePermissionsToKeyVault() {
-    local objectId=$1
 
     echo "revoking permission to key vault $keyVault for logged in user"
-    az keyvault delete-policy --name "$keyVault" --object-id "$objectId" 1>/dev/null
+
+    if [[ $loggedInUserType == "user" ]]; then
+        echo "revoking keyvault permission for user account"
+        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null
+    else
+        echo "revoking keyvault permission for service principal"
+        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null
+    fi
 }
 
 pushSecretToKeyVault() {
@@ -96,10 +123,10 @@ fi
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 
-getLoggedInUserObjectId
+getLoggedInUserDetails
 
-trap 'revokePermissionsToKeyVault "$loggedInUserObjectId"' EXIT
-grantWritePermissionToKeyVault "$loggedInUserObjectId"
+trap 'revokePermissionsToKeyVault' EXIT
+grantWritePermissionToKeyVault
 
 getCosmosDbUrl
 pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
