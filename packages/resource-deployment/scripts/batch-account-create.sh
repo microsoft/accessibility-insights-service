@@ -61,7 +61,7 @@ keyVault="$resourceName"
 batchAccountName="$resourceName"
 
 if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
-    echo "unable to required resource information from batch creation.
+    echo "Unable to get required resource information from batch creation:
     batchAccountName - $batchAccountName
     keyVault - $keyVault"
     exit 1

@@ -7,20 +7,19 @@ export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
 export includePattern="*[!*.map]"
 
-
 uploadFileBatch() {
     destinationContainer=$1
     pathToSource=$2
     storageAccountName=$3
     includePattern=$4
 
-    az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 
+    az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern"
 }
 
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -s <storage account name> -d <path to drop folder>
+Usage: $0 -s <storage account name> -d <path to drop folder (optional)>
 "
     exit 1
 }
