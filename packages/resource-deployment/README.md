@@ -25,7 +25,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 4. Clean
 
--   Run below command to delete resource group if it exists
+-   Run below command to delete the resource group if it exists
 
     ```bash
     ./scripts/delete-resource-group.sh -r <resourceGroupName>
@@ -33,21 +33,21 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 5. Deploy
 
--         Run below command to:
+-   Run below command to:
 
-          		-	Create Azure Resource Group
-          		-	Deploy Storage Account
-          		-	Create Queue in Storage Account
-          		-	Deploy Batch Account
-          		-	Deploy CosmosDB
-          		-	Deploy AppInsights
-          		-	Upload the service binaries to the Blob containers
-          		-	Setup url-scan-schedule job schedule
-          		-	Setup scan-req-schedule job schedule
+    -   Create Azure Resource Group
+    -   Deploy Storage Account
+    -   Create Queue in Storage Account
+    -   Deploy Batch Account
+    -   Deploy CosmosDB
+    -   Deploy AppInsights
+    -   Upload the service binaries to the Blob containers
+    -   Setup url-scan-schedule job schedule
+    -   Setup scan-req-schedule job schedule
 
-        		```bash
-        		./scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
-        		```
+    ```bash
+    ./scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
+    ```
 
 ### 6. Login to Azure portal to verify the Resources are being created
 
