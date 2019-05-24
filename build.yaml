@@ -17,6 +17,10 @@ steps:
       displayName: check code formatting
 
     - script: |
+          yarn copyright-check
+      displayName: check for copyright headers
+
+    - script: |
           yarn clean
       displayName: clean
 

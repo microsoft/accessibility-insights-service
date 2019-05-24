@@ -13,7 +13,7 @@
         "build": "npx lerna run build --stream",
         "test": "npx jest",
         "lint": "npx lerna run lint --stream",
-        "precheckin": "npm-run-all --serial format lint build test",
+        "precheckin": "npm-run-all --serial format lint build test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
         "copyright-check": "license-check-and-add"
