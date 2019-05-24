@@ -35,15 +35,15 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 - 	Run below command to:
 		
-		--	Create Azure Resource Group
-		--	Deploy Storage Account
-		--	Create Queue in Storage Account
-		--	Deploy Batch Account
-		--	Deploy CosmosDB
-		--	Deploy AppInsights
-		--	Upload the service binaries to the Blob containers
-		--	Setup url-scan-schedule job schedule
-		--	Setup scan-req-schedule job schedule
+		-	Create Azure Resource Group
+		-	Deploy Storage Account
+		-	Create Queue in Storage Account
+		-	Deploy Batch Account
+		-	Deploy CosmosDB
+		-	Deploy AppInsights
+		-	Upload the service binaries to the Blob containers
+		-	Setup url-scan-schedule job schedule
+		-	Setup scan-req-schedule job schedule
 		
 	```bash
     ./scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
