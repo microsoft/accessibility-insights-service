@@ -55,14 +55,6 @@ if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsigh
     exitWithUsageInfo
 fi
 
-echo "
-batchAccountName=$batchAccountName
-resourceGroupName=$resourceGroupName
-appInsightsKey=$appInsightsKey
-keyVaultUrl=$keyVaultUrl
-templatesFolder=$templatesFolder
-"
-
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 
