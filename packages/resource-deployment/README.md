@@ -23,55 +23,37 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     az login
     ```
 
-### 4. Create Azure Resource Group
+### 4. Clean
 
--   Run below command to get supported locations and choose where you want to deploy resources
-
-    ```bash
-    az account list-locations
-    ```
-
-    Create Resource Group
-
--   ```bash
-     az group create --subscription <subscriptionId> --name <resourceGroupName> --location <resourceGroupLocation>
-    ```
-
-### 5. Deploy Storage Account
-
--   ```bash
-    az group deployment create  --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/blob-storage.template.json" --parameters "./templates/blob-storage.parameters.json"
-    ```
-
-### 6. Create Queue in Storage Account
-
--   Default storage account name is 'a11yaxisstorage' if you have changed it please specify accordingly
-    ```bash
-    az storage queue create --name scanrequest --account-name a11yaxisstorage
-    ```
-
-### 7. Deploy Batch Account
+-   Run below command to delete resource group if it exists
 
     ```bash
-    ./scripts/batch-account-create.sh -s <subscriptionId> -r <resourceGroupName>
+    ./scripts/delete-resource-group.sh -r <resourceGroupName>
     ```
 
-### 8. Deploy CosmosDB
+### 5. Deploy
 
--   ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/cosmos-db.template.json" --parameters "./templates/cosmos-db.parameters.json"
+- 	Run below command to:
+		
+		--	Create Azure Resource Group
+		--	Deploy Storage Account
+		--	Create Queue in Storage Account
+		--	Deploy Batch Account
+		--	Deploy CosmosDB
+		--	Deploy AppInsights
+		--	Upload the service binaries to the Blob containers
+		--	Setup url-scan-schedule job schedule
+		--	Setup scan-req-schedule job schedule
+		
+	```bash
+    ./scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
     ```
 
-### 9. Deploy AppInsights
+### 6. Login to Azure portal to verify the Resources are being created
 
--   ```bash
-    az group deployment create --subscription <subscriptionId> --resource-group <resourceGroupName> --template-file "./templates/app-insights.template.json"
-    ```
-
-### 10. Login to Azure portal to verify the Resources are being created
-
--   Resource Group is created
--   And all the resources are deployed under the resource group.
+-   Resource Group is created.
+-   All the resources are deployed under the resource group.
+-	And all jobs are scheduled.
 
 # Contributing
 
