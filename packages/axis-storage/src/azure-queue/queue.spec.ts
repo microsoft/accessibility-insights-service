@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-empty no-null-keyword
 import 'reflect-metadata';
 

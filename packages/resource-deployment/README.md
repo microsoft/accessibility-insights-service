@@ -1,3 +1,8 @@
+<!--
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+-->
+
 # Deploy Resources for Accessibility Insights Service
 
 The deployment script is going to create Resource Group and deploy Storage Account, Batch Account and CosmosDB under it.

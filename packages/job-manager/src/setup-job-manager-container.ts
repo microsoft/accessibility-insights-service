@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 import { CredentialsProvider, registerAxisStorageToContainer } from 'axis-storage';
 import { Container, interfaces } from 'inversify';

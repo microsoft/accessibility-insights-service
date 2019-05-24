@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 export { HashGenerator } from './common/hash-generator';
 export { StorageClient } from './storage/storage-client';
 export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';

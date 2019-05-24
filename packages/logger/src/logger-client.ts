@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 

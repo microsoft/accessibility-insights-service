@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';

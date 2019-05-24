@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { StringUtils } from './string-utils';
 // tslint:disable: no-null-keyword
 

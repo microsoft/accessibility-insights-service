@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // tslint:disable:no-import-side-effect no-unnecessary-class
 import 'reflect-metadata';
 import '../../test-utilities/common-mock-methods';

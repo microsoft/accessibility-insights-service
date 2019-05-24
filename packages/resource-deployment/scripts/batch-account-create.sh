@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 #!/bin/bash
 # shellcheck disable=SC1090
 set -eo pipefail
@@ -73,6 +75,8 @@ echo "The '$batchAccountName' Azure Batch account deployed successfully"
 echo "Logging into '$batchAccountName' Azure Batch account"
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
+
+pools=$(az batch pool list --query "[].allocationState" -o tsv)
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
 export pool
