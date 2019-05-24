@@ -46,7 +46,7 @@ while getopts "b:r:a:k:t:" option; do
 done
 
 if [[ -z $templatesFolder ]]; then
-    templatesFolder="${0%/*}/../"
+    templatesFolder="${0%/*}/../templates/"
     exitWithUsageInfo
 fi
 
