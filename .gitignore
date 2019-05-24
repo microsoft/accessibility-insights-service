@@ -9,4 +9,6 @@ out/
 **/.env
 **/.prod
 
+**/*.generated.template.json
+
 yarn-error.log

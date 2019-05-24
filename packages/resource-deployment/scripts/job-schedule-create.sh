@@ -1,10 +1,16 @@
 #!/bin/bash
 set -eo pipefail
 
+export batchAccountName
+export resourceGroupName
+export appInsightsKey
+export keyVaultUrl
+export templatesFolder
+
 scanReqScheduleJobName="scan-req-schedule"
-parsedScanReqScheduleFileName="final_scan-req-schedule.template.json"
+parsedScanReqScheduleFileName="scan-req-schedule.generated.template.json"
 urlScanScheduleJobName="url-scan-schedule"
-parsedUrlScanScheduleFileName="final_url-scan-schedule.template.json"
+parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
 
 adjustJob() {
     local jobName=$1
@@ -22,7 +28,7 @@ adjustJob() {
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder>
+        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder (optional)>
     "
     exit 1
 }
@@ -32,20 +38,33 @@ while getopts "b:r:a:k:t:" option; do
     case $option in
     b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
-    a) appInstrumentationKey=${OPTARG} ;;
+    a) appInsightsKey=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
     t) templatesFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-# Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInstrumentationKey ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
+if [[ -z $templatesFolder ]]; then
+    templatesFolder="${0%/*}/../"
     exitWithUsageInfo
 fi
 
-sed -e "s/%APP_INSIGHTS_TOKEN%/$appInstrumentationKey/" -e "s/%KEY_VAULT_TOKEN%/$keyVaultUrl/" "$templatesFolder/scan-req-schedule.template.json">"$parsedScanReqScheduleFileName"
-sed -e "s/%APP_INSIGHTS_TOKEN%/$appInstrumentationKey/" -e "s/%KEY_VAULT_TOKEN%/$keyVaultUrl/" "$templatesFolder/url-scan-schedule.template.json">"$parsedUrlScanScheduleFileName"
+# Print script usage help
+if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsightsKey ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
+    exitWithUsageInfo
+fi
+
+echo "
+batchAccountName=$batchAccountName
+resourceGroupName=$resourceGroupName
+appInsightsKey=$appInsightsKey
+keyVaultUrl=$keyVaultUrl
+templatesFolder=$templatesFolder
+"
+
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 

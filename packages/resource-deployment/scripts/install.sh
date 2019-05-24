@@ -8,10 +8,10 @@ export location
 export storageAccountName
 export batchAccountName
 export keyVault
-export keyVaultUri
+export keyVaultUrl
 export cosmosAccountName
 export dropFolder="${0%/*}/../../"
-export templatesFolder="${0%/*}/../"
+export templatesFolder="${0%/*}/../templates/"
 export appInsightsKey
 
 exitWithUsageInfo() {
@@ -57,6 +57,9 @@ az account set --subscription "$subscription"
 . "${0%/*}/upload-files.sh"
 
 # shellcheck disable=SC2154
-keyVaultUri=$(az keyvault show --name "$keyvault" --query "properties.vaultUri" -o tsv)
+keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
+echo "Fetched keyvault url $keyVaultUrl"
 
 . "${0%/*}/app-insights-create.sh"
+
+. "${0%/*}/job-schedule-create.sh"
