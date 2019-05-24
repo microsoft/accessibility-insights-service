@@ -19,7 +19,7 @@ deleteResourceGroup()  {
         if [[ -z $response ]]; then
             echo "$resourceGroupName - Resource group deleted."
         else
-            echo "Something went wrong. Response - $response"
+            echo "Unable to delete resource group $resourceGroupName. Response - $response"
             exit 1
         fi
     else
