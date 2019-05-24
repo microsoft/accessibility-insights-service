@@ -15,6 +15,7 @@ deleteResourceGroup()  {
     response=$(az group exists --name "$resourceGroupName")
 
     if [[ "$response" == true ]]; then
+        echo "Resource group $resourceGroupName exists - Triggering delete operation."
         response=$(az group delete --name "$resourceGroupName" --yes)
         if [[ -z $response ]]; then
             echo "$resourceGroupName - Resource group deleted."
