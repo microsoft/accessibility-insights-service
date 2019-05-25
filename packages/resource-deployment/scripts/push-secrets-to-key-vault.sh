@@ -8,6 +8,9 @@ export cosmosAccountName
 export cosmosDbUrl
 export cosmosAccessKey
 
+export loggedInUserType
+export loggedInServicePrincipalName
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name>
@@ -15,36 +18,50 @@ Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name>
     exit 1
 }
 
-getLoggedInUserObjectId() {
-    echo "getting logged in user's object id"
+getLoggedInUserDetails() {
+    echo "Getting logged in service principal id"
 
-    loggedInUserObjectId=$(az ad signed-in-user show --query "objectId" -o tsv)
-    if [[ -z $loggedInUserObjectId ]]; then
-        echo "unable to get logged in user's object id"
+    loggedInUserType=$(az account show --query "user.type" -o tsv)
+    loggedInServicePrincipalName=$(az account show --query "user.name" -o tsv)
+
+    echo "Logged in user account type - $loggedInUserType"
+    if [[ -z $loggedInServicePrincipalName ]]; then
+        echo "Unable to get logged in user service principal id"
         exit 1
     fi
 }
 
 grantWritePermissionToKeyVault() {
-    local objectId=$1
+    echo "Granting write permission to key vault $keyVault for logged in user"
 
-    echo "granting write permission to key vault $keyVault for logged in user for $objectId"
+    if [[ $loggedInUserType == "user" ]]; then
+        echo "Setting write policy for user account"
+        az keyvault set-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" --secret-permissions set 1>/dev/null
+    else
+        echo "Setting write policy for service principal"
+        az keyvault set-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" --secret-permissions set 1>/dev/null
+    fi
 
-    az keyvault set-policy --name "$keyVault" --object-id "$objectId" --secret-permissions set 1>/dev/null
 }
 
 revokePermissionsToKeyVault() {
-    local objectId=$1
 
-    echo "revoking permission to key vault $keyVault for logged in user"
-    az keyvault delete-policy --name "$keyVault" --object-id "$objectId" 1>/dev/null
+    echo "Revoking permission to key vault $keyVault for logged in user"
+
+    if [[ $loggedInUserType == "user" ]]; then
+        echo "Revoking keyvault permission for user account"
+        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null
+    else
+        echo "Revoking keyvault permission for service principal"
+        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null
+    fi
 }
 
 pushSecretToKeyVault() {
     local secretName=$1
     local secretValue=$2
 
-    echo "adding secret for $secretName in key vault $keyVault"
+    echo "Adding secret for $secretName in key vault $keyVault"
     az keyvault secret set --vault-name "$keyVault" --name "$secretName" --value "$secretValue" 1>/dev/null
 }
 
@@ -52,7 +69,7 @@ getCosmosDbUrl() {
     cosmosDbUrl=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "documentEndpoint" -o tsv)
 
     if [[ -z $cosmosDbUrl ]]; then
-        echo "unable to get cosmos db url for cosmos account $cosmosAccountName under resource group $resourceGroupName"
+        echo "Unable to get cosmos db url for cosmos account $cosmosAccountName under resource group $resourceGroupName"
         exit 1
     fi
 }
@@ -62,7 +79,7 @@ getCosmosAccessKey() {
     cosmosAccessKey=$(az cosmosdb list-keys --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
 
     if [[ -z $cosmosAccessKey ]]; then
-        echo "unable to get accessKey for cosmos db account $cosmosAccountName under resource group $resourceGroupName"
+        echo "Unable to get accessKey for cosmos db account $cosmosAccountName under resource group $resourceGroupName"
         exit 1
     fi
 }
@@ -71,7 +88,7 @@ getStorageAccessKey() {
     storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
 
     if [[ -z $storageAccountKey ]]; then
-        echo "unable to get accessKey for storage account $storageAccountName"
+        echo "Unable to get accessKey for storage account $storageAccountName"
         exit 1
     fi
 }
@@ -96,10 +113,10 @@ fi
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 
-getLoggedInUserObjectId
+getLoggedInUserDetails
 
-trap 'revokePermissionsToKeyVault "$loggedInUserObjectId"' EXIT
-grantWritePermissionToKeyVault "$loggedInUserObjectId"
+trap 'revokePermissionsToKeyVault' EXIT
+grantWritePermissionToKeyVault
 
 getCosmosDbUrl
 pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
