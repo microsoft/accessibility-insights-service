@@ -8,12 +8,41 @@ set -eo pipefail
 export resourceGroupName
 export batchAccountName
 export pool
+export vmssResourceGroup
+export vmssName
 
 exitWithUsageInfo() {
     echo "
 Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
 "
     exit 1
+}
+
+getVmssInfo() {
+    echo "Retrieving '$pool' Batch pool VMSS configuration"
+    local query="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName']"
+
+    for i in {1..10}; do
+        vmssResourceGroup=$(az vmss list --query "$query.resourceGroup" -o tsv)
+        vmssName=$(az vmss list --query "$query.name" -o tsv)
+
+        if [[ -n $vmssResourceGroup ]] && [[ -n $vmssName ]]; then
+            break
+        else
+            echo "Retry count - $i."
+        fi
+        sleep 5
+    done
+
+    if [[ -z $vmssResourceGroup ]] || [[ -z $vmssName ]]; then
+        echo "The '$batchAccountName' Azure Batch account has no VMSS created for the '$pool' pool"
+        exit 1
+    fi
+
+    echo "Successfully retrieved vmss info :
+        vmssResourceGroup: $vmssResourceGroup
+        vmssName: $vmssName
+    "
 }
 
 # Read script arguments
@@ -40,18 +69,10 @@ if [[ $poolAllocationMode != "UserSubscription" ]]; then
 fi
 
 # Get Batch pool Azure VMSS resource group and name
-echo "Retrieving '$pool' Batch pool VMSS configuration"
-query="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName']"
-vmssResourceGroup=$(az vmss list --query "$query.resourceGroup" -o tsv)
-vmssName=$(az vmss list --query "$query.name" -o tsv)
-
-if [[ -z $vmssResourceGroup ]] || [[ -z $vmssName ]]; then
-    echo "The '$batchAccountName' Azure Batch account has no VMSS created for the '$pool' pool"
-    exit 1
-fi
+getVmssInfo
 
 # Enable system-assigned managed identity on a VMSS
-echo "Enabling system-assigned managed identity on /resourceGroups/$vmssResourceGroup/providers/Microsoft.Compute/virtualMachineScaleSets/$vmssName"
+echo "Enabling system-assigned managed identity for $vmssName in resource group $vmssResourceGroup"
 systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
 
 echo \

@@ -6,6 +6,7 @@ set -eo pipefail
 
 # This script will deploy Azure Batch account in user subscription mode
 # and enable managed identity for Azure on Batch pools
+export resourceGroupName
 
 export keyVault
 export systemAssignedIdentity
@@ -20,6 +21,31 @@ exitWithUsageInfo() {
 Usage: $0 -r <resource group> [-t <batch template file (optional)>]
 "
     exit 1
+}
+
+grantAccessToManagedIdentity() {
+    local role=$1
+    local managedIdentity=$2
+    local response
+    echo "Granting role - '$role' to the resource group '$resourceGroupName' for managed identity '$managedIdentity'"
+
+    for i in {1..10}; do
+        response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$managedIdentity" --query "roleDefinitionId") || true
+
+        if [[ -n $response ]]; then
+            break
+        else
+            echo "Retry count - $i."
+        fi
+        sleep 5
+    done
+
+    if [[ -z $response ]]; then
+        echo "Unable to create role assignment - '$role' for managed identity - '$managedIdentity'"
+        exit 1
+    fi
+
+    echo "Successfully granted role - '$role' to the resource group - '$resourceGroupName' for managed identity - '$managedIdentity'"
 }
 
 # Read script arguments
@@ -85,8 +111,7 @@ for pool in $pools; do
     . "${0%/*}/key-vault-enable-msi.sh"
 
     # Enable VMSS access to resource group that contains external Azure services Batch tasks depend on
-    echo "Granting access to the resource group '$resourceGroupName' for managed identity '$systemAssignedIdentity'"
-    az role assignment create --role "Contributor" --resource-group "$resourceGroupName" --assignee-object-id "$systemAssignedIdentity" 1>/dev/null
+    grantAccessToManagedIdentity "Contributor" "$systemAssignedIdentity"
 done
 
 echo "Successfully setup batch account $batchAccountName with pools"
