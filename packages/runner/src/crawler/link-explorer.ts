@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { Logger } from 'logger';
 import { CrawlerScanResults } from './crawler-scan-results';
 import { HCCrawlerTyped } from './hc-crawler';

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
 import { WebDriver } from '../web-driver/web-driver';

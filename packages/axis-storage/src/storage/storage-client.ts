@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 // tslint:disable: no-any
 import { Logger } from 'logger';
 import * as util from 'util';

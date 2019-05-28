@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { injectable } from 'inversify';
 
 // tslint:disable: no-any no-object-literal-type-assertion prefer-object-spread

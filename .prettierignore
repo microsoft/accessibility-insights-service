@@ -20,3 +20,4 @@ dist/
 out/
 **/.env.*
 **/yarn-*.log
+copyright-header.txt

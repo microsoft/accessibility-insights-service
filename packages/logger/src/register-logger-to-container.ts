@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import * as appInsights from 'applicationinsights';
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';

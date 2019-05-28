@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 export { Logger, LogLevel } from './logger';
 export { BaseEntryPoint } from './base-entry-point';
 export { loggerTypes } from './logger-types';

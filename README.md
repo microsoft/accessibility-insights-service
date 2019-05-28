@@ -1,3 +1,8 @@
+<!--
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+-->
+
 # Accessibility Insights Service
 
 ## Building the code
@@ -75,82 +80,7 @@
 
 ## Deployment
 
-### Azure Resources
-
 -   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy required Azure resources.
-
-### Service Binaries
-
--   Under the **batch-pool-startup-script** Blob container upload following files from the [resource-deployment](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment) package:
-
-    ```
-        pool-startup.sh
-    ```
-
--   Under the **batch-job-manager-script** Blob container upload following files from the [job-manager](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/job-manager) package build output:
-
-    ```
-        job-manager.js
-        run-job-manager.sh
-    ```
-
--   Under the **batch-scan-request-sender-script** Blob container upload following files from the [scan-request-sender](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/scan-request-sender) package build output:
-
-    ```
-        job-manager.js
-        run-job-manager.sh
-    ```
-
--   Under the **batch-runner-script** Blob container upload following files from the [runner](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/runner) package build output:
-
-    ```
-        runner.js
-        start-runner.sh
-    ```
-
-### Azure Batch Account
-
-#### Setup _url-scan-schedule_ job schedule
-
--   Update the local copy of [url-scan-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/url-scan-schedule.template.json) template file by adding the following data:
-
-    ```
-        ⋅ The values under commonEnvironmentSettings section. Update the value for the environment settings like
-            ⋅ KEY_VAULT_URL (key vault url for the keyvault resource that was created for the batch account)
-            ⋅ APPINSIGHTS_INSTRUMENTATIONKEY (application insights instrumentation key to use for tracing & logging telemetry events)
-    ```
-
--   Login into Azure Batch account using Azure CLI:
-
-    ```
-        az batch account login --name <accountName> --resource-group <resourceGroup>
-    ```
-
--   Deploy job schedule using Azure CLI:
-
-    ```
-        az batch job-schedule create --json-file ./url-scan-schedule.template.json
-    ```
-
-#### Setup _scan-req-schedule_ job schedule
-
--   Update the local copy of [scan-req-schedule.template.json](https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates/scan-req-schedule.template.json) template file by adding the following data:
-
-    ```
-        ⋅ The values under commonEnvironmentSettings section
-    ```
-
--   Login into Azure Batch account using Azure CLI (if not done previously):
-
-    ```
-        az batch account login --name <accountName> --resource-group <resourceGroup>
-    ```
-
--   Deploy job schedule using Azure CLI:
-
-    ```
-        az batch job-schedule create --json-file ./scan-req-schedule.template.json
-    ```
 
 # Contributing
 

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { IMock } from 'typemoq';
 
 export function getPromisableDynamicMock<T>(mock: IMock<T>): IMock<T> {

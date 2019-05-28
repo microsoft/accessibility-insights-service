@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { RunState, ScanLevel } from './states';
 import { StorageDocument } from './storage-document';
 

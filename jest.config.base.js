@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 module.exports = {
     clearMocks: true,
     displayName: 'storage unit tests',
