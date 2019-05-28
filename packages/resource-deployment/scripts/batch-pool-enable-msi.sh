@@ -27,7 +27,7 @@ getVmssInfo() {
         if [[ -n $vmssResourceGroup ]] && [[ -n $vmssName ]]; then
             break
         else
-            echo "Retry count - $i. Unable to fetch vmss for the pool '$pool' in batch account '$batchAccountName'"
+            echo "Retry count - $i."
         fi
         sleep 5
     done
@@ -70,7 +70,7 @@ fi
 getVmssInfo
 
 # Enable system-assigned managed identity on a VMSS
-echo "Enabling system-assigned managed identity on /resourceGroups/$vmssResourceGroup/providers/Microsoft.Compute/virtualMachineScaleSets/$vmssName"
+echo "Enabling system-assigned managed identity for $vmssName in resource group $vmssResourceGroup"
 systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
 
 echo \

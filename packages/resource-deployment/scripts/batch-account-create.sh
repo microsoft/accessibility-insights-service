@@ -33,7 +33,7 @@ grantAccessToManagedIdentity() {
         if [[ -n $response ]]; then
             break
         else
-            echo "Retry count - $i. Unable to create role assignment - '$role' for managed identity - '$managedIdentity'"
+            echo "Retry count - $i."
         fi
         sleep 5
     done
