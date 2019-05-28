@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import * as cosmos from '@azure/cosmos';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';

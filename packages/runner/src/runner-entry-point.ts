@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { Container } from 'inversify';
 import { BaseEntryPoint, BaseTelemetryProperties } from 'logger';
 import { Runner } from './runner/runner';

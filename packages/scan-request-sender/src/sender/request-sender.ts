@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { Queue, StorageConfig } from 'axis-storage';
 import { inject, injectable } from 'inversify';
 import { WebSite } from '../request-type/website';

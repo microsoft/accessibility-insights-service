@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { CosmosClientWrapper, registerAxisStorageToContainer, StorageClient } from 'axis-storage';
 import * as inversify from 'inversify';
 import { Logger, registerLoggerToContainer } from 'logger';

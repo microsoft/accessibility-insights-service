@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';

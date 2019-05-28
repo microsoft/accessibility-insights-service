@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 pool:
     vmImage: 'Ubuntu-16.04'
     demands: npm
@@ -15,6 +17,10 @@ steps:
     - script: |
           yarn format-check
       displayName: check code formatting
+
+    - script: |
+          yarn copyright-check
+      displayName: check for copyright headers
 
     - script: |
           yarn clean

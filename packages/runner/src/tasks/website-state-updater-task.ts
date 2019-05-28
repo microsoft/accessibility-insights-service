@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { RetryOptions, StorageClient } from 'axis-storage';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';

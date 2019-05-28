@@ -1,3 +1,5 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
 #!/bin/bash
 export NODE_PATH=$AZ_BATCH_NODE_SHARED_DIR/batch-runner/node_modules
 

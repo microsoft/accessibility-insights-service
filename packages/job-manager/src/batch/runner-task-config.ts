@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Logger, loggerTypes } from 'logger';
 import * as node_url from 'url';
