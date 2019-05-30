@@ -79,7 +79,7 @@ export class Batch {
                 } else {
                     this.jobTasks.get(taskAddResult.taskId).state = JobTaskState.failed;
                     this.jobTasks.get(taskAddResult.taskId).error = taskAddResult.error.message.value;
-                    this.logger.logError(`An error occurred while adding new task ${taskAddResult.taskId} to the job ${jobId}.`);
+                    this.logger.logError(`An error occurred while adding new task ${JSON.stringify(taskAddResult)} to the job ${jobId}.`);
                 }
             });
         } else {
