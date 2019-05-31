@@ -6,10 +6,10 @@ import 'reflect-metadata';
 import { HashGenerator } from 'axis-storage';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { IssueScanResults, Product, ResultLevel } from '../documents/issue-scan-result';
+import { IssueScanResults, Product } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
 import { PageScanResult } from '../documents/page-scan-result';
-import { RunState, ScanLevel } from '../documents/states';
+import { RunState, ScanLevel, ResultLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 import { PageScanResultFactory } from './page-scan-result-factory';
 

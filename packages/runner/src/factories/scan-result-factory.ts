@@ -3,16 +3,17 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { ResultLevel, ScanResult } from '../documents/issue-scan-result';
+import { IssueScanResult } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
+import { ResultLevel } from '../documents/states';
 
 @injectable()
 export class ScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public create(axeResults: AxeResults, scanConfig: ScanMetadata): ScanResult[] {
-        const results: ScanResult[] = [];
+    public create(axeResults: AxeResults, scanConfig: ScanMetadata): IssueScanResult[] {
+        const results: IssueScanResult[] = [];
 
         axeResults.violations.forEach((axeResult: Result) => {
             results.push(...this.convertResults(axeResult, axeResult.nodes, ResultLevel.error, scanConfig));
@@ -21,7 +22,7 @@ export class ScanResultFactory {
         return results;
     }
 
-    private convertResults(axeResult: Result, nodes: NodeResult[], level: ResultLevel, scanConfig: ScanMetadata): ScanResult[] {
+    private convertResults(axeResult: Result, nodes: NodeResult[], level: ResultLevel, scanConfig: ScanMetadata): IssueScanResult[] {
         return nodes.map((node: NodeResult) => {
             const selector = node.target.join(';');
 

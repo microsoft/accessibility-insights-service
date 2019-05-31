@@ -76,7 +76,11 @@
             "./packages/crawler/dist",
             "./packages/crawler/node_modules",
             "./packages/crawler/src/test-resources/",
-            "./packages/crawler/test-results"
+            "./packages/crawler/test-results",
+            "./packages/storage-documents/dist",
+            "./packages/storage-documents/node_modules",
+            "./packages/storage-documents/src/test-resources/",
+            "./packages/storage-documents/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [

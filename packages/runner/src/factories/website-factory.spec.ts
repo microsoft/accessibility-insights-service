@@ -5,8 +5,7 @@ import 'reflect-metadata';
 import { HashGenerator } from 'axis-storage';
 import { IMock, Mock, Times } from 'typemoq';
 import { ItemType } from '../documents/item-type';
-import { RunState, ScanLevel } from '../documents/states';
-import { WebsiteScanState } from '../documents/website';
+import { RunState, ScanLevel, WebsiteScanState } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteFactory } from './website-factory';
 

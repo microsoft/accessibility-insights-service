@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { IssueScanResults } from '../documents/issue-scan-result';
 import { ItemType } from '../documents/item-type';
-import { CrawlResult, PageScanResult, Result, ScanResult } from '../documents/page-scan-result';
+import { PageScanResult, PageCrawlRunResult, PageIssueScanRunResult } from '../documents/page-scan-result';
 import { RunState, ScanLevel } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 
@@ -35,7 +35,7 @@ export class PageScanResultFactory {
         };
     }
 
-    private createCrawlResult(scanUrl: string, crawlerScanResults: CrawlerScanResults, runTime: Date): Result<CrawlResult> {
+    private createCrawlResult(scanUrl: string, crawlerScanResults: CrawlerScanResults, runTime: Date): PageCrawlRunResult {
         const runState = crawlerScanResults.error === undefined ? RunState.completed : RunState.failed;
 
         if (runState === RunState.completed) {
@@ -64,7 +64,7 @@ export class PageScanResultFactory {
         }
     }
 
-    private createScanResult(issueScanResults: IssueScanResults, runTime: Date): Result<ScanResult> {
+    private createScanResult(issueScanResults: IssueScanResults, runTime: Date): PageIssueScanRunResult {
         const runState = issueScanResults.error === undefined ? RunState.completed : RunState.failed;
 
         if (runState === RunState.completed) {
