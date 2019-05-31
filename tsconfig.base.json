@@ -17,5 +17,5 @@
         "useWebpackText": true
     },
     "include": ["**/*"],
-    "exclude": ["node_modules", "**/node_modules", "**/dist", "**/*.d.ts"]
+    "exclude": ["**/dist", "**/*.d.ts"]
 }
