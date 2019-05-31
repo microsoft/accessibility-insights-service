@@ -15,5 +15,7 @@
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,
         "useWebpackText": true
-    }
+    },
+    "include": ["**/*"],
+    "exclude": ["node_modules"]
 }
