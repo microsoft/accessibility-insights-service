@@ -16,6 +16,6 @@
         "usePrecompiledFiles": true,
         "useWebpackText": true
     },
-    "include": ["**/*"],
+    "include": ["**/*.ts", "**/*.js"],
     "exclude": ["**/dist", "**/*.d.ts"]
 }
