@@ -5,12 +5,10 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { HashGenerator } from 'axis-storage';
+import { IssueScanResult, ItemType, Product, ResultLevel } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { Product, IssueScanResult } from '../documents/issue-scan-result';
-import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanResultFactory } from './scan-result-factory';
-import { ResultLevel } from '../documents/states';
 
 const testScanUrl: string = 'test scan url';
 const scanMetadata: ScanMetadata = {

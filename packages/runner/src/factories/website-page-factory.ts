@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
+import { ItemType, WebsitePage } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ItemType } from '../documents/item-type';
-import { WebsitePage } from '../documents/website-page';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()

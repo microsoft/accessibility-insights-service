@@ -3,9 +3,8 @@
 import 'reflect-metadata';
 
 import { HashGenerator } from 'axis-storage';
+import { ItemType, RunState, ScanLevel, WebsiteScanState } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { ItemType } from '../documents/item-type';
-import { RunState, ScanLevel, WebsiteScanState } from '../documents/states';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteFactory } from './website-factory';
 

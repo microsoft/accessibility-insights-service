@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { StorageDocument } from './storage-document';
 import { ResultLevel } from './states';
+import { StorageDocument } from './storage-document';
 
 export interface PhysicalLocation {
     fileLocation: {

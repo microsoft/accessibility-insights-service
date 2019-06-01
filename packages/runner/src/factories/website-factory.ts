@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { ItemType } from '../documents/item-type';
-import { PageScanResult } from '../documents/page-scan-result';
-import { RunState, ScanLevel, WebsiteScanState } from '../documents/states';
-import { PageLastScanResult, Website } from '../documents/website';
+import { ItemType, PageLastScanResult, PageScanResult, RunState, ScanLevel, Website, WebsiteScanState } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()

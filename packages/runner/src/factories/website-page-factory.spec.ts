@@ -3,10 +3,9 @@
 import 'reflect-metadata';
 
 import { HashGenerator } from 'axis-storage';
+import { ItemType, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ItemType } from '../documents/item-type';
-import { WebsitePage } from '../documents/website-page';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsitePageFactory } from './website-page-factory';
 

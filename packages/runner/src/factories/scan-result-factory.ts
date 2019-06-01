@@ -3,10 +3,8 @@
 import { AxeResults, NodeResult, Result } from 'axe-core';
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { IssueScanResult } from '../documents/issue-scan-result';
-import { ItemType } from '../documents/item-type';
+import { IssueScanResult, ItemType, ResultLevel } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
-import { ResultLevel } from '../documents/states';
 
 @injectable()
 export class ScanResultFactory {
