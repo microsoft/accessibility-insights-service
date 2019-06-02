@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { RunState } from './states';
 import { StorageDocument } from './storage-document';
 
 /**
@@ -14,6 +15,13 @@ export interface WebsitePage extends StorageDocument {
     page: {
         websiteId: string;
         url: string;
+        basePage?: boolean;
+        referenceIndex: number;
         lastSeen: string;
+        lastRunState: {
+            lastUpdated: string;
+            state: RunState;
+            retries?: number;
+        };
     };
 }
