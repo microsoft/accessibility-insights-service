@@ -1,6 +1,8 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-#!/bin/bash
+
 set -eo pipefail
 
 exitWithUsageInfo() {
@@ -10,7 +12,7 @@ exitWithUsageInfo() {
     exit 1
 }
 
-deleteResourceGroup()  {
+deleteResourceGroup() {
     local resourceGroupName=$1
     local response
 

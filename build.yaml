@@ -47,9 +47,6 @@ steps:
       condition: always()
       displayName: publish unit test results
 
-    - task: NuGetToolInstaller@0
-      displayName: 'Install NuGet'
-
     - task: PublishCodeCoverageResults@1
       inputs:
           codeCoverageTool: Cobertura
@@ -60,7 +57,9 @@ steps:
       inputs:
           SourceFolder: packages
           Contents: |
-              **/dist/**/*
+              job-manager/dist/**/*
+              runner/dist/**/*
+              scan-request-sender/dist/**/*
               resource-deployment/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
