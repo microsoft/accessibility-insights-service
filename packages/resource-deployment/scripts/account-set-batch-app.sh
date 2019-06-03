@@ -1,6 +1,8 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-#!/bin/bash
+
 set -eo pipefail
 
 # The script will configure the default Azure subscription account to support Batch user subscription mode
@@ -17,7 +19,7 @@ if [[ $batchProviderRegistrationState != "Registered" ]]; then
     az provider register --namespace Microsoft.Batch
 
     # Wait for the registration to complete
-    end=$((SECONDS+300))
+    end=$((SECONDS + 300))
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
         sleep 10
@@ -41,5 +43,5 @@ fi
 roleDefinitionName=$(az role assignment list --query "[?principalId=='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'].roleDefinitionName" -o tsv)
 if [[ $roleDefinitionName != "Contributor" ]]; then
     echo "Granting Azure Batch service access to the '$subscription' Azure subscription"
-    az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1> /dev/null
+    az role assignment create --assignee ddbf3205-c6bd-46ae-8127-60eb93363864 --role contributor 1>/dev/null
 fi
