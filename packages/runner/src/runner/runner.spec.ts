@@ -47,7 +47,12 @@ const websitePages: WebsitePage[] = [
         page: {
             websiteId: 'websiteId',
             url: 'url',
-            lastSeen: 'lastSeen4',
+            referenceIndex: 0,
+            lastSeen: 'lastSeen',
+            lastRunState: {
+                lastUpdated: '2019-06-01T00:00:00.000Z',
+                state: RunState.completed,
+            },
         },
         partitionKey: scanMetadata.websiteId,
     },

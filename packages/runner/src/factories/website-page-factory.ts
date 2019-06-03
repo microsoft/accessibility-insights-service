@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { ItemType, WebsitePage } from 'storage-documents';
+import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { ScanMetadata } from '../types/scan-metadata';
 
@@ -22,7 +22,12 @@ export class WebsitePageFactory {
                     page: {
                         websiteId: scanMetadata.websiteId,
                         url: link,
+                        referenceIndex: 0,
                         lastSeen: runTime.toJSON(),
+                        lastRunState: {
+                            lastUpdated: runTime.toJSON(),
+                            state: RunState.completed,
+                        },
                     },
                     partitionKey: scanMetadata.websiteId,
                 };
