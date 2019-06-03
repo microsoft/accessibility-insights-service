@@ -21,8 +21,12 @@
             "path": "../packages/scan-request-sender"
         },
         {
-
+            "name": "resource-deployment",
             "path": "../packages/resource-deployment"
+        },
+        {
+            "name": "storage-documents",
+            "path": "../packages/storage-documents"
         },
         {
             "name": "root",
@@ -47,7 +51,15 @@
             "**/out": true,
             "**/test-results": true
         },
-        "cSpell.words": ["cout", "coutd", "etag", "injectable", "inversify", "upsert"]
+        "cSpell.words": [
+            "cout",
+            "coutd",
+            "etag",
+            "injectable",
+            "inversify",
+            "typemoq",
+            "upsert"
+        ]
     },
     "extensions": {
         "recommendations": [

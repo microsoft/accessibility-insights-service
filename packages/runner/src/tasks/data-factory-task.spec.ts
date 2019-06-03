@@ -4,12 +4,9 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { IssueScanResult, IssueScanResults, PageScanResult, Website, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { IssueScanResults, ScanResult } from '../documents/issue-scan-result';
-import { PageScanResult } from '../documents/page-scan-result';
-import { Website } from '../documents/website';
-import { WebsitePage } from '../documents/website-page';
 import { PageScanResultFactory } from '../factories/page-scan-result-factory';
 import { ScanResultFactory } from '../factories/scan-result-factory';
 import { WebsiteFactory } from '../factories/website-factory';
@@ -90,7 +87,7 @@ describe('DataFactoryTask', () => {
     it('convert to scan result model w/ error', () => {
         const axeScanResults = <AxeScanResults>(<unknown>{ type: 'AxeScanResults', error: 'error' });
         const scanMetadata = <ScanMetadata>(<unknown>{ type: 'ScanMetadata' });
-        const scanResults: ScanResult[] = [<ScanResult>(<unknown>{ type: 'ScanResult' })];
+        const scanResults: IssueScanResult[] = [<IssueScanResult>(<unknown>{ type: 'ScanResult' })];
 
         scanResultFactoryMock
             .setup(o => o.create(axeScanResults.results, scanMetadata))
@@ -109,7 +106,7 @@ describe('DataFactoryTask', () => {
             (<unknown>{ type: 'AxeScanResults', results: [<AxeResults>(<unknown>{ type: 'AxeResults' })] })
         );
         const scanMetadata = <ScanMetadata>(<unknown>{ type: 'ScanMetadata' });
-        const scanResults: ScanResult[] = [<ScanResult>(<unknown>{ type: 'ScanResult' })];
+        const scanResults: IssueScanResult[] = [<IssueScanResult>(<unknown>{ type: 'ScanResult' })];
         scanResultFactoryMock
             .setup(o => o.create(axeScanResults.results, scanMetadata))
             .returns(() => scanResults)

@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ResultLevel } from './states';
 import { StorageDocument } from './storage-document';
-
-export enum ResultLevel {
-    error = 'error',
-    pass = 'pass',
-}
 
 export interface PhysicalLocation {
     fileLocation: {
@@ -23,7 +19,7 @@ export interface Location {
     fullyQualifiedLogicalName: string;
 }
 
-export interface Result {
+export interface RuleResult {
     ruleId: string;
     level: ResultLevel;
     locations: Location[];
@@ -39,12 +35,12 @@ export interface Product {
 /**
  * Descries the accessibility scan issue.
  */
-export interface ScanResult extends StorageDocument {
-    result: Result;
+export interface IssueScanResult extends StorageDocument {
+    result: RuleResult;
     product: Product;
 }
 
 export interface IssueScanResults {
-    results?: ScanResult[];
+    results?: IssueScanResult[];
     error?: string;
 }

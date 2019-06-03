@@ -5,13 +5,9 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { Browser } from 'puppeteer';
+import { IssueScanResults, ItemType, PageScanResult, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { IssueScanResults } from '../documents/issue-scan-result';
-import { ItemType } from '../documents/item-type';
-import { PageScanResult } from '../documents/page-scan-result';
-import { RunState } from '../documents/states';
-import { WebsitePage } from '../documents/website-page';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { CrawlerTask } from '../tasks/crawler-task';
@@ -51,7 +47,12 @@ const websitePages: WebsitePage[] = [
         page: {
             websiteId: 'websiteId',
             url: 'url',
-            lastSeen: 'lastSeen4',
+            referenceIndex: 0,
+            lastSeen: 'lastSeen',
+            lastRunState: {
+                lastUpdated: '2019-06-01T00:00:00.000Z',
+                state: RunState.completed,
+            },
         },
         partitionKey: scanMetadata.websiteId,
     },

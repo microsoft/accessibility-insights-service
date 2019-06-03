@@ -19,13 +19,13 @@ export class Runner {
         @inject(DataFactoryTask) private readonly dataFactoryTask: DataFactoryTask,
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(StorageTask) private readonly storageTask: StorageTask,
-        @inject(ScanMetadataConfig) private readonly scanMetatadataConfig: ScanMetadataConfig,
+        @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
     ) {}
 
     public async run(): Promise<void> {
         let browser: Browser;
         const runTime = new Date();
-        const scanMetadata = this.scanMetatadataConfig.getConfig();
+        const scanMetadata = this.scanMetadataConfig.getConfig();
 
         try {
             // start new web driver process

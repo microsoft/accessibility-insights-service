@@ -3,13 +3,13 @@
 import { RunState, ScanLevel } from './states';
 import { StorageDocument } from './storage-document';
 
-export interface ScanResult {
+export interface PageIssueScanResult {
     runTime: string;
     level: ScanLevel;
     issues: string[];
 }
 
-export interface CrawlResult {
+export interface PageCrawlResult {
     runTime: string;
     links: string[];
 }
@@ -20,8 +20,13 @@ export interface RunResult {
     error?: string;
 }
 
-export interface Result<T> {
-    result?: T;
+export interface PageIssueScanRunResult {
+    result?: PageIssueScanResult;
+    run: RunResult;
+}
+
+export interface PageCrawlRunResult {
+    result?: PageCrawlResult;
     run: RunResult;
 }
 
@@ -35,6 +40,6 @@ export interface Result<T> {
 export interface PageScanResult extends StorageDocument {
     websiteId: string;
     url: string;
-    crawl: Result<CrawlResult>;
-    scan: Result<ScanResult>;
+    crawl: PageCrawlRunResult;
+    scan: PageIssueScanRunResult;
 }

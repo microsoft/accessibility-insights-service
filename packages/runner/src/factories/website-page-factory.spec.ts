@@ -3,10 +3,9 @@
 import 'reflect-metadata';
 
 import { HashGenerator } from 'axis-storage';
+import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ItemType } from '../documents/item-type';
-import { WebsitePage } from '../documents/website-page';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsitePageFactory } from './website-page-factory';
 
@@ -89,37 +88,91 @@ describe('WebsitePageFactory', () => {
             {
                 id: 'baseUrl-scanUrl-1-hash-1',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-1-link-1', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-1-link-1',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-2',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-1-link-2', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-1-link-2',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-1-hash-3',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-1-link-3', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-1-link-3',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-1',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-2-link-1', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-2-link-1',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-2',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-2-link-2', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-2-link-2',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
             {
                 id: 'baseUrl-scanUrl-2-hash-3',
                 itemType: ItemType.page,
-                page: { websiteId: 'websiteId', url: 'scanUrl-2-link-3', lastSeen: runTime.toJSON() },
+                page: {
+                    websiteId: 'websiteId',
+                    url: 'scanUrl-2-link-3',
+                    lastSeen: runTime.toJSON(),
+                    referenceIndex: 0,
+                    lastRunState: {
+                        lastUpdated: runTime.toJSON(),
+                        state: RunState.completed,
+                    },
+                },
                 partitionKey: scanMetadata.websiteId,
             },
         ];

@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { ItemType } from '../documents/item-type';
-import { PageScanResult } from '../documents/page-scan-result';
-import { RunState, ScanLevel } from '../documents/states';
-import { Page, Website, WebsiteScanState } from '../documents/website';
+import { ItemType, PageLastScanResult, PageScanResult, RunState, ScanLevel, Website, WebsiteScanState } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()
@@ -81,13 +78,13 @@ export class WebsiteFactory {
         };
     }
 
-    private getWebsiteScanState(websitePageScanResult: Page[]): WebsiteScanState {
+    private getWebsiteScanState(websitePageScanResult: PageLastScanResult[]): WebsiteScanState {
         return websitePageScanResult.some(result => result.runState === RunState.failed)
             ? WebsiteScanState.completedWithError
             : WebsiteScanState.completed;
     }
 
-    private getWebsiteScanLevel(websitePageScanResult: Page[]): ScanLevel {
+    private getWebsiteScanLevel(websitePageScanResult: PageLastScanResult[]): ScanLevel {
         return websitePageScanResult.some(result => result.level === ScanLevel.fail) ? ScanLevel.fail : ScanLevel.pass;
     }
 

@@ -1,17 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RunState, ScanLevel } from './states';
+import { RunState, ScanLevel, WebsiteScanState } from './states';
 import { StorageDocument } from './storage-document';
-
-export enum WebsiteScanState {
-    completed = 'completed',
-    completedWithError = 'completedWithError',
-}
 
 /**
  * Describes the website page last scan result.
  */
-export interface Page {
+export interface PageLastScanResult {
     id: string;
     pageId: string;
     url: string;
@@ -33,5 +28,5 @@ export interface Website extends StorageDocument {
         level?: ScanLevel;
         scanState: WebsiteScanState;
     };
-    lastPageScanResults: Page[];
+    lastPageScanResults: PageLastScanResult[];
 }

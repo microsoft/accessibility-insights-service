@@ -5,9 +5,8 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { HashGenerator } from 'axis-storage';
+import { IssueScanResult, ItemType, Product, ResultLevel } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { Product, ResultLevel, ScanResult } from '../documents/issue-scan-result';
-import { ItemType } from '../documents/item-type';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanResultFactory } from './scan-result-factory';
 
@@ -32,7 +31,7 @@ describe('ScanResultFactory', () => {
     it('generate scan result', () => {
         setupHashFunction();
         const axeResults: AxeResults = buildAxeResult();
-        const expectedConvertedResult: ScanResult[] = buildExpectedConvertedResult();
+        const expectedConvertedResult: IssueScanResult[] = buildExpectedConvertedResult();
 
         expect(scanResultFactory.create(axeResults, scanMetadata)).toMatchObject(expectedConvertedResult);
         hashGeneratorMock.verifyAll();
@@ -117,7 +116,7 @@ describe('ScanResultFactory', () => {
         } as AxeResults;
     }
 
-    function buildExpectedConvertedResult(): ScanResult[] {
+    function buildExpectedConvertedResult(): IssueScanResult[] {
         const productInfo: Product = {
             id: 'test product id',
             name: 'test name',
