@@ -21,6 +21,7 @@
             {
                 "ignore": "test.each"
             }
-        ]
+        ],
+        "quotemark": [true, "single", "avoid-escape"]
     }
 }

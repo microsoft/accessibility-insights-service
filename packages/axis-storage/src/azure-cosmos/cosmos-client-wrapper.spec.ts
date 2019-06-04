@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { CosmosClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { ItemType } from '../test-utilities/test-document-types/item-type';
@@ -21,6 +21,7 @@ describe('CosmosClientWrapper', () => {
     let collectionsMock: IMock<cosmos.Containers>;
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
+    let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
     const partitoningKey = 'partKey';
 
     const dbName = 'stub db';
@@ -94,6 +95,45 @@ describe('CosmosClientWrapper', () => {
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName);
 
+            expect(result).toEqual(expectedResult);
+            itemMock.verifyAll();
+            verifyMocks();
+        });
+        it('read items using query', async () => {
+            const query = "SELECT * from C where C.itemType = 'Page'";
+            const items = [
+                {
+                    id: 'id-1',
+                    itemType: ItemType.page,
+                    propA: 'propA',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-2',
+                    itemType: ItemType.page,
+                    propA: 'propB',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-3',
+                    itemType: ItemType.page,
+                    propA: 'propC',
+                    _etag: '1',
+                },
+            ];
+            const expectedResult = {
+                item: items,
+                statusCode: 200,
+                continuationToken: 'abdf12345fd',
+            };
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            // tslint:disable-next-line: no-unsafe-any
+            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            queryIteratorMock
+                .setup(async qi => qi.toArray())
+                .returns(async () => Promise.resolve({ result: items, statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } }));
+
+            const result = await testSubject.readItems(dbName, collectionName, query);
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
             verifyMocks();
@@ -260,6 +300,7 @@ describe('CosmosClientWrapper', () => {
         collectionsMock = Mock.ofType(cosmos.Containers);
         itemsMock = Mock.ofType(cosmos.Items);
         itemMock = Mock.ofType(cosmos.Item);
+        queryIteratorMock = Mock.ofType(cosmos.QueryIterator);
         cosmosClientProviderStub = async () => cosmosClientMock.object;
 
         collectionMock.setup(c => c.items).returns(() => itemsMock.object);
