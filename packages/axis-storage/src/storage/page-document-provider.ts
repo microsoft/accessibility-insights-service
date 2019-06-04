@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// tslint:disable: no-any
 import { RunState, WebsitePage } from 'storage-documents';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';

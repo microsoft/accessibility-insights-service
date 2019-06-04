@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+// tslint:disable: no-import-side-effect no-any
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { PageDocumentProvider } from './page-document-provider';
