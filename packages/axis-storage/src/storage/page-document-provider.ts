@@ -20,7 +20,7 @@ export class PageDocumentProvider {
                 },
                 {
                     name: '@state',
-                    value: RunState.queued,
+                    value: RunState.completed,
                 },
             ],
         };
