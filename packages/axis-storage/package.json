@@ -54,6 +54,7 @@
         "logger": "1.0.0",
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
+        "storage-documents": "1.0.0",
         "sha.js": "^2.4.11",
         "verror": "^1.10.0"
     }
