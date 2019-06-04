@@ -10,6 +10,7 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 @injectable()
 export class CosmosClientWrapper {
     public static readonly PARTITIONKEY_NAME: string = '/partitionKey';
+    public static readonly MAXIMUM_ITEM_COUNT: number = 100;
     constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
@@ -63,6 +64,44 @@ export class CosmosClientWrapper {
             return {
                 item: itemsT,
                 statusCode: 200,
+            };
+        } catch (error) {
+            if ((<cosmos.ErrorResponse>error).code !== undefined) {
+                return {
+                    response: (<cosmos.ErrorResponse>error).body,
+                    statusCode: (<cosmos.ErrorResponse>error).code,
+                };
+            } else {
+                throw error;
+            }
+        }
+    }
+
+    public async readItems<T>(
+        dbName: string,
+        collectionName: string,
+        query: cosmos.SqlQuerySpec | string,
+        continuationToken?: string,
+    ): Promise<CosmosOperationResponse<T[]>> {
+        const container = await this.getContainer(dbName, collectionName);
+
+        try {
+            const feedOptions: cosmos.FeedOptions = {
+                continuation: continuationToken,
+                maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
+            };
+            const response = await container.items.query(query, feedOptions).toArray();
+            const itemsT: T[] = [];
+
+            response.result.forEach(document => {
+                itemsT.push(this.convert<T>(document));
+            });
+
+            return {
+                item: itemsT,
+                statusCode: 200,
+                // tslint:disable-next-line: no-unsafe-any
+                continuationToken: response.headers['x-ms-continuation'],
             };
         } catch (error) {
             if ((<cosmos.ErrorResponse>error).code !== undefined) {
