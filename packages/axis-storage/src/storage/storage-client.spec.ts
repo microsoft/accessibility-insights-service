@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any
+// tslint:disable: no-import-side-effect no-any no-unsafe-any
 import 'reflect-metadata';
 
 import { Logger } from 'logger';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { StorageClient } from './storage-client';
@@ -31,6 +31,79 @@ beforeEach(() => {
     operationCallbackMock = Mock.ofType<OperationCallback>();
     loggerMock = Mock.ofType(Logger);
     storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
+});
+
+describe('StorageClient.mergeDocument()', () => {
+    it('validate document id value', async () => {
+        const item = {
+            value: 'value',
+        };
+
+        const op = storageClient.mergeDocument(item, partitionKey);
+
+        await expect(op).rejects.toEqual(
+            'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
+        );
+    });
+
+    it('validate existence of a storage document', async () => {
+        const item = {
+            id: '123',
+            value: 'value',
+        };
+
+        cosmosClientWrapperMock
+            .setup(async o => o.readItem(item.id, dbName, collectionName, partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 404 }))
+            .verifiable(Times.once());
+
+        const op = storageClient.mergeDocument(item, partitionKey);
+
+        await expect(op).rejects.toEqual(`Storage document with id ${item.id} not found. Unable to perform merge operation.`);
+        cosmosClientWrapperMock.verifyAll();
+    });
+
+    it('merge with a storage document', async () => {
+        const mergeItem = {
+            id: '123',
+            valueA: 'new-value',
+            valueB: <string>undefined,
+            valueC: 'new-property',
+            valueD: [1, 2],
+        };
+
+        const storageItem = {
+            id: '123',
+            valueA: 'old-value',
+            valueB: 'current-value',
+            valueD: [3, 4],
+        };
+
+        let resultItem = {};
+        cosmosClientWrapperMock
+            .setup(async o => o.readItem(mergeItem.id, dbName, collectionName, partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 201, item: storageItem }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, partitionKey))
+            .callback(async (i, d, c, p) => {
+                resultItem = i;
+            })
+            .returns(async () => Promise.resolve({ statusCode: 202, item: resultItem }))
+            .verifiable(Times.once());
+
+        const response = await storageClient.mergeDocument(mergeItem, partitionKey);
+
+        const expectedItem = {
+            id: storageItem.id,
+            valueA: mergeItem.valueA,
+            valueB: storageItem.valueB,
+            valueC: mergeItem.valueC,
+            valueD: mergeItem.valueD,
+        };
+        expect(response.item).toEqual(expectedItem);
+        cosmosClientWrapperMock.verifyAll();
+    });
 });
 
 describe('StorageClient.tryExecuteOperation()', () => {

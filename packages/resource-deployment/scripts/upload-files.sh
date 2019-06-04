@@ -1,6 +1,8 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-#!/bin/bash
+
 set -eo pipefail
 
 export jobManagerContainerName="batch-job-manager-script"
@@ -45,4 +47,4 @@ echo "Uploading files to blobs"
 uploadFileBatch $jobManagerContainerName "$dropFolder/job-manager/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
-uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/scripts" "$storageAccountName" "$includePattern"
+uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/scripts/pool-startup" "$storageAccountName" "$includePattern"

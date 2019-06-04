@@ -1,6 +1,8 @@
+#!/bin/bash
+
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-#!/bin/bash
+
 # shellcheck disable=SC1090
 
 set -eo pipefail
