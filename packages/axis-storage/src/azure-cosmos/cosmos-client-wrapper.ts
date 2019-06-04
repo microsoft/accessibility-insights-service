@@ -9,7 +9,7 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 
 @injectable()
 export class CosmosClientWrapper {
-    public static readonly PARTITIONKEY_NAME: string = '/partitionKey';
+    public static readonly PARTITION_KEY_NAME: string = '/partitionKey';
     constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
@@ -76,11 +76,16 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async readItem<T>(id: string, dbName: string, collectionName: string, partKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async readItem<T>(
+        id: string,
+        dbName: string,
+        collectionName: string,
+        partitionKey?: string,
+    ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partKey);
+            const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
             const response = await container.item(id).read(options);
             const itemT = this.convert<T>(response.body);
 
@@ -108,7 +113,7 @@ export class CosmosClientWrapper {
 
     private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
         const response = await cosmosDb.containers.createIfNotExists(
-            { id: collectionName, partitionKey: { paths: [CosmosClientWrapper.PARTITIONKEY_NAME], kind: cosmos.PartitionKind.Hash } },
+            { id: collectionName, partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash } },
             { offerThroughput: 10000 },
         );
 
@@ -132,8 +137,9 @@ export class CosmosClientWrapper {
     private getOptions<T>(item: T, partitionKey: string): cosmos.RequestOptions {
         let requestOpts: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
 
-        const accessCondition = { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag };
         if (item !== undefined && (<cosmos.Resource>(<unknown>item))._etag !== undefined) {
+            const accessCondition = { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag };
+
             if (requestOpts !== undefined) {
                 requestOpts.accessCondition = accessCondition;
             } else {

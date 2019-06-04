@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-any
+import * as cosmos from '@azure/cosmos';
+import * as _ from 'lodash';
 import { Logger } from 'logger';
 import * as util from 'util';
 import { VError } from 'verror';
@@ -26,6 +28,33 @@ export class StorageClient {
 
     public async writeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
         return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, partitionKey);
+    }
+
+    /**
+     * Merge the document with the current storage document. Document must have valid storage id value.
+     * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     *
+     * @param document Document to merge with the current storage document
+     * @param partitionKey The storage partition key
+     */
+    public async mergeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        const documentId = (<cosmos.Item>(<unknown>document)).id;
+        if (documentId === undefined) {
+            return Promise.reject(
+                'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
+            );
+        }
+
+        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);
+        if (response.statusCode === 404) {
+            return Promise.reject(`Storage document with id ${documentId} not found. Unable to perform merge operation.`);
+        }
+
+        const mergedDocument = response.item;
+        _.merge(mergedDocument, document);
+
+        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, partitionKey);
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {

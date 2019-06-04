@@ -21,7 +21,7 @@ describe('CosmosClientWrapper', () => {
     let collectionsMock: IMock<cosmos.Containers>;
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
-    const partitoningKey = 'partKey';
+    const partitionKey = 'partitionKey';
 
     const dbName = 'stub db';
     const collectionName = 'stub collection';
@@ -44,9 +44,9 @@ describe('CosmosClientWrapper', () => {
                 code: 404,
             };
             collectionMock.setup(c => c.item('id')).returns(() => itemMock.object);
-            itemMock.setup(async i => i.read({ partitionKey: partitoningKey })).returns(async () => Promise.reject(responseError));
+            itemMock.setup(async i => i.read({ partitionKey: partitionKey })).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readItem('id', dbName, collectionName, partitoningKey);
+            const result = await testSubject.readItem('id', dbName, collectionName, partitionKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -66,10 +66,10 @@ describe('CosmosClientWrapper', () => {
             };
             collectionMock.setup(c => c.item(responseItem.id)).returns(() => itemMock.object);
             itemMock
-                .setup(async i => i.read({ partitionKey: partitoningKey }))
+                .setup(async i => i.read({ partitionKey: partitionKey }))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitoningKey);
+            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitionKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -205,38 +205,38 @@ describe('CosmosClientWrapper', () => {
                 },
             ];
             const options: cosmos.RequestOptions = {
-                partitionKey: partitoningKey,
+                partitionKey: partitionKey,
                 accessCondition: { type: 'IfMatch', condition: '1' },
             };
             items.map(item => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
+            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
 
             verifyMocks();
         });
 
         it('should upsert list of items with partition key', async () => {
             const items = [1, 2, 3];
-            const options: cosmos.RequestOptions = { partitionKey: partitoningKey };
+            const options: cosmos.RequestOptions = { partitionKey: partitionKey };
             items.map(item => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
+            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
 
             verifyMocks();
         });
 
         it('should upsert list of items with partition key', async () => {
             const items = [1, 2, 3];
-            const options: cosmos.RequestOptions = { partitionKey: partitoningKey };
+            const options: cosmos.RequestOptions = { partitionKey: partitionKey };
             items.map(item => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitoningKey);
+            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
 
             verifyMocks();
         });
@@ -291,7 +291,7 @@ describe('CosmosClientWrapper', () => {
                 d.createIfNotExists(
                     {
                         id: collectionName,
-                        partitionKey: { paths: [CosmosClientWrapper.PARTITIONKEY_NAME], kind: cosmos.PartitionKind.Hash },
+                        partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
                     },
                     { offerThroughput: 10000 },
                 ),
