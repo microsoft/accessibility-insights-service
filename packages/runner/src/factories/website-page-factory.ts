@@ -22,7 +22,7 @@ export class WebsitePageFactory {
                     page: {
                         websiteId: scanMetadata.websiteId,
                         url: link,
-                        referenceIndex: <number>undefined,
+                        referenceIndex: 0,
                         lastSeen: runTime.toJSON(),
                         lastRunState: {
                             lastUpdated: runTime.toJSON(),
