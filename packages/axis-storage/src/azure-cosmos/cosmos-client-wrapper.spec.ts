@@ -21,7 +21,7 @@ describe('CosmosClientWrapper', () => {
     let collectionsMock: IMock<cosmos.Containers>;
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
-
+    let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
     const partitionKey = 'partitionKey';
     const dbName = 'stub db';
     const collectionName = 'stub collection';
