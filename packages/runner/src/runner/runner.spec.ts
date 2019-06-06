@@ -12,6 +12,7 @@ import { ScanMetadataConfig } from '../scan-metadata-config';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
+import { PageStateUpdaterTask } from '../tasks/page-state-updater-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
@@ -27,6 +28,9 @@ let scannerTaskMock: IMock<ScannerTask>;
 let storageTaskMock: IMock<StorageTask>;
 let dataFactoryTaskMock: IMock<DataFactoryTask>;
 let websiteStateUpdaterTaskMock: IMock<WebsiteStateUpdaterTask>;
+let scanMetadataConfig: IMock<ScanMetadataConfig>;
+let pageStateUpdaterTaskMock: IMock<PageStateUpdaterTask>;
+
 const scanMetadata: ScanMetadata = {
     websiteId: 'websiteId',
     websiteName: 'websiteName',
@@ -44,15 +48,14 @@ const websitePages: WebsitePage[] = [
     {
         id: 'id',
         itemType: ItemType.page,
-        page: {
-            websiteId: 'websiteId',
-            url: 'url',
-            referenceIndex: 0,
-            lastSeen: 'lastSeen',
-            lastRunState: {
-                lastUpdated: '2019-06-01T00:00:00.000Z',
-                state: RunState.completed,
-            },
+        websiteId: 'websiteId',
+        baseUrl: 'baseUrl',
+        url: 'url',
+        pageRank: 0,
+        backlinkLastSeen: 'backlinkLastSeen',
+        lastRun: {
+            runTime: '2019-06-01T00:00:00.000Z',
+            state: RunState.completed,
         },
         partitionKey: scanMetadata.websiteId,
     },
@@ -107,8 +110,6 @@ const axeScanResults: AxeScanResults = {
     } as AxeResults,
 };
 
-let scanMetadataConfig: IMock<ScanMetadataConfig>;
-
 beforeEach(() => {
     browser = <Browser>{};
     crawlerTaskMock = Mock.ofType<CrawlerTask>();
@@ -118,6 +119,7 @@ beforeEach(() => {
     dataFactoryTaskMock = Mock.ofType<DataFactoryTask>();
     websiteStateUpdaterTaskMock = Mock.ofType<WebsiteStateUpdaterTask>();
     scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
+    pageStateUpdaterTaskMock = Mock.ofType(PageStateUpdaterTask);
 
     scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
 });
@@ -174,6 +176,11 @@ describe('runner', () => {
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
+        pageStateUpdaterTaskMock
+            .setup(async o => o.setState(It.isAny(), scanMetadata, It.isAny()))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.exactly(2));
+
         runner = new Runner(
             crawlerTaskMock.object,
             scannerTaskMock.object,
@@ -182,6 +189,7 @@ describe('runner', () => {
             webDriverTaskMock.object,
             storageTaskMock.object,
             scanMetadataConfig.object,
+            pageStateUpdaterTaskMock.object,
         );
 
         await runner.run();

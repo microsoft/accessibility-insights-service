@@ -52,6 +52,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "backlink",
             "cout",
             "coutd",
             "etag",

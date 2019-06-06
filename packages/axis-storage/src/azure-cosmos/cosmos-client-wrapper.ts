@@ -11,6 +11,7 @@ import { CosmosOperationResponse } from './cosmos-operation-response';
 export class CosmosClientWrapper {
     public static readonly PARTITION_KEY_NAME: string = '/partitionKey';
     public static readonly MAXIMUM_ITEM_COUNT: number = 100;
+
     constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {

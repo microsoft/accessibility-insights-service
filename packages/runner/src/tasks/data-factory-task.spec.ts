@@ -58,7 +58,7 @@ describe('DataFactoryTask', () => {
         const websitePages: WebsitePage[] = [<WebsitePage>(<unknown>{ type: 'WebsitePage' })];
 
         websitePageFactoryMock
-            .setup(o => o.create(crawlerScanResults, scanMetadata, It.isAny()))
+            .setup(o => o.createFromLinks(crawlerScanResults, scanMetadata, It.isAny()))
             .returns(() => websitePages)
             .verifiable(Times.once());
 
@@ -74,7 +74,7 @@ describe('DataFactoryTask', () => {
         const websitePages: WebsitePage[] = [<WebsitePage>(<unknown>{ type: 'WebsitePage' })];
 
         websitePageFactoryMock
-            .setup(o => o.create(crawlerScanResults, scanMetadata, It.isAny()))
+            .setup(o => o.createFromLinks(crawlerScanResults, scanMetadata, It.isAny()))
             .returns(() => websitePages)
             .verifiable(Times.never());
 

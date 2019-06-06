@@ -14,17 +14,22 @@ export enum ScanLevel {
 
 export enum RunState {
     /**
-     * Indicates that scan execution request was queued.
+     * Indicates that run request was queued.
      */
     queued = 'queued',
 
     /**
-     * Indicates that scan execution completed successfully.
+     * Indicates that request is currently in run state.
+     */
+    running = 'running',
+
+    /**
+     * Indicates that run completed successfully.
      */
     completed = 'completed',
 
     /**
-     * Indicates that scan execution run has failed.
+     * Indicates that run has failed.
      */
     failed = 'failed',
 }

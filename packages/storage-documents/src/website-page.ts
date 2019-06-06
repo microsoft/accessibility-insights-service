@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RunState } from './states';
+import { RunResult } from '.';
 import { StorageDocument } from './storage-document';
 
 /**
@@ -12,16 +12,11 @@ import { StorageDocument } from './storage-document';
  * that only a single document present in database for the given website page.
  */
 export interface WebsitePage extends StorageDocument {
-    page: {
-        websiteId: string;
-        url: string;
-        basePage?: boolean;
-        referenceIndex: number;
-        lastSeen: string;
-        lastRunState: {
-            lastUpdated: string;
-            state: RunState;
-            retries?: number;
-        };
-    };
+    websiteId: string;
+    baseUrl: string;
+    url: string;
+    basePage?: boolean;
+    pageRank: number;
+    backlinkLastSeen: string;
+    lastRun: RunResult;
 }
