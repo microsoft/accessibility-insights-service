@@ -11,7 +11,7 @@ export class WebsitePageFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
     /**
-     * Creates page document instance with only immutable properties defined.
+     * Creates page document instance with immutable properties defined.
      *
      * @param websiteId The website ID
      * @param baseUrl The website base URL

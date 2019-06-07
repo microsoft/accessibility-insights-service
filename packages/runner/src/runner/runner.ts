@@ -55,7 +55,7 @@ export class Runner {
             // store page scan history model in a storage
             await this.storageTask.storeResult(pageScanResult, scanMetadata.websiteId);
 
-            // set corresponding page document run state to running
+            // set corresponding page document run state to completed
             await this.pageStateUpdaterTask.setState(RunState.completed, scanMetadata, runTime);
 
             // update website root scan state document with last page scan result

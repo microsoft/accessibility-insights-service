@@ -40,7 +40,7 @@ export class StorageClient {
             document,
             this.dbName,
             this.collectionName,
-            this.getActualPartitionKey(document, partitionKey),
+            this.getEffectivePartitionKey(document, partitionKey),
         );
     }
 
@@ -64,8 +64,8 @@ export class StorageClient {
             );
         }
 
-        const actualPartitionKey = this.getActualPartitionKey(document, partitionKey);
-        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, actualPartitionKey);
+        const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, effectivePartitionKey);
         if (response.statusCode === 404) {
             return Promise.reject(`Storage document with id ${documentId} not found. Unable to perform merge operation.`);
         }
@@ -73,7 +73,7 @@ export class StorageClient {
         const mergedDocument = response.item;
         _.merge(mergedDocument, document);
 
-        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, actualPartitionKey);
+        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, effectivePartitionKey);
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
@@ -136,7 +136,7 @@ export class StorageClient {
         });
     }
 
-    private getActualPartitionKey<T>(document: T, partitionKey: string): string {
+    private getEffectivePartitionKey<T>(document: T, partitionKey: string): string {
         return partitionKey !== undefined ? partitionKey : (<CosmosDocument>(<unknown>document)).partitionKey;
     }
 }

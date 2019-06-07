@@ -14,17 +14,21 @@ export class PageStateUpdaterTask {
     ) {}
 
     public async setState(runState: RunState, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
-        const page = this.websitePageFactory.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, scanMetadata.scanUrl);
-        page.lastRun = {
+        const websitePage = this.websitePageFactory.createImmutableInstance(
+            scanMetadata.websiteId,
+            scanMetadata.baseUrl,
+            scanMetadata.scanUrl,
+        );
+        websitePage.lastRun = {
             runTime: runTime.toJSON(),
             state: runState,
         };
 
-        let response = await this.storageClient.readDocument(page.id, page.partitionKey);
+        let response = await this.storageClient.readDocument(websitePage.id, websitePage.partitionKey);
         if (response.statusCode === 404) {
-            response = await this.storageClient.writeDocument(page);
+            response = await this.storageClient.writeDocument(websitePage);
         } else {
-            response = await this.storageClient.mergeDocument(page);
+            response = await this.storageClient.mergeDocument(websitePage);
         }
     }
 }
