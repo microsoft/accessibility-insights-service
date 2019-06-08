@@ -57,6 +57,7 @@ const websitePages: WebsitePage[] = [
             runTime: '2019-06-01T00:00:00.000Z',
             state: RunState.completed,
         },
+        links: [],
         partitionKey: scanMetadata.websiteId,
     },
 ];
@@ -180,6 +181,10 @@ describe('runner', () => {
             .setup(async o => o.setState(It.isAny(), scanMetadata, It.isAny()))
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(2));
+        pageStateUpdaterTaskMock
+            .setup(async o => o.setOnPageLinks(crawlerScanResults, scanMetadata))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
 
         runner = new Runner(
             crawlerTaskMock.object,

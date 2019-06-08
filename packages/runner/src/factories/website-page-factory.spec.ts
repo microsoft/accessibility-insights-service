@@ -94,6 +94,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
             {
@@ -105,6 +106,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
             {
@@ -116,6 +118,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
             {
@@ -127,6 +130,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
             {
@@ -138,6 +142,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
             {
@@ -149,6 +154,7 @@ describe('WebsitePageFactory', () => {
                 backlinkLastSeen: runTime.toJSON(),
                 pageRank: <number>undefined,
                 lastRun: <RunResult>undefined,
+                links: undefined,
                 partitionKey: scanMetadata.websiteId,
             },
         ];

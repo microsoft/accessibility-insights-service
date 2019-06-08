@@ -19,4 +19,5 @@ export interface WebsitePage extends StorageDocument {
     pageRank: number;
     backlinkLastSeen: string;
     lastRun: RunResult;
+    links: string[];
 }

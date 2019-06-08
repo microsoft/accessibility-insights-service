@@ -31,6 +31,7 @@ export class WebsitePageFactory {
             pageRank: <number>undefined,
             backlinkLastSeen: <string>undefined,
             lastRun: <RunResult>undefined,
+            links: undefined,
             partitionKey: websiteId,
         };
     }
