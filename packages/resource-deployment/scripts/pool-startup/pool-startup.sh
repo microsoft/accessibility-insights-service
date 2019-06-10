@@ -39,4 +39,4 @@ cd $SCAN_REQUEST_SENDER_SHARED_LOCATION
 echo "Installing scan request sender dependencies"
 npm install yargs@13.2.1
 
-./custom-pool-script.sh
+./custom-pool-post-startup.sh
