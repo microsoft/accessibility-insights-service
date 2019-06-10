@@ -185,6 +185,10 @@ describe('runner', () => {
             .setup(async o => o.setOnPageLinks(crawlerScanResults, scanMetadata))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
+        pageStateUpdaterTaskMock
+            .setup(async o => o.setStateOnComplete(pageScanResult, scanMetadata, It.isAny()))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
 
         runner = new Runner(
             crawlerTaskMock.object,

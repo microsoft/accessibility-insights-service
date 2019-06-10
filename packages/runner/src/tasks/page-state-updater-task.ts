@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { StorageClient } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { RunState, WebsitePage } from 'storage-documents';
+import { PageScanResult, RunState, WebsitePage } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { WebsitePageFactory } from '../factories/website-page-factory';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -42,6 +42,14 @@ export class PageStateUpdaterTask {
             websitePage.links = scanResult !== undefined ? scanResult.links : [];
             await this.saveDocument(websitePage);
         }
+    }
+
+    public async setStateOnComplete(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
+        const pageRunState =
+            pageScanResult.crawl.run.state === RunState.failed || pageScanResult.scan.run.state === RunState.failed
+                ? RunState.failed
+                : RunState.completed;
+        await this.setState(pageRunState, scanMetadata, runTime);
     }
 
     private async saveDocument(websitePage: WebsitePage): Promise<void> {

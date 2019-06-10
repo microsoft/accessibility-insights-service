@@ -31,7 +31,7 @@ export class Runner {
         const scanMetadata = this.scanMetadataConfig.getConfig();
 
         try {
-            // set scan URL`s corresponding page document run state to running
+            // set scanned page run state to running
             await this.pageStateUpdaterTask.setState(RunState.running, scanMetadata, runTime);
 
             // start new web driver process
@@ -42,7 +42,7 @@ export class Runner {
             const websitePages = this.dataFactoryTask.toWebsitePagesModel(crawlerScanResults, scanMetadata, runTime);
             // store pages references model in a storage
             await this.storageTask.storeResults(websitePages, scanMetadata.websiteId);
-            // set scan URL`s corresponding page document on-page links
+            // update scanned page with on-page links
             await this.pageStateUpdaterTask.setOnPageLinks(crawlerScanResults, scanMetadata);
 
             // scan website page for accessibility issues
@@ -57,8 +57,8 @@ export class Runner {
             // store page scan history model in a storage
             await this.storageTask.storeResult(pageScanResult, scanMetadata.websiteId);
 
-            // set corresponding page document run state to completed
-            await this.pageStateUpdaterTask.setState(RunState.completed, scanMetadata, runTime);
+            // set scanned page run state to corresponding page run result
+            await this.pageStateUpdaterTask.setStateOnComplete(pageScanResult, scanMetadata, runTime);
 
             // update website root scan state document with last page scan result
             await this.websiteStateUpdaterTask.update(pageScanResult, scanMetadata, runTime);
