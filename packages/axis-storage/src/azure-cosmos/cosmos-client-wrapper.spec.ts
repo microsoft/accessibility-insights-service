@@ -129,7 +129,7 @@ describe('CosmosClientWrapper', () => {
             // tslint:disable-next-line: no-unsafe-any
             itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock
-                .setup(async qi => qi.toArray())
+                .setup(async qi => qi.executeNext())
                 .returns(async () => Promise.resolve({ result: items, statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } }));
 
             const result = await testSubject.readItems(dbName, collectionName, query);
