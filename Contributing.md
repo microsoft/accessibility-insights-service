@@ -21,13 +21,13 @@ If you are new to Git, read more about [creating a pull request](https://help.gi
 
 Project specific PR guidelines:
 
-* Please be sure to verify that all applicable items in the PR template are completed.
-* Every PR that is created will kick off a build. Be sure to verify that the build for your PR has passed. The status of the build along with the status of any other checks will be displayed at the bottom of a PR.
-* Address any build failures on the PR. To get more information about build failures:
-  * Click on "Show all checks" at the bottom of a PR.
-  * Click on "Details" for the PR build.
-  * Click on the build in the left pane. This should display the information associated with that build.
-  * For more details, click on "View more details on Azure Pipelines".  
+-   Please be sure to verify that all applicable items in the PR template are completed.
+-   Every PR that is created will kick off a build. Be sure to verify that the build for your PR has passed. The status of the build along with the status of any other checks will be displayed at the bottom of a PR.
+-   Address any build failures on the PR. To get more information about build failures:
+    -   Click on "Show all checks" at the bottom of a PR.
+    -   Click on "Details" for the PR build.
+    -   Click on the build in the left pane. This should display the information associated with that build.
+    -   For more details, click on "View more details on Azure Pipelines".
 
 ### Contributing License Agreement
 

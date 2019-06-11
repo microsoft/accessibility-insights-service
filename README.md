@@ -84,4 +84,4 @@ Licensed under the MIT License.
 
 # Contributing
 
-Please visit our [Contributing](./CONTRIBUTING.md) page.
+Please visit our [Contributing](https://github.com/Microsoft/accessibility-insights-service/blob/master/CONTRIBUTING.md) page.
