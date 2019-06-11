@@ -44,7 +44,7 @@ export class PageScanResultFactory {
         const runState = crawlerScanResults.error === undefined ? RunState.completed : RunState.failed;
 
         if (runState === RunState.completed) {
-            // process crawl result for scanned URL only if crawl result contains multi-depth run
+            // select crawl result for a scanned URL only
             const scanResult = crawlerScanResults.results.find(result => result.scanUrl === scanUrl);
             const links = scanResult !== undefined ? scanResult.links : [];
 

@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
+import { RunState } from 'storage-documents';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
+import { PageStateUpdaterTask } from '../tasks/page-state-updater-task';
 import { ScannerTask } from '../tasks/scanner-task';
 import { StorageTask } from '../tasks/storage-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
@@ -20,6 +22,7 @@ export class Runner {
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(StorageTask) private readonly storageTask: StorageTask,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
+        @inject(PageStateUpdaterTask) private readonly pageStateUpdaterTask: PageStateUpdaterTask,
     ) {}
 
     public async run(): Promise<void> {
@@ -28,6 +31,9 @@ export class Runner {
         const scanMetadata = this.scanMetadataConfig.getConfig();
 
         try {
+            // set scanned page run state to running
+            await this.pageStateUpdaterTask.setState(RunState.running, scanMetadata, runTime);
+
             // start new web driver process
             browser = await this.webDriverTask.launch();
             // scan website page for next level pages references
@@ -36,6 +42,8 @@ export class Runner {
             const websitePages = this.dataFactoryTask.toWebsitePagesModel(crawlerScanResults, scanMetadata, runTime);
             // store pages references model in a storage
             await this.storageTask.storeResults(websitePages, scanMetadata.websiteId);
+            // update scanned page with on-page links
+            await this.pageStateUpdaterTask.setOnPageLinks(crawlerScanResults, scanMetadata);
 
             // scan website page for accessibility issues
             const axeScanResults = await this.scannerTask.scan(scanMetadata.scanUrl);
@@ -48,6 +56,9 @@ export class Runner {
             const pageScanResult = this.dataFactoryTask.toPageScanResultModel(crawlerScanResults, issueScanResults, scanMetadata, runTime);
             // store page scan history model in a storage
             await this.storageTask.storeResult(pageScanResult, scanMetadata.websiteId);
+
+            // set scanned page run state to corresponding page run result
+            await this.pageStateUpdaterTask.setStateOnComplete(pageScanResult, scanMetadata, runTime);
 
             // update website root scan state document with last page scan result
             await this.websiteStateUpdaterTask.update(pageScanResult, scanMetadata, runTime);

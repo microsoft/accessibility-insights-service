@@ -7,6 +7,7 @@ import { Logger } from 'logger';
 import * as util from 'util';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
+import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { RetryOptions } from './retry-options';
 
@@ -26,19 +27,36 @@ export class StorageClient {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
-    public async writeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, partitionKey);
+    /**
+     * Writes document to a storage.
+     *
+     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
+     *
+     * @param document Document to write to a storage
+     * @param partitionKey The storage partition key
+     */
+    public async writeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.upsertItem<T>(
+            document,
+            this.dbName,
+            this.collectionName,
+            this.getEffectivePartitionKey(document, partitionKey),
+        );
     }
 
     /**
-     * Merge the document with the current storage document. Document must have valid storage id value.
+     * Merges the document with the current storage document.
+     *
+     * Document must have valid storage id value.
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     *
+     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
      *
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
      */
-    public async mergeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async mergeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
         const documentId = (<cosmos.Item>(<unknown>document)).id;
         if (documentId === undefined) {
             return Promise.reject(
@@ -46,7 +64,8 @@ export class StorageClient {
             );
         }
 
-        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);
+        const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, effectivePartitionKey);
         if (response.statusCode === 404) {
             return Promise.reject(`Storage document with id ${documentId} not found. Unable to perform merge operation.`);
         }
@@ -54,7 +73,7 @@ export class StorageClient {
         const mergedDocument = response.item;
         _.merge(mergedDocument, document);
 
-        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, partitionKey);
+        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, effectivePartitionKey);
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
@@ -115,5 +134,14 @@ export class StorageClient {
                 await new Promise(r => setTimeout(r, retryOptions.intervalMilliseconds));
             }
         });
+    }
+
+    private getEffectivePartitionKey<T extends CosmosDocument>(document: T, partitionKey: string): string {
+        const effectivePartitionKey = partitionKey !== undefined ? partitionKey : document.partitionKey;
+        if (effectivePartitionKey === undefined) {
+            throw new Error('Storage operation require partition key defined either as part of the document or as an operation parameter.');
+        }
+
+        return effectivePartitionKey;
     }
 }

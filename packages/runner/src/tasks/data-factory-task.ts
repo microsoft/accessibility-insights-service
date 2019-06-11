@@ -42,7 +42,7 @@ export class DataFactoryTask {
             return [];
         }
 
-        return this.websitePageFactory.create(crawlerScanResults, scanMetadata, runTime);
+        return this.websitePageFactory.createFromLinks(crawlerScanResults, scanMetadata, runTime);
     }
 
     public toPageScanResultModel(
