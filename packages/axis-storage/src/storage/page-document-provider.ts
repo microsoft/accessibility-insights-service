@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-any
-import { RunState, WebsitePage } from 'storage-documents';
+import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 export class PageDocumentProvider {
@@ -10,13 +10,13 @@ export class PageDocumentProvider {
         private readonly dbName: string,
         private readonly collectionName: string,
     ) {}
-    public async getReadyToScanPages(): Promise<CosmosOperationResponse<WebsitePage[]>> {
+    public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
-            query: 'SELECT * FROM c WHERE c.itemType = @itemType and c.lastRunState.state = @state',
+            query: 'SELECT * FROM c WHERE c.itemType = @itemType and c.page.lastRunState.state = @state',
             parameters: [
                 {
                     name: '@itemType',
-                    value: 'page',
+                    value: ItemType.page,
                 },
                 {
                     name: '@state',
@@ -25,6 +25,6 @@ export class PageDocumentProvider {
             ],
         };
 
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, querySpec);
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, querySpec, continuationToken);
     }
 }

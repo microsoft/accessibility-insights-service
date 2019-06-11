@@ -62,6 +62,13 @@ export class Queue {
         await this.createQueueMessage(queueURL, message);
     }
 
+    public async getMessageCount(queue: string = this.scanQueue): Promise<number> {
+        const queueURL = await this.getQueueURL(queue);
+        const queueProperties = await queueURL.getProperties(Aborter.none);
+
+        return queueProperties.approximateMessagesCount;
+    }
+
     private async ensureQueueExists(queueURL: QueueURL): Promise<void> {
         try {
             await queueURL.getProperties(Aborter.none);

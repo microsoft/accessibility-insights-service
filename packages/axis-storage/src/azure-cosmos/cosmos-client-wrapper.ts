@@ -89,8 +89,9 @@ export class CosmosClientWrapper {
             const feedOptions: cosmos.FeedOptions = {
                 continuation: continuationToken,
                 maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
+                enableCrossPartitionQuery: true,
             };
-            const response = await container.items.query(query, feedOptions).toArray();
+            const response = await container.items.query(query, feedOptions).executeNext();
             const itemsT: T[] = [];
 
             response.result.forEach(document => {

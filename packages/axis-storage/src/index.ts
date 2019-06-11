@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 export { HashGenerator } from './common/hash-generator';
 export { StorageClient } from './storage/storage-client';
+export { PageDocumentProvider } from './storage/page-document-provider';
 export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';
 export { Message } from './azure-queue/message';
