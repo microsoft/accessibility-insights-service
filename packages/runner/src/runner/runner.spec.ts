@@ -52,7 +52,7 @@ const websitePages: WebsitePage[] = [
         baseUrl: 'baseUrl',
         url: 'url',
         pageRank: 0,
-        backlinkLastSeen: 'backlinkLastSeen',
+        lastReferenceSeen: 'lastReferenceSeen',
         lastRun: {
             runTime: '2019-06-01T00:00:00.000Z',
             state: RunState.completed,

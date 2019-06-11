@@ -12,12 +12,13 @@ import { StorageDocument } from './storage-document';
  * that only a single document present in database for the given website page.
  */
 export interface WebsitePage extends StorageDocument {
-    websiteId: string;
-    baseUrl: string;
-    url: string;
+    // Note: Read-only properties are not intended to be updated for the existing storage document
+    readonly websiteId: string;
+    readonly baseUrl: string;
+    readonly url: string;
     basePage?: boolean;
     pageRank: number;
-    backlinkLastSeen: string;
+    lastReferenceSeen: string;
     lastRun: RunResult;
     links: string[];
 }

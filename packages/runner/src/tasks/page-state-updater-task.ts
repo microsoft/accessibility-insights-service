@@ -26,7 +26,7 @@ export class PageStateUpdaterTask {
             runTime: runTime.toJSON(),
         };
 
-        await this.saveDocument(websitePage);
+        await this.writeDocument(websitePage);
     }
 
     public async setOnPageLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata): Promise<void> {
@@ -40,7 +40,7 @@ export class PageStateUpdaterTask {
             // select crawl result for a scanned URL only
             const scanResult = crawlerScanResults.results.find(result => result.scanUrl === scanMetadata.scanUrl);
             websitePage.links = scanResult !== undefined ? scanResult.links : [];
-            await this.saveDocument(websitePage);
+            await this.writeDocument(websitePage);
         }
     }
 
@@ -52,7 +52,7 @@ export class PageStateUpdaterTask {
         await this.setState(pageRunState, scanMetadata, runTime);
     }
 
-    private async saveDocument(websitePage: WebsitePage): Promise<void> {
+    private async writeDocument(websitePage: WebsitePage): Promise<void> {
         let response = await this.storageClient.readDocument(websitePage.id, websitePage.partitionKey);
         if (response.statusCode === 404) {
             response = await this.storageClient.writeDocument(websitePage);

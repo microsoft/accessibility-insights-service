@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Activator } from '../common/activator';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
+import { CosmosDocument } from './cosmos-document';
 import { CosmosOperationResponse } from './cosmos-operation-response';
 
 @injectable()
@@ -24,7 +25,7 @@ export class CosmosClientWrapper {
         );
     }
 
-    public async upsertItem<T>(
+    public async upsertItem<T extends CosmosDocument>(
         item: T,
         dbName: string,
         collectionName: string,
@@ -174,11 +175,12 @@ export class CosmosClientWrapper {
         return activator.convert<T>(source);
     }
 
-    private getOptions<T>(item: T, partitionKey: string): cosmos.RequestOptions {
+    private getOptions<T extends CosmosDocument>(item: T, partitionKey: string): cosmos.RequestOptions {
         let requestOpts: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
 
-        const accessCondition = { type: 'IfMatch', condition: (<cosmos.Resource>(<unknown>item))._etag };
-        if (item !== undefined && (<cosmos.Resource>(<unknown>item))._etag !== undefined) {
+        if (item !== undefined && item._etag !== undefined) {
+            const accessCondition = { type: 'IfMatch', condition: item._etag };
+
             if (requestOpts !== undefined) {
                 requestOpts.accessCondition = accessCondition;
             } else {

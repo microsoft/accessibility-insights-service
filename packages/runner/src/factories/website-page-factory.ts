@@ -20,8 +20,7 @@ export class WebsitePageFactory {
     public createImmutableInstance(websiteId: string, baseUrl: string, scanUrl: string): WebsitePage {
         const id = this.getPageDocumentId(baseUrl, scanUrl);
 
-        // NOTE: Any property value defined below will override its corresponding storage document property value.
-        // Properties below are considered to be immutable for the document instance.
+        // NOTE: Any property with undefined value will override its corresponding storage document property value.
         return {
             id: id,
             itemType: ItemType.page,
@@ -29,7 +28,7 @@ export class WebsitePageFactory {
             baseUrl: baseUrl,
             url: scanUrl,
             pageRank: <number>undefined,
-            backlinkLastSeen: <string>undefined,
+            lastReferenceSeen: <string>undefined,
             lastRun: <RunResult>undefined,
             links: undefined,
             partitionKey: websiteId,
@@ -41,7 +40,7 @@ export class WebsitePageFactory {
         crawlerScanResults.results.map(result => {
             result.links.map(link => {
                 const websitePage = this.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, link);
-                websitePage.backlinkLastSeen = runTime.toJSON();
+                websitePage.lastReferenceSeen = runTime.toJSON();
                 websitePages.set(websitePage.id, websitePage);
             });
         });

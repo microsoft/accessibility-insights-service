@@ -215,7 +215,7 @@ function createWebsitePage(): WebsitePage {
         baseUrl: scanMetadata.baseUrl,
         url: scanMetadata.scanUrl,
         pageRank: <number>undefined,
-        backlinkLastSeen: <string>undefined,
+        lastReferenceSeen: <string>undefined,
         lastRun: <RunResult>undefined,
         links: undefined,
         partitionKey: 'partitionKey',

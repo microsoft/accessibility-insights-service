@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
+import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { StorageClient } from './storage-client';
 
@@ -39,7 +40,7 @@ describe('StorageClient.mergeDocument()', () => {
             value: 'value',
         };
 
-        const op = storageClient.mergeDocument(item, partitionKey);
+        const op = storageClient.mergeDocument(item as CosmosDocument, partitionKey);
 
         await expect(op).rejects.toEqual(
             'Document id property is undefined. Storage document merge operation must have a valid document id property value.',

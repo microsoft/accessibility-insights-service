@@ -35,7 +35,7 @@ export class StorageClient {
      * @param document Document to write to a storage
      * @param partitionKey The storage partition key
      */
-    public async writeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async writeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
         return this.cosmosClientWrapper.upsertItem<T>(
             document,
             this.dbName,
@@ -56,7 +56,7 @@ export class StorageClient {
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
      */
-    public async mergeDocument<T>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async mergeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
         const documentId = (<cosmos.Item>(<unknown>document)).id;
         if (documentId === undefined) {
             return Promise.reject(
@@ -136,7 +136,12 @@ export class StorageClient {
         });
     }
 
-    private getEffectivePartitionKey<T>(document: T, partitionKey: string): string {
-        return partitionKey !== undefined ? partitionKey : (<CosmosDocument>(<unknown>document)).partitionKey;
+    private getEffectivePartitionKey<T extends CosmosDocument>(document: T, partitionKey: string): string {
+        const effectivePartitionKey = partitionKey !== undefined ? partitionKey : document.partitionKey;
+        if (effectivePartitionKey === undefined) {
+            throw new Error('Storage operation require partition key defined either as part of the document or as an operation parameter.');
+        }
+
+        return effectivePartitionKey;
     }
 }
