@@ -190,8 +190,8 @@
                     "commandLine": "/bin/bash -c pool-startup.sh",
                     "environmentSettings": [
                         {
-                            "name": "KEY_VAULT_URL",
-                            "value": "[variables('keyVaultUrl')]"
+                            "name": "KEY_VAULT_NAME",
+                            "value": "[parameters('keyVault')]"
                         }
                     ],
                     "resourceFiles": [
