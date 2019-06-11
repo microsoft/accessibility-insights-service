@@ -28,7 +28,7 @@ describe('PageDocumentProvider', () => {
         };
         cosmosClientWrapperMock
             // tslint:disable-next-line: no-unsafe-any
-            .setup(async o => o.readItems(dbName, collectionName, It.isAny()))
+            .setup(async o => o.readItems(dbName, collectionName, It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve({ item: item, statusCode: 200 }))
             .verifiable(Times.once());
 
