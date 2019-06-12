@@ -22,8 +22,6 @@ describe(setupJobManagerContainer, () => {
         process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
         process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
-
-        process.env.AZ_BATCH_TASK_PARAMETER = new Buffer(JSON.stringify({ resourceFiles: 'test-resource-files' })).toString('base64');
     });
 
     describe('BatchServiceClient', () => {
