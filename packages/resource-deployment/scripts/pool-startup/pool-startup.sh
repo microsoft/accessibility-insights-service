@@ -3,6 +3,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+# shellcheck disable=SC1090
+
 set -eo pipefail
 
 echo "Installing curl"
@@ -23,20 +25,22 @@ echo "Install node_modules on shared location $AZ_BATCH_NODE_SHARED_DIR"
 JOB_MANAGER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-job-manager
 RUNNER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-runner
 SCAN_REQUEST_SENDER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-scan-request-sender
-mkdir $JOB_MANAGER_SHARED_LOCATION
-mkdir $RUNNER_SHARED_LOCATION
-mkdir $SCAN_REQUEST_SENDER_SHARED_LOCATION
+mkdir -p "$JOB_MANAGER_SHARED_LOCATION"
+mkdir -p "$RUNNER_SHARED_LOCATION"
+mkdir -p "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 
-cd $JOB_MANAGER_SHARED_LOCATION
+cd "$JOB_MANAGER_SHARED_LOCATION"
 echo "Installing job manager dependencies"
 npm install yargs@13.2.1
 
-cd $RUNNER_SHARED_LOCATION
+cd "$RUNNER_SHARED_LOCATION"
 echo "Installing runner dependencies"
 npm install yargs@13.2.1 puppeteer@1.12.2 axe-core@3.2.2 axe-puppeteer@1.0.0
 
-cd $SCAN_REQUEST_SENDER_SHARED_LOCATION
+cd "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 echo "Installing scan request sender dependencies"
 npm install yargs@13.2.1
 
-./custom-pool-post-startup.sh
+echo "Invoking custom pool startup script"
+"${0%/*}/custom-pool-post-startup.sh"
+echo "Successfully completed pool startup script execution."
