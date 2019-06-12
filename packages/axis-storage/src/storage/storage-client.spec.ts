@@ -311,4 +311,39 @@ describe('StorageClient', () => {
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();
     });
+
+    it('mergeDocuments() using document partition key', async () => {
+        const items = [
+            {
+                id: 'id1',
+                partitionKey: 'item-partitionKey',
+                value: 'value1',
+            },
+            {
+                id: 'id2',
+                partitionKey: 'item-partitionKey',
+                value: 'value2',
+            },
+        ];
+        cosmosClientWrapperMock
+            .setup(async o => o.readItem(items[0].id, dbName, collectionName, items[0].partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 201, item: items[0] }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async o => o.readItem(items[1].id, dbName, collectionName, items[1].partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 201, item: items[1] }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async o => o.upsertItem(items[0], dbName, collectionName, items[0].partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 200, item: items[0] }))
+            .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async o => o.upsertItem(items[1], dbName, collectionName, items[1].partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 200, item: items[1] }))
+            .verifiable(Times.once());
+
+        await storageClient.mergeDocuments(items);
+
+        cosmosClientWrapperMock.verifyAll();
+    });
 });

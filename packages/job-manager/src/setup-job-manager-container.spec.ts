@@ -22,27 +22,25 @@ describe(setupJobManagerContainer, () => {
         process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
         process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
-
-        process.env.AZ_BATCH_TASK_PARAMETER = new Buffer(JSON.stringify({ resourceFiles: 'test-resource-files' })).toString('base64');
     });
 
     describe('BatchServiceClient', () => {
         let secretProviderMock: IMock<SecretProvider>;
         let container: Container;
-        let credentailsProviderMock: IMock<CredentialsProvider>;
+        let credentialsProviderMock: IMock<CredentialsProvider>;
         let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
             container = setupJobManagerContainer();
-            credentailsProviderMock = Mock.ofType(CredentialsProvider);
+            credentialsProviderMock = Mock.ofType(CredentialsProvider);
             credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
 
-            credentailsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+            credentialsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
 
             stubBinding(container, SecretProvider, secretProviderMock.object);
-            stubBinding(container, CredentialsProvider, credentailsProviderMock.object);
+            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
         });
 
         it('resolves BatchServiceClient', async () => {

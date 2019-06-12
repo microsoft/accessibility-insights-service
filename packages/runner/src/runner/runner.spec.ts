@@ -150,15 +150,15 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         storageTaskMock
-            .setup(async o => o.storeResult(pageScanResult, scanMetadata.websiteId))
+            .setup(async o => o.writeResult(pageScanResult, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(async o => o.storeResults(websitePages, scanMetadata.websiteId))
+            .setup(async o => o.mergeResults(websitePages, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(async o => o.storeResults(issueScanResults.results, scanMetadata.websiteId))
+            .setup(async o => o.writeResults(issueScanResults.results, scanMetadata.websiteId))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 

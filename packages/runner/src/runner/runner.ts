@@ -40,8 +40,8 @@ export class Runner {
             const crawlerScanResults = await this.crawlerTask.crawl(scanMetadata.scanUrl, browser);
             // convert pages references to a storage model
             const websitePages = this.dataFactoryTask.toWebsitePagesModel(crawlerScanResults, scanMetadata, runTime);
-            // store pages references model in a storage
-            await this.storageTask.storeResults(websitePages, scanMetadata.websiteId);
+            // upsert pages references model in a storage
+            await this.storageTask.mergeResults(websitePages, scanMetadata.websiteId);
             // update scanned page with on-page links
             await this.pageStateUpdaterTask.setOnPageLinks(crawlerScanResults, scanMetadata);
 
@@ -50,12 +50,12 @@ export class Runner {
             // convert accessibility issues to a storage model
             const issueScanResults = this.dataFactoryTask.toScanResultsModel(axeScanResults, scanMetadata);
             // store accessibility issues model in a storage
-            await this.storageTask.storeResults(issueScanResults.results, scanMetadata.websiteId);
+            await this.storageTask.writeResults(issueScanResults.results, scanMetadata.websiteId);
 
             // convert scan results to a page scan history storage model
             const pageScanResult = this.dataFactoryTask.toPageScanResultModel(crawlerScanResults, issueScanResults, scanMetadata, runTime);
             // store page scan history model in a storage
-            await this.storageTask.storeResult(pageScanResult, scanMetadata.websiteId);
+            await this.storageTask.writeResult(pageScanResult, scanMetadata.websiteId);
 
             // set scanned page run state to corresponding page run result
             await this.pageStateUpdaterTask.setStateOnComplete(pageScanResult, scanMetadata, runTime);

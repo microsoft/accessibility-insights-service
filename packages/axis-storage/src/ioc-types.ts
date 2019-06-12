@@ -12,6 +12,7 @@ export const iocTypeNames = {
     CosmosClientProvider: 'CosmosClientProvider',
     msRestAzure: 'msRestAzure',
     QueueServiceURLProvider: 'QueueServiceURLProvider',
+    AuthenticationMethod: 'AuthenticationMethod',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<KeyVaultClient>;
