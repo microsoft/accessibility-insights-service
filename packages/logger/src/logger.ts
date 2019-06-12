@@ -26,9 +26,7 @@ export class Logger {
         }
 
         this.invokeLoggerClient(client => client.setup(baseProperties));
-
-        this.isDebugEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
-
+        this.isDebugEnabled = /--debug|--inspect/.test(this.currentProcess.execArgv.join(' '));
         this.initialized = true;
     }
 
