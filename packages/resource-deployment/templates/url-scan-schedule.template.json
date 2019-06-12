@@ -45,10 +45,6 @@
                 "value": "%KEY_VAULT_TOKEN%"
             },
             {
-                "name": "AZ_BATCH_TASK_PARAMETER",
-                "value": ""
-            },
-            {
                 "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
                 "value": "batch-runner-script"
             }

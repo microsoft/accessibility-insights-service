@@ -6,6 +6,7 @@
 set -eo pipefail
 
 # The script will create a service principal and configure its access to Azure resources under resource group and key vault
+# The script can be run multiple times that result the same service principal entity but with password reset
 
 export subscription
 export resourceGroupName
