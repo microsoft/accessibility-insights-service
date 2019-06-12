@@ -27,20 +27,20 @@ describe(setupJobManagerContainer, () => {
     describe('BatchServiceClient', () => {
         let secretProviderMock: IMock<SecretProvider>;
         let container: Container;
-        let credentailsProviderMock: IMock<CredentialsProvider>;
+        let credentialsProviderMock: IMock<CredentialsProvider>;
         let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
             container = setupJobManagerContainer();
-            credentailsProviderMock = Mock.ofType(CredentialsProvider);
+            credentialsProviderMock = Mock.ofType(CredentialsProvider);
             credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
 
-            credentailsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+            credentialsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
 
             stubBinding(container, SecretProvider, secretProviderMock.object);
-            stubBinding(container, CredentialsProvider, credentailsProviderMock.object);
+            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
         });
 
         it('resolves BatchServiceClient', async () => {
