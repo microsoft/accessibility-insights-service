@@ -88,6 +88,7 @@ To debug packages locally follow the generic steps below.
 
 1.  Complete deployment of Azure resources on your test subscription.
 2.  Create `.env` plain text file under package root folder with environment variables set required for the package to run. For instance, refer to the batch task schedule `url-scan-schedule.template.json` [template](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates) configuration for a list of common environment settings. The `.env` file format:
+
     ```bash
           VARIABLE_NAME=VARIABLE_VALUE
     ```
