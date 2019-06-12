@@ -76,6 +76,26 @@ export class StorageClient {
         return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, effectivePartitionKey);
     }
 
+    /**
+     * Merges documents with the current corresponding storage documents.
+     *
+     * Document must have valid storage id value.
+     * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     *
+     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
+     *
+     * @param documents Documents to merge with the current corresponding storage documents
+     * @param partitionKey The storage partition key
+     */
+    public async mergeDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
+        await Promise.all(
+            documents.map(async document => {
+                await this.mergeDocument(document, partitionKey);
+            }),
+        );
+    }
+
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
         await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, partitionKey);
     }

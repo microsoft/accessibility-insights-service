@@ -7,11 +7,15 @@ import { inject, injectable } from 'inversify';
 export class StorageTask {
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
-    public async storeResults<T>(results: T[], partitionKey?: string): Promise<void> {
+    public async writeResults<T>(results: T[], partitionKey?: string): Promise<void> {
         await this.storageClient.writeDocuments<T>(results, partitionKey);
     }
 
-    public async storeResult<T>(result: T, partitionKey?: string): Promise<void> {
+    public async writeResult<T>(result: T, partitionKey?: string): Promise<void> {
         await this.storageClient.writeDocument<T>(result, partitionKey);
+    }
+
+    public async mergeResults<T>(results: T[], partitionKey?: string): Promise<void> {
+        await this.storageClient.mergeDocuments<T>(results, partitionKey);
     }
 }

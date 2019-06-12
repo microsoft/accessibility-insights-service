@@ -61,7 +61,7 @@ export function registerAxisStorageToContainer(container: Container): void {
 }
 
 function setupAuthenticationMethod(container: interfaces.Container): void {
-    const isDebugEnabled = /--debug|--inspect/.test(process.execArgv.join(' '));
+    const isDebugEnabled = /--debug|--inspect/i.test(process.execArgv.join(' '));
     container
         .bind(iocTypeNames.AuthenticationMethod)
         .toConstantValue(isDebugEnabled ? AuthenticationMethod.servicePrincipal : AuthenticationMethod.managedIdentity);
