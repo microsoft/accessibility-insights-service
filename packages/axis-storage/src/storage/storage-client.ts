@@ -122,8 +122,7 @@ export class StorageClient {
                     }
                 } catch (error) {
                     const customErrorMessage = 'An error occurred while executing storage operation';
-                    const customError =
-                        error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)} - ${util.inspect(error)}`;
+                    const customError = error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)}`;
 
                     reject(customError);
 

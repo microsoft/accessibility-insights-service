@@ -15,11 +15,11 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "args": [
-                "--websiteId=\"f81e98aa-d7c9-46a0-829f-9c4d67eb3405\"",
-                "--websiteName=\"MSFT Support\"",
-                "--baseUrl=\"https://support.microsoft.com/\"",
-                "--scanUrl=\"https://support.microsoft.com/en-us\"",
-                "--serviceTreeId=\"ec7b0c88-0e85-4ff7-8179-267615decc67\""
+                "--websiteId=\"32f13fd0-2157-44cf-9389-b96fa9cfdd4a\"",
+                "--websiteName=\"MSN\"",
+                "--baseUrl=\"https://www.msn.com/\"",
+                "--scanUrl=\"https://www.msn.com/\"",
+                "--serviceTreeId=\"0b9ad4c5-07d8-4753-baee-e6b39fe7ea48\""
             ]
         }
     ]

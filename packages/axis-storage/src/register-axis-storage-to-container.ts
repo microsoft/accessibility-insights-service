@@ -11,7 +11,7 @@ import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { Activator } from './common/activator';
 import { HashGenerator } from './common/hash-generator';
-import { CredentialsProvider } from './credentials/credentials-provider';
+import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
 import { iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
@@ -26,6 +26,8 @@ export function registerAxisStorageToContainer(container: Container): void {
         .bind(Activator)
         .toSelf()
         .inSingletonScope();
+
+    setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
     container
@@ -56,6 +58,13 @@ export function registerAxisStorageToContainer(container: Container): void {
     setupSingletonQueueServiceURLProvider(container);
 
     container.bind(Queue).toSelf();
+}
+
+function setupAuthenticationMethod(container: interfaces.Container): void {
+    const isDebugEnabled = process.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
+    container
+        .bind(iocTypeNames.AuthenticationMethod)
+        .toConstantValue(isDebugEnabled ? AuthenticationMethod.servicePrincipal : AuthenticationMethod.managedIdentity);
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {

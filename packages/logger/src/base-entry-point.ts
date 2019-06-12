@@ -47,6 +47,7 @@ export abstract class BaseEntryPoint {
             throw error;
         }
     }
+
     private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: Logger): void {
         if (dotEnvConfig.parsed !== undefined) {
             logger.logInfo('Config based environment variables:');
