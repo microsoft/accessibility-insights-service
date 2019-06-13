@@ -27,6 +27,9 @@
         {
             "name": "storage-documents",
             "path": "../packages/storage-documents"
+        },        {
+            "name": "service-library",
+            "path": "../packages/service-library"
         },
         {
             "name": "root",

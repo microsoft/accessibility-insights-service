@@ -34,33 +34,38 @@ beforeEach(() => {
     storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
 });
 
-describe('StorageClient.mergeDocument()', () => {
+describe('mergeOrWriteDocument()', () => {
     it('validate document id value', async () => {
         const item = {
             value: 'value',
         };
 
-        const op = storageClient.mergeDocument(item as CosmosDocument, partitionKey);
+        const op = storageClient.mergeOrWriteDocument(item as CosmosDocument, partitionKey);
 
         await expect(op).rejects.toEqual(
             'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
         );
     });
 
-    it('validate existence of a storage document', async () => {
+    it('insert a storage document', async () => {
         const item = {
             id: '123',
+            partitionKey: 'item-partitionKey',
             value: 'value',
         };
 
         cosmosClientWrapperMock
-            .setup(async o => o.readItem(item.id, dbName, collectionName, partitionKey))
+            .setup(async o => o.readItem(item.id, dbName, collectionName, item.partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 404 }))
             .verifiable(Times.once());
+        cosmosClientWrapperMock
+            .setup(async o => o.upsertItem(item, dbName, collectionName, item.partitionKey))
+            .returns(async () => Promise.resolve({ statusCode: 202, item: item }))
+            .verifiable(Times.once());
 
-        const op = storageClient.mergeDocument(item, partitionKey);
+        const response = await storageClient.mergeOrWriteDocument(item);
 
-        await expect(op).rejects.toEqual(`Storage document with id ${item.id} not found. Unable to perform merge operation.`);
+        expect(response.item).toEqual(item);
         cosmosClientWrapperMock.verifyAll();
     });
 
@@ -79,9 +84,9 @@ describe('StorageClient.mergeDocument()', () => {
             .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, item.partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 202, item: { storageItem: true } }))
             .verifiable(Times.once());
-        const response = await storageClient.mergeDocument(item);
-        expect(response.item).toEqual({ storageItem: true });
+        const response = await storageClient.mergeOrWriteDocument(item);
 
+        expect(response.item).toEqual({ storageItem: true });
         cosmosClientWrapperMock.verifyAll();
     });
 
@@ -100,7 +105,7 @@ describe('StorageClient.mergeDocument()', () => {
             .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 202, item: { storageItem: true } }))
             .verifiable(Times.once());
-        const response = await storageClient.mergeDocument(item, partitionKey);
+        const response = await storageClient.mergeOrWriteDocument(item, partitionKey);
         expect(response.item).toEqual({ storageItem: true });
 
         cosmosClientWrapperMock.verifyAll();
@@ -135,7 +140,7 @@ describe('StorageClient.mergeDocument()', () => {
             .returns(async () => Promise.resolve({ statusCode: 202, item: resultItem }))
             .verifiable(Times.once());
 
-        const response = await storageClient.mergeDocument(mergeItem, partitionKey);
+        const response = await storageClient.mergeOrWriteDocument(mergeItem, partitionKey);
 
         const expectedItem = {
             id: storageItem.id,
@@ -342,7 +347,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: items[1] }))
             .verifiable(Times.once());
 
-        await storageClient.mergeDocuments(items);
+        await storageClient.mergeOrWriteDocuments(items);
 
         cosmosClientWrapperMock.verifyAll();
     });

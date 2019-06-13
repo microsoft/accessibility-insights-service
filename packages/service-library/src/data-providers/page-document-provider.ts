@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-any
+import { CosmosOperationResponse, StorageClient } from 'axis-storage';
 import { ItemType, RunState, WebsitePage } from 'storage-documents';
-import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
-import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
+import { PageObjectFactory } from '../factories/page-object-factory';
+
 export class PageDocumentProvider {
-    constructor(
-        private readonly cosmosClientWrapper: CosmosClientWrapper,
-        private readonly dbName: string,
-        private readonly collectionName: string,
-    ) {}
+    constructor(private readonly pageObjectFactory: PageObjectFactory, private readonly storageClient: StorageClient) {}
+
     public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
             query: 'SELECT * FROM c WHERE c.itemType = @itemType and c.page.lastRunState.state = @state',
@@ -25,6 +23,13 @@ export class PageDocumentProvider {
             ],
         };
 
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, querySpec, continuationToken);
+        return this.storageClient.queryDocuments<WebsitePage>(querySpec, continuationToken);
+    }
+
+    public async setPageRunState(websitePage: WebsitePage): Promise<void> {
+        const instanceToMerge = this.pageObjectFactory.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url);
+        instanceToMerge.lastRun = websitePage.lastRun;
+
+        await this.storageClient.mergeOrWriteDocument(instanceToMerge);
     }
 }

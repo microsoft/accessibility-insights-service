@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { HashGenerator } from 'service-library';
 import { ItemType, RunResult, WebsitePage } from 'storage-documents';
-import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { ScanMetadata } from '../types/scan-metadata';
+import { HashGenerator } from '..';
 
 @injectable()
-export class WebsitePageFactory {
+export class PageObjectFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
     /**
@@ -18,7 +16,7 @@ export class WebsitePageFactory {
      * @param scanUrl The page URL
      */
     public createImmutableInstance(websiteId: string, baseUrl: string, scanUrl: string): WebsitePage {
-        const id = this.getPageDocumentId(baseUrl, scanUrl);
+        const id = this.hashGenerator.getWebsitePageDocumentId(baseUrl, scanUrl);
 
         // NOTE: Any property with undefined value will override its corresponding storage document property value.
         return {
@@ -33,23 +31,5 @@ export class WebsitePageFactory {
             links: undefined,
             partitionKey: websiteId,
         };
-    }
-
-    public createFromLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata, runTime: Date): WebsitePage[] {
-        const websitePages = new Map<string, WebsitePage>();
-        crawlerScanResults.results.map(result => {
-            result.links.map(link => {
-                const websitePage = this.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, link);
-                websitePage.lastReferenceSeen = runTime.toJSON();
-                websitePages.set(websitePage.id, websitePage);
-            });
-        });
-
-        return Array.from(websitePages.values());
-    }
-
-    private getPageDocumentId(baseUrl: string, link: string): string {
-        // preserve parameters order for the hash compatibility
-        return this.hashGenerator.getWebsitePageDocumentId(baseUrl, link);
     }
 }

@@ -9,19 +9,13 @@ import { setupSingletonProvider } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
-import { Activator } from './common/activator';
-import { HashGenerator } from './common/hash-generator';
 import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
 import { iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
+import { Activator } from './system/activator';
 
 export function registerAxisStorageToContainer(container: Container): void {
-    container
-        .bind(HashGenerator)
-        .toSelf()
-        .inSingletonScope();
-
     container
         .bind(Activator)
         .toSelf()

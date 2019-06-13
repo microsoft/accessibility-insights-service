@@ -43,19 +43,21 @@ az account set --subscription "$subscription"
 
 # Generate service principal name
 user=$(az ad signed-in-user show --query "mailNickname" -o tsv)
-spn="https://$user.$resourceGroupName"
+displayName="$user-$resourceGroupName"
+servicePrincipalName="http://$displayName"
 
 # Create or update service principal object
-echo "Creating '$spn' service principal..."
-password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$spn" --query "password" -o tsv)
+# Use display name instead of service principal name to prevent az cli assiging a random name
+echo "Creating service principal..."
+password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$displayName" --query "password" -o tsv)
 
 # Set key vault access policy
 echo "Granting service principal permissions to the '$keyVault' key vault"
-az keyvault set-policy --name "$keyVault" --spn "$spn" --secret-permissions get list 1> /dev/null
+az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret-permissions get list 1> /dev/null
 
 # Retrieve service principal object properties
-tenant=$(az ad sp show --id "$spn" --query "appOwnerTenantId" -o tsv)
-clientId=$(az ad sp show --id "$spn" --query "appId" -o tsv)
+tenant=$(az ad sp show --id "$servicePrincipalName" --query "appOwnerTenantId" -o tsv)
+clientId=$(az ad sp show --id "$servicePrincipalName" --query "appId" -o tsv)
 
 # Generate environment variable file template
 echo "

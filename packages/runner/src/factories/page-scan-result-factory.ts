@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { HashGenerator } from 'axis-storage';
 import { inject, injectable } from 'inversify';
+import { HashGenerator } from 'service-library';
 import {
     IssueScanResults,
     ItemType,

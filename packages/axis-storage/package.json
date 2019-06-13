@@ -47,15 +47,12 @@
         "@azure/keyvault": "^0.1.0",
         "@azure/ms-rest-nodeauth": "^1.1.1",
         "@azure/storage-queue": "^10.1.0",
-        "@types/sha.js": "^2.4.0",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.11",
         "logger": "1.0.0",
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
-        "storage-documents": "1.0.0",
-        "sha.js": "^2.4.11",
         "verror": "^1.10.0"
     }
 }

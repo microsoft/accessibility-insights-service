@@ -13,13 +13,12 @@ import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
-import { Activator } from './common/activator';
-import { HashGenerator } from './common/hash-generator';
 import { CredentialsProvider } from './credentials/credentials-provider';
 import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
+import { Activator } from './system/activator';
 // tslint:disable: no-any no-unsafe-any
 
 describe(registerAxisStorageToContainer, () => {
@@ -35,7 +34,6 @@ describe(registerAxisStorageToContainer, () => {
     it('verify singleton resolution', async () => {
         registerAxisStorageToContainer(container);
 
-        verifySingletonDependencyResolution(HashGenerator);
         verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);

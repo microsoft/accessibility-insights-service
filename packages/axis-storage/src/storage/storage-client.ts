@@ -27,10 +27,14 @@ export class StorageClient {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
+    public async queryDocuments<T>(query: cosmos.SqlQuerySpec | string, continuationToken?: string): Promise<CosmosOperationResponse<T[]>> {
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken);
+    }
+
     /**
      * Writes document to a storage.
      *
-     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
+     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
      *
      * @param document Document to write to a storage
      * @param partitionKey The storage partition key
@@ -45,29 +49,27 @@ export class StorageClient {
     }
 
     /**
-     * Merges the document with the current storage document.
+     * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
-     * Document must have valid storage id value.
-     * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Source document properties that resolve to undefined are skipped on merge if a destination document value exists.
      * Array and plain object properties are merged recursively. Other objects and value types are overridden.
      *
-     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
+     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
      *
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
      */
-    public async mergeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
-        const documentId = (<cosmos.Item>(<unknown>document)).id;
-        if (documentId === undefined) {
+    public async mergeOrWriteDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        if (document.id === undefined) {
             return Promise.reject(
                 'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
             );
         }
 
         const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
-        const response = await this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, effectivePartitionKey);
+        const response = await this.cosmosClientWrapper.readItem<T>(document.id, this.dbName, this.collectionName, effectivePartitionKey);
         if (response.statusCode === 404) {
-            return Promise.reject(`Storage document with id ${documentId} not found. Unable to perform merge operation.`);
+            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
         }
 
         const mergedDocument = response.item;
@@ -77,21 +79,20 @@ export class StorageClient {
     }
 
     /**
-     * Merges documents with the current corresponding storage documents.
+     * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
-     * Document must have valid storage id value.
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Array and plain object properties are merged recursively. Other objects and value types are overridden.
      *
-     * Will use document partitionKey property if defined or partitionKey parameter otherwise.
+     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
      *
      * @param documents Documents to merge with the current corresponding storage documents
      * @param partitionKey The storage partition key
      */
-    public async mergeDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
+    public async mergeOrWriteDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
         await Promise.all(
             documents.map(async document => {
-                await this.mergeDocument(document, partitionKey);
+                await this.mergeOrWriteDocument(document, partitionKey);
             }),
         );
     }

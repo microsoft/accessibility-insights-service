@@ -3,8 +3,8 @@
 import * as cosmos from '@azure/cosmos';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { Activator } from '../common/activator';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
+import { Activator } from '../system/activator';
 import { CosmosDocument } from './cosmos-document';
 import { CosmosOperationResponse } from './cosmos-operation-response';
 
