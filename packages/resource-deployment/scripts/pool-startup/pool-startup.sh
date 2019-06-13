@@ -7,8 +7,21 @@
 
 set -eo pipefail
 
+waitForAptUpdates() {
+    echo "waiting for other apt updates"
+    while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock* >/dev/null 2>&1; do
+        echo "waiting ..."
+        sleep 5
+    done
+}
+
+echo "running - apt-get update"
+apt-get update
+
+waitForAptUpdates
+
 echo "Installing curl"
-apt-get update && apt-get install -y curl
+apt-get install -y curl
 
 echo "Installing chrome"
 #referred from https://www.ubuntuupdates.org/ppa/google_chrome
