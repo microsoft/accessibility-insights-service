@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any
+// tslint:disable: no-import-side-effect no-any no-unsafe-any
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
 import { IMock, It, Mock } from 'typemoq';
 import { CosmosClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { ItemType } from '../test-utilities/test-document-types/item-type';
-import { StorageDocument } from '../test-utilities/test-document-types/storage-document';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
+import { CosmosDocument } from './cosmos-document';
 
 describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;
@@ -98,24 +97,22 @@ describe('CosmosClientWrapper', () => {
             itemMock.verifyAll();
             verifyMocks();
         });
+
         it('read items using query', async () => {
             const query = "SELECT * from C where C.itemType = 'Page'";
             const items = [
                 {
                     id: 'id-1',
-                    itemType: ItemType.page,
                     propA: 'propA',
                     _etag: '1',
                 },
                 {
                     id: 'id-2',
-                    itemType: ItemType.page,
                     propA: 'propB',
                     _etag: '1',
                 },
                 {
                     id: 'id-3',
-                    itemType: ItemType.page,
                     propA: 'propC',
                     _etag: '1',
                 },
@@ -126,13 +123,13 @@ describe('CosmosClientWrapper', () => {
                 continuationToken: 'abdf12345fd',
             };
             collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            // tslint:disable-next-line: no-unsafe-any
             itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock
                 .setup(async qi => qi.executeNext())
                 .returns(async () => Promise.resolve({ result: items, statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } }));
 
             const result = await testSubject.readItems(dbName, collectionName, query);
+
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
             verifyMocks();
@@ -143,7 +140,6 @@ describe('CosmosClientWrapper', () => {
         it('upsert item with failed response', async () => {
             const item = {
                 id: 'id-1',
-                itemType: ItemType.page,
                 propA: 'propA',
             };
             const expectedResult = {
@@ -166,7 +162,6 @@ describe('CosmosClientWrapper', () => {
         it('upsert item with etag condition with success', async () => {
             const item = {
                 id: 'id-1',
-                itemType: ItemType.page,
                 propA: 'propA',
                 _etag: 'etag-1',
             };
@@ -197,7 +192,6 @@ describe('CosmosClientWrapper', () => {
         it('upsert item without etag condition with success', async () => {
             const item = {
                 id: 'id-1',
-                itemType: ItemType.page,
                 propA: 'propA',
             };
             const responseItem = {
@@ -226,19 +220,16 @@ describe('CosmosClientWrapper', () => {
             const items = [
                 {
                     id: 'id-1',
-                    itemType: ItemType.page,
                     propA: 'propA',
                     _etag: '1',
                 },
                 {
                     id: 'id-2',
-                    itemType: ItemType.page,
                     propA: 'propB',
                     _etag: '1',
                 },
                 {
                     id: 'id-3',
-                    itemType: ItemType.page,
                     propA: 'propC',
                     _etag: '1',
                 },
@@ -355,6 +346,6 @@ describe('CosmosClientWrapper', () => {
     }
 });
 
-interface DbItemMock extends StorageDocument {
+interface DbItemMock extends CosmosDocument {
     propA: string;
 }
