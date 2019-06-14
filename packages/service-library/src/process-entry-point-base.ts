@@ -2,11 +2,9 @@
 // Licensed under the MIT License.
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
-import { Logger } from './logger';
-import { loggerTypes } from './logger-types';
+import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 
-export abstract class BaseEntryPoint {
+export abstract class ProcessEntryPointBase {
     constructor(private readonly container: Container) {}
 
     public async start(): Promise<void> {

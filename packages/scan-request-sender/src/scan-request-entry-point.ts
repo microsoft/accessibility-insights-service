@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Container } from 'inversify';
-import { BaseEntryPoint, BaseTelemetryProperties, Logger } from 'logger';
+import { BaseTelemetryProperties, Logger } from 'logger';
+import { ProcessEntryPointBase } from 'service-library';
 import { WebSite } from './request-type/website';
 import { ScanRequestSender } from './sender/request-sender';
 import { SeedSource } from './source/seed-source';
 
-export class ScanRequestEntryPoint extends BaseEntryPoint {
+export class ScanRequestEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return { source: 'scanRequestSender' };
     }

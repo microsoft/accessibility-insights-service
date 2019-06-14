@@ -44,7 +44,7 @@
         "lodash": "^4.17.11",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0",
-        "common": "1.0.0",
-        "yargs": "^13.2.1"
+        "yargs": "^13.2.1",
+        "common": "1.0.0"
     }
 }

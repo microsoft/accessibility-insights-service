@@ -1,19 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// tslint:disable: no-unsafe-any
 import 'reflect-metadata';
 
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import * as _ from 'lodash';
+import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { BaseEntryPoint } from './base-entry-point';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
-import { Logger } from './logger';
-import { loggerTypes } from './logger-types';
-// tslint:disable: no-unsafe-any
+import { ProcessEntryPointBase } from './process-entry-point-base';
 
-describe(BaseEntryPoint, () => {
-    class TestEntryPoint extends BaseEntryPoint {
+describe(ProcessEntryPointBase, () => {
+    class TestEntryPoint extends ProcessEntryPointBase {
         public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
         public customActionInvoked = false;
 

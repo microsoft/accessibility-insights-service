@@ -4,7 +4,7 @@ import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
-import { IoC } from 'common';
+import { Activator, IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -13,7 +13,6 @@ import { AuthenticationMethod, CredentialsProvider } from './credentials/credent
 import { iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
-import { Activator } from './system/activator';
 
 export function registerAxisStorageToContainer(container: Container): void {
     container

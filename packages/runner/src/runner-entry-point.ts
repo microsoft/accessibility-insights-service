@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Container } from 'inversify';
-import { BaseEntryPoint, BaseTelemetryProperties } from 'logger';
+import { BaseTelemetryProperties } from 'logger';
+import { ProcessEntryPointBase } from 'service-library';
 import { Runner } from './runner/runner';
 
-export class RunnerEntryPoint extends BaseEntryPoint {
+export class RunnerEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return { source: 'runner' };
     }

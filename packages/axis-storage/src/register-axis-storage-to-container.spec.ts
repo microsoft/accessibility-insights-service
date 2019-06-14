@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// tslint:disable: no-any no-unsafe-any
 import 'reflect-metadata';
 
 import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
+import { Activator } from 'common';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
@@ -18,8 +20,6 @@ import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueS
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
-import { Activator } from './system/activator';
-// tslint:disable: no-any no-unsafe-any
 
 describe(registerAxisStorageToContainer, () => {
     let container: Container;

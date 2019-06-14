@@ -51,6 +51,7 @@
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0",
         "common": "1.0.0",
-        "service-library": "1.0.0"
+        "service-library": "1.0.0",
+        "storage-documents": "1.0.0"
     }
 }
