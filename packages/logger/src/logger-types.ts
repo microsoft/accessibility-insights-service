@@ -3,7 +3,7 @@
 export const loggerTypes = {
     AppInsights: 'AppInsights',
     Process: 'Process',
-    console: 'console',
+    Console: 'Console',
     DotEnvConfig: 'DotEnvConfig',
     Argv: 'Argv',
 };

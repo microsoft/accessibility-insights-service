@@ -16,7 +16,7 @@ export class ConsoleLoggerClient implements LoggerClient {
 
     constructor(
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
-        @inject(loggerTypes.console) private readonly consoleObject: typeof console,
+        @inject(loggerTypes.Console) private readonly consoleObject: typeof console,
     ) {}
 
     public setup(baseProperties?: BaseTelemetryProperties): void {

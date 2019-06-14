@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
-
 import { ScanRequestEntryPoint } from './scan-request-entry-point';
+import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
 
 (async () => {
     await new ScanRequestEntryPoint(setupScanRequestSenderContainer()).start();

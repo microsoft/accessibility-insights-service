@@ -23,7 +23,7 @@ export function registerLoggerToContainer(container: Container): void {
 
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Argv).toConstantValue(argv);
-    container.bind(loggerTypes.console).toConstantValue(console);
+    container.bind(loggerTypes.Console).toConstantValue(console);
 
     container
         .bind(Logger)
