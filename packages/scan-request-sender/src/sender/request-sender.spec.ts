@@ -1,55 +1,67 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// tslint:disable: no-import-side-effect no-any
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
+import { PageDocumentProvider } from 'service-library';
+import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { WebSite } from '../request-type/website';
 import { ScanRequestSender } from './request-sender';
 // tslint:disable: no-unsafe-any
 describe('Scan request Sender', () => {
     let queueMock: IMock<Queue>;
     let testSubject: ScanRequestSender;
     let storageConfigStub: StorageConfig;
+    let pageDocumentProviderMock: IMock<PageDocumentProvider>;
     beforeEach(() => {
         storageConfigStub = {
             scanQueue: 'test-scan-queue',
         };
 
         queueMock = Mock.ofType<Queue>();
-
-        testSubject = new ScanRequestSender(queueMock.object, storageConfigStub);
+        pageDocumentProviderMock = Mock.ofType<PageDocumentProvider>();
+        testSubject = new ScanRequestSender(pageDocumentProviderMock.object, queueMock.object, storageConfigStub);
     });
     it('send scan request', async () => {
         const websitesData = getWebSitesData();
-
-        // tslint:disable-next-line: no-floating-promises
+        //tslint:disable-next-line: no-floating-promises
         websitesData.forEach(website => {
             queueMock
                 .setup(async q => q.createMessage(storageConfigStub.scanQueue, website))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
+
+            pageDocumentProviderMock
+                .setup(async o => o.updateRunState(website))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
         });
 
         await testSubject.sendRequestToScan(websitesData);
-
         queueMock.verifyAll();
     });
 
-    function getWebSitesData(): WebSite[] {
+    function getWebSitesData(): WebsitePage[] {
         return [
             {
-                id: '7113152f-4d38-4443-a0d8-a07a6aab32f9',
-                name: 'Azure',
-                baseUrl: 'https://azure.microsoft.com/',
-                serviceTreeId: '7113152f-4d38-4443-a0d8-a07a5aab32f9',
+                id: '1',
+                itemType: ItemType.page,
+                partitionKey: 'https://www.microsoft.com',
+                websiteId: '1234',
+                baseUrl: 'https://www.microsoft.com',
+                url: 'https://www.microsoft.com',
+                basePage: true,
+                pageRank: 1,
+                lastReferenceSeen: 'abc',
+                lastRun: {
+                    runTime: 'test',
+                    state: RunState.completed,
+                    error: '',
+                    retries: 1,
+                },
+                links: ['https://www.microsoft.com/1', 'https://www.microsoft.com/2'],
             },
-            {
-                id: '7113152f-4d38-4443-a0d8-b07a6aab32f9',
-                name: 'Channel9',
-                baseUrl: '"https://channel9.msdn.com/',
-                serviceTreeId: '7113152f-4d38-4443-v0d8-a07a5aab32f9',
-            },
-        ] as WebSite[];
+        ] as WebsitePage[];
     }
 });

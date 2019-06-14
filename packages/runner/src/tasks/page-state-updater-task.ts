@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { PageDocumentProvider, PageObjectFactory } from 'service-library';
 import { PageScanResult, RunState } from 'storage-documents';
@@ -10,7 +9,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 @injectable()
 export class PageStateUpdaterTask {
     constructor(
-        @inject(StorageClient) private readonly pageDocumentProvider: PageDocumentProvider,
+        @inject(PageDocumentProvider) private readonly pageDocumentProvider: PageDocumentProvider,
         @inject(PageObjectFactory) private readonly pageObjectFactory: PageObjectFactory,
     ) {}
 

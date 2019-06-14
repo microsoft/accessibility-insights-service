@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { CosmosOperationResponse, StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import * as moment from 'moment';
 import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { PageObjectFactory } from '../factories/page-object-factory';
 
@@ -14,7 +15,9 @@ export class PageDocumentProvider {
 
     public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
-            query: 'SELECT * FROM c WHERE c.itemType = @itemType and c.page.lastRunState.state = @state',
+            query:
+                // tslint:disable-next-line:max-line-length
+                'SELECT * FROM c WHERE c.itemType = @itemType and (c.lastRun.state = @state or c.lastReferenceSeen >= @shouldSeeInLastNDays)',
             parameters: [
                 {
                     name: '@itemType',
@@ -23,6 +26,12 @@ export class PageDocumentProvider {
                 {
                     name: '@state',
                     value: RunState.completed,
+                },
+                {
+                    name: '@shouldSeeInLastNDays',
+                    value: moment()
+                        .subtract(5, 'day')
+                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
                 },
             ],
         };
