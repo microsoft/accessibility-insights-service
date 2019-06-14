@@ -47,7 +47,7 @@ displayName="$user-$resourceGroupName"
 servicePrincipalName="http://$displayName"
 
 # Create or update service principal object
-# Use display name instead of service principal name to prevent az cli assiging a random name
+# Use display name instead of service principal name to prevent az cli assiging a random display name
 echo "Creating service principal..."
 password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/$subscription/resourceGroups/$resourceGroupName" --name "$displayName" --query "password" -o tsv)
 
