@@ -16,6 +16,6 @@ export class StorageTask {
     }
 
     public async mergeResults<T>(results: T[], partitionKey?: string): Promise<void> {
-        await this.storageClient.mergeDocuments<T>(results, partitionKey);
+        await this.storageClient.mergeOrWriteDocuments<T>(results, partitionKey);
     }
 }

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { HashGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { ItemType, RunResult, WebsitePage } from 'storage-documents';
-import { HashGenerator } from '..';
 
 @injectable()
 export class PageObjectFactory {

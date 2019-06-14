@@ -182,11 +182,11 @@ describe('runner', () => {
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(2));
         pageStateUpdaterTaskMock
-            .setup(async o => o.setOnPageLinks(crawlerScanResults, scanMetadata))
+            .setup(async o => o.setPageLinks(crawlerScanResults, scanMetadata))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         pageStateUpdaterTaskMock
-            .setup(async o => o.setStateOnComplete(pageScanResult, scanMetadata, It.isAny()))
+            .setup(async o => o.setCompleteState(pageScanResult, scanMetadata, It.isAny()))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 

@@ -11,7 +11,7 @@ import { loggerTypes } from './logger-types';
 
 @injectable()
 export class ConsoleLoggerClient implements LoggerClient {
-    private isconsoleLogEnabled: boolean;
+    private isConsoleLogEnabled: boolean;
     private baseProperties?: { [key: string]: string };
 
     constructor(
@@ -22,7 +22,7 @@ export class ConsoleLoggerClient implements LoggerClient {
     public setup(baseProperties?: BaseTelemetryProperties): void {
         this.baseProperties = baseProperties;
 
-        this.isconsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--no-console').length === 0;
+        this.isConsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--no-console').length === 0;
     }
 
     public trackMetric(name: string, value: number): void {
@@ -59,7 +59,7 @@ export class ConsoleLoggerClient implements LoggerClient {
     }
 
     private executeInDebugMode(action: () => void): void {
-        if (this.isconsoleLogEnabled) {
+        if (this.isConsoleLogEnabled) {
             action();
         }
     }

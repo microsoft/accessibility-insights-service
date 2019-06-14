@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 import { StorageClient } from 'axis-storage';
 import { inject, injectable } from 'inversify';
-import { PageScanResult, RunState, WebsitePage } from 'storage-documents';
+import { PageDocumentProvider, PageObjectFactory } from 'service-library';
+import { PageScanResult, RunState } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
-import { WebsitePageFactory } from '../factories/website-page-factory';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()
 export class PageStateUpdaterTask {
     constructor(
-        @inject(StorageClient) private readonly storageClient: StorageClient,
-        @inject(WebsitePageFactory) private readonly websitePageFactory: WebsitePageFactory,
+        @inject(StorageClient) private readonly pageDocumentProvider: PageDocumentProvider,
+        @inject(PageObjectFactory) private readonly pageObjectFactory: PageObjectFactory,
     ) {}
 
     public async setState(runState: RunState, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
-        const websitePage = this.websitePageFactory.createImmutableInstance(
+        const websitePage = this.pageObjectFactory.createImmutableInstance(
             scanMetadata.websiteId,
             scanMetadata.baseUrl,
             scanMetadata.scanUrl,
@@ -26,38 +26,31 @@ export class PageStateUpdaterTask {
             runTime: runTime.toJSON(),
         };
 
-        await this.writeDocument(websitePage);
+        await this.pageDocumentProvider.updateRunState(websitePage);
     }
 
-    public async setOnPageLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata): Promise<void> {
-        const websitePage = this.websitePageFactory.createImmutableInstance(
+    public async setPageLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata): Promise<void> {
+        const websitePage = this.pageObjectFactory.createImmutableInstance(
             scanMetadata.websiteId,
             scanMetadata.baseUrl,
             scanMetadata.scanUrl,
         );
 
         if (crawlerScanResults.error === undefined) {
-            // select crawl result for a scanned URL only
+            // select crawl result for a page URL only
             const scanResult = crawlerScanResults.results.find(result => result.scanUrl === scanMetadata.scanUrl);
             websitePage.links = scanResult !== undefined ? scanResult.links : [];
-            await this.writeDocument(websitePage);
+
+            await this.pageDocumentProvider.updateLinks(websitePage);
         }
     }
 
-    public async setStateOnComplete(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
+    public async setCompleteState(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
         const pageRunState =
             pageScanResult.crawl.run.state === RunState.failed || pageScanResult.scan.run.state === RunState.failed
                 ? RunState.failed
                 : RunState.completed;
-        await this.setState(pageRunState, scanMetadata, runTime);
-    }
 
-    private async writeDocument(websitePage: WebsitePage): Promise<void> {
-        let response = await this.storageClient.readDocument(websitePage.id, websitePage.partitionKey);
-        if (response.statusCode === 404) {
-            response = await this.storageClient.writeDocument(websitePage);
-        } else {
-            response = await this.storageClient.mergeDocument(websitePage);
-        }
+        await this.setState(pageRunState, scanMetadata, runTime);
     }
 }

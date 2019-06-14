@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 import { CredentialsProvider, registerAxisStorageToContainer } from 'axis-storage';
+import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { registerLoggerToContainer, setupSingletonProvider } from 'logger';
+import { registerLoggerToContainer } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
 import { RunnerTaskConfig } from './batch/runner-task-config';
@@ -35,7 +36,7 @@ export function setupJobManagerContainer(): Container {
 }
 
 function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
-    setupSingletonProvider(jobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
+    IoC.setupSingletonProvider(jobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
 

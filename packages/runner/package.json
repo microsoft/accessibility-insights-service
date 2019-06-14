@@ -60,6 +60,7 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
-        "yargs": "^13.2.1"
+        "yargs": "^13.2.1",
+        "common": "1.0.0"
     }
 }

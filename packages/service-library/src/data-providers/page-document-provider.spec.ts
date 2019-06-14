@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-import-side-effect no-any no-unsafe-any
+import 'reflect-metadata';
+
 import { StorageClient } from 'axis-storage';
 import { ItemType, RunResult, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -18,7 +20,7 @@ beforeEach(() => {
 });
 
 describe('PageDocumentProvider', () => {
-    it('read ready to scan pages', async () => {
+    it('Query ready to scan pages', async () => {
         const items = [
             {
                 value: 'value1',
@@ -44,9 +46,9 @@ describe('PageDocumentProvider', () => {
         storageClientMock.verifyAll();
     });
 
-    it('Set page run state', async () => {
+    it('Update page run state', async () => {
         const websitePage = createWebsitePage();
-        websitePage._etag = 'ts12';
+        websitePage._etag = 'et10';
         websitePage.lastRun = {
             state: RunState.running,
             runTime: new Date().toJSON(),
@@ -64,7 +66,27 @@ describe('PageDocumentProvider', () => {
             .returns(async () => Promise.resolve({ statusCode: 200 }))
             .verifiable(Times.once());
 
-        await pageDocumentProvider.setPageRunState(websitePage);
+        await pageDocumentProvider.updateRunState(websitePage);
+    });
+
+    it('Update page links', async () => {
+        const websitePage = createWebsitePage();
+        websitePage._etag = 'et12';
+        websitePage.links = ['link1', 'link2'];
+
+        const websitePageToMerge = createWebsitePage();
+        websitePageToMerge.lastRun = websitePage.lastRun;
+
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
+            .returns(() => websitePageToMerge)
+            .verifiable(Times.once());
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePageToMerge))
+            .returns(async () => Promise.resolve({ statusCode: 200 }))
+            .verifiable(Times.once());
+
+        await pageDocumentProvider.updateLinks(websitePage);
     });
 });
 

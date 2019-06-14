@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { loggerTypes, StringUtils } from 'logger';
-// tslint:disable: no-unsafe-any no-any
+import { loggerTypes } from 'logger';
 
 @injectable()
 export class RunnerTaskConfig {
     public readonly commandLineTemplate: string =
         '/bin/bash -c \'start-runner.sh "%id%" "%name%" "%baseUrl%" "%scanUrl%" "%serviceTreeId%"\'';
-    private resourceFiles: BatchServiceModels.ResourceFile[];
 
+    private environmentSettings: BatchServiceModels.EnvironmentSetting[];
+    private resourceFiles: BatchServiceModels.ResourceFile[];
     private readonly environmentSettingsTemplate: BatchServiceModels.EnvironmentSetting[] = [
         {
             name: 'APPINSIGHTS_INSTRUMENTATIONKEY',
@@ -23,11 +24,11 @@ export class RunnerTaskConfig {
         },
     ];
 
-    private environmentSettings: BatchServiceModels.EnvironmentSetting[];
-
     constructor(@inject(loggerTypes.Process) private readonly currentProcess: typeof process) {}
 
+    // tslint:disable-next-line: no-any
     public getCommandLine(data: any): string {
+        // tslint:disable-next-line: no-unsafe-any
         return this.commandLineTemplate.replace(/%(\w*)%/g, (match, key) => (data.hasOwnProperty(key) ? data[key] : ''));
     }
 
@@ -35,8 +36,8 @@ export class RunnerTaskConfig {
         if (isEmpty(this.environmentSettings)) {
             this.environmentSettings = [];
             this.environmentSettingsTemplate.forEach(setting => {
-                const value = StringUtils.isNullOrEmptyString(setting.value) ? this.currentProcess.env[setting.name] : setting.value;
-                if (StringUtils.isNullOrEmptyString(value)) {
+                const value = System.isNullOrEmptyString(setting.value) ? this.currentProcess.env[setting.name] : setting.value;
+                if (System.isNullOrEmptyString(value)) {
                     throw new Error(`Unable to get environment property value for ${setting.name}`);
                 }
 

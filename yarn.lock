@@ -1204,13 +1204,6 @@
   dependencies:
     "@types/node" "*"
 
-"@types/sha@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@types/sha/-/sha-3.0.0.tgz#096eae8172bd9907e5e0aa35c81a4e9fe3acd4e8"
-  integrity sha512-rxSsiWGgUjZXSSiolK0jCq1dv26pUyI598Mo8THedp0vPNZtMI79U1gxXYI0FWLltaKc4Q9pOlnwaP9/OZHY8A==
-  dependencies:
-    "@types/node" "*"
-
 "@types/stack-utils@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/stack-utils/-/stack-utils-1.0.1.tgz#0a851d3bd96498fa25c33ab7278ed3bd65f06c3e"
@@ -7013,13 +7006,6 @@ sha.js@^2.4.0, sha.js@^2.4.11, sha.js@^2.4.8:
   dependencies:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
-
-sha@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/sha/-/sha-3.0.0.tgz#b2f2f90af690c16a3a839a6a6c680ea51fedd1ae"
-  integrity sha512-DOYnM37cNsLNSGIG/zZWch5CKIRNoLdYUQTQlcgkRkoYIUwDYjqDyye16YcDZg/OPdcbUgTKMjc4SY6TB7ZAPw==
-  dependencies:
-    graceful-fs "^4.1.2"
 
 shebang-command@^1.2.0:
   version "1.2.0"

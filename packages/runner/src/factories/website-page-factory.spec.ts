@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { HashGenerator } from 'service-library';
+import { PageObjectFactory } from 'service-library';
 import { ItemType, RunResult, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
@@ -10,7 +10,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 import { WebsitePageFactory } from './website-page-factory';
 
 describe('WebsitePageFactory', () => {
-    let hashGeneratorMock: IMock<HashGenerator>;
+    let pageObjectFactoryMock: IMock<PageObjectFactory>;
     let websitePageFactory: WebsitePageFactory;
     const scanMetadata: ScanMetadata = {
         websiteId: 'websiteId',
@@ -21,9 +21,9 @@ describe('WebsitePageFactory', () => {
     };
 
     beforeEach(() => {
-        hashGeneratorMock = Mock.ofType<HashGenerator>();
-        setupHashGenerator();
-        websitePageFactory = new WebsitePageFactory(hashGeneratorMock.object);
+        pageObjectFactoryMock = Mock.ofType<PageObjectFactory>();
+        websitePageFactory = new WebsitePageFactory(pageObjectFactoryMock.object);
+        setupPageObjectFactoryMock();
     });
 
     it('create when scan url result provided', () => {
@@ -34,34 +34,49 @@ describe('WebsitePageFactory', () => {
         const result = websitePageFactory.createFromLinks(crawlerScanResults, scanMetadata, runTime);
 
         expect(result).toEqual(expectedResult);
-        hashGeneratorMock.verifyAll();
+        pageObjectFactoryMock.verifyAll();
     });
 
-    function setupHashGenerator(): void {
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-1'))
-            .returns(() => 'baseUrl-scanUrl-1-hash-1')
+    function setupPageObjectFactoryMock(): void {
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-1-link-1'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-1-hash-1', 'scanUrl-1-link-1'))
             .verifiable(Times.once());
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-2'))
-            .returns(() => 'baseUrl-scanUrl-1-hash-2')
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-1-link-2'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-1-hash-2', 'scanUrl-1-link-2'))
             .verifiable(Times.once());
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-1-link-3'))
-            .returns(() => 'baseUrl-scanUrl-1-hash-3')
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-1-link-3'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-1-hash-3', 'scanUrl-1-link-3'))
             .verifiable(Times.once());
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-1'))
-            .returns(() => 'baseUrl-scanUrl-2-hash-1')
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-2-link-1'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-2-hash-1', 'scanUrl-2-link-1'))
             .verifiable(Times.once());
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-2'))
-            .returns(() => 'baseUrl-scanUrl-2-hash-2')
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-2-link-2'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-2-hash-2', 'scanUrl-2-link-2'))
             .verifiable(Times.once());
-        hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(scanMetadata.baseUrl, 'scanUrl-2-link-3'))
-            .returns(() => 'baseUrl-scanUrl-2-hash-3')
+        pageObjectFactoryMock
+            .setup(o => o.createImmutableInstance(scanMetadata.websiteId, scanMetadata.baseUrl, 'scanUrl-2-link-3'))
+            .returns(() => createPageDocument('baseUrl-scanUrl-2-hash-3', 'scanUrl-2-link-3'))
             .verifiable(Times.once());
+    }
+
+    function createPageDocument(id: string, url: string): WebsitePage {
+        return {
+            id: id,
+            itemType: ItemType.page,
+            websiteId: scanMetadata.websiteId,
+            baseUrl: scanMetadata.baseUrl,
+            url: url,
+            pageRank: <number>undefined,
+            lastReferenceSeen: <string>undefined,
+            lastRun: <RunResult>undefined,
+            links: <[]>undefined,
+            partitionKey: scanMetadata.websiteId,
+        };
     }
 
     function createCrawlerScanResults(): CrawlerScanResults {

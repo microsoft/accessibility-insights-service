@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { HashGenerator } from 'common';
 import { ItemType, RunResult } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { HashGenerator } from '../ciphers/hash-generator';
 import { PageObjectFactory } from './page-object-factory';
 
 let hashGeneratorMock: IMock<HashGenerator>;

@@ -5,31 +5,36 @@
             "path": "../packages/job-manager"
         },
         {
-            "name": "logger",
-            "path": "../packages/logger"
-        },
-        {
             "name": "runner",
             "path": "../packages/runner"
-        },
-        {
-            "name": "axis-storage",
-            "path": "../packages/axis-storage"
         },
         {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
         },
         {
-            "name": "resource-deployment",
-            "path": "../packages/resource-deployment"
+            "name": "service-library",
+            "path": "../packages/service-library"
+        },
+        {
+            "name": "axis-storage",
+            "path": "../packages/axis-storage"
         },
         {
             "name": "storage-documents",
             "path": "../packages/storage-documents"
-        },        {
-            "name": "service-library",
-            "path": "../packages/service-library"
+        },
+        {
+            "name": "logger",
+            "path": "../packages/logger"
+        },
+        {
+            "name": "common",
+            "path": "../packages/common"
+        },
+        {
+            "name": "resource-deployment",
+            "path": "../packages/resource-deployment"
         },
         {
             "name": "root",

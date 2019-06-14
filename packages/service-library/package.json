@@ -21,13 +21,6 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
-    "dependencies": {
-        "inversify": "^5.0.1",
-        "reflect-metadata": "^0.1.13",
-        "sha.js": "^2.4.11",
-        "storage-documents": "1.0.0",
-        "axis-storage": "1.0.0"
-    },
     "devDependencies": {
         "@types/jest": "^24.0.11",
         "@types/node": "^11.13.4",
@@ -41,5 +34,14 @@
         "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
         "typescript": "^3.4.3"
+    },
+    "dependencies": {
+        "axis-storage": "1.0.0",
+        "inversify": "^5.0.1",
+        "lodash": "^4.17.11",
+        "reflect-metadata": "^0.1.13",
+        "sha.js": "^2.4.11",
+        "storage-documents": "1.0.0",
+        "common": "1.0.0"
     }
 }

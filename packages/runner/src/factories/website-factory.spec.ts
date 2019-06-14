@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { HashGenerator } from 'service-library';
+import { HashGenerator } from 'common';
 import { ItemType, RunState, ScanLevel, WebsiteScanState } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadata } from '../types/scan-metadata';

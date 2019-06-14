@@ -3,9 +3,9 @@
 import 'reflect-metadata';
 
 import { Container, interfaces } from 'inversify';
-import { setupSingletonProvider } from './setup-singleton-provider';
+import { IoC } from './setup-singleton-provider';
 
-describe(setupSingletonProvider, () => {
+describe(IoC.setupSingletonProvider, () => {
     let container: interfaces.Container;
 
     beforeEach(() => {
@@ -22,7 +22,7 @@ describe(setupSingletonProvider, () => {
             return instanceCount;
         };
 
-        setupSingletonProvider(key, container, factory);
+        IoC.setupSingletonProvider(key, container, factory);
 
         const instanceProvider1: () => Promise<number> = container.get(key);
         const instanceProvider2: () => Promise<number> = container.get(key);

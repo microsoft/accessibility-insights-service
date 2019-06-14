@@ -4,8 +4,8 @@ import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
+import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { setupSingletonProvider } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -62,7 +62,7 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
-    setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async context => {
+    IoC.setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async context => {
         const credentialsProvider = context.container.get(CredentialsProvider);
         const credentials = await credentialsProvider.getCredentialsForKeyVault();
 
@@ -71,7 +71,7 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 }
 
 function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
-    setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
+    IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
         const secretProvider = context.container.get(SecretProvider);
         const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
         const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
@@ -83,7 +83,7 @@ function setupSingletonQueueServiceURLProvider(container: interfaces.Container):
 }
 
 function setupSingletonCosmosClientProvider(container: interfaces.Container): void {
-    setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async context => {
+    IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async context => {
         const secretProvider = context.container.get(SecretProvider);
         const cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
         const cosmosDbKey = await secretProvider.getSecret(secretNames.cosmosDbKey);
