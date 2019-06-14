@@ -25,7 +25,7 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('console not enabled', () => {
-        it('donot log', () => {
+        it('do not log', () => {
             processStub = { execArgv: ['--test', '--no-CONSOLE'] } as typeof process;
             consoleMock = Mock.ofInstance({ log: () => {} } as typeof console, MockBehavior.Strict);
             testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);

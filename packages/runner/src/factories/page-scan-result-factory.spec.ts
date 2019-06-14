@@ -3,7 +3,7 @@
 // tslint:disable: max-func-body-length
 import 'reflect-metadata';
 
-import { HashGenerator } from 'axis-storage';
+import { HashGenerator } from 'common';
 import { IssueScanResults, ItemType, PageScanResult, Product, ResultLevel, RunState, ScanLevel } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';

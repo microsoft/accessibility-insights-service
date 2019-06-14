@@ -44,11 +44,14 @@
     "dependencies": {
         "@azure/cosmos": "^2.1.2",
         "@types/sha.js": "^2.4.0",
-        "axis-storage": "^1.0.0",
+        "azure-services": "^1.0.0",
         "logger": "1.0.0",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
         "reflect-metadata": "^0.1.13",
-        "verror": "^1.10.0"
+        "verror": "^1.10.0",
+        "common": "1.0.0",
+        "service-library": "1.0.0",
+        "storage-documents": "1.0.0"
     }
 }

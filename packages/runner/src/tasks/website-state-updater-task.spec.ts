@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 import '../../test-utilities/common-mock-methods';
 
-import { CosmosOperationResponse, RetryOptions, StorageClient } from 'axis-storage';
+import { CosmosOperationResponse, RetryOptions, StorageClient } from 'azure-services';
 import { Logger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';

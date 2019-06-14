@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Task } from '@azure/batch';
-import { Message } from 'axis-storage';
+import { Message } from 'azure-services';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';

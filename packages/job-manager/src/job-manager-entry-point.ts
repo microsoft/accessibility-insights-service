@@ -1,12 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Queue } from 'axis-storage';
+import { Queue } from 'azure-services';
 import { Container } from 'inversify';
-import { BaseEntryPoint, BaseTelemetryProperties } from 'logger';
+import { BaseTelemetryProperties } from 'logger';
+import { ProcessEntryPointBase } from 'service-library';
 import { Batch } from './batch/batch';
 import { JobTaskExecutionResult, JobTaskState } from './batch/job-task';
 
-export class JobManagerEntryPoint extends BaseEntryPoint {
+export class JobManagerEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return {
             source: 'jobManager',

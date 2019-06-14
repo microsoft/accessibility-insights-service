@@ -43,7 +43,7 @@ export class Runner {
             // upsert pages references model in a storage
             await this.storageTask.mergeResults(websitePages, scanMetadata.websiteId);
             // update scanned page with on-page links
-            await this.pageStateUpdaterTask.setOnPageLinks(crawlerScanResults, scanMetadata);
+            await this.pageStateUpdaterTask.setPageLinks(crawlerScanResults, scanMetadata);
 
             // scan website page for accessibility issues
             const axeScanResults = await this.scannerTask.scan(scanMetadata.scanUrl);
@@ -58,7 +58,7 @@ export class Runner {
             await this.storageTask.writeResult(pageScanResult, scanMetadata.websiteId);
 
             // set scanned page run state to corresponding page run result
-            await this.pageStateUpdaterTask.setStateOnComplete(pageScanResult, scanMetadata, runTime);
+            await this.pageStateUpdaterTask.setCompleteState(pageScanResult, scanMetadata, runTime);
 
             // update website root scan state document with last page scan result
             await this.websiteStateUpdaterTask.update(pageScanResult, scanMetadata, runTime);

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-unsafe-any
-import { StorageClient } from 'axis-storage';
+import { StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ScanRequest, WebSite } from '../request-type/website';

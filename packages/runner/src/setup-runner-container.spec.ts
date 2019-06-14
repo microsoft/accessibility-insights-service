@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { StorageClient } from 'axis-storage';
+import { StorageClient } from 'azure-services';
 import { Runner } from './runner/runner';
 import { setupRunnerContainer } from './setup-runner-container';
 // tslint:disable: no-any

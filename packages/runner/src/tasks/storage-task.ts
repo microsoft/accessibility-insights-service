@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { StorageClient } from 'axis-storage';
+import { StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 
 @injectable()
@@ -16,6 +16,6 @@ export class StorageTask {
     }
 
     public async mergeResults<T>(results: T[], partitionKey?: string): Promise<void> {
-        await this.storageClient.mergeDocuments<T>(results, partitionKey);
+        await this.storageClient.mergeOrWriteDocuments<T>(results, partitionKey);
     }
 }

@@ -27,7 +27,7 @@ describe(registerLoggerToContainer, () => {
 
         expect(container.get(loggerTypes.AppInsights)).toBe(appInsights);
         expect(container.get(loggerTypes.Process)).toBe(process);
-        expect(container.get(loggerTypes.console)).toBe(console);
+        expect(container.get(loggerTypes.Console)).toBe(console);
         expect(container.get(loggerTypes.Argv)).toBe(argv);
         expect(container.get(loggerTypes.DotEnvConfig)).toEqual(dotenv.config());
 

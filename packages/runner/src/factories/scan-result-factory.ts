@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AxeResults, NodeResult, Result } from 'axe-core';
-import { HashGenerator } from 'axis-storage';
+import { HashGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { IssueScanResult, ItemType, ResultLevel } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
