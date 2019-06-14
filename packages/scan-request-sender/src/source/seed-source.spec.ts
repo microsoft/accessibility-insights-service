@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CosmosOperationResponse, StorageClient } from 'axis-storage';
+import { CosmosOperationResponse, StorageClient } from 'azure-services';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 // tslint:disable: no-unsafe-any

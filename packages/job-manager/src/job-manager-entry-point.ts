@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Queue } from 'axis-storage';
+import { Queue } from 'azure-services';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { CredentialsProvider, Queue, SecretProvider } from 'axis-storage';
+import { CredentialsProvider, Queue, SecretProvider } from 'azure-services';
 import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 import { Batch } from './batch/batch';

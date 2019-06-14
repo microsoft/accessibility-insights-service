@@ -19,9 +19,9 @@ import { CredentialsProvider } from './credentials/credentials-provider';
 import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
-import { registerAxisStorageToContainer } from './register-axis-storage-to-container';
+import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 
-describe(registerAxisStorageToContainer, () => {
+describe(registerAzureServicesToContainer, () => {
     let container: Container;
 
     beforeEach(() => {
@@ -32,7 +32,7 @@ describe(registerAxisStorageToContainer, () => {
     });
 
     it('verify singleton resolution', async () => {
-        registerAxisStorageToContainer(container);
+        registerAzureServicesToContainer(container);
 
         verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
@@ -45,7 +45,7 @@ describe(registerAxisStorageToContainer, () => {
     });
 
     it('verify non-singleton resolution', () => {
-        registerAxisStorageToContainer(container);
+        registerAzureServicesToContainer(container);
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
@@ -69,7 +69,7 @@ describe(registerAxisStorageToContainer, () => {
                 .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
-            registerAxisStorageToContainer(container);
+            registerAzureServicesToContainer(container);
             stubBinding(SecretProvider, secretProviderMock.object);
         });
 
@@ -101,7 +101,7 @@ describe(registerAxisStorageToContainer, () => {
         beforeEach(() => {
             credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
             credentialsProviderMock = Mock.ofType(CredentialsProvider);
-            registerAxisStorageToContainer(container);
+            registerAzureServicesToContainer(container);
 
             stubBinding(CredentialsProvider, credentialsProviderMock.object);
 
@@ -143,7 +143,7 @@ describe(registerAxisStorageToContainer, () => {
             secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbUrl)).returns(async () => Promise.resolve(cosmosDbUrl));
             secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).returns(async () => Promise.resolve(cosmosDbKey));
 
-            registerAxisStorageToContainer(container);
+            registerAzureServicesToContainer(container);
             stubBinding(SecretProvider, secretProviderMock.object);
         });
 

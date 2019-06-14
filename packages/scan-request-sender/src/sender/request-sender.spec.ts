@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Queue, StorageConfig } from 'axis-storage';
+import { Queue, StorageConfig } from 'azure-services';
 import { IMock, Mock, Times } from 'typemoq';
 import { WebSite } from '../request-type/website';
 import { ScanRequestSender } from './request-sender';

@@ -3,7 +3,7 @@
 // tslint:disable: no-import-side-effect no-any no-unsafe-any
 import 'reflect-metadata';
 
-import { StorageClient } from 'axis-storage';
+import { StorageClient } from 'azure-services';
 import { ItemType, RunResult, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { PageObjectFactory } from '../factories/page-object-factory';

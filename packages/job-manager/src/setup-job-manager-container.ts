@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
-import { CredentialsProvider, registerAxisStorageToContainer } from 'axis-storage';
+import { CredentialsProvider, registerAzureServicesToContainer } from 'azure-services';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { registerLoggerToContainer } from 'logger';
@@ -13,7 +13,7 @@ import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 export function setupJobManagerContainer(): Container {
     const container = new Container();
     registerLoggerToContainer(container);
-    registerAxisStorageToContainer(container);
+    registerAzureServicesToContainer(container);
 
     container
         .bind(BatchConfig)

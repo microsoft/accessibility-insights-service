@@ -14,7 +14,7 @@ import { iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 
-export function registerAxisStorageToContainer(container: Container): void {
+export function registerAzureServicesToContainer(container: Container): void {
     container
         .bind(Activator)
         .toSelf()

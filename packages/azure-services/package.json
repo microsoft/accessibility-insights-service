@@ -1,5 +1,5 @@
 {
-    "name": "axis-storage",
+    "name": "azure-services",
     "version": "1.0.0",
     "description": "Common package for CRUD operation with your azure storage",
     "scripts": {

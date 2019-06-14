@@ -16,10 +16,10 @@
             "name": "service-library",
             "path": "../packages/service-library"
         },
-        {
-            "name": "axis-storage",
-            "path": "../packages/axis-storage"
-        },
+      {
+        "name": "azure-services",
+        "path": "../packages/azure-services"
+      },
         {
             "name": "storage-documents",
             "path": "../packages/storage-documents"

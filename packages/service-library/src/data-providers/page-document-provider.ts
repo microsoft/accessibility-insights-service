@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosOperationResponse, StorageClient } from 'axis-storage';
+import { CosmosOperationResponse, StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { PageObjectFactory } from '../factories/page-object-factory';
