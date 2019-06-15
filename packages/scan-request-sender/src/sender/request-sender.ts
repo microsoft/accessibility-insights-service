@@ -27,8 +27,11 @@ export class ScanRequestSender {
         return this.queue.getMessageCount();
     }
     private changePageState(websitePage: WebsitePage, state: RunState): void {
-        _.isNil(websitePage.lastRun)
-            ? (websitePage.lastRun = { state: state, runTime: new Date().toJSON() })
-            : (websitePage.lastRun.state = state);
+        if (_.isNil(websitePage.lastRun)) {
+            websitePage.lastRun = { state: state, runTime: new Date().toJSON() };
+        } else {
+            websitePage.lastRun.state = state;
+            websitePage.lastRun.runTime = new Date().toJSON();
+        }
     }
 }
