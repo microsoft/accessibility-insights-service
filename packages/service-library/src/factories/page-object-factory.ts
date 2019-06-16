@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { HashGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { ItemType, RunResult, WebsitePage } from 'storage-documents';
+import { ItemType, WebsitePage } from 'storage-documents';
 
 @injectable()
 export class PageObjectFactory {
@@ -25,10 +25,6 @@ export class PageObjectFactory {
             websiteId: websiteId,
             baseUrl: baseUrl,
             url: scanUrl,
-            pageRank: <number>undefined,
-            lastReferenceSeen: <string>undefined,
-            lastRun: <RunResult>undefined,
-            links: undefined,
             partitionKey: websiteId,
         };
     }

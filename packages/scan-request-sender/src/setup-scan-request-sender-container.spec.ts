@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
-import { ScanRequestSender } from './sender/request-sender';
+import { ScanRequestSender } from './sender/scan-request-sender';
 import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
 // tslint:disable: no-any
 

@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { WebsitePage } from 'storage-documents';
-import { ScanRequestSender } from './request-sender';
+import { ScanRequestSender } from './scan-request-sender';
 
 @injectable()
 export class Dispatcher {
@@ -15,9 +15,10 @@ export class Dispatcher {
         @inject(Logger) private readonly logger: Logger,
         @inject(ScanRequestSender) private readonly sender: ScanRequestSender,
     ) {}
+
     public async dispatchScanRequests(): Promise<void> {
         const configQueueSize = Number(process.env.QUEUE_SIZE);
-        this.logger.logInfo(`[Sender] maximum queue size configuration set to  ${configQueueSize}`);
+        this.logger.logInfo(`[Sender] maximum queue size configuration set to ${configQueueSize}`);
         let currentQueueSize = await this.sender.getCurrentQueueSize();
         this.logger.logInfo(`[Sender] current queue size is ${currentQueueSize}`);
         let continuationToken;
@@ -36,7 +37,7 @@ export class Dispatcher {
                     this.logger.logInfo(`[Sender] sending ${pagesToScan.length} website pages to scan`);
                     await this.sender.sendRequestToScan(pagesToScan);
                     currentQueueSize = await this.sender.getCurrentQueueSize();
-                    this.logger.logInfo(`[Sender] queue size after sending requests is  ${currentQueueSize}`);
+                    this.logger.logInfo(`[Sender] queue size after sending requests is ${currentQueueSize}`);
                     continuationToken = pageDocumentResponse.continuationToken;
                 } else {
                     this.logger.logInfo(`[Sender] No website pages found to scan or queue already reached to its maximum capacity`);

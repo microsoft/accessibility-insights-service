@@ -9,7 +9,7 @@ import { PageDocumentProvider } from 'service-library';
 import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Dispatcher } from './dispatcher';
-import { ScanRequestSender } from './request-sender';
+import { ScanRequestSender } from './scan-request-sender';
 
 let loggerMock: IMock<Logger>;
 let pageDocumentProviderMock: IMock<PageDocumentProvider>;
