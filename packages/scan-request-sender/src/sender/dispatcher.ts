@@ -39,7 +39,7 @@ export class Dispatcher {
                     this.logger.logInfo(`[Sender] queue size after sending requests is  ${currentQueueSize}`);
                     continuationToken = pageDocumentResponse.continuationToken;
                 } else {
-                    this.logger.logInfo(`[Sender] No website pages found to scan`);
+                    this.logger.logInfo(`[Sender] No website pages found to scan or queue already reached to its maximum capacity`);
                 }
 
                 if (_.isNil(pageDocumentResponse.continuationToken)) {
