@@ -51,6 +51,6 @@ export class PageDocumentProvider {
 
         _.merge(propertiesToUpdate, properties);
 
-        return this.storageClient.mergeOrWriteDocument(propertiesToUpdate);
+        return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
     }
 }

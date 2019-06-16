@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
+import { ItemType, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { PageDocumentProvider } from './page-document-provider';
 
@@ -40,5 +41,46 @@ describe('PageDocumentProvider', () => {
 
         expect(result).toEqual(expectedResult);
         storageClientMock.verifyAll();
+    });
+
+    it('update page properties', async () => {
+        const websitePageBase: WebsitePage = {
+            id: 'id',
+            itemType: ItemType.page,
+            websiteId: 'websiteId',
+            baseUrl: 'baseUrl',
+            url: 'url',
+            partitionKey: 'partitionKey',
+            links: ['link1', 'link2'],
+        };
+
+        const propertiesToUpdate: WebsitePageExtra = {
+            lastRun: {
+                runTime: 'runTime',
+                state: RunState.completed,
+            },
+        };
+
+        const websitePageToWrite: WebsitePage = {
+            id: 'id',
+            itemType: ItemType.page,
+            websiteId: 'websiteId',
+            baseUrl: 'baseUrl',
+            url: 'url',
+            partitionKey: 'partitionKey',
+            lastRun: {
+                runTime: 'runTime',
+                state: RunState.completed,
+            },
+        };
+
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePageToWrite))
+            .returns(async () => Promise.resolve({ item: websitePageToWrite, statusCode: 200 }))
+            .verifiable(Times.once());
+
+        const result = await pageDocumentProvider.updatePageProperties(websitePageBase, propertiesToUpdate);
+
+        expect(result.item).toEqual(websitePageToWrite);
     });
 });
