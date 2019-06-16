@@ -1,6 +1,6 @@
 {
     "extends": ["tslint-microsoft-contrib"],
-    "rulesDirectory": ["node_modules/tslint-microsoft-contrib"],
+    "rulesDirectory": ["node_modules/tslint-microsoft-contrib", "node_modules/tslint-lines-between-class-members"],
     "rules": {
         "await-promise": true,
         "completed-docs": false,
@@ -22,6 +22,7 @@
                 "ignore": "test.each"
             }
         ],
-        "quotemark": [true, "single", "avoid-escape"]
+        "quotemark": [true, "single", "avoid-escape"],
+        "lines-between-class-members": true
     }
 }

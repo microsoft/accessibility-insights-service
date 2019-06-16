@@ -16,6 +16,7 @@ describe(ProcessEntryPointBase, () => {
         public customActionInvoked = false;
 
         public customActionToBeInvoked: () => void;
+
         protected getTelemetryBaseProperties(): BaseTelemetryProperties {
             return this.baseTelemetryProperties;
         }

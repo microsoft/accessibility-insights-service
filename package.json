@@ -13,6 +13,7 @@
         "build": "npx lerna run build --stream",
         "test": "npx jest",
         "lint": "npx lerna run lint --stream",
+        "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.base.json --force",
         "precheckin": "npm-run-all --serial format lint build test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
@@ -30,7 +31,8 @@
         "prettier": "1.16.4",
         "tslint": "^5.12.1",
         "tslint-microsoft-contrib": "^6.0.0",
-        "typescript": "^3.3.3"
+        "typescript": "^3.3.3",
+        "tslint-lines-between-class-members": "^1.3.2"
     },
     "workspaces": {
         "packages": [

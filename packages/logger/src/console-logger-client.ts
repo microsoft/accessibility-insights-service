@@ -42,6 +42,7 @@ export class ConsoleLoggerClient implements LoggerClient {
             this.logInConsole(`[Trace][${LogLevel[logLevel]}]${this.getPrintablePropertiesString(properties)}`, message);
         });
     }
+
     public trackException(error: Error): void {
         this.executeInDebugMode(() => {
             this.logInConsole(`[Exception]${this.getPrintablePropertiesString()}`, this.getPrintableString(error));
