@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
-import { RunState } from 'storage-documents';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { CrawlerTask } from '../tasks/crawler-task';
 import { DataFactoryTask } from '../tasks/data-factory-task';
@@ -32,7 +31,7 @@ export class Runner {
 
         try {
             // set scanned page run state to running
-            await this.pageStateUpdaterTask.setState(RunState.running, scanMetadata, runTime);
+            await this.pageStateUpdaterTask.setRunningState(scanMetadata, runTime);
 
             // start new web driver process
             browser = await this.webDriverTask.launch();

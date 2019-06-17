@@ -13,6 +13,7 @@ type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.
 
 class PuppeteerBrowserMock {
     public isClosed: boolean;
+
     public async close(): Promise<void> {
         this.isClosed = true;
 

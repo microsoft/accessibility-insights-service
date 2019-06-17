@@ -9,7 +9,7 @@ import { PageDocumentProvider } from 'service-library';
 import { ItemType, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Dispatcher } from './dispatcher';
-import { ScanRequestSender } from './request-sender';
+import { ScanRequestSender } from './scan-request-sender';
 
 let loggerMock: IMock<Logger>;
 let pageDocumentProviderMock: IMock<PageDocumentProvider>;
@@ -24,16 +24,21 @@ describe('Dispatcher', () => {
         scanRequestSenderMock = Mock.ofType(ScanRequestSender);
         dispatcher = new Dispatcher(pageDocumentProviderMock.object, loggerMock.object, scanRequestSenderMock.object);
     });
+
     it('dispatch scan requests, when current queue size greater than config queue size', async () => {
         setupQueueSize(15);
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
+        loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+
+        await dispatcher.dispatchScanRequests();
+        loggerMock.verifyAll();
     });
 
-    it('error while retriving documents', async () => {
-        setupQueueSize(15);
-        setupPageDocumentProviderMock(getErrorReponse());
+    it('error while retrieving documents', async () => {
+        setupQueueSize(8);
+        setupPageDocumentProviderMock(getErrorResponse());
 
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
+        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Server response:/);
+        pageDocumentProviderMock.verifyAll();
     });
 
     it('dispatch scan requests, when current queue size less than config queue size', async () => {
@@ -51,6 +56,7 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
     }
+
     function setupQueueSize(size: number): void {
         scanRequestSenderMock.setup(async s => s.getCurrentQueueSize()).returns(async () => Promise.resolve(size));
     }
@@ -60,7 +66,7 @@ describe('Dispatcher', () => {
         scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).returns(async () => Promise.resolve(setupQueueSize(10)));
     }
 
-    function getErrorReponse(): CosmosOperationResponse<WebsitePage[]> {
+    function getErrorResponse(): CosmosOperationResponse<WebsitePage[]> {
         // tslint:disable-next-line: no-object-literal-type-assertion
         return <CosmosOperationResponse<WebsitePage[]>>{
             type: 'CosmosOperationResponse<WebsitePage>',

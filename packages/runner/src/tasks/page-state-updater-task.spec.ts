@@ -3,7 +3,8 @@
 // tslint:disable: no-unsafe-any
 import 'reflect-metadata';
 
-import { PageDocumentProvider, PageObjectFactory } from 'service-library';
+import { StorageClient } from 'azure-services';
+import { PageObjectFactory } from 'service-library';
 import { ItemType, PageScanResult, RunResult, RunState, ScanLevel, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
@@ -11,7 +12,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 import { PageStateUpdaterTask } from './page-state-updater-task';
 
 let pageObjectFactoryMock: IMock<PageObjectFactory>;
-let pageDocumentProviderMock: IMock<PageDocumentProvider>;
+let storageClientMock: IMock<StorageClient>;
 let pageStateUpdaterTask: PageStateUpdaterTask;
 
 const scanMetadata: ScanMetadata = {
@@ -24,13 +25,13 @@ const scanMetadata: ScanMetadata = {
 
 beforeEach(() => {
     pageObjectFactoryMock = Mock.ofType<PageObjectFactory>();
-    pageDocumentProviderMock = Mock.ofType<PageDocumentProvider>();
-    pageStateUpdaterTask = new PageStateUpdaterTask(pageDocumentProviderMock.object, pageObjectFactoryMock.object);
+    storageClientMock = Mock.ofType<StorageClient>();
+    pageStateUpdaterTask = new PageStateUpdaterTask(storageClientMock.object, pageObjectFactoryMock.object);
 });
 
 afterEach(() => {
     pageObjectFactoryMock.verifyAll();
-    pageDocumentProviderMock.verifyAll();
+    storageClientMock.verifyAll();
 });
 
 describe('PageStateUpdaterTask', () => {
@@ -46,12 +47,12 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        pageDocumentProviderMock
-            .setup(async o => o.updateRunState(websitePage))
-            .returns(async () => Promise.resolve())
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
-        await pageStateUpdaterTask.setState(RunState.running, scanMetadata, runTime);
+        await pageStateUpdaterTask.setRunningState(scanMetadata, runTime);
     });
 
     it('Set on-page links', async () => {
@@ -78,9 +79,9 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        pageDocumentProviderMock
-            .setup(async o => o.updateLinks(websitePage))
-            .returns(async () => Promise.resolve())
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
         await pageStateUpdaterTask.setPageLinks(crawlerScanResults, scanMetadata);
@@ -99,9 +100,9 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        pageDocumentProviderMock
-            .setup(async o => o.updateRunState(websitePage))
-            .returns(async () => Promise.resolve())
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
         await pageStateUpdaterTask.setCompleteState(pageScanResult, scanMetadata, runTime);
@@ -121,9 +122,9 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        pageDocumentProviderMock
-            .setup(async o => o.updateRunState(websitePage))
-            .returns(async () => Promise.resolve())
+        storageClientMock
+            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
         await pageStateUpdaterTask.setCompleteState(pageScanResult, scanMetadata, runTime);

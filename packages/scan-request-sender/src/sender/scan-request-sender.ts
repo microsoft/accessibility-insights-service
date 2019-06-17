@@ -4,7 +4,7 @@ import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { PageDocumentProvider } from 'service-library';
-import { RunState, WebsitePage } from 'storage-documents';
+import { RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class ScanRequestSender {
@@ -13,25 +13,34 @@ export class ScanRequestSender {
         @inject(Queue) private readonly queue: Queue,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
     ) {}
-    public async sendRequestToScan(websites: WebsitePage[]): Promise<void> {
-        await Promise.all(
-            websites.map(async page => {
-                await this.queue.createMessage(this.storageConfig.scanQueue, page);
 
-                this.changePageState(page, RunState.queued);
-                await this.pageDocumentProvider.updateRunState(page);
+    public async sendRequestToScan(websitePage: WebsitePage[]): Promise<void> {
+        await Promise.all(
+            websitePage.map(async page => {
+                await this.updatePageState(page);
+                await this.queue.createMessage(this.storageConfig.scanQueue, page);
             }),
         );
     }
+
     public async getCurrentQueueSize(): Promise<number> {
         return this.queue.getMessageCount();
     }
-    private changePageState(websitePage: WebsitePage, state: RunState): void {
-        if (_.isNil(websitePage.lastRun)) {
-            websitePage.lastRun = { state: state, runTime: new Date().toJSON() };
-        } else {
-            websitePage.lastRun.state = state;
-            websitePage.lastRun.runTime = new Date().toJSON();
+
+    private async updatePageState(websitePage: WebsitePage): Promise<void> {
+        let retryCount;
+        if (!_.isNil(websitePage.lastRun) && websitePage.lastRun.state !== RunState.completed) {
+            retryCount = _.defaultTo(websitePage.lastRun.retries, 0) + 1;
         }
+
+        const websitePageState: WebsitePageExtra = {
+            lastRun: {
+                runTime: new Date().toJSON(),
+                state: RunState.queued,
+                retries: retryCount,
+            },
+        };
+
+        await this.pageDocumentProvider.updatePageProperties(websitePage, websitePageState);
     }
 }

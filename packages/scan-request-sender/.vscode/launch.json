@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start debugging request-sender",
+            "name": "Start debugging scan-request-sender",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/out/**/*.js"],

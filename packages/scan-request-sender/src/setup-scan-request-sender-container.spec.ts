@@ -3,15 +3,11 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
-import { ScanRequestSender } from './sender/request-sender';
+import { ScanRequestSender } from './sender/scan-request-sender';
 import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';
 // tslint:disable: no-any
 
 describe(setupScanRequestSenderContainer, () => {
-    beforeEach(() => {
-        process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-    });
-
     it('verify StorageClient resolution', () => {
         const container = setupScanRequestSenderContainer();
 
