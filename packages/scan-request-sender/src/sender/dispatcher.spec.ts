@@ -28,7 +28,9 @@ describe('Dispatcher', () => {
     it('dispatch scan requests, when current queue size greater than config queue size', async () => {
         setupQueueSize(15);
         loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+
         await dispatcher.dispatchScanRequests();
+        loggerMock.verifyAll();
     });
 
     it('error while retrieving documents', async () => {
@@ -36,6 +38,7 @@ describe('Dispatcher', () => {
         setupPageDocumentProviderMock(getErrorResponse());
 
         await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Server response:/);
+        pageDocumentProviderMock.verifyAll();
     });
 
     it('dispatch scan requests, when current queue size less than config queue size', async () => {
