@@ -27,8 +27,6 @@ describe(registerAzureServicesToContainer, () => {
     beforeEach(() => {
         container = new Container();
         registerLoggerToContainer(container);
-
-        process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
     });
 
     it('verify singleton resolution', async () => {

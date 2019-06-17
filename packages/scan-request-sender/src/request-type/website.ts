@@ -5,6 +5,7 @@ export interface ScanRequest {
     count: number;
     websites: WebSite[];
 }
+
 export interface WebSite {
     id: string;
     name: string;

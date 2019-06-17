@@ -9,6 +9,7 @@ export class ScanRequestEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return { source: 'scanRequestSender' };
     }
+
     protected async runCustomAction(container: Container): Promise<void> {
         const dispatcher = container.get(Dispatcher);
         const logger = container.get(Logger);

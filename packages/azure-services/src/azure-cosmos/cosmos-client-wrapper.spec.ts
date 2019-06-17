@@ -75,7 +75,7 @@ describe('CosmosClientWrapper', () => {
             verifyMocks();
         });
 
-        it('read item with success with no partition key', async () => {
+        it('read item with success and no partition key', async () => {
             const responseItem = {
                 id: 'id-1',
                 propA: 'propA',
@@ -127,6 +127,47 @@ describe('CosmosClientWrapper', () => {
             queryIteratorMock
                 .setup(async qi => qi.executeNext())
                 .returns(async () => Promise.resolve({ result: items, statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } }));
+
+            const result = await testSubject.readItems(dbName, collectionName, query);
+
+            expect(result).toEqual(expectedResult);
+            itemMock.verifyAll();
+            verifyMocks();
+        });
+
+        it('read items using cross partition query', async () => {
+            const query = "SELECT * from C where C.itemType = 'Page'";
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propB',
+                    _etag: '1',
+                },
+            ];
+            const expectedResult = {
+                item: items,
+                statusCode: 200,
+            };
+
+            let iterationCount = 1;
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            queryIteratorMock
+                .setup(async qi => qi.executeNext())
+                .returns(async () => {
+                    if (iterationCount > 1) {
+                        return Promise.resolve({ result: items, statusCode: 200 });
+                    }
+
+                    iterationCount = iterationCount + 1;
+
+                    return Promise.resolve({ result: <any[]>[], statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } });
+                });
 
             const result = await testSubject.readItems(dbName, collectionName, query);
 

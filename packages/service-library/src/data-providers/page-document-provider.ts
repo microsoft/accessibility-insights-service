@@ -2,16 +2,13 @@
 // Licensed under the MIT License.
 import { CosmosOperationResponse, StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import * as _ from 'lodash';
 import * as moment from 'moment';
-import { ItemType, RunState, WebsitePage } from 'storage-documents';
-import { PageObjectFactory } from '../factories/page-object-factory';
+import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class PageDocumentProvider {
-    constructor(
-        @inject(PageObjectFactory) private readonly pageObjectFactory: PageObjectFactory,
-        @inject(StorageClient) private readonly storageClient: StorageClient,
-    ) {}
+    constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
     public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
@@ -39,17 +36,21 @@ export class PageDocumentProvider {
         return this.storageClient.queryDocuments<WebsitePage>(querySpec, continuationToken);
     }
 
-    public async updateRunState(websitePage: WebsitePage): Promise<void> {
-        const instanceToMerge = this.pageObjectFactory.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url);
-        instanceToMerge.lastRun = websitePage.lastRun;
+    public async updatePageProperties(
+        websitePage: WebsitePageBase,
+        properties: WebsitePageExtra,
+    ): Promise<CosmosOperationResponse<WebsitePage>> {
+        const propertiesToUpdate: WebsitePageBase = {
+            id: websitePage.id,
+            itemType: websitePage.itemType,
+            websiteId: websitePage.websiteId,
+            baseUrl: websitePage.baseUrl,
+            url: websitePage.url,
+            partitionKey: websitePage.partitionKey,
+        };
 
-        await this.storageClient.mergeOrWriteDocument(instanceToMerge);
-    }
+        _.merge(propertiesToUpdate, properties);
 
-    public async updateLinks(websitePage: WebsitePage): Promise<void> {
-        const instanceToMerge = this.pageObjectFactory.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url);
-        instanceToMerge.links = websitePage.links;
-
-        await this.storageClient.mergeOrWriteDocument(instanceToMerge);
+        return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
     }
 }

@@ -8,21 +8,33 @@ const jsonLineExporter = require('headless-chrome-crawler/exporter/json-line');
 
 export declare class HCCrawlerTyped {
     public static launch(options: CrawlerLaunchOptions): Promise<HCCrawlerTyped>;
+
     public static connect(options: CrawlerConnectOptions): Promise<HCCrawlerTyped>;
+
     public close(): Promise<void>;
+
     public disconnect(): Promise<void>;
+
     public queue(url: string): Promise<void>;
+
     public onIdle(): Promise<void>;
+
     public on(eventName: string, callback: Function): void;
+
     public queueSize(): number;
 }
 
 export declare class JSONLineExporterTyped {
     constructor(options: JSONLineExporterOptions);
+
     public writeLine(result: CrawlerResult): void;
+
     public writeHeader(): void;
+
     public writeFooter(): void;
+
     public end(): void;
+
     public onEnd(): Promise<void>;
 }
 

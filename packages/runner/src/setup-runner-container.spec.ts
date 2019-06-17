@@ -8,10 +8,6 @@ import { setupRunnerContainer } from './setup-runner-container';
 // tslint:disable: no-any
 
 describe(setupRunnerContainer, () => {
-    beforeEach(() => {
-        process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-    });
-
     it('verify StorageClient resolution', () => {
         const container = setupRunnerContainer();
 

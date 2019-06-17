@@ -51,7 +51,7 @@ export class StorageClient {
     /**
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
-     * Source document properties that resolve to undefined are skipped on merge if a destination document value exists.
+     * Source document properties that resolve to undefined are skipped on merge if a current storage document value exists.
      * Array and plain object properties are merged recursively. Other objects and value types are overridden.
      *
      * Use document partitionKey property if defined; otherwise, the partitionKey parameter.

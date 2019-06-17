@@ -178,9 +178,9 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         pageStateUpdaterTaskMock
-            .setup(async o => o.setState(It.isAny(), scanMetadata, It.isAny()))
+            .setup(async o => o.setRunningState(scanMetadata, It.isAny()))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.once());
         pageStateUpdaterTaskMock
             .setup(async o => o.setPageLinks(crawlerScanResults, scanMetadata))
             .returns(async () => Promise.resolve())

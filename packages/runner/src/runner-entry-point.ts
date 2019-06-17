@@ -9,6 +9,7 @@ export class RunnerEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return { source: 'runner' };
     }
+
     protected async runCustomAction(container: Container): Promise<void> {
         const runner = container.get<Runner>(Runner);
         await runner.run();

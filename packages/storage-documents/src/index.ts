@@ -4,6 +4,6 @@ export { PhysicalLocation, Location, RuleResult, Product, IssueScanResult, Issue
 export { ItemType } from './item-type';
 export { PageIssueScanResult, PageCrawlResult, PageIssueScanRunResult, PageCrawlRunResult, PageScanResult } from './page-scan-result';
 export { ScanLevel, RunState, ResultLevel, WebsiteScanState } from './states';
-export { WebsitePage } from './website-page';
+export { WebsitePage, WebsitePageBase, WebsitePageExtra } from './website-page';
 export { PageLastScanResult, Website } from './website';
 export { RunResult } from './run-result';

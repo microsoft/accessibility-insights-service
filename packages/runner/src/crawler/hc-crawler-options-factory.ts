@@ -27,6 +27,7 @@ export class HCCrawlerOptionsFactory {
 
         return connectOptions;
     }
+
     public createLaunchOptions(url: string): CrawlerLaunchOptions {
         const IGNORED_EXTENSIONS = /\.pdf|.js|.css|.svg|.png|.jpg|.jpeg|.gif|.json|.xml|.exe|.dmg|.zip|.war|.rar|.ico|.txt$/i;
         const scanResult: CrawlerScanResult[] = [];

@@ -4,19 +4,16 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
-import { ItemType, RunResult, RunState, WebsitePage } from 'storage-documents';
+import { ItemType, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { PageObjectFactory } from '../factories/page-object-factory';
 import { PageDocumentProvider } from './page-document-provider';
 
-let pageObjectFactoryMock: IMock<PageObjectFactory>;
 let storageClientMock: IMock<StorageClient>;
 let pageDocumentProvider: PageDocumentProvider;
 
 beforeEach(() => {
-    pageObjectFactoryMock = Mock.ofType<PageObjectFactory>();
     storageClientMock = Mock.ofType<StorageClient>();
-    pageDocumentProvider = new PageDocumentProvider(pageObjectFactoryMock.object, storageClientMock.object);
+    pageDocumentProvider = new PageDocumentProvider(storageClientMock.object);
 });
 
 describe('PageDocumentProvider', () => {
@@ -46,61 +43,44 @@ describe('PageDocumentProvider', () => {
         storageClientMock.verifyAll();
     });
 
-    it('Update page run state', async () => {
-        const websitePage = createWebsitePage();
-        websitePage._etag = 'et10';
-        websitePage.lastRun = {
-            state: RunState.running,
-            runTime: new Date().toJSON(),
+    it('update page properties', async () => {
+        const websitePageBase: WebsitePage = {
+            id: 'id',
+            itemType: ItemType.page,
+            websiteId: 'websiteId',
+            baseUrl: 'baseUrl',
+            url: 'url',
+            partitionKey: 'partitionKey',
+            links: ['link1', 'link2'],
         };
 
-        const websitePageToMerge = createWebsitePage();
-        websitePageToMerge.lastRun = websitePage.lastRun;
+        const propertiesToUpdate: WebsitePageExtra = {
+            lastRun: {
+                runTime: 'runTime',
+                state: RunState.completed,
+            },
+        };
 
-        pageObjectFactoryMock
-            .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
-            .returns(() => websitePageToMerge)
-            .verifiable(Times.once());
+        const websitePageToWrite: WebsitePage = {
+            id: 'id',
+            itemType: ItemType.page,
+            websiteId: 'websiteId',
+            baseUrl: 'baseUrl',
+            url: 'url',
+            partitionKey: 'partitionKey',
+            lastRun: {
+                runTime: 'runTime',
+                state: RunState.completed,
+            },
+        };
+
         storageClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePageToMerge))
-            .returns(async () => Promise.resolve({ statusCode: 200 }))
+            .setup(async o => o.mergeOrWriteDocument(websitePageToWrite))
+            .returns(async () => Promise.resolve({ item: websitePageToWrite, statusCode: 200 }))
             .verifiable(Times.once());
 
-        await pageDocumentProvider.updateRunState(websitePage);
-    });
+        const result = await pageDocumentProvider.updatePageProperties(websitePageBase, propertiesToUpdate);
 
-    it('Update page links', async () => {
-        const websitePage = createWebsitePage();
-        websitePage._etag = 'et12';
-        websitePage.links = ['link1', 'link2'];
-
-        const websitePageToMerge = createWebsitePage();
-        websitePageToMerge.lastRun = websitePage.lastRun;
-
-        pageObjectFactoryMock
-            .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
-            .returns(() => websitePageToMerge)
-            .verifiable(Times.once());
-        storageClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePageToMerge))
-            .returns(async () => Promise.resolve({ statusCode: 200 }))
-            .verifiable(Times.once());
-
-        await pageDocumentProvider.updateLinks(websitePage);
+        expect(result.item).toEqual(websitePageToWrite);
     });
 });
-
-function createWebsitePage(): WebsitePage {
-    return {
-        id: 'id',
-        itemType: ItemType.page,
-        websiteId: 'websiteId',
-        baseUrl: 'baseUrl',
-        url: 'url',
-        pageRank: <number>undefined,
-        lastReferenceSeen: <string>undefined,
-        lastRun: <RunResult>undefined,
-        links: undefined,
-        partitionKey: 'partitionKey',
-    };
-}
