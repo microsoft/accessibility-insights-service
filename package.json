@@ -119,5 +119,8 @@
                 }
             }
         }
+    },
+    "resolutions": {
+        "puppeteer": "^1.13.0"
     }
 }
