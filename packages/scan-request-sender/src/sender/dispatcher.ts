@@ -23,7 +23,9 @@ export class Dispatcher {
         this.logger.logInfo(`[Sender] Current queue size is ${currentQueueSize}`);
 
         if (currentQueueSize >= configQueueSize) {
-            throw new Error('[Sender] Queue already reached to its maximum capacity');
+            this.logger.logWarn('[Sender] Unable to queue new scan request as queue already reached to its maximum capacity');
+
+            return;
         }
 
         let continuationToken;

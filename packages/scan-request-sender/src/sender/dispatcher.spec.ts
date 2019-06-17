@@ -24,16 +24,18 @@ describe('Dispatcher', () => {
         scanRequestSenderMock = Mock.ofType(ScanRequestSender);
         dispatcher = new Dispatcher(pageDocumentProviderMock.object, loggerMock.object, scanRequestSenderMock.object);
     });
+
     it('dispatch scan requests, when current queue size greater than config queue size', async () => {
         setupQueueSize(15);
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
+        loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+        await dispatcher.dispatchScanRequests();
     });
 
     it('error while retrieving documents', async () => {
-        setupQueueSize(15);
+        setupQueueSize(8);
         setupPageDocumentProviderMock(getErrorResponse());
 
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
+        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Server response:/);
     });
 
     it('dispatch scan requests, when current queue size less than config queue size', async () => {
@@ -51,6 +53,7 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
     }
+
     function setupQueueSize(size: number): void {
         scanRequestSenderMock.setup(async s => s.getCurrentQueueSize()).returns(async () => Promise.resolve(size));
     }
