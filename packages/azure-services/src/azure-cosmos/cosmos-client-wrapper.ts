@@ -88,23 +88,43 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
+            const itemsT: T[] = [];
             const feedOptions: cosmos.FeedOptions = {
-                continuation: continuationToken,
                 maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
                 enableCrossPartitionQuery: true,
+                continuation: continuationToken,
             };
-            const response = await container.items.query(query, feedOptions).executeNext();
-            const itemsT: T[] = [];
 
-            response.result.forEach(document => {
-                itemsT.push(this.convert<T>(document));
+            const queryIterator = container.items.query(query, feedOptions);
+
+            let partitionQueryResult;
+            do {
+                partitionQueryResult = await queryIterator.executeNext();
+            } while (
+                partitionQueryResult !== undefined &&
+                partitionQueryResult.result !== undefined &&
+                partitionQueryResult.result.length === 0
+            );
+
+            if (partitionQueryResult.result === undefined) {
+                return {
+                    item: itemsT,
+                    statusCode: 204, // HTTP NO CONTENT
+                };
+            }
+
+            const continuationTokenResponse =
+                partitionQueryResult.headers !== undefined ? partitionQueryResult.headers['x-ms-continuation'] : undefined;
+
+            partitionQueryResult.result.forEach(item => {
+                itemsT.push(this.convert<T>(item));
             });
 
             return {
                 item: itemsT,
                 statusCode: 200,
                 // tslint:disable-next-line: no-unsafe-any
-                continuationToken: response.headers['x-ms-continuation'],
+                continuationToken: continuationTokenResponse,
             };
         } catch (error) {
             if ((<cosmos.ErrorResponse>error).code !== undefined) {

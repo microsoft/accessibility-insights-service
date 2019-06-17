@@ -8,10 +8,6 @@ import { setupScanRequestSenderContainer } from './setup-scan-request-sender-con
 // tslint:disable: no-any
 
 describe(setupScanRequestSenderContainer, () => {
-    beforeEach(() => {
-        process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-    });
-
     it('verify StorageClient resolution', () => {
         const container = setupScanRequestSenderContainer();
 

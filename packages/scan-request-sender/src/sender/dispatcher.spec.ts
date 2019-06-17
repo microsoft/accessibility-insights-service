@@ -29,9 +29,9 @@ describe('Dispatcher', () => {
         await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
     });
 
-    it('error while retriving documents', async () => {
+    it('error while retrieving documents', async () => {
         setupQueueSize(15);
-        setupPageDocumentProviderMock(getErrorReponse());
+        setupPageDocumentProviderMock(getErrorResponse());
 
         await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError();
     });
@@ -60,7 +60,7 @@ describe('Dispatcher', () => {
         scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).returns(async () => Promise.resolve(setupQueueSize(10)));
     }
 
-    function getErrorReponse(): CosmosOperationResponse<WebsitePage[]> {
+    function getErrorResponse(): CosmosOperationResponse<WebsitePage[]> {
         // tslint:disable-next-line: no-object-literal-type-assertion
         return <CosmosOperationResponse<WebsitePage[]>>{
             type: 'CosmosOperationResponse<WebsitePage>',
