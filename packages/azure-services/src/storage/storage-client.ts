@@ -73,7 +73,14 @@ export class StorageClient {
         }
 
         const mergedDocument = response.item;
-        _.merge(mergedDocument, document);
+        // preserve storage document _etag value
+        _.mergeWith(mergedDocument, document, (target: T, source: T, key) => {
+            if (key === '_etag') {
+                return target;
+            }
+
+            return undefined;
+        });
 
         return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, effectivePartitionKey);
     }
