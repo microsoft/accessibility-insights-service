@@ -5,6 +5,10 @@ Licensed under the MIT License.
 
 # Accessibility Insights Service
 
+Accessibility Insights Service is a service that can be used to scan websites for accessibility issues on a periodic basis. It is Typescript project with shell scripts for install and update scenarios.
+
+This project can be run in an Azure environment and can be set up easily using the install scripts provided.
+
 ## Building the code
 
 ### 1. Clone the repository
@@ -97,6 +101,16 @@ To debug packages locally follow the generic steps below.
 4.  Run the TypeScript compiler `tsc` for the selected package.
 5.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
 
-# Contributing
+## Contributing
 
-Please visit our [Contributing](https://github.com/Microsoft/accessibility-insights-service/blob/master/CONTRIBUTING.md) page.
+All contributions are welcome! Please visit our [Contributing](https://github.com/Microsoft/accessibility-insights-service/blob/master/CONTRIBUTING.md) page.
+
+## Contact us
+
+Please file a [Github Issue](https://github.com/Microsoft/accessibility-insights-service/issues/new/choose). We actively monitor PRs and issues.
+
+Alternatively you may also ask questions on stackoverflow.com and tag them with an `accessibility-insights` tag.
+
+## Reporting security vulnerabilities
+
+If you believe you have found a security vulnerability in this project, please follow [these steps](https://technet.microsoft.com/en-us/security/ff852094.aspx) to report it. For more information on how vulnerabilities are disclosed, see [Coordinated Vulnerability Disclosure](https://technet.microsoft.com/en-us/security/dn467923).
