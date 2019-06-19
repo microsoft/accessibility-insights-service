@@ -9,7 +9,7 @@ import { loggerTypes } from 'logger';
 @injectable()
 export class RunnerTaskConfig {
     public readonly commandLineTemplate: string =
-        '/bin/bash -c \'start-runner.sh "%id%" "%name%" "%baseUrl%" "%scanUrl%" "%serviceTreeId%"\'';
+        '/bin/bash -c \'start-runner.sh "%websiteId%" "%name%" "%baseUrl%" "%url%" "%serviceTreeId%"\'';
 
     private environmentSettings: BatchServiceModels.EnvironmentSetting[];
     private resourceFiles: BatchServiceModels.ResourceFile[];

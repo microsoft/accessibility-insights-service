@@ -26,7 +26,7 @@ describe(RunnerTaskConfig, () => {
     });
 
     it('builds command line', () => {
-        const data = { id: 'id1', name: 'name1', baseUrl: 'baseUrl1', scanUrl: 'scanUrl1', serviceTreeId: 'serviceTreeId1' };
+        const data = { websiteId: 'id1', name: 'name1', baseUrl: 'baseUrl1', url: 'scanUrl1', serviceTreeId: 'serviceTreeId1' };
 
         const commandLine = testSubject.getCommandLine(data);
 
