@@ -7,3 +7,4 @@ export { ScanLevel, RunState, ResultLevel, WebsiteScanState } from './states';
 export { WebsitePage, WebsitePageBase, WebsitePageExtra } from './website-page';
 export { PageLastScanResult, Website } from './website';
 export { RunResult } from './run-result';
+export { StorageDocument } from './storage-document';

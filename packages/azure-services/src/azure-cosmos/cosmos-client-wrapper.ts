@@ -167,7 +167,7 @@ export class CosmosClientWrapper {
         }
     }
 
-    private async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {
+    public async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {
         const db = await this.getDatabase(dbName);
 
         return this.getCollection(db, collectionName);

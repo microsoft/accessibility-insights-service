@@ -4,16 +4,67 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
-import { ItemType, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { Logger } from 'logger';
+import * as moment from 'moment';
+import { ItemType, RunState, StorageDocument, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import * as dbHelper from '../test-utilities/db-mock-helpers';
 import { PageDocumentProvider } from './page-document-provider';
 
 let storageClientMock: IMock<StorageClient>;
+let loggerMock: IMock<Logger>;
 let pageDocumentProvider: PageDocumentProvider;
 
 beforeEach(() => {
     storageClientMock = Mock.ofType<StorageClient>();
+    loggerMock = Mock.ofType<Logger>();
     pageDocumentProvider = new PageDocumentProvider(storageClientMock.object);
+});
+
+describe('SQL query', () => {
+    it('', async () => {
+        const queryItems: StorageDocument[] = [];
+        const nonQueryItems: StorageDocument[] = [];
+        const dbItems: StorageDocument[] = [];
+
+        let page;
+        // select c.itemType = page only
+        nonQueryItems.push(dbHelper.createDocument(ItemType.website));
+
+        // select c.lastReferenceSeen >= today - N days
+        const nDays = 7;
+        page = dbHelper.createPageDocument({
+            lastReferenceSeen: moment()
+                .subtract(nDays - 1, 'day')
+                .toJSON(),
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            lastReferenceSeen: moment()
+                .subtract(nDays + 1, 'day')
+                .toJSON(),
+        });
+        nonQueryItems.push(page);
+
+        // create test db
+        await dbHelper.init('db-f1bc8ebda1', 'col-bbe6a9c52f');
+        dbItems.push(...queryItems);
+        dbItems.push(...nonQueryItems);
+        await dbHelper.upsertItems(dbItems);
+
+        // invoke
+        const storageClient = new StorageClient(
+            dbHelper.cosmosClient,
+            dbHelper.dbContainer.dbName,
+            dbHelper.dbContainer.collectionName,
+            loggerMock.object,
+        );
+        pageDocumentProvider = new PageDocumentProvider(storageClient);
+        const result = await pageDocumentProvider.getReadyToScanPages();
+
+        // validate
+        expect(result).toEqual('');
+    });
 });
 
 describe('PageDocumentProvider', () => {
