@@ -52,19 +52,19 @@ or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterT
                     name: '@pageActiveBeforeTime',
                     value: moment()
                         .subtract(7, 'day')
-                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                        .toJSON(),
                 },
                 {
                     name: '@rescanAbandonedRunAfterTime',
                     value: moment()
                         .subtract(3, 'hour')
-                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                        .toJSON(),
                 },
                 {
                     name: '@pageRescanAfterTime',
                     value: moment()
                         .subtract(3, 'day')
-                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                        .toJSON(),
                 },
             ],
         };
