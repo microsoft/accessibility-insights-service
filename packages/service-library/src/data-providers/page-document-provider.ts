@@ -12,22 +12,58 @@ export class PageDocumentProvider {
 
     public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
-            query:
-                // tslint:disable-next-line:max-line-length
-                'SELECT * FROM c WHERE c.itemType = @itemType and (c.lastRun.state = @state or c.lastReferenceSeen >= @shouldSeeInLastNDays)',
+            query: `
+SELECT * FROM c WHERE
+c.itemType = @itemType and c.lastReferenceSeen >= @pageActiveBeforeTime
+and (
+((IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun)))
+or ((c.lastRun.state = @failedState or c.lastRun.state = @queuedState or c.lastRun.state = @runningState)
+    and (c.lastRun.retries < @maxRetryCount or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+    and c.lastRun.runTime <= @rescanAbandonedRunAfterTime)
+or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterTime)
+)
+`,
             parameters: [
                 {
                     name: '@itemType',
                     value: ItemType.page,
                 },
                 {
-                    name: '@state',
+                    name: '@completedState',
                     value: RunState.completed,
                 },
                 {
-                    name: '@shouldSeeInLastNDays',
+                    name: '@failedState',
+                    value: RunState.failed,
+                },
+                {
+                    name: '@queuedState',
+                    value: RunState.queued,
+                },
+                {
+                    name: '@runningState',
+                    value: RunState.running,
+                },
+                {
+                    name: '@maxRetryCount',
+                    value: 2,
+                },
+                {
+                    name: '@pageActiveBeforeTime',
                     value: moment()
-                        .subtract(5, 'day')
+                        .subtract(7, 'day')
+                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                },
+                {
+                    name: '@rescanAbandonedRunAfterTime',
+                    value: moment()
+                        .subtract(3, 'hour')
+                        .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
+                },
+                {
+                    name: '@pageRescanAfterTime',
+                    value: moment()
+                        .subtract(1, 'day')
                         .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
                 },
             ],
