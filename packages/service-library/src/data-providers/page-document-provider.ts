@@ -63,7 +63,7 @@ or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterT
                 {
                     name: '@pageRescanAfterTime',
                     value: moment()
-                        .subtract(1, 'day')
+                        .subtract(3, 'day')
                         .format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
                 },
             ],
