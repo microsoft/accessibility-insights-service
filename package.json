@@ -121,6 +121,8 @@
         }
     },
     "resolutions": {
-        "puppeteer": "^1.13.0"
+        "puppeteer": "^1.13.0",
+        "jquery": "^3.4.0",
+        "lodash": "^4.13.1"
     }
 }

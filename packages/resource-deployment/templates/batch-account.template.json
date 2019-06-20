@@ -38,13 +38,6 @@
             "metadata": {
                 "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
-        },
-        "processingQueueCapacity": {
-            "type": "string",
-            "defaultValue": "500",
-            "metadata": {
-                "description": "Maximum number of scan requests a scan queue can hold."
-            }
         }
     },
     "variables": {
@@ -151,10 +144,6 @@
                         {
                             "name": "KEY_VAULT_NAME",
                             "value": "[parameters('keyVault')]"
-                        },
-                        {
-                            "name": "QUEUE_SIZE",
-                            "value": "[parameters('processingQueueCapacity')]"
                         }
                     ],
                     "resourceFiles": [
@@ -181,7 +170,7 @@
             "properties": {
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
-                "maxTasksPerNode": 1,
+                "maxTasksPerNode": 4,
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"
                 },
