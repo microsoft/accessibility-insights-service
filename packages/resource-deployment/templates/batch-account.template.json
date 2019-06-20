@@ -170,7 +170,7 @@
             "properties": {
                 "vmSize": "STANDARD_A1",
                 "interNodeCommunication": "Disabled",
-                "maxTasksPerNode": 1,
+                "maxTasksPerNode": 4,
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"
                 },
