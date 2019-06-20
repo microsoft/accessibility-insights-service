@@ -69,7 +69,7 @@ This project can be run in an Azure environment and can be set up easily using t
 ### 2. Run current test file from Visual Studio Code
 
 -   Execute "Debug current unit test file" launch task. This build the project & deploys azure function locally.
-    You can do this by either of the below two options.
+    You can do this by either of the below two options -
 
     -   Press F5. (Make sure the correct launch task is selected from the drop down that appears).
     -   Or Press Ctrl+P and then type "debug" followed by space ' '. And then select "Debug current unit test file" from the list that appears.
