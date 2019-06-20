@@ -20,7 +20,7 @@ export appInsightsKey
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id>
+Usage: $0 -r <resource group> -s <subscription name or id> -l <azure region>
 "
     exit 1
 }
