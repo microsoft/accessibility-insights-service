@@ -8,6 +8,11 @@ import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } fr
 
 @injectable()
 export class PageDocumentProvider {
+    public static readonly pageActiveBeforeDays = 7;
+    public static readonly pageRescanAfterDays = 3;
+    public static readonly rescanAbandonedRunAfterHours = 12;
+    public static readonly maxRetryCount = 3;
+
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
     public async getReadyToScanPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
@@ -46,24 +51,24 @@ or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterT
                 },
                 {
                     name: '@maxRetryCount',
-                    value: 2,
+                    value: PageDocumentProvider.maxRetryCount,
                 },
                 {
                     name: '@pageActiveBeforeTime',
                     value: moment()
-                        .subtract(7, 'day')
+                        .subtract(PageDocumentProvider.pageActiveBeforeDays, 'day')
                         .toJSON(),
                 },
                 {
                     name: '@rescanAbandonedRunAfterTime',
                     value: moment()
-                        .subtract(3, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours, 'hour')
                         .toJSON(),
                 },
                 {
                     name: '@pageRescanAfterTime',
                     value: moment()
-                        .subtract(3, 'day')
+                        .subtract(PageDocumentProvider.pageRescanAfterDays, 'day')
                         .toJSON(),
                 },
             ],
