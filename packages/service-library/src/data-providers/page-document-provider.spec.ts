@@ -23,15 +23,17 @@ beforeEach(() => {
 
 describe('SQL query', () => {
     it('select pages to scan', async () => {
+        // init helper
+        if (!(await dbHelper.init())) {
+            console.log('\x1b[31m', 'Warning: The PageDocumentProvider SQL query test has been disabled.');
+
+            return;
+        }
+
         // setup
         const queryItems: StorageDocument[] = [];
         const nonQueryItems: StorageDocument[] = [];
         const dbItems: StorageDocument[] = [];
-
-        const pageActiveBeforeDays = 7;
-        const pageRescanAfterDays = 3;
-        const rescanAbandonedRunAfterHours = 3;
-        const maxRetryCount = 2;
 
         let page;
         // select c.itemType === page only
@@ -42,7 +44,7 @@ describe('SQL query', () => {
             label: 'before lastReferenceSeen date',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
             },
         });
@@ -51,7 +53,7 @@ describe('SQL query', () => {
             label: 'past lastReferenceSeen date',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays + 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays + 1, 'day')
                     .toJSON(),
             },
         });
@@ -62,7 +64,7 @@ describe('SQL query', () => {
             label: 'lastRun is undefined',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
             },
         });
@@ -71,7 +73,7 @@ describe('SQL query', () => {
             label: 'lastRun is null',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: <RunResult>null,
             },
@@ -81,7 +83,7 @@ describe('SQL query', () => {
             label: 'lastRun is defined',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: new Date().toJSON(),
@@ -96,11 +98,11 @@ describe('SQL query', () => {
             label: 'completed state after lastRun.runTime',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(pageRescanAfterDays + 1, 'day')
+                        .subtract(PageDocumentProvider.pageRescanAfterDays + 1, 'day')
                         .toJSON(),
                     state: RunState.completed,
                 },
@@ -111,11 +113,11 @@ describe('SQL query', () => {
             label: 'completed state before lastRun.runTime',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(pageRescanAfterDays - 1, 'day')
+                        .subtract(PageDocumentProvider.pageRescanAfterDays - 1, 'day')
                         .toJSON(),
                     state: RunState.completed,
                 },
@@ -130,11 +132,11 @@ describe('SQL query', () => {
             label: 'failed state after lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.failed,
                 },
@@ -145,11 +147,11 @@ describe('SQL query', () => {
             label: 'failed state before lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours - 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours - 1, 'hour')
                         .toJSON(),
                     state: RunState.failed,
                 },
@@ -160,11 +162,11 @@ describe('SQL query', () => {
             label: 'failed state after lastRun.runTime (retries === null)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.failed,
                     retries: null,
@@ -176,11 +178,11 @@ describe('SQL query', () => {
             label: 'failed state after lastRun.runTime (retries < threshold)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.failed,
                     retries: 1,
@@ -192,14 +194,14 @@ describe('SQL query', () => {
             label: 'failed state after lastRun.runTime (retries > threshold)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.failed,
-                    retries: maxRetryCount,
+                    retries: PageDocumentProvider.maxRetryCount,
                 },
             },
         });
@@ -208,11 +210,11 @@ describe('SQL query', () => {
             label: 'queued state after lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.queued,
                 },
@@ -223,11 +225,11 @@ describe('SQL query', () => {
             label: 'running state after lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
-                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
                     .toJSON(),
                 lastRun: {
                     runTime: moment()
-                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
                         .toJSON(),
                     state: RunState.running,
                 },

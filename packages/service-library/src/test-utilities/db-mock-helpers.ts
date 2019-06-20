@@ -15,22 +15,37 @@ export interface DbContainer {
     collectionName: string;
 }
 
-const cosmosDbUrl = 'https://allycosmosafwl4qhutktlu.documents.azure.com:443/';
-const cosmosDbKey = 'Zn8qsUKCCtelXpW5xHGludP7JO6uBDz4hEYHeuWObjGiNK4HKmUNsxVtK8gYFQCzFRY9SmE3NQ62zMrahh4bjg==';
-
 export let dbContainer: DbContainer;
-const azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
-export const cosmosClient = new CosmosClientWrapper(() => Promise.resolve(azureCosmosClient));
-const pageFactory = new PageObjectFactory(new HashGenerator());
+export let cosmosClient: CosmosClientWrapper;
 
-export async function init(dbName?: string, collectionName?: string): Promise<void> {
+const warningMessage = `Warning: To use the Azure Cosmos DB based tests provide Cosmos DB Url and key.
+    The Azure Cosmos DB or Azure Cosmos DB emulator https://aka.ms/cosmosdb-emulator (Windows only) can be used.`;
+
+const cosmosDbUrl: string = undefined;
+const cosmosDbKey: string = undefined;
+
+const pageFactory = new PageObjectFactory(new HashGenerator());
+let azureCosmosClient: cosmos.CosmosClient;
+
+export async function init(dbName?: string, collectionName?: string): Promise<boolean> {
     dbContainer = {
         dbName: dbName === undefined ? createRandomString('db') : dbName,
         collectionName: collectionName === undefined ? createRandomString('col') : collectionName,
     };
 
+    if (cosmosDbUrl === undefined || cosmosDbKey === undefined) {
+        console.log('\x1b[31m', warningMessage);
+
+        return false;
+    }
+
+    azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
+    cosmosClient = new CosmosClientWrapper(() => Promise.resolve(azureCosmosClient));
+
     await deleteDbContainer(dbContainer);
     await createDbContainer(dbContainer);
+
+    return true;
 }
 
 export function createPageDocument(options?: {
