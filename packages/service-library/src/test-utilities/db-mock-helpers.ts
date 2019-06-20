@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// tslint:disable: no-unsafe-any no-any
+// tslint:disable: no-unsafe-any no-any align no-constant-condition
 import * as cosmos from '@azure/cosmos';
 import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
@@ -28,18 +28,26 @@ export async function init(dbName?: string, collectionName?: string): Promise<vo
         dbName: dbName === undefined ? createRandomString('db') : dbName,
         collectionName: collectionName === undefined ? createRandomString('col') : collectionName,
     };
+
     await deleteDbContainer(dbContainer);
     await createDbContainer(dbContainer);
 }
 
-export function createPageDocument(propertiesToSet?: WebsitePageExtra, websiteId?: string, baseUrl?: string, url?: string): WebsitePage {
-    const websiteIdLoc = websiteId === undefined ? createRandomString('id') : websiteId;
-    const baseUrlLoc = baseUrl === undefined ? createBaseUrl() : baseUrl;
-    const urlLoc = url === undefined ? createUrl(baseUrlLoc) : url;
-    const page = pageFactory.createImmutableInstance(websiteIdLoc, baseUrlLoc, urlLoc);
+export function createPageDocument(options?: {
+    label?: string;
+    extra?: WebsitePageExtra;
+    websiteId?: string;
+    baseUrl?: string;
+    url?: string;
+}): WebsitePage {
+    const websiteId = options === undefined || options.websiteId === undefined ? createRandomString('id') : options.websiteId;
+    const baseUrl = options === undefined || options.baseUrl === undefined ? createBaseUrl() : options.baseUrl;
+    const url = options === undefined || options.url === undefined ? createUrl(baseUrl) : options.url;
+    const page = pageFactory.createImmutableInstance(websiteId, baseUrl, url);
+    (<any>page).label = options === undefined || options.label === undefined ? '' : options.label;
 
-    if (propertiesToSet !== undefined) {
-        _.merge(page, propertiesToSet);
+    if (options.extra !== undefined) {
+        _.merge(page, options.extra);
     }
 
     return page;
@@ -66,19 +74,49 @@ export function createUrl(baseUrl: string): string {
 }
 
 export async function createDbContainer(container: DbContainer): Promise<DbContainer> {
+    console.log(`Creating database '${container.dbName}..`);
     await cosmosClient.getContainer(container.dbName, container.collectionName);
-    console.log(`
-Cosmos container:
+    sleep(2000);
+
+    while (true) {
+        try {
+            await azureCosmosClient.database(container.dbName).read();
+            break;
+        } catch (error) {
+            if ((<cosmos.ErrorResponse>error).code === 404) {
+                continue;
+            }
+
+            throw error;
+        }
+    }
+    console.log('.created');
+
+    console.log(`Cosmos container:
     DB: ${container.dbName}
-    Collection: ${container.collectionName}
-`);
+    Collection: ${container.collectionName}`);
 
     return dbContainer;
 }
 
-export async function deleteDbContainer(storage: DbContainer): Promise<void> {
+export async function deleteDbContainer(container: DbContainer): Promise<void> {
     try {
-        await azureCosmosClient.database(storage.dbName).delete();
+        console.log(`Deleting database '${container.dbName}..`);
+        await azureCosmosClient.database(container.dbName).delete();
+        sleep(2000);
+
+        while (true) {
+            try {
+                await azureCosmosClient.database(container.dbName).read();
+            } catch (error) {
+                if ((<cosmos.ErrorResponse>error).code === 404) {
+                    break;
+                }
+
+                throw error;
+            }
+        }
+        console.log('.deleted');
     } catch (error) {
         if ((<cosmos.ErrorResponse>error).code !== 404) {
             throw error;
@@ -96,4 +134,19 @@ export async function upsertItems<T>(items: T[]): Promise<void> {
             await upsertItem(item);
         }),
     );
+}
+
+export function getDocumentProjection(item: any): any {
+    return {
+        id: item.id,
+        label: item.label,
+    };
+}
+
+export function sleep(time: number): void {
+    const stop = new Date().getTime();
+    let i = 0;
+    while (new Date().getTime() < stop + time) {
+        i = i + 1;
+    }
 }

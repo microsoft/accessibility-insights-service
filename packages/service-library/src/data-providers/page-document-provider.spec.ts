@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any
+// tslint:disable: no-import-side-effect no-any no-unsafe-any max-func-body-length no-null-keyword
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { ItemType, RunState, StorageDocument, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { ItemType, RunResult, RunState, StorageDocument, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as dbHelper from '../test-utilities/db-mock-helpers';
 import { PageDocumentProvider } from './page-document-provider';
@@ -22,27 +22,186 @@ beforeEach(() => {
 });
 
 describe('SQL query', () => {
-    it('', async () => {
+    it('select pages to scan', async () => {
+        // setup
         const queryItems: StorageDocument[] = [];
         const nonQueryItems: StorageDocument[] = [];
         const dbItems: StorageDocument[] = [];
 
+        const pageActiveBeforeDays = 7;
+        const pageRescanAfterDays = 3;
+        const rescanAbandonedRunAfterHours = 3;
+        const maxRetryCount = 2;
+
         let page;
-        // select c.itemType = page only
+        // select c.itemType === page only
         nonQueryItems.push(dbHelper.createDocument(ItemType.website));
 
         // select c.lastReferenceSeen >= today - N days
-        const nDays = 7;
         page = dbHelper.createPageDocument({
-            lastReferenceSeen: moment()
-                .subtract(nDays - 1, 'day')
-                .toJSON(),
+            label: 'before lastReferenceSeen date',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+            },
         });
         queryItems.push(page);
         page = dbHelper.createPageDocument({
-            lastReferenceSeen: moment()
-                .subtract(nDays + 1, 'day')
-                .toJSON(),
+            label: 'past lastReferenceSeen date',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays + 1, 'day')
+                    .toJSON(),
+            },
+        });
+        nonQueryItems.push(page);
+
+        //select IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun)
+        page = dbHelper.createPageDocument({
+            label: 'lastRun is undefined',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'lastRun is null',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: <RunResult>null,
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'lastRun is defined',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: new Date().toJSON(),
+                    state: RunState.completed,
+                },
+            },
+        });
+        nonQueryItems.push(page);
+
+        // select c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterTime
+        page = dbHelper.createPageDocument({
+            label: 'completed after lastRun.runTime',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(pageRescanAfterDays + 1, 'day')
+                        .toJSON(),
+                    state: RunState.completed,
+                },
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'completed before lastRun.runTime',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(pageRescanAfterDays - 1, 'day')
+                        .toJSON(),
+                    state: RunState.completed,
+                },
+            },
+        });
+        nonQueryItems.push(page);
+
+        // select ((c.lastRun.state = @failedState or c.lastRun.state = @queuedState or c.lastRun.state = @runningState)
+        // and (c.lastRun.retries < @maxRetryCount or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+        // and c.lastRun.runTime <= @rescanAbandonedRunAfterTime)
+        page = dbHelper.createPageDocument({
+            label: 'failed after lastRun.runTime (retries === undefined)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.failed,
+                },
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'failed before lastRun.runTime (retries === undefined)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours - 1, 'hour')
+                        .toJSON(),
+                    state: RunState.failed,
+                },
+            },
+        });
+        nonQueryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'failed after lastRun.runTime (retries === null)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.failed,
+                    retries: null,
+                },
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'failed after lastRun.runTime (retries === 1)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.failed,
+                    retries: 1,
+                },
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'failed after lastRun.runTime (retries > threshold)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.failed,
+                    retries: maxRetryCount,
+                },
+            },
         });
         nonQueryItems.push(page);
 
@@ -60,11 +219,31 @@ describe('SQL query', () => {
             loggerMock.object,
         );
         pageDocumentProvider = new PageDocumentProvider(storageClient);
-        const result = await pageDocumentProvider.getReadyToScanPages();
+
+        const result: StorageDocument[] = [];
+        let continuationToken: string;
+        do {
+            const response = await pageDocumentProvider.getReadyToScanPages(continuationToken);
+            if (response !== undefined && response.item !== undefined) {
+                result.push(...response.item);
+            }
+            continuationToken = response.continuationToken;
+        } while (continuationToken !== undefined);
 
         // validate
-        expect(result).toEqual('');
-    });
+        const resultItemsProjection = result.map(i => dbHelper.getDocumentProjection(i));
+        const queryItemsProjection = queryItems.map(i => dbHelper.getDocumentProjection(i));
+        const nonQueryItemsProjection = nonQueryItems.map(i => dbHelper.getDocumentProjection(i));
+
+        queryItemsProjection.map(i => {
+            const item = resultItemsProjection.filter(r => r.id === i.id);
+            expect(item[0]).toEqual(i);
+        });
+        nonQueryItemsProjection.map(i => {
+            const item = resultItemsProjection.filter(r => r.id === i.id);
+            expect(item[0]).toBeUndefined();
+        });
+    }, 20000);
 });
 
 describe('PageDocumentProvider', () => {
