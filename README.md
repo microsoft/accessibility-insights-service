@@ -97,7 +97,7 @@ To debug packages locally follow the generic steps below.
           VARIABLE_NAME=VARIABLE_VALUE
     ```
 
-3.  Run Bash script `create-sp-for-key-vault.sh` from [here](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/scripts) to create a debug service principal entity. Copy script output to `.env` file as per script instruction. `Note:` The script can be run multiple times that result the same service principal entity but with password reset.
+3.  Run the Bash script `create-sp-for-key-vault.sh` from [here](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/scripts) to create a debug service principal entity. Copy script output to `.env` file as per script instruction. `Note:` The script can be run multiple times that result the same service principal entity but with password reset.
 4.  Run the TypeScript compiler `tsc` for the selected package.
 5.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
 
