@@ -90,7 +90,8 @@
             "./packages/service-library/test-results",
             "./packages/common/node_modules",
             "./packages/common/src/test-resources/",
-            "./packages/common/test-results"
+            "./packages/common/test-results",
+            "./packages/resource-deployment/dist"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [

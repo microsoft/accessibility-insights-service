@@ -1,0 +1,21 @@
+{
+    "name": "resource-deployment",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "cpx ./templates/** dist/templates && cpx ./scripts/** dist/scripts && echo",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {
+        "cpx": "^1.5.0",
+        "rimraf": "^2.6.3"
+    },
+    "dependencies": {}
+}

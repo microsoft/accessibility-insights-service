@@ -56,6 +56,8 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/setup-cosmos-db.sh"
 
+. "${0%/*}/app-insights-create.sh"
+
 . "${0%/*}/batch-account-create.sh"
 
 . "${0%/*}/push-secrets-to-key-vault.sh"
@@ -63,7 +65,5 @@ az account set --subscription "$subscription"
 # shellcheck disable=SC2154
 keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
 echo "Fetched keyvault url $keyVaultUrl"
-
-. "${0%/*}/app-insights-create.sh"
 
 . "${0%/*}/job-schedule-create.sh"
