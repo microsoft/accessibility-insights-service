@@ -93,7 +93,7 @@ describe('SQL query', () => {
 
         // select c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterTime
         page = dbHelper.createPageDocument({
-            label: 'completed after lastRun.runTime',
+            label: 'completed state after lastRun.runTime',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -108,7 +108,7 @@ describe('SQL query', () => {
         });
         queryItems.push(page);
         page = dbHelper.createPageDocument({
-            label: 'completed before lastRun.runTime',
+            label: 'completed state before lastRun.runTime',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -127,7 +127,7 @@ describe('SQL query', () => {
         // and (c.lastRun.retries < @maxRetryCount or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
         // and c.lastRun.runTime <= @rescanAbandonedRunAfterTime)
         page = dbHelper.createPageDocument({
-            label: 'failed after lastRun.runTime (retries === undefined)',
+            label: 'failed state after lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -142,7 +142,7 @@ describe('SQL query', () => {
         });
         queryItems.push(page);
         page = dbHelper.createPageDocument({
-            label: 'failed before lastRun.runTime (retries === undefined)',
+            label: 'failed state before lastRun.runTime (retries === undefined)',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -157,7 +157,7 @@ describe('SQL query', () => {
         });
         nonQueryItems.push(page);
         page = dbHelper.createPageDocument({
-            label: 'failed after lastRun.runTime (retries === null)',
+            label: 'failed state after lastRun.runTime (retries === null)',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -173,7 +173,7 @@ describe('SQL query', () => {
         });
         queryItems.push(page);
         page = dbHelper.createPageDocument({
-            label: 'failed after lastRun.runTime (retries === 1)',
+            label: 'failed state after lastRun.runTime (retries < threshold)',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -189,7 +189,7 @@ describe('SQL query', () => {
         });
         queryItems.push(page);
         page = dbHelper.createPageDocument({
-            label: 'failed after lastRun.runTime (retries > threshold)',
+            label: 'failed state after lastRun.runTime (retries > threshold)',
             extra: {
                 lastReferenceSeen: moment()
                     .subtract(pageActiveBeforeDays - 1, 'day')
@@ -204,6 +204,36 @@ describe('SQL query', () => {
             },
         });
         nonQueryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'queued state after lastRun.runTime (retries === undefined)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.queued,
+                },
+            },
+        });
+        queryItems.push(page);
+        page = dbHelper.createPageDocument({
+            label: 'running state after lastRun.runTime (retries === undefined)',
+            extra: {
+                lastReferenceSeen: moment()
+                    .subtract(pageActiveBeforeDays - 1, 'day')
+                    .toJSON(),
+                lastRun: {
+                    runTime: moment()
+                        .subtract(rescanAbandonedRunAfterHours + 1, 'hour')
+                        .toJSON(),
+                    state: RunState.running,
+                },
+            },
+        });
+        queryItems.push(page);
 
         // create test db
         await dbHelper.init('db-f1bc8ebda1', 'col-bbe6a9c52f');
@@ -243,7 +273,7 @@ describe('SQL query', () => {
             const item = resultItemsProjection.filter(r => r.id === i.id);
             expect(item[0]).toBeUndefined();
         });
-    }, 20000);
+    }, 30000);
 });
 
 describe('PageDocumentProvider', () => {
