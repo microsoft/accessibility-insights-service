@@ -24,7 +24,7 @@ getVmssInfo() {
     echo "Retrieving '$pool' Batch pool VMSS configuration"
     local query="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName']"
 
-    for i in {1..10}; do
+    for i in {1..30}; do
         vmssResourceGroup=$(az vmss list --query "$query.resourceGroup" -o tsv)
         vmssName=$(az vmss list --query "$query.name" -o tsv)
 

@@ -31,7 +31,7 @@ grantAccessToManagedIdentity() {
     local response
     echo "Granting role - '$role' to the resource group '$resourceGroupName' for managed identity '$managedIdentity'"
 
-    for i in {1..10}; do
+    for i in {1..30}; do
         response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$managedIdentity" --query "roleDefinitionId") || true
 
         if [[ -n $response ]]; then
