@@ -28,12 +28,20 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     az login
     ```
 
-### 4. Clean
+### 4. Build repository
+
+-   Run the below command to build the whole repo
+
+    ```bash
+    yarn build --cwd ../../
+    ```
+
+### 4. Delete resource group
 
 -   Run below command to delete the resource group if it exists
 
     ```bash
-    ./scripts/delete-resource-group.sh -r <resourceGroupName>
+    ./dist/scripts/delete-resource-group.sh -r <resourceGroupName>
     ```
 
 ### 5. Deploy
@@ -41,7 +49,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 -   Run below command to:
 
     ```bash
-    ./scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
+    ./dist/scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
     ```
 
 ### 6. Login to Azure portal to verify the Resources are being created

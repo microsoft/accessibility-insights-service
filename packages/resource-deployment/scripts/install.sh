@@ -14,7 +14,7 @@ export batchAccountName
 export keyVault
 export keyVaultUrl
 export cosmosAccountName
-export dropFolder="${0%/*}/../../"
+export dropFolder="${0%/*}/../../../"
 export templatesFolder="${0%/*}/../templates/"
 export appInsightsKey
 
