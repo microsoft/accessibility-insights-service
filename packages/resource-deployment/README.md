@@ -30,10 +30,10 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 4. Build repository
 
--   Run the below command to build the whole repo
+-   Run the below command from repository root folder to build all packages.
 
     ```bash
-    yarn build --cwd ../../
+    yarn build
     ```
 
 ### 4. Delete resource group
