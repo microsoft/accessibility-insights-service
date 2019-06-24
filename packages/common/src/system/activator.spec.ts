@@ -15,6 +15,15 @@ describe('Activator', () => {
         activator = new Activator();
     });
 
+    it('convert to primitive type', () => {
+        const source: string = 'value';
+
+        const instance = activator.convert<string>(source);
+
+        expect(instance).toBeDefined();
+        expect(instance).toEqual('value');
+    });
+
     it('convert to new dynamic instance', () => {
         const source = {
             value: 'value',

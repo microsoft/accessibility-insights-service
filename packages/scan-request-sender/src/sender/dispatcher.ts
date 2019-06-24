@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosOperationResponse } from 'azure-services';
+import { client, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
@@ -28,39 +28,32 @@ export class Dispatcher {
             return;
         }
 
+        let itemCount;
         let continuationToken;
-        while (configQueueSize > currentQueueSize) {
-            const pageDocumentResponse: CosmosOperationResponse<WebsitePage[]> = await this.getPages(continuationToken);
-
-            if (pageDocumentResponse.statusCode >= 200 && pageDocumentResponse.statusCode <= 299) {
-                const pagesToScan = pageDocumentResponse.item.slice(0, configQueueSize - currentQueueSize);
-
-                if (pagesToScan.length > 0) {
-                    this.logger.logInfo(`[Sender] Sending ${pagesToScan.length} website pages to scan queue`);
-                    await this.sender.sendRequestToScan(pagesToScan);
-
-                    currentQueueSize = await this.sender.getCurrentQueueSize();
-                    this.logger.logInfo(`[Sender] Queue size after sending requests is ${currentQueueSize}`);
-
-                    continuationToken = pageDocumentResponse.continuationToken;
-                } else {
-                    this.logger.logInfo(`[Sender] No website pages found to scan or queue already reached to its maximum capacity`);
-                }
-
-                if (continuationToken === undefined || pageDocumentResponse.item.length === 0) {
-                    break;
-                }
-            } else {
-                throw new Error(
-                    `An error occurred while retrieving website pages to scan. Server response: ${JSON.stringify(
-                        pageDocumentResponse.response,
-                    )}`,
+        do {
+            do {
+                const response: CosmosOperationResponse<WebsitePage[]> = await this.pageDocumentProvider.getReadyToScanPages(
+                    continuationToken,
                 );
-            }
-        }
-    }
+                client.ensureSuccessStatusCode(response);
+                continuationToken = response.continuationToken;
+                itemCount = response.item.length;
 
-    private async getPages(continuationToken?: string): Promise<CosmosOperationResponse<WebsitePage[]>> {
-        return this.pageDocumentProvider.getReadyToScanPages(continuationToken);
+                if (itemCount > 0) {
+                    await this.sender.sendRequestToScan(response.item);
+                    this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to a queue`);
+                }
+            } while (continuationToken !== undefined);
+
+            currentQueueSize = await this.sender.getCurrentQueueSize();
+        } while (configQueueSize > currentQueueSize && itemCount > 0);
+
+        if (itemCount === 0) {
+            this.logger.logInfo(`[Sender] No scan requests available for a queuing`);
+        } else {
+            this.logger.logInfo(`[Sender] Queue reached to its maximum capacity`);
+        }
+
+        this.logger.logInfo(`[Sender] Sending scan requests completed. Queue size: ${currentQueueSize}`);
     }
 }

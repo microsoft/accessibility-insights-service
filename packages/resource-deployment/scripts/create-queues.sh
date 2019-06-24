@@ -16,7 +16,7 @@ createQueue() {
     if [ "$queueExists" = true ]; then
         echo "Queue '$queue' already exists"
     else
-        az storage queue create --name "$queue" --account-name "$storageAccountName"
+        az storage queue create --name "$queue" --account-name "$storageAccountName" 1>/dev/null
         echo "Successfully created queue '$queue'"
     fi
 }

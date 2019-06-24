@@ -17,7 +17,7 @@ uploadFileBatch() {
     storageAccountName=$3
     includePattern=$4
 
-    az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern"
+    az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
 }
 
 exitWithUsageInfo() {

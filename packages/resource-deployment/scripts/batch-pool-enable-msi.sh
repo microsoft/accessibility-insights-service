@@ -21,27 +21,29 @@ Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
 }
 
 getVmssInfo() {
-    echo "Retrieving '$pool' Batch pool VMSS configuration"
+    echo "Waiting for the '$pool' Batch pool VMSS to be created"
     local query="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName']"
 
-    for i in {1..30}; do
+    end=$((SECONDS + 300))
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        sleep 5
+        printf "."
         vmssResourceGroup=$(az vmss list --query "$query.resourceGroup" -o tsv)
         vmssName=$(az vmss list --query "$query.name" -o tsv)
 
         if [[ -n $vmssResourceGroup ]] && [[ -n $vmssName ]]; then
             break
-        else
-            echo "Retry count - $i."
         fi
-        sleep 5
     done
+    echo " Completed"
 
     if [[ -z $vmssResourceGroup ]] || [[ -z $vmssName ]]; then
         echo "The '$batchAccountName' Azure Batch account has no VMSS created for the '$pool' pool"
         exit 1
     fi
 
-    echo "Successfully retrieved vmss info :
+    echo "Successfully retrieved VMSS configuration:
         vmssResourceGroup: $vmssResourceGroup
         vmssName: $vmssName
     "

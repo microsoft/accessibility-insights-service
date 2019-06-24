@@ -27,8 +27,12 @@ export class StorageClient {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
-    public async queryDocuments<T>(query: cosmos.SqlQuerySpec | string, continuationToken?: string): Promise<CosmosOperationResponse<T[]>> {
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken);
+    public async queryDocuments<T>(
+        query: cosmos.SqlQuerySpec | string,
+        continuationToken?: string,
+        partitionKey?: string,
+    ): Promise<CosmosOperationResponse<T[]>> {
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
     }
 
     /**

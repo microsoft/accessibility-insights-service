@@ -31,10 +31,10 @@ adjustJob() {
 
     if [[ $foundJobSchedule == true ]]; then
         echo "$jobName exists. Resetting job schedule"
-        az batch job-schedule reset --job-schedule-id "$jobName" --json-file "$jobTemplate"
+        az batch job-schedule reset --job-schedule-id "$jobName" --json-file "$jobTemplate" 1>/dev/null
     else
         echo "$jobName doesn't exist. Creating job schedule"
-        az batch job-schedule create --json-file "$jobTemplate"
+        az batch job-schedule create --json-file "$jobTemplate" 1>/dev/null
     fi
 
 }
@@ -69,7 +69,7 @@ sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVau
 echo "Logging into batch account $batchAccountName in resource group $resourceGroupName"
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-echo "Fetching existing job schdule list"
+echo "Fetching existing job schedule list"
 allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"

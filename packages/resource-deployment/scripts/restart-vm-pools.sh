@@ -39,7 +39,7 @@ restartBatchPools() {
         name=$(az vmss list --subscription "$subscription" --resource-group "$vmssResourceGroupName" --query "$query.[name]" -o tsv)
 
         echo "Restarting vm scaleset $name under resource group $vmssResourceGroupName"
-        az vmss restart --name "$name" --resource-group "$vmssResourceGroupName" --subscription "$subscription"
+        az vmss restart --name "$name" --resource-group "$vmssResourceGroupName" --subscription "$subscription" 1>/dev/null
     done
 }
 

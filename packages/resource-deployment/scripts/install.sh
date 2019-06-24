@@ -20,7 +20,39 @@ export appInsightsKey
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id> -l <azure region>
+Usage: $0 -r <resource group> -s <subscription name or id> -l <Azure region>
+
+List of available Azure regions:
+
+centralus
+eastasia
+southeastasia
+eastus
+eastus2
+westus
+westus2
+northcentralus
+southcentralus
+westcentralus
+northeurope
+westeurope
+japaneast
+japanwest
+brazilsouth
+australiasoutheast
+australiaeast
+westindia
+southindia
+centralindia
+canadacentral
+canadaeast
+uksouth
+ukwest
+koreacentral
+koreasouth
+francecentral
+southafricanorth
+uaenorth
 "
     exit 1
 }

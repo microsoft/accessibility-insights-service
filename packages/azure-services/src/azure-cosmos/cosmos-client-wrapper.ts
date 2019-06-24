@@ -84,16 +84,24 @@ export class CosmosClientWrapper {
         collectionName: string,
         query: cosmos.SqlQuerySpec | string,
         continuationToken?: string,
+        partitionKey?: string,
     ): Promise<CosmosOperationResponse<T[]>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
             const itemsT: T[] = [];
-            const feedOptions: cosmos.FeedOptions = {
-                maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
-                enableCrossPartitionQuery: true,
-                continuation: continuationToken,
-            };
+            const feedOptions: cosmos.FeedOptions =
+                partitionKey === undefined
+                    ? {
+                          maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
+                          enableCrossPartitionQuery: true,
+                          continuation: continuationToken,
+                      }
+                    : {
+                          maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
+                          partitionKey: partitionKey,
+                          continuation: continuationToken,
+                      };
 
             const queryIterator = container.items.query(query, feedOptions);
 

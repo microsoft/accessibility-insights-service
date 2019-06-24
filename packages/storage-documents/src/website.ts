@@ -23,10 +23,10 @@ export interface Website extends StorageDocument {
     name: string;
     baseUrl: string;
     serviceTreeId: string;
-    lastScanResult: {
+    lastScanResult?: {
         lastUpdated: string;
         level?: ScanLevel;
         scanState: WebsiteScanState;
     };
-    lastPageScanResults: PageLastScanResult[];
+    lastPageScanResults?: PageLastScanResult[];
 }

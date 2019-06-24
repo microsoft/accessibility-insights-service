@@ -17,9 +17,14 @@ export class WebsiteFactory {
     }
 
     public update(sourceWebsite: Website, pageScanResult: PageScanResult, runTime: Date): Website {
+        if (sourceWebsite.lastPageScanResults === undefined) {
+            sourceWebsite.lastPageScanResults = [];
+        }
+
         const websitePageId = this.hashGenerator.getWebsitePageDocumentId(sourceWebsite.baseUrl, pageScanResult.url);
         const pageScanIndex = sourceWebsite.lastPageScanResults.findIndex(scan => scan.pageId === websitePageId);
         const pageScanLevel = this.getPageScanLevel(pageScanResult);
+
         if (pageScanIndex > -1) {
             sourceWebsite.lastPageScanResults[pageScanIndex].lastUpdated = runTime.toJSON();
             sourceWebsite.lastPageScanResults[pageScanIndex].level = pageScanLevel;
@@ -38,9 +43,18 @@ export class WebsiteFactory {
 
         const scanState = this.getWebsiteScanState(sourceWebsite.lastPageScanResults);
         const websiteScanLevel = this.getWebsiteScanLevel(sourceWebsite.lastPageScanResults);
-        sourceWebsite.lastScanResult.lastUpdated = runTime.toJSON();
-        sourceWebsite.lastScanResult.scanState = scanState;
-        sourceWebsite.lastScanResult.level = websiteScanLevel;
+        if (sourceWebsite.lastScanResult === undefined) {
+            sourceWebsite.lastScanResult = {
+                lastUpdated: runTime.toJSON(),
+                scanState: scanState,
+                level: websiteScanLevel,
+            };
+        } else {
+            sourceWebsite.lastScanResult.lastUpdated = runTime.toJSON();
+            sourceWebsite.lastScanResult.scanState = scanState;
+            sourceWebsite.lastScanResult.level = websiteScanLevel;
+        }
+
         if (sourceWebsite.itemType === undefined) {
             sourceWebsite.itemType = ItemType.website;
         }
