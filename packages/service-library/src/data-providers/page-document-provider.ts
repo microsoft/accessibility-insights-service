@@ -69,7 +69,7 @@ export class PageDocumentProvider {
     ): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const querySpec = {
             query: `SELECT TOP @top * FROM c WHERE
-c.itemType = @itemType and c.websiteId = @websiteId and c.lastReferenceSeen >= @pageActiveBeforeTime
+c.itemType = @itemType and c.websiteId = @websiteId and c.lastReferenceSeen >= @pageActiveBeforeTime and c.basePage = true
 and (
 ((IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun)))
 or ((c.lastRun.state = @failedState or c.lastRun.state = @queuedState or c.lastRun.state = @runningState)

@@ -19,6 +19,7 @@ export interface WebsitePageBase extends StorageDocument {
 export interface WebsitePageExtra {
     basePage?: boolean;
     pageRank?: number;
+    priority?: number;
     lastReferenceSeen?: string;
     lastRun?: RunResult;
     links?: string[];
