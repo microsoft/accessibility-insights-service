@@ -14,6 +14,6 @@ export class ScanRequestEntryPoint extends ProcessEntryPointBase {
         const dispatcher = container.get(Dispatcher);
         const logger = container.get(Logger);
         await dispatcher.dispatchScanRequests();
-        logger.logInfo(`[Sender] scan request sent successfully`);
+        logger.logInfo(`[Sender] Scan request sent successfully`);
     }
 }

@@ -12,3 +12,4 @@ export { StorageConfig } from './azure-queue/storage-config';
 export { secretNames } from './key-vault/secret-names';
 export { SecretProvider } from './key-vault/secret-provider';
 export { Credentials, CredentialsProvider } from './credentials/credentials-provider';
+export { client } from './storage/client';

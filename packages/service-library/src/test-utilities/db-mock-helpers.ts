@@ -7,7 +7,7 @@ import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
 import * as crypto from 'crypto';
 import * as _ from 'lodash';
-import { ItemType, StorageDocument, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { ItemType, StorageDocument, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { PageObjectFactory } from '../factories/page-object-factory';
 
 export interface DbContainer {
@@ -55,17 +55,32 @@ export function createPageDocument(options?: {
     baseUrl?: string;
     url?: string;
 }): WebsitePage {
-    const websiteId = options === undefined || options.websiteId === undefined ? createRandomString('id') : options.websiteId;
+    const websiteId = options === undefined || options.websiteId === undefined ? createRandomString('websiteId') : options.websiteId;
     const baseUrl = options === undefined || options.baseUrl === undefined ? createBaseUrl() : options.baseUrl;
     const url = options === undefined || options.url === undefined ? createUrl(baseUrl) : options.url;
     const page = pageFactory.createImmutableInstance(websiteId, baseUrl, url);
-    (<any>page).label = options === undefined || options.label === undefined ? '' : options.label;
+    (<any>page).label = options === undefined || options.label === undefined ? undefined : options.label;
 
     if (options.extra !== undefined) {
         _.merge(page, options.extra);
     }
 
     return page;
+}
+
+export function createWebsiteDocument(options?: { label?: string; websiteId?: string; baseUrl?: string }): Website {
+    const website = {
+        id: createRandomString('id'),
+        itemType: ItemType.website,
+        partitionKey: 'website',
+        websiteId: options === undefined || options.websiteId === undefined ? createRandomString('websiteId') : options.websiteId,
+        name: createRandomString('name'),
+        baseUrl: options === undefined || options.baseUrl === undefined ? createBaseUrl() : options.baseUrl,
+        serviceTreeId: createRandomString('serviceTreeId'),
+    };
+    (<any>website).label = options === undefined || options.label === undefined ? undefined : options.label;
+
+    return website;
 }
 
 export function createDocument(itemType: ItemType = ItemType.website, id?: string, partitionKey?: string): StorageDocument {

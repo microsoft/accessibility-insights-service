@@ -11,15 +11,14 @@ export cosmosAccountName
 export resourceGroupName
 
 createCosmosAccount() {
-
+    echo "Creating Cosmos DB account $cosmosAccountName"
     resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
-
     cosmosAccountName="$resourceName"
 
-    echo "cosmos account $cosmosAccountName created"
+    echo "Successfully created Cosmos DB account $cosmosAccountName"
 }
 
 createCosmosCollection() {
@@ -32,22 +31,24 @@ createCosmosCollection() {
     if [ "$collectionExists" = true ]; then
         echo "Collection '$collectionName' already exists"
     else
-        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 10000
-        echo "Successfully created collection '$collectionName'"
+        echo "Creating DB collection '$collectionName'"
+        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 1>/dev/null
+        echo "Successfully created DB collection '$collectionName'"
     fi
 }
 
 createCosmosDatabase() {
     local dbName=$1
 
-    echo "Checking if database '$dbName' exists in cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
+    echo "Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
     databaseExists=$(az cosmosdb database exists --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
     if [ "$databaseExists" = true ]; then
         echo "Database $dbName already exists"
     else
-        az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName"
-        echo "Successfully created database $dbName"
+        echo "Creating Cosmos DB $dbName"
+        az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" 1>/dev/null
+        echo "Successfully created Cosmos DB $dbName"
     fi
 }
 

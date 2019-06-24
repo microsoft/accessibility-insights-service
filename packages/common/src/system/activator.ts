@@ -10,6 +10,10 @@ export class DynamicObject {
 @injectable()
 export class Activator {
     public convert<T>(source: any, typeT?: new () => T): T {
+        if (typeof source === 'string' || source instanceof String) {
+            return <T>(<any>source);
+        }
+
         if (typeT === undefined) {
             const target = this.createInstance(DynamicObject);
 

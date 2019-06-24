@@ -37,7 +37,7 @@ describe('Dispatcher', () => {
         setupQueueSize(8);
         setupPageDocumentProviderMock(getErrorResponse());
 
-        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Server response:/);
+        await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Invalid HTTP response/);
         pageDocumentProviderMock.verifyAll();
     });
 

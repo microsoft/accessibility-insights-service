@@ -26,7 +26,7 @@ while getopts "r:s:" option; do
     esac
 done
 
-echo "Installing application-insights extension for azure-cli"
+echo "Installing microsoft.insights extension for azure-cli"
 az extension add -n application-insights
 
 echo "Creating Application Insights resource using ARM template"
@@ -40,7 +40,7 @@ resources=$(az group deployment create \
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.insights/components" -r "$resources"
 appInsightsName=$resourceName
-echo "Successfully created application insights $appInsightsName"
+echo "Successfully created Application Insights $appInsightsName"
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 echo "App Insights Key fetched - $appInsightsKey"
