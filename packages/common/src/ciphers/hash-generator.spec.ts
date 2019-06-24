@@ -22,6 +22,12 @@ describe('HashGenerator', () => {
         hashGenerator = new HashGenerator(shaJsMock.object);
     });
 
+    it('generate hash bucket', () => {
+        hashGenerator = new HashGenerator(sha256);
+        const bucket = hashGenerator.getHashBucket('bucket', 1000, 'id1', 'id2', 'id3');
+        expect(bucket).toEqual('bucket-760');
+    });
+
     it('generate WebsitePageDocumentId', () => {
         hashGenerator = new HashGenerator(sha256);
         const id = hashGenerator.getWebsitePageDocumentId('baseUrl', 'url');
