@@ -30,7 +30,7 @@ export class PageDocumentProvider {
         return {
             item: pages,
             statusCode: response.statusCode,
-            continuationToken: continuationToken,
+            continuationToken: response.continuationToken,
         };
     }
 
