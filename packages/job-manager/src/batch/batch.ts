@@ -15,7 +15,7 @@ import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
 export class Batch {
-    public static readonly MAX_TASK_DURATION: number = 10;
+    public static readonly MAX_TASK_DURATION: number = 3;
     private readonly jobTasks: Map<string, JobTask> = new Map();
 
     public constructor(
