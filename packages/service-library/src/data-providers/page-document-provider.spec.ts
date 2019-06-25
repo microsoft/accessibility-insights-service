@@ -32,8 +32,8 @@ describe('PageDocumentProvider', () => {
         expectedResult.item.push(...pages2);
 
         storageClientMock
-            .setup(async o => o.queryDocuments(It.isAny(), continuationToken, It.isAny()))
-            .returns(async () => Promise.resolve({ item: websites, statusCode: 200 }))
+            .setup(async o => o.queryDocuments(It.isAny(), undefined, 'website'))
+            .returns(async () => Promise.resolve({ statusCode: 200, item: websites, continuationToken: continuationToken }))
             .verifiable(Times.once());
         storageClientMock
             .setup(async o => o.queryDocuments(It.isAny(), undefined, websites[0]))
@@ -44,7 +44,7 @@ describe('PageDocumentProvider', () => {
             .returns(async () => Promise.resolve({ item: pages2, statusCode: 200 }))
             .verifiable(Times.once());
 
-        const result = await pageDocumentProvider.getReadyToScanPages(continuationToken);
+        const result = await pageDocumentProvider.getReadyToScanPages();
 
         expect(result).toEqual(expectedResult);
         storageClientMock.verifyAll();
