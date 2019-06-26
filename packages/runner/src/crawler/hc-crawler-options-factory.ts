@@ -55,7 +55,7 @@ export class HCCrawlerOptionsFactory {
                 return processUrl;
             },
             onSuccess: (result: CrawlerResult) => {
-                const links = new Set();
+                const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
                         if (node_url.parse(link).hostname === allowedDomain) {
