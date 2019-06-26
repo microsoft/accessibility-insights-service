@@ -9,7 +9,7 @@ import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } fr
 @injectable()
 export class PageDocumentProvider {
     public static readonly pageActiveBeforeDays = 7;
-    public static readonly pageRescanAfterDays = 2;
+    public static readonly pageRescanAfterDays = 1;
     public static readonly rescanAbandonedRunAfterHours = 12;
     public static readonly maxRetryCount = 3;
 
