@@ -9,7 +9,19 @@ Before you start, make sure you have the Owner permission, or Contributor with U
 
 The deployment script is going to create Resource Group and deploy Storage Account, Batch Account and CosmosDB under it.
 
-### 1. Clone the repository
+### 1. Accept Azure Marketplace legal terms
+
+Before to deploy the Azure Batch pool virtual machine image you need to accept the Azure Marketplace legal terms. To accept legal terms use PowerShell Get-AzureRmMarketplaceTerms and Set-AzureRmMarketplaceTerms [API](https://go.microsoft.com/fwlink/?linkid=862451).
+
+You can use the following PowerShell commands to accept the Azure Marketplace legal terms:
+
+```PowerShell
+Add-AzureRmAccount
+Set-AzureRmContext -SubscriptionId <The name or id of the subscription> -TenantId <Tenant name or ID>
+Get-AzureRmMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-server-container' -Name '16-04-lts' | Set-AzureRmMarketplaceTerms -Accept
+```
+
+### 2. Clone the repository
 
 -   Clone the repository using one of the following commands
     ```bash
@@ -20,25 +32,25 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     cd accessibility-insights-service/resource-deployment
     ```
 
-### 2. Install Azure-Cli
+### 3. Install Azure-Cli
 
 -   Follow instructions from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest
 
-### 3. Login to azure-cli
+### 4. Login to Azure-Cli
 
 -   ```bash
     az login
     ```
 
-### 4. Build repository
+### 5. Build repository
 
--   Run the below command from repository root folder to build all packages.
+-   Run the below command from repository root folder to build all packages
 
     ```bash
     yarn build
     ```
 
-### 4. Delete resource group
+### 6. Delete resource group
 
 -   Run below command to delete the resource group if it exists
 
@@ -46,19 +58,19 @@ The deployment script is going to create Resource Group and deploy Storage Accou
     ./dist/scripts/delete-resource-group.sh -r <resourceGroupName>
     ```
 
-### 5. Deploy
+### 7. Deploy
 
--   Run below command to:
+-   Run below command to deploy Azure resources and binaries
 
     ```bash
     ./dist/scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
     ```
 
-### 6. Login to Azure portal to verify the Resources are being created
+### 8. Login to Azure portal to verify the resources are being created
 
--   Resource Group is created.
--   All the resources are deployed under the resource group.
--   And all jobs are scheduled.
+-   Resource group is created
+-   All the resources are deployed under the resource group
+-   And all Batch jobs are scheduled
 
 # Contributing
 
