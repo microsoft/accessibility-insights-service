@@ -11,7 +11,7 @@ The deployment script is going to create Resource Group and deploy Storage Accou
 
 ### 1. Accept Azure Marketplace legal terms
 
-Before to deploy the Azure Batch pool virtual machine image you need to accept the Azure Marketplace legal terms. To accept legal terms use PowerShell Get-AzureRmMarketplaceTerms and Set-AzureRmMarketplaceTerms [API](https://go.microsoft.com/fwlink/?linkid=862451).
+Before to deploy the Azure Batch pool virtual machine image you need to accept the Azure Marketplace legal terms one time on Azure subscription level. To accept legal terms use PowerShell Get-AzureRmMarketplaceTerms and Set-AzureRmMarketplaceTerms [API](https://go.microsoft.com/fwlink/?linkid=862451).
 
 You can use the following PowerShell commands to accept the Azure Marketplace legal terms:
 
