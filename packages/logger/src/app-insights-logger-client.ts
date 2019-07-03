@@ -18,9 +18,9 @@ export class AppInsightsLoggerClient implements LoggerClient {
     public setup(baseProperties?: BaseTelemetryProperties): void {
         this.appInsightsObject
             .setup()
-            .setAutoCollectConsole(false)
+            .setAutoCollectConsole(true)
             .setAutoCollectExceptions(true)
-            .setAutoCollectRequests(false);
+            .setAutoCollectRequests(true);
 
         // this should be set after calling setup
         this.appInsightsObject.defaultClient.commonProperties = {
