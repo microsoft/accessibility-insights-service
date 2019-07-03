@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { IssueScanResults, ItemType, PageScanResult, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -30,6 +31,7 @@ let dataFactoryTaskMock: IMock<DataFactoryTask>;
 let websiteStateUpdaterTaskMock: IMock<WebsiteStateUpdaterTask>;
 let scanMetadataConfig: IMock<ScanMetadataConfig>;
 let pageStateUpdaterTaskMock: IMock<PageStateUpdaterTask>;
+let loggerMock: IMock<Logger>;
 
 const scanMetadata: ScanMetadata = {
     websiteId: 'websiteId',
@@ -121,6 +123,7 @@ beforeEach(() => {
     websiteStateUpdaterTaskMock = Mock.ofType<WebsiteStateUpdaterTask>();
     scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
     pageStateUpdaterTaskMock = Mock.ofType(PageStateUpdaterTask);
+    loggerMock = Mock.ofType(Logger);
 
     scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
 });
@@ -199,6 +202,7 @@ describe('runner', () => {
             storageTaskMock.object,
             scanMetadataConfig.object,
             pageStateUpdaterTaskMock.object,
+            loggerMock.object,
         );
 
         await runner.run();

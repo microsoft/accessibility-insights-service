@@ -20,7 +20,9 @@ export class AppInsightsLoggerClient implements LoggerClient {
             .setup()
             .setAutoCollectConsole(true)
             .setAutoCollectExceptions(true)
-            .setAutoCollectRequests(true);
+            .setAutoCollectRequests(true)
+            .setAutoCollectDependencies(true)
+            .setAutoDependencyCorrelation(true);
 
         // this should be set after calling setup
         this.appInsightsObject.defaultClient.commonProperties = {

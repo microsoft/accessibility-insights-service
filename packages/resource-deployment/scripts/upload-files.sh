@@ -11,6 +11,10 @@ export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
 export includePattern="*[!*.map]"
 
+if [[ -z $dropFolder ]]; then
+    dropFolder="${0%/*}/../../../"
+fi
+
 uploadFileBatch() {
     destinationContainer=$1
     pathToSource=$2
@@ -23,7 +27,7 @@ uploadFileBatch() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -s <storage account name> -d <path to drop folder (optional)>
+Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
