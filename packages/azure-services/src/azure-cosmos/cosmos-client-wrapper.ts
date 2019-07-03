@@ -181,7 +181,7 @@ export class CosmosClientWrapper {
         return this.getCollection(db, collectionName);
     }
 
-    private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
+    private getCollection(cosmosDb: cosmos.Database, collectionName: string): cosmos.Container {
         return cosmosDb.container(collectionName);
     }
 
