@@ -182,19 +182,13 @@ export class CosmosClientWrapper {
     }
 
     private async getCollection(cosmosDb: cosmos.Database, collectionName: string): Promise<cosmos.Container> {
-        const response = await cosmosDb.containers.createIfNotExists(
-            { id: collectionName, partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash } },
-            { offerThroughput: 10000 },
-        );
-
-        return response.container;
+        return cosmosDb.container(collectionName);
     }
 
     private async getDatabase(databaseId: string): Promise<cosmos.Database> {
         const client = await this.cosmosClientProvider();
-        const response = await client.databases.createIfNotExists({ id: databaseId });
 
-        return response.database;
+        return client.database(databaseId);
     }
 
     // tslint:disable-next-line: no-any

@@ -14,10 +14,8 @@ describe('CosmosClientWrapper', () => {
     let testSubject: CosmosClientWrapper;
     let cosmosClientProviderStub: CosmosClientProvider;
     let cosmosClientMock: IMock<cosmos.CosmosClient>;
-    let databasesMock: IMock<cosmos.Databases>;
     let dbMock: IMock<cosmos.Database>;
     let collectionMock: IMock<cosmos.Container>;
-    let collectionsMock: IMock<cosmos.Containers>;
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
     let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
@@ -27,8 +25,8 @@ describe('CosmosClientWrapper', () => {
 
     beforeEach(() => {
         setupCosmosMocks();
-        setupVerifiableGetOrCreateDbCall();
-        setupVerifiableGetOrCreateCollectionCall();
+        setupVerifiableGetDbCall();
+        setupVerifiableGetCollectionCall();
         testSubject = new CosmosClientWrapper(cosmosClientProviderStub);
     });
 
@@ -325,18 +323,14 @@ describe('CosmosClientWrapper', () => {
 
     function setupCosmosMocks(): void {
         cosmosClientMock = Mock.ofType<cosmos.CosmosClient>();
-        databasesMock = Mock.ofType(cosmos.Databases);
         dbMock = Mock.ofType(cosmos.Database);
         collectionMock = Mock.ofType(cosmos.Container);
-        collectionsMock = Mock.ofType(cosmos.Containers);
         itemsMock = Mock.ofType(cosmos.Items);
         itemMock = Mock.ofType(cosmos.Item);
         queryIteratorMock = Mock.ofType(cosmos.QueryIterator);
         cosmosClientProviderStub = async () => cosmosClientMock.object;
 
         collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-        dbMock.setup(d => d.containers).returns(() => collectionsMock.object);
-        cosmosClientMock.setup(c => c.databases).returns(() => databasesMock.object);
 
         getPromisableDynamicMock(cosmosClientMock);
     }
@@ -345,30 +339,20 @@ describe('CosmosClientWrapper', () => {
         itemsMock.verifyAll();
         dbMock.verifyAll();
         collectionMock.verifyAll();
-        databasesMock.verifyAll();
-        collectionsMock.verifyAll();
         cosmosClientMock.verifyAll();
     }
 
-    function setupVerifiableGetOrCreateDbCall(): void {
-        databasesMock
-            .setup(async d => d.createIfNotExists({ id: dbName }))
-            .returns(async () => Promise.resolve({ database: dbMock.object }))
+    function setupVerifiableGetDbCall(): void {
+        cosmosClientMock
+            .setup(c => c.database(dbName))
+            .returns(() => dbMock.object)
             .verifiable();
     }
 
-    function setupVerifiableGetOrCreateCollectionCall(): void {
-        collectionsMock
-            .setup(async d =>
-                d.createIfNotExists(
-                    {
-                        id: collectionName,
-                        partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
-                    },
-                    { offerThroughput: 10000 },
-                ),
-            )
-            .returns(async () => Promise.resolve({ container: collectionMock.object }))
+    function setupVerifiableGetCollectionCall(): void {
+        dbMock
+            .setup(c => c.container(collectionName))
+            .returns(() => collectionMock.object)
             .verifiable();
     }
 
