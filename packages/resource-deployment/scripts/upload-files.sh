@@ -27,7 +27,7 @@ uploadFileBatch() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -s <storage account name> -d <path to drop folder. default value: $dropFolder>
+Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
