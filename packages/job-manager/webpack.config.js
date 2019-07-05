@@ -12,7 +12,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs'],
+        externals: ['yargs', 'applicationinsights'],
         entry: {
             ['job-manager']: path.resolve('./src/index.ts'),
         },
