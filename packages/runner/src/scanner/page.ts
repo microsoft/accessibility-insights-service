@@ -28,12 +28,17 @@ export class Page {
     }
 
     public async goto(url: string): Promise<void> {
-        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
+        const gotoUrlPromise = this.puppeteerPage
+            .goto(url, { waitUntil: ['load'] })
+            .then(response => {
+                if (response.headers()['content-type'] !== 'text/html ') {
+                    throw Error('scan cannot run on this type of document');
+                }
+            });
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
-        await gotoUrlPromise;
-
         try {
+            await gotoUrlPromise;
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
             // tslint:disable-next-line:no-empty
