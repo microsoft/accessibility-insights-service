@@ -30,7 +30,7 @@ export class HCCrawlerOptionsFactory {
 
     public createLaunchOptions(url: string): CrawlerLaunchOptions {
         // tslint:disable-next-line: max-line-length
-        const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt)$/i;
+        const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const scanResult: CrawlerScanResult[] = [];
         const allowedDomain = node_url.parse(url).hostname;
         const exporter = this.isDebug()
