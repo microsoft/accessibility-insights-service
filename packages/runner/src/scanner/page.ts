@@ -41,7 +41,7 @@ export class Page {
 
         await gotoUrlPromise;
 
-        try {    
+        try {
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
             // tslint:disable-next-line:no-empty
