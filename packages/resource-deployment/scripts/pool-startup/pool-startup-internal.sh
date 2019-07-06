@@ -44,15 +44,15 @@ mkdir -p "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 
 cd "$JOB_MANAGER_SHARED_LOCATION"
 echo "Installing job manager dependencies"
-npm install yargs@13.2.1
+npm install yargs@13.2.4 applicationinsights@1.4.0
 
 cd "$RUNNER_SHARED_LOCATION"
 echo "Installing runner dependencies"
-npm install yargs@13.2.1 puppeteer@1.12.2 axe-core@3.2.2 axe-puppeteer@1.0.0
+npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.2.2 axe-puppeteer@1.0.0 applicationinsights@1.4.0
 
 cd "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 echo "Installing scan request sender dependencies"
-npm install yargs@13.2.1
+npm install yargs@13.2.4 applicationinsights@1.4.0
 
 echo "Invoking custom pool startup script"
 "${0%/*}/custom-pool-post-startup.sh"
