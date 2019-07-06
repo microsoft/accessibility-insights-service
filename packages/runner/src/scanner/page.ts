@@ -31,14 +31,17 @@ export class Page {
         const gotoUrlPromise = this.puppeteerPage
             .goto(url, { waitUntil: ['load'] })
             .then(response => {
-                if (response.headers()['content-type'] !== 'text/html ') {
-                    throw Error('scan cannot run on this type of document');
+                const contentType = response.headers()['content-type'];
+                if (contentType.indexOf('text/html') !== -1) {
+                    throw Error(`Scan cannot run on ${url} of document type: ${contentType}`);
                 }
             });
+
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
-        try {
-            await gotoUrlPromise;
+        await gotoUrlPromise;
+
+        try {    
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
             // tslint:disable-next-line:no-empty
