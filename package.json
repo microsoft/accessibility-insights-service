@@ -88,6 +88,8 @@
             "./packages/service-library/node_modules",
             "./packages/service-library/src/test-resources/",
             "./packages/service-library/test-results",
+            "./packages/service-library/dist",
+            "./packages/common/dist",
             "./packages/common/node_modules",
             "./packages/common/src/test-resources/",
             "./packages/common/test-results",
