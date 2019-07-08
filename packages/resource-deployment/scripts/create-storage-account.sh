@@ -25,8 +25,11 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-echo "Creating storage account under resource group $resourceGroupName using ARM template"
-resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/blob-storage.template.json" --parameters "${0%/*}/../templates/blob-storage.parameters.json" --query "properties.outputResources[].id" -o tsv)
+templateFile="${0%/*}/../templates/blob-storage.template.json"
+parameters="${0%/*}/../templates/blob-storage.parameters.json"
+
+echo "Creating storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "$templateFile" --parameters "$parameters" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Storage/storageAccounts" -r "$resources"
@@ -37,4 +40,4 @@ if [[ -z $storageAccountName ]]; then
     exit 1
 fi
 
-echo "Created storage account $storageAccountName"
+echo "Created storage account '$storageAccountName'"
