@@ -7,11 +7,8 @@ set -eo pipefail
 
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
-export resourceGroupName
-export batchAccountName
-export pool
-export vmssResourceGroup
-export vmssName
+# export vmssResourceGroups
+# export systemAssignedIdentities
 
 exitWithUsageInfo() {
     echo "
@@ -20,33 +17,80 @@ Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
     exit 1
 }
 
+getPoolNodeCount() {
+    echo "Retrieving information about the '$pool' Batch pool"
+
+    dedicatedNodes=$(az batch pool show --pool-id "$pool" --query "targetDedicatedNodes" -o tsv)
+    lowPriorityNodes=$(az batch pool show --pool-id "$pool" --query "targetLowPriorityNodes" -o tsv)
+    poolNodeCount=$((dedicatedNodes + lowPriorityNodes))
+    echo "  Pool nodes total $poolNodeCount"
+}
+
 getVmssInfo() {
-    echo "Waiting for the '$pool' Batch pool VMSS to be created"
-    local query="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName']"
+    echo "Retrieving information about the '$pool' Batch pool VMSS resources"
 
-    end=$((SECONDS + 300))
-    printf " - Running .."
+    # Azure Batch hosts up to 50 nodes on a single VMSS resource
+    # Calculate expected number of VMSS resources
+    maxNodeCount=50
+    vmssCount=$(((poolNodeCount + maxNodeCount - 1) / maxNodeCount))
+    echo "  Pool VMSS resources total $vmssCount"
+
+    vmssResourceGroupsQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName'].resourceGroup"
+
+    waiting=false
+    end=$((SECONDS + 600))
     while [ $SECONDS -le $end ]; do
-        sleep 5
-        printf "."
-        vmssResourceGroup=$(az vmss list --query "$query.resourceGroup" -o tsv)
-        vmssName=$(az vmss list --query "$query.name" -o tsv)
+        vmssResourceGroupsStr=$(az vmss list --query "$vmssResourceGroupsQuery" -o tsv | tr "\n" ",")
+        IFS=$',' read -ra vmssResourceGroups <<< "$vmssResourceGroupsStr"
+        currentVmssCount=$((${#vmssResourceGroups[@]}))
 
-        if [[ -n $vmssResourceGroup ]] && [[ -n $vmssName ]]; then
+        if [ $currentVmssCount -ge $vmssCount ]; then
             break
         fi
-    done
-    echo " Completed"
 
-    if [[ -z $vmssResourceGroup ]] || [[ -z $vmssName ]]; then
-        echo "The '$batchAccountName' Azure Batch account has no VMSS created for the '$pool' pool"
+        if [ "$waiting" != true ]; then
+            waiting=true
+            echo "Waiting for the '$pool' Batch pool VMSS resources deployment"
+            printf " - Running .."
+        fi
+
+        sleep 5
+        printf "."
+    done
+    [ "$waiting" = true ] && echo " ended"
+
+    # Validate result if timed out
+    if [ $currentVmssCount -lt $vmssCount ]; then
+        echo "The '$batchAccountName' Azure Batch account has no VMSS resources deployed for the '$pool' Batch pool"
         exit 1
     fi
 
-    echo "Successfully retrieved VMSS configuration:
-        vmssResourceGroup: $vmssResourceGroup
-        vmssName: $vmssName
-    "
+    echo \
+"VMSS resource groups:"
+
+    for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
+        echo "  $vmssResourceGroup"
+    done
+    echo ""
+}
+
+assignSystemIdentity() {
+    for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
+        echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
+        vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
+        vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
+
+        systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+        systemAssignedIdentities+=($systemAssignedIdentity)
+
+        echo \
+"VMSS Resource configuration:
+  Pool: $pool
+  VMSS resource group: $vmssResourceGroup
+  VMSS name: $vmssName
+  System-assigned identity: $systemAssignedIdentity
+"
+    done
 }
 
 # Read script arguments
@@ -70,18 +114,15 @@ poolAllocationMode=$(az batch account show --name "$batchAccountName" --resource
 if [[ $poolAllocationMode != "UserSubscription" ]]; then
     echo "ERROR: The '$batchAccountName' Azure Batch account with '$poolAllocationMode' pool allocation mode is not supported."
     exit 1
+else
+    echo "  Valid pool allocation mode $poolAllocationMode"
 fi
+
+# Get total pool node count
+getPoolNodeCount
 
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Enable system-assigned managed identity on a VMSS
-echo "Enabling system-assigned managed identity for $vmssName in resource group $vmssResourceGroup"
-systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-
-echo \
-    "Batch pool VMSS configuration:
-  Pool: $pool
-  VMSS resource group: $vmssResourceGroup
-  VMSS name: $vmssName
-  System-assigned identity: $systemAssignedIdentity"
+# Enable system-assigned managed identity on VMSS resources
+assignSystemIdentity

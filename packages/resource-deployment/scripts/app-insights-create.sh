@@ -40,7 +40,7 @@ resources=$(az group deployment create \
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.insights/components" -r "$resources"
 appInsightsName=$resourceName
-echo "Successfully created Application Insights $appInsightsName"
+echo "Successfully created Application Insights '$appInsightsName'"
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
-echo "App Insights Key fetched - $appInsightsKey"
+echo "App Insights key fetched '$appInsightsKey'"
