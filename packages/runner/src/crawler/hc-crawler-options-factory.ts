@@ -93,6 +93,7 @@ export class HCCrawlerOptionsFactory {
         // tslint:disable-next-line: max-line-length
         const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
+
         return url.indexOf(loginPageBaseUrl) === -1 && url.match(IGNORED_EXTENSIONS) === null;
     }
 }
