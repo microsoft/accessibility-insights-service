@@ -46,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (!this.isAllowedUrl(options.url, allowedDomain)) {
+                if (!this.isAllowedUrl(options.url, url)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -57,7 +57,7 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (this.isAllowedUrl(link, allowedDomain)) {
+                        if (this.isAllowedUrl(link, url)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
@@ -89,13 +89,18 @@ export class HCCrawlerOptionsFactory {
         return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
     }
 
-    private isAllowedUrl(url: string, allowedDomain: string): boolean {
+    private isAllowedUrl(childUrl: string, baseUrl: string): boolean {
         // tslint:disable-next-line: max-line-length
+        const allowedDomain = node_url.parse(baseUrl).hostname;
+        const allowedPath = node_url.parse(baseUrl).pathname;
         const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
 
         return (
-            node_url.parse(url).hostname === allowedDomain && url.indexOf(loginPageBaseUrl) === -1 && url.match(ignoredExtentions) === null
+            node_url.parse(childUrl).hostname === allowedDomain &&
+            node_url.parse(childUrl).pathname.startsWith(allowedPath) &&
+            childUrl.indexOf(loginPageBaseUrl) === -1 &&
+            childUrl.match(ignoredExtentions) === null
         );
     }
 }

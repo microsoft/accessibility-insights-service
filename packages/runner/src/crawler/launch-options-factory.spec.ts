@@ -74,12 +74,26 @@ describe('LaunchOptionsFactory', () => {
     });
 
     it('should only add valid links to the scan result', () => {
-        const url = 'https://www.microsoft.com/device/surface';
+        const url = 'https://www.microsoft.com/device/';
         const crawResult = createCrawlResult(url);
         const pdfLink = 'https://www.microsoft.com/device/surface.pdf';
         const externalLink = 'https://www.external.com/device/child-link';
         const validLink = 'https://www.microsoft.com/device/child-link';
         crawResult.links = [pdfLink, externalLink, validLink];
+
+        const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
+
+        options.onSuccess(crawResult);
+        expect(options.scanResult[0].links).toEqual([validLink]);
+    });
+
+    it('should not add child links that do not share the same path to the scan result', () => {
+        const url = 'https://www.microsoft.com/device/';
+        const crawResult = createCrawlResult(url);
+        const validLink = 'https://www.microsoft.com/device/surface';
+        const ancestorLink = 'https://www.microsoft.com/';
+        const siblingLink = 'https://www.microsoft.com/service/foo';
+        crawResult.links = [validLink, ancestorLink, siblingLink];
 
         const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
 
