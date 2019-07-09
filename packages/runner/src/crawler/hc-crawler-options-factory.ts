@@ -20,8 +20,8 @@ export class HCCrawlerOptionsFactory {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public createConnectOptions(url: string, baseUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
-        const launchOptions = this.createLaunchOptions(url, baseUrl);
+    public createConnectOptions(crawlUrl: string, baseUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
+        const launchOptions = this.createLaunchOptions(crawlUrl, baseUrl);
         const connectOptions = launchOptions as CrawlerConnectOptions;
         connectOptions.browserWSEndpoint = browserWSEndpoint;
 
@@ -30,7 +30,7 @@ export class HCCrawlerOptionsFactory {
 
     public createLaunchOptions(crawlUrl: string, baseUrl: string): CrawlerLaunchOptions {
         const scanResult: CrawlerScanResult[] = [];
-        const allowedDomain = node_url.parse(crawlUrl).hostname;
+        const allowedDomain = node_url.parse(baseUrl).hostname;
         const exporter = this.isDebug()
             ? new JSONLineExporter({
                   file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
@@ -46,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (!this.isAllowedUrl(crawlUrl, baseUrl)) {
+                if (!this.isAllowedUrl(options.url, baseUrl)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -89,7 +89,7 @@ export class HCCrawlerOptionsFactory {
         return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
     }
 
-    private isAllowedUrl(childUrl: string, baseUrl: string): boolean {
+    private isAllowedUrl(url: string, baseUrl: string): boolean {
         // tslint:disable-next-line: max-line-length
         const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const allowedDomain = node_url.parse(baseUrl).hostname;
@@ -97,10 +97,10 @@ export class HCCrawlerOptionsFactory {
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
 
         return (
-            node_url.parse(childUrl).hostname === allowedDomain &&
-            node_url.parse(childUrl).pathname.startsWith(allowedPath) &&
-            childUrl.indexOf(loginPageBaseUrl) === -1 &&
-            childUrl.match(ignoredExtentions) === null
+            node_url.parse(url).hostname === allowedDomain &&
+            node_url.parse(url).pathname.startsWith(allowedPath) &&
+            url.indexOf(loginPageBaseUrl) === -1 &&
+            url.match(ignoredExtentions) === null
         );
     }
 }

@@ -24,6 +24,7 @@ describe('LinkExplorer', () => {
     let loggerMock: IMock<Logger>;
     let processMock: IMock<typeof process>;
     const testUrl = 'https://www.microsoft.com';
+    const baeUrl = testUrl;
     const invalidUrl = 'https://www.xyzxyz.com';
     beforeEach(() => {
         crawlerMock = Mock.ofType<HCCrawlerTyped>();
@@ -35,7 +36,7 @@ describe('LinkExplorer', () => {
         processMock = Mock.ofInstance(process);
         launchOptionsStub = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object).createConnectOptions(
             testUrl,
-            testUrl,
+            baeUrl,
             It.isAny(),
         );
         linkExplorer = new LinkExplorer(crawlerMock.object, launchOptionsStub, loggerMock.object);

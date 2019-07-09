@@ -106,7 +106,7 @@ describe('LaunchOptionsFactory', () => {
     });
 
     it('validate only valid child link is added for complicated base urls', () => {
-        baseUrl = 'https://www.host.com/p/a/';
+        baseUrl = 'https://www.host.com/p/a/?query=helloworld';
         const url = 'https://www.host.com/p/a/t/h?query=hello';
         const crawResult = createCrawlResult(url);
         const validLink1 = 'https://www.host.com/p/a/t/h/foo';
