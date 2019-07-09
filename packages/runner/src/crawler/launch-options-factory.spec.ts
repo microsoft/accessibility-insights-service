@@ -56,6 +56,16 @@ describe('LaunchOptionsFactory', () => {
         expect(shouldProceed).toEqual(false);
     });
 
+    it('should reject crawling for not allowed domain', () => {
+        const url = 'https://www.microsoft.com/abc/xyz';
+        const options: CrawlerConnectOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
+        const reqOptions: CrawlerRequestOptions = {
+            url: 'https://www.external.com/abc/xyz',
+        };
+        const shouldProceed: boolean = options.preRequest(reqOptions);
+        expect(shouldProceed).toEqual(false);
+    });
+
     it('should call success of valid url', () => {
         const url = 'https://www.microsoft.com/device/surface';
         const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
