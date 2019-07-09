@@ -33,7 +33,11 @@ describe('LinkExplorer', () => {
         crawlerMock = getPromisableDynamicMock(crawlerMock);
         loggerMock = Mock.ofType(Logger);
         processMock = Mock.ofInstance(process);
-        launchOptionsStub = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object).createConnectOptions(testUrl, It.isAny());
+        launchOptionsStub = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object).createConnectOptions(
+            testUrl,
+            testUrl,
+            It.isAny(),
+        );
         linkExplorer = new LinkExplorer(crawlerMock.object, launchOptionsStub, loggerMock.object);
     });
 

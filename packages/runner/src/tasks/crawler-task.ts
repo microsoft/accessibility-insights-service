@@ -22,8 +22,8 @@ export class CrawlerTask {
         private readonly linkExplorerFactory: LinkExplorerFactory = linkExplorerFactoryImpl,
     ) {}
 
-    public async crawl(url: string, browser: Browser): Promise<CrawlerScanResults> {
-        const connectOptions = this.hcCrawlerOptionsFactory.createConnectOptions(url, browser.wsEndpoint());
+    public async crawl(url: string, baseUrl: string, browser: Browser): Promise<CrawlerScanResults> {
+        const connectOptions = this.hcCrawlerOptionsFactory.createConnectOptions(url, baseUrl, browser.wsEndpoint());
         const crawler = await HCCrawler.connect(connectOptions);
         const linkExplorer = this.linkExplorerFactory(crawler, connectOptions, this.logger);
 

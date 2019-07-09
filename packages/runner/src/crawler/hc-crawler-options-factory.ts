@@ -20,17 +20,17 @@ export class HCCrawlerOptionsFactory {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public createConnectOptions(url: string, browserWSEndpoint: string): CrawlerConnectOptions {
-        const launchOptions = this.createLaunchOptions(url);
+    public createConnectOptions(url: string, baseUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
+        const launchOptions = this.createLaunchOptions(url, baseUrl);
         const connectOptions = launchOptions as CrawlerConnectOptions;
         connectOptions.browserWSEndpoint = browserWSEndpoint;
 
         return connectOptions;
     }
 
-    public createLaunchOptions(url: string): CrawlerLaunchOptions {
+    public createLaunchOptions(crawlUrl: string, baseUrl: string): CrawlerLaunchOptions {
         const scanResult: CrawlerScanResult[] = [];
-        const allowedDomain = node_url.parse(url).hostname;
+        const allowedDomain = node_url.parse(crawlUrl).hostname;
         const exporter = this.isDebug()
             ? new JSONLineExporter({
                   file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
@@ -46,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (!this.isAllowedUrl(options.url, url)) {
+                if (!this.isAllowedUrl(crawlUrl, baseUrl)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -57,14 +57,14 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (this.isAllowedUrl(link, url)) {
+                        if (this.isAllowedUrl(link, baseUrl)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
                     });
                 }
                 scanResult.push({
-                    baseUrl: url,
+                    baseUrl: crawlUrl,
                     scanUrl: result.response.url,
                     depth: result.depth,
                     links: Array.from(links),
@@ -73,13 +73,13 @@ export class HCCrawlerOptionsFactory {
             },
             onError: (error: CrawlerError) => {
                 scanResult.push({
-                    baseUrl: url,
+                    baseUrl: crawlUrl,
                     scanUrl: error.options.url,
                     depth: error.depth,
                     links: undefined,
                     error: error,
                 });
-                this.logger.logError(`[hc-crawl] Error processing URL ${url} - error - ${JSON.stringify(error)}`);
+                this.logger.logError(`[hc-crawl] Error processing URL ${crawlUrl} - error - ${JSON.stringify(error)}`);
             },
             scanResult: scanResult,
         };
