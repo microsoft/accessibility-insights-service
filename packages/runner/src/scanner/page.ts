@@ -29,7 +29,6 @@ export class Page {
 
     public async goto(url: string): Promise<void> {
         const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
-
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
         await gotoUrlPromise;
