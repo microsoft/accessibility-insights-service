@@ -91,9 +91,9 @@ export class HCCrawlerOptionsFactory {
 
     private isAllowedUrl(childUrl: string, baseUrl: string): boolean {
         // tslint:disable-next-line: max-line-length
+        const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const allowedDomain = node_url.parse(baseUrl).hostname;
         const allowedPath = node_url.parse(baseUrl).pathname;
-        const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
 
         return (
