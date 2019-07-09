@@ -100,4 +100,18 @@ describe('LaunchOptionsFactory', () => {
         options.onSuccess(crawResult);
         expect(options.scanResult[0].links).toEqual([validLink]);
     });
+
+    it('validate only valid child link is added for complicated base urls', () => {
+        const url = 'http://www.host.com/p/a/t/h?query=string#hash';
+        const crawResult = createCrawlResult(url);
+        const validLink = 'https://www.host.com/p/a/t/h/foo';
+        const invalidLink = 'https://www.host.com/bar/foo';
+
+        crawResult.links = [validLink, invalidLink];
+
+        const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
+
+        options.onSuccess(crawResult);
+        expect(options.scanResult[0].links).toEqual([validLink]);
+    });
 });
