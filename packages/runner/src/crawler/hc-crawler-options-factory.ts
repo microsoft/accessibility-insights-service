@@ -46,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (!this.isAllowedUrl(options.url)) {
+                if (!this.isAllowedUrl(options.url, allowedDomain)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -57,7 +57,7 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (node_url.parse(link).hostname === allowedDomain && this.isAllowedUrl(link)) {
+                        if (this.isAllowedUrl(link, allowedDomain)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
@@ -89,11 +89,13 @@ export class HCCrawlerOptionsFactory {
         return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
     }
 
-    private isAllowedUrl(url: string): boolean {
+    private isAllowedUrl(url: string, allowedDomain: string): boolean {
         // tslint:disable-next-line: max-line-length
-        const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
+        const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
 
-        return url.indexOf(loginPageBaseUrl) === -1 && url.match(IGNORED_EXTENSIONS) === null;
+        return (
+            node_url.parse(url).hostname === allowedDomain && url.indexOf(loginPageBaseUrl) === -1 && url.match(ignoredExtentions) === null
+        );
     }
 }
