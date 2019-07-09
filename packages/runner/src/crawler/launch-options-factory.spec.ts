@@ -36,14 +36,14 @@ describe('LaunchOptionsFactory', () => {
         });
     });
 
-    test.each(getNotAllowedUrls())('should reject the unsupprted urls preRequest %o', async (preRequestUrl: string) => {
+    test.each(getNotAllowedUrls())('should reject the unsupported urls preRequest %o', async (preRequestUrl: string) => {
         const options: CrawlerConnectOptions = testSubject.createConnectOptions(preRequestUrl, browserWSEndPoint);
 
         const reqOptions: CrawlerRequestOptions = {
             url: preRequestUrl,
         };
-        const shouldProceeed: boolean = options.preRequest(reqOptions);
-        expect(shouldProceeed).toEqual(false);
+        const shouldProceed: boolean = options.preRequest(reqOptions);
+        expect(shouldProceed).toEqual(false);
     });
 
     it('should reject crawling for login page', () => {
@@ -52,8 +52,8 @@ describe('LaunchOptionsFactory', () => {
         const reqOptions: CrawlerRequestOptions = {
             url: loginUrl,
         };
-        const shouldProceeed: boolean = options.preRequest(reqOptions);
-        expect(shouldProceeed).toEqual(false);
+        const shouldProceed: boolean = options.preRequest(reqOptions);
+        expect(shouldProceed).toEqual(false);
     });
 
     it('should call success of valid url', () => {
@@ -61,5 +61,19 @@ describe('LaunchOptionsFactory', () => {
         const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
 
         options.onSuccess(createCrawlResult(url));
+    });
+
+    it('should only add valid links to the scan result', () => {
+        const url = 'https://www.microsoft.com/device/surface';
+        const crawResult = createCrawlResult(url);
+        const pdfLink = 'https://www.microsoft.com/device/surface.pdf';
+        const externalLink = 'https://www.external.com/device/child-link';
+        const validLink = 'https://www.microsoft.com/device/child-link';
+        crawResult.links = [pdfLink, externalLink, validLink];
+
+        const options: CrawlerLaunchOptions = testSubject.createConnectOptions(url, browserWSEndPoint);
+
+        options.onSuccess(crawResult);
+        expect(options.scanResult[0].links).toEqual([validLink]);
     });
 });

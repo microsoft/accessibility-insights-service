@@ -28,9 +28,14 @@ export class HCCrawlerOptionsFactory {
         return connectOptions;
     }
 
-    public createLaunchOptions(url: string): CrawlerLaunchOptions {
+    private isAllowedUrl(url: string) {
         // tslint:disable-next-line: max-line-length
         const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
+        const loginPageBaseUrl = 'https://login.microsoftonline.com/';
+        return url.indexOf(loginPageBaseUrl) == -1 && url.match(IGNORED_EXTENSIONS) === null;
+    }
+
+    public createLaunchOptions(url: string): CrawlerLaunchOptions {
         const scanResult: CrawlerScanResult[] = [];
         const allowedDomain = node_url.parse(url).hostname;
         const exporter = this.isDebug()
@@ -48,7 +53,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (options.url.indexOf('https://login.microsoftonline.com/') !== -1 || options.url.match(IGNORED_EXTENSIONS) !== null) {
+                if (!this.isAllowedUrl(options.url)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -59,7 +64,7 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (node_url.parse(link).hostname === allowedDomain) {
+                        if (node_url.parse(link).hostname === allowedDomain && this.isAllowedUrl(link)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
