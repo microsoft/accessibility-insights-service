@@ -28,14 +28,7 @@ export class Page {
     }
 
     public async goto(url: string): Promise<void> {
-        const gotoUrlPromise = this.puppeteerPage
-            .goto(url, { waitUntil: ['load'] })
-            .then(response => {
-                const contentType = response.headers()['content-type'];
-                if (contentType.indexOf('text/html') !== -1) {
-                    throw Error(`Scan cannot run on ${url} of document type: ${contentType}`);
-                }
-            });
+        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
 
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
