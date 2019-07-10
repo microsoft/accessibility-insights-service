@@ -89,11 +89,11 @@ export class HCCrawlerOptionsFactory {
         return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
     }
 
-    private isAllowedUrl(url: string, baseUrl: string): boolean {
+    private isAllowedUrl(url: string, websiteUrl: string): boolean {
         // tslint:disable-next-line: max-line-length
         const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
-        const allowedDomain = node_url.parse(baseUrl).hostname;
-        const allowedPath = node_url.parse(baseUrl).pathname;
+        const allowedDomain = node_url.parse(websiteUrl).hostname;
+        const allowedPath = node_url.parse(websiteUrl).pathname;
         const loginPageBaseUrl = 'https://login.microsoftonline.com/';
 
         return (
