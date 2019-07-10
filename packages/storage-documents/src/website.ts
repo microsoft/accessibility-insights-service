@@ -29,5 +29,5 @@ export interface Website extends StorageDocument {
         scanState: WebsiteScanState;
     };
     lastPageScanResults?: PageLastScanResult[];
-    deepScanningEnabled: boolean;
+    deepScanningEnabled?: boolean;
 }
