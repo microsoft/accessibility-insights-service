@@ -20,19 +20,17 @@ export class HCCrawlerOptionsFactory {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public createConnectOptions(url: string, browserWSEndpoint: string): CrawlerConnectOptions {
-        const launchOptions = this.createLaunchOptions(url);
+    public createConnectOptions(crawlUrl: string, websiteUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
+        const launchOptions = this.createLaunchOptions(crawlUrl, websiteUrl);
         const connectOptions = launchOptions as CrawlerConnectOptions;
         connectOptions.browserWSEndpoint = browserWSEndpoint;
 
         return connectOptions;
     }
 
-    public createLaunchOptions(url: string): CrawlerLaunchOptions {
-        // tslint:disable-next-line: max-line-length
-        const IGNORED_EXTENSIONS = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt)$/i;
+    public createLaunchOptions(crawlUrl: string, websiteUrl: string): CrawlerLaunchOptions {
         const scanResult: CrawlerScanResult[] = [];
-        const allowedDomain = node_url.parse(url).hostname;
+        const allowedDomain = node_url.parse(websiteUrl).hostname;
         const exporter = this.isDebug()
             ? new JSONLineExporter({
                   file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
@@ -48,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (options.url.indexOf('https://login.microsoftonline.com/') !== -1 || options.url.match(IGNORED_EXTENSIONS) !== null) {
+                if (!this.isAllowedUrl(options.url, websiteUrl)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -59,14 +57,14 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (node_url.parse(link).hostname === allowedDomain) {
+                        if (this.isAllowedUrl(link, websiteUrl)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
                     });
                 }
                 scanResult.push({
-                    baseUrl: url,
+                    baseUrl: crawlUrl,
                     scanUrl: result.response.url,
                     depth: result.depth,
                     links: Array.from(links),
@@ -75,13 +73,13 @@ export class HCCrawlerOptionsFactory {
             },
             onError: (error: CrawlerError) => {
                 scanResult.push({
-                    baseUrl: url,
+                    baseUrl: crawlUrl,
                     scanUrl: error.options.url,
                     depth: error.depth,
                     links: undefined,
                     error: error,
                 });
-                this.logger.logError(`[hc-crawl] Error processing URL ${url} - error - ${JSON.stringify(error)}`);
+                this.logger.logError(`[hc-crawl] Error processing URL ${crawlUrl} - error - ${JSON.stringify(error)}`);
             },
             scanResult: scanResult,
         };
@@ -89,5 +87,20 @@ export class HCCrawlerOptionsFactory {
 
     private isDebug(): boolean {
         return this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--debug').length > 0;
+    }
+
+    private isAllowedUrl(url: string, baseUrl: string): boolean {
+        // tslint:disable-next-line: max-line-length
+        const ignoredExtentions = /(\.pdf|\.js|\.css|\.svg|\.png|\.jpg|\.jpeg|\.gif|\.json|\.xml|\.exe|\.dmg|\.zip|\.war|\.rar|\.ico|\.txt|\.yaml)$/i;
+        const allowedDomain = node_url.parse(baseUrl).hostname;
+        const allowedPath = node_url.parse(baseUrl).pathname;
+        const loginPageBaseUrl = 'https://login.microsoftonline.com/';
+
+        return (
+            node_url.parse(url).hostname === allowedDomain &&
+            node_url.parse(url).pathname.startsWith(allowedPath) &&
+            url.indexOf(loginPageBaseUrl) === -1 &&
+            url.match(ignoredExtentions) === null
+        );
     }
 }

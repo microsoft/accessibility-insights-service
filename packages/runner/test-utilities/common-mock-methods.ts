@@ -22,6 +22,7 @@ export function getNotAllowedUrls(): string[] {
         'https://www.bing.com/abc.war',
         'https://www.bing.com/abc.rar',
         'https://www.bing.com/abc.svg',
+        'https://www.bing.com/abc.yaml',
     ];
 }
 
