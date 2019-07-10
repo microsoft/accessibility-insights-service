@@ -4,7 +4,7 @@ import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { PageDocumentProvider } from 'service-library';
-import { RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class ScanRequestSender {
@@ -18,13 +18,23 @@ export class ScanRequestSender {
         await Promise.all(
             websitePage.map(async page => {
                 await this.updatePageState(page);
-                await this.queue.createMessage(this.storageConfig.scanQueue, page);
+                // Convert to the type here.
+                const message = this.createScanRequestMessage(page);
+                await this.queue.createMessage(this.storageConfig.scanQueue, message);
             }),
         );
     }
 
     public async getCurrentQueueSize(): Promise<number> {
         return this.queue.getMessageCount();
+    }
+
+    private createScanRequestMessage(page: WebsitePage): ScanRequestMessage {
+        return {
+            baseUrl: page.baseUrl,
+            url: page.url,
+            websiteId: page.websiteId,
+        };
     }
 
     private async updatePageState(websitePage: WebsitePage): Promise<void> {
