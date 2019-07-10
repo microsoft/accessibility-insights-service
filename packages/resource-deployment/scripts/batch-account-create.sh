@@ -8,14 +8,16 @@ set -eo pipefail
 
 # This script will deploy Azure Batch account in user subscription mode
 # and enable managed identity for Azure on Batch pools
-export resourceGroupName
 
-export keyVault
-export systemAssignedIdentity
+export resourceGroupName
 export batchAccountName
+export pool
+export keyVault
+export resourceName
+export systemAssignedIdentities
+export principalId
 
 # Set default ARM Batch account template files
-
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
@@ -23,31 +25,6 @@ exitWithUsageInfo() {
 Usage: $0 -r <resource group> [-t <batch template file (optional)>]
 "
     exit 1
-}
-
-grantAccessToManagedIdentity() {
-    local role=$1
-    local managedIdentity=$2
-    local response
-    echo "Granting role - '$role' to the resource group '$resourceGroupName' for managed identity '$managedIdentity'"
-
-    for i in {1..30}; do
-        response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$managedIdentity" --query "roleDefinitionId") || true
-
-        if [[ -n $response ]]; then
-            break
-        else
-            echo "Retry count - $i."
-        fi
-        sleep 5
-    done
-
-    if [[ -z $response ]]; then
-        echo "Unable to create role assignment - '$role' for managed identity - '$managedIdentity'"
-        exit 1
-    fi
-
-    echo "Successfully granted role - '$role' to the resource group - '$resourceGroupName' for managed identity - '$managedIdentity'"
 }
 
 # Read script arguments
@@ -64,9 +41,7 @@ if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
-echo "setting up batch account in resource group $resourceGroupName with template $batchTemplateFile"
-
-# Login to Azure if required
+# Login to Azure account if required
 if ! az account show 1>/dev/null; then
     az login
 fi
@@ -75,7 +50,7 @@ fi
 . "${0%/*}/account-set-batch-app.sh"
 
 # Deploy Azure Batch account using resource manager template
-echo "Deploying Azure Batch account"
+echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$batchTemplateFile" \
@@ -83,7 +58,6 @@ resources=$(az group deployment create \
     -o tsv)
 
 # Get key vault and batch account resources
-export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.KeyVault/vaults" -r "$resources"
 keyVault="$resourceName"
 
@@ -91,13 +65,13 @@ keyVault="$resourceName"
 batchAccountName="$resourceName"
 
 if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
-    echo "Unable to get required resource information from batch creation:
+    echo \
+"Unable to get required resource information from Batch account deployment:
     batchAccountName - $batchAccountName
     keyVault - $keyVault"
+
     exit 1
 fi
-
-echo "The '$batchAccountName' Azure Batch account deployed successfully"
 
 # Login into Azure Batch account
 echo "Logging into '$batchAccountName' Azure Batch account"
@@ -105,13 +79,13 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
-export pool
 for pool in $pools; do
     . "${0%/*}/batch-pool-enable-msi.sh"
-    . "${0%/*}/key-vault-enable-msi.sh"
 
-    # Enable VMSS access to resource group that contains external Azure services Batch tasks depend on
-    grantAccessToManagedIdentity "Contributor" "$systemAssignedIdentity"
+    for principalId in "${systemAssignedIdentities[@]}"; do
+        . "${0%/*}/key-vault-enable-msi.sh"
+        . "${0%/*}/role-assign-for-sp.sh"
+    done
 done
 
-echo "Successfully setup batch account $batchAccountName with pools"
+echo "The '$batchAccountName' Azure Batch account successfully deployed"

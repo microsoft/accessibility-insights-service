@@ -11,14 +11,14 @@ export cosmosAccountName
 export resourceGroupName
 
 createCosmosAccount() {
-    echo "Creating Cosmos DB account $cosmosAccountName"
+    echo "Creating Cosmos DB account '$cosmosAccountName'"
     resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
     cosmosAccountName="$resourceName"
 
-    echo "Successfully created Cosmos DB account $cosmosAccountName"
+    echo "Successfully created Cosmos DB account '$cosmosAccountName'"
 }
 
 createCosmosCollection() {
@@ -44,11 +44,11 @@ createCosmosDatabase() {
     databaseExists=$(az cosmosdb database exists --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
     if [ "$databaseExists" = true ]; then
-        echo "Database $dbName already exists"
+        echo "Database '$dbName' already exists"
     else
-        echo "Creating Cosmos DB $dbName"
+        echo "Creating Cosmos DB '$dbName'"
         az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" 1>/dev/null
-        echo "Successfully created Cosmos DB $dbName"
+        echo "Successfully created Cosmos DB '$dbName'"
     fi
 }
 

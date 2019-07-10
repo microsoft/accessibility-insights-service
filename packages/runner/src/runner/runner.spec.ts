@@ -166,7 +166,7 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         crawlerTaskMock
-            .setup(async o => o.crawl(scanMetadata.scanUrl, browser))
+            .setup(async o => o.crawl(scanMetadata.scanUrl, scanMetadata.baseUrl, browser))
             .returns(async () => Promise.resolve(crawlerScanResults))
             .verifiable(Times.once());
 

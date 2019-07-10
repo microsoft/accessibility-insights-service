@@ -46,7 +46,7 @@ describe('CrawlerTask', () => {
         const crawlerConnectOptions = { browserWSEndpoint: 'wsEndpoint' };
         const linkExplorerResult = { error: 'link explorer result' };
         hcCrawlerOptionsFactoryMock
-            .setup(o => o.createConnectOptions('url', 'wsEndpoint'))
+            .setup(o => o.createConnectOptions('url', 'baseUrl', 'wsEndpoint'))
             .returns(() => <CrawlerConnectOptions>(<unknown>crawlerConnectOptions))
             .verifiable(Times.once());
         hcCrawlerConnectMock
@@ -62,7 +62,7 @@ describe('CrawlerTask', () => {
             .returns(async () => Promise.resolve(linkExplorerResult))
             .verifiable(Times.once());
 
-        const result = await crawlerTask.crawl('url', <Puppeteer.Browser>(<unknown>browserMock));
+        const result = await crawlerTask.crawl('url', 'baseUrl', <Puppeteer.Browser>(<unknown>browserMock));
 
         expect(result).toEqual(linkExplorerResult);
         hcCrawlerOptionsFactoryMock.verifyAll();

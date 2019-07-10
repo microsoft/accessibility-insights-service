@@ -39,7 +39,7 @@ export class Runner {
             // start new web driver process
             browser = await this.webDriverTask.launch();
             // scan website page for next level pages references
-            const crawlerScanResults = await this.crawlerTask.crawl(scanMetadata.scanUrl, browser);
+            const crawlerScanResults = await this.crawlerTask.crawl(scanMetadata.scanUrl, scanMetadata.baseUrl, browser);
             this.logger.logInfo(`Completed crawling ${scanMetadata.scanUrl}`);
 
             // convert pages references to a storage model
