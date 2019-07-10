@@ -20,17 +20,17 @@ export class HCCrawlerOptionsFactory {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public createConnectOptions(crawlUrl: string, baseUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
-        const launchOptions = this.createLaunchOptions(crawlUrl, baseUrl);
+    public createConnectOptions(crawlUrl: string, websiteUrl: string, browserWSEndpoint: string): CrawlerConnectOptions {
+        const launchOptions = this.createLaunchOptions(crawlUrl, websiteUrl);
         const connectOptions = launchOptions as CrawlerConnectOptions;
         connectOptions.browserWSEndpoint = browserWSEndpoint;
 
         return connectOptions;
     }
 
-    public createLaunchOptions(crawlUrl: string, baseUrl: string): CrawlerLaunchOptions {
+    public createLaunchOptions(crawlUrl: string, websiteUrl: string): CrawlerLaunchOptions {
         const scanResult: CrawlerScanResult[] = [];
-        const allowedDomain = node_url.parse(baseUrl).hostname;
+        const allowedDomain = node_url.parse(websiteUrl).hostname;
         const exporter = this.isDebug()
             ? new JSONLineExporter({
                   file: `${__dirname}/crawl-trace-${new Date().valueOf()}.json`,
@@ -46,7 +46,7 @@ export class HCCrawlerOptionsFactory {
             retryCount: 1,
             preRequest: (options: CrawlerRequestOptions) => {
                 let processUrl = true;
-                if (!this.isAllowedUrl(options.url, baseUrl)) {
+                if (!this.isAllowedUrl(options.url, websiteUrl)) {
                     processUrl = false;
                 }
                 this.logger.logInfo(`[hc-crawl] ${processUrl ? 'Processing' : 'Skipping'} URL ${options.url}`);
@@ -57,7 +57,7 @@ export class HCCrawlerOptionsFactory {
                 const links = new Set<string>();
                 if (result.links !== undefined) {
                     result.links.forEach(link => {
-                        if (this.isAllowedUrl(link, baseUrl)) {
+                        if (this.isAllowedUrl(link, websiteUrl)) {
                             links.add(link);
                             this.logger.logInfo(`[hc-crawl] Found link ${link}`);
                         }
