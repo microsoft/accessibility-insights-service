@@ -18,7 +18,6 @@ export class ScanRequestSender {
         await Promise.all(
             websitePage.map(async page => {
                 await this.updatePageState(page);
-                // Convert to the type here.
                 const message = this.createScanRequestMessage(page);
                 await this.queue.createMessage(this.storageConfig.scanQueue, message);
             }),
