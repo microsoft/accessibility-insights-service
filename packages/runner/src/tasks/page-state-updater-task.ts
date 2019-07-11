@@ -42,10 +42,12 @@ export class PageStateUpdaterTask {
             pageScanResult.crawl.run.state === RunState.failed || pageScanResult.scan.run.state === RunState.failed
                 ? RunState.failed
                 : RunState.completed;
+        const unscannable = pageScanResult.scan.run.unscannable === true ? true : false;
 
         websitePage.lastRun = {
             state: pageRunState,
             runTime: runTime.toJSON(),
+            unscannable,
         };
 
         await this.storageClient.mergeOrWriteDocument(websitePage);

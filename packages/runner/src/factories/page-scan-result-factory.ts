@@ -92,6 +92,7 @@ export class PageScanResultFactory {
                     runTime: runTime.toJSON(),
                     state: runState,
                     error: issueScanResults.error,
+                    unscannable: issueScanResults.unscannable === true ? true : false,
                 },
             };
         }
