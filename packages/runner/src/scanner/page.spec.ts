@@ -9,6 +9,7 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
+import { AxeScanResults } from './axe-scan-results';
 
 class PuppeteerPageMock {}
 
@@ -41,6 +42,8 @@ beforeEach(() => {
 describe('Page', () => {
     it('should analyze accessibility issues', async () => {
         const axeResults: AxeResults = <AxeResults>(<unknown>{ type: 'AxeResults' });
+        const scanResults: AxeScanResults = { results: axeResults };
+        const scanUrl = 'https://www.example.com';
         axePuppeteerMock
             .setup(async o => o.analyze())
             .returns(async () => Promise.resolve(axeResults))
@@ -50,9 +53,9 @@ describe('Page', () => {
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
 
-        const result = await page.scanForA11yIssues();
+        const result = await page.scanForA11yIssues(scanUrl);
 
-        expect(result).toEqual(axeResults);
+        expect(result).toEqual(scanResults);
         axePuppeteerMock.verifyAll();
         axePuppeteerFactoryMock.verifyAll();
     });
