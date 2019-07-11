@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/dotenv": "^6.1.0",
         "@types/jest": "^24.0.11",
-        "@types/lodash": "^4.14.122",
+        "@types/lodash": "^4.14.136",
         "@types/node": "^11.9.4",
         "@types/verror": "^1.10.3",
         "copy-webpack-plugin": "^4.6.0",
@@ -46,14 +46,14 @@
         "@azure/batch": "^7.0.0",
         "@azure/ms-rest-nodeauth": "^1.1.1",
         "azure-services": "1.0.0",
+        "common": "1.0.0",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.11",
+        "lodash": "^4.17.14",
         "logger": "1.0.0",
         "moment": "^2.22.2",
         "reflect-metadata": "^0.1.13",
-        "verror": "^1.10.0",
-        "common": "1.0.0",
-        "service-library": "1.0.0"
+        "service-library": "1.0.0",
+        "verror": "^1.10.0"
     }
 }
