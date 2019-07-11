@@ -185,7 +185,7 @@ describe(Queue, () => {
 
     function setupVerifyCallForDequeueMessage(queueMessageResults: Models.DequeuedMessageItem[]): void {
         messagesURLMock
-            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: 300 }))
+            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: 3600 }))
             .returns(async () =>
                 Promise.resolve({
                     dequeuedMessageItems: queueMessageResults,
