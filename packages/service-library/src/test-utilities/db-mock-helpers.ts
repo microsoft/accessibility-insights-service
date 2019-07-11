@@ -185,8 +185,10 @@ export async function upsertItems<T>(items: T[]): Promise<void> {
     );
 }
 
-export function getDocumentLabels(documents: any[]): any[] {
-    return documents.map(d => d.label);
+export function getDocumentProjections(documents: any[]): any[] {
+    return documents.map(d => {
+        return { id: d.id, label: d.label };
+    });
 }
 
 export function sleep(time: number): void {

@@ -37,10 +37,10 @@ describe(PageDocumentProvider, () => {
         let testSubject: PageDocumentProvider;
         let websiteId: string;
         let afterLastReferenceSeenTime: string;
-        let afterMaxPageRescanTime: string;
-        let beforeMaxPageRescanTime: string;
-        let afterMaxRescanAbandonTime: string;
-        let beforeMaxRescanAbandonTime: string;
+        let afterRescanIntervalTime: string;
+        let beforeRescanIntervalTime: string;
+        let afterFailedPageRescanIntervalTime: string;
+        let beforeFailedPageRescanIntervalTime: string;
         let beforeLastReferenceSeenTime: string;
 
         beforeAll(async () => {
@@ -58,26 +58,26 @@ describe(PageDocumentProvider, () => {
             );
 
             beforeLastReferenceSeenTime = currentMoment()
-                .subtract(PageDocumentProvider.pageActiveBeforeDays + 1, 'day')
+                .subtract(PageDocumentProvider.minLastReferenceSeenInDays + 1, 'day')
                 .toJSON();
 
             afterLastReferenceSeenTime = currentMoment()
-                .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
+                .subtract(PageDocumentProvider.minLastReferenceSeenInDays - 1, 'day')
                 .toJSON();
 
-            afterMaxPageRescanTime = currentMoment()
-                .subtract(PageDocumentProvider.pageRescanAfterDays + 1, 'day')
+            afterRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.pageRescanIntervalInDays + 1, 'day')
                 .toJSON();
 
-            beforeMaxPageRescanTime = currentMoment()
-                .subtract(PageDocumentProvider.pageRescanAfterDays - 1, 'day')
+            beforeRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.pageRescanIntervalInDays - 1, 'hour')
                 .toJSON();
 
-            afterMaxRescanAbandonTime = currentMoment()
-                .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
+            afterFailedPageRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours + 1, 'hour')
                 .toJSON();
-            beforeMaxRescanAbandonTime = currentMoment()
-                .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours - 1, 'hour')
+            beforeFailedPageRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours - 1, 'hour')
                 .toJSON();
 
             testSubject = new PageDocumentProvider(storageClient);
@@ -101,20 +101,20 @@ describe(PageDocumentProvider, () => {
         }
 
         function verifyQueryResultsWithoutOrder(expectedQueryResults: WebsitePage[], actualResults: WebsitePage[]): void {
-            const actualResultLabels = dbHelper.getDocumentLabels(actualResults);
-            const expectedQueryResultLabels = dbHelper.getDocumentLabels(expectedQueryResults);
+            const actualResultProjections = dbHelper.getDocumentProjections(actualResults);
+            const expectedQueryResultProjections = dbHelper.getDocumentProjections(expectedQueryResults);
 
-            expect(new Set(actualResultLabels)).toEqual(new Set(expectedQueryResultLabels));
+            expect(new Set(actualResultProjections)).toEqual(new Set(expectedQueryResultProjections));
         }
 
         function verifyQueryResultsWithOrder(expectedQueryResults: WebsitePage[], actualResults: WebsitePage[]): void {
-            const actualResultLabels = dbHelper.getDocumentLabels(actualResults);
-            const expectedQueryResultLabels = dbHelper.getDocumentLabels(expectedQueryResults);
+            const actualResultProjections = dbHelper.getDocumentProjections(actualResults);
+            const expectedQueryResultProjections = dbHelper.getDocumentProjections(expectedQueryResults);
 
-            expect(actualResultLabels).toEqual(expectedQueryResultLabels);
+            expect(actualResultProjections).toEqual(expectedQueryResultProjections);
         }
 
-        describe('getPagesNotScannedBefore', () => {
+        describe('getPagesNeverScanned', () => {
             let pageAfterMinLastReferenceSeen: WebsitePage;
             let pageBeforeMinLastReferenceSeen: WebsitePage;
             let pageWithLastRunNull: WebsitePage;
@@ -135,7 +135,7 @@ describe(PageDocumentProvider, () => {
 
                 pageWithLastRunInfo = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxPageRescanTime,
+                        runTime: afterRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -147,7 +147,7 @@ describe(PageDocumentProvider, () => {
             });
 
             it('returns all query results', async () => {
-                const actualResults = await testSubject.getPagesNotScannedBefore(websiteId, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
 
                 const expectedResults = [pageAfterMinLastReferenceSeen, pageWithLastRunNull];
 
@@ -155,13 +155,13 @@ describe(PageDocumentProvider, () => {
             }, 3000);
 
             it('returns top n query results', async () => {
-                const actualResults = await testSubject.getPagesNotScannedBefore(websiteId, 1);
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 1);
 
                 expect(actualResults.length).toBe(1);
             }, 3000);
         });
 
-        describe('getPagesScannedBefore', () => {
+        describe('getPagesScanned', () => {
             it('do not return results without last run info', async () => {
                 const pageAfterMinLastReferenceSeen = createPageWithoutLastRunInfo(
                     afterLastReferenceSeenTime,
@@ -175,7 +175,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithLastRunInfo = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxPageRescanTime,
+                        runTime: afterRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -194,7 +194,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -205,7 +205,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithLastRunCompletedAfterMaxRescanTime = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxPageRescanTime,
+                        runTime: afterRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -215,7 +215,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithLastRunCompletedBeforeMaxRescanTime = createPageWithLastRunInfo(
                     {
-                        runTime: beforeMaxPageRescanTime,
+                        runTime: beforeRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -226,7 +226,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -236,7 +236,7 @@ describe(PageDocumentProvider, () => {
 
                 const page1 = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxPageRescanTime,
+                        runTime: afterRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -244,7 +244,7 @@ describe(PageDocumentProvider, () => {
                 );
                 const page2 = createPageWithLastRunInfo(
                     {
-                        runTime: unMockedMoment(afterMaxPageRescanTime).add(1, 'hour'),
+                        runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -253,7 +253,7 @@ describe(PageDocumentProvider, () => {
 
                 const page3 = createPageWithLastRunInfo(
                     {
-                        runTime: unMockedMoment(afterMaxPageRescanTime).subtract(1, 'hour'),
+                        runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -266,7 +266,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
 
                 verifyQueryResultsWithOrder([page3, page1, page2], actualResults);
             });
@@ -276,7 +276,7 @@ describe(PageDocumentProvider, () => {
 
                 const page1 = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxPageRescanTime,
+                        runTime: afterRescanIntervalTime,
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -284,7 +284,7 @@ describe(PageDocumentProvider, () => {
                 );
                 const page2 = createPageWithLastRunInfo(
                     {
-                        runTime: unMockedMoment(afterMaxPageRescanTime).add(1, 'hour'),
+                        runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -293,7 +293,7 @@ describe(PageDocumentProvider, () => {
 
                 const page3 = createPageWithLastRunInfo(
                     {
-                        runTime: unMockedMoment(afterMaxPageRescanTime).subtract(1, 'hour'),
+                        runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
                         state: RunState.completed,
                     },
                     afterLastReferenceSeenTime,
@@ -306,7 +306,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 2);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 2);
 
                 expect(actualResults.length).toBe(2);
             });
@@ -317,7 +317,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithFailedRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxRescanAbandonTime,
+                        runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
                     },
                     afterLastReferenceSeenTime,
@@ -327,7 +327,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithFailedRunBeforeMaxRescanAbandonTime = createPageWithLastRunInfo(
                     {
-                        runTime: beforeMaxRescanAbandonTime,
+                        runTime: beforeFailedPageRescanIntervalTime,
                         state: RunState.failed,
                     },
                     afterLastReferenceSeenTime,
@@ -337,7 +337,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithRunningStateAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxRescanAbandonTime,
+                        runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.running,
                     },
                     afterLastReferenceSeenTime,
@@ -347,7 +347,7 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithQueuedStateRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxRescanAbandonTime,
+                        runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.queued,
                     },
                     afterLastReferenceSeenTime,
@@ -358,7 +358,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -369,9 +369,9 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithMaxRetires = createPageWithLastRunInfo(
                     {
-                        runTime: beforeMaxPageRescanTime,
+                        runTime: beforeRescanIntervalTime,
                         state: RunState.failed,
-                        retries: PageDocumentProvider.maxRetryCount,
+                        retries: PageDocumentProvider.maxScanRetryCount,
                     },
                     afterLastReferenceSeenTime,
                     'page with max retries',
@@ -380,9 +380,9 @@ describe(PageDocumentProvider, () => {
 
                 const pageWithMaxRetryNotReached = createPageWithLastRunInfo(
                     {
-                        runTime: afterMaxRescanAbandonTime,
+                        runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
-                        retries: PageDocumentProvider.maxRetryCount - 1,
+                        retries: PageDocumentProvider.maxScanRetryCount - 1,
                     },
                     afterLastReferenceSeenTime,
                     'page with max retry not reached',
@@ -393,7 +393,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScannedAtLeastOnce(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });

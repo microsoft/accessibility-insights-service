@@ -56,7 +56,7 @@ describe('PageDocumentProvider', () => {
         });
     });
 
-    describe('getPagesNotScannedBefore', () => {
+    describe('getPagesNeverScanned', () => {
         const websiteId = 'website1';
         let query: string;
         const itemCount = 5;
@@ -78,7 +78,7 @@ describe('PageDocumentProvider', () => {
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', websiteId))
                 .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
 
-            const results = await pageDocumentProvider.getPagesNotScannedBefore(websiteId, itemCount);
+            const results = await pageDocumentProvider.getPagesNeverScanned(websiteId, itemCount);
 
             expect(results).toEqual(pageResultsFor1stCall.concat(pageResultsFor2ndCall));
         });
@@ -90,21 +90,21 @@ describe('PageDocumentProvider', () => {
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, websiteId))
                 .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
 
-            await expect(pageDocumentProvider.getPagesNotScannedBefore(websiteId, itemCount)).rejects.not.toBeNull();
+            await expect(pageDocumentProvider.getPagesNeverScanned(websiteId, itemCount)).rejects.not.toBeNull();
         });
     });
 
-    describe('getPagesScannedAtLeastOnce', () => {
+    describe('getPagesScanned', () => {
         const websiteId = 'website1';
         let query: string;
         const itemCount = 5;
 
         beforeEach(() => {
-            const rescanAbandonedRunAfterTime = moment()
-                .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours, 'hour')
+            const maxRescanAfterFailureTime = moment()
+                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
                 .toJSON();
-            const pageRescanAfterTime = moment()
-                .subtract(PageDocumentProvider.pageRescanAfterDays, 'day')
+            const maxRescanTime = moment()
+                .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
                 .toJSON();
 
             query = `SELECT TOP ${itemCount} * FROM c WHERE
@@ -112,10 +112,10 @@ describe('PageDocumentProvider', () => {
             and (
             ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
                 and (c.lastRun.retries < ${
-                    PageDocumentProvider.maxRetryCount
+                    PageDocumentProvider.maxScanRetryCount
                 } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-                and c.lastRun.runTime <= '${rescanAbandonedRunAfterTime}')
-            or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${pageRescanAfterTime}')
+                and c.lastRun.runTime <= '${maxRescanAfterFailureTime}')
+            or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
             ) order by c.lastRun.runTime asc`;
         });
 
@@ -130,7 +130,7 @@ describe('PageDocumentProvider', () => {
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', websiteId))
                 .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
 
-            const results = await pageDocumentProvider.getPagesScannedAtLeastOnce(websiteId, itemCount);
+            const results = await pageDocumentProvider.getPagesScanned(websiteId, itemCount);
 
             expect(results).toEqual(pageResultsFor1stCall.concat(pageResultsFor2ndCall));
         });
@@ -142,24 +142,24 @@ describe('PageDocumentProvider', () => {
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, websiteId))
                 .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
 
-            await expect(pageDocumentProvider.getPagesNotScannedBefore(websiteId, itemCount)).rejects.not.toBeNull();
+            await expect(pageDocumentProvider.getPagesNeverScanned(websiteId, itemCount)).rejects.not.toBeNull();
         });
     });
 
     describe('getReadyToScanPagesForWebsite', () => {
         const websiteId = 'website1';
-        let getPagesNotScannedBeforeMock: IMock<typeof pageDocumentProvider.getPagesNotScannedBefore>;
-        let getPagesScannedAtLeastOnceMock: IMock<typeof pageDocumentProvider.getPagesScannedAtLeastOnce>;
+        let getPagesNotScannedBeforeMock: IMock<typeof pageDocumentProvider.getPagesNeverScanned>;
+        let getPagesScannedAtLeastOnceMock: IMock<typeof pageDocumentProvider.getPagesScanned>;
         let webPagesNotScannedBefore: WebsitePage[];
         let webPagesScannedAtLeastOnce: WebsitePage[];
         const itemCount = 5;
 
         beforeEach(() => {
-            getPagesNotScannedBeforeMock = Mock.ofInstance(pageDocumentProvider.getPagesNotScannedBefore, MockBehavior.Strict);
-            getPagesScannedAtLeastOnceMock = Mock.ofInstance(pageDocumentProvider.getPagesScannedAtLeastOnce, MockBehavior.Strict);
+            getPagesNotScannedBeforeMock = Mock.ofInstance(pageDocumentProvider.getPagesNeverScanned, MockBehavior.Strict);
+            getPagesScannedAtLeastOnceMock = Mock.ofInstance(pageDocumentProvider.getPagesScanned, MockBehavior.Strict);
 
-            pageDocumentProvider.getPagesNotScannedBefore = getPagesNotScannedBeforeMock.object;
-            pageDocumentProvider.getPagesScannedAtLeastOnce = getPagesScannedAtLeastOnceMock.object;
+            pageDocumentProvider.getPagesNeverScanned = getPagesNotScannedBeforeMock.object;
+            pageDocumentProvider.getPagesScanned = getPagesScannedAtLeastOnceMock.object;
         });
 
         afterEach(() => {
@@ -295,7 +295,7 @@ describe('PageDocumentProvider', () => {
 
     function getMinLastReferenceSeenValue(): string {
         return moment()
-            .subtract(PageDocumentProvider.pageActiveBeforeDays, 'day')
+            .subtract(PageDocumentProvider.minLastReferenceSeenInDays, 'day')
             .toJSON();
     }
 

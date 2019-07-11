@@ -8,10 +8,10 @@ import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } fr
 
 @injectable()
 export class PageDocumentProvider {
-    public static readonly pageActiveBeforeDays = 7;
-    public static readonly pageRescanAfterDays = 1;
-    public static readonly rescanAbandonedRunAfterHours = 12;
-    public static readonly maxRetryCount = 3;
+    public static readonly minLastReferenceSeenInDays = 7;
+    public static readonly pageRescanIntervalInDays = 1;
+    public static readonly failedPageRescanIntervalInHours = 12;
+    public static readonly maxScanRetryCount = 3;
 
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
@@ -37,12 +37,12 @@ export class PageDocumentProvider {
     }
 
     public async getReadyToScanPagesForWebsite(websiteId: string, itemCount: number = 1): Promise<WebsitePage[]> {
-        const pagesNotScannedBefore = await this.getPagesNotScannedBefore(websiteId, itemCount);
+        const pagesNotScannedBefore = await this.getPagesNeverScanned(websiteId, itemCount);
         if (pagesNotScannedBefore.length >= itemCount) {
             return pagesNotScannedBefore;
         }
 
-        const pagesScannedAtLeastOnce = await this.getPagesScannedAtLeastOnce(websiteId, itemCount - pagesNotScannedBefore.length);
+        const pagesScannedAtLeastOnce = await this.getPagesScanned(websiteId, itemCount - pagesNotScannedBefore.length);
 
         return pagesNotScannedBefore.concat(pagesScannedAtLeastOnce);
     }
@@ -76,7 +76,7 @@ export class PageDocumentProvider {
         return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
     }
 
-    public async getPagesNotScannedBefore(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+    public async getPagesNeverScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${ItemType.page}' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}'
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
@@ -86,21 +86,23 @@ export class PageDocumentProvider {
         });
     }
 
-    public async getPagesScannedAtLeastOnce(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
-        const rescanAbandonedRunAfterTime = moment()
-            .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours, 'hour')
+    public async getPagesScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+        const maxRescanAfterFailureTime = moment()
+            .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
             .toJSON();
-        const pageRescanAfterTime = moment()
-            .subtract(PageDocumentProvider.pageRescanAfterDays, 'day')
+        const maxRescanTime = moment()
+            .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
             .toJSON();
 
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${ItemType.page}' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}'
     and (
     ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
-        and (c.lastRun.retries < ${PageDocumentProvider.maxRetryCount} or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-        and c.lastRun.runTime <= '${rescanAbandonedRunAfterTime}')
-    or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${pageRescanAfterTime}')
+        and (c.lastRun.retries < ${
+            PageDocumentProvider.maxScanRetryCount
+        } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+        and c.lastRun.runTime <= '${maxRescanAfterFailureTime}')
+    or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
     ) order by c.lastRun.runTime asc`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
@@ -124,7 +126,7 @@ export class PageDocumentProvider {
 
     private getMinLastReferenceSeenValue(): string {
         return moment()
-            .subtract(PageDocumentProvider.pageActiveBeforeDays, 'day')
+            .subtract(PageDocumentProvider.minLastReferenceSeenInDays, 'day')
             .toJSON();
     }
 }
