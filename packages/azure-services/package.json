@@ -23,7 +23,7 @@
     "homepage": "https://github.com/manishsat/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^24.0.11",
-        "@types/lodash": "^4.14.123",
+        "@types/lodash": "^4.14.136",
         "@types/verror": "^1.10.3",
         "@types/yargs": "^12.0.9",
         "copy-webpack-plugin": "^4.6.0",
@@ -47,13 +47,13 @@
         "@azure/keyvault": "^0.1.0",
         "@azure/ms-rest-nodeauth": "^1.1.1",
         "@azure/storage-queue": "^10.1.0",
+        "common": "1.0.0",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.11",
+        "lodash": "^4.17.14",
         "logger": "1.0.0",
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
-        "verror": "^1.10.0",
-        "common": "1.0.0"
+        "verror": "^1.10.0"
     }
 }

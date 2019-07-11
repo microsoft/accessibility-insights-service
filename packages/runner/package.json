@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/dotenv": "^6.1.0",
         "@types/jest": "^24.0.11",
-        "@types/lodash": "^4.14.123",
+        "@types/lodash": "^4.14.136",
         "@types/node": "^11.9.4",
         "@types/puppeteer": "^1.12.1",
         "@types/sha.js": "^2.4.0",
@@ -50,6 +50,7 @@
         "axe-core": "3.2.2",
         "axe-puppeteer": "^1.0.0",
         "azure-services": "1.0.0",
+        "common": "1.0.0",
         "dotenv": "^6.2.0",
         "headless-chrome-crawler": "^1.8.0",
         "inversify": "^5.0.1",
@@ -60,7 +61,6 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
-        "yargs": "^13.2.1",
-        "common": "1.0.0"
+        "yargs": "^13.2.1"
     }
 }
