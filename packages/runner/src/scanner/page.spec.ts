@@ -7,7 +7,7 @@ import '../../test-utilities/common-mock-methods';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
@@ -50,8 +50,17 @@ describe('Page', () => {
     let axePuppeteerMock: IMock<AxePuppeteer>;
     let puppeteerBrowserMock: PuppeteerBrowserMock;
     let page: Page;
+    let gotoOptions: Puppeteer.DirectNavigationOptions;
+    let waitOptions: Puppeteer.DirectNavigationOptions;
 
     beforeEach(() => {
+        gotoOptions = {
+            waitUntil: ['load' as Puppeteer.LoadEvent],
+        };
+        waitOptions = {
+            waitUntil: ['networkidle0' as Puppeteer.LoadEvent],
+            timeout: 15000,
+        };
         gotoMock = Mock.ofInstance((url: string, options: Puppeteer.DirectNavigationOptions) => {
             return undefined;
         });
@@ -86,16 +95,13 @@ describe('Page', () => {
             },
             // tslint:disable-next-line: no-any
         } as any;
-        const options: Puppeteer.DirectNavigationOptions = {
-            waitUntil: ['load' as Puppeteer.LoadEvent],
-        };
+
         gotoMock
-            .setup(async goto => goto(scanUrl, options))
+            .setup(async goto => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        // tslint:disable-next-line: no-any no-unsafe-any
-        waitForNavigationMock.setup(async wait => wait(It.isAny())).verifiable(Times.once());
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
 
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
@@ -120,14 +126,12 @@ describe('Page', () => {
             // tslint:disable-next-line: no-any
         } as any;
         gotoMock
-            // tslint:disable-next-line: no-any no-unsafe-any
-            .setup(async goto => goto(scanUrl, It.isAny()))
+            .setup(async goto => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
         waitForNavigationMock
-            // tslint:disable-next-line: no-any no-unsafe-any
-            .setup(async wait => wait(It.isAny()))
+            .setup(async wait => wait(waitOptions))
             .returns(async () => {
                 throw new Error('network timed out');
             })
@@ -139,7 +143,7 @@ describe('Page', () => {
             .verifiable(Times.once());
         axePuppeteerFactoryMock
             // tslint:disable-next-line: no-any no-unsafe-any
-            .setup(o => o(It.isAny()))
+            .setup(o => o(puppeteerPageMock as any))
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
 
