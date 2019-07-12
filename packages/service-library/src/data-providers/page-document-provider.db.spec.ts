@@ -1,294 +1,490 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any max-func-body-length no-null-keyword
+// tslint:disable: no-any no-unsafe-any no-null-keyword no-object-literal-type-assertion
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { ItemType, RunResult, RunState, StorageDocument } from 'storage-documents';
+import { RunState, WebsitePage } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import * as dbHelper from '../test-utilities/db-mock-helpers';
 import { PageDocumentProvider } from './page-document-provider';
 
-let storageClientMock: IMock<StorageClient>;
-let loggerMock: IMock<Logger>;
-let pageDocumentProvider: PageDocumentProvider;
+// tslint:disable-next-line: mocha-no-side-effect-code
+const unMockedMoment = jest.requireActual('moment') as typeof moment;
+const currentTime = '2019-01-01';
 
-beforeEach(() => {
-    storageClientMock = Mock.ofType<StorageClient>();
-    loggerMock = Mock.ofType<Logger>();
-    pageDocumentProvider = new PageDocumentProvider(storageClientMock.object);
+jest.mock('moment', () => {
+    return () => {
+        return {
+            subtract: (amount: moment.DurationInputArg1, unit: moment.unitOfTime.DurationConstructor) =>
+                unMockedMoment(currentTime).subtract(amount, unit),
+        } as moment.Moment;
+    };
 });
 
-describe('Page document provider SQL query', () => {
-    it('getPages()', async () => {
-        // init helper
-        if (!(await dbHelper.init())) {
-            console.log('\x1b[31m', 'Warning: The PageDocumentProvider SQL query test has been disabled.');
+describe(PageDocumentProvider, () => {
+    it('no-op', () => {
+        // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
+    });
 
-            return;
+    // tslint:disable-next-line: mocha-no-side-effect-code
+    if (dbHelper.isDbTestSupported()) {
+        const currentMoment = () => moment(currentTime);
+
+        let loggerMock: IMock<Logger>;
+        let testSubject: PageDocumentProvider;
+        let websiteId: string;
+        let afterLastReferenceSeenTime: string;
+        let afterRescanIntervalTime: string;
+        let beforeRescanIntervalTime: string;
+        let afterFailedPageRescanIntervalTime: string;
+        let beforeFailedPageRescanIntervalTime: string;
+        let beforeLastReferenceSeenTime: string;
+
+        beforeAll(async () => {
+            await dbHelper.init('test-db', 'page-tests-collection');
+        }, 30000);
+
+        beforeEach(() => {
+            websiteId = dbHelper.createRandomString('websiteId');
+            loggerMock = Mock.ofType<Logger>();
+            const storageClient = new StorageClient(
+                dbHelper.cosmosClient,
+                dbHelper.dbContainer.dbName,
+                dbHelper.dbContainer.collectionName,
+                loggerMock.object,
+            );
+
+            beforeLastReferenceSeenTime = currentMoment()
+                .subtract(PageDocumentProvider.minLastReferenceSeenInDays + 1, 'day')
+                .toJSON();
+
+            afterLastReferenceSeenTime = currentMoment()
+                .subtract(PageDocumentProvider.minLastReferenceSeenInDays - 1, 'day')
+                .toJSON();
+
+            afterRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.pageRescanIntervalInDays + 1, 'day')
+                .toJSON();
+
+            beforeRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.pageRescanIntervalInDays - 1, 'hour')
+                .toJSON();
+
+            afterFailedPageRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours + 1, 'hour')
+                .toJSON();
+            beforeFailedPageRescanIntervalTime = currentMoment()
+                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours - 1, 'hour')
+                .toJSON();
+
+            testSubject = new PageDocumentProvider(storageClient);
+        });
+
+        function createPageWithLastRunInfo(lastRun: any, lastReferenceSeen: string, label: string, basePage = true): WebsitePage {
+            const page = createPageWithoutLastRunInfo(lastReferenceSeen, label, basePage);
+            page.lastRun = lastRun;
+
+            return page;
         }
 
-        // setup
-        const websiteId = dbHelper.createRandomString('websiteId');
-        const queryItems: StorageDocument[] = [];
-        const nonQueryItems: StorageDocument[] = [];
-        const dbItems: StorageDocument[] = [];
-
-        let page;
-        // select c.itemType === page only
-        nonQueryItems.push(dbHelper.createDocument(ItemType.website));
-
-        // select c.lastReferenceSeen >= today - N days
-        page = dbHelper.createPageDocument({
-            label: 'before lastReferenceSeen date',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'past lastReferenceSeen date',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays + 1, 'day')
-                    .toJSON(),
-            },
-        });
-        nonQueryItems.push(page);
-
-        //select IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun)
-        page = dbHelper.createPageDocument({
-            label: 'lastRun is undefined',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'lastRun is null',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: <RunResult>null,
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'lastRun is defined',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: new Date().toJSON(),
-                    state: RunState.completed,
+        function createPageWithoutLastRunInfo(lastReferenceSeen: string, label: string, basePage = true): WebsitePage {
+            return dbHelper.createPageDocument({
+                label: label,
+                websiteId: websiteId,
+                extra: {
+                    lastReferenceSeen: lastReferenceSeen,
+                    basePage: basePage,
                 },
-            },
-        });
-        nonQueryItems.push(page);
+            });
+        }
 
-        // select c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterTime
-        page = dbHelper.createPageDocument({
-            label: 'completed state after lastRun.runTime',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.pageRescanAfterDays + 1, 'day')
+        function verifyQueryResultsWithoutOrder(expectedQueryResults: WebsitePage[], actualResults: WebsitePage[]): void {
+            const actualResultProjections = dbHelper.getDocumentProjections(actualResults);
+            const expectedQueryResultProjections = dbHelper.getDocumentProjections(expectedQueryResults);
+
+            expect(new Set(actualResultProjections)).toEqual(new Set(expectedQueryResultProjections));
+        }
+
+        function verifyQueryResultsWithOrder(expectedQueryResults: WebsitePage[], actualResults: WebsitePage[]): void {
+            const actualResultProjections = dbHelper.getDocumentProjections(actualResults);
+            const expectedQueryResultProjections = dbHelper.getDocumentProjections(expectedQueryResults);
+
+            expect(actualResultProjections).toEqual(expectedQueryResultProjections);
+        }
+
+        describe('getPagesNeverScanned', () => {
+            it('returns results after min lastReference date', async () => {
+                let queryResults: WebsitePage[];
+                const pageAfterMinLastReferenceSeen1 = createPageWithoutLastRunInfo(
+                    afterLastReferenceSeenTime,
+                    'after lastReferenceSeen date 1',
+                );
+                const pageAfterMinLastReferenceSeen2 = createPageWithoutLastRunInfo(
+                    unMockedMoment(afterLastReferenceSeenTime)
+                        .add(1, 'hour')
                         .toJSON(),
-                    state: RunState.completed,
-                },
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'completed state before lastRun.runTime',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.pageRescanAfterDays - 1, 'day')
-                        .toJSON(),
-                    state: RunState.completed,
-                },
-            },
-        });
-        nonQueryItems.push(page);
+                    'after lastReferenceSeen date 2',
+                );
+                const pageBeforeMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    beforeLastReferenceSeenTime,
+                    'before lastReferenceSeen date',
+                );
 
-        // select ((c.lastRun.state = @failedState or c.lastRun.state = @queuedState or c.lastRun.state = @runningState)
-        // and (c.lastRun.retries < @maxRetryCount or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-        // and c.lastRun.runTime <= @rescanAbandonedRunAfterTime)
-        page = dbHelper.createPageDocument({
-            label: 'failed state after lastRun.runTime (retries === undefined)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.failed,
-                },
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'failed state before lastRun.runTime (retries === undefined)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours - 1, 'hour')
-                        .toJSON(),
-                    state: RunState.failed,
-                },
-            },
-        });
-        nonQueryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'failed state after lastRun.runTime (retries === null)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.failed,
-                    retries: null,
-                },
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'failed state after lastRun.runTime (retries < threshold)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.failed,
-                    retries: 1,
-                },
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'failed state after lastRun.runTime (retries > threshold)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.failed,
-                    retries: PageDocumentProvider.maxRetryCount,
-                },
-            },
-        });
-        nonQueryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'queued state after lastRun.runTime (retries === undefined)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.queued,
-                },
-            },
-        });
-        queryItems.push(page);
-        page = dbHelper.createPageDocument({
-            label: 'running state after lastRun.runTime (retries === undefined)',
-            websiteId: websiteId,
-            extra: {
-                lastReferenceSeen: moment()
-                    .subtract(PageDocumentProvider.pageActiveBeforeDays - 1, 'day')
-                    .toJSON(),
-                lastRun: {
-                    runTime: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours + 1, 'hour')
-                        .toJSON(),
-                    state: RunState.running,
-                },
-            },
-        });
-        queryItems.push(page);
+                await dbHelper.upsertItems([
+                    pageAfterMinLastReferenceSeen1,
+                    pageBeforeMinLastReferenceSeen,
+                    pageAfterMinLastReferenceSeen2,
+                ]);
+                queryResults = [pageAfterMinLastReferenceSeen1, pageAfterMinLastReferenceSeen2];
 
-        // create test db
-        await dbHelper.init('db-f1bc8ebda1', 'col-bbe6a9c52f');
-        dbItems.push(...queryItems);
-        dbItems.push(...nonQueryItems);
-        await dbHelper.upsertItems(dbItems);
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
 
-        // invoke
-        const storageClient = new StorageClient(
-            dbHelper.cosmosClient,
-            dbHelper.dbContainer.dbName,
-            dbHelper.dbContainer.collectionName,
-            loggerMock.object,
-        );
-        pageDocumentProvider = new PageDocumentProvider(storageClient);
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            }, 3000);
 
-        const result: StorageDocument[] = [];
-        let continuationToken: string;
-        do {
-            const response = await pageDocumentProvider.getPages(websiteId, continuationToken, 100);
-            if (response !== undefined && response.item !== undefined) {
-                result.push(...response.item);
-            }
-            continuationToken = response.continuationToken;
-        } while (continuationToken !== undefined);
+            it('returns results that does not have last run info', async () => {
+                let queryResults: WebsitePage[];
+                const pageWithLastRunNull = createPageWithLastRunInfo(null, afterLastReferenceSeenTime, 'lastRun is null');
+                const pageWithLastRunNotFound = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'lastRun not found');
+                const pageWithLastRunInfo = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'completed state after min rescan time',
+                );
 
-        // validate
-        const resultItemsProjection = result.map(i => dbHelper.getDocumentProjection(i));
-        const queryItemsProjection = queryItems.map(i => dbHelper.getDocumentProjection(i));
-        const nonQueryItemsProjection = nonQueryItems.map(i => dbHelper.getDocumentProjection(i));
+                await dbHelper.upsertItems([pageWithLastRunNull, pageWithLastRunNotFound, pageWithLastRunInfo]);
+                queryResults = [pageWithLastRunNull, pageWithLastRunNotFound];
 
-        queryItemsProjection.map(i => {
-            const item = resultItemsProjection.filter(r => r.id === i.id);
-            expect(item[0]).toEqual(i);
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            }, 3000);
+
+            it('returns top n query results', async () => {
+                const basePage1 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 1);
+
+                expect(actualResults.length).toBe(1);
+            }, 3000);
+
+            it('returns base page results only', async () => {
+                let queryResults: WebsitePage[];
+                const basePage1 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+                queryResults = [basePage1, basePage2];
+
+                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
         });
-        nonQueryItemsProjection.map(i => {
-            const item = resultItemsProjection.filter(r => r.id === i.id);
-            expect(item[0]).toBeUndefined();
+
+        describe('getPagesScanned', () => {
+            it('do not return results without last run info', async () => {
+                const pageAfterMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    afterLastReferenceSeenTime,
+                    'after lastReferenceSeen date',
+                );
+                const pageBeforeMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    beforeLastReferenceSeenTime,
+                    'before lastReferenceSeen date',
+                );
+                const pageWithLastRunNull = createPageWithLastRunInfo(null, afterLastReferenceSeenTime, 'lastRun is null');
+
+                const pageWithLastRunInfo = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'completed state after min rescan time',
+                );
+
+                const queryResults: WebsitePage[] = [];
+                queryResults.push(pageWithLastRunInfo);
+
+                const nonQueryResults: WebsitePage[] = [];
+                nonQueryResults.push(pageBeforeMinLastReferenceSeen);
+                nonQueryResults.push(pageWithLastRunInfo);
+                nonQueryResults.push(pageWithLastRunNull);
+                nonQueryResults.push(pageAfterMinLastReferenceSeen);
+
+                await dbHelper.upsertItems(queryResults);
+                await dbHelper.upsertItems(nonQueryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+
+            it('returns results with last run info state as completed', async () => {
+                const queryResults: WebsitePage[] = [];
+                const nonQueryResults: WebsitePage[] = [];
+
+                const pageWithLastRunCompletedAfterMaxRescanTime = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'completed state after min rescan time',
+                );
+                queryResults.push(pageWithLastRunCompletedAfterMaxRescanTime);
+
+                const pageWithLastRunCompletedBeforeMaxRescanTime = createPageWithLastRunInfo(
+                    {
+                        runTime: beforeRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'completed state before min rescan time',
+                );
+                nonQueryResults.push(pageWithLastRunCompletedBeforeMaxRescanTime);
+
+                await dbHelper.upsertItems(queryResults);
+                await dbHelper.upsertItems(nonQueryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+
+            it('returns results sorted by last run time', async () => {
+                const queryResults: WebsitePage[] = [];
+
+                const page1 = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page1',
+                );
+                const page2 = createPageWithLastRunInfo(
+                    {
+                        runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page2',
+                );
+
+                const page3 = createPageWithLastRunInfo(
+                    {
+                        runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page3',
+                );
+
+                queryResults.push(page1);
+                queryResults.push(page2);
+                queryResults.push(page3);
+
+                await dbHelper.upsertItems(queryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithOrder([page3, page1, page2], actualResults);
+            });
+
+            it('returns top n query result', async () => {
+                const queryResults: WebsitePage[] = [];
+
+                const page1 = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page1',
+                );
+                const page2 = createPageWithLastRunInfo(
+                    {
+                        runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page2',
+                );
+
+                const page3 = createPageWithLastRunInfo(
+                    {
+                        runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page3',
+                );
+
+                queryResults.push(page1);
+                queryResults.push(page2);
+                queryResults.push(page3);
+
+                await dbHelper.upsertItems(queryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 2);
+
+                expect(actualResults.length).toBe(2);
+            });
+
+            it('returns base pages only', async () => {
+                let queryResults: WebsitePage[];
+
+                const basePage1 = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 1',
+                    true,
+                );
+                const basePage2 = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 2',
+                    true,
+                );
+
+                const childPage = createPageWithLastRunInfo(
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'child page',
+                    false,
+                );
+
+                queryResults = [basePage1, basePage2];
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+
+            it('returns results with last run info state as failed/queued/running', async () => {
+                const queryResults: WebsitePage[] = [];
+                const nonQueryResults: WebsitePage[] = [];
+
+                const pageWithFailedRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.failed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'With Failed Run after Min RescanAbandonTime',
+                );
+                queryResults.push(pageWithFailedRunAfterMaxRescanAbandonTime);
+
+                const pageWithFailedRunBeforeMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    {
+                        runTime: beforeFailedPageRescanIntervalTime,
+                        state: RunState.failed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'With Failed Run Before Min RescanAbandonTime',
+                );
+                nonQueryResults.push(pageWithFailedRunBeforeMaxRescanAbandonTime);
+
+                const pageWithRunningStateAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.running,
+                    },
+                    afterLastReferenceSeenTime,
+                    'With Running state After Min RescanAbandonTime',
+                );
+                queryResults.push(pageWithRunningStateAfterMaxRescanAbandonTime);
+
+                const pageWithQueuedStateRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.queued,
+                    },
+                    afterLastReferenceSeenTime,
+                    'With Queued State After Min RescanAbandonTime',
+                );
+                queryResults.push(pageWithQueuedStateRunAfterMaxRescanAbandonTime);
+
+                await dbHelper.upsertItems(queryResults);
+                await dbHelper.upsertItems(nonQueryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+
+            it('returns results within max retry value', async () => {
+                const queryResults: WebsitePage[] = [];
+                const nonQueryResults: WebsitePage[] = [];
+
+                const pageWithMaxRetires = createPageWithLastRunInfo(
+                    {
+                        runTime: beforeRescanIntervalTime,
+                        state: RunState.failed,
+                        retries: PageDocumentProvider.maxScanRetryCount,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page with max retries',
+                );
+                nonQueryResults.push(pageWithMaxRetires);
+
+                const pageWithMaxRetryNotReached = createPageWithLastRunInfo(
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.failed,
+                        retries: PageDocumentProvider.maxScanRetryCount - 1,
+                    },
+                    afterLastReferenceSeenTime,
+                    'page with max retry not reached',
+                );
+
+                queryResults.push(pageWithMaxRetryNotReached);
+
+                await dbHelper.upsertItems(queryResults);
+                await dbHelper.upsertItems(nonQueryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
         });
-    }, 30000);
+
+        describe('getWebsiteIds', () => {
+            it('returns website ids', async () => {
+                const website1 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+                const website2 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+                const website3 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+                const allWebsites = [website1, website2, website3];
+
+                await dbHelper.upsertItems(Array.from(allWebsites));
+
+                const actualQueryResults = await testSubject.getWebsiteIds();
+
+                expect(new Set(actualQueryResults.item)).toEqual(new Set(allWebsites.map(s => s.websiteId)));
+            });
+        });
+    }
 });

@@ -8,21 +8,23 @@ import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } fr
 
 @injectable()
 export class PageDocumentProvider {
-    public static readonly pageActiveBeforeDays = 7;
-    public static readonly pageRescanAfterDays = 1;
-    public static readonly rescanAbandonedRunAfterHours = 12;
-    public static readonly maxRetryCount = 3;
+    public static readonly minLastReferenceSeenInDays = 7;
+    public static readonly pageRescanIntervalInDays = 1;
+    public static readonly failedPageRescanIntervalInHours = 12;
+    public static readonly maxScanRetryCount = 3;
 
     constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
 
-    public async getReadyToScanPages(continuationToken?: string, pageBatchSize?: number): Promise<CosmosOperationResponse<WebsitePage[]>> {
+    public async getReadyToScanPages(
+        continuationToken?: string,
+        pageBatchSize: number = 1,
+    ): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const pages: WebsitePage[] = [];
 
         const response = await this.getWebsiteIds(continuationToken);
-        client.ensureSuccessStatusCode(response);
         await Promise.all(
-            response.item.map(async i => {
-                const websitePages = await this.getAllPages(i, pageBatchSize);
+            response.item.map(async websiteId => {
+                const websitePages = await this.getReadyToScanPagesForWebsite(websiteId, pageBatchSize);
                 pages.push(...websitePages);
             }),
         );
@@ -34,104 +36,26 @@ export class PageDocumentProvider {
         };
     }
 
-    public async getAllPages(websiteId: string, itemCount?: number): Promise<WebsitePage[]> {
-        const pages: WebsitePage[] = [];
-        let continuationToken: string;
-        do {
-            const response = await this.getPages(websiteId, continuationToken, itemCount);
-            client.ensureSuccessStatusCode(response);
-            pages.push(...response.item);
-            continuationToken = response.continuationToken;
-        } while (continuationToken !== undefined);
+    public async getReadyToScanPagesForWebsite(websiteId: string, itemCount: number = 1): Promise<WebsitePage[]> {
+        const pagesNotScannedBefore = await this.getPagesNeverScanned(websiteId, itemCount);
+        if (pagesNotScannedBefore.length >= itemCount) {
+            return pagesNotScannedBefore;
+        }
 
-        return pages;
+        const pagesScannedAtLeastOnce = await this.getPagesScanned(websiteId, itemCount - pagesNotScannedBefore.length);
+
+        return pagesNotScannedBefore.concat(pagesScannedAtLeastOnce);
     }
 
     public async getWebsiteIds(continuationToken?: string): Promise<CosmosOperationResponse<string[]>> {
         const partitionKey = 'website';
-        const querySpec = {
-            query: `SELECT VALUE c.websiteId FROM c WHERE c.itemType = @itemType ORDER BY c.websiteId`,
-            parameters: [
-                {
-                    name: '@itemType',
-                    value: ItemType.website,
-                },
-            ],
-        };
+        const query = `SELECT VALUE c.websiteId FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
 
-        return this.storageClient.queryDocuments<string>(querySpec, continuationToken, partitionKey);
-    }
+        const response = await this.storageClient.queryDocuments<string>(query, continuationToken, partitionKey);
 
-    public async getPages(
-        websiteId: string,
-        continuationToken?: string,
-        itemCount?: number,
-    ): Promise<CosmosOperationResponse<WebsitePage[]>> {
-        const querySpec = {
-            query: `SELECT TOP @top * FROM c WHERE
-c.itemType = @itemType and c.websiteId = @websiteId and c.lastReferenceSeen >= @pageActiveBeforeTime and c.basePage = true
-and (
-((IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun)))
-or ((c.lastRun.state = @failedState or c.lastRun.state = @queuedState or c.lastRun.state = @runningState)
-    and (c.lastRun.retries < @maxRetryCount or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-    and c.lastRun.runTime <= @rescanAbandonedRunAfterTime)
-or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterTime)
-)`,
-            parameters: [
-                {
-                    name: '@top',
-                    value: itemCount === undefined ? 1 : itemCount,
-                },
-                {
-                    name: '@itemType',
-                    value: ItemType.page,
-                },
-                {
-                    name: '@websiteId',
-                    value: websiteId,
-                },
-                {
-                    name: '@completedState',
-                    value: RunState.completed,
-                },
-                {
-                    name: '@failedState',
-                    value: RunState.failed,
-                },
-                {
-                    name: '@queuedState',
-                    value: RunState.queued,
-                },
-                {
-                    name: '@runningState',
-                    value: RunState.running,
-                },
-                {
-                    name: '@maxRetryCount',
-                    value: PageDocumentProvider.maxRetryCount,
-                },
-                {
-                    name: '@pageActiveBeforeTime',
-                    value: moment()
-                        .subtract(PageDocumentProvider.pageActiveBeforeDays, 'day')
-                        .toJSON(),
-                },
-                {
-                    name: '@rescanAbandonedRunAfterTime',
-                    value: moment()
-                        .subtract(PageDocumentProvider.rescanAbandonedRunAfterHours, 'hour')
-                        .toJSON(),
-                },
-                {
-                    name: '@pageRescanAfterTime',
-                    value: moment()
-                        .subtract(PageDocumentProvider.pageRescanAfterDays, 'day')
-                        .toJSON(),
-                },
-            ],
-        };
+        client.ensureSuccessStatusCode(response);
 
-        return this.storageClient.queryDocuments<WebsitePage>(querySpec, continuationToken, websiteId);
+        return response;
     }
 
     public async updatePageProperties(
@@ -150,5 +74,63 @@ or (c.lastRun.state = @completedState and c.lastRun.runTime <= @pageRescanAfterT
         _.merge(propertiesToUpdate, properties);
 
         return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
+    }
+
+    public async getPagesNeverScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+        const query = `SELECT TOP ${itemCount} * FROM c WHERE
+    c.itemType = '${
+        ItemType.page
+    }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and c.basePage = true
+    and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
+
+        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+            return this.storageClient.queryDocuments<WebsitePage>(query, token, websiteId);
+        });
+    }
+
+    public async getPagesScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+        const maxRescanAfterFailureTime = moment()
+            .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
+            .toJSON();
+        const maxRescanTime = moment()
+            .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
+            .toJSON();
+
+        const query = `SELECT TOP ${itemCount} * FROM c WHERE
+    c.itemType = '${
+        ItemType.page
+    }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and c.basePage = true
+    and (
+    ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
+        and (c.lastRun.retries < ${
+            PageDocumentProvider.maxScanRetryCount
+        } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+        and c.lastRun.runTime <= '${maxRescanAfterFailureTime}')
+    or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
+    ) order by c.lastRun.runTime asc`;
+
+        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+            return this.storageClient.queryDocuments<WebsitePage>(query, token, websiteId);
+        });
+    }
+
+    private async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
+        let token: string;
+        const result = [];
+
+        do {
+            const response = await execute(token);
+            client.ensureSuccessStatusCode(response);
+            token = response.continuationToken;
+            result.push(...response.item);
+        } while (token !== undefined);
+
+        return result;
+    }
+
+    private getMinLastReferenceSeenValue(): string {
+        return moment()
+            .subtract(PageDocumentProvider.minLastReferenceSeenInDays, 'day')
+            .toJSON();
     }
 }

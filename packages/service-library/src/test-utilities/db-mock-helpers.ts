@@ -27,17 +27,21 @@ const cosmosDbKey: string = undefined;
 const pageFactory = new PageObjectFactory(new HashGenerator());
 let azureCosmosClient: cosmos.CosmosClient;
 
-export async function init(dbName?: string, collectionName?: string): Promise<boolean> {
-    dbContainer = {
-        dbName: dbName === undefined ? createRandomString('db') : dbName,
-        collectionName: collectionName === undefined ? createRandomString('col') : collectionName,
-    };
-
+export function isDbTestSupported(): boolean {
     if (cosmosDbUrl === undefined || cosmosDbKey === undefined) {
         console.log('\x1b[31m', warningMessage);
 
         return false;
     }
+
+    return true;
+}
+
+export async function init(dbName?: string, collectionName?: string): Promise<boolean> {
+    dbContainer = {
+        dbName: dbName === undefined ? 'test-db' : dbName,
+        collectionName: collectionName === undefined ? createRandomString('col') : collectionName,
+    };
 
     azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
     cosmosClient = new CosmosClientWrapper(() => Promise.resolve(azureCosmosClient));
@@ -105,12 +109,34 @@ export function createUrl(baseUrl: string): string {
 
 export async function createDbContainer(container: DbContainer): Promise<DbContainer> {
     console.log(`Creating database '${container.dbName}..`);
-    await cosmosClient.getContainer(container.dbName, container.collectionName);
+    const dbResponse = await azureCosmosClient.databases.createIfNotExists({ id: container.dbName });
+    const db = dbResponse.database;
+
+    await waitForDbCreation(container.dbName);
+
+    await db.containers.createIfNotExists(
+        {
+            id: container.collectionName,
+            partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
+        },
+        { offerThroughput: 1000 },
+    );
+
+    console.log('.created');
+
+    console.log(`Cosmos container:
+    DB: ${container.dbName}
+    Collection: ${container.collectionName}`);
+
+    return dbContainer;
+}
+
+async function waitForDbCreation(dbName: string): Promise<void> {
     sleep(2000);
 
     while (true) {
         try {
-            await azureCosmosClient.database(container.dbName).read();
+            await azureCosmosClient.database(dbName).read();
             break;
         } catch (error) {
             if ((<cosmos.ErrorResponse>error).code === 404) {
@@ -120,13 +146,6 @@ export async function createDbContainer(container: DbContainer): Promise<DbConta
             throw error;
         }
     }
-    console.log('.created');
-
-    console.log(`Cosmos container:
-    DB: ${container.dbName}
-    Collection: ${container.collectionName}`);
-
-    return dbContainer;
 }
 
 export async function deleteDbContainer(container: DbContainer): Promise<void> {
@@ -166,11 +185,10 @@ export async function upsertItems<T>(items: T[]): Promise<void> {
     );
 }
 
-export function getDocumentProjection(item: any): any {
-    return {
-        id: item.id,
-        label: item.label,
-    };
+export function getDocumentProjections(documents: any[]): any[] {
+    return documents.map(d => {
+        return { id: d.id, label: d.label };
+    });
 }
 
 export function sleep(time: number): void {
