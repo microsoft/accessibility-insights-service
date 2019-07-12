@@ -38,7 +38,7 @@
     "dependencies": {
         "@sindresorhus/fnv1a": "^1.2.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.11",
+        "lodash": "^4.17.14",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11"
     }

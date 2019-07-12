@@ -73,6 +73,7 @@
             "./packages/scan-request-sender/node_modules",
             "./packages/scan-request-sender/src/test-resources/",
             "./packages/scan-request-sender/test-results",
+            "./packages/scan-request-sender/out",
             "./packages/azure-client/dist",
             "./packages/azure-client/node_modules",
             "./packages/azure-client/src/test-resources/",

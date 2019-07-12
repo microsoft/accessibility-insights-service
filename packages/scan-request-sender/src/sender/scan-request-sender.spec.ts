@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
 import { PageDocumentProvider } from 'service-library';
-import { ItemType, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { ItemType, RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanRequestSender } from './scan-request-sender';
 
@@ -35,8 +35,9 @@ describe('Scan request Sender', () => {
         let websitePageUpdateDelta: WebsitePageExtra;
 
         websitePages.forEach(page => {
+            const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, page))
+                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
@@ -60,8 +61,9 @@ describe('Scan request Sender', () => {
         let websitePageUpdateDelta: WebsitePageExtra;
 
         websitePages.forEach(page => {
+            const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, page))
+                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
@@ -101,5 +103,13 @@ describe('Scan request Sender', () => {
                 links: ['https://www.microsoft.com/1', 'https://www.microsoft.com/2'],
             },
         ] as WebsitePage[];
+    }
+
+    function getScanRequestMessage(page: WebsitePage): ScanRequestMessage {
+        return {
+            url: page.url,
+            baseUrl: page.baseUrl,
+            websiteId: page.websiteId,
+        };
     }
 });
