@@ -96,7 +96,7 @@ export class PageDocumentProvider {
             .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
             .toJSON();
 
-        const query = `SELECT TOP ${itemCount} * FROM c WHERE 
+        const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${
         ItemType.page
     }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and c.basePage = true
