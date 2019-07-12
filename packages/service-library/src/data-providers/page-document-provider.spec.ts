@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-import-side-effect no-any no-unsafe-any max-func-body-length no-null-keyword no-object-literal-type-assertion
-
 import 'reflect-metadata';
 
 import { CosmosOperationResponse, StorageClient } from 'azure-services';
 import * as moment from 'moment';
 import { ItemType, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+
 import { PageDocumentProvider } from './page-document-provider';
 
 // tslint:disable-next-line: mocha-no-side-effect-code
@@ -117,8 +117,9 @@ describe('PageDocumentProvider', () => {
                 and (c.lastRun.retries < ${
                     PageDocumentProvider.maxScanRetryCount
                 } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-                and c.lastRun.runTime <= '${maxRescanAfterFailureTime}')
-            or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
+                and c.lastRun.runTime <= '${maxRescanAfterFailureTime}'
+                and (IS_NULL(c.lastRun.unscannable) or NOT IS_DEFINED(c.lastRun.unscannable) or c.lastRun.unscannable <> true))
+                or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
             ) order by c.lastRun.runTime asc`;
         });
 
