@@ -7,4 +7,5 @@ export interface RunResult {
     state: RunState;
     error?: string;
     retries?: number;
+    unscannable?: boolean;
 }

@@ -43,4 +43,5 @@ export interface IssueScanResult extends StorageDocument {
 export interface IssueScanResults {
     results?: IssueScanResult[];
     error?: string;
+    unscannable?: boolean;
 }
