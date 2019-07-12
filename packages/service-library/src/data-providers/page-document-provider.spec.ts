@@ -64,6 +64,7 @@ describe('PageDocumentProvider', () => {
         beforeEach(() => {
             query = `SELECT TOP ${itemCount} * FROM c WHERE
             c.itemType = 'page' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}'
+            and c.basePage = true
             and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
         });
 
@@ -108,7 +109,9 @@ describe('PageDocumentProvider', () => {
                 .toJSON();
 
             query = `SELECT TOP ${itemCount} * FROM c WHERE
-            c.itemType = '${ItemType.page}' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}'
+            c.itemType = '${
+                ItemType.page
+            }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}' and c.basePage = true
             and (
             ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
                 and (c.lastRun.retries < ${
