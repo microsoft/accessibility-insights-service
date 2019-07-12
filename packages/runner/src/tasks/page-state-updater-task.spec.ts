@@ -93,6 +93,7 @@ describe('PageStateUpdaterTask', () => {
         websitePage.lastRun = {
             state: RunState.completed,
             runTime: runTime.toJSON(),
+            unscannable: false,
         };
         const pageScanResult = createPageScanResult(runTime);
 
@@ -114,6 +115,7 @@ describe('PageStateUpdaterTask', () => {
         websitePage.lastRun = {
             state: RunState.failed,
             runTime: runTime.toJSON(),
+            unscannable: false,
         };
         const pageScanResult = createPageScanResult(runTime);
         pageScanResult.crawl.run.state = RunState.failed;
@@ -158,7 +160,7 @@ function createPageScanResult(runTime: Date): PageScanResult {
         },
         scan: {
             result: { runTime: runTime.toJSON(), level: ScanLevel.fail, issues: ['test id 1'] },
-            run: { runTime: runTime.toJSON(), state: RunState.completed },
+            run: { runTime: runTime.toJSON(), state: RunState.completed, unscannable: false },
         },
         partitionKey: scanMetadata.websiteId,
     };

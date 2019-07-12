@@ -61,6 +61,7 @@ export class Page {
     }
 
     private getContentType(headers: Record<string, string>): string {
-        return headers['content-type'] || headers['Content-Type'];
+        // All header names are lower-case, According to puppeteer API doc
+        return headers['content-type'];
     }
 }
