@@ -33,7 +33,7 @@ export class DataFactoryTask {
 
             return { results: scanResults };
         } else {
-            return { results: [], error: axeScanResults.error, unscannable: axeScanResults.unscannable === true ? true : false };
+            return { results: [], error: axeScanResults.error, unscannable: axeScanResults.unscannable };
         }
     }
 
