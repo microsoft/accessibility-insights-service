@@ -4,28 +4,30 @@
 import 'reflect-metadata';
 import '../../test-utilities/common-mock-methods';
 
+import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
-import { IMock, Mock, Times, It } from 'typemoq';
-import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
+import { IMock, It, Mock, Times } from 'typemoq';
+
 import { AxeScanResults } from './axe-scan-results';
-import { AxeResults } from 'axe-core';
+import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
 
 class PuppeteerPageMock {
     constructor(
-        private gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
-        private waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
-        private setBypassCSPMock: (enabled: boolean) => Promise<void>,
+        private readonly gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
+        private readonly waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
+        private readonly setBypassCSPMock: (enabled: boolean) => Promise<void>,
     ) {}
-    public goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
+
+    public async goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
         return this.gotoMock(url, options);
     }
 
-    public waitForNavigation(options?: Puppeteer.NavigationOptions): Promise<Puppeteer.Response> {
+    public async waitForNavigation(options?: Puppeteer.NavigationOptions): Promise<Puppeteer.Response> {
         return this.waitForNavigationMock(options);
     }
 
-    public setBypassCSP(enabled: boolean): Promise<void> {
+    public async setBypassCSP(enabled: boolean): Promise<void> {
         return this.setBypassCSPMock(enabled);
     }
 }
@@ -51,13 +53,13 @@ describe('Page', () => {
 
     beforeEach(() => {
         gotoMock = Mock.ofInstance((url: string, options: Puppeteer.DirectNavigationOptions) => {
-            return null;
+            return undefined;
         });
         waitForNavigationMock = Mock.ofInstance((options?: Puppeteer.NavigationOptions) => {
-            return null;
+            return undefined;
         });
         setBypassCSPMock = Mock.ofInstance((enabled: boolean) => {
-            return null;
+            return undefined;
         });
 
         puppeteerPageMock = new PuppeteerPageMock(gotoMock.object, waitForNavigationMock.object, setBypassCSPMock.object);
@@ -82,14 +84,17 @@ describe('Page', () => {
             headers: () => {
                 return { 'content-type': 'text/plain' };
             },
+            // tslint:disable-next-line: no-any
         } as any;
         const options: Puppeteer.DirectNavigationOptions = {
             waitUntil: ['load' as Puppeteer.LoadEvent],
         };
         gotoMock
             .setup(async goto => goto(scanUrl, options))
-            .returns(async () => Promise.resolve(response as Puppeteer.Response))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
+
+        // tslint:disable-next-line: no-any no-unsafe-any
         waitForNavigationMock.setup(async wait => wait(It.isAny())).verifiable(Times.once());
 
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
@@ -112,12 +117,16 @@ describe('Page', () => {
             headers: () => {
                 return { 'content-type': 'text/html' };
             },
+            // tslint:disable-next-line: no-any
         } as any;
         gotoMock
+            // tslint:disable-next-line: no-any no-unsafe-any
             .setup(async goto => goto(scanUrl, It.isAny()))
-            .returns(async () => Promise.resolve(response as Puppeteer.Response))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
+
         waitForNavigationMock
+            // tslint:disable-next-line: no-any no-unsafe-any
             .setup(async wait => wait(It.isAny()))
             .returns(async () => {
                 throw new Error('network timed out');
@@ -129,6 +138,7 @@ describe('Page', () => {
             .returns(async () => Promise.resolve(axeResults))
             .verifiable(Times.once());
         axePuppeteerFactoryMock
+            // tslint:disable-next-line: no-any no-unsafe-any
             .setup(o => o(It.isAny()))
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
@@ -148,7 +158,7 @@ describe('Page', () => {
     });
 
     it('should call setBypassCSP', async () => {
-        setBypassCSPMock.setup(set => set(true)).verifiable(Times.once());
+        setBypassCSPMock.setup(async setBypassCSP => setBypassCSP(true)).verifiable(Times.once());
 
         await page.create();
         await page.enableBypassCSP();

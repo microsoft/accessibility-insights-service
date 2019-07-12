@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable:no-import-side-effect no-any
-import '../../test-utilities/common-mock-methods';
 import 'reflect-metadata';
+import '../../test-utilities/common-mock-methods';
 
 import { AxeResults } from 'axe-core';
 import { Logger } from 'logger';

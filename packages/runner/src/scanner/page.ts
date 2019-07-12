@@ -46,6 +46,7 @@ export class Page {
 
         const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
+
         return { results: scanResults };
     }
 
@@ -57,7 +58,8 @@ export class Page {
 
     private isHtmlPage(response: Puppeteer.Response): boolean {
         const contentType = this.getContentType(response.headers());
-        return contentType != null && contentType.indexOf('text/html') != -1;
+
+        return contentType !== undefined && contentType.indexOf('text/html') !== -1;
     }
 
     private getContentType(headers: Record<string, string>): string {
