@@ -1,0 +1,14 @@
+{
+    "commonConfig": {
+        "taskTimeout": 5,
+        "logInConsole": false,
+        "maxQueueSize": 500
+    },
+
+    "scanConfig": {
+        "minLastReferenceSeenInDays": 7,
+        "pageRescanIntervalInDays": 1,
+        "failedPageRescanIntervalInHours": 12,
+        "maxScanRetryCount": 3
+    }
+}
