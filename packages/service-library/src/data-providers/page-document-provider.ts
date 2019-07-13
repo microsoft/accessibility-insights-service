@@ -105,7 +105,8 @@ export class PageDocumentProvider {
         and (c.lastRun.retries < ${
             PageDocumentProvider.maxScanRetryCount
         } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
-        and c.lastRun.runTime <= '${maxRescanAfterFailureTime}')
+        and c.lastRun.runTime <= '${maxRescanAfterFailureTime}'
+        and (IS_NULL(c.lastRun.unscannable) or NOT IS_DEFINED(c.lastRun.unscannable) or c.lastRun.unscannable <> true))
     or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
     ) order by c.lastRun.runTime asc`;
 

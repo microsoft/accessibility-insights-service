@@ -470,6 +470,41 @@ describe(PageDocumentProvider, () => {
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
+
+            it('filter out unscannable pages', async () => {
+                const queryResults: WebsitePage[] = [];
+                const nonQueryResults: WebsitePage[] = [];
+
+                const unscannablePage = createPageWithLastRunInfo(
+                    {
+                        runTime: beforeRescanIntervalTime,
+                        state: RunState.failed,
+                        unscannable: true,
+                    },
+                    afterLastReferenceSeenTime,
+                    'unscannable page',
+                );
+                nonQueryResults.push(unscannablePage);
+
+                const scannablePage = createPageWithLastRunInfo(
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.failed,
+                        unscannable: undefined,
+                    },
+                    afterLastReferenceSeenTime,
+                    'scannable page',
+                );
+
+                queryResults.push(scannablePage);
+
+                await dbHelper.upsertItems(queryResults);
+                await dbHelper.upsertItems(nonQueryResults);
+
+                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
         });
 
         describe('getWebsiteIds', () => {
