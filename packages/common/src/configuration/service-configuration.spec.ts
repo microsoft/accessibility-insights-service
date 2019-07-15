@@ -19,8 +19,21 @@ describe(ServiceConfiguration, () => {
         testSubject = new ServiceConfiguration(fsMock.object);
     });
 
+    it('verifies dev config path', async () => {
+        const buffer = fs.readFileSync(ServiceConfiguration.devProfilePath);
+
+        const actualConfig = JSON.parse(buffer.toString('utf-8'));
+
+        expect(actualConfig).toEqual(defaultConfig);
+    });
+
     it('should return dev config as default config', async () => {
-        setupVerifiableFileExistsCall(false);
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
+        setupVerifiableFileExistsCall(ServiceConfiguration.devProfilePath, true);
+
+        setupVerifiableFileReadCall(ServiceConfiguration.devProfilePath, cb => {
+            cb(undefined, new Buffer(JSON.stringify(defaultConfig)));
+        });
 
         const config = await testSubject.getConfig();
 
@@ -30,10 +43,10 @@ describe(ServiceConfiguration, () => {
     });
 
     it('returns profile config', async () => {
-        setupVerifiableFileExistsCall(true);
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
         const expectedConfig = { foo: 'bar' };
 
-        setupVerifiableFileReadCall(cb => {
+        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
             cb(undefined, new Buffer(JSON.stringify(expectedConfig)));
         });
 
@@ -45,10 +58,10 @@ describe(ServiceConfiguration, () => {
     });
 
     it('throw if file not parsable', async () => {
-        setupVerifiableFileExistsCall(true);
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
         const fileContent = 'content not json parsable';
 
-        setupVerifiableFileReadCall(cb => {
+        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
             cb(undefined, new Buffer(fileContent));
         });
 
@@ -58,11 +71,11 @@ describe(ServiceConfiguration, () => {
     });
 
     it('throw if file reading fails', async () => {
-        setupVerifiableFileExistsCall(true);
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
         const expectedConfig = { foo: 'bar' };
         const errorMessage = 'some error occurred while reading';
 
-        setupVerifiableFileReadCall(cb => {
+        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
             cb(errorMessage as any, new Buffer(JSON.stringify(expectedConfig)));
         });
 
@@ -71,17 +84,20 @@ describe(ServiceConfiguration, () => {
         fsMock.verifyAll();
     });
 
-    function setupVerifiableFileReadCall(callback: (prodCodeReadCallback: (err: Error, buffer: Buffer) => void) => void): void {
+    function setupVerifiableFileReadCall(
+        profilePath: string,
+        callback: (prodCodeReadCallback: (err: Error, buffer: Buffer) => void) => void,
+    ): void {
         fsMock
-            .setup(f => f.readFile(ServiceConfiguration.profilePath, It.isAny()))
+            .setup(f => f.readFile(profilePath, It.isAny()))
             .callback((filePath: string, cb: (err: Error, buffer: Buffer) => void) => {
                 callback(cb);
             })
             .verifiable(Times.once());
     }
-    function setupVerifiableFileExistsCall(fileExistsValue: boolean): void {
+    function setupVerifiableFileExistsCall(profilePath: string, fileExistsValue: boolean): void {
         fsMock
-            .setup(f => f.exists(ServiceConfiguration.profilePath, It.isAny()))
+            .setup(f => f.exists(profilePath, It.isAny()))
             .callback((filePath: string, cb: (exists: boolean) => void) => {
                 cb(fileExistsValue);
             })

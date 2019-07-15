@@ -1,6 +1,7 @@
 {
+    "configType": "dev",
     "commonConfig": {
-        "taskTimeout": 5,
+        "taskTimeoutInMinutes": 5,
         "logInConsole": false,
         "maxQueueSize": 500
     },
