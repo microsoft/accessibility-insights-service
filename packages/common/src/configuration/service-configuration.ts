@@ -1,53 +1,110 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import * as convict from 'convict';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
-import * as path from 'path';
-import * as defaultConfig from './runtime-config/runtime-config.dev.json';
+
+export interface CommonRuntimeConfig {
+    taskTimeoutInMinutes: number;
+    logInConsole: boolean;
+    maxQueueSize: number;
+}
+
+export interface ScanRunTimeConfig {
+    minLastReferenceSeenInDays: number;
+    pageRescanIntervalInDays: number;
+    failedPageRescanIntervalInHours: number;
+    maxScanRetryCount: number;
+}
+
+export interface RuntimeConfig {
+    commonConfig: CommonRuntimeConfig;
+    scanConfig: ScanRunTimeConfig;
+}
 
 @injectable()
 export class ServiceConfiguration {
     public static readonly profilePath = './runtime-config/runtime-config.json';
-    public static readonly devProfilePath = path.resolve(__dirname, 'runtime-config/runtime-config.dev.json');
-    public config: typeof defaultConfig;
     private readonly fileSystem: typeof fs;
+    private loadConfigPromise: Promise<convict.Config<RuntimeConfig>>;
+    private readonly convictModule: typeof convict;
 
-    constructor(fileSystem: typeof fs = fs) {
+    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict) {
         this.fileSystem = fileSystem;
+        this.convictModule = convictModule;
     }
 
-    public async getConfig(): Promise<typeof defaultConfig> {
-        if (isNil(this.config)) {
-            this.config = await this.getProfileConfigFromFile(ServiceConfiguration.profilePath);
+    public async getConfigValue<K extends keyof RuntimeConfig | null | undefined = undefined>(
+        key?: K,
+    ): Promise<K extends null | undefined ? RuntimeConfig : RuntimeConfig[K]> {
+        const config = await this.getConvictConfig();
 
-            if (isNil(this.config)) {
-                console.log('Unable to find runtime configuration file. Using dev configuration');
-                this.config = await this.getProfileConfigFromFile(ServiceConfiguration.devProfilePath);
-                console.log(`dev configuration used - ${JSON.stringify(this.config)}`);
-            }
+        return config.get(key);
+    }
+
+    private async getConvictConfig(): Promise<convict.Config<RuntimeConfig>> {
+        if (isNil(this.loadConfigPromise)) {
+            this.loadConfigPromise = new Promise((resolve, reject) => {
+                const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
+
+                this.fileSystem.exists(ServiceConfiguration.profilePath, exists => {
+                    if (exists === true) {
+                        config.loadFile(ServiceConfiguration.profilePath);
+                        config.validate({ allowed: 'strict' });
+                    } else {
+                        console.log(`Unable to load custom configuration. Using default config  - ${config}`);
+                    }
+                    resolve(config);
+                });
+            });
         }
 
-        return this.config;
+        return this.loadConfigPromise;
     }
 
-    private async getProfileConfigFromFile(configPath: string): Promise<typeof defaultConfig> {
-        return new Promise<typeof defaultConfig>((resolve, reject) => {
-            this.fileSystem.exists(configPath, (exists: boolean) => {
-                if (exists === true) {
-                    this.fileSystem.readFile(configPath, (err, buffer) => {
-                        if (isNil(err)) {
-                            const config = JSON.parse(buffer.toString('utf-8')) as typeof defaultConfig;
-                            resolve(config);
-                        } else {
-                            reject(err);
-                        }
-                    });
-                } else {
-                    resolve(undefined);
-                }
-            });
-        });
+    private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
+        return {
+            commonConfig: {
+                logInConsole: {
+                    format: 'Boolean',
+                    default: true,
+                    doc: 'Property to decide if console logging is enabled',
+                },
+                maxQueueSize: {
+                    format: 'int',
+                    default: 10,
+                    doc: 'Maximum message the queue can have',
+                },
+                taskTimeoutInMinutes: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Timeout value after which the task has to be terminated',
+                },
+            },
+            scanConfig: {
+                minLastReferenceSeenInDays: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Minimum days since we last saw a page. Pages older than this time will not be scanned.',
+                },
+                pageRescanIntervalInDays: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Minimum days since we last scanned. Pages newer than this time will not be scanned.',
+                },
+                failedPageRescanIntervalInHours: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Minimum hours since the last scan failed. Pages newer than this time will not be scanned.',
+                },
+                maxScanRetryCount: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Maximum number of retries allowed for a page scan',
+                },
+            },
+        };
     }
 }

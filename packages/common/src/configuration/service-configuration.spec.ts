@@ -3,96 +3,106 @@
 
 import 'reflect-metadata';
 
+import * as convict from 'convict';
 import * as fs from 'fs';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import * as defaultConfig from './runtime-config/runtime-config.dev.json';
-import { ServiceConfiguration } from './service-configuration';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { RuntimeConfig, ServiceConfiguration } from './service-configuration';
 
 // tslint:disable: non-literal-fs-path no-unsafe-any no-any
 
 describe(ServiceConfiguration, () => {
     let testSubject: ServiceConfiguration;
     let fsMock: IMock<typeof fs>;
+    let convictMock: IMock<typeof convict>;
+    let configMock: IMock<convict.Config<RuntimeConfig>>;
+    let actualSchema: convict.Schema<RuntimeConfig>;
 
     beforeEach(() => {
+        convictMock = Mock.ofInstance(convict);
+
+        configMock = Mock.ofType<convict.Config<RuntimeConfig>>();
+        getPromisableDynamicMock(configMock);
+
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
-        testSubject = new ServiceConfiguration(fsMock.object);
+        testSubject = new ServiceConfiguration(fsMock.object, convictMock.object);
     });
 
-    it('verifies dev config path', async () => {
-        const buffer = fs.readFileSync(ServiceConfiguration.devProfilePath);
-
-        const actualConfig = JSON.parse(buffer.toString('utf-8'));
-
-        expect(actualConfig).toEqual(defaultConfig);
-    });
-
-    it('should return dev config as default config', async () => {
+    it('verifies dev config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
-        setupVerifiableFileExistsCall(ServiceConfiguration.devProfilePath, true);
+        const keyToFetch = 'commonConfig';
+        const expectedConfigValue = 'config value';
 
-        setupVerifiableFileReadCall(ServiceConfiguration.devProfilePath, cb => {
-            cb(undefined, new Buffer(JSON.stringify(defaultConfig)));
-        });
+        setupVerifiableSchemaSetupCall();
+        setupLoadCustomFileConfigCallsNotCalled();
+        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
 
-        const config = await testSubject.getConfig();
+        const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
-        expect(config).toEqual(defaultConfig);
+        expect(actualConfigValue).toBe(expectedConfigValue);
+        expect(actualSchema).toMatchSnapshot();
 
-        fsMock.verifyAll();
+        verifyMocks();
     });
 
-    it('returns profile config', async () => {
+    it('loads config only once', async () => {
+        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
+        const keyToFetch = 'commonConfig';
+        const expectedConfigValue = 'config value';
+
+        setupVerifiableSchemaSetupCall();
+        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+
+        let actualConfigValue = await testSubject.getConfigValue(keyToFetch);
+        expect(actualConfigValue).toBe(expectedConfigValue);
+
+        actualConfigValue = await testSubject.getConfigValue(keyToFetch);
+        expect(actualConfigValue).toBe(expectedConfigValue);
+
+        verifyMocks();
+    });
+
+    it('verifies custom config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const expectedConfig = { foo: 'bar' };
+        const keyToFetch = 'commonConfig';
+        const expectedConfigValue = 'config value';
 
-        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
-            cb(undefined, new Buffer(JSON.stringify(expectedConfig)));
-        });
+        setupVerifiableSchemaSetupCall();
+        setupVerifiableLoadCustomFileConfigCalls();
 
-        const config = await testSubject.getConfig();
+        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
 
-        expect(config).toEqual(expectedConfig);
+        const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
-        fsMock.verifyAll();
+        expect(actualConfigValue).toBe(expectedConfigValue);
+        expect(actualSchema).toMatchSnapshot();
+
+        verifyMocks();
     });
 
-    it('throw if file not parsable', async () => {
-        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const fileContent = 'content not json parsable';
-
-        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
-            cb(undefined, new Buffer(fileContent));
-        });
-
-        await expect(testSubject.getConfig()).rejects.toBeDefined();
-
+    function verifyMocks(): void {
+        configMock.verifyAll();
+        convictMock.verifyAll();
         fsMock.verifyAll();
-    });
+    }
 
-    it('throw if file reading fails', async () => {
-        setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const expectedConfig = { foo: 'bar' };
-        const errorMessage = 'some error occurred while reading';
+    function setupVerifiableLoadCustomFileConfigCalls(): void {
+        configMock.setup(c => c.loadFile(ServiceConfiguration.profilePath)).verifiable(Times.once());
+        configMock.setup(c => c.validate(It.isValue({ allowed: 'strict' }))).verifiable(Times.once());
+    }
 
-        setupVerifiableFileReadCall(ServiceConfiguration.profilePath, cb => {
-            cb(errorMessage as any, new Buffer(JSON.stringify(expectedConfig)));
-        });
+    function setupLoadCustomFileConfigCallsNotCalled(): void {
+        configMock.setup(c => c.loadFile(It.isAny())).verifiable(Times.never());
+        configMock.setup(c => c.validate(It.isAny())).verifiable(Times.never());
+    }
 
-        await expect(testSubject.getConfig()).rejects.toBe(errorMessage);
-
-        fsMock.verifyAll();
-    });
-
-    function setupVerifiableFileReadCall(
-        profilePath: string,
-        callback: (prodCodeReadCallback: (err: Error, buffer: Buffer) => void) => void,
-    ): void {
-        fsMock
-            .setup(f => f.readFile(profilePath, It.isAny()))
-            .callback((filePath: string, cb: (err: Error, buffer: Buffer) => void) => {
-                callback(cb);
+    function setupVerifiableSchemaSetupCall(): void {
+        convictMock
+            .setup(c => c<RuntimeConfig>(It.isAny()))
+            .callback((s: convict.Schema<RuntimeConfig>) => {
+                actualSchema = s;
             })
+            .returns(() => configMock.object)
             .verifiable(Times.once());
     }
     function setupVerifiableFileExistsCall(profilePath: string, fileExistsValue: boolean): void {
