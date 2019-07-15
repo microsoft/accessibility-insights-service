@@ -9,6 +9,8 @@ export jobManagerContainerName="batch-job-manager-script"
 export runnerContainerName="batch-runner-script"
 export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
+export runtimeConfigurationContainerName="runtime-configuration-container-name"
+export runtimeConfigurationBlobName="runtime-config.json"
 export includePattern="*[!*.map]"
 
 if [[ -z $dropFolder ]]; then
@@ -24,6 +26,15 @@ uploadFileBatch() {
     az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
 }
 
+uploadFile() {
+    destinationContainer=$1
+    pathToSource=$2
+    storageAccountName=$3
+    blobName=$4
+
+    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName"
+}
+
 exitWithUsageInfo() {
     echo \
         "
@@ -33,10 +44,11 @@ Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFold
 }
 
 # Read script arguments
-while getopts "s:d:" option; do
+while getopts "s:d:p:" option; do
     case $option in
     s) storageAccountName=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
+    p) profileName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -52,3 +64,4 @@ uploadFileBatch $jobManagerContainerName "$dropFolder/job-manager/dist" "$storag
 uploadFileBatch $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"
+uploadFile $runtimeConfigurationContainerName "$toBeReplaced" "$storageAccountName" "$runtimeConfigurationBlobName"

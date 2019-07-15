@@ -20,7 +20,7 @@ export appInsightsKey
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id> -l <Azure region>
+Usage: $0 -r <resource group> -s <subscription name or id> -l <Azure region> -p <profile name>
 
 List of available Azure regions:
 
@@ -58,16 +58,17 @@ uaenorth
 }
 
 # Read script arguments
-while getopts "r:s:l:" option; do
+while getopts "r:s:l:p:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
+    p) profileName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $profileName]]; then
     exitWithUsageInfo
 fi
 
