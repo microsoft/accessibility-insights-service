@@ -54,7 +54,7 @@ while getopts "s:d:p:" option; do
 done
 
 # Print script usage help
-if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]]; then
+if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $profileName]]; then
     exitWithUsageInfo
 fi
 
