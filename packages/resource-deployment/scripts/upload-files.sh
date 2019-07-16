@@ -32,7 +32,7 @@ uploadFile() {
     storageAccountName=$3
     blobName=$4
 
-    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName"
+    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName" 1>/dev/null
 }
 
 exitWithUsageInfo() {
