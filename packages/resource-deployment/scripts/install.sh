@@ -17,6 +17,7 @@ export cosmosAccountName
 export dropFolder="${0%/*}/../../../"
 export templatesFolder="${0%/*}/../templates/"
 export appInsightsKey
+export profileName
 
 exitWithUsageInfo() {
     echo "
