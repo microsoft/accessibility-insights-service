@@ -9,7 +9,7 @@
             "value": "batch-pool-startup-script"
         },
         "runtimeConfigurationContainerName": {
-            "value": "runtime-configuration-container-name"
+            "value": "runtime-configuration"
         },
         "runnerContainerName": {
             "value": "batch-runner-script"

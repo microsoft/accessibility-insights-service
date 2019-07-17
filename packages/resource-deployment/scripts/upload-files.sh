@@ -9,7 +9,7 @@ export jobManagerContainerName="batch-job-manager-script"
 export runnerContainerName="batch-runner-script"
 export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
-export runtimeConfigurationContainerName="runtime-configuration-container-name"
+export runtimeConfigurationContainerName="runtime-configuration"
 export runtimeConfigurationBlobName="runtime-config.json"
 export includePattern="*[!*.map]"
 
@@ -54,7 +54,7 @@ while getopts "s:d:p:" option; do
 done
 
 # Print script usage help
-if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $profileName]]; then
+if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $profileName ]]; then
     exitWithUsageInfo
 fi
 

@@ -49,7 +49,7 @@
         },
         "runtimeConfigurationContainerName": {
             "type": "string",
-            "defaultValue": "runtime-configuration-container-name",
+            "defaultValue": "runtime-configuration",
             "metadata": {
                 "description": "The name of the blob container."
             }
