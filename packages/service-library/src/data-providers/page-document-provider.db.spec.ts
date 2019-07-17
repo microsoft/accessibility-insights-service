@@ -48,7 +48,7 @@ describe(PageDocumentProvider, () => {
         }, 30000);
 
         beforeEach(() => {
-            website = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+            website = dbHelper.createWebsiteDocument({ websiteId: dbHelper.createRandomString('websiteId') });
             loggerMock = Mock.ofType<Logger>();
             const storageClient = new StorageClient(
                 dbHelper.cosmosClient,
@@ -119,6 +119,10 @@ describe(PageDocumentProvider, () => {
             const expectedQueryResultProjections = dbHelper.getDocumentProjections(expectedQueryResults);
 
             expect(actualResultProjections).toEqual(expectedQueryResultProjections);
+        }
+
+        function setupDeepScanningWebsite(deepScanning: boolean): void {
+            website.deepScanningEnabled = deepScanning;
         }
 
         describe('getPagesNeverScanned', () => {
@@ -201,6 +205,33 @@ describe(PageDocumentProvider, () => {
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
+        });
+
+        describe('getPagesNeverScanned for website with deep scanning', () => {
+            it('returns top n query results for website with deep scanning true', async () => {
+                setupDeepScanningWebsite(true);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+
+                expect(actualResults.length).toBe(3);
+            }, 3000);
+            it('returns top n query results for website with deep scanning false', async () => {
+                setupDeepScanningWebsite(false);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+
+                expect(actualResults.length).toBe(2);
+            }, 3000);
         });
 
         describe('getPagesScanned', () => {
@@ -550,19 +581,114 @@ describe(PageDocumentProvider, () => {
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
         });
+        describe('getPagesScanned for website with deep scanning', () => {
+            it('returns top n query result for website with deep scanning true', async () => {
+                setupDeepScanningWebsite(true);
+                let queryResults: WebsitePage[];
 
-        describe('getWebsiteIds', () => {
-            it('returns website ids', async () => {
-                const website1 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
-                const website2 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
-                const website3 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+                const basePage1 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 1',
+                    true,
+                );
+                const basePage2 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 2',
+                    true,
+                );
+
+                const childPage = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'child page',
+                    false,
+                );
+
+                queryResults = [basePage1, basePage2, childPage];
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesScanned(website, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+            it('returns top n query result for website with deep scanning false', async () => {
+                setupDeepScanningWebsite(false);
+                let queryResults: WebsitePage[];
+
+                const basePage1 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 1',
+                    true,
+                );
+                const basePage2 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 2',
+                    true,
+                );
+
+                const childPage = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'child page',
+                    false,
+                );
+
+                queryResults = [basePage1, basePage2];
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesScanned(website, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+        });
+        describe('getWebsites', () => {
+            it('returns websites', async () => {
+                const websiteId1 = dbHelper.createRandomString('websiteId');
+                const websiteId2 = dbHelper.createRandomString('websiteId');
+                const websiteId3 = dbHelper.createRandomString('websiteId');
+                const website1 = dbHelper.createWebsiteDocument({ websiteId: websiteId1 });
+                const website2 = dbHelper.createWebsiteDocument({ websiteId: websiteId2 });
+                const website3 = dbHelper.createWebsiteDocument({ websiteId: websiteId3 });
                 const allWebsites = [website1, website2, website3];
-
+                const actualWebsiteIds = [] as string[];
                 await dbHelper.upsertItems(Array.from(allWebsites));
 
                 const actualQueryResults = await testSubject.getWebsites();
+                actualQueryResults.item.forEach(w => {
+                    actualWebsiteIds.push(w.websiteId);
+                });
 
-                expect(new Set(actualQueryResults.item)).toEqual(new Set(allWebsites));
+                expect(new Set(actualWebsiteIds)).toEqual(new Set([websiteId1, websiteId2, websiteId3]));
             });
         });
     }
