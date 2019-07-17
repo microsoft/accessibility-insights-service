@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { CosmosOperationResponse } from 'azure-services';
-import { CommonRuntimeConfig, ServiceConfiguration } from 'common';
+import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { WebsitePage } from 'storage-documents';
@@ -53,8 +53,8 @@ describe('Dispatcher', () => {
         currentQueueSize = 1;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('commonConfig'))
-            .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as CommonRuntimeConfig));
+            .setup(async s => s.getConfigValue('queueConfig'))
+            .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
 
         loggerMock = Mock.ofType(Logger);
         pageDocumentProviderMock = Mock.ofType(PageDocumentProvider);

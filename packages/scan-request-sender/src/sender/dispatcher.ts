@@ -18,7 +18,7 @@ export class Dispatcher {
     ) {}
 
     public async dispatchScanRequests(): Promise<void> {
-        const configQueueSize = (await this.serviceConfig.getConfigValue('commonConfig')).maxQueueSize;
+        const configQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
         this.logger.logInfo(`[Sender] Maximum queue size configuration set to ${configQueueSize}`);
 
         let currentQueueSize = await this.sender.getCurrentQueueSize();
