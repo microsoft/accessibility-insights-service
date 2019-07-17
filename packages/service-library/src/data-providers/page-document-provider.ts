@@ -4,7 +4,7 @@ import { client, CosmosOperationResponse, StorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
-import { ItemType, RunState, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
+import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class PageDocumentProvider {
@@ -21,10 +21,10 @@ export class PageDocumentProvider {
     ): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const pages: WebsitePage[] = [];
 
-        const response = await this.getWebsiteIds(continuationToken);
+        const response = await this.getWebsites(continuationToken);
         await Promise.all(
-            response.item.map(async websiteId => {
-                const websitePages = await this.getReadyToScanPagesForWebsite(websiteId, pageBatchSize);
+            response.item.map(async website => {
+                const websitePages = await this.getReadyToScanPagesForWebsite(website, pageBatchSize);
                 pages.push(...websitePages);
             }),
         );
@@ -36,22 +36,22 @@ export class PageDocumentProvider {
         };
     }
 
-    public async getReadyToScanPagesForWebsite(websiteId: string, itemCount: number = 1): Promise<WebsitePage[]> {
-        const pagesNotScannedBefore = await this.getPagesNeverScanned(websiteId, itemCount);
+    public async getReadyToScanPagesForWebsite(website: Website, itemCount: number = 1): Promise<WebsitePage[]> {
+        const pagesNotScannedBefore = await this.getPagesNeverScanned(website, itemCount);
         if (pagesNotScannedBefore.length >= itemCount) {
             return pagesNotScannedBefore;
         }
 
-        const pagesScannedAtLeastOnce = await this.getPagesScanned(websiteId, itemCount - pagesNotScannedBefore.length);
+        const pagesScannedAtLeastOnce = await this.getPagesScanned(website, itemCount - pagesNotScannedBefore.length);
 
         return pagesNotScannedBefore.concat(pagesScannedAtLeastOnce);
     }
 
-    public async getWebsiteIds(continuationToken?: string): Promise<CosmosOperationResponse<string[]>> {
+    public async getWebsites(continuationToken?: string): Promise<CosmosOperationResponse<Website[]>> {
         const partitionKey = 'website';
-        const query = `SELECT VALUE c.websiteId FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
+        const query = `SELECT * FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
 
-        const response = await this.storageClient.queryDocuments<string>(query, continuationToken, partitionKey);
+        const response = await this.storageClient.queryDocuments<Website>(query, continuationToken, partitionKey);
 
         client.ensureSuccessStatusCode(response);
 
@@ -76,19 +76,19 @@ export class PageDocumentProvider {
         return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
     }
 
-    public async getPagesNeverScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+    public async getPagesNeverScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
-    c.itemType = '${
-        ItemType.page
-    }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and c.basePage = true
+    c.itemType = '${ItemType.page}' and c.websiteId = '${
+            website.websiteId
+        }' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.storageClient.queryDocuments<WebsitePage>(query, token, websiteId);
+            return this.storageClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
 
-    public async getPagesScanned(websiteId: string, itemCount: number): Promise<WebsitePage[]> {
+    public async getPagesScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
         const maxRescanAfterFailureTime = moment()
             .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
             .toJSON();
@@ -97,9 +97,9 @@ export class PageDocumentProvider {
             .toJSON();
 
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
-    c.itemType = '${
-        ItemType.page
-    }' and c.websiteId = '${websiteId}' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and c.basePage = true
+    c.itemType = '${ItemType.page}' and c.websiteId = '${
+            website.websiteId
+        }' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (
     ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
         and (c.lastRun.retries < ${
@@ -111,7 +111,7 @@ export class PageDocumentProvider {
     ) order by c.lastRun.runTime asc`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.storageClient.queryDocuments<WebsitePage>(query, token, websiteId);
+            return this.storageClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
 
@@ -127,6 +127,10 @@ export class PageDocumentProvider {
         } while (token !== undefined);
 
         return result;
+    }
+
+    private getPageScanningCondition(website: Website): string {
+        return website.deepScanningEnabled ? '1=1' : 'c.basePage = true';
     }
 
     private getMinLastReferenceSeenValue(): string {
