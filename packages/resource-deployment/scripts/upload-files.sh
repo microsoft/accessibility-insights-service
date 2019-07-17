@@ -42,7 +42,7 @@ uploadFile() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
+Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> -e <deploy environment>
 "
     exit 1
 }
