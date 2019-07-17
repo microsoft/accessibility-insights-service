@@ -15,7 +15,7 @@ export abstract class ProcessEntryPointBase {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
             logger = this.container.get(Logger);
 
-            logger.setup(this.getTelemetryBaseProperties());
+            await logger.setup(this.getTelemetryBaseProperties());
             loggerInitialized = true;
             this.verifyDotEnvParsing(dotEnvConfig, logger);
 

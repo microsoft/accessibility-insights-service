@@ -2,20 +2,15 @@
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
-  "commonConfig": Object {
-    "logInConsole": Object {
-      "default": true,
-      "doc": "Property to decide if console logging is enabled",
-      "format": "Boolean",
-    },
+  "logInConsole": Object {
+    "default": true,
+    "doc": "Property to decide if console logging is enabled",
+    "format": "Boolean",
+  },
+  "queueConfig": Object {
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message the queue can have",
-      "format": "int",
-    },
-    "taskTimeoutInMinutes": Object {
-      "default": 3,
-      "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },
   },
@@ -38,6 +33,13 @@ Object {
     "pageRescanIntervalInDays": Object {
       "default": 3,
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+  },
+  "taskConfig": Object {
+    "taskTimeoutInMinutes": Object {
+      "default": 3,
+      "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },
   },
@@ -46,20 +48,15 @@ Object {
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
-  "commonConfig": Object {
-    "logInConsole": Object {
-      "default": true,
-      "doc": "Property to decide if console logging is enabled",
-      "format": "Boolean",
-    },
+  "logInConsole": Object {
+    "default": true,
+    "doc": "Property to decide if console logging is enabled",
+    "format": "Boolean",
+  },
+  "queueConfig": Object {
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message the queue can have",
-      "format": "int",
-    },
-    "taskTimeoutInMinutes": Object {
-      "default": 3,
-      "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },
   },
@@ -82,6 +79,13 @@ Object {
     "pageRescanIntervalInDays": Object {
       "default": 3,
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+  },
+  "taskConfig": Object {
+    "taskTimeoutInMinutes": Object {
+      "default": 3,
+      "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },
   },
