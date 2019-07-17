@@ -64,4 +64,4 @@ uploadFileBatch $jobManagerContainerName "$dropFolder/job-manager/dist" "$storag
 uploadFileBatch $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFileBatch $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"
-uploadFile $runtimeConfigurationContainerName "$dropFolder/common/dist/configuration/runtime-config.$profileName.json" "$storageAccountName" "$runtimeConfigurationBlobName"
+uploadFile $runtimeConfigurationContainerName "$dropFolder/resource-deployment/runtime-config/runtime-config.$profileName.json" "$storageAccountName" "$runtimeConfigurationBlobName"
