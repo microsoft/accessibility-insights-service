@@ -19,7 +19,7 @@ describe(registerLoggerToContainer, () => {
     let container: Container;
 
     beforeEach(() => {
-        container = new Container();
+        container = new Container({ autoBindInjectable: true });
     });
 
     it('verify logger dependency resolution', () => {

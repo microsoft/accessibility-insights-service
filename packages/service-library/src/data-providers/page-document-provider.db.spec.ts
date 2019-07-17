@@ -517,7 +517,7 @@ describe(PageDocumentProvider, () => {
                 );
                 nonQueryResults.push(unscannablePage);
 
-                const scannablePage = createPageWithLastRunInfo(
+                const scannablePage1 = createPageWithLastRunInfo(
                     website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
@@ -528,7 +528,19 @@ describe(PageDocumentProvider, () => {
                     'scannable page',
                 );
 
-                queryResults.push(scannablePage);
+                const scannablePage2 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterFailedPageRescanIntervalTime,
+                        state: RunState.failed,
+                        unscannable: false,
+                    },
+                    afterLastReferenceSeenTime,
+                    'scannable page',
+                );
+
+                queryResults.push(scannablePage1);
+                queryResults.push(scannablePage2);
 
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);

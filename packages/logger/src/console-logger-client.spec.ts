@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
@@ -13,24 +14,28 @@ import { LogLevel } from './logger';
 
 describe(ConsoleLoggerClient, () => {
     let testSubject: ConsoleLoggerClient;
-    let processStub: typeof process;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
     let consoleMock: IMock<typeof console>;
+    let logInConsole: boolean;
 
     beforeEach(() => {
-        processStub = { execArgv: ['--test'] } as typeof process;
+        logInConsole = true;
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+
+        serviceConfigMock.setup(async s => s.getConfigValue('logInConsole')).returns(async () => Promise.resolve(logInConsole));
 
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
-        testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);
+        testSubject = new ConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);
     });
 
     describe('console not enabled', () => {
-        it('do not log', () => {
-            processStub = { execArgv: ['--test', '--no-CONSOLE'] } as typeof process;
+        it('do not log', async () => {
+            logInConsole = false;
             consoleMock = Mock.ofInstance({ log: () => {} } as typeof console, MockBehavior.Strict);
-            testSubject = new ConsoleLoggerClient(processStub, consoleMock.object);
+            testSubject = new ConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);
 
-            testSubject.setup();
+            await testSubject.setup();
             testSubject.trackMetric('metric1', 1);
             testSubject.trackEvent('event1');
             testSubject.log('trace1', LogLevel.info);
@@ -41,18 +46,18 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackMetric', () => {
-        it('log data', () => {
-            testSubject.setup(null);
+        it('log data', async () => {
+            await testSubject.setup(null);
 
             testSubject.trackMetric('metric1', 1);
 
             consoleMock.verify(c => c.log('[Metric] === metric1 - 1'), Times.once());
         });
 
-        it('log data with base properties with circular reference', () => {
+        it('log data with base properties with circular reference', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             (baseProps as any).y = baseProps;
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
 
             testSubject.trackMetric('metric1', 1);
 
@@ -61,26 +66,26 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackEvent', () => {
-        it('log data without properties', () => {
-            testSubject.setup(null);
+        it('log data without properties', async () => {
+            await testSubject.setup(null);
 
             testSubject.trackEvent('event1');
 
             consoleMock.verify(c => c.log('[Event] === event1'), Times.once());
         });
 
-        it('log data with base properties', () => {
+        it('log data with base properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
 
             testSubject.trackEvent('event1');
 
             consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === event1`), Times.once());
         });
 
-        it('log data with event properties', () => {
+        it('log data with event properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
 
             testSubject.trackEvent('event1', eventProps);
@@ -93,26 +98,26 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('log', () => {
-        it('log data without properties', () => {
-            testSubject.setup(null);
+        it('log data without properties', async () => {
+            await testSubject.setup(null);
 
             testSubject.log('trace1', LogLevel.verbose);
 
             consoleMock.verify(c => c.log('[Trace][verbose] === trace1'), Times.once());
         });
 
-        it('log data with base properties', () => {
+        it('log data with base properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
 
             testSubject.log('trace1', LogLevel.warn);
 
             consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(baseProps)}] === trace1`), Times.once());
         });
 
-        it('log data with event properties', () => {
+        it('log data with event properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
             const traceProps = { eventProp1: 'prop value' };
 
             testSubject.log('trace1', LogLevel.warn, traceProps);
@@ -125,8 +130,8 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackException', () => {
-        it('log data without properties', () => {
-            testSubject.setup(null);
+        it('log data without properties', async () => {
+            await testSubject.setup(null);
             const error = new Error('error1');
 
             testSubject.trackException(error);
@@ -134,9 +139,9 @@ describe(ConsoleLoggerClient, () => {
             consoleMock.verify(c => c.log(`[Exception] === ${util.inspect(error, { depth: null })}`), Times.once());
         });
 
-        it('log data with base properties', () => {
+        it('log data with base properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            testSubject.setup(baseProps);
+            await testSubject.setup(baseProps);
             const error = new Error('error1');
 
             testSubject.trackException(error);

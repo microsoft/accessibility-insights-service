@@ -56,28 +56,28 @@ describe(AppInsightsLoggerClient, () => {
     });
 
     describe('setup', () => {
-        it('verify default setup', () => {
+        it('verify default setup', async () => {
             setupCallsForTelemetrySetup();
 
-            testSubject.setup(null);
+            await testSubject.setup(null);
 
             verifyMocks();
         });
 
-        it('initializes with additional common properties', () => {
+        it('initializes with additional common properties', async () => {
             const additionalCommonProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             setupCallsForTelemetrySetup(additionalCommonProps);
 
-            testSubject.setup(additionalCommonProps);
+            await testSubject.setup(additionalCommonProps);
 
             verifyMocks();
         });
     });
 
     describe('trackMetric', () => {
-        it('when value passed', () => {
+        it('when value passed', async () => {
             setupCallsForTelemetrySetup();
-            testSubject.setup(null);
+            await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock.setup(t => t.trackMetric(It.isValue({ name: 'metric1', value: 10 }))).verifiable();
@@ -88,9 +88,9 @@ describe(AppInsightsLoggerClient, () => {
         });
     });
     describe('trackEvent', () => {
-        it('when properties not passed', () => {
+        it('when properties not passed', async () => {
             setupCallsForTelemetrySetup();
-            testSubject.setup(null);
+            await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: undefined }))).verifiable();
@@ -100,9 +100,9 @@ describe(AppInsightsLoggerClient, () => {
             verifyMocks();
         });
 
-        it('when properties passed', () => {
+        it('when properties passed', async () => {
             setupCallsForTelemetrySetup();
-            testSubject.setup(null);
+            await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
@@ -116,9 +116,9 @@ describe(AppInsightsLoggerClient, () => {
     });
 
     describe('log', () => {
-        it('when properties not passed', () => {
+        it('when properties not passed', async () => {
             setupCallsForTelemetrySetup();
-            testSubject.setup(null);
+            await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
@@ -156,9 +156,9 @@ describe(AppInsightsLoggerClient, () => {
                 logLevel: LogLevel.verbose,
                 appInsightsLogLevel: appInsights.Contracts.SeverityLevel.Verbose,
             },
-        ])('when properties passed %o', (testCase: TrackTraceTestCase) => {
+        ])('when properties passed %o', async (testCase: TrackTraceTestCase) => {
             setupCallsForTelemetrySetup();
-            testSubject.setup(null);
+            await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
