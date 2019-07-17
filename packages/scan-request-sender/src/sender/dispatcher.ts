@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { client, CosmosOperationResponse } from 'azure-services';
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
@@ -13,10 +14,11 @@ export class Dispatcher {
         @inject(PageDocumentProvider) private readonly pageDocumentProvider: PageDocumentProvider,
         @inject(Logger) private readonly logger: Logger,
         @inject(ScanRequestSender) private readonly sender: ScanRequestSender,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
     public async dispatchScanRequests(): Promise<void> {
-        const configQueueSize = Number(process.env.QUEUE_SIZE);
+        const configQueueSize = (await this.serviceConfig.getConfigValue('commonConfig')).maxQueueSize;
         this.logger.logInfo(`[Sender] Maximum queue size configuration set to ${configQueueSize}`);
 
         let currentQueueSize = await this.sender.getCurrentQueueSize();

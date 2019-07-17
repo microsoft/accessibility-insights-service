@@ -1,69 +1,237 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any
+// tslint:disable: no-import-side-effect no-any no-unsafe-any no-object-literal-type-assertion
 import 'reflect-metadata';
 
 import { CosmosOperationResponse } from 'azure-services';
+import { CommonRuntimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
-import { ItemType, RunState, WebsitePage } from 'storage-documents';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { WebsitePage } from 'storage-documents';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { Dispatcher } from './dispatcher';
 import { ScanRequestSender } from './scan-request-sender';
 
-let loggerMock: IMock<Logger>;
-let pageDocumentProviderMock: IMock<PageDocumentProvider>;
-let scanRequestSenderMock: IMock<ScanRequestSender>;
-let dispatcher: Dispatcher;
+interface QueryDataProviderStubResponse<T> {
+    continuationToken: string;
+    data: T[];
+}
+
+class QueryDataProviderStub<T> {
+    private readonly data: T[];
+    private currentStartPos: number;
+    private readonly maxItemsPerRequest: number;
+
+    constructor(data: T[], chunkCount: number) {
+        this.data = data;
+        this.currentStartPos = 0;
+        this.maxItemsPerRequest = chunkCount;
+    }
+
+    public getNextDataChunk(): QueryDataProviderStubResponse<T> {
+        const endPos = this.currentStartPos + this.maxItemsPerRequest;
+        const currentChunk = this.data.slice(this.currentStartPos, endPos);
+        this.currentStartPos = endPos;
+
+        return {
+            continuationToken: this.currentStartPos >= this.data.length ? undefined : `token - ${this.currentStartPos}`,
+            data: currentChunk,
+        };
+    }
+}
 
 describe('Dispatcher', () => {
+    let loggerMock: IMock<Logger>;
+    let pageDocumentProviderMock: IMock<PageDocumentProvider>;
+    let scanRequestSenderMock: IMock<ScanRequestSender>;
+    let dispatcher: Dispatcher;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
+    const maxQueueSize = 10;
+    let currentQueueSize: number;
+
     beforeEach(() => {
-        process.env.QUEUE_SIZE = '10';
+        currentQueueSize = 1;
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async s => s.getConfigValue('commonConfig'))
+            .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as CommonRuntimeConfig));
+
         loggerMock = Mock.ofType(Logger);
         pageDocumentProviderMock = Mock.ofType(PageDocumentProvider);
-        scanRequestSenderMock = Mock.ofType(ScanRequestSender);
-        dispatcher = new Dispatcher(pageDocumentProviderMock.object, loggerMock.object, scanRequestSenderMock.object);
+        scanRequestSenderMock = Mock.ofType(ScanRequestSender, MockBehavior.Strict);
+        dispatcher = new Dispatcher(
+            pageDocumentProviderMock.object,
+            loggerMock.object,
+            scanRequestSenderMock.object,
+            serviceConfigMock.object,
+        );
     });
 
-    it('dispatch scan requests, when current queue size greater than config queue size', async () => {
-        setupQueueSize(15);
-        loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+    function verifyAll(): void {
+        pageDocumentProviderMock.verifyAll();
+        scanRequestSenderMock.verifyAll();
+        loggerMock.verifyAll();
+    }
+
+    test.each([maxQueueSize, maxQueueSize + 1])(
+        'does nothing if current queue size is greater than max queue size - current queue size - %o',
+        async (queueSize: number) => {
+            currentQueueSize = queueSize;
+            setupVerifiableQueueSizeCall();
+            setupPageDocumentProviderNotCalled();
+            setupVerifiableScanRequestNotCalled();
+            loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+
+            await dispatcher.dispatchScanRequests();
+
+            verifyAll();
+        },
+    );
+
+    it('does not call scan request if no pages to add', async () => {
+        setupVerifiableQueueSizeCall();
+        const queryDataProviderStub = new QueryDataProviderStub<WebsitePage>([], 5);
+        setupReadyToScanPageForAllPages([queryDataProviderStub]);
+        setupVerifiableScanRequestNotCalled();
 
         await dispatcher.dispatchScanRequests();
-        loggerMock.verifyAll();
+
+        verifyAll();
+    });
+
+    it('sends requests when total ready to scan pages < current queue size', async () => {
+        const initialQueueSize = 1;
+        currentQueueSize = 1;
+        setupVerifiableQueueSizeCall();
+        const allPages = getWebPages(maxQueueSize - 2);
+
+        const queryDataProviderStub1 = new QueryDataProviderStub<WebsitePage>(allPages, 2);
+        const queryDataProviderStub2 = new QueryDataProviderStub<WebsitePage>([], 2);
+
+        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+
+        await dispatcher.dispatchScanRequests();
+
+        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
+        verifyAll();
+    });
+
+    it('sends requests when total ready to scan pages > current queue size', async () => {
+        const initialQueueSize = 1;
+        currentQueueSize = 1;
+        setupVerifiableQueueSizeCall();
+        const allPages = getWebPages(maxQueueSize + 1);
+
+        const queryDataProviderStub1 = new QueryDataProviderStub<WebsitePage>(allPages.slice(0, allPages.length / 2), 2);
+        const queryDataProviderStub2 = new QueryDataProviderStub<WebsitePage>(allPages.slice(allPages.length / 2, allPages.length), 2);
+
+        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+
+        await dispatcher.dispatchScanRequests();
+        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
+
+        verifyAll();
+    });
+
+    it('sends requests when total ready to scan pages = current queue size', async () => {
+        const initialQueueSize = 1;
+        currentQueueSize = 1;
+        setupVerifiableQueueSizeCall();
+        const allPages = getWebPages(maxQueueSize - currentQueueSize);
+
+        const queryDataProviderStub1 = new QueryDataProviderStub<WebsitePage>(allPages.slice(0, allPages.length / 2), 2);
+        const queryDataProviderStub2 = new QueryDataProviderStub<WebsitePage>(allPages.slice(allPages.length / 2, allPages.length), 2);
+
+        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+
+        await dispatcher.dispatchScanRequests();
+        expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
+
+        verifyAll();
     });
 
     it('error while retrieving documents', async () => {
-        setupQueueSize(8);
-        setupPageDocumentProviderMock(getErrorResponse());
+        setupVerifiableQueueSizeCall();
+
+        pageDocumentProviderMock
+            .setup(async p => p.getReadyToScanPages(It.isAny()))
+            .returns(async () => Promise.resolve(getErrorResponse()))
+            .verifiable(Times.once());
 
         await expect(dispatcher.dispatchScanRequests()).rejects.toThrowError(/Invalid HTTP response/);
         pageDocumentProviderMock.verifyAll();
     });
 
-    it('dispatch scan requests, when current queue size less than config queue size', async () => {
-        setupQueueSize(8);
-        setupSenderMock();
-        setupPageDocumentProviderMock(getReadyToScanPagesData());
+    function getWebPages(count: number): WebsitePage[] {
+        const webPages: WebsitePage[] = [];
 
-        await dispatcher.dispatchScanRequests();
-        pageDocumentProviderMock.verifyAll();
-    });
+        for (let i = 0; i < count; i += 1) {
+            webPages.push({
+                id: `website-${i}`,
+            } as WebsitePage);
+        }
 
-    function setupPageDocumentProviderMock(response: CosmosOperationResponse<WebsitePage[]>): void {
-        pageDocumentProviderMock
-            .setup(async p => p.getReadyToScanPages(It.isAny()))
-            .returns(async () => Promise.resolve(response))
+        return webPages;
+    }
+
+    function createWebPagesRequestResponse(webPages: WebsitePage[], continuationToken?: string): CosmosOperationResponse<WebsitePage[]> {
+        return {
+            type: 'CosmosOperationResponse<WebsitePage>',
+            statusCode: 200,
+            item: webPages,
+            continuationToken: continuationToken,
+        } as CosmosOperationResponse<WebsitePage[]>;
+    }
+
+    function setupReadyToScanPageForAllPages(dataProviders: QueryDataProviderStub<WebsitePage>[]): void {
+        dataProviders.forEach(dataProvider => {
+            let previousContinuationToken;
+
+            do {
+                const response = dataProvider.getNextDataChunk();
+
+                setupGetReadyToScanPagesCallForChunk(response.data, previousContinuationToken, response.continuationToken);
+
+                if (response.data.length > 0) {
+                    setupVerifiableScanRequestCallForChunk(response.data);
+                }
+
+                previousContinuationToken = response.continuationToken;
+            } while (previousContinuationToken !== undefined);
+        });
+    }
+
+    function setupVerifiableScanRequestCallForChunk(webPages: WebsitePage[]): void {
+        scanRequestSenderMock
+            .setup(async s => s.sendRequestToScan(webPages))
+            .returns(async () => {
+                currentQueueSize += webPages.length;
+            })
             .verifiable(Times.once());
     }
 
-    function setupQueueSize(size: number): void {
-        scanRequestSenderMock.setup(async s => s.getCurrentQueueSize()).returns(async () => Promise.resolve(size));
+    function setupGetReadyToScanPagesCallForChunk(
+        webPages: WebsitePage[],
+        previousContinuationToken: string,
+        continuationToken: string,
+    ): void {
+        pageDocumentProviderMock
+            .setup(async p => p.getReadyToScanPages(previousContinuationToken))
+            .returns(async () => Promise.resolve(createWebPagesRequestResponse(webPages, continuationToken)));
     }
 
-    function setupSenderMock(): void {
-        // tslint:disable-next-line: no-void-expression
-        scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).returns(async () => Promise.resolve(setupQueueSize(10)));
+    function setupPageDocumentProviderNotCalled(): void {
+        pageDocumentProviderMock.setup(async p => p.getReadyToScanPages(It.isAny())).verifiable(Times.never());
+    }
+    function setupVerifiableQueueSizeCall(): void {
+        scanRequestSenderMock
+            .setup(async s => s.getCurrentQueueSize())
+            .returns(async () => Promise.resolve(currentQueueSize))
+            .verifiable(Times.atLeastOnce());
+    }
+
+    function setupVerifiableScanRequestNotCalled(): void {
+        scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
     }
 
     function getErrorResponse(): CosmosOperationResponse<WebsitePage[]> {
@@ -72,52 +240,6 @@ describe('Dispatcher', () => {
             type: 'CosmosOperationResponse<WebsitePage>',
             statusCode: 500,
             item: <WebsitePage[]>undefined,
-        };
-    }
-
-    function getReadyToScanPagesData(): CosmosOperationResponse<WebsitePage[]> {
-        // tslint:disable-next-line: no-object-literal-type-assertion
-        return <CosmosOperationResponse<WebsitePage[]>>{
-            type: 'CosmosOperationResponse<WebsitePage>',
-            statusCode: 200,
-            item: <WebsitePage[]>[
-                {
-                    id: '1',
-                    itemType: ItemType.page,
-                    partitionKey: 'https://www.microsoft.com',
-                    websiteId: '1234',
-                    baseUrl: 'https://www.microsoft.com',
-                    url: 'https://www.microsoft.com',
-                    basePage: true,
-                    pageRank: 1,
-                    lastReferenceSeen: 'abc',
-                    lastRun: {
-                        runTime: 'test',
-                        state: RunState.completed,
-                        error: '',
-                        retries: 1,
-                    },
-                    links: ['https://www.microsoft.com/1', 'https://www.microsoft.com/2'],
-                },
-                {
-                    id: '2',
-                    itemType: ItemType.page,
-                    partitionKey: 'https://www.xbox.com',
-                    websiteId: '1234',
-                    baseUrl: 'https://www.xbox.com',
-                    url: 'https://www.xbox.com',
-                    basePage: true,
-                    pageRank: 1,
-                    lastReferenceSeen: 'abc',
-                    lastRun: {
-                        runTime: 'test',
-                        state: RunState.completed,
-                        error: '',
-                        retries: 1,
-                    },
-                    links: ['https://www.xbox.com/1', 'https://www.xbox.com/2'],
-                },
-            ],
         };
     }
 });
