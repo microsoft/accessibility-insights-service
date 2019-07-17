@@ -20,12 +20,14 @@ export class Logger {
 
     constructor(private readonly loggerClients: LoggerClient[], private readonly currentProcess: typeof process) {}
 
-    public setup(baseProperties?: BaseTelemetryProperties): void {
+    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         if (this.initialized === true) {
             return;
         }
 
-        this.invokeLoggerClient(client => client.setup(baseProperties));
+        this.invokeLoggerClient(async client => {
+            await client.setup(baseProperties);
+        });
         this.isDebugEnabled = /--debug|--inspect/i.test(this.currentProcess.execArgv.join(' '));
         this.initialized = true;
     }

@@ -15,7 +15,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 
-    public setup(baseProperties?: BaseTelemetryProperties): void {
+    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.appInsightsObject
             .setup()
             .setAutoCollectConsole(true)

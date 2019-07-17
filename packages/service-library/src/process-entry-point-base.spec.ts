@@ -64,11 +64,7 @@ describe(ProcessEntryPointBase, () => {
             const errorMsg = 'logger setup error';
             setupContainerForDotEnvConfig();
             setupContainerForLogger();
-            loggerMock
-                .setup(l => l.setup(testSubject.baseTelemetryProperties))
-                .returns(() => {
-                    throw errorMsg;
-                });
+            loggerMock.setup(async l => l.setup(testSubject.baseTelemetryProperties)).returns(async () => Promise.reject(errorMsg));
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
             verifyNoLoggingCalls();
@@ -173,6 +169,9 @@ describe(ProcessEntryPointBase, () => {
     }
 
     function setupLoggerSetupCall(): void {
-        loggerMock.setup(l => l.setup(testSubject.baseTelemetryProperties)).verifiable();
+        loggerMock
+            .setup(async l => l.setup(testSubject.baseTelemetryProperties))
+            .returns(async () => Promise.resolve())
+            .verifiable();
     }
 });

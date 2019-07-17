@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 
+import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import * as utils from 'util';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
@@ -15,14 +16,15 @@ export class ConsoleLoggerClient implements LoggerClient {
     private baseProperties?: { [key: string]: string };
 
     constructor(
-        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Console) private readonly consoleObject: typeof console,
     ) {}
 
-    public setup(baseProperties?: BaseTelemetryProperties): void {
+    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
 
-        this.isConsoleLogEnabled = this.currentProcess.execArgv.filter(arg => arg.toLocaleLowerCase() === '--no-console').length === 0;
+        const commonConfig = await this.serviceConfig.getConfigValue('commonConfig');
+        this.isConsoleLogEnabled = commonConfig.logInConsole;
     }
 
     public trackMetric(name: string, value: number): void {
