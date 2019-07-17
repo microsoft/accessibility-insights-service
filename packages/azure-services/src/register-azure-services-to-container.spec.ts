@@ -25,7 +25,7 @@ describe(registerAzureServicesToContainer, () => {
     let container: Container;
 
     beforeEach(() => {
-        container = new Container();
+        container = new Container({ autoBindInjectable: true });
         registerLoggerToContainer(container);
     });
 

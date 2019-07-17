@@ -11,7 +11,7 @@ import { RunnerTaskConfig } from './batch/runner-task-config';
 import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
 export function setupJobManagerContainer(): Container {
-    const container = new Container();
+    const container = new Container({ autoBindInjectable: true });
     registerLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 
