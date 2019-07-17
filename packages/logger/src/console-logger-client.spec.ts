@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CommonRuntimeConfig, ServiceConfiguration } from 'common';
+import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
@@ -22,13 +22,8 @@ describe(ConsoleLoggerClient, () => {
         logInConsole = true;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
-        serviceConfigMock
-            .setup(async s => s.getConfigValue('commonConfig'))
-            .returns(async () => {
-                return {
-                    logInConsole: logInConsole,
-                } as CommonRuntimeConfig;
-            });
+        serviceConfigMock.setup(async s => s.getConfigValue('logInConsole')).returns(async () => Promise.resolve(logInConsole));
+
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
         testSubject = new ConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);

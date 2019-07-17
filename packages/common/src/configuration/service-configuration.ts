@@ -6,9 +6,11 @@ import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 
-export interface CommonRuntimeConfig {
+export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
-    logInConsole: boolean;
+}
+
+export interface QueueRuntimeConfig {
     maxQueueSize: number;
 }
 
@@ -20,7 +22,9 @@ export interface ScanRunTimeConfig {
 }
 
 export interface RuntimeConfig {
-    commonConfig: CommonRuntimeConfig;
+    logInConsole: boolean;
+    taskConfig: TaskRuntimeConfig;
+    queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
 }
 
@@ -66,23 +70,26 @@ export class ServiceConfiguration {
 
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
-            commonConfig: {
-                logInConsole: {
-                    format: 'Boolean',
-                    default: true,
-                    doc: 'Property to decide if console logging is enabled',
-                },
+            logInConsole: {
+                format: 'Boolean',
+                default: true,
+                doc: 'Property to decide if console logging is enabled',
+            },
+            queueConfig: {
                 maxQueueSize: {
                     format: 'int',
                     default: 10,
                     doc: 'Maximum message the queue can have',
                 },
+            },
+            taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
                     default: 3,
                     doc: 'Timeout value after which the task has to be terminated',
                 },
             },
+
             scanConfig: {
                 minLastReferenceSeenInDays: {
                     format: 'int',
