@@ -17,8 +17,8 @@ if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
 fi
 
-if [[ -z $profileName ]]; then
-    profileName="dev"
+if [[ -z $environment ]]; then
+    environment="dev"
 fi
 
 uploadFolderContents() {
@@ -48,17 +48,17 @@ Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFold
 }
 
 # Read script arguments
-while getopts "s:d:p:" option; do
+while getopts "s:d:e:" option; do
     case $option in
     s) storageAccountName=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
-    p) profileName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $profileName ]]; then
+if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
@@ -68,4 +68,4 @@ uploadFolderContents $jobManagerContainerName "$dropFolder/job-manager/dist" "$s
 uploadFolderContents $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"
-uploadFile $runtimeConfigurationContainerName "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$profileName.json" "$storageAccountName" "$runtimeConfigurationBlobName"
+uploadFile $runtimeConfigurationContainerName "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$storageAccountName" "$runtimeConfigurationBlobName"
