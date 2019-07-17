@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { StorageClient } from 'azure-services';
+import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { RunState, Website, WebsitePage } from 'storage-documents';
@@ -34,6 +35,8 @@ describe(PageDocumentProvider, () => {
         const currentMoment = () => moment(currentTime);
 
         let loggerMock: IMock<Logger>;
+        let serviceConfigMock: IMock<ServiceConfiguration>;
+        let scanConfig: ScanRunTimeConfig;
         let testSubject: PageDocumentProvider;
         let website: Website;
         let afterLastReferenceSeenTime: string;
@@ -48,6 +51,15 @@ describe(PageDocumentProvider, () => {
         }, 30000);
 
         beforeEach(() => {
+            scanConfig = {
+                pageRescanIntervalInDays: 2,
+                failedPageRescanIntervalInHours: 3,
+                maxScanRetryCount: 4,
+                minLastReferenceSeenInDays: 5,
+            };
+            serviceConfigMock = Mock.ofType(ServiceConfiguration);
+            serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
+
             website = dbHelper.createWebsiteDocument({ websiteId: dbHelper.createRandomString('websiteId') });
             loggerMock = Mock.ofType<Logger>();
             const storageClient = new StorageClient(
@@ -58,29 +70,29 @@ describe(PageDocumentProvider, () => {
             );
 
             beforeLastReferenceSeenTime = currentMoment()
-                .subtract(PageDocumentProvider.minLastReferenceSeenInDays + 1, 'day')
+                .subtract(scanConfig.minLastReferenceSeenInDays + 1, 'day')
                 .toJSON();
 
             afterLastReferenceSeenTime = currentMoment()
-                .subtract(PageDocumentProvider.minLastReferenceSeenInDays - 1, 'day')
+                .subtract(scanConfig.minLastReferenceSeenInDays - 1, 'day')
                 .toJSON();
 
             afterRescanIntervalTime = currentMoment()
-                .subtract(PageDocumentProvider.pageRescanIntervalInDays + 1, 'day')
+                .subtract(scanConfig.pageRescanIntervalInDays + 1, 'day')
                 .toJSON();
 
             beforeRescanIntervalTime = currentMoment()
-                .subtract(PageDocumentProvider.pageRescanIntervalInDays - 1, 'hour')
+                .subtract(scanConfig.pageRescanIntervalInDays - 1, 'hour')
                 .toJSON();
 
             afterFailedPageRescanIntervalTime = currentMoment()
-                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours + 1, 'hour')
+                .subtract(scanConfig.failedPageRescanIntervalInHours + 1, 'hour')
                 .toJSON();
             beforeFailedPageRescanIntervalTime = currentMoment()
-                .subtract(PageDocumentProvider.failedPageRescanIntervalInHours - 1, 'hour')
+                .subtract(scanConfig.failedPageRescanIntervalInHours - 1, 'hour')
                 .toJSON();
 
-            testSubject = new PageDocumentProvider(storageClient);
+            testSubject = new PageDocumentProvider(serviceConfigMock.object, storageClient);
         });
 
         function createPageWithLastRunInfo(
@@ -504,7 +516,7 @@ describe(PageDocumentProvider, () => {
                     {
                         runTime: beforeRescanIntervalTime,
                         state: RunState.failed,
-                        retries: PageDocumentProvider.maxScanRetryCount,
+                        retries: scanConfig.maxScanRetryCount,
                     },
                     afterLastReferenceSeenTime,
                     'page with max retries',
@@ -516,7 +528,7 @@ describe(PageDocumentProvider, () => {
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
-                        retries: PageDocumentProvider.maxScanRetryCount - 1,
+                        retries: scanConfig.maxScanRetryCount - 1,
                     },
                     afterLastReferenceSeenTime,
                     'page with max retry not reached',
