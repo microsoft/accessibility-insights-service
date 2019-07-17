@@ -69,7 +69,7 @@ while getopts "r:s:l:p:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $profileName]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $profileName ]]; then
     exitWithUsageInfo
 fi
 
