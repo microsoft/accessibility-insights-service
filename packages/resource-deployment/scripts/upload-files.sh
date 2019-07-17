@@ -17,6 +17,10 @@ if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
 fi
 
+if [[ -z $profileName ]]; then
+    profileName="dev"
+fi
+
 uploadFileBatch() {
     destinationContainer=$1
     pathToSource=$2
