@@ -1,3 +1,44 @@
 {
-    "profileName": "prod"
+    "logInConsole": {
+        "format": "Boolean",
+        "default": true,
+        "doc": "Property to decide if console logging is enabled"
+    },
+    "queueConfig": {
+        "maxQueueSize": {
+            "format": "int",
+            "default": 10,
+            "doc": "Maximum message the queue can have"
+        }
+    },
+    "taskConfig": {
+        "taskTimeoutInMinutes": {
+            "format": "int",
+            "default": 3,
+            "doc": "Timeout value after which the task has to be terminated"
+        }
+    },
+
+    "scanConfig": {
+        "minLastReferenceSeenInDays": {
+            "format": "int",
+            "default": 3,
+            "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned."
+        },
+        "pageRescanIntervalInDays": {
+            "format": "int",
+            "default": 3,
+            "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned."
+        },
+        "failedPageRescanIntervalInHours": {
+            "format": "int",
+            "default": 3,
+            "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned."
+        },
+        "maxScanRetryCount": {
+            "format": "int",
+            "default": 3,
+            "doc": "Maximum number of retries allowed for a page scan"
+        }
+    }
 }
