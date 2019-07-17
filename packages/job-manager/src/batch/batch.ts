@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
 import { Message } from 'azure-services';
+import { ServiceConfiguration } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -15,10 +16,10 @@ import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
 export class Batch {
-    public static readonly MAX_TASK_DURATION: number = 10;
     private readonly jobTasks: Map<string, JobTask> = new Map();
 
     public constructor(
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
         @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
@@ -62,11 +63,12 @@ export class Batch {
 
     public async createTasks(jobId: string, messages: Message[]): Promise<JobTask[]> {
         const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
+        const maxTaskDurationInMinutes = await this.getMaxTaskDurationInMinutes();
 
         messages.forEach(message => {
             const jobTask = new JobTask(message.messageId);
             this.jobTasks.set(jobTask.id, jobTask);
-            const taskAddParameter = this.getTaskAddParameter(jobTask.id, message.messageText);
+            const taskAddParameter = this.getTaskAddParameter(jobTask.id, message.messageText, maxTaskDurationInMinutes);
             taskAddParameters.push(taskAddParameter);
         });
 
@@ -153,7 +155,11 @@ export class Batch {
         });
     }
 
-    private getTaskAddParameter(jobTaskId: string, messageText: string): BatchServiceModels.TaskAddParameter {
+    private getTaskAddParameter(
+        jobTaskId: string,
+        messageText: string,
+        maxTaskDurationInMinutes: number,
+    ): BatchServiceModels.TaskAddParameter {
         const message = JSON.parse(messageText);
         const commandLine = this.runnerTaskConfig.getCommandLine(message);
 
@@ -162,7 +168,13 @@ export class Batch {
             commandLine: commandLine,
             resourceFiles: this.runnerTaskConfig.getResourceFiles(),
             environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
-            constraints: { maxWallClockTime: moment.duration({ minute: Batch.MAX_TASK_DURATION }).toISOString() },
+            constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
         };
+    }
+
+    private async getMaxTaskDurationInMinutes(): Promise<number> {
+        const commonConfig = await this.serviceConfig.getConfigValue('taskConfig');
+
+        return commonConfig.taskTimeoutInMinutes;
     }
 }
