@@ -127,6 +127,7 @@
     "resolutions": {
         "jquery": "^3.4.1",
         "puppeteer": "^1.18.1",
-        "axe-core": "^3.2.2"
+        "axe-core": "^3.2.2",
+        "lodash": "^4.17.14"
     }
 }
