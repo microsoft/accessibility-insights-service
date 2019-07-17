@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ServiceConfiguration } from 'common';
-import { CommonRuntimeConfig } from 'common/dist/configuration/service-configuration';
+import { CommonRuntimeConfig, ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
