@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { StorageClient } from 'azure-services';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { RunState, WebsitePage } from 'storage-documents';
+import { RunState, Website, WebsitePage } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import * as dbHelper from '../test-utilities/db-mock-helpers';
 import { PageDocumentProvider } from './page-document-provider';
@@ -35,7 +35,7 @@ describe(PageDocumentProvider, () => {
 
         let loggerMock: IMock<Logger>;
         let testSubject: PageDocumentProvider;
-        let websiteId: string;
+        let website: Website;
         let afterLastReferenceSeenTime: string;
         let afterRescanIntervalTime: string;
         let beforeRescanIntervalTime: string;
@@ -48,7 +48,7 @@ describe(PageDocumentProvider, () => {
         }, 30000);
 
         beforeEach(() => {
-            websiteId = dbHelper.createRandomString('websiteId');
+            website = dbHelper.createWebsiteDocument({ websiteId: dbHelper.createRandomString('websiteId') });
             loggerMock = Mock.ofType<Logger>();
             const storageClient = new StorageClient(
                 dbHelper.cosmosClient,
@@ -83,17 +83,23 @@ describe(PageDocumentProvider, () => {
             testSubject = new PageDocumentProvider(storageClient);
         });
 
-        function createPageWithLastRunInfo(lastRun: any, lastReferenceSeen: string, label: string, basePage = true): WebsitePage {
-            const page = createPageWithoutLastRunInfo(lastReferenceSeen, label, basePage);
+        function createPageWithLastRunInfo(
+            site: Website,
+            lastRun: any,
+            lastReferenceSeen: string,
+            label: string,
+            basePage = true,
+        ): WebsitePage {
+            const page = createPageWithoutLastRunInfo(site, lastReferenceSeen, label, basePage);
             page.lastRun = lastRun;
 
             return page;
         }
 
-        function createPageWithoutLastRunInfo(lastReferenceSeen: string, label: string, basePage = true): WebsitePage {
+        function createPageWithoutLastRunInfo(site: Website, lastReferenceSeen: string, label: string, basePage = true): WebsitePage {
             return dbHelper.createPageDocument({
                 label: label,
-                websiteId: websiteId,
+                websiteId: site.websiteId,
                 extra: {
                     lastReferenceSeen: lastReferenceSeen,
                     basePage: basePage,
@@ -115,20 +121,27 @@ describe(PageDocumentProvider, () => {
             expect(actualResultProjections).toEqual(expectedQueryResultProjections);
         }
 
+        function setupDeepScanningWebsite(deepScanning: boolean): void {
+            website.deepScanningEnabled = deepScanning;
+        }
+
         describe('getPagesNeverScanned', () => {
             it('returns results after min lastReference date', async () => {
                 let queryResults: WebsitePage[];
                 const pageAfterMinLastReferenceSeen1 = createPageWithoutLastRunInfo(
+                    website,
                     afterLastReferenceSeenTime,
                     'after lastReferenceSeen date 1',
                 );
                 const pageAfterMinLastReferenceSeen2 = createPageWithoutLastRunInfo(
+                    website,
                     unMockedMoment(afterLastReferenceSeenTime)
                         .add(1, 'hour')
                         .toJSON(),
                     'after lastReferenceSeen date 2',
                 );
                 const pageBeforeMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    website,
                     beforeLastReferenceSeenTime,
                     'before lastReferenceSeen date',
                 );
@@ -140,16 +153,17 @@ describe(PageDocumentProvider, () => {
                 ]);
                 queryResults = [pageAfterMinLastReferenceSeen1, pageAfterMinLastReferenceSeen2];
 
-                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             }, 3000);
 
             it('returns results that does not have last run info', async () => {
                 let queryResults: WebsitePage[];
-                const pageWithLastRunNull = createPageWithLastRunInfo(null, afterLastReferenceSeenTime, 'lastRun is null');
-                const pageWithLastRunNotFound = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'lastRun not found');
+                const pageWithLastRunNull = createPageWithLastRunInfo(website, null, afterLastReferenceSeenTime, 'lastRun is null');
+                const pageWithLastRunNotFound = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'lastRun not found');
                 const pageWithLastRunInfo = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -161,51 +175,81 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems([pageWithLastRunNull, pageWithLastRunNotFound, pageWithLastRunInfo]);
                 queryResults = [pageWithLastRunNull, pageWithLastRunNotFound];
 
-                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             }, 3000);
 
             it('returns top n query results', async () => {
-                const basePage1 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 1', true);
-                const basePage2 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 2', true);
-                const childPage = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'child page', false);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 1);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 1);
 
                 expect(actualResults.length).toBe(1);
             }, 3000);
 
             it('returns base page results only', async () => {
                 let queryResults: WebsitePage[];
-                const basePage1 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 1', true);
-                const basePage2 = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'base page 2', true);
-                const childPage = createPageWithoutLastRunInfo(afterLastReferenceSeenTime, 'child page', false);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
                 queryResults = [basePage1, basePage2];
 
-                const actualResults = await testSubject.getPagesNeverScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
         });
 
+        describe('getPagesNeverScanned for website with deep scanning', () => {
+            it('returns top n query results for website with deep scanning true', async () => {
+                setupDeepScanningWebsite(true);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+
+                expect(actualResults.length).toBe(3);
+            }, 3000);
+            it('returns top n query results for website with deep scanning false', async () => {
+                setupDeepScanningWebsite(false);
+                const basePage1 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 1', true);
+                const basePage2 = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'base page 2', true);
+                const childPage = createPageWithoutLastRunInfo(website, afterLastReferenceSeenTime, 'child page', false);
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+
+                expect(actualResults.length).toBe(2);
+            }, 3000);
+        });
+
         describe('getPagesScanned', () => {
             it('do not return results without last run info', async () => {
                 const pageAfterMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    website,
                     afterLastReferenceSeenTime,
                     'after lastReferenceSeen date',
                 );
                 const pageBeforeMinLastReferenceSeen = createPageWithoutLastRunInfo(
+                    website,
                     beforeLastReferenceSeenTime,
                     'before lastReferenceSeen date',
                 );
-                const pageWithLastRunNull = createPageWithLastRunInfo(null, afterLastReferenceSeenTime, 'lastRun is null');
+                const pageWithLastRunNull = createPageWithLastRunInfo(website, null, afterLastReferenceSeenTime, 'lastRun is null');
 
                 const pageWithLastRunInfo = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -226,7 +270,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -236,6 +280,7 @@ describe(PageDocumentProvider, () => {
                 const nonQueryResults: WebsitePage[] = [];
 
                 const pageWithLastRunCompletedAfterMaxRescanTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -246,6 +291,7 @@ describe(PageDocumentProvider, () => {
                 queryResults.push(pageWithLastRunCompletedAfterMaxRescanTime);
 
                 const pageWithLastRunCompletedBeforeMaxRescanTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: beforeRescanIntervalTime,
                         state: RunState.completed,
@@ -258,7 +304,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -267,6 +313,7 @@ describe(PageDocumentProvider, () => {
                 const queryResults: WebsitePage[] = [];
 
                 const page1 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -275,6 +322,7 @@ describe(PageDocumentProvider, () => {
                     'page1',
                 );
                 const page2 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
                         state: RunState.completed,
@@ -284,6 +332,7 @@ describe(PageDocumentProvider, () => {
                 );
 
                 const page3 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
                         state: RunState.completed,
@@ -298,7 +347,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithOrder([page3, page1, page2], actualResults);
             });
@@ -307,6 +356,7 @@ describe(PageDocumentProvider, () => {
                 const queryResults: WebsitePage[] = [];
 
                 const page1 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -315,6 +365,7 @@ describe(PageDocumentProvider, () => {
                     'page1',
                 );
                 const page2 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: unMockedMoment(afterRescanIntervalTime).add(1, 'hour'),
                         state: RunState.completed,
@@ -324,6 +375,7 @@ describe(PageDocumentProvider, () => {
                 );
 
                 const page3 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: unMockedMoment(afterRescanIntervalTime).subtract(1, 'hour'),
                         state: RunState.completed,
@@ -338,7 +390,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 2);
+                const actualResults = await testSubject.getPagesScanned(website, 2);
 
                 expect(actualResults.length).toBe(2);
             });
@@ -347,6 +399,7 @@ describe(PageDocumentProvider, () => {
                 let queryResults: WebsitePage[];
 
                 const basePage1 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -356,6 +409,7 @@ describe(PageDocumentProvider, () => {
                     true,
                 );
                 const basePage2 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -366,6 +420,7 @@ describe(PageDocumentProvider, () => {
                 );
 
                 const childPage = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterRescanIntervalTime,
                         state: RunState.completed,
@@ -379,7 +434,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -389,6 +444,7 @@ describe(PageDocumentProvider, () => {
                 const nonQueryResults: WebsitePage[] = [];
 
                 const pageWithFailedRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
@@ -399,6 +455,7 @@ describe(PageDocumentProvider, () => {
                 queryResults.push(pageWithFailedRunAfterMaxRescanAbandonTime);
 
                 const pageWithFailedRunBeforeMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: beforeFailedPageRescanIntervalTime,
                         state: RunState.failed,
@@ -409,6 +466,7 @@ describe(PageDocumentProvider, () => {
                 nonQueryResults.push(pageWithFailedRunBeforeMaxRescanAbandonTime);
 
                 const pageWithRunningStateAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.running,
@@ -419,6 +477,7 @@ describe(PageDocumentProvider, () => {
                 queryResults.push(pageWithRunningStateAfterMaxRescanAbandonTime);
 
                 const pageWithQueuedStateRunAfterMaxRescanAbandonTime = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.queued,
@@ -431,7 +490,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -441,6 +500,7 @@ describe(PageDocumentProvider, () => {
                 const nonQueryResults: WebsitePage[] = [];
 
                 const pageWithMaxRetires = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: beforeRescanIntervalTime,
                         state: RunState.failed,
@@ -452,6 +512,7 @@ describe(PageDocumentProvider, () => {
                 nonQueryResults.push(pageWithMaxRetires);
 
                 const pageWithMaxRetryNotReached = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
@@ -466,7 +527,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -476,6 +537,7 @@ describe(PageDocumentProvider, () => {
                 const nonQueryResults: WebsitePage[] = [];
 
                 const unscannablePage = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: beforeRescanIntervalTime,
                         state: RunState.failed,
@@ -487,6 +549,7 @@ describe(PageDocumentProvider, () => {
                 nonQueryResults.push(unscannablePage);
 
                 const scannablePage1 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
@@ -497,6 +560,7 @@ describe(PageDocumentProvider, () => {
                 );
 
                 const scannablePage2 = createPageWithLastRunInfo(
+                    website,
                     {
                         runTime: afterFailedPageRescanIntervalTime,
                         state: RunState.failed,
@@ -512,24 +576,119 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(websiteId, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
         });
+        describe('getPagesScanned for website with deep scanning', () => {
+            it('returns top n query result for website with deep scanning true', async () => {
+                setupDeepScanningWebsite(true);
+                let queryResults: WebsitePage[];
 
-        describe('getWebsiteIds', () => {
-            it('returns website ids', async () => {
-                const website1 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
-                const website2 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
-                const website3 = dbHelper.createWebsiteDocument({ websiteId: 'site1' });
+                const basePage1 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 1',
+                    true,
+                );
+                const basePage2 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 2',
+                    true,
+                );
+
+                const childPage = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'child page',
+                    false,
+                );
+
+                queryResults = [basePage1, basePage2, childPage];
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesScanned(website, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+            it('returns top n query result for website with deep scanning false', async () => {
+                setupDeepScanningWebsite(false);
+                let queryResults: WebsitePage[];
+
+                const basePage1 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 1',
+                    true,
+                );
+                const basePage2 = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'base page 2',
+                    true,
+                );
+
+                const childPage = createPageWithLastRunInfo(
+                    website,
+                    {
+                        runTime: afterRescanIntervalTime,
+                        state: RunState.completed,
+                    },
+                    afterLastReferenceSeenTime,
+                    'child page',
+                    false,
+                );
+
+                queryResults = [basePage1, basePage2];
+
+                await dbHelper.upsertItems([basePage1, basePage2, childPage]);
+
+                const actualResults = await testSubject.getPagesScanned(website, 10);
+
+                verifyQueryResultsWithoutOrder(queryResults, actualResults);
+            });
+        });
+        describe('getWebsites', () => {
+            it('returns websites', async () => {
+                const websiteId1 = dbHelper.createRandomString('websiteId');
+                const websiteId2 = dbHelper.createRandomString('websiteId');
+                const websiteId3 = dbHelper.createRandomString('websiteId');
+                const website1 = dbHelper.createWebsiteDocument({ websiteId: websiteId1 });
+                const website2 = dbHelper.createWebsiteDocument({ websiteId: websiteId2 });
+                const website3 = dbHelper.createWebsiteDocument({ websiteId: websiteId3 });
                 const allWebsites = [website1, website2, website3];
-
+                const actualWebsiteIds = [] as string[];
                 await dbHelper.upsertItems(Array.from(allWebsites));
 
-                const actualQueryResults = await testSubject.getWebsiteIds();
+                const actualQueryResults = await testSubject.getWebsites();
+                actualQueryResults.item.forEach(w => {
+                    actualWebsiteIds.push(w.websiteId);
+                });
 
-                expect(new Set(actualQueryResults.item)).toEqual(new Set(allWebsites.map(s => s.websiteId)));
+                expect(new Set(actualWebsiteIds)).toEqual(new Set([websiteId1, websiteId2, websiteId3]));
             });
         });
     }
