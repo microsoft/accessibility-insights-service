@@ -23,7 +23,6 @@ export interface WebsitePageExtra {
     lastReferenceSeen?: string;
     lastRun?: RunResult;
     links?: string[];
-    unscannable?: boolean;
 }
 
 /**

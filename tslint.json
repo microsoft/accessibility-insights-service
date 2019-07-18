@@ -2,6 +2,7 @@
     "extends": ["tslint-microsoft-contrib"],
     "rulesDirectory": ["node_modules/tslint-microsoft-contrib", "node_modules/tslint-lines-between-class-members"],
     "rules": {
+        "align": false,
         "await-promise": true,
         "completed-docs": false,
         "export-name": false,

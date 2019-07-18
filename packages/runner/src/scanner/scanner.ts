@@ -16,11 +16,8 @@ export class Scanner {
 
             await this.page.create();
             await this.page.enableBypassCSP();
-            await this.page.goto(url);
 
-            const result = await this.page.scanForA11yIssues();
-
-            return { results: result };
+            return await this.page.scanForA11yIssues(url);
         } catch (error) {
             this.logger.trackExceptionAny(error, `[scanner] An error occurred while scanning website page ${url}.`);
 

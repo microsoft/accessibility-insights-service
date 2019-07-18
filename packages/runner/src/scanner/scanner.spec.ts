@@ -7,6 +7,7 @@ import '../../test-utilities/common-mock-methods';
 import { AxeResults } from 'axe-core';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
+
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory, Page } from './page';
 import { Scanner } from './scanner';
@@ -32,7 +33,7 @@ describe('Scanner', () => {
         const url = 'some url';
         const axeResultsStub = ('axe results' as any) as AxeResults;
         setupNewPageCall(url);
-        setupPageScanCall(axeResultsStub);
+        setupPageScanCall(url, axeResultsStub);
         await scanner.scan(url);
 
         verifyMocks();
@@ -42,7 +43,7 @@ describe('Scanner', () => {
         const url = 'some url';
         const errorMessage: string = `An error occurred while scanning website page ${url}.`;
         setupNewPageCall(url);
-        setupPageErrorScanCall(errorMessage);
+        setupPageErrorScanCall(url, errorMessage);
         setupPageCloseCall();
         const scanResult: AxeScanResults = await scanner.scan(url);
         expect(scanResult.error).not.toBeNull();
@@ -51,24 +52,23 @@ describe('Scanner', () => {
     function setupNewPageCall(url: string): void {
         pageMock.setup(async p => p.create()).verifiable(Times.once());
         pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
-        pageMock.setup(async p => p.goto(url)).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {
         pageMock.setup(async b => b.close()).verifiable();
     }
 
-    function setupPageScanCall(axeResults: AxeResults): void {
+    function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues())
-            .returns(async () => Promise.resolve(axeResults))
+            .setup(async p => p.scanForA11yIssues(url))
+            .returns(async () => Promise.resolve({ results: axeResults }))
             .verifiable(Times.once());
     }
 
-    function setupPageErrorScanCall(errorMessage: string): void {
+    function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues())
-            .returns(async () => Promise.reject(errorMessage))
+            .setup(async p => p.scanForA11yIssues(url))
+            .returns(async () => Promise.resolve({ error: errorMessage }))
             .verifiable(Times.once());
     }
 

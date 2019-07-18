@@ -85,7 +85,7 @@ describe('DataFactoryTask', () => {
     });
 
     it('convert to scan result model w/ error', () => {
-        const axeScanResults = <AxeScanResults>(<unknown>{ type: 'AxeScanResults', error: 'error' });
+        const axeScanResults = <AxeScanResults>(<unknown>{ type: 'AxeScanResults', error: 'error', unscannable: false });
         const scanMetadata = <ScanMetadata>(<unknown>{ type: 'ScanMetadata' });
         const scanResults: IssueScanResult[] = [<IssueScanResult>(<unknown>{ type: 'ScanResult' })];
 
@@ -98,6 +98,7 @@ describe('DataFactoryTask', () => {
 
         expect(result.results).toEqual([]);
         expect(result.error).toEqual(axeScanResults.error);
+        expect(result.unscannable).toEqual(false);
         scanResultFactoryMock.verifyAll();
     });
 

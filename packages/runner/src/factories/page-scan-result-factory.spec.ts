@@ -61,10 +61,13 @@ describe('PageScanResultFactory', () => {
         setupHashGenerator(runTime);
         const issueScanResults = {
             error: 'crawl error',
+            unscannable: true,
         };
         const crawlerScanResults = createCrawlerScanResults();
         const expectedResult = createPageScanResult(runTime);
-        expectedResult.scan = { run: { runTime: runTime.toJSON(), state: RunState.failed, error: 'crawl error' } };
+        expectedResult.scan = {
+            run: { runTime: runTime.toJSON(), state: RunState.failed, error: 'crawl error', unscannable: true },
+        };
 
         const result = pageScanResultFactory.create(crawlerScanResults, issueScanResults, scanMetadata, runTime);
 
