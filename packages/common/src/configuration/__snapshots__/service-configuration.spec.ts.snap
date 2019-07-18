@@ -2,10 +2,12 @@
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
-  "logInConsole": Object {
-    "default": true,
-    "doc": "Property to decide if console logging is enabled",
-    "format": "Boolean",
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
   },
   "queueConfig": Object {
     "maxQueueSize": Object {
@@ -48,10 +50,12 @@ Object {
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
-  "logInConsole": Object {
-    "default": true,
-    "doc": "Property to decide if console logging is enabled",
-    "format": "Boolean",
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
   },
   "queueConfig": Object {
     "maxQueueSize": Object {

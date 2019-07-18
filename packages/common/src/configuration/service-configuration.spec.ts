@@ -30,7 +30,7 @@ describe(ServiceConfiguration, () => {
 
     it('verifies dev config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
-        const keyToFetch = 'logInConsole';
+        const keyToFetch = 'logConfig';
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
@@ -47,7 +47,7 @@ describe(ServiceConfiguration, () => {
 
     it('loads config only once', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, false);
-        const keyToFetch = 'logInConsole';
+        const keyToFetch = 'logConfig';
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
@@ -64,7 +64,7 @@ describe(ServiceConfiguration, () => {
 
     it('verifies custom config', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const keyToFetch = 'logInConsole';
+        const keyToFetch = 'logConfig';
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
@@ -82,7 +82,7 @@ describe(ServiceConfiguration, () => {
 
     it('throws on custom config validation failure', async () => {
         setupVerifiableFileExistsCall(ServiceConfiguration.profilePath, true);
-        const keyToFetch = 'logInConsole';
+        const keyToFetch = 'logConfig';
         const expectedError = 'validation failed';
 
         setupVerifiableSchemaSetupCall();

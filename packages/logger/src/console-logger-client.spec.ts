@@ -22,7 +22,9 @@ describe(ConsoleLoggerClient, () => {
         logInConsole = true;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
-        serviceConfigMock.setup(async s => s.getConfigValue('logInConsole')).returns(async () => Promise.resolve(logInConsole));
+        serviceConfigMock
+            .setup(async s => s.getConfigValue('logConfig'))
+            .returns(async () => Promise.resolve({ logInConsole: logInConsole }));
 
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
