@@ -8,6 +8,7 @@ import * as moment from 'moment';
 import { ItemType, RunState, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
+import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { PageDocumentProvider } from './page-document-provider';
 
 // tslint:disable: mocha-no-side-effect-code
@@ -26,10 +27,21 @@ jest.mock('moment', () => {
 describe('PageDocumentProvider', () => {
     let storageClientMock: IMock<StorageClient>;
     let pageDocumentProvider: PageDocumentProvider;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
+    let scanConfig: ScanRunTimeConfig;
 
     beforeEach(() => {
+        scanConfig = {
+            failedPageRescanIntervalInHours: 3,
+            maxScanRetryCount: 4,
+            minLastReferenceSeenInDays: 5,
+            pageRescanIntervalInDays: 6,
+        };
+
         storageClientMock = Mock.ofType<StorageClient>();
-        pageDocumentProvider = new PageDocumentProvider(storageClientMock.object);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
+        pageDocumentProvider = new PageDocumentProvider(serviceConfigMock.object, storageClientMock.object);
     });
 
     describe('getWebsites', () => {
@@ -285,7 +297,7 @@ describe('PageDocumentProvider', () => {
     }
     function getMinLastReferenceSeenValue(): string {
         return moment()
-            .subtract(PageDocumentProvider.minLastReferenceSeenInDays, 'day')
+            .subtract(scanConfig.minLastReferenceSeenInDays, 'day')
             .toJSON();
     }
 
@@ -330,10 +342,10 @@ describe('PageDocumentProvider', () => {
     }
     function getPagesScannedQuery(website: Website, itemCount: number): string {
         const maxRescanAfterFailureTime = moment()
-            .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
+            .subtract(scanConfig.failedPageRescanIntervalInHours, 'hour')
             .toJSON();
         const maxRescanTime = moment()
-            .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
+            .subtract(scanConfig.pageRescanIntervalInDays, 'day')
             .toJSON();
 
         return `SELECT TOP ${itemCount} * FROM c WHERE
@@ -342,9 +354,7 @@ describe('PageDocumentProvider', () => {
         }' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}' and ${getPageScanningCondition(website)}
             and (
             ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
-                and (c.lastRun.retries < ${
-                    PageDocumentProvider.maxScanRetryCount
-                } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+                and (c.lastRun.retries < ${scanConfig.maxScanRetryCount} or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
                 and c.lastRun.runTime <= '${maxRescanAfterFailureTime}'
                 and (IS_NULL(c.lastRun.unscannable) or NOT IS_DEFINED(c.lastRun.unscannable) or c.lastRun.unscannable <> true))
             or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
