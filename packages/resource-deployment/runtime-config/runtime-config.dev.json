@@ -1,5 +1,7 @@
 {
-    "logInConsole": true,
+    "logConfig": {
+        "logInConsole": true
+    },
     "queueConfig": {
         "maxQueueSize": 10
     },
