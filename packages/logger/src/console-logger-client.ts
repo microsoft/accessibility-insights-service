@@ -23,7 +23,7 @@ export class ConsoleLoggerClient implements LoggerClient {
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
 
-        this.isConsoleLogEnabled = await this.serviceConfig.getConfigValue('logInConsole');
+        this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
     }
 
     public trackMetric(name: string, value: number): void {
