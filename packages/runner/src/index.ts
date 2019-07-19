@@ -9,6 +9,6 @@ import { setupRunnerContainer } from './setup-runner-container';
     const runnerEntryPoint = new RunnerEntryPoint(setupRunnerContainer());
     await runnerEntryPoint.start();
 })().catch(error => {
-    console.log('Exception thrwon in runner: ', error);
+    console.log('Exception thrown in runner: ', error);
     process.exit(1);
 });
