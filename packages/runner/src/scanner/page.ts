@@ -14,7 +14,7 @@ export class Page {
 
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
-        @inject('AxePuppeteerFactory') private readonly axePuppeteerFactory: AxePuppeteerFactory,
+        @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
     ) {}
 
     public async create(): Promise<void> {

@@ -4,6 +4,7 @@ import { CosmosClientWrapper, registerAzureServicesToContainer, StorageClient } 
 import * as inversify from 'inversify';
 import { Logger, registerLoggerToContainer } from 'logger';
 import { Browser } from 'puppeteer';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver/web-driver';
 
 export function setupRunnerContainer(): inversify.Container {
@@ -17,6 +18,10 @@ export function setupRunnerContainer(): inversify.Container {
 
     container
         .bind<WebDriver>(WebDriver)
+        .toSelf()
+        .inSingletonScope();
+    container
+        .bind<AxePuppeteerFactory>(AxePuppeteerFactory)
         .toSelf()
         .inSingletonScope();
 
