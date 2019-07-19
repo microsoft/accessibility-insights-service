@@ -15,6 +15,9 @@
             "resourceFiles": [
                 {
                     "autoStorageContainerName": "batch-scan-request-sender-script"
+                },
+                {
+                    "autoStorageContainerName": "runtime-configuration"
                 }
             ],
             "constraints": {
@@ -43,6 +46,10 @@
             {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
+            },
+            {
+                "name": "QUEUE_SIZE",
+                "value": "500"
             }
         ],
         "poolInfo": {

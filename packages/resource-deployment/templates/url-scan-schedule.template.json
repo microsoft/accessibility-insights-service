@@ -15,6 +15,9 @@
             "resourceFiles": [
                 {
                     "autoStorageContainerName": "batch-job-manager-script"
+                },
+                {
+                    "autoStorageContainerName": "runtime-configuration"
                 }
             ],
             "constraints": {
