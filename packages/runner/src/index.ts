@@ -8,6 +8,7 @@ import { setupRunnerContainer } from './setup-runner-container';
 (async () => {
     const runnerEntryPoint = new RunnerEntryPoint(setupRunnerContainer());
     await runnerEntryPoint.start();
-})().catch(() => {
+})().catch(error => {
+    console.log('Exception thrwon in runner: ', error);
     process.exit(1);
 });

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import * as convict from 'convict';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
@@ -39,7 +38,7 @@ export class ServiceConfiguration {
     private loadConfigPromise: Promise<convict.Config<RuntimeConfig>>;
     private readonly convictModule: typeof convict;
 
-    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict) {
+    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict = convict) {
         this.fileSystem = fileSystem;
         this.convictModule = convictModule;
     }
