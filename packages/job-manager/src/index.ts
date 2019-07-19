@@ -9,6 +9,6 @@ import { setupJobManagerContainer } from './setup-job-manager-container';
     const jobManagerEntryPoint = new JobManagerEntryPoint(setupJobManagerContainer());
     await jobManagerEntryPoint.start();
 })().catch(error => {
-    console.log('Exception thrwon in job manager: ', error);
+    console.log('Exception thrown in job manager: ', error);
     process.exit(1);
 });
