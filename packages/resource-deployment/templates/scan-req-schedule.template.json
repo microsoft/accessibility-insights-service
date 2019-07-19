@@ -46,10 +46,6 @@
             {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
-            },
-            {
-                "name": "QUEUE_SIZE",
-                "value": "500"
             }
         ],
         "poolInfo": {
