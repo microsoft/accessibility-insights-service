@@ -38,7 +38,7 @@ while [ $SECONDS -le $end ]; do
     response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$managedIdentity" --query "roleDefinitionId") || true
 
     if [[ -n $response ]]; then	
-            break	
+        break	
     else	
         echo "Retry count - $i."	
     fi	
