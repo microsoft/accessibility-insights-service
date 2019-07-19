@@ -34,12 +34,12 @@ export interface RuntimeConfig {
 
 @injectable()
 export class ServiceConfiguration {
-    public static readonly profilePath = './runtime-config/runtime-config.json';
+    public static readonly profilePath = `${__dirname}/runtime-config.json`;
     private readonly fileSystem: typeof fs;
     private loadConfigPromise: Promise<convict.Config<RuntimeConfig>>;
     private readonly convictModule: typeof convict;
 
-    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict) {
+    constructor(fileSystem: typeof fs = fs, convictModule: typeof convict = convict) {
         this.fileSystem = fileSystem;
         this.convictModule = convictModule;
     }
