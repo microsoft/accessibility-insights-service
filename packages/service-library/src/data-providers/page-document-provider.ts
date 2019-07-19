@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { client, CosmosOperationResponse, StorageClient } from 'azure-services';
+import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -8,12 +9,10 @@ import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageE
 
 @injectable()
 export class PageDocumentProvider {
-    public static readonly minLastReferenceSeenInDays = 7;
-    public static readonly pageRescanIntervalInDays = 1;
-    public static readonly failedPageRescanIntervalInHours = 12;
-    public static readonly maxScanRetryCount = 3;
-
-    constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
+    constructor(
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(StorageClient) private readonly storageClient: StorageClient,
+    ) {}
 
     public async getReadyToScanPages(
         continuationToken?: string,
@@ -80,7 +79,7 @@ export class PageDocumentProvider {
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
-        }' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
+        }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
@@ -89,22 +88,22 @@ export class PageDocumentProvider {
     }
 
     public async getPagesScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
+        const scanConfig = await this.getScanConfig();
+
         const maxRescanAfterFailureTime = moment()
-            .subtract(PageDocumentProvider.failedPageRescanIntervalInHours, 'hour')
+            .subtract(scanConfig.failedPageRescanIntervalInHours, 'hour')
             .toJSON();
         const maxRescanTime = moment()
-            .subtract(PageDocumentProvider.pageRescanIntervalInDays, 'day')
+            .subtract(scanConfig.pageRescanIntervalInDays, 'day')
             .toJSON();
 
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
-        }' and c.lastReferenceSeen >= '${this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
+        }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (
     ((c.lastRun.state = '${RunState.failed}' or c.lastRun.state = '${RunState.queued}' or c.lastRun.state = '${RunState.running}')
-        and (c.lastRun.retries < ${
-            PageDocumentProvider.maxScanRetryCount
-        } or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
+        and (c.lastRun.retries < ${scanConfig.maxScanRetryCount} or IS_NULL(c.lastRun.retries) or NOT IS_DEFINED(c.lastRun.retries))
         and c.lastRun.runTime <= '${maxRescanAfterFailureTime}'
         and (IS_NULL(c.lastRun.unscannable) or NOT IS_DEFINED(c.lastRun.unscannable) or c.lastRun.unscannable <> true))
     or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
@@ -133,9 +132,15 @@ export class PageDocumentProvider {
         return website.deepScanningEnabled ? '1=1' : 'c.basePage = true';
     }
 
-    private getMinLastReferenceSeenValue(): string {
+    private async getScanConfig(): Promise<ScanRunTimeConfig> {
+        return this.serviceConfig.getConfigValue('scanConfig');
+    }
+
+    private async getMinLastReferenceSeenValue(): Promise<string> {
+        const scanConfig = await this.getScanConfig();
+
         return moment()
-            .subtract(PageDocumentProvider.minLastReferenceSeenInDays, 'day')
+            .subtract(scanConfig.minLastReferenceSeenInDays, 'day')
             .toJSON();
     }
 }

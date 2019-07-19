@@ -63,7 +63,7 @@ Get-AzureRmMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-
 -   Run below command to deploy Azure resources and binaries
 
     ```bash
-    ./dist/scripts/install.sh -r <resource group> -s <subscription name or id> -l <location>
+    ./dist/scripts/install.sh -r <resource group> -s <subscription name or id> -l <location> -e <environment>
     ```
 
 ### 8. Login to Azure portal to verify the resources are being created

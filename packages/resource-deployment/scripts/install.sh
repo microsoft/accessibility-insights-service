@@ -17,10 +17,11 @@ export cosmosAccountName
 export dropFolder="${0%/*}/../../../"
 export templatesFolder="${0%/*}/../templates/"
 export appInsightsKey
+export environment
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id> -l <Azure region>
+Usage: $0 -r <resource group> -s <subscription name or id> -l <Azure region> -e <environment>
 
 List of available Azure regions:
 
@@ -58,16 +59,17 @@ uaenorth
 }
 
 # Read script arguments
-while getopts "r:s:l:" option; do
+while getopts "r:s:l:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     l) location=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 

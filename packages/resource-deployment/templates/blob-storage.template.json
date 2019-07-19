@@ -37,28 +37,35 @@
             "type": "string",
             "defaultValue": "batch-job-manager-script",
             "metadata": {
-                "description": "The name of the blob container."
+                "description": "The name of the blob container for job manager script."
             }
         },
         "poolScriptContainerName": {
             "type": "string",
             "defaultValue": "batch-pool-startup-script",
             "metadata": {
-                "description": "The name of the blob container."
+                "description": "The name of the blob container for pool startup script."
+            }
+        },
+        "runtimeConfigurationContainerName": {
+            "type": "string",
+            "defaultValue": "runtime-configuration",
+            "metadata": {
+                "description": "The name of the blob container for runtime configuration."
             }
         },
         "runnerContainerName": {
             "type": "string",
             "defaultValue": "batch-runner-script",
             "metadata": {
-                "description": "The name of the blob container."
+                "description": "The name of the blob container for runner script."
             }
         },
         "scanRequestContainerName": {
             "type": "string",
             "defaultValue": "batch-scan-request-sender-script",
             "metadata": {
-                "description": "The name of the blob container."
+                "description": "The name of the blob container for scan request sender script."
             }
         },
         "location": {
@@ -110,6 +117,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('poolScriptContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('runtimeConfigurationContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

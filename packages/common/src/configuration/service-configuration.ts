@@ -14,6 +14,10 @@ export interface QueueRuntimeConfig {
     maxQueueSize: number;
 }
 
+export interface LogRuntimeConfig {
+    logInConsole: boolean;
+}
+
 export interface ScanRunTimeConfig {
     minLastReferenceSeenInDays: number;
     pageRescanIntervalInDays: number;
@@ -22,7 +26,7 @@ export interface ScanRunTimeConfig {
 }
 
 export interface RuntimeConfig {
-    logInConsole: boolean;
+    logConfig: LogRuntimeConfig;
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
@@ -70,10 +74,12 @@ export class ServiceConfiguration {
 
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
-            logInConsole: {
-                format: 'Boolean',
-                default: true,
-                doc: 'Property to decide if console logging is enabled',
+            logConfig: {
+                logInConsole: {
+                    format: 'Boolean',
+                    default: true,
+                    doc: 'Property to decide if console logging is enabled',
+                },
             },
             queueConfig: {
                 maxQueueSize: {
