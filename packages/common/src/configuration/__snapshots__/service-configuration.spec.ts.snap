@@ -2,6 +2,19 @@
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
+  "jobManagerConfig": Object {
+    "jobTasksAddIntervalInSeconds": Object {
+      "default": 30,
+      "doc": "The time interval a job manager adds new tasks to an active job.",
+      "format": "int",
+    },
+    "maxPoolTaskProcessingRatio": Object {
+      "default": 0.5,
+      "doc": "The maximum pool processing ratio between all active and running tasks
+                    within a pool where job runs under that is maintained by the job manager.",
+      "format": [Function],
+    },
+  },
   "logConfig": Object {
     "logInConsole": Object {
       "default": true,
@@ -50,6 +63,19 @@ Object {
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
+  "jobManagerConfig": Object {
+    "jobTasksAddIntervalInSeconds": Object {
+      "default": 30,
+      "doc": "The time interval a job manager adds new tasks to an active job.",
+      "format": "int",
+    },
+    "maxPoolTaskProcessingRatio": Object {
+      "default": 0.5,
+      "doc": "The maximum pool processing ratio between all active and running tasks
+                    within a pool where job runs under that is maintained by the job manager.",
+      "format": [Function],
+    },
+  },
   "logConfig": Object {
     "logInConsole": Object {
       "default": true,

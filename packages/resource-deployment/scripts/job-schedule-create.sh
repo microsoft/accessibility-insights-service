@@ -11,6 +11,7 @@ export appInsightsKey
 export keyVaultUrl
 export templatesFolder
 
+templatesFolder="${0%/*}/../templates/"
 scanReqScheduleJobName="scan-req-schedule"
 parsedScanReqScheduleFileName="scan-req-schedule.generated.template.json"
 urlScanScheduleJobName="url-scan-schedule"
@@ -30,18 +31,17 @@ adjustJob() {
     done
 
     if [[ $foundJobSchedule == true ]]; then
-        echo "$jobName exists. Resetting job schedule"
+        echo "The '$jobName' job schedule exists. Resetting job schedule."
         az batch job-schedule reset --job-schedule-id "$jobName" --json-file "$jobTemplate" 1>/dev/null
     else
-        echo "$jobName doesn't exist. Creating job schedule"
+        echo "The '$jobName' job schedule doesn't exist. Creating job schedule."
         az batch job-schedule create --json-file "$jobTemplate" 1>/dev/null
     fi
-
 }
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder (optional)>
+        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>
     "
     exit 1
 }
@@ -66,11 +66,13 @@ fi
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 
-echo "Logging into batch account $batchAccountName in resource group $resourceGroupName"
+echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-echo "Fetching existing job schedule list"
+echo "Fetching existing job schedule list..."
 allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
+
+echo "Job schedules were created successfully."

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
 import { Message } from 'azure-services';
-import { ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -13,6 +13,8 @@ import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manag
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { RunnerTaskConfig } from './runner-task-config';
+
+// tslint:disable: max-line-length
 
 @injectable()
 export class Batch {
@@ -25,6 +27,61 @@ export class Batch {
         @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public async getPoolTaskProcessingRatio(): Promise<number> {
+        const resultVariableName = 'taskProcessingRatioResult';
+        const poolTaskProcessingRatioFormula = `
+        // The script will calculate the tasks processing ratio returned in $taskProcessingRatio variable as
+        // double value and will return -1 when there are no active tasks or sampling data is insufficient
+
+        // the time interval for data sampling
+        $sampleTimeIntervalMinutes = 15 * TimeInterval_Minute;
+        $samplePercentThreshold = 70;
+
+        // get sample data for pending tasks (the sum of active and running tasks)
+        $pendingTasksSamplePercent = $PendingTasks.GetSamplePercent($sampleTimeIntervalMinutes);
+        $pendingTasksVector = $PendingTasks.GetSample(TimeInterval_Minute, $sampleTimeIntervalMinutes);
+        $pendingTasksAvg = avg($pendingTasksVector);
+
+        // get sample data for running tasks
+        $runningTasksSamplePercent = $RunningTasks.GetSamplePercent($sampleTimeIntervalMinutes);
+        $runningTasksVector = $RunningTasks.GetSample(TimeInterval_Minute, $sampleTimeIntervalMinutes);
+        $runningTasksAvg = avg($runningTasksVector);
+
+        // calculate the tasks processing ratio
+        $taskProcessingRatio = $runningTasksAvg / ($pendingTasksAvg > 0 ? $pendingTasksAvg : 1);
+
+        // set the tasks processing ratio for case when there are no active tasks (no processing)
+        $taskProcessingRatio = $pendingTasksAvg > 0 ? $taskProcessingRatio : -1;
+
+        // skip data sampling when sample percent is low
+        $${resultVariableName} = ($pendingTasksSamplePercent < $samplePercentThreshold || $runningTasksSamplePercent < $samplePercentThreshold) ? -1 : $taskProcessingRatio;
+        `;
+
+        const client = await this.batchClientProvider();
+        const formulaEvaluationResult = await client.pool.evaluateAutoScale(this.config.poolId, poolTaskProcessingRatioFormula);
+
+        // we need to escape the escaping \ in the regex string
+        const regExp = new RegExp(`.+?${resultVariableName}=(-?\\d+\\.?\\d*);?`, 'g');
+        const regExpMatch = regExp.exec(formulaEvaluationResult.results);
+        if (regExpMatch === null || regExpMatch.length < 2) {
+            throw new Error(
+                `The tasks processing ratio formula evaluation result has no expected variable '${resultVariableName}' returned.`,
+            );
+        }
+
+        const taskProcessingRatio = +regExpMatch[1];
+        this.logger.logInfo(`The pool ${this.config.poolId} tasks processing ratio is ${taskProcessingRatio}.`);
+
+        return taskProcessingRatio;
+    }
+
+    public async isPoolOverloaded(): Promise<boolean> {
+        const maxPoolTaskProcessingRatio = (await this.getJobManagerConfig()).maxPoolTaskProcessingRatio;
+        const taskProcessingRatio = await this.getPoolTaskProcessingRatio();
+
+        return taskProcessingRatio <= maxPoolTaskProcessingRatio;
+    }
 
     public async createJobIfNotExists(jobId: string, addJobIdIndexOnCreate: boolean = false): Promise<string> {
         let serviceJobId = jobId;
@@ -176,5 +233,9 @@ export class Batch {
         const commonConfig = await this.serviceConfig.getConfigValue('taskConfig');
 
         return commonConfig.taskTimeoutInMinutes;
+    }
+
+    private async getJobManagerConfig(): Promise<JobManagerConfig> {
+        return this.serviceConfig.getConfigValue('jobManagerConfig');
     }
 }

@@ -17,6 +17,11 @@ export interface LogRuntimeConfig {
     logInConsole: boolean;
 }
 
+export interface JobManagerConfig {
+    maxPoolTaskProcessingRatio: number;
+    jobTasksAddIntervalInSeconds: number;
+}
+
 export interface ScanRunTimeConfig {
     minLastReferenceSeenInDays: number;
     pageRescanIntervalInDays: number;
@@ -29,6 +34,7 @@ export interface RuntimeConfig {
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
+    jobManagerConfig: JobManagerConfig;
 }
 
 @injectable()
@@ -94,7 +100,19 @@ export class ServiceConfiguration {
                     doc: 'Timeout value after which the task has to be terminated',
                 },
             },
-
+            jobManagerConfig: {
+                maxPoolTaskProcessingRatio: {
+                    format: Number,
+                    default: 0.5,
+                    doc: `The maximum pool processing ratio between all active and running tasks
+                    within a pool where job runs under that is maintained by the job manager.`,
+                },
+                jobTasksAddIntervalInSeconds: {
+                    format: 'int',
+                    default: 30,
+                    doc: 'The time interval a job manager adds new tasks to an active job.',
+                },
+            },
             scanConfig: {
                 minLastReferenceSeenInDays: {
                     format: 'int',

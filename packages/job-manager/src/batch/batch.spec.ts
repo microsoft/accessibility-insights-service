@@ -3,9 +3,10 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
 import 'reflect-metadata';
 
-import { BatchServiceClient, BatchServiceModels, Job, Task } from '@azure/batch';
+import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
+import { PoolEvaluateAutoScaleResponse } from '@azure/batch/esm/models';
 import { Message } from 'azure-services';
-import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
+import { JobManagerConfig, ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -23,15 +24,18 @@ describe(Batch, () => {
     let runnerTaskConfigMock: IMock<RunnerTaskConfig>;
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
+    let poolMock: IMock<Pool>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<Logger>;
     let taskEnvSettings: BatchServiceModels.EnvironmentSetting[];
     let taskResourceFiles: BatchServiceModels.ResourceFile[];
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let maxTaskDurationInMinutes: number;
+    let maxPoolTaskProcessingRatioDefault: number;
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
+        maxPoolTaskProcessingRatioDefault = 0.5;
         config = {
             accountName: '',
             accountUrl: '',
@@ -48,21 +52,93 @@ describe(Batch, () => {
                     taskTimeoutInMinutes: maxTaskDurationInMinutes,
                 } as TaskRuntimeConfig;
             });
+        serviceConfigMock
+            .setup(async s => s.getConfigValue('jobManagerConfig'))
+            .returns(async () => {
+                return {
+                    maxPoolTaskProcessingRatio: maxPoolTaskProcessingRatioDefault,
+                } as JobManagerConfig;
+            });
         runnerTaskConfigMock = Mock.ofType(RunnerTaskConfig);
         runnerTaskConfigMock.setup(t => t.getEnvironmentSettings()).returns(() => taskEnvSettings);
         runnerTaskConfigMock.setup(t => t.getResourceFiles()).returns(() => taskResourceFiles);
 
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
+        poolMock = Mock.ofType();
         batchClientStub = ({
             job: jobMock.object,
             task: taskMock.object,
+            pool: poolMock.object,
         } as unknown) as BatchServiceClient;
 
         loggerMock = Mock.ofType(Logger);
         batchServiceClientProviderStub = async () => batchClientStub;
 
         batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);
+    });
+
+    describe('isPoolOverloaded()', () => {
+        it('validate pool is overloaded condition', async () => {
+            poolMock
+                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
+                .returns(async () =>
+                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
+                        results: `$taskProcessingRatioResult=0.09`,
+                    })),
+                )
+                .verifiable();
+
+            const isPoolOverloaded = await batch.isPoolOverloaded();
+            expect(isPoolOverloaded).toBeTruthy();
+        });
+
+        it('validate pool is not overloaded condition', async () => {
+            poolMock
+                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
+                .returns(async () =>
+                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
+                        results: `$taskProcessingRatioResult=0.8`,
+                    })),
+                )
+                .verifiable();
+
+            const isPoolOverloaded = await batch.isPoolOverloaded();
+            expect(isPoolOverloaded).toBeFalsy();
+        });
+    });
+
+    describe('getPoolTaskProcessingRatio()', () => {
+        it('evaluate tasks processing ratio formula', async () => {
+            const taskProcessingRatioExpected = 26.98;
+            poolMock
+                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
+                .returns(async () =>
+                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
+                        results: `$runningTasksSamplePercent=96.6667;$taskProcessingRatioResult=${taskProcessingRatioExpected}`,
+                    })),
+                )
+                .verifiable();
+
+            const taskProcessingRatio = await batch.getPoolTaskProcessingRatio();
+
+            expect(taskProcessingRatio).toEqual(taskProcessingRatioExpected);
+            poolMock.verifyAll();
+        });
+
+        it('error to evaluate tasks processing ratio formula', async () => {
+            poolMock
+                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
+                .returns(async () =>
+                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
+                        results: `$runningTasksSamplePercent=96.6667;$taskProcessingVector=[1,2,3]`,
+                    })),
+                )
+                .verifiable();
+
+            await expect(batch.getPoolTaskProcessingRatio()).rejects.toThrowError(/taskProcessingRatioResult/);
+            poolMock.verifyAll();
+        });
     });
 
     describe('waitJob()', () => {

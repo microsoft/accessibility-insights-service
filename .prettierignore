@@ -21,3 +21,4 @@ out/
 **/.env.*
 **/yarn-*.log
 copyright-header.txt
+**/*.ts.snap

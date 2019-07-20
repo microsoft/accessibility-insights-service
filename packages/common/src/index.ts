@@ -10,4 +10,5 @@ export {
     ScanRunTimeConfig,
     TaskRuntimeConfig,
     ServiceConfiguration,
+    JobManagerConfig,
 } from './configuration/service-configuration';
