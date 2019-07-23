@@ -35,14 +35,15 @@ echo "Granting role '$role' to the resource group '$resourceGroupName' for servi
 end=$((SECONDS + 300))
 printf " - Running .."
 while [ $SECONDS -le $end ]; do
-    response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$managedIdentity" --query "roleDefinitionId") || true
+    response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" --query "roleDefinitionId") || true
 
     if [[ -n $response ]]; then	
         break	
     else	
-        echo "Retry count - $i."	
+        echo "Retry count - $SECONDS."	
     fi	
-        sleep 5
+    
+    sleep 5
 done
 echo "  ended"
 
