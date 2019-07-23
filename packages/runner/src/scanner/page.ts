@@ -3,13 +3,10 @@
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-
+import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
 
-export type AxePuppeteerFactory = (page: Puppeteer.Page) => AxePuppeteer;
 export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
-
-const axePuppeteerFactoryImpl = (page: Puppeteer.Page) => new AxePuppeteer(page);
 
 @injectable()
 export class Page {
@@ -17,7 +14,7 @@ export class Page {
 
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
-        private readonly axePuppeteerFactory: AxePuppeteerFactory = axePuppeteerFactoryImpl,
+        @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
     ) {}
 
     public async create(): Promise<void> {
@@ -44,7 +41,7 @@ export class Page {
             // tslint:disable-next-line:no-empty
         } catch {}
 
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory(this.puppeteerPage);
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createAxePuppteteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
         return { results: scanResults };

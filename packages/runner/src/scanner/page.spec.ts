@@ -9,8 +9,9 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
 
+import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory, Page, PuppeteerBrowserFactory } from './page';
+import { Page, PuppeteerBrowserFactory } from './page';
 
 class PuppeteerPageMock {
     constructor(
@@ -105,7 +106,7 @@ describe('Page', () => {
 
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(apfm => apfm(page.puppeteerPage))
+            .setup(apfm => apfm.createAxePuppteteer(page.puppeteerPage))
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
 
@@ -143,7 +144,7 @@ describe('Page', () => {
             .verifiable(Times.once());
         axePuppeteerFactoryMock
             // tslint:disable-next-line: no-any no-unsafe-any
-            .setup(o => o(puppeteerPageMock as any))
+            .setup(o => o.createAxePuppteteer(puppeteerPageMock as any))
             .returns(() => axePuppeteerMock.object)
             .verifiable(Times.once());
 
