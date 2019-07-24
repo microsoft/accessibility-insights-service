@@ -18,8 +18,10 @@ export interface LogRuntimeConfig {
 }
 
 export interface JobManagerConfig {
-    maxPoolTaskProcessingRatio: number;
-    jobTasksAddIntervalInSeconds: number;
+    minTaskProcessingRatio: number;
+    maxTaskProcessingRatio: number;
+    taskProcessingSamplingIntervalInMinutes: number;
+    addTaskIntervalInSeconds: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -101,16 +103,25 @@ export class ServiceConfiguration {
                 },
             },
             jobManagerConfig: {
-                maxPoolTaskProcessingRatio: {
+                minTaskProcessingRatio: {
+                    format: Number,
+                    default: 0.1,
+                    doc: `The minimum allowed processing ratio of active to running tasks.`,
+                },
+                maxTaskProcessingRatio: {
                     format: Number,
                     default: 0.5,
-                    doc: `The maximum pool processing ratio between all active and running tasks
-                    within a pool where job runs under that is maintained by the job manager.`,
+                    doc: `The maximum allowed processing ratio of active to running tasks.`,
                 },
-                jobTasksAddIntervalInSeconds: {
+                taskProcessingSamplingIntervalInMinutes: {
+                    format: 'int',
+                    default: 15,
+                    doc: `The tasks processing sampling interval.`,
+                },
+                addTaskIntervalInSeconds: {
                     format: 'int',
                     default: 30,
-                    doc: 'The time interval a job manager adds new tasks to an active job.',
+                    doc: 'The time interval at which a job manager adds tasks to the job.',
                 },
             },
             scanConfig: {

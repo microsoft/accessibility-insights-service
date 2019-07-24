@@ -3,16 +3,25 @@
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "jobTasksAddIntervalInSeconds": Object {
+    "addTaskIntervalInSeconds": Object {
       "default": 30,
-      "doc": "The time interval a job manager adds new tasks to an active job.",
+      "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxPoolTaskProcessingRatio": Object {
+    "maxTaskProcessingRatio": Object {
       "default": 0.5,
-      "doc": "The maximum pool processing ratio between all active and running tasks
-                    within a pool where job runs under that is maintained by the job manager.",
+      "doc": "The maximum allowed processing ratio of active to running tasks.",
       "format": [Function],
+    },
+    "minTaskProcessingRatio": Object {
+      "default": 0.1,
+      "doc": "The minimum allowed processing ratio of active to running tasks.",
+      "format": [Function],
+    },
+    "taskProcessingSamplingIntervalInMinutes": Object {
+      "default": 15,
+      "doc": "The tasks processing sampling interval.",
+      "format": "int",
     },
   },
   "logConfig": Object {
@@ -64,16 +73,25 @@ Object {
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "jobTasksAddIntervalInSeconds": Object {
+    "addTaskIntervalInSeconds": Object {
       "default": 30,
-      "doc": "The time interval a job manager adds new tasks to an active job.",
+      "doc": "The time interval at which a job manager adds tasks to the job.",
       "format": "int",
     },
-    "maxPoolTaskProcessingRatio": Object {
+    "maxTaskProcessingRatio": Object {
       "default": 0.5,
-      "doc": "The maximum pool processing ratio between all active and running tasks
-                    within a pool where job runs under that is maintained by the job manager.",
+      "doc": "The maximum allowed processing ratio of active to running tasks.",
       "format": [Function],
+    },
+    "minTaskProcessingRatio": Object {
+      "default": 0.1,
+      "doc": "The minimum allowed processing ratio of active to running tasks.",
+      "format": [Function],
+    },
+    "taskProcessingSamplingIntervalInMinutes": Object {
+      "default": 15,
+      "doc": "The tasks processing sampling interval.",
+      "format": "int",
     },
   },
   "logConfig": Object {

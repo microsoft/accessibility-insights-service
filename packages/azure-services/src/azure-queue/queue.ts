@@ -87,7 +87,7 @@ export class Queue {
     private async getQueueMessages(queueURL: QueueURL): Promise<Models.DequeuedMessageItem[]> {
         const requestOptions: Models.MessagesDequeueOptionalParams = {
             numberOfMessages: 32, // Maximum number of messages to retrieve from queue: 32
-            visibilitytimeout: 300, // Message visibility timeout in seconds
+            visibilitytimeout: 180, // Message visibility timeout in seconds
         };
 
         await this.ensureQueueExists(queueURL);

@@ -9,7 +9,7 @@ import { Message } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { BatchServiceClientProvider } from '../job-manager-ioc-types';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
@@ -31,11 +31,13 @@ describe(Batch, () => {
     let taskResourceFiles: BatchServiceModels.ResourceFile[];
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let maxTaskDurationInMinutes: number;
-    let maxPoolTaskProcessingRatioDefault: number;
+    let maxTaskProcessingRatioDefault: number;
+    let taskProcessingSamplingIntervalInMinutesDefault: number;
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
-        maxPoolTaskProcessingRatioDefault = 0.5;
+        maxTaskProcessingRatioDefault = 0.5;
+        taskProcessingSamplingIntervalInMinutesDefault = 15;
         config = {
             accountName: '',
             accountUrl: '',
@@ -56,7 +58,8 @@ describe(Batch, () => {
             .setup(async s => s.getConfigValue('jobManagerConfig'))
             .returns(async () => {
                 return {
-                    maxPoolTaskProcessingRatio: maxPoolTaskProcessingRatioDefault,
+                    maxTaskProcessingRatio: maxTaskProcessingRatioDefault,
+                    taskProcessingSamplingIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
                 } as JobManagerConfig;
             });
         runnerTaskConfigMock = Mock.ofType(RunnerTaskConfig);
@@ -78,187 +81,32 @@ describe(Batch, () => {
         batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);
     });
 
-    describe('isPoolOverloaded()', () => {
-        it('validate pool is overloaded condition', async () => {
+    describe('getBatchMetrics()', () => {
+        it('evaluate formula to get batch metrics', async () => {
+            const batchMetricsExpected = {
+                poolId: 'poolId',
+                timeIntervalInMinutes: 15,
+                pendingTasksVector: [1, 2, 3],
+                runningTasksVector: [4, 5, 6],
+            };
             poolMock
                 .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
                 .returns(async () =>
                     Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
-                        results: `$taskProcessingRatioResult=0.09`,
+                        // tslint:disable-next-line: max-line-length
+                        results: `$TargetDedicatedNodes=2;$TargetLowPriorityNodes=0;$NodeDeallocationOption=requeue;$pendingTasksVector=[1,2,3];$runningTasksVector=[4,5,6]`,
                     })),
                 )
                 .verifiable();
 
-            const isPoolOverloaded = await batch.isPoolOverloaded();
-            expect(isPoolOverloaded).toBeTruthy();
-        });
+            const batchMetrics = await batch.getBatchMetrics();
 
-        it('validate pool is not overloaded condition', async () => {
-            poolMock
-                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
-                .returns(async () =>
-                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
-                        results: `$taskProcessingRatioResult=0.8`,
-                    })),
-                )
-                .verifiable();
-
-            const isPoolOverloaded = await batch.isPoolOverloaded();
-            expect(isPoolOverloaded).toBeFalsy();
-        });
-    });
-
-    describe('getPoolTaskProcessingRatio()', () => {
-        it('evaluate tasks processing ratio formula', async () => {
-            const taskProcessingRatioExpected = 26.98;
-            poolMock
-                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
-                .returns(async () =>
-                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
-                        results: `$runningTasksSamplePercent=96.6667;$taskProcessingRatioResult=${taskProcessingRatioExpected}`,
-                    })),
-                )
-                .verifiable();
-
-            const taskProcessingRatio = await batch.getPoolTaskProcessingRatio();
-
-            expect(taskProcessingRatio).toEqual(taskProcessingRatioExpected);
+            expect(batchMetrics).toEqual(batchMetricsExpected);
             poolMock.verifyAll();
-        });
-
-        it('error to evaluate tasks processing ratio formula', async () => {
-            poolMock
-                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
-                .returns(async () =>
-                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
-                        results: `$runningTasksSamplePercent=96.6667;$taskProcessingVector=[1,2,3]`,
-                    })),
-                )
-                .verifiable();
-
-            await expect(batch.getPoolTaskProcessingRatio()).rejects.toThrowError(/taskProcessingRatioResult/);
-            poolMock.verifyAll();
-        });
-    });
-
-    describe('waitJob()', () => {
-        it('stop wait on error', async () => {
-            taskMock
-                .setup(async o => o.list(jobId1, It.isAny()))
-                .returns(async () => Promise.reject('error'))
-                .verifiable();
-
-            await expect(batch.waitJob(jobId1, 200)).rejects.toThrowError();
-            taskMock.verifyAll();
-        });
-
-        it('wait for all tasks to complete', async () => {
-            const cloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
-            for (let k = 1; k < 5; k++) {
-                cloudTaskListResult.push({
-                    id: `job-${k}`,
-                    state: 'preparing',
-                    executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                        result: JobTaskExecutionResult.success,
-                    },
-                });
-            }
-            // the last task is a hosted task
-            process.env.AZ_BATCH_TASK_ID = 'taskManagerId';
-            cloudTaskListResult[cloudTaskListResult.length - 1].id = process.env.AZ_BATCH_TASK_ID;
-            let i = 0;
-            taskMock
-                .setup(async o => o.list(jobId1, It.isAny()))
-                .callback((id, taskListOptions) => {
-                    // the hosted task does not complete
-                    if (i < cloudTaskListResult.length - 1) {
-                        cloudTaskListResult[i++].state = 'completed';
-                    }
-                })
-                .returns(async () => Promise.resolve(cloudTaskListResult.filter(r => r.state !== JobTaskState.completed) as any))
-                .verifiable();
-
-            await batch.waitJob(jobId1, 200);
-
-            taskMock.verify(async t => t.list(jobId1, It.isAny()), Times.atLeast(3));
         });
     });
 
     describe('getCreatedTasksState()', () => {
-        it('get created job tasks state with pagination', async () => {
-            const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultFirst.odatanextLink = 'nextPageLink';
-            cloudTaskListResultFirst.push({
-                id: 'job-1',
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-            const cloudTaskListResultNext: BatchServiceModels.CloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultNext.push({
-                id: 'job-2',
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-            const jobTasksExpected = [
-                {
-                    id: 'job-1',
-                    state: JobTaskState.completed,
-                    result: JobTaskExecutionResult.success,
-                    correlationId: 'messageId-1',
-                },
-                {
-                    id: 'job-2',
-                    state: JobTaskState.completed,
-                    result: JobTaskExecutionResult.success,
-                    correlationId: 'messageId-2',
-                },
-            ];
-            let i = 0;
-            const messages = [
-                {
-                    messageId: 'messageId-1',
-                    messageText: '{}',
-                },
-                {
-                    messageId: 'messageId-2',
-                    messageText: '{}',
-                },
-            ];
-
-            taskMock
-                .setup(async o => o.list(jobId1))
-                .returns(async () => {
-                    if (i++ === 0) {
-                        return Promise.resolve(cloudTaskListResultFirst as any);
-                    } else {
-                        return Promise.resolve(<BatchServiceModels.CloudTaskListResult>{});
-                    }
-                })
-                .verifiable();
-            taskMock
-                .setup(async o => o.listNext('nextPageLink'))
-                .returns(async () => Promise.resolve(cloudTaskListResultNext as BatchServiceModels.TaskListResponse))
-                .verifiable();
-            taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
-                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
-
-            const jobTask = await batch.createTasks(jobId1, messages);
-            cloudTaskListResultFirst[0].id = jobTask[0].id;
-            cloudTaskListResultNext[0].id = jobTask[1].id;
-            jobTasksExpected[0].id = jobTask[0].id;
-            jobTasksExpected[1].id = jobTask[1].id;
-
-            const tasksActual = await batch.getCreatedTasksState(jobId1);
-
-            expect(tasksActual).toEqual(jobTasksExpected);
-            taskMock.verifyAll();
-        });
-
         it('verifies taskAddParameter data', async () => {
             const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
             cloudTaskListResultFirst.push({
