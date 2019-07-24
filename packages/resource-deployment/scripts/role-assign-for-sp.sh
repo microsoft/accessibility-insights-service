@@ -34,7 +34,7 @@ echo "Granting role '$role' to the resource group '$resourceGroupName' for servi
 
 end=$((SECONDS + 300))
 
-printf " - Assigning role for service principal $principalId .."
+printf " - Running .."
 
 while [ $SECONDS -le $end ]; do
     response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" --query "roleDefinitionId") || true
