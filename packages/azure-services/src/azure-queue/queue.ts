@@ -10,8 +10,6 @@ import { StorageConfig } from './storage-config';
 
 @injectable()
 export class Queue {
-    public readonly scanQueue: string = this.config.scanQueue;
-
     constructor(
         @inject(StorageConfig) private readonly config: StorageConfig,
         @inject(iocTypeNames.QueueServiceURLProvider) private readonly queueServiceURLProvider: QueueServiceURLProvider,
@@ -20,6 +18,10 @@ export class Queue {
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public get scanQueue(): string {
+        return this.config.scanQueue;
+    }
 
     public async getMessages(queue: string = this.scanQueue): Promise<Message[]> {
         const maxDequeueCount = 2;

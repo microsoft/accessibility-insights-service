@@ -10,6 +10,8 @@ import { JobTaskState } from '../batch/job-task';
 
 @injectable()
 export class Runner {
+    public runOnce: boolean = false;
+
     private jobId: string;
     private jobManagerConfig: JobManagerConfig;
 
@@ -47,6 +49,10 @@ export class Runner {
                 }
 
                 await this.addTasksToJob(scanMessages);
+            }
+
+            if (this.runOnce) {
+                break;
             }
 
             // tslint:disable-next-line: no-string-based-set-timeout

@@ -4,7 +4,7 @@ import { BatchMetrics, BatchMetricsResult } from './batch-metrics';
 
 let batchMetricsResult: BatchMetricsResult;
 
-describe('BatchMetrics', () => {
+describe(BatchMetrics, () => {
     beforeEach(() => {
         batchMetricsResult = {
             poolId: 'poolId',
