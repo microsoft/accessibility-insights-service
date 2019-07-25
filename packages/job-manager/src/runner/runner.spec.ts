@@ -20,7 +20,8 @@ let loggerMock: IMock<Logger>;
 const minTaskProcessingRatioDefault = 0.1;
 const maxTaskProcessingRatioDefault = 0.5;
 const taskProcessingSamplingIntervalInMinutesDefault = 2;
-const addTaskIntervalInSecondsDefault = 1;
+const taskIncrementIntervalInSecondsDefault = 1;
+const taskIncrementCountDefault = 1;
 
 describe(Runner, () => {
     beforeEach(() => {
@@ -39,7 +40,8 @@ describe(Runner, () => {
                     minTaskProcessingRatio: minTaskProcessingRatioDefault,
                     maxTaskProcessingRatio: maxTaskProcessingRatioDefault,
                     taskProcessingSamplingIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    addTaskIntervalInSeconds: addTaskIntervalInSecondsDefault,
+                    taskIncrementIntervalInSeconds: taskIncrementIntervalInSecondsDefault,
+                    taskIncrementCount: taskIncrementCountDefault,
                 };
             })
             .verifiable(Times.atLeastOnce());
@@ -59,7 +61,7 @@ describe(Runner, () => {
         serviceConfigMock.verifyAll();
     });
 
-    it('add tasks to the job', async () => {
+    it('add tasks to the job when batch metrics is available', async () => {
         // running tasks vector average = 2
         const taskCount = 2 / maxTaskProcessingRatioDefault;
         const queueMessages: Message[] = [];
@@ -112,6 +114,64 @@ describe(Runner, () => {
 
         await runner.run();
 
+        // should delete messages from the queue
+        expect(queueMessages.length).toEqual(0);
+    });
+
+    it('add tasks to the job when batch metrics is not available', async () => {
+        // should fallback to default task increment count
+        const taskCount = taskIncrementCountDefault;
+        const queueMessages: Message[] = [];
+        const jobTasks: JobTask[] = [];
+        let scanMessagesCount = 0;
+
+        for (let i = 1; i <= taskCount; i += 1) {
+            const message = {
+                messageText: '{}',
+                messageId: `message-id-${i}`,
+            };
+            queueMessages.push(message);
+
+            const jobTask = new JobTask();
+            jobTask.state = JobTaskState.queued;
+            jobTask.correlationId = message.messageId;
+            jobTasks.push(jobTask);
+        }
+
+        batchMock
+            .setup(async o => o.getBatchMetrics())
+            .returns(async () =>
+                Promise.resolve({
+                    poolId: 'pool-id',
+                    timeIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
+                    pendingTasksVector: [],
+                    runningTasksVector: [],
+                }),
+            )
+            .verifiable(Times.once());
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, queueMessages))
+            .returns(async () => Promise.resolve(jobTasks))
+            .verifiable(Times.once());
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .callback(q => {
+                scanMessagesCount += 1;
+            })
+            .returns(async () => Promise.resolve([queueMessages[scanMessagesCount - 1]]))
+            .verifiable(Times.exactly(taskCount));
+        queueMock
+            .setup(async o => o.deleteMessage(It.isAny()))
+            .callback(message => {
+                const i = queueMessages.indexOf(queueMessages.find(m => m.messageId === message.messageId));
+                queueMessages.splice(i, 1);
+            })
+            .verifiable(Times.exactly(taskCount));
+
+        await runner.run();
+
+        // should delete messages from the queue
         expect(queueMessages.length).toEqual(0);
     });
 

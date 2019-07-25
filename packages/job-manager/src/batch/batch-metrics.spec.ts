@@ -35,19 +35,19 @@ describe(BatchMetrics, () => {
         expect(batchMetrics.taskProcessingRatio).toEqual(-1);
     });
 
-    it('get pending tasks for processing ratio with empty metrics', () => {
+    it('get pending tasks increment count for target processing ratio with empty metrics', () => {
         batchMetricsResult.pendingTasksVector = [0, 0, 0, 0, 0, 0];
         batchMetricsResult.runningTasksVector = [0, 0, 0, 0, 0, 0];
         const batchMetrics = new BatchMetrics(batchMetricsResult);
-        const tasksCount = batchMetrics.getPendingTasksForProcessingRatio(0.5);
+        const tasksCount = batchMetrics.getPendingTaskIncrementCount(0.5);
         expect(tasksCount).toEqual(-1);
     });
 
-    it('get pending tasks for processing ratio with complete metrics', () => {
+    it('get pending tasks increment count for target processing ratio with complete metrics', () => {
         batchMetricsResult.pendingTasksVector = [5, 5, 5, 5, 5, 5];
         batchMetricsResult.runningTasksVector = [2, 2, 2, 2, 2, 2];
         const batchMetrics = new BatchMetrics(batchMetricsResult);
-        const tasksCount = batchMetrics.getPendingTasksForProcessingRatio(0.5);
+        const tasksCount = batchMetrics.getPendingTaskIncrementCount(0.5);
         expect(tasksCount).toEqual(4);
     });
 });

@@ -12,14 +12,14 @@ export class BatchMetrics {
         this.taskProcessingRatio = this.getTaskProcessingRatio();
     }
 
-    public getPendingTasksForProcessingRatio(taskProcessingRatio: number): number {
+    public getPendingTaskIncrementCount(targetTaskProcessingRatio: number): number {
         if (this.taskProcessingRatio === -1) {
             return -1;
         }
 
         const runningTasksAvg = this.getAverage(this.batchMetricsResult.runningTasksVector);
 
-        return runningTasksAvg / taskProcessingRatio;
+        return runningTasksAvg / targetTaskProcessingRatio;
     }
 
     private getTaskProcessingRatio(): number {

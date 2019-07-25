@@ -21,7 +21,8 @@ export interface JobManagerConfig {
     minTaskProcessingRatio: number;
     maxTaskProcessingRatio: number;
     taskProcessingSamplingIntervalInMinutes: number;
-    addTaskIntervalInSeconds: number;
+    taskIncrementIntervalInSeconds: number;
+    taskIncrementCount: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -105,7 +106,7 @@ export class ServiceConfiguration {
             jobManagerConfig: {
                 minTaskProcessingRatio: {
                     format: Number,
-                    default: 0.1,
+                    default: 0.25,
                     doc: `The minimum allowed processing ratio of active to running tasks.`,
                 },
                 maxTaskProcessingRatio: {
@@ -118,10 +119,15 @@ export class ServiceConfiguration {
                     default: 15,
                     doc: `The tasks processing sampling interval.`,
                 },
-                addTaskIntervalInSeconds: {
+                taskIncrementIntervalInSeconds: {
                     format: 'int',
                     default: 30,
                     doc: 'The time interval at which a job manager adds tasks to the job.',
+                },
+                taskIncrementCount: {
+                    format: 'int',
+                    default: 32,
+                    doc: 'The tasks count a job manager will add to the job at each interval when Batch metrics are not available.',
                 },
             },
             scanConfig: {

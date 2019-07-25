@@ -3,20 +3,25 @@
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "addTaskIntervalInSeconds": Object {
-      "default": 30,
-      "doc": "The time interval at which a job manager adds tasks to the job.",
-      "format": "int",
-    },
     "maxTaskProcessingRatio": Object {
       "default": 0.5,
       "doc": "The maximum allowed processing ratio of active to running tasks.",
       "format": [Function],
     },
     "minTaskProcessingRatio": Object {
-      "default": 0.1,
+      "default": 0.25,
       "doc": "The minimum allowed processing ratio of active to running tasks.",
       "format": [Function],
+    },
+    "taskIncrementCount": Object {
+      "default": 32,
+      "doc": "The tasks count a job manager will add to the job at each interval when Batch metrics are not available.",
+      "format": "int",
+    },
+    "taskIncrementIntervalInSeconds": Object {
+      "default": 30,
+      "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
     },
     "taskProcessingSamplingIntervalInMinutes": Object {
       "default": 15,
@@ -73,20 +78,25 @@ Object {
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "addTaskIntervalInSeconds": Object {
-      "default": 30,
-      "doc": "The time interval at which a job manager adds tasks to the job.",
-      "format": "int",
-    },
     "maxTaskProcessingRatio": Object {
       "default": 0.5,
       "doc": "The maximum allowed processing ratio of active to running tasks.",
       "format": [Function],
     },
     "minTaskProcessingRatio": Object {
-      "default": 0.1,
+      "default": 0.25,
       "doc": "The minimum allowed processing ratio of active to running tasks.",
       "format": [Function],
+    },
+    "taskIncrementCount": Object {
+      "default": 32,
+      "doc": "The tasks count a job manager will add to the job at each interval when Batch metrics are not available.",
+      "format": "int",
+    },
+    "taskIncrementIntervalInSeconds": Object {
+      "default": 30,
+      "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
     },
     "taskProcessingSamplingIntervalInMinutes": Object {
       "default": 15,

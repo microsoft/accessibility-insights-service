@@ -29,6 +29,7 @@ export class Runner {
         while (true) {
             const batchMetricsResult = await this.batch.getBatchMetrics();
             const batchMetrics = new BatchMetrics(batchMetricsResult);
+
             if (batchMetrics.taskProcessingRatio !== -1) {
                 this.logger.logInfo(
                     `The pool '${batchMetricsResult.poolId}' tasks processing ratio is ${batchMetrics.taskProcessingRatio}.`,
@@ -37,9 +38,16 @@ export class Runner {
                 this.logger.logInfo(`The pool '${batchMetricsResult.poolId}' tasks processing ratio is not available.`);
             }
 
-            if (batchMetrics.taskProcessingRatio >= this.jobManagerConfig.minTaskProcessingRatio) {
-                const scanMessagesCount = batchMetrics.getPendingTasksForProcessingRatio(this.jobManagerConfig.maxTaskProcessingRatio);
-                const scanMessages = await this.getMessages(scanMessagesCount);
+            const taskIncrementCount =
+                batchMetrics.taskProcessingRatio !== -1
+                    ? batchMetrics.getPendingTaskIncrementCount(this.jobManagerConfig.maxTaskProcessingRatio)
+                    : this.jobManagerConfig.taskIncrementCount;
+
+            if (
+                batchMetrics.taskProcessingRatio >= this.jobManagerConfig.minTaskProcessingRatio ||
+                batchMetrics.taskProcessingRatio === -1
+            ) {
+                const scanMessages = await this.getMessages(taskIncrementCount);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(
                         `The storage queue '${this.queue.scanQueue}' has no message to process. No tasks added to the job '${this.jobId}'.`,
@@ -56,7 +64,7 @@ export class Runner {
             }
 
             // tslint:disable-next-line: no-string-based-set-timeout
-            await new Promise(r => setTimeout(r, this.jobManagerConfig.addTaskIntervalInSeconds));
+            await new Promise(r => setTimeout(r, this.jobManagerConfig.taskIncrementIntervalInSeconds));
         }
     }
 
