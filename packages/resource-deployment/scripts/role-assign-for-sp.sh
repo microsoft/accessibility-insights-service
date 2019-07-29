@@ -33,21 +33,23 @@ fi
 echo "Granting role '$role' to the resource group '$resourceGroupName' for service principal '$principalId'"
 
 end=$((SECONDS + 300))
+
 printf " - Running .."
+
 while [ $SECONDS -le $end ]; do
-    az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" 1>/dev/null
-    principalIdResponse=$(az role assignment list --resource-group "$resourceGroupName" --assignee "$principalId" --query "[?principalId=='$principalId'].principalId" -o tsv)
+    response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" --query "roleDefinitionId") || true
 
-    if [[ $principalIdResponse == "$principalId" ]]; then
-        break
-    fi
-
+    if [[ -n $response ]]; then	
+        break	
+    else	
+        printf "."
+    fi	
+    
     sleep 5
-    printf "."
 done
 echo "  ended"
 
-if [[ $principalIdResponse != "$principalId" ]]; then
+if [[ -z $response ]]; then
     echo "Unable to create role assignment '$role' for service principal '$principalId'"
 
     exit 1
