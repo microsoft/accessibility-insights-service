@@ -8,8 +8,9 @@ import { AxeResults } from 'axe-core';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 
+import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory, Page } from './page';
+import { Page } from './page';
 import { Scanner } from './scanner';
 
 describe('Scanner', () => {
