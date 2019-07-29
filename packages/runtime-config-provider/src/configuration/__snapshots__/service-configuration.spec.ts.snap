@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ServiceConfiguration verifies custom config 1`] = `
+Object {
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
+  },
+  "queueConfig": Object {
+    "maxQueueSize": Object {
+      "default": 10,
+      "doc": "Maximum message the queue can have",
+      "format": "int",
+    },
+  },
+  "scanConfig": Object {
+    "failedPageRescanIntervalInHours": Object {
+      "default": 3,
+      "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+    "maxScanRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a page scan",
+      "format": "int",
+    },
+    "minLastReferenceSeenInDays": Object {
+      "default": 3,
+      "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned.",
+      "format": "int",
+    },
+    "pageRescanIntervalInDays": Object {
+      "default": 3,
+      "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+  },
+  "taskConfig": Object {
+    "taskTimeoutInMinutes": Object {
+      "default": 3,
+      "doc": "Timeout value after which the task has to be terminated",
+      "format": "int",
+    },
+  },
+}
+`;
+
+exports[`ServiceConfiguration verifies dev config 1`] = `
+Object {
+  "logConfig": Object {
+    "logInConsole": Object {
+      "default": true,
+      "doc": "Property to decide if console logging is enabled",
+      "format": "Boolean",
+    },
+  },
+  "queueConfig": Object {
+    "maxQueueSize": Object {
+      "default": 10,
+      "doc": "Maximum message the queue can have",
+      "format": "int",
+    },
+  },
+  "scanConfig": Object {
+    "failedPageRescanIntervalInHours": Object {
+      "default": 3,
+      "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+    "maxScanRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a page scan",
+      "format": "int",
+    },
+    "minLastReferenceSeenInDays": Object {
+      "default": 3,
+      "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned.",
+      "format": "int",
+    },
+    "pageRescanIntervalInDays": Object {
+      "default": 3,
+      "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
+      "format": "int",
+    },
+  },
+  "taskConfig": Object {
+    "taskTimeoutInMinutes": Object {
+      "default": 3,
+      "doc": "Timeout value after which the task has to be terminated",
+      "format": "int",
+    },
+  },
+}
+`;

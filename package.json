@@ -94,7 +94,10 @@
             "./packages/common/node_modules",
             "./packages/common/src/test-resources/",
             "./packages/common/test-results",
-            "./packages/resource-deployment/dist"
+            "./packages/resource-deployment/dist",
+            "./packages/runtime-config-provider/test-results",
+            "./packages/runtime-config-provider/node_modules",
+            "./packages/runtime-config-provider/dist"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [

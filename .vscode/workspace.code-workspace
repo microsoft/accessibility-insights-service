@@ -16,10 +16,10 @@
             "name": "service-library",
             "path": "../packages/service-library"
         },
-      {
-        "name": "azure-services",
-        "path": "../packages/azure-services"
-      },
+        {
+            "name": "azure-services",
+            "path": "../packages/azure-services"
+        },
         {
             "name": "storage-documents",
             "path": "../packages/storage-documents"
@@ -35,6 +35,10 @@
         {
             "name": "resource-deployment",
             "path": "../packages/resource-deployment"
+        },
+        {
+            "name": "runtime-config-provider",
+            "path": "../packages/runtime-config-provider"
         },
         {
             "name": "root",
