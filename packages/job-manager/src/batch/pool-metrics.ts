@@ -44,7 +44,7 @@ export class PoolMetrics {
             this.poolState.processingSpeed;
         // Normalize tasks increment count
         this.poolState.lastTasksIncrementCount = this.poolState.lastTasksIncrementCount > 0 ? this.poolState.lastTasksIncrementCount : 0;
-        // Presrve last pool load state
+        // Preserve last pool load state
         this.poolState.lastPoolLoad = poolMetricsInfo.load;
 
         return this.poolState.lastTasksIncrementCount;
