@@ -186,9 +186,10 @@
                     }
                 },
                 "scaleSettings": {
-                    "autoScale": {
-                        "formula": "$TargetDedicatedNodes = 3",
-                        "evaluationInterval": "PT15M"
+                    "fixedScale": {
+                        "targetDedicatedNodes": 3,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
                     }
                 },
                 "startTask": {
