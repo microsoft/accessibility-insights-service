@@ -8,6 +8,7 @@ import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
+import { PoolMetrics, PoolMetricsState } from '../batch/pool-metrics';
 import { Runner } from './runner';
 
 // tslint:disable: no-unsafe-any
@@ -15,19 +16,18 @@ import { Runner } from './runner';
 let runner: Runner;
 let batchMock: IMock<Batch>;
 let queueMock: IMock<Queue>;
+let poolMetricsMock: IMock<PoolMetrics>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
-const minTaskProcessingRatioDefault = 0.1;
-const maxTaskProcessingRatioDefault = 0.5;
-const taskProcessingSamplingIntervalInMinutesDefault = 2;
-const taskIncrementIntervalInSecondsDefault = 1;
-const taskIncrementCountDefault = 1;
+const targetQueuedTasksOverloadRatioDefault = 2;
+const tasksIncrementIntervalInSecondsDefault = 1;
 
 describe(Runner, () => {
     beforeEach(() => {
         process.env.AZ_BATCH_JOB_ID = 'batch-job-id';
         batchMock = Mock.ofType(Batch);
         queueMock = Mock.ofType(Queue);
+        poolMetricsMock = Mock.ofType(PoolMetrics);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(Logger);
 
@@ -37,11 +37,9 @@ describe(Runner, () => {
             .setup(async s => s.getConfigValue('jobManagerConfig'))
             .returns(async () => {
                 return {
-                    minTaskProcessingRatio: minTaskProcessingRatioDefault,
-                    maxTaskProcessingRatio: maxTaskProcessingRatioDefault,
-                    taskProcessingSamplingIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    taskIncrementIntervalInSeconds: taskIncrementIntervalInSecondsDefault,
-                    taskIncrementCount: taskIncrementCountDefault,
+                    targetQueuedTasksOverloadRatio: targetQueuedTasksOverloadRatioDefault,
+                    tasksIncrementIntervalInSeconds: tasksIncrementIntervalInSecondsDefault,
+                    periodicRestartInHours: 1,
                 };
             })
             .verifiable(Times.atLeastOnce());
@@ -51,7 +49,7 @@ describe(Runner, () => {
             .returns(async () => Promise.resolve(process.env.AZ_BATCH_JOB_ID))
             .verifiable(Times.once());
 
-        runner = new Runner(batchMock.object, queueMock.object, serviceConfigMock.object, loggerMock.object);
+        runner = new Runner(batchMock.object, queueMock.object, poolMetricsMock.object, serviceConfigMock.object, loggerMock.object);
         runner.runOnce = true;
     });
 
@@ -61,9 +59,8 @@ describe(Runner, () => {
         serviceConfigMock.verifyAll();
     });
 
-    it('add tasks to the job when batch metrics is available', async () => {
-        // running tasks vector average = 2
-        const taskCount = 2 / maxTaskProcessingRatioDefault;
+    it('add tasks to the job', async () => {
+        const taskCount = 2;
         const queueMessages: Message[] = [];
         const jobTasks: JobTask[] = [];
         let scanMessagesCount = 0;
@@ -81,20 +78,27 @@ describe(Runner, () => {
             jobTasks.push(jobTask);
         }
 
-        batchMock
-            .setup(async o => o.getBatchMetrics())
-            .returns(async () =>
-                Promise.resolve({
-                    poolId: 'pool-id',
-                    timeIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    pendingTasksVector: [5, 5, 5, 5],
-                    runningTasksVector: [2, 2, 2, 2],
-                }),
-            )
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 4,
+                runningTasks: 4,
+                pendingTasks: 8,
+            },
+        };
+        poolMetricsMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+            .returns(() => 8)
             .verifiable(Times.once());
+
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, queueMessages))
             .returns(async () => Promise.resolve(jobTasks))
+            .verifiable(Times.once());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
             .verifiable(Times.once());
 
         queueMock
@@ -102,8 +106,12 @@ describe(Runner, () => {
             .callback(q => {
                 scanMessagesCount += 1;
             })
-            .returns(async () => Promise.resolve([queueMessages[scanMessagesCount - 1]]))
-            .verifiable(Times.exactly(taskCount));
+            .returns(async () => {
+                return queueMessages.length >= scanMessagesCount
+                    ? Promise.resolve([queueMessages[scanMessagesCount - 1]])
+                    : Promise.resolve([]);
+            })
+            .verifiable(Times.exactly(taskCount + 1));
         queueMock
             .setup(async o => o.deleteMessage(It.isAny()))
             .callback(message => {
@@ -118,103 +126,69 @@ describe(Runner, () => {
         expect(queueMessages.length).toEqual(0);
     });
 
-    it('add tasks to the job when batch metrics is not available', async () => {
-        // should fallback to default task increment count
-        const taskCount = taskIncrementCountDefault;
-        const queueMessages: Message[] = [];
-        const jobTasks: JobTask[] = [];
-        let scanMessagesCount = 0;
-
-        for (let i = 1; i <= taskCount; i += 1) {
-            const message = {
-                messageText: '{}',
-                messageId: `message-id-${i}`,
-            };
-            queueMessages.push(message);
-
-            const jobTask = new JobTask();
-            jobTask.state = JobTaskState.queued;
-            jobTask.correlationId = message.messageId;
-            jobTasks.push(jobTask);
-        }
-
-        batchMock
-            .setup(async o => o.getBatchMetrics())
-            .returns(async () =>
-                Promise.resolve({
-                    poolId: 'pool-id',
-                    timeIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    pendingTasksVector: [],
-                    runningTasksVector: [],
-                }),
-            )
-            .verifiable(Times.once());
-        batchMock
-            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, queueMessages))
-            .returns(async () => Promise.resolve(jobTasks))
+    it('skip adding tasks when pool is overloaded', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 4,
+                runningTasks: 4,
+                pendingTasks: 8,
+            },
+        };
+        poolMetricsMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+            .returns(() => 0)
             .verifiable(Times.once());
 
-        queueMock
-            .setup(async o => o.getMessages())
-            .callback(q => {
-                scanMessagesCount += 1;
-            })
-            .returns(async () => Promise.resolve([queueMessages[scanMessagesCount - 1]]))
-            .verifiable(Times.exactly(taskCount));
-        queueMock
-            .setup(async o => o.deleteMessage(It.isAny()))
-            .callback(message => {
-                const i = queueMessages.indexOf(queueMessages.find(m => m.messageId === message.messageId));
-                queueMessages.splice(i, 1);
-            })
-            .verifiable(Times.exactly(taskCount));
-
-        await runner.run();
-
-        // should delete messages from the queue
-        expect(queueMessages.length).toEqual(0);
-    });
-
-    it('skip adding tasks run when message queue is empty', async () => {
         batchMock
-            .setup(async o => o.getBatchMetrics())
-            .returns(async () =>
-                Promise.resolve({
-                    poolId: 'pool-id',
-                    timeIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    pendingTasksVector: [5, 5, 5, 5],
-                    runningTasksVector: [2, 2, 2, 2],
-                }),
-            )
-            .verifiable(Times.once());
-        batchMock.setup(async o => o.createTasks(It.isAny(), It.isAny())).verifiable(Times.never());
-
-        queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
             .returns(async () => Promise.resolve([]))
-            .verifiable(Times.once());
-
-        await runner.run();
-    });
-
-    it('skip adding tasks when tasks processing ratio less than minTaskProcessingRatio', async () => {
+            .verifiable(Times.never());
         batchMock
-            .setup(async o => o.getBatchMetrics())
-            .returns(async () =>
-                Promise.resolve({
-                    poolId: 'pool-id',
-                    timeIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                    pendingTasksVector: [50, 50, 50, 50],
-                    runningTasksVector: [2, 2, 2, 2],
-                }),
-            )
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
             .verifiable(Times.once());
-        batchMock.setup(async o => o.createTasks(It.isAny(), It.isAny())).verifiable(Times.never());
 
         queueMock
             .setup(async o => o.getMessages())
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.never());
+        queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
+
+        await runner.run();
+    });
+
+    it('skip adding tasks when message queue is empty', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 4,
+                runningTasks: 4,
+                pendingTasks: 8,
+            },
+        };
+        poolMetricsMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+            .returns(() => 8)
+            .verifiable(Times.once());
+        poolMetricsMock.setup(o => o.poolState).returns(() => <PoolMetricsState>(<unknown>{ lastTasksIncrementCount: 2 }));
+
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
+        queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
 
         await runner.run();
     });

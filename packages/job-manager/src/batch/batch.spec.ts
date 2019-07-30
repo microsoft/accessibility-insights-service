@@ -4,9 +4,9 @@
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
-import { PoolEvaluateAutoScaleResponse } from '@azure/batch/esm/models';
+import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
 import { Message } from 'azure-services';
-import { JobManagerConfig, ServiceConfiguration, TaskRuntimeConfig } from 'common';
+import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock } from 'typemoq';
@@ -15,6 +15,20 @@ import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
 import { JobTaskExecutionResult, JobTaskState } from './job-task';
 import { RunnerTaskConfig } from './runner-task-config';
+
+export interface JobListItemStub {
+    id: string;
+}
+
+export class JobListStub {
+    public odatanextLink: string;
+
+    public constructor(public items: JobListItemStub[]) {}
+
+    public values(): JobListItemStub[] {
+        return this.items;
+    }
+}
 
 describe(Batch, () => {
     const jobId1 = 'job-1';
@@ -31,13 +45,9 @@ describe(Batch, () => {
     let taskResourceFiles: BatchServiceModels.ResourceFile[];
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let maxTaskDurationInMinutes: number;
-    let maxTaskProcessingRatioDefault: number;
-    let taskProcessingSamplingIntervalInMinutesDefault: number;
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
-        maxTaskProcessingRatioDefault = 0.5;
-        taskProcessingSamplingIntervalInMinutesDefault = 15;
         config = {
             accountName: '',
             accountUrl: '',
@@ -53,14 +63,6 @@ describe(Batch, () => {
                 return {
                     taskTimeoutInMinutes: maxTaskDurationInMinutes,
                 } as TaskRuntimeConfig;
-            });
-        serviceConfigMock
-            .setup(async s => s.getConfigValue('jobManagerConfig'))
-            .returns(async () => {
-                return {
-                    maxTaskProcessingRatio: maxTaskProcessingRatioDefault,
-                    taskProcessingSamplingIntervalInMinutes: taskProcessingSamplingIntervalInMinutesDefault,
-                } as JobManagerConfig;
             });
         runnerTaskConfigMock = Mock.ofType(RunnerTaskConfig);
         runnerTaskConfigMock.setup(t => t.getEnvironmentSettings()).returns(() => taskEnvSettings);
@@ -81,27 +83,54 @@ describe(Batch, () => {
         batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);
     });
 
-    describe('getBatchMetrics()', () => {
-        it('evaluate formula to get batch metrics', async () => {
-            const batchMetricsExpected = {
-                poolId: 'poolId',
-                timeIntervalInMinutes: 15,
-                pendingTasksVector: [1, 2, 3],
-                runningTasksVector: [4, 5, 6],
+    describe('getPoolMetricsInfo()', () => {
+        it('get pool metrics info', async () => {
+            const poolMetricsInfoExpected = {
+                id: 'poolId',
+                maxTasksPerPool: 32,
+                load: {
+                    activeTasks: 4,
+                    runningTasks: 7,
+                    pendingTasks: 11,
+                },
             };
             poolMock
-                .setup(async o => o.evaluateAutoScale(config.poolId, It.isAny()))
+                .setup(async o => o.get(config.poolId))
                 .returns(async () =>
-                    Promise.resolve(<PoolEvaluateAutoScaleResponse>(<unknown>{
-                        // tslint:disable-next-line: max-line-length
-                        results: `$TargetDedicatedNodes=2;$TargetLowPriorityNodes=0;$NodeDeallocationOption=requeue;$pendingTasksVector=[1,2,3];$runningTasksVector=[4,5,6]`,
+                    Promise.resolve(<PoolGetResponse>(<unknown>{
+                        maxTasksPerNode: 8,
+                        currentDedicatedNodes: 3,
+                        currentLowPriorityNodes: 1,
                     })),
                 )
                 .verifiable();
 
-            const batchMetrics = await batch.getBatchMetrics();
+            const options = {
+                jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${config.poolId}'` },
+            };
+            const items1 = new JobListStub([{ id: 'job-id-1' }]);
+            items1.odatanextLink = 'odatanextLink-1';
+            const items2 = new JobListStub([{ id: 'job-id-2' }]);
+            jobMock
+                .setup(async o => o.list(options))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items1)))
+                .verifiable();
+            jobMock
+                .setup(async o => o.listNext(items1.odatanextLink, options))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items2)))
+                .verifiable();
+            jobMock
+                .setup(async o => o.getTaskCounts(items1.items[0].id))
+                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 1, running: 2 })))
+                .verifiable();
+            jobMock
+                .setup(async o => o.getTaskCounts(items2.items[0].id))
+                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 3, running: 5 })))
+                .verifiable();
 
-            expect(batchMetrics).toEqual(batchMetricsExpected);
+            const poolMetricsInfo = await batch.getPoolMetricsInfo();
+
+            expect(poolMetricsInfo).toEqual(poolMetricsInfoExpected);
             poolMock.verifyAll();
         });
     });

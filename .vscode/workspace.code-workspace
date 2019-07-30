@@ -60,6 +60,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Presrve",
             "Rescan",
             "backlink",
             "cout",

@@ -18,11 +18,9 @@ export interface LogRuntimeConfig {
 }
 
 export interface JobManagerConfig {
-    minTaskProcessingRatio: number;
-    maxTaskProcessingRatio: number;
-    taskProcessingSamplingIntervalInMinutes: number;
-    taskIncrementIntervalInSeconds: number;
-    taskIncrementCount: number;
+    targetQueuedTasksOverloadRatio: number;
+    tasksIncrementIntervalInSeconds: number;
+    periodicRestartInHours: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -104,30 +102,21 @@ export class ServiceConfiguration {
                 },
             },
             jobManagerConfig: {
-                minTaskProcessingRatio: {
+                targetQueuedTasksOverloadRatio: {
                     format: Number,
-                    default: 0.25,
-                    doc: `The minimum allowed processing ratio of active to running tasks.`,
+                    default: 3,
+                    // tslint:disable-next-line: max-line-length
+                    doc: `The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.`,
                 },
-                maxTaskProcessingRatio: {
-                    format: Number,
-                    default: 0.5,
-                    doc: `The maximum allowed processing ratio of active to running tasks.`,
-                },
-                taskProcessingSamplingIntervalInMinutes: {
+                tasksIncrementIntervalInSeconds: {
                     format: 'int',
                     default: 15,
-                    doc: `The tasks processing sampling interval.`,
-                },
-                taskIncrementIntervalInSeconds: {
-                    format: 'int',
-                    default: 30,
                     doc: 'The time interval at which a job manager adds tasks to the job.',
                 },
-                taskIncrementCount: {
+                periodicRestartInHours: {
                     format: 'int',
-                    default: 32,
-                    doc: 'The tasks count a job manager will add to the job at each interval when Batch metrics are not available.',
+                    default: 29,
+                    doc: 'The amount of time the job manager instance will be restarted after a time has elapsed.',
                 },
             },
             scanConfig: {
