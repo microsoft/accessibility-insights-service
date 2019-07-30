@@ -46,15 +46,15 @@ export class ConfigFileUpdater {
     }
 
     private async triggerUpdate(): Promise<void> {
-        const newTime = new Date();
+        const currentTime = new Date();
         const response = await this.blobReader.getModifiedBlobContent(
             'runtime-configuration',
             'runtime-config.json',
             this.lastModifiedTime,
         );
+        this.lastModifiedTime = currentTime;
         if (response.isModified) {
             await this.writeToFile(response.updatedContent);
-            this.lastModifiedTime = newTime;
             await this.notifySubscribers();
         }
     }

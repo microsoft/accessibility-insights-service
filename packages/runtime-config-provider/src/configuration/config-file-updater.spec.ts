@@ -17,14 +17,26 @@ describe(ConfigFileUpdater, () => {
     let fsMock: IMock<typeof fs>;
     const fileContent = 'file content';
     let intervalCallback: () => Promise<boolean>;
+    // tslint:disable-next-line:variable-name
+    let RealDate: typeof Date;
+    let currentDate: Date;
 
     beforeEach(() => {
+        RealDate = global.Date;
+        (global.Date as any) = jest.fn((...props) => (props.length > 0 ? new (RealDate as any)(...props) : currentDate));
+
+        currentDate = new RealDate(2019, 1, 1);
+
         asyncIntervalMock = Mock.ofType(AsyncInterval, MockBehavior.Strict);
         // tslint:disable-next-line:no-empty
         blobReaderMock = Mock.ofType(BlobReader, MockBehavior.Strict, false, () => {});
         fsMock = Mock.ofInstance(fs);
 
         testSubject = new ConfigFileUpdater(blobReaderMock.object, asyncIntervalMock.object, fsMock.object);
+    });
+
+    afterEach(() => {
+        global.Date = RealDate;
     });
 
     describe('initialize', () => {
@@ -89,7 +101,11 @@ describe(ConfigFileUpdater, () => {
     describe('last modified time', () => {
         it('verifies modified time is updated on every call', async () => {
             const fetchContentTimes: Date[] = [];
-            const expectedStartTime = new Date(1, 1, 2019);
+            const expectedStartTime = new RealDate(1, 1, 2019);
+            const secondCallTime = new RealDate(2, 2, 2019);
+            const thirdCallTime = new RealDate(5, 2, 2019);
+
+            currentDate = secondCallTime;
             blobReaderMock
                 .setup(b => b.getModifiedBlobContent('runtime-configuration', 'runtime-config.json', It.isAny()))
                 .returns(async (container, blob, time) => {
@@ -104,11 +120,12 @@ describe(ConfigFileUpdater, () => {
 
             expect(fetchContentTimes[0]).toEqual(expectedStartTime);
 
+            currentDate = thirdCallTime;
             await intervalCallback();
-            await waitForTimeout(10);
             await intervalCallback();
 
-            expect(fetchContentTimes[1] < fetchContentTimes[2]).toBe(true);
+            expect(fetchContentTimes[1]).toEqual(secondCallTime);
+            expect(fetchContentTimes[2]).toEqual(thirdCallTime);
         });
     });
 
@@ -140,14 +157,6 @@ describe(ConfigFileUpdater, () => {
                 callback(new Error('file write failure message'));
             })
             .verifiable(Times.once());
-    }
-
-    async function waitForTimeout(timeoutValue: number): Promise<void> {
-        return new Promise<void>(resolve => {
-            setTimeout(() => {
-                resolve();
-            }, timeoutValue);
-        });
     }
 
     function setupVerifiableIntervalExecutionCall(): void {
