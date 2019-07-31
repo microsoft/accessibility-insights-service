@@ -11,3 +11,4 @@ export {
     TaskRuntimeConfig,
     ServiceConfiguration,
 } from './configuration/service-configuration';
+export { setupRuntimeConfigContainer } from './setup-runtime-config-container';
