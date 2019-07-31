@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 import { CredentialsProvider, registerAzureServicesToContainer } from 'azure-services';
-import { IoC } from 'common';
+import { IoC, setupRuntimeConfigContainer } from 'common';
 import { Container, interfaces } from 'inversify';
 import { registerLoggerToContainer } from 'logger';
 import { Batch } from './batch/batch';
@@ -12,6 +12,7 @@ import { jobManagerIocTypeNames } from './job-manager-ioc-types';
 
 export function setupJobManagerContainer(): Container {
     const container = new Container({ autoBindInjectable: true });
+    setupRuntimeConfigContainer(container);
     registerLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 

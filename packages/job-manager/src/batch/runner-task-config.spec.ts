@@ -38,6 +38,9 @@ describe(RunnerTaskConfig, () => {
             {
                 autoStorageContainerName: runnerScriptContainerName,
             },
+            {
+                autoStorageContainerName: 'runtime-configuration',
+            },
         ] as BatchServiceModels.ResourceFile[]);
     });
 

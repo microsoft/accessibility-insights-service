@@ -57,6 +57,9 @@ export class RunnerTaskConfig {
                 {
                     autoStorageContainerName: this.currentProcess.env.RUNNER_SCRIPTS_CONTAINER_NAME,
                 },
+                {
+                    autoStorageContainerName: 'runtime-configuration',
+                },
             ];
         }
 
