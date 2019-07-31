@@ -143,7 +143,7 @@ describe(Batch, () => {
         });
 
         it('should add no more than 100 tasks in a single Batch API call', async () => {
-            const messagesCount = 150;
+            const messagesCount = 103;
             const messages = [];
             let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
             const tasksAddedBatchCount: number[] = [];
@@ -172,7 +172,7 @@ describe(Batch, () => {
             expect(tasksActual.length).toEqual(messagesCount);
             expect(tasksAddedBatchCount.length).toEqual(2);
             expect(tasksAddedBatchCount[0]).toEqual(100);
-            expect(tasksAddedBatchCount[1]).toEqual(50);
+            expect(tasksAddedBatchCount[1]).toEqual(3);
             taskMock.verifyAll();
         });
 

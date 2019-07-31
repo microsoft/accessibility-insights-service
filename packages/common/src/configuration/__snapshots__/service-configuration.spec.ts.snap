@@ -5,7 +5,7 @@ Object {
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
-      "doc": "The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.",
+      "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
     "addTasksIntervalInSeconds": Object {
@@ -75,7 +75,7 @@ Object {
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
-      "doc": "The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.",
+      "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
     "addTasksIntervalInSeconds": Object {

@@ -32,7 +32,9 @@ export class PoolLoadGenerator {
         if (this.poolState.lastTasksIncrementCount === undefined) {
             this.poolState.lastPoolLoad = poolMetricsInfo.load;
             this.poolState.processingSpeed = 0;
-            this.poolState.lastTasksIncrementCount = poolMetricsInfo.maxTasksPerPool * activeToRunningTasksRatio;
+            // account for existing active tasks in a pool
+            this.poolState.lastTasksIncrementCount =
+                poolMetricsInfo.maxTasksPerPool * activeToRunningTasksRatio - poolMetricsInfo.load.activeTasks;
 
             return this.poolState.lastTasksIncrementCount;
         }

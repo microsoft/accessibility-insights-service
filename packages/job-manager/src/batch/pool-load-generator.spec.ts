@@ -20,13 +20,13 @@ describe(PoolLoadGenerator, () => {
 
     it('get tasks increment on first run', () => {
         const poolLoadGenerator = new PoolLoadGenerator();
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(60);
         expect(poolLoadGenerator.processingSpeed).toEqual(0);
     });
 
     it('get tasks increment on next run', () => {
         const poolLoadGenerator = new PoolLoadGenerator();
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(60);
         poolLoadGenerator.setLastTasksIncrementCount(52);
 
         poolMetricsInfo = {
@@ -50,7 +50,7 @@ describe(PoolLoadGenerator, () => {
                 runningTasks: 12,
             },
         };
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(55);
         poolLoadGenerator.setLastTasksIncrementCount(52);
 
         poolMetricsInfo = {
