@@ -63,4 +63,42 @@ describe(PoolLoadGenerator, () => {
         };
         expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(0);
     });
+
+    it('get tasks increment on fast processing', () => {
+        const poolLoadGenerator = new PoolLoadGenerator();
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 0,
+                runningTasks: 0,
+            },
+        };
+        let increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(64);
+        poolLoadGenerator.setLastTasksIncrementCount(increment);
+
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 0,
+                runningTasks: 0,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(128);
+        poolLoadGenerator.setLastTasksIncrementCount(increment);
+
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 0,
+                runningTasks: 0,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(192);
+    });
 });

@@ -92,7 +92,7 @@ export class Queue {
         const messageVisibilityTimeoutInSeconds = (await this.serviceConfig.getConfigValue('queueConfig'))
             .messageVisibilityTimeoutInSeconds;
         const requestOptions: Models.MessagesDequeueOptionalParams = {
-            numberOfMessages: 32, // Maximum number of messages to retrieve from queue (fixed by Azure storage service) is 32
+            numberOfMessages: 32, // Maximum number of messages to retrieve from queue (limited by Azure storage service) is 32
             visibilitytimeout: messageVisibilityTimeoutInSeconds,
         };
 
