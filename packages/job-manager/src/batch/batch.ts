@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
 import { Message } from 'azure-services';
-import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
+import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -12,7 +12,7 @@ import { VError } from 'verror';
 import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manager-ioc-types';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
-import { PoolLoad, PoolMetricsInfo } from './pool-metrics';
+import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
@@ -71,18 +71,16 @@ export class Batch {
     }
 
     public async createTasks(jobId: string, messages: Message[]): Promise<JobTask[]> {
-        // Azure Batch supports the maximum 100 tasks to add in collection
         const tasks: JobTask[] = [];
 
-        let position = 0;
-        let count = messages.length > 100 ? 100 : messages.length;
-        do {
-            const taskCollection = await this.addTaskCollection(jobId, messages.slice(position, position + count));
-            tasks.push(...taskCollection);
-
-            position = position + count;
-            count = messages.length - position > 100 ? 100 : messages.length - position;
-        } while (position < messages.length);
+        // Azure Batch supports the maximum 100 tasks to be added in addTaskCollection() API call
+        const chunks = System.chunkArray(messages, 100);
+        await Promise.all(
+            chunks.map(async chunk => {
+                const taskCollection = await this.addTaskCollection(jobId, chunk);
+                tasks.push(...taskCollection);
+            }),
+        );
 
         return tasks;
     }
@@ -95,6 +93,27 @@ export class Batch {
     }
 
     private async getCurrentPoolLoad(): Promise<PoolLoad> {
+        const activeJobIds = await this.getActiveJobIds();
+
+        let activeTasks = 0;
+        let runningTasks = 0;
+
+        const client = await this.batchClientProvider();
+        await Promise.all(
+            activeJobIds.map(async jbId => {
+                const jobInfo = await client.job.getTaskCounts(jbId);
+                activeTasks += jobInfo.active;
+                runningTasks += jobInfo.running;
+            }),
+        );
+
+        return {
+            activeTasks: activeTasks,
+            runningTasks: runningTasks,
+        };
+    }
+
+    private async getActiveJobIds(): Promise<string[]> {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
         const options = {
             jobListOptions: { filter: filterClause },
@@ -112,21 +131,7 @@ export class Batch {
             odatanextLink = jobListResponseNext.odatanextLink;
         }
 
-        let activeTasks = 0;
-        let runningTasks = 0;
-        await Promise.all(
-            jobs.map(async job => {
-                const jobInfo = await client.job.getTaskCounts(job.id);
-                activeTasks += jobInfo.active;
-                runningTasks += jobInfo.running;
-            }),
-        );
-
-        return {
-            activeTasks: activeTasks,
-            runningTasks: runningTasks,
-            pendingTasks: activeTasks + runningTasks,
-        };
+        return jobs.map(i => i.id);
     }
 
     private async addTaskCollection(jobId: string, messages: Message[]): Promise<JobTask[]> {

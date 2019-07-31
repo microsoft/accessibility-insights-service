@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any
 import * as cosmos from '@azure/cosmos';
+import { System } from 'common';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
 import * as util from 'util';
@@ -10,6 +10,8 @@ import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { RetryOptions } from './retry-options';
+
+// tslint:disable: no-any
 
 export class StorageClient {
     constructor(
@@ -161,8 +163,7 @@ export class StorageClient {
                     break;
                 }
 
-                // tslint:disable-next-line: no-string-based-set-timeout
-                await new Promise(r => setTimeout(r, retryOptions.intervalMilliseconds));
+                await System.wait(retryOptions.intervalMilliseconds);
             }
         });
     }

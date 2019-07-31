@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PoolMetrics, PoolMetricsInfo } from './pool-metrics';
+import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 
 let poolMetricsInfo: PoolMetricsInfo;
 
-describe(PoolMetrics, () => {
+describe(PoolLoadGenerator, () => {
     beforeEach(() => {
         poolMetricsInfo = {
             id: 'pool-id',
@@ -14,21 +14,20 @@ describe(PoolMetrics, () => {
             load: {
                 activeTasks: 4,
                 runningTasks: 7,
-                pendingTasks: 11,
             },
         };
     });
 
     it('get tasks increment on first run', () => {
-        const poolMetrics = new PoolMetrics();
-        expect(poolMetrics.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
-        expect(poolMetrics.poolState.lastPoolLoad).toEqual(poolMetricsInfo.load);
+        const poolLoadGenerator = new PoolLoadGenerator();
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        expect(poolLoadGenerator.processingSpeed).toEqual(0);
     });
 
     it('get tasks increment on next run', () => {
-        const poolMetrics = new PoolMetrics();
-        expect(poolMetrics.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
-        poolMetrics.poolState.lastTasksIncrementCount = 52;
+        const poolLoadGenerator = new PoolLoadGenerator();
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        poolLoadGenerator.setLastTasksIncrementCount(52);
 
         poolMetricsInfo = {
             id: 'pool-id',
@@ -36,25 +35,23 @@ describe(PoolMetrics, () => {
             load: {
                 activeTasks: 9,
                 runningTasks: 12,
-                pendingTasks: 21,
             },
         };
-        expect(poolMetrics.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(102);
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(102);
     });
 
     it('get tasks increment on slow processing', () => {
-        const poolMetrics = new PoolMetrics();
+        const poolLoadGenerator = new PoolLoadGenerator();
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
             load: {
                 activeTasks: 9,
                 runningTasks: 12,
-                pendingTasks: 21,
             },
         };
-        expect(poolMetrics.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
-        poolMetrics.poolState.lastTasksIncrementCount = 52;
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(64);
+        poolLoadGenerator.setLastTasksIncrementCount(52);
 
         poolMetricsInfo = {
             id: 'pool-id',
@@ -62,9 +59,8 @@ describe(PoolMetrics, () => {
             load: {
                 activeTasks: 91,
                 runningTasks: 10,
-                pendingTasks: 101,
             },
         };
-        expect(poolMetrics.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(0);
+        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(0);
     });
 });

@@ -3,12 +3,12 @@
 import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
-import { Runner } from './runner/runner';
+import { Worker } from './worker/worker';
 
 export class JobManagerEntryPoint extends ProcessEntryPointBase {
     protected async runCustomAction(container: Container): Promise<void> {
-        const runner = container.get<Runner>(Runner);
-        await runner.run();
+        const worker = container.get<Worker>(Worker);
+        await worker.run();
     }
 
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {

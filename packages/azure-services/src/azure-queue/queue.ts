@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
@@ -16,6 +17,7 @@ export class Queue {
         @inject(iocTypeNames.QueueURLProvider) private readonly queueURLProvider: QueueURLProvider,
         @inject(iocTypeNames.MessagesURLProvider) private readonly messagesURLProvider: MessagesURLProvider,
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
@@ -87,9 +89,11 @@ export class Queue {
     }
 
     private async getQueueMessages(queueURL: QueueURL): Promise<Models.DequeuedMessageItem[]> {
+        const messageVisibilityTimeoutInSeconds = (await this.serviceConfig.getConfigValue('queueConfig'))
+            .messageVisibilityTimeoutInSeconds;
         const requestOptions: Models.MessagesDequeueOptionalParams = {
-            numberOfMessages: 32, // Maximum number of messages to retrieve from queue: 32
-            visibilitytimeout: 180, // Message visibility timeout in seconds
+            numberOfMessages: 32, // Maximum number of messages to retrieve from queue (fixed by Azure storage service) is 32
+            visibilitytimeout: messageVisibilityTimeoutInSeconds,
         };
 
         await this.ensureQueueExists(queueURL);

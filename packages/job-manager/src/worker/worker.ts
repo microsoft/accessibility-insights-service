@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Message, Queue } from 'azure-services';
-import { JobManagerConfig, ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { Batch } from '../batch/batch';
 import { JobTaskState } from '../batch/job-task';
-import { PoolMetrics } from '../batch/pool-metrics';
+import { PoolLoadGenerator } from '../batch/pool-load-generator';
 
 @injectable()
-export class Runner {
+export class Worker {
     public runOnce: boolean = false;
 
     private jobId: string;
@@ -20,7 +20,7 @@ export class Runner {
     public constructor(
         @inject(Batch) private readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
-        @inject(PoolMetrics) private readonly poolMetrics: PoolMetrics,
+        @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {}
@@ -31,9 +31,9 @@ export class Runner {
         // tslint:disable-next-line: no-constant-condition
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-            const tasksIncrementCount = this.poolMetrics.getTasksIncrementCount(
+            const tasksIncrementCount = this.poolLoadGenerator.getTasksIncrementCount(
                 poolMetricsInfo,
-                this.jobManagerConfig.targetQueuedTasksOverloadRatio,
+                this.jobManagerConfig.activeToRunningTasksRatio,
             );
 
             let tasksQueuedCount = 0;
@@ -48,18 +48,17 @@ export class Runner {
                 tasksQueuedCount = await this.addTasksToJob(scanMessages);
             }
 
-            this.poolMetrics.poolState.lastTasksIncrementCount = tasksQueuedCount;
+            this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
             this.logger.logInfo('Pool load statistics', {
                 activeTasks: poolMetricsInfo.load.activeTasks.toString(),
                 runningTasks: poolMetricsInfo.load.runningTasks.toString(),
-                pendingTasks: poolMetricsInfo.load.pendingTasks.toString(),
                 processingSpeedTasksPerMinute: (
-                    (60 / this.jobManagerConfig.tasksIncrementIntervalInSeconds) *
-                    this.poolMetrics.poolState.processingSpeed
+                    (60 / this.jobManagerConfig.addTasksIntervalInSeconds) *
+                    this.poolLoadGenerator.processingSpeed
                 ).toString(),
                 tasksIncrementCountPerInterval: tasksIncrementCount.toString(),
-                tasksIncrementIntervalInSeconds: this.jobManagerConfig.tasksIncrementIntervalInSeconds.toString(),
+                addTasksIntervalInSeconds: this.jobManagerConfig.addTasksIntervalInSeconds.toString(),
                 tasksQueuedCountPerInterval: tasksQueuedCount.toString(),
             });
 
@@ -68,12 +67,11 @@ export class Runner {
             }
 
             if (moment().toDate() > this.restartAfterTime) {
-                this.logger.logInfo(`Performing scheduled restart after ${this.jobManagerConfig.periodicRestartInHours} hours.`);
+                this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
                 break;
             }
 
-            // tslint:disable-next-line: no-string-based-set-timeout
-            await new Promise(r => setTimeout(r, this.jobManagerConfig.tasksIncrementIntervalInSeconds * 1000));
+            await System.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
         }
     }
 
@@ -111,7 +109,7 @@ export class Runner {
         this.jobManagerConfig = await this.serviceConfig.getConfigValue('jobManagerConfig');
         this.jobId = await this.batch.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true);
         this.restartAfterTime = moment()
-            .add(this.jobManagerConfig.periodicRestartInHours, 'hour')
+            .add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour')
             .toDate();
     }
 }

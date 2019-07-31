@@ -3,19 +3,19 @@
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "periodicRestartInHours": Object {
-      "default": 29,
-      "doc": "The amount of time the job manager instance will be restarted after a time has elapsed.",
-      "format": "int",
-    },
-    "targetQueuedTasksOverloadRatio": Object {
+    "activeToRunningTasksRatio": Object {
       "default": 3,
       "doc": "The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
-    "tasksIncrementIntervalInSeconds": Object {
+    "addTasksIntervalInSeconds": Object {
       "default": 15,
       "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
+    },
+    "maxWallClockTimeInHours": Object {
+      "default": 29,
+      "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
   },
@@ -30,6 +30,11 @@ Object {
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message the queue can have",
+      "format": "int",
+    },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 180,
+      "doc": "Message visibility timeout in seconds",
       "format": "int",
     },
   },
@@ -68,19 +73,19 @@ Object {
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
   "jobManagerConfig": Object {
-    "periodicRestartInHours": Object {
-      "default": 29,
-      "doc": "The amount of time the job manager instance will be restarted after a time has elapsed.",
-      "format": "int",
-    },
-    "targetQueuedTasksOverloadRatio": Object {
+    "activeToRunningTasksRatio": Object {
       "default": 3,
       "doc": "The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.",
       "format": [Function],
     },
-    "tasksIncrementIntervalInSeconds": Object {
+    "addTasksIntervalInSeconds": Object {
       "default": 15,
       "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
+    },
+    "maxWallClockTimeInHours": Object {
+      "default": 29,
+      "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
   },
@@ -95,6 +100,11 @@ Object {
     "maxQueueSize": Object {
       "default": 10,
       "doc": "Maximum message the queue can have",
+      "format": "int",
+    },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 180,
+      "doc": "Message visibility timeout in seconds",
       "format": "int",
     },
   },

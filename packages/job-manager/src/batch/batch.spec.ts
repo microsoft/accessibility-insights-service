@@ -9,11 +9,11 @@ import { Message } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { BatchServiceClientProvider } from '../job-manager-ioc-types';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
-import { JobTaskExecutionResult, JobTaskState } from './job-task';
+import { JobTaskState } from './job-task';
 import { RunnerTaskConfig } from './runner-task-config';
 
 export interface JobListItemStub {
@@ -91,7 +91,6 @@ describe(Batch, () => {
                 load: {
                     activeTasks: 4,
                     runningTasks: 7,
-                    pendingTasks: 11,
                 },
             };
             poolMock
@@ -135,74 +134,46 @@ describe(Batch, () => {
         });
     });
 
-    describe('getCreatedTasksState()', () => {
-        it('verifies taskAddParameter data', async () => {
-            const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultFirst.push({
-                id: jobId1,
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-
-            const messages = [
-                {
-                    messageId: 'messageId-1',
-                    messageText: JSON.stringify({ msg: 'message 1 text' }),
-                },
-                {
-                    messageId: 'messageId-2',
-                    messageText: JSON.stringify({ msg: 'message 2 text' }),
-                },
-            ];
-            const message1CommandLine = 'message 1 command line';
-            const message2CommandLine = 'message 2 command line';
-
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[0].messageText)))
-                .returns(() => message1CommandLine)
-                .verifiable();
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[1].messageText)))
-                .returns(() => message2CommandLine)
-                .verifiable();
-
-            let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
-            taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
-                .callback((id, taskParameters) => {
-                    actualTaskAddParameters = taskParameters;
-                })
-                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
-
-            await batch.createTasks(jobId1, messages);
-
-            verifyTaskAddParameter(actualTaskAddParameters[0], message1CommandLine, messages[0].messageId);
-            verifyTaskAddParameter(actualTaskAddParameters[1], message2CommandLine, messages[1].messageId);
-
-            taskMock.verifyAll();
-            runnerTaskConfigMock.verifyAll();
-        });
-
-        function verifyTaskAddParameter(
-            actualTaskAddParameter: BatchServiceModels.TaskAddParameter,
-            expectedCommandLineMessage: string,
-            messageId: string,
-        ): void {
-            expect(actualTaskAddParameter.commandLine).toEqual(expectedCommandLineMessage);
-            expect(actualTaskAddParameter.environmentSettings).toEqual(taskEnvSettings);
-            expect(actualTaskAddParameter.resourceFiles).toEqual(taskResourceFiles);
-            expect(actualTaskAddParameter.id.startsWith(`task_${messageId}_`)).toBe(true);
-        }
-    });
-
     describe('createTasks()', () => {
         it('create no new tasks when no messages provided', async () => {
             const messages: Message[] = [];
             const tasksActual = await batch.createTasks(jobId1, messages);
 
             expect(tasksActual.length).toBe(0);
+        });
+
+        it('should add no more than 100 tasks in a single Batch API call', async () => {
+            const messagesCount = 150;
+            const messages = [];
+            let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
+            const tasksAddedBatchCount: number[] = [];
+
+            for (let i = 0; i < messagesCount; i += 1) {
+                messages.push({
+                    messageText: '{}',
+                    messageId: `message-id-${i}`,
+                });
+            }
+
+            taskMock
+                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .callback((id, taskAddParameters) => {
+                    tasksAddedBatchCount.push(taskAddParameters.length);
+                    taskAddCollectionResponse = <BatchServiceModels.TaskAddCollectionResponse>(<unknown>{ value: [] });
+                    taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
+                        taskAddCollectionResponse.value.push({ taskId: taskAddParameter.id, status: 'success' });
+                    });
+                })
+                .returns(async () => Promise.resolve(<BatchServiceModels.TaskAddCollectionResponse>(<unknown>taskAddCollectionResponse)))
+                .verifiable(Times.exactly(2));
+
+            const tasksActual = await batch.createTasks(jobId1, messages);
+
+            expect(tasksActual.length).toEqual(messagesCount);
+            expect(tasksAddedBatchCount.length).toEqual(2);
+            expect(tasksAddedBatchCount[0]).toEqual(100);
+            expect(tasksAddedBatchCount[1]).toEqual(50);
+            taskMock.verifyAll();
         });
 
         it('create new job tasks in batch request with success and failure ', async () => {
@@ -270,6 +241,57 @@ describe(Batch, () => {
             expect(expectedTaskConstraints).toEqual(actualTaskConstraints);
             taskMock.verifyAll();
         });
+
+        it('verifies tasks parameters on creation', async () => {
+            const messages = [
+                {
+                    messageId: 'messageId-1',
+                    messageText: JSON.stringify({ msg: 'message 1 text' }),
+                },
+                {
+                    messageId: 'messageId-2',
+                    messageText: JSON.stringify({ msg: 'message 2 text' }),
+                },
+            ];
+            const message1CommandLine = 'message 1 command line';
+            const message2CommandLine = 'message 2 command line';
+
+            runnerTaskConfigMock
+                .setup(t => t.getCommandLine(JSON.parse(messages[0].messageText)))
+                .returns(() => message1CommandLine)
+                .verifiable();
+            runnerTaskConfigMock
+                .setup(t => t.getCommandLine(JSON.parse(messages[1].messageText)))
+                .returns(() => message2CommandLine)
+                .verifiable();
+
+            let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
+            taskMock
+                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .callback((id, taskParameters) => {
+                    actualTaskAddParameters = taskParameters;
+                })
+                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
+
+            await batch.createTasks(jobId1, messages);
+
+            verifyTaskAddParameter(actualTaskAddParameters[0], message1CommandLine, messages[0].messageId);
+            verifyTaskAddParameter(actualTaskAddParameters[1], message2CommandLine, messages[1].messageId);
+
+            taskMock.verifyAll();
+            runnerTaskConfigMock.verifyAll();
+        });
+
+        function verifyTaskAddParameter(
+            actualTaskAddParameter: BatchServiceModels.TaskAddParameter,
+            expectedCommandLineMessage: string,
+            messageId: string,
+        ): void {
+            expect(actualTaskAddParameter.commandLine).toEqual(expectedCommandLineMessage);
+            expect(actualTaskAddParameter.environmentSettings).toEqual(taskEnvSettings);
+            expect(actualTaskAddParameter.resourceFiles).toEqual(taskResourceFiles);
+            expect(actualTaskAddParameter.id.startsWith(`task_${messageId}_`)).toBe(true);
+        }
     });
 
     describe('createJobIfNotExists()', () => {

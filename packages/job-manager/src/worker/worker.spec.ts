@@ -8,26 +8,26 @@ import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
-import { PoolMetrics, PoolMetricsState } from '../batch/pool-metrics';
-import { Runner } from './runner';
+import { PoolLoadGenerator } from '../batch/pool-load-generator';
+import { Worker } from './worker';
 
 // tslint:disable: no-unsafe-any
 
-let runner: Runner;
+let worker: Worker;
 let batchMock: IMock<Batch>;
 let queueMock: IMock<Queue>;
-let poolMetricsMock: IMock<PoolMetrics>;
+let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
-const targetQueuedTasksOverloadRatioDefault = 2;
-const tasksIncrementIntervalInSecondsDefault = 1;
+const activeToRunningTasksRatioDefault = 2;
+const addTasksIntervalInSecondsDefault = 1;
 
-describe(Runner, () => {
+describe(Worker, () => {
     beforeEach(() => {
         process.env.AZ_BATCH_JOB_ID = 'batch-job-id';
         batchMock = Mock.ofType(Batch);
         queueMock = Mock.ofType(Queue);
-        poolMetricsMock = Mock.ofType(PoolMetrics);
+        poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(Logger);
 
@@ -37,9 +37,9 @@ describe(Runner, () => {
             .setup(async s => s.getConfigValue('jobManagerConfig'))
             .returns(async () => {
                 return {
-                    targetQueuedTasksOverloadRatio: targetQueuedTasksOverloadRatioDefault,
-                    tasksIncrementIntervalInSeconds: tasksIncrementIntervalInSecondsDefault,
-                    periodicRestartInHours: 1,
+                    activeToRunningTasksRatio: activeToRunningTasksRatioDefault,
+                    addTasksIntervalInSeconds: addTasksIntervalInSecondsDefault,
+                    maxWallClockTimeInHours: 1,
                 };
             })
             .verifiable(Times.atLeastOnce());
@@ -49,8 +49,8 @@ describe(Runner, () => {
             .returns(async () => Promise.resolve(process.env.AZ_BATCH_JOB_ID))
             .verifiable(Times.once());
 
-        runner = new Runner(batchMock.object, queueMock.object, poolMetricsMock.object, serviceConfigMock.object, loggerMock.object);
-        runner.runOnce = true;
+        worker = new Worker(batchMock.object, queueMock.object, poolLoadGeneratorMock.object, serviceConfigMock.object, loggerMock.object);
+        worker.runOnce = true;
     });
 
     afterEach(() => {
@@ -84,11 +84,10 @@ describe(Runner, () => {
             load: {
                 activeTasks: 4,
                 runningTasks: 4,
-                pendingTasks: 8,
             },
         };
-        poolMetricsMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+        poolLoadGeneratorMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
             .returns(() => 8)
             .verifiable(Times.once());
 
@@ -120,7 +119,7 @@ describe(Runner, () => {
             })
             .verifiable(Times.exactly(taskCount));
 
-        await runner.run();
+        await worker.run();
 
         // should delete messages from the queue
         expect(queueMessages.length).toEqual(0);
@@ -133,11 +132,10 @@ describe(Runner, () => {
             load: {
                 activeTasks: 4,
                 runningTasks: 4,
-                pendingTasks: 8,
             },
         };
-        poolMetricsMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+        poolLoadGeneratorMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
             .returns(() => 0)
             .verifiable(Times.once());
 
@@ -156,7 +154,7 @@ describe(Runner, () => {
             .verifiable(Times.never());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
 
-        await runner.run();
+        await worker.run();
     });
 
     it('skip adding tasks when message queue is empty', async () => {
@@ -166,14 +164,12 @@ describe(Runner, () => {
             load: {
                 activeTasks: 4,
                 runningTasks: 4,
-                pendingTasks: 8,
             },
         };
-        poolMetricsMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, targetQueuedTasksOverloadRatioDefault))
+        poolLoadGeneratorMock
+            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
             .returns(() => 8)
             .verifiable(Times.once());
-        poolMetricsMock.setup(o => o.poolState).returns(() => <PoolMetricsState>(<unknown>{ lastTasksIncrementCount: 2 }));
 
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
@@ -190,6 +186,6 @@ describe(Runner, () => {
             .verifiable(Times.once());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
 
-        await runner.run();
+        await worker.run();
     });
 });

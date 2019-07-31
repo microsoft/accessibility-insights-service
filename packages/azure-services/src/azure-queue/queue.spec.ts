@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
+import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
@@ -13,6 +14,7 @@ import { Queue } from './queue';
 import { StorageConfig } from './storage-config';
 
 describe(Queue, () => {
+    const messageVisibilityTimeout = 30;
     let config: StorageConfig;
     let testSubject: Queue;
     let queueServiceURLProviderMock: IMock<QueueServiceURLProvider>;
@@ -26,6 +28,7 @@ describe(Queue, () => {
     let messagesURLMock: IMock<MessagesURL>;
     let deadMessagesURLMock: IMock<MessagesURL>;
     let messageIdUrlMock: IMock<MessageIdURL>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
         config = {
@@ -43,6 +46,15 @@ describe(Queue, () => {
         deadMessagesURLMock = Mock.ofType<MessagesURL>();
         messageIdUrlMock = Mock.ofType<MessageIdURL>();
         loggerMock = Mock.ofType(Logger);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async s => s.getConfigValue('queueConfig'))
+            .returns(async () =>
+                Promise.resolve({
+                    maxQueueSize: 10,
+                    messageVisibilityTimeoutInSeconds: messageVisibilityTimeout,
+                }),
+            );
 
         getPromisableDynamicMock(serviceURLMock);
         getPromisableDynamicMock(queueURLMock);
@@ -63,6 +75,7 @@ describe(Queue, () => {
             queueURLProviderMock.object,
             messagesURLProviderMock.object,
             messageIdURLProviderMock.object,
+            serviceConfigMock.object,
             loggerMock.object,
         );
     });
@@ -185,7 +198,7 @@ describe(Queue, () => {
 
     function setupVerifyCallForDequeueMessage(queueMessageResults: Models.DequeuedMessageItem[]): void {
         messagesURLMock
-            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: 180 }))
+            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: messageVisibilityTimeout }))
             .returns(async () =>
                 Promise.resolve({
                     dequeuedMessageItems: queueMessageResults,

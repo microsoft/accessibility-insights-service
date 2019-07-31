@@ -11,6 +11,7 @@ export interface TaskRuntimeConfig {
 
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
+    messageVisibilityTimeoutInSeconds: number;
 }
 
 export interface LogRuntimeConfig {
@@ -18,9 +19,9 @@ export interface LogRuntimeConfig {
 }
 
 export interface JobManagerConfig {
-    targetQueuedTasksOverloadRatio: number;
-    tasksIncrementIntervalInSeconds: number;
-    periodicRestartInHours: number;
+    activeToRunningTasksRatio: number;
+    addTasksIntervalInSeconds: number;
+    maxWallClockTimeInHours: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -93,6 +94,11 @@ export class ServiceConfiguration {
                     default: 10,
                     doc: 'Maximum message the queue can have',
                 },
+                messageVisibilityTimeoutInSeconds: {
+                    format: 'int',
+                    default: 180,
+                    doc: 'Message visibility timeout in seconds',
+                },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
@@ -102,21 +108,21 @@ export class ServiceConfiguration {
                 },
             },
             jobManagerConfig: {
-                targetQueuedTasksOverloadRatio: {
+                activeToRunningTasksRatio: {
                     format: Number,
                     default: 3,
                     // tslint:disable-next-line: max-line-length
                     doc: `The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.`,
                 },
-                tasksIncrementIntervalInSeconds: {
+                addTasksIntervalInSeconds: {
                     format: 'int',
                     default: 15,
                     doc: 'The time interval at which a job manager adds tasks to the job.',
                 },
-                periodicRestartInHours: {
+                maxWallClockTimeInHours: {
                     format: 'int',
                     default: 29,
-                    doc: 'The amount of time the job manager instance will be restarted after a time has elapsed.',
+                    doc: 'The amount of time the job manager instance will run.',
                 },
             },
             scanConfig: {
