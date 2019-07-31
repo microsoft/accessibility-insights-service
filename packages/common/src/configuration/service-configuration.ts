@@ -112,7 +112,7 @@ export class ServiceConfiguration {
                     format: Number,
                     default: 3,
                     // tslint:disable-next-line: max-line-length
-                    doc: `The target overload ratio of running to queued tasks. Higher ratio value will result higher queued tasks count.`,
+                    doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {
                     format: 'int',
