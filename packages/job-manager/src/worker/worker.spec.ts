@@ -91,8 +91,8 @@ describe(Worker, () => {
             },
         };
         poolLoadGeneratorMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
-            .returns(() => 8)
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(8))
             .verifiable(Times.once());
 
         batchMock
@@ -139,8 +139,8 @@ describe(Worker, () => {
             },
         };
         poolLoadGeneratorMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
-            .returns(() => 0)
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(0))
             .verifiable(Times.once());
 
         batchMock
@@ -171,8 +171,8 @@ describe(Worker, () => {
             },
         };
         poolLoadGeneratorMock
-            .setup(o => o.getTasksIncrementCount(poolMetricsInfo, activeToRunningTasksRatioDefault))
-            .returns(() => 8)
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(8))
             .verifiable(Times.once());
 
         batchMock

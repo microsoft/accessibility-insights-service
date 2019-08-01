@@ -31,10 +31,7 @@ export class Worker {
         // tslint:disable-next-line: no-constant-condition
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-            const tasksIncrementCount = this.poolLoadGenerator.getTasksIncrementCount(
-                poolMetricsInfo,
-                this.jobManagerConfig.activeToRunningTasksRatio,
-            );
+            const tasksIncrementCount = await this.poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo);
 
             let tasksQueuedCount = 0;
             if (tasksIncrementCount > 0) {

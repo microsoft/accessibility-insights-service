@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { injectable } from 'inversify';
+import { JobManagerConfig, ServiceConfiguration } from 'common';
+import { inject, injectable } from 'inversify';
 
 export interface PoolLoad {
     activeTasks: number;
@@ -26,6 +27,20 @@ export interface PoolMetricsState {
 export class PoolLoadGenerator {
     private lastPoolState: PoolMetricsState;
 
+    public constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {
+        this.lastPoolState = {
+            poolLoad: {
+                activeTasks: 0,
+                runningTasks: 0,
+            },
+            tasksIncrementCount: 0,
+            processingSpeed: 0,
+            activeToRunningTasksRatio: undefined,
+            samplingIntervalInSeconds: 1,
+            timestamp: process.hrtime()[0],
+        };
+    }
+
     public get processingSpeedPerMinute(): number {
         return Math.round((60 / this.lastPoolState.samplingIntervalInSeconds) * this.lastPoolState.processingSpeed);
     }
@@ -42,22 +57,15 @@ export class PoolLoadGenerator {
         this.lastPoolState.tasksIncrementCount = lastTasksIncrementCount;
     }
 
-    public getTasksIncrementCount(poolMetricsInfo: PoolMetricsInfo, targetActiveToRunningTasksRatio: number): number {
-        // No last pool state available. Use maximum pool capacity multiplied by active to running tasks ratio tasks increment value.
-        if (this.lastPoolState === undefined) {
-            // account for existing active tasks in a pool
-            const initialTasksIncrementCount =
-                poolMetricsInfo.maxTasksPerPool * targetActiveToRunningTasksRatio - poolMetricsInfo.load.activeTasks;
-            this.lastPoolState = {
-                poolLoad: poolMetricsInfo.load,
-                tasksIncrementCount: initialTasksIncrementCount,
-                processingSpeed: 0,
-                activeToRunningTasksRatio: targetActiveToRunningTasksRatio,
-                samplingIntervalInSeconds: 1,
-                timestamp: process.hrtime()[0],
-            };
+    public async getTasksIncrementCount(poolMetricsInfo: PoolMetricsInfo): Promise<number> {
+        // No last pool state is available. Use maximum pool capacity multiplied by active to running tasks ratio tasks increment value.
+        if (this.lastPoolState.activeToRunningTasksRatio === undefined) {
+            this.lastPoolState.activeToRunningTasksRatio = (await this.getJobManagerConfig()).activeToRunningTasksRatio;
+            this.lastPoolState.poolLoad = poolMetricsInfo.load;
+            this.lastPoolState.tasksIncrementCount =
+                poolMetricsInfo.maxTasksPerPool * this.lastPoolState.activeToRunningTasksRatio - poolMetricsInfo.load.activeTasks;
 
-            return initialTasksIncrementCount;
+            return this.lastPoolState.tasksIncrementCount;
         }
 
         // Calculate processing speed since last state
@@ -89,5 +97,9 @@ export class PoolLoadGenerator {
         };
 
         return tasksIncrementCount;
+    }
+
+    private async getJobManagerConfig(): Promise<JobManagerConfig> {
+        return this.serviceConfig.getConfigValue('jobManagerConfig');
     }
 }
