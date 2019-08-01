@@ -100,8 +100,8 @@ export class Batch {
 
         const client = await this.batchClientProvider();
         await Promise.all(
-            activeJobIds.map(async jbId => {
-                const jobInfo = await client.job.getTaskCounts(jbId);
+            activeJobIds.map(async jobId => {
+                const jobInfo = await client.job.getTaskCounts(jobId);
                 activeTasks += jobInfo.active;
                 runningTasks += jobInfo.running;
             }),

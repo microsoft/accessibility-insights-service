@@ -53,13 +53,11 @@ export class Worker {
             this.logger.logInfo('Pool load statistics', {
                 activeTasks: poolMetricsInfo.load.activeTasks.toString(),
                 runningTasks: poolMetricsInfo.load.runningTasks.toString(),
-                processingSpeedTasksPerMinute: (
-                    (60 / this.jobManagerConfig.addTasksIntervalInSeconds) *
-                    this.poolLoadGenerator.processingSpeed
-                ).toString(),
-                tasksIncrementCountPerInterval: tasksIncrementCount.toString(),
-                addTasksIntervalInSeconds: this.jobManagerConfig.addTasksIntervalInSeconds.toString(),
-                tasksQueuedCountPerInterval: tasksQueuedCount.toString(),
+                requestedTasksToAddPerInterval: tasksIncrementCount.toString(),
+                tasksAddedPerInterval: tasksQueuedCount.toString(),
+                samplingIntervalInSeconds: this.poolLoadGenerator.samplingIntervalInSeconds.toString(),
+                processingSpeedTasksPerMinute: this.poolLoadGenerator.processingSpeedPerMinute.toString(),
+                activeToRunningTasksRatio: this.poolLoadGenerator.activeToRunningTasksRatio.toString(),
             });
 
             if (this.runOnce) {

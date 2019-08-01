@@ -5,9 +5,14 @@ import 'reflect-metadata';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 
 let poolMetricsInfo: PoolMetricsInfo;
+let poolLoadGenerator: PoolLoadGenerator;
 
 describe(PoolLoadGenerator, () => {
     beforeEach(() => {
+        poolLoadGenerator = new PoolLoadGenerator();
+    });
+
+    it('get tasks increment on initial run', () => {
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -16,68 +21,64 @@ describe(PoolLoadGenerator, () => {
                 runningTasks: 7,
             },
         };
+        const increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(60);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
     });
 
-    it('get tasks increment on first run', () => {
-        const poolLoadGenerator = new PoolLoadGenerator();
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(60);
-        expect(poolLoadGenerator.processingSpeed).toEqual(0);
-    });
-
-    it('get tasks increment on next run', () => {
-        const poolLoadGenerator = new PoolLoadGenerator();
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(60);
-        poolLoadGenerator.setLastTasksIncrementCount(52);
-
+    it('get tasks increment when ration is enough to compensate processing speed', () => {
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
             load: {
-                activeTasks: 9,
-                runningTasks: 12,
-            },
-        };
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(102);
-    });
-
-    it('get tasks increment on slow processing', () => {
-        const poolLoadGenerator = new PoolLoadGenerator();
-        poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 32,
-            load: {
-                activeTasks: 9,
-                runningTasks: 12,
-            },
-        };
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(55);
-        poolLoadGenerator.setLastTasksIncrementCount(52);
-
-        poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 32,
-            load: {
-                activeTasks: 91,
-                runningTasks: 10,
-            },
-        };
-        expect(poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2)).toEqual(0);
-    });
-
-    it('get tasks increment on fast processing', () => {
-        const poolLoadGenerator = new PoolLoadGenerator();
-        poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 32,
-            load: {
-                activeTasks: 0,
-                runningTasks: 0,
+                activeTasks: 22,
+                runningTasks: 7,
             },
         };
         let increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
-        expect(increment).toEqual(64);
-        poolLoadGenerator.setLastTasksIncrementCount(increment);
+        expect(increment).toEqual(42);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
 
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 10,
+                runningTasks: 12,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(81);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+    });
+
+    it('get tasks increment on a slow tasks processing', () => {
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 1,
+                runningTasks: 12,
+            },
+        };
+        let increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(63);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 90,
+                runningTasks: 10,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        expect(increment).toEqual(0);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+    });
+
+    it('get tasks increment when initial ration is not enough to compensate processing speed', () => {
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
@@ -86,19 +87,59 @@ describe(PoolLoadGenerator, () => {
                 runningTasks: 0,
             },
         };
-        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
-        expect(increment).toEqual(128);
-        poolLoadGenerator.setLastTasksIncrementCount(increment);
+        let increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 1);
+        expect(increment).toEqual(32);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(1);
 
         poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 32,
             load: {
                 activeTasks: 0,
-                runningTasks: 0,
+                runningTasks: 2,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 1);
+        expect(increment).toEqual(80);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 6,
+                runningTasks: 4,
+            },
+        };
+        increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 1);
+        expect(increment).toEqual(95);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+    });
+
+    it('get tasks increment when actual added tasks count is different from calculated value', () => {
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 22,
+                runningTasks: 7,
+            },
+        };
+        let increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
+        poolLoadGenerator.setLastTasksIncrementCount(26);
+        expect(increment).toEqual(42);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 10,
+                runningTasks: 12,
             },
         };
         increment = poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo, 2);
-        expect(increment).toEqual(192);
+        expect(increment).toEqual(73);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
     });
 });
