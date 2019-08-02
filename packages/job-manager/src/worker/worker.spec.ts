@@ -44,9 +44,8 @@ describe(Worker, () => {
             })
             .verifiable(Times.atLeastOnce());
 
-        poolLoadGeneratorMock.setup(o => o.activeToRunningTasksRatio).returns(() => 1);
+        poolLoadGeneratorMock.object.activeToRunningTasksRatio = 1;
         poolLoadGeneratorMock.setup(o => o.processingSpeedPerMinute).returns(() => 1);
-        poolLoadGeneratorMock.setup(o => o.samplingIntervalInSeconds).returns(() => 1);
 
         batchMock
             .setup(async o => o.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true))

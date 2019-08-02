@@ -94,6 +94,33 @@ describe(PoolLoadGenerator, () => {
         expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
     });
 
+    it('reduce ratio on a slow tasks processing', async () => {
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 22,
+                runningTasks: 7,
+            },
+        };
+        let increment = await poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo);
+        expect(increment).toEqual(42);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+
+        poolLoadGenerator.activeToRunningTasksRatio = 10;
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 32,
+            load: {
+                activeTasks: 1000,
+                runningTasks: 12,
+            },
+        };
+        increment = await poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo);
+        expect(increment).toEqual(0);
+        expect(poolLoadGenerator.activeToRunningTasksRatio).toEqual(2);
+    });
+
     it('get tasks increment when initial ration is not enough to compensate processing speed', async () => {
         activeToRunningTasksRatio = 1;
         poolMetricsInfo = {
