@@ -6,6 +6,7 @@ import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { JobManagerEntryPoint } from './job-manager-entry-point';
+
 // tslint:disable: no-object-literal-type-assertion
 
 class TestJobManagerEntryPoint extends JobManagerEntryPoint {
