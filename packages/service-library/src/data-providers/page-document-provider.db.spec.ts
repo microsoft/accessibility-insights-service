@@ -56,7 +56,7 @@ describe(PageDocumentProvider, () => {
                 failedPageRescanIntervalInHours: 3,
                 maxScanRetryCount: 4,
                 minLastReferenceSeenInDays: 5,
-                ruleExclusionList: [],
+                accessibilityRuleExclusionList: [],
             };
             serviceConfigMock = Mock.ofType(ServiceConfiguration);
             serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);

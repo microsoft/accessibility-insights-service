@@ -36,7 +36,7 @@ describe('PageDocumentProvider', () => {
             maxScanRetryCount: 4,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
-            ruleExclusionList: [],
+            accessibilityRuleExclusionList: [],
         };
 
         storageClientMock = Mock.ofType<StorageClient>();

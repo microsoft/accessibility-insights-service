@@ -18,7 +18,7 @@ describe('AxePuppeteerFactory', () => {
             maxScanRetryCount: 4,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
-            ruleExclusionList: ['image-redundant-alt', 'empty-heading', 'p-as-heading', 'table-duplicate-name'],
+            accessibilityRuleExclusionList: [],
         };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);

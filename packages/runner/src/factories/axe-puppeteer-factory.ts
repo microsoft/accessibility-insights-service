@@ -10,7 +10,7 @@ export class AxePuppeteerFactory {
     constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
 
     public async createAxePuppteteer(page: Puppeteer.Page): Promise<AxePuppeteer> {
-        const ruleExclusionList: string[] = (await this.serviceConfig.getConfigValue('scanConfig')).ruleExclusionList;
+        const ruleExclusionList: string[] = (await this.serviceConfig.getConfigValue('scanConfig')).accessibilityRuleExclusionList;
 
         return new AxePuppeteer(page).disableRules(ruleExclusionList);
     }
