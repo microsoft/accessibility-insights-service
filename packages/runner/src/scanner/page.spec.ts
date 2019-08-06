@@ -141,6 +141,7 @@ describe('Page', () => {
         axePuppeteerFactoryMock
             // tslint:disable-next-line: no-unsafe-any
             .setup(async o => o.createAxePuppteteer(It.isAny()))
+            // tslint:disable-next-line: no-any
             .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
             .verifiable(Times.once());
 
