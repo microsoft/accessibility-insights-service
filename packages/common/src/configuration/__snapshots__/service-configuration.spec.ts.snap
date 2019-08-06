@@ -39,6 +39,11 @@ Object {
     },
   },
   "scanConfig": Object {
+    "accessibilityRuleExclusionList": Object {
+      "default": Array [],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
+    },
     "failedPageRescanIntervalInHours": Object {
       "default": 3,
       "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
@@ -109,6 +114,11 @@ Object {
     },
   },
   "scanConfig": Object {
+    "accessibilityRuleExclusionList": Object {
+      "default": Array [],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
+    },
     "failedPageRescanIntervalInHours": Object {
       "default": 3,
       "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
