@@ -37,6 +37,11 @@ Object {
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
     },
+    "ruleExclusionList": Object {
+      "default": Array [],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
+    },
   },
   "taskConfig": Object {
     "taskTimeoutInMinutes": Object {
@@ -84,6 +89,11 @@ Object {
       "default": 3,
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
+    },
+    "ruleExclusionList": Object {
+      "default": Array [],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
     },
   },
   "taskConfig": Object {

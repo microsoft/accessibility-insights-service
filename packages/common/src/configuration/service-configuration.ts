@@ -22,6 +22,7 @@ export interface ScanRunTimeConfig {
     pageRescanIntervalInDays: number;
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
+    ruleExclusionList: string[];
 }
 
 export interface RuntimeConfig {
@@ -115,6 +116,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'Maximum number of retries allowed for a page scan',
+                },
+                ruleExclusionList: {
+                    format: Array,
+                    default: [],
+                    doc: 'Axe core rule exclusion list',
                 },
             },
         };

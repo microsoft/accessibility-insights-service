@@ -7,7 +7,7 @@ import '../../test-utilities/common-mock-methods';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 
 import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
@@ -106,8 +106,8 @@ describe('Page', () => {
 
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(apfm => apfm.createAxePuppteteer(page.puppeteerPage))
-            .returns(() => axePuppeteerMock.object)
+            .setup(async apfm => apfm.createAxePuppteteer(page.puppeteerPage))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
         await page.create();
@@ -116,7 +116,7 @@ describe('Page', () => {
         expect(result).toEqual(errorResult);
     });
 
-    it('should analyze accessibility issues, even if error thrwon when waitForNavigation', async () => {
+    it('should analyze accessibility issues, even if error thrown when waitForNavigation', async () => {
         const axeResults: AxeResults = <AxeResults>(<unknown>{ type: 'AxeResults' });
         const scanResults: AxeScanResults = { results: axeResults };
         const scanUrl = 'https://www.example.com';
@@ -138,22 +138,19 @@ describe('Page', () => {
             })
             .verifiable(Times.once());
 
-        axePuppeteerMock
-            .setup(async o => o.analyze())
-            .returns(async () => Promise.resolve(axeResults))
-            .verifiable(Times.once());
         axePuppeteerFactoryMock
-            // tslint:disable-next-line: no-any no-unsafe-any
-            .setup(o => o.createAxePuppteteer(puppeteerPageMock as any))
-            .returns(() => axePuppeteerMock.object)
+            // tslint:disable-next-line: no-unsafe-any
+            .setup(async o => o.createAxePuppteteer(It.isAny()))
+            .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
             .verifiable(Times.once());
 
         await page.create();
         const result = await page.scanForA11yIssues(scanUrl);
 
-        expect(result).toEqual(scanResults);
-        axePuppeteerMock.verifyAll();
         axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+
+        expect(result).toEqual(scanResults);
     });
 
     it('should create new browser page', async () => {

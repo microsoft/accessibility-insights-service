@@ -41,7 +41,7 @@ export class Page {
             // tslint:disable-next-line:no-empty
         } catch {}
 
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createAxePuppteteer(this.puppeteerPage);
+        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppteteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
         return { results: scanResults };
