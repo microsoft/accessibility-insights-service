@@ -1,0 +1,14 @@
+{
+    "bindings": [
+        {
+            "name": "scanRequest",
+            "type": "httpTrigger",
+            "direction": "in"
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "res"
+        }
+    ]
+}
