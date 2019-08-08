@@ -103,7 +103,7 @@ To debug packages locally follow the generic steps below.
 
 ## Contributing
 
-All contributions are welcome! Please visit our [Contributing](https://github.com/Microsoft/accessibility-insights-service/blob/master/CONTRIBUTING.md) page.
+All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/accessibility-insights-service/blob/master/Contributing.md) page.
 
 ## Contact us
 
