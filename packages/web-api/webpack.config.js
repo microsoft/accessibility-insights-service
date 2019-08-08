@@ -40,7 +40,7 @@ module.exports = env => {
         },
         output: {
             path: path.resolve('./dist'),
-            filename: '[name].js',
+            filename: '[name]/index.js',
             libraryTarget: 'commonjs2',
         },
         plugins: [
