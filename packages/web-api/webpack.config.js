@@ -12,7 +12,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['applicationinsights'],
+        externals: [],
         entry: {
             ['scan-request']: path.resolve('./scan-request/index.ts'),
         },
@@ -54,6 +54,20 @@ module.exports = env => {
                     from: '**/*.sh',
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
+                },
+                {
+                    context: './',
+                    from: '**/function.json',
+                    to: '',
+                    ignore: ['dist/**'],
+                },
+                {
+                    from: 'package.json',
+                    to: '',
+                },
+                {
+                    from: '../../yarn.lock',
+                    to: '',
                 },
             ]),
         ],

@@ -8,7 +8,7 @@
         {
             "type": "http",
             "direction": "out",
-            "name": "res"
+            "name": "scanResponse"
         }
     ]
 }
