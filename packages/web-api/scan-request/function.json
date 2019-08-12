@@ -3,7 +3,8 @@
         {
             "name": "scanRequest",
             "type": "httpTrigger",
-            "direction": "in"
+            "direction": "in",
+            "methods": ["get", "post"]
         },
         {
             "type": "http",
