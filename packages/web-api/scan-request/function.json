@@ -1,0 +1,15 @@
+{
+    "bindings": [
+        {
+            "name": "scanRequest",
+            "type": "httpTrigger",
+            "direction": "in",
+            "methods": ["get", "post"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "scanResponse"
+        }
+    ]
+}
