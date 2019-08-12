@@ -41,12 +41,12 @@
             "path": "../packages/api-contracts"
         },
         {
-            "name": "root",
-            "path": "../"
-        },
-        {
             "name": "web-api",
             "path": "../packages/web-api"
+        },
+        {
+            "name": "root",
+            "path": "../"
         }
     ],
     "settings": {
