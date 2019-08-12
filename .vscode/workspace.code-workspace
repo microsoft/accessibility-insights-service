@@ -17,8 +17,8 @@
             "path": "../packages/service-library"
         },
         {
-          "name": "azure-services",
-          "path": "../packages/azure-services"
+            "name": "azure-services",
+            "path": "../packages/azure-services"
         },
         {
             "name": "storage-documents",
@@ -42,8 +42,12 @@
         },
         {
             "name": "root",
-            "path": "../",
+            "path": "../"
         },
+        {
+            "name": "web-api",
+            "path": "../packages/web-api"
+        }
     ],
     "settings": {
         "editor.formatOnSave": true,
