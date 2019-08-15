@@ -9,8 +9,6 @@ export jobManagerContainerName="batch-job-manager-script"
 export runnerContainerName="batch-runner-script"
 export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
-export runtimeConfigurationContainerName="runtime-configuration"
-export runtimeConfigurationBlobName="runtime-config.json"
 export includePattern="*[!*.map]"
 
 if [[ -z $dropFolder ]]; then
@@ -28,15 +26,6 @@ uploadFolderContents() {
     includePattern=$4
 
     az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
-}
-
-uploadFile() {
-    destinationContainer=$1
-    pathToSource=$2
-    storageAccountName=$3
-    blobName=$4
-
-    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName" 1>/dev/null
 }
 
 exitWithUsageInfo() {
@@ -68,4 +57,4 @@ uploadFolderContents $jobManagerContainerName "$dropFolder/job-manager/dist" "$s
 uploadFolderContents $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"
-uploadFile $runtimeConfigurationContainerName "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$storageAccountName" "$runtimeConfigurationBlobName"
+. "${0%/*}/upload-config-files.sh"

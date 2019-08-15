@@ -20,4 +20,6 @@ dist/
 out/
 **/.env.*
 **/yarn-*.log
+**/*.ts.snap
 copyright-header.txt
+**/.DS_Store

@@ -43,15 +43,24 @@ describe('create instance if nil', () => {
     });
 });
 
-describe('StringUtils', () => {
-    describe('isNullOrEmpty', () => {
-        // tslint:disable-next-line: no-null-keyword
-        test.each([null, undefined, ''])('returns true when for %o', testCase => {
-            expect(System.isNullOrEmptyString(testCase)).toBe(true);
-        });
+describe('isNullOrEmptyString', () => {
+    // tslint:disable-next-line: no-null-keyword
+    test.each([null, undefined, ''])('returns true when for %o', testCase => {
+        expect(System.isNullOrEmptyString(testCase)).toBe(true);
+    });
 
-        test.each(['val1', ' '])('returns false for non null value %o', testCase => {
-            expect(System.isNullOrEmptyString(testCase)).toBe(false);
-        });
+    test.each(['val1', ' '])('returns false for non null value %o', testCase => {
+        expect(System.isNullOrEmptyString(testCase)).toBe(false);
+    });
+});
+
+describe('chunkArray()', () => {
+    it('chunk array', () => {
+        const sourceArray = [1, 2, 3, 4, 5, 6, 7];
+        const result = System.chunkArray(sourceArray, 3);
+        expect(result.length).toEqual(3);
+        expect(result[0]).toEqual([1, 2, 3]);
+        expect(result[1]).toEqual([4, 5, 6]);
+        expect(result[2]).toEqual([7]);
     });
 });

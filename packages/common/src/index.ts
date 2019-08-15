@@ -10,4 +10,6 @@ export {
     ScanRunTimeConfig,
     TaskRuntimeConfig,
     ServiceConfiguration,
+    JobManagerConfig,
 } from './configuration/service-configuration';
+export { setupRuntimeConfigContainer } from './setup-runtime-config-container';

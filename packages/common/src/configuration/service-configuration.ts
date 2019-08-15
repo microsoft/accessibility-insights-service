@@ -11,10 +11,17 @@ export interface TaskRuntimeConfig {
 
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
+    messageVisibilityTimeoutInSeconds: number;
 }
 
 export interface LogRuntimeConfig {
     logInConsole: boolean;
+}
+
+export interface JobManagerConfig {
+    activeToRunningTasksRatio: number;
+    addTasksIntervalInSeconds: number;
+    maxWallClockTimeInHours: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -22,6 +29,7 @@ export interface ScanRunTimeConfig {
     pageRescanIntervalInDays: number;
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
+    accessibilityRuleExclusionList: string[];
 }
 
 export interface RuntimeConfig {
@@ -29,6 +37,7 @@ export interface RuntimeConfig {
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
+    jobManagerConfig: JobManagerConfig;
 }
 
 @injectable()
@@ -86,6 +95,11 @@ export class ServiceConfiguration {
                     default: 10,
                     doc: 'Maximum message the queue can have',
                 },
+                messageVisibilityTimeoutInSeconds: {
+                    format: 'int',
+                    default: 180,
+                    doc: 'Message visibility timeout in seconds',
+                },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
@@ -94,7 +108,24 @@ export class ServiceConfiguration {
                     doc: 'Timeout value after which the task has to be terminated',
                 },
             },
-
+            jobManagerConfig: {
+                activeToRunningTasksRatio: {
+                    format: Number,
+                    default: 3,
+                    // tslint:disable-next-line: max-line-length
+                    doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
+                },
+                addTasksIntervalInSeconds: {
+                    format: 'int',
+                    default: 15,
+                    doc: 'The time interval at which a job manager adds tasks to the job.',
+                },
+                maxWallClockTimeInHours: {
+                    format: 'int',
+                    default: 29,
+                    doc: 'The amount of time the job manager instance will run.',
+                },
+            },
             scanConfig: {
                 minLastReferenceSeenInDays: {
                     format: 'int',
@@ -115,6 +146,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'Maximum number of retries allowed for a page scan',
+                },
+                accessibilityRuleExclusionList: {
+                    format: Array,
+                    default: [],
+                    doc: 'Axe core rule exclusion list',
                 },
             },
         };

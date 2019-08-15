@@ -27,6 +27,11 @@
     tslib "^1.9.3"
     tunnel "0.0.5"
 
+"@azure/functions@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@azure/functions/-/functions-1.0.3.tgz#1b51d58f188903f59f39bd093fe6f7b8d88deb11"
+  integrity sha512-/D+sz6LgWT+A6RRW2zhwlwhKqqDSxL6HCF1Q1lN0iXolD2FfNFZpzrOxGyGYEEXp/5Dtjp12bcRTBhMH1cBi2Q==
+
 "@azure/keyvault@^0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@azure/keyvault/-/keyvault-0.1.0.tgz#7cff48eaf3b933b01967148b634da6661de2ab04"

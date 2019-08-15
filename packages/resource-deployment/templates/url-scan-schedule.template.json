@@ -6,7 +6,7 @@
     "jobSpecification": {
         "priority": 0,
         "constraints": {
-            "maxWallClockTime": "P1D",
+            "maxWallClockTime": "P2D",
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {

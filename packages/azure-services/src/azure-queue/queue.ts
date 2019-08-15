@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
@@ -10,16 +11,19 @@ import { StorageConfig } from './storage-config';
 
 @injectable()
 export class Queue {
-    public readonly scanQueue: string = this.config.scanQueue;
-
     constructor(
         @inject(StorageConfig) private readonly config: StorageConfig,
         @inject(iocTypeNames.QueueServiceURLProvider) private readonly queueServiceURLProvider: QueueServiceURLProvider,
         @inject(iocTypeNames.QueueURLProvider) private readonly queueURLProvider: QueueURLProvider,
         @inject(iocTypeNames.MessagesURLProvider) private readonly messagesURLProvider: MessagesURLProvider,
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public get scanQueue(): string {
+        return this.config.scanQueue;
+    }
 
     public async getMessages(queue: string = this.scanQueue): Promise<Message[]> {
         const maxDequeueCount = 2;
@@ -85,9 +89,11 @@ export class Queue {
     }
 
     private async getQueueMessages(queueURL: QueueURL): Promise<Models.DequeuedMessageItem[]> {
+        const messageVisibilityTimeoutInSeconds = (await this.serviceConfig.getConfigValue('queueConfig'))
+            .messageVisibilityTimeoutInSeconds;
         const requestOptions: Models.MessagesDequeueOptionalParams = {
-            numberOfMessages: 32, // Maximum number of messages to retrieve from queue: 32
-            visibilitytimeout: 300, // Message visibility timeout in seconds
+            numberOfMessages: 32, // Maximum number of messages to retrieve from queue (limited by Azure storage service) is 32
+            visibilitytimeout: messageVisibilityTimeoutInSeconds,
         };
 
         await this.ensureQueueExists(queueURL);

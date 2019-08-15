@@ -1,0 +1,232 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+openapi: 3.0.0
+info:
+    version: 1.0.0
+    title: Accessibility Insight Service – Scan API
+paths:
+    /scans:
+        post:
+            summary: Create accessibility scan requests
+            operationId: createScans
+            parameters:
+                - name: api-version
+                  in: path
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ScanRunRequests'
+            responses:
+                '202':
+                    description: Accepted
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScanRunResponses'
+    /scans/{scanid}:
+        get:
+            summary: Get accessibility scan result
+            operationId: getScan
+            parameters:
+                - name: scanid
+                  in: path
+                  required: true
+                  description: The scan request ID
+                  schema:
+                      type: string
+                - name: api-version
+                  in: path
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScanResultResponse'
+    /scans/$batch:
+        post:
+            summary: Get accessibility scan results
+            operationId: getScanBatch
+            parameters:
+                - name: api-version
+                  in: path
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/ScanRuns'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScanResultResponses'
+    /reports/{reportid}:
+        get:
+            summary: Get accessibility scan report
+            operationId: getReport
+            parameters:
+                - name: reportid
+                  in: path
+                  required: true
+                  description: The report ID
+                  schema:
+                      type: string
+                - name: api-version
+                  in: path
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            example:
+                                href: 'https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html'
+components:
+    schemas:
+        ScanRunRequest:
+            type: object
+            required:
+                - url
+            properties:
+                url:
+                    type: string
+        ScanRunRequests:
+            type: array
+            items:
+                $ref: '#/components/schemas/ScanRunRequest'
+        ScanRunResponse:
+            type: object
+            required:
+                - url
+                - scanId
+            properties:
+                url:
+                    type: string
+                scanId:
+                    type: string
+        ScanRunResponses:
+            type: array
+            items:
+                $ref: '#/components/schemas/ScanRunResponse'
+        ScanResult:
+            type: object
+            required:
+                - state
+            properties:
+                state:
+                    type: string
+                    default: unknown
+                    enum:
+                        - unknown
+                        - pass
+                        - fail
+                issueCount:
+                    type: integer
+                    format: int32
+                    minimum: 0
+        Links:
+            type: object
+            required:
+                - rel
+                - href
+            properties:
+                rel:
+                    type: string
+                    default: self
+                    enum:
+                        - self
+                href:
+                    type: string
+        Run:
+            type: object
+            required:
+                - state
+            properties:
+                timestamp:
+                    description: Full date and time string format as defined by ISO 8601
+                    type: string
+                error:
+                    type: string
+                state:
+                    type: string
+                    default: unknown
+                    enum:
+                        - unknown
+                        - queued
+                        - running
+                        - completed
+                        - failed
+        Report:
+            type: object
+            required:
+                - id
+                - format
+            properties:
+                id:
+                    type: string
+                format:
+                    type: string
+                    description: |
+                        SARIF format specification https://www.oasis-open.org/committees/sarif/charter.php
+                    enum:
+                        - sarif
+                links:
+                    $ref: '#/components/schemas/Links'
+        Reports:
+            type: array
+            items:
+                $ref: '#/components/schemas/Report'
+        ScanRun:
+            type: object
+            required:
+                - scanId
+            properties:
+                scanId:
+                    type: string
+        ScanRuns:
+            type: array
+            items:
+                $ref: '#/components/schemas/ScanRun'
+        ScanResultResponse:
+            type: object
+            required:
+                - scanId
+                - url
+                - run
+            properties:
+                scanId:
+                    type: string
+                url:
+                    type: string
+                scanResult:
+                    $ref: '#/components/schemas/ScanResult'
+                run:
+                    $ref: '#/components/schemas/Run'
+                reports:
+                    $ref: '#/components/schemas/Reports'
+        ScanResultResponses:
+            type: array
+            items:
+                $ref: '#/components/schemas/ScanResultResponse'
