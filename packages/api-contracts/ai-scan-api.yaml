@@ -11,7 +11,7 @@ paths:
             operationId: createScans
             parameters:
                 - name: api-version
-                  in: path
+                  in: query
                   required: true
                   description: The client API version
                   schema:
@@ -41,7 +41,7 @@ paths:
                   schema:
                       type: string
                 - name: api-version
-                  in: path
+                  in: query
                   required: true
                   description: The client API version
                   schema:
@@ -60,7 +60,7 @@ paths:
             operationId: getScanBatch
             parameters:
                 - name: api-version
-                  in: path
+                  in: query
                   required: true
                   description: The client API version
                   schema:
@@ -90,7 +90,7 @@ paths:
                   schema:
                       type: string
                 - name: api-version
-                  in: path
+                  in: query
                   required: true
                   description: The client API version
                   schema:
@@ -120,11 +120,12 @@ components:
             type: object
             required:
                 - url
-                - scanId
             properties:
                 url:
                     type: string
                 scanId:
+                    type: string
+                error:
                     type: string
         ScanRunResponses:
             type: array
@@ -181,10 +182,11 @@ components:
         Report:
             type: object
             required:
-                - id
+                - reportId
                 - format
+                - links
             properties:
-                id:
+                reportId:
                     type: string
                 format:
                     type: string

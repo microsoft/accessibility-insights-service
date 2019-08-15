@@ -17,7 +17,7 @@ export class PostScansController extends ApiController {
         } else {
             const payload = this.tryGetPayload<ScanRunRequest[]>();
             if (payload.hasValue) {
-                const response = this.createResponse(payload.value);
+                const response = this.createMockResponse(payload.value);
                 this.context.res = {
                     status: 202, // Accepted
                     body: response,
@@ -26,7 +26,7 @@ export class PostScansController extends ApiController {
         }
     }
 
-    private createResponse(requests: ScanRunRequest[]): ScanRunResponse[] {
+    private createMockResponse(requests: ScanRunRequest[]): ScanRunResponse[] {
         const response: ScanRunResponse[] = [];
         requests.map(request =>
             response.push({
@@ -34,6 +34,14 @@ export class PostScansController extends ApiController {
                 scanId: System.createRandomString(),
             }),
         );
+
+        if (response.length > 1) {
+            const last = response.pop();
+            response.push({
+                url: last.url,
+                error: 'An error occurred while processing your request',
+            });
+        }
 
         return response;
     }
