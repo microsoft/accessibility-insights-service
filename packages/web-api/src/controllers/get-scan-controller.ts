@@ -9,16 +9,20 @@ export class GetScanController extends ApiController {
 
     protected invokeImpl(): void {
         // To Do - add scan id regex validation in func binding
-        const response = this.createMockResponse(<string>this.context.bindingData.scanId);
+        const scanId = <string>this.context.bindingData.scanId;
+        const response = this.createMockResponse(scanId);
         this.context.res = {
             status: 200, // OK
             body: response,
+            headers: {
+                'Content-Type': 'application/json',
+            },
         };
     }
 
     private createMockResponse(scanId: string): ScanResultResponse {
         const reportId = System.createRandomString();
-        const reportUrl = this.context.req.url.replace(`scan/${scanId}`, `report/${reportId}`);
+        const reportUrl = this.context.req.url.replace(`scans/${scanId}`, `reports/${reportId}`);
 
         return {
             scanId: scanId,

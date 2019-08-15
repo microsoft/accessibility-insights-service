@@ -5,7 +5,7 @@ import { NullableValue, System } from 'common';
 
 export abstract class ApiController {
     public abstract readonly apiVersion: string;
-    private readonly jsonContentType = 'application/json';
+    public readonly jsonContentType = 'application/json';
 
     constructor(public readonly context: Context) {}
 

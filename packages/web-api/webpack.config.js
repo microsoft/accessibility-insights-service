@@ -15,7 +15,8 @@ module.exports = env => {
         externals: [],
         entry: {
             ['post-scans']: path.resolve('./post-scans/index.ts'),
-            ['reports']: path.resolve('./reports/index.ts'),
+            ['get-scan']: path.resolve('./get-scan/index.ts'),
+            ['get-report']: path.resolve('./get-report/index.ts'),
         },
         mode: 'development',
         module: {

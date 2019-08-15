@@ -4,7 +4,7 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "scan/{scanId}",
+            "route": "scans/{scanId}",
             "methods": ["get"]
         },
         {

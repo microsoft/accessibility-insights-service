@@ -12,7 +12,6 @@ export class PostScansController extends ApiController {
         if (!this.hasPayload()) {
             this.context.res = {
                 status: 204, // No Content
-                body: [],
             };
         } else {
             const payload = this.tryGetPayload<ScanRunRequest[]>();
@@ -21,6 +20,9 @@ export class PostScansController extends ApiController {
                 this.context.res = {
                     status: 202, // Accepted
                     body: response,
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 };
             }
         }

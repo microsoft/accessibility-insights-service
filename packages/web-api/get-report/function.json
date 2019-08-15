@@ -1,16 +1,17 @@
 {
     "bindings": [
         {
-            "name": "scanRequest",
+            "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "methods": ["get", "post"]
+            "route": "reports/{reportId}",
+            "methods": ["get"]
         },
         {
             "type": "http",
             "direction": "out",
-            "name": "scanResponse"
+            "name": "response"
         }
     ],
-    "scriptFile": "../dist/reports/index.js"
+    "scriptFile": "../dist/get-report/index.js"
 }
