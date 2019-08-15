@@ -4,6 +4,8 @@ import 'reflect-metadata';
 
 import { Activator, DynamicObject } from './activator';
 
+// tslint:disable: no-any
+
 class TypedClass {
     public value: string;
 }
@@ -15,13 +17,22 @@ describe('Activator', () => {
         activator = new Activator();
     });
 
-    it('convert to primitive type', () => {
+    it('convert to string type', () => {
         const source: string = 'value';
 
         const instance = activator.convert<string>(source);
 
         expect(instance).toBeDefined();
         expect(instance).toEqual('value');
+    });
+
+    it('convert to array type', () => {
+        const source: any[] = [{ p1: 'value' }];
+
+        const instance = activator.convert<string>(source);
+
+        expect(instance).toBeDefined();
+        expect(instance).toEqual([{ p1: 'value' }]);
     });
 
     it('convert to new dynamic instance', () => {

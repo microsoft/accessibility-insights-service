@@ -49,7 +49,8 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^2.1.2",
-        "common": "^0.2.5"
+        "common": "1.0.0",
+        "reflect-metadata": "^0.1.13",
+        "inversify": "^5.0.1"
     }
 }

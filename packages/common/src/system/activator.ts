@@ -14,15 +14,13 @@ export class Activator {
             return <T>(<any>source);
         }
 
-        if (typeT === undefined) {
-            const target = this.createInstance(DynamicObject);
-
-            return <T>Object.assign(target, source);
-        } else {
-            const target = this.createInstance(typeT);
-
-            return <T>Object.assign(target, source);
+        if (source instanceof Array) {
+            return <T>(<any>source);
         }
+
+        const target = typeT === undefined ? this.createInstance(DynamicObject) : this.createInstance(typeT);
+
+        return <T>Object.assign(target, source);
     }
 
     public createInstance<T>(typeT: new () => T): T {

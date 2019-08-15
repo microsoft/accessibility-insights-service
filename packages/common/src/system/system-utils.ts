@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as crypto from 'crypto';
 import { isNil } from 'lodash';
 import { Activator } from './activator';
 
@@ -35,5 +36,14 @@ export namespace System {
         const activator = new Activator();
 
         return activator.convert<T>(source);
+    }
+
+    export function createRandomString(length: number = 32): string {
+        const bytes = length % 2 === 0 ? length / 2 : (length + 1) / 2;
+
+        return crypto
+            .randomBytes(bytes)
+            .toString('hex')
+            .substr(0, length);
     }
 }

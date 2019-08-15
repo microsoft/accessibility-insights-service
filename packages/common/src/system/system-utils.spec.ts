@@ -65,22 +65,32 @@ describe('chunkArray()', () => {
         expect(result[1]).toEqual([4, 5, 6]);
         expect(result[2]).toEqual([7]);
     });
+});
 
-    describe('convert()', () => {
-        class TypedClass {
-            public value: string;
-        }
+describe('convert()', () => {
+    class TypedClass {
+        public value: string;
+    }
 
-        it('convert to type', () => {
-            const source = {
-                value: 'value',
-                name: 'name',
-            };
+    it('convert to type', () => {
+        const source = {
+            value: 'value',
+            name: 'name',
+        };
 
-            const instance = System.convert<TypedClass>(source);
+        const instance = System.convert<TypedClass>(source);
 
-            expect(instance).toBeDefined();
-            expect(instance.value).toEqual('value');
-        });
+        expect(instance).toBeDefined();
+        expect(instance.value).toEqual('value');
+    });
+});
+
+describe('createRandomString()', () => {
+    it('create random string', () => {
+        let id = System.createRandomString(33);
+        expect(id.length).toEqual(33);
+
+        id = System.createRandomString();
+        expect(id.length).toEqual(32);
     });
 });
