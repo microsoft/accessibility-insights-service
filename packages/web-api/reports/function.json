@@ -11,5 +11,6 @@
             "direction": "out",
             "name": "scanResponse"
         }
-    ]
+    ],
+    "scriptFile": "../dist/reports/index.js"
 }

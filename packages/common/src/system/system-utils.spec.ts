@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
+
 import { System } from './system-utils';
 
 describe('create instance if nil', () => {
@@ -62,5 +64,23 @@ describe('chunkArray()', () => {
         expect(result[0]).toEqual([1, 2, 3]);
         expect(result[1]).toEqual([4, 5, 6]);
         expect(result[2]).toEqual([7]);
+    });
+
+    describe('convert()', () => {
+        class TypedClass {
+            public value: string;
+        }
+
+        it('convert to type', () => {
+            const source = {
+                value: 'value',
+                name: 'name',
+            };
+
+            const instance = System.convert<TypedClass>(source);
+
+            expect(instance).toBeDefined();
+            expect(instance.value).toEqual('value');
+        });
     });
 });

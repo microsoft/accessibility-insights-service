@@ -8,7 +8,10 @@
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
-        "test": "jest --coverage --colors"
+        "test": "jest --coverage --colors",
+        "watch": "tsc --w",
+        "start:host": "func start",
+        "start": "npm-run-all --parallel start:host watch"
     },
     "repository": {
         "type": "git",
@@ -46,6 +49,7 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^2.1.2"
+        "@azure/cosmos": "^2.1.2",
+        "common": "^0.2.5"
     }
 }
