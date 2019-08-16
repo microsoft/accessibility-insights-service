@@ -29,7 +29,7 @@ export abstract class ApiController {
             return false;
         }
 
-        if (this.context.req.headers['content-type'] === undefined) {
+        if (this.context.req.headers === undefined || this.context.req.headers['content-type'] === undefined) {
             this.context.res = {
                 status: 400, // Bad Request
                 body: 'Content type was not specified',
@@ -51,7 +51,7 @@ export abstract class ApiController {
     }
 
     public validateApiVersion(): boolean {
-        if (this.context.req.query['api-version'] === undefined) {
+        if (this.context.req.query === undefined || this.context.req.query['api-version'] === undefined) {
             this.context.res = {
                 status: 400, // Bad Request
                 body: 'Client API version was not specified',
