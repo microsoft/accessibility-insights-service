@@ -9,22 +9,16 @@ export class PostScansController extends ApiController {
     public readonly apiVersion = '1.0';
 
     protected invokeImpl(): void {
-        if (!this.hasPayload()) {
+        const payload = this.tryGetPayload<ScanRunRequest[]>();
+        if (payload.hasValue) {
+            const response = this.createMockResponse(payload.value);
             this.context.res = {
-                status: 204, // No Content
+                status: 202, // Accepted
+                body: response,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
             };
-        } else {
-            const payload = this.tryGetPayload<ScanRunRequest[]>();
-            if (payload.hasValue) {
-                const response = this.createMockResponse(payload.value);
-                this.context.res = {
-                    status: 202, // Accepted
-                    body: response,
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                };
-            }
         }
     }
 

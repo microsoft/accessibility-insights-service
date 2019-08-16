@@ -26,10 +26,11 @@ export class GetScanController extends ApiController {
 
         return {
             scanId: scanId,
-            url: 'http://localhost/webroot/',
+            url: `http://localhost/webroot/${scanId}`,
             scanResult: {
                 state: 'fail',
-                issueCount: 12,
+                // tslint:disable-next-line: insecure-random
+                issueCount: Math.floor(Math.random() * (100 - 1) + 1),
             },
             reports: [
                 {

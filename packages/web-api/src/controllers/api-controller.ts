@@ -5,7 +5,6 @@ import { NullableValue, System } from 'common';
 
 export abstract class ApiController {
     public abstract readonly apiVersion: string;
-    public readonly jsonContentType = 'application/json';
 
     constructor(public readonly context: Context) {}
 
@@ -22,6 +21,14 @@ export abstract class ApiController {
             return true;
         }
 
+        if (!this.hasPayload()) {
+            this.context.res = {
+                status: 204, // No Content
+            };
+
+            return false;
+        }
+
         if (this.context.req.headers['content-type'] === undefined) {
             this.context.res = {
                 status: 400, // Bad Request
@@ -31,7 +38,7 @@ export abstract class ApiController {
             return false;
         }
 
-        if (this.context.req.headers['content-type'] !== this.jsonContentType) {
+        if (this.context.req.headers['content-type'] !== 'application/json') {
             this.context.res = {
                 status: 415, // Unsupported Media Type
                 body: 'Content type is not supported',

@@ -14,9 +14,10 @@ module.exports = env => {
         devtool: 'cheap-source-map',
         externals: [],
         entry: {
-            ['post-scans']: path.resolve('./post-scans/index.ts'),
-            ['get-scan']: path.resolve('./get-scan/index.ts'),
-            ['get-report']: path.resolve('./get-report/index.ts'),
+            ['post-scans-func']: path.resolve('./post-scans-func/index.ts'),
+            ['get-scan-func']: path.resolve('./get-scan-func/index.ts'),
+            ['get-scans-batch-func']: path.resolve('./get-scans-batch-func/index.ts'),
+            ['get-report-func']: path.resolve('./get-report-func/index.ts'),
         },
         mode: 'development',
         module: {

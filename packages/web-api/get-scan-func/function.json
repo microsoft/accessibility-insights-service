@@ -4,7 +4,7 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "reports/{reportId}",
+            "route": "scans/{scanId}",
             "methods": ["get"]
         },
         {
@@ -13,5 +13,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../dist/get-report/index.js"
+    "scriptFile": "../dist/get-scan-func/index.js"
 }
