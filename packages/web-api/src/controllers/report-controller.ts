@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { getSarifReportMock } from '../../get-report-func/sarif-report-mock';
+import { getSarifReportMock } from '../sarif-report-mock';
 import { ApiController } from './api-controller';
 
-export class GetReportController extends ApiController {
+export class ReportController extends ApiController {
     public readonly apiVersion = '1.0';
 
-    protected invokeImpl(): void {
+    public getReport(): void {
         this.context.res = {
             status: 200, // OK
             body: getSarifReportMock(),

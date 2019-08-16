@@ -161,18 +161,18 @@ describe('hasPayload()', () => {
 });
 
 describe('hasPayload()', () => {
-    it('should not invoke controller implementation', () => {
+    it('should accept request', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
             },
         });
         const apiControllerMock = new ApiControllerMock(context);
-        apiControllerMock.invoke();
-        expect(apiControllerMock.invoked).toEqual(false);
+        const valid = apiControllerMock.validateRequest();
+        expect(valid).toEqual(false);
     });
 
-    it('should invoke controller implementation', () => {
+    it('should reject request', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -184,8 +184,8 @@ describe('hasPayload()', () => {
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
         const apiControllerMock = new ApiControllerMock(context);
-        apiControllerMock.invoke();
-        expect(apiControllerMock.invoked).toEqual(true);
+        const valid = apiControllerMock.validateRequest();
+        expect(valid).toEqual(true);
     });
 });
 
@@ -202,7 +202,7 @@ describe('tryGetPayload()', () => {
         });
         const apiControllerMock = new ApiControllerMock(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
-        expect(payload.hasValue).toEqual(false);
+        expect(payload).toEqual(undefined);
         expect(context.res.status).toEqual(400);
     });
 
@@ -214,7 +214,6 @@ describe('tryGetPayload()', () => {
         });
         const apiControllerMock = new ApiControllerMock(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
-        expect(payload.hasValue).toEqual(true);
-        expect(payload.value).toEqual({ id: 1 });
+        expect(payload).toEqual({ id: 1 });
     });
 });

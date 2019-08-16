@@ -3,9 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GetReportController } from '../src/controllers/get-report-controller';
+import { ReportController } from '../src/controllers/report-controller';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new GetReportController(context);
-    controller.invoke();
+    const controller = new ReportController(context);
+    if (controller.validateRequest()) {
+        controller.getReport();
+    }
 }

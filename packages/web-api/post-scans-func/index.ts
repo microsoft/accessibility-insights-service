@@ -3,9 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { PostScansController } from '../src/controllers/post-scans-controller';
+import { ScanController } from '../src/controllers/scan-controller';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new PostScansController(context);
-    controller.invoke();
+    const controller = new ScanController(context);
+    if (controller.validateRequest()) {
+        controller.postScanRunRequests();
+    }
 }

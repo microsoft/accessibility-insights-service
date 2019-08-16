@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { NullableValue, System } from 'common';
 
 export abstract class ApiController {
     public abstract readonly apiVersion: string;
 
     constructor(public readonly context: Context) {}
 
-    public invoke(): void {
+    public validateRequest(): boolean {
         if (!this.validateApiVersion() || !this.validateContentType()) {
-            return;
+            return false;
         }
 
-        this.invokeImpl();
+        return true;
     }
 
     public validateContentType(): boolean {
@@ -76,15 +75,10 @@ export abstract class ApiController {
         return this.context.req.rawBody !== undefined;
     }
 
-    public tryGetPayload<T>(): NullableValue<T> {
+    public tryGetPayload<T>(): T {
         try {
             // tslint:disable-next-line: no-unsafe-any
-            const value = JSON.parse(this.context.req.rawBody);
-
-            return {
-                value: System.convert<T>(value),
-                hasValue: true,
-            };
+            return JSON.parse(this.context.req.rawBody);
         } catch (error) {
             this.context.res = {
                 status: 400, // Bad Request
@@ -92,10 +86,6 @@ export abstract class ApiController {
             };
         }
 
-        return {
-            hasValue: false,
-        };
+        return undefined;
     }
-
-    protected abstract invokeImpl(): void;
 }

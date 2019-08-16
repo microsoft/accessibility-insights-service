@@ -3,9 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GetScansBatchController } from '../src/controllers/get-scans-batch-controller';
+import { ScanController } from '../src/controllers/scan-controller';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new GetScansBatchController(context);
-    controller.invoke();
+    const controller = new ScanController(context);
+    if (controller.validateRequest()) {
+        controller.getScanResults();
+    }
 }
