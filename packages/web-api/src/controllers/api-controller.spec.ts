@@ -15,7 +15,7 @@ export class ApiControllerMock extends ApiController {
 }
 
 describe('validateContentType()', () => {
-    it('should validate HTTP POST and PUT only', () => {
+    it('should not fail content validation on non POST or PUT', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -27,7 +27,7 @@ describe('validateContentType()', () => {
         expect(valid).toEqual(true);
     });
 
-    it('should validate empty body', () => {
+    it('should detect empty body for POST', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -39,7 +39,7 @@ describe('validateContentType()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should validate when no HTTP headers', () => {
+    it('should fail when no HTTP headers present', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -55,7 +55,7 @@ describe('validateContentType()', () => {
         context.req.headers.host = 'localhost';
     });
 
-    it('should validate missing content-type HTTP header', () => {
+    it('should fail when missing content-type HTTP header', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -69,7 +69,7 @@ describe('validateContentType()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should validate application/json content-type HTTP header', () => {
+    it('should fail when non valid content-type HTTP header', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -84,7 +84,7 @@ describe('validateContentType()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should accept valid content type', () => {
+    it('should accept valid content-type HTTP header', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -101,7 +101,7 @@ describe('validateContentType()', () => {
 });
 
 describe('validateApiVersion()', () => {
-    it('should validate missing query param', () => {
+    it('should fail when missing api-version query param', () => {
         const context = <Context>(<unknown>{
             req: {},
         });
@@ -111,7 +111,7 @@ describe('validateApiVersion()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should validate invalid api version', () => {
+    it('should fail when invalid api-version query param value', () => {
         const context = <Context>(<unknown>{
             req: {
                 query: {},
@@ -124,7 +124,7 @@ describe('validateApiVersion()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should accept api version', () => {
+    it('should accept valid api-version', () => {
         const context = <Context>(<unknown>{
             req: {
                 query: {},
@@ -139,7 +139,7 @@ describe('validateApiVersion()', () => {
 });
 
 describe('hasPayload()', () => {
-    it('should detect no payload', () => {
+    it('should detect no payload in request', () => {
         const context = <Context>(<unknown>{
             req: {},
         });
@@ -148,7 +148,7 @@ describe('hasPayload()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should detect payload', () => {
+    it('should detect payload in request', () => {
         const context = <Context>(<unknown>{
             req: {
                 rawBody: `{ id: '1' }`,
@@ -160,8 +160,8 @@ describe('hasPayload()', () => {
     });
 });
 
-describe('hasPayload()', () => {
-    it('should accept request', () => {
+describe('validateRequest()', () => {
+    it('should reject invalid request', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -172,7 +172,7 @@ describe('hasPayload()', () => {
         expect(valid).toEqual(false);
     });
 
-    it('should reject request', () => {
+    it('should accept valid request', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -206,7 +206,7 @@ describe('tryGetPayload()', () => {
         expect(context.res.status).toEqual(400);
     });
 
-    it('should parse body content', () => {
+    it('should parse valid content', () => {
         const context = <Context>(<unknown>{
             req: {
                 rawBody: `{ "id": 1 }`,
