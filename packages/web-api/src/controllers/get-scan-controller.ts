@@ -8,7 +8,6 @@ export class GetScanController extends ApiController {
     public readonly apiVersion = '1.0';
 
     protected invokeImpl(): void {
-        // To Do - add scan id regex validation in func binding
         const scanId = <string>this.context.bindingData.scanId;
         const response = this.createMockResponse(scanId);
         this.context.res = {

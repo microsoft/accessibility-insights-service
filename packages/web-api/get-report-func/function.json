@@ -4,7 +4,7 @@
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "route": "reports/{reportId}",
+            "route": "reports/{reportId:guid}",
             "methods": ["get"]
         },
         {
