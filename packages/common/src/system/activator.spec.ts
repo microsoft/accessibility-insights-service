@@ -29,7 +29,7 @@ describe('Activator', () => {
     it('convert to array type', () => {
         const source: any[] = [{ p1: 'value' }];
 
-        const instance = activator.convert<string>(source);
+        const instance = activator.convert<string[]>(source);
 
         expect(instance).toBeDefined();
         expect(instance).toEqual([{ p1: 'value' }]);

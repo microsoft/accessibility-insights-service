@@ -39,6 +39,18 @@ describe('validateContentType()', () => {
         expect(valid).toEqual(false);
     });
 
+    it('should detect empty body for PUT', () => {
+        const context = <Context>(<unknown>{
+            req: {
+                method: 'PUT',
+            },
+        });
+        const apiControllerMock = new ApiControllerMock(context);
+        const valid = apiControllerMock.validateContentType();
+        expect(context.res).toEqual({ status: 204 });
+        expect(valid).toEqual(false);
+    });
+
     it('should fail when no HTTP headers present', () => {
         const context = <Context>(<unknown>{
             req: {
