@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as cosmos from '@azure/cosmos';
-import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
@@ -34,7 +33,7 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
         try {
             const response = await container.items.upsert(item, this.getOptions(item, partitionKey));
-            const itemT = System.convert<T>(response.body);
+            const itemT = <T>(<unknown>response.body);
 
             return {
                 item: itemT,
@@ -60,7 +59,7 @@ export class CosmosClientWrapper {
             const itemsT: T[] = [];
 
             response.result.forEach(document => {
-                itemsT.push(System.convert<T>(document));
+                itemsT.push(<T>(<unknown>document));
             });
 
             return {
@@ -125,7 +124,7 @@ export class CosmosClientWrapper {
                 partitionQueryResult.headers !== undefined ? partitionQueryResult.headers['x-ms-continuation'] : undefined;
 
             partitionQueryResult.result.forEach(item => {
-                itemsT.push(System.convert<T>(item));
+                itemsT.push(<T>(<unknown>item));
             });
 
             return {
@@ -157,7 +156,7 @@ export class CosmosClientWrapper {
         try {
             const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
             const response = await container.item(id).read(options);
-            const itemT = System.convert<T>(response.body);
+            const itemT = <T>(<unknown>response.body);
 
             return {
                 item: itemT,

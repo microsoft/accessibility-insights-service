@@ -67,24 +67,6 @@ describe('chunkArray()', () => {
     });
 });
 
-describe('convert()', () => {
-    class TypedClass {
-        public value: string;
-    }
-
-    it('convert to type', () => {
-        const source = {
-            value: 'value',
-            name: 'name',
-        };
-
-        const instance = System.convert<TypedClass>(source);
-
-        expect(instance).toBeDefined();
-        expect(instance.value).toEqual('value');
-    });
-});
-
 describe('createRandomString()', () => {
     it('create random string', () => {
         let id = System.createRandomString(33);
