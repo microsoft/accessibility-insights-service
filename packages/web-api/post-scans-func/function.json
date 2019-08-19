@@ -13,5 +13,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../dist/post-scans-func/index.js"
+    "scriptFile": "../post-scans-func/index.js"
 }

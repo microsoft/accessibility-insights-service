@@ -23,7 +23,7 @@ Build the [web-api](https://github.com/microsoft/accessibility-insights-service/
 Deploy Azure Functions binaries to the Azure Functions App. The Azure Functions App can be created following the steps from the guide [here](https://docs.microsoft.com/en-us/azure/azure-functions/scripts/functions-cli-create-serverless).
 
 ```bash
-        cd accessibility-insights-service/packages/web-api
+        cd accessibility-insights-service/packages/web-api/dist
         func azure functionapp publish <FunctionAppName>
 ```
 
