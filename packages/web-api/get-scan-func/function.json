@@ -13,5 +13,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../dist/get-scan-func/index.js"
+    "scriptFile": "../get-scan-func/index.js"
 }

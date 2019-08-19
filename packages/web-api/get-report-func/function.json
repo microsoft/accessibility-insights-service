@@ -13,5 +13,5 @@
             "name": "response"
         }
     ],
-    "scriptFile": "../dist/get-report-func/index.js"
+    "scriptFile": "../get-report-func/index.js"
 }
