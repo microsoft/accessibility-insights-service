@@ -4,7 +4,7 @@ import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
-import { Activator, IoC } from 'common';
+import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -15,11 +15,6 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 
 export function registerAzureServicesToContainer(container: Container): void {
-    container
-        .bind(Activator)
-        .toSelf()
-        .inSingletonScope();
-
     setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);

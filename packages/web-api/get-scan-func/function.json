@@ -1,0 +1,17 @@
+{
+    "bindings": [
+        {
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "scans/{scanId:guid}",
+            "methods": ["get"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../dist/get-scan-func/index.js"
+}
