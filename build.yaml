@@ -62,7 +62,8 @@ steps:
               job-manager/dist/**/*
               runner/dist/**/*
               scan-request-sender/dist/**/*
-              resource-deployment/**/*
+              resource-deployment/dist/**/*
+              web-api/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
