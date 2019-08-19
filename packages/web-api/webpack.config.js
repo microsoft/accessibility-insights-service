@@ -65,6 +65,12 @@ module.exports = env => {
                     ignore: ['dist/**'],
                 },
                 {
+                    context: './',
+                    from: 'host.json',
+                    to: '',
+                    ignore: ['dist/**'],
+                },
+                {
                     from: 'package.json',
                     to: '',
                 },
