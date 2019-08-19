@@ -6,7 +6,10 @@
             "command": "host start",
             "problemMatcher": "$func-watch",
             "isBackground": true,
-            "dependsOn": "tsc"
+            "dependsOn": "tsc",
+            "options": {
+                "cwd": "${workspaceRoot}/dist"
+            }
         },
         {
             "type": "shell",
