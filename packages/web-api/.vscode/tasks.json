@@ -6,7 +6,21 @@
             "command": "host start",
             "problemMatcher": "$func-watch",
             "isBackground": true,
-            "dependsOn": "tsc"
+            "dependsOn": "copy-local-settings",
+            "options": {
+                "cwd": "${workspaceRoot}/dist"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "copy-local-settings",
+            "dependsOn": "tsc",
+            "windows": {
+                "command": "xcopy local.settings.json ./dist /y"
+            },
+            "osx": {
+                "command": "cp local.settings.json ./dist"
+            }
         },
         {
             "type": "shell",
