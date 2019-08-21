@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 // tslint:disable:no-import-side-effect no-unsafe-any
 import 'reflect-metadata';
-import '../../test-utilities/common-mock-methods';
 
 import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';

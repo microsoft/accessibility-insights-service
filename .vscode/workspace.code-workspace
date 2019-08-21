@@ -9,6 +9,10 @@
             "path": "../packages/runner"
         },
         {
+            "name": "scanner",
+            "path": "../packages/scanner"
+        },
+        {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
         },

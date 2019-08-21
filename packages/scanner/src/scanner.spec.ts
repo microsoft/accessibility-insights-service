@@ -2,14 +2,13 @@
 // Licensed under the MIT License.
 // tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
-import '../../test-utilities/common-mock-methods';
 
 import { AxeResults } from 'axe-core';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
 import { Scanner } from './scanner';
 

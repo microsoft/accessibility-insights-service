@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { AxeScanResults } from 'scanner';
 import { IssueScanResult, IssueScanResults, PageScanResult, Website, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
@@ -11,7 +12,6 @@ import { PageScanResultFactory } from '../factories/page-scan-result-factory';
 import { ScanResultFactory } from '../factories/scan-result-factory';
 import { WebsiteFactory } from '../factories/website-factory';
 import { WebsitePageFactory } from '../factories/website-page-factory';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanMetadata } from '../types/scan-metadata';
 import { DataFactoryTask } from './data-factory-task';
 
