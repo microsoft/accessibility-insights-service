@@ -1,0 +1,45 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+import 'reflect-metadata';
+
+import { Container } from 'inversify';
+
+import { Logger } from 'logger';
+import { IMock, Mock } from 'typemoq';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { registerScannerToContainer } from './register-scanner-to-container';
+import { Scanner } from './scanner';
+
+// tslint:disable: no-unsafe-any no-any
+
+describe(registerScannerToContainer, () => {
+    let container: Container;
+    let loggerMock: IMock<Logger>;
+
+    beforeEach(() => {
+        container = new Container({ autoBindInjectable: true });
+        loggerMock = Mock.ofType(Logger);
+
+        container.bind(Logger).toConstantValue(loggerMock.object);
+    });
+
+    it('should verify scanner resolution', () => {
+        registerScannerToContainer(container);
+
+        const scanner = container.get(Scanner);
+
+        expect(scanner).toBeDefined();
+        expect(scanner).toBeInstanceOf(Scanner);
+    });
+
+    it('should verify singleton resolution', () => {
+        registerScannerToContainer(container);
+
+        verifySingletonResolution(AxePuppeteerFactory);
+    });
+
+    function verifySingletonResolution(key: any): void {
+        expect(container.get(key)).toBeDefined();
+        expect(container.get(key)).toBe(container.get(key));
+    }
+});

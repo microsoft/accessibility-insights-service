@@ -26,7 +26,7 @@ describe('AxePuppeteerFactory', () => {
         testSubject = new AxePuppeteerFactory(serviceConfigMock.object);
     });
     it('create axe puppeteer instance', async () => {
-        const axePuppeteer = await testSubject.createAxePuppteteer(page.object);
+        const axePuppeteer = await testSubject.createAxePuppeteer(page.object);
         expect(axePuppeteer).toBeDefined();
     });
 });

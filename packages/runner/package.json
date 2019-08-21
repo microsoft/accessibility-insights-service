@@ -55,6 +55,7 @@
         "headless-chrome-crawler": "^1.8.0",
         "inversify": "^5.0.1",
         "logger": "1.0.0",
+        "scanner": "1.0.0",
         "puppeteer": "^1.12.2",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",

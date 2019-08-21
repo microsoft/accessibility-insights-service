@@ -1,7 +1,8 @@
 {
-    "name": "service-library",
+    "name": "scanner",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "main": "dist/index.js",
     "scripts": {
         "build": "tsc && echo",
         "cbuild": "npm-run-all --serial clean build",
@@ -14,7 +15,6 @@
         "type": "git",
         "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
     },
-    "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
@@ -22,10 +22,9 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/cosmos": "^2.1.2",
         "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
-        "@types/sha.js": "^2.4.0",
         "@types/puppeteer": "^1.12.1",
         "jest": "^24.7.1",
         "jest-circus": "^24.7.1",
@@ -38,16 +37,14 @@
         "typescript": "^3.4.3"
     },
     "dependencies": {
+        "axe-core": "3.2.2",
+        "axe-puppeteer": "^1.0.0",
         "puppeteer": "^1.12.2",
-        "azure-services": "1.0.0",
         "common": "1.0.0",
-        "dotenv": "^6.2.0",
+        "service-library": "1.0.0",
+        "logger": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
-        "logger": "1.0.0",
-        "moment": "2.24.0",
-        "reflect-metadata": "^0.1.13",
-        "sha.js": "^2.4.11",
-        "storage-documents": "1.0.0"
+        "reflect-metadata": "^0.1.13"
     }
 }
