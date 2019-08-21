@@ -112,6 +112,13 @@ components:
             properties:
                 url:
                     type: string
+                priority:
+                    description: >-
+                        Priority values can range from -1000 to 1000, with -1000 being the
+                        lowest priority and 1000 being the highest priority. The default
+                        value is 0.
+                    default: 0
+                    type: integer
         ScanRunRequests:
             type: array
             items:

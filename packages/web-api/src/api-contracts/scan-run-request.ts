@@ -2,4 +2,5 @@
 // Licensed under the MIT License.
 export interface ScanRunRequest {
     url: string;
+    priority?: number;
 }
