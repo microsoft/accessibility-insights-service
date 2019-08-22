@@ -1,0 +1,61 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string",
+            "defaultValue": "[concat('a11y-apim',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The name of the API management instance"
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westus",
+            "metadata": {
+                "description": "The geo location for the api management instance"
+            }
+        },
+        "adminEmail": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The admin email for the API management instance"
+            }
+        },
+        "orgName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The org name. This will be used in user facing situations"
+            }
+        },
+        "tier": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "metadata": {
+                "description": "The tier of service for this API management instance"
+            }
+        },
+        "capacity": {
+            "type": "int",
+            "defaultValue": 1
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-01-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.ApiManagement/service",
+            "sku": {
+                "name": "[parameters('tier')]",
+                "capacity": "[parameters('capacity')]"
+            },
+            "properties": {
+                "publisherEmail": "[parameters('adminEmail')]",
+                "publisherName": "[parameters('orgName')]"
+            }
+        }
+    ]
+}

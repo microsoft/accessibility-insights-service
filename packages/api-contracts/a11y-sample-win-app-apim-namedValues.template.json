@@ -1,0 +1,43 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ApimServiceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "tags": ["key", "function", "auto"],
+                "secret": true,
+                "displayName": "a11y-sample-win-app-key",
+                "value": "aDI149AQXqpBH+6yy5jFy59Rv+OzqGu4YED8E4RUTySLi/WvSYXzHw=="
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/a11y-sample-win-app-key')]",
+            "type": "Microsoft.ApiManagement/service/properties",
+            "apiVersion": "2019-01-01"
+        },
+        {
+            "properties": {
+                "tags": ["key", "function", "auto"],
+                "secret": true,
+                "displayName": "demurugefunc-key",
+                "value": "a4fIt5rfwHWY8Kj5kqIuKhwsghpEumgslXWz6VUSxvxzXOiYYGJEdQ=="
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/demurugefunc-key')]",
+            "type": "Microsoft.ApiManagement/service/properties",
+            "apiVersion": "2019-01-01"
+        },
+        {
+            "properties": {
+                "secret": true,
+                "displayName": "Logger-Credentials-5d5735c1f87b45119c295fd5",
+                "value": "6a4b4f22-2d5d-490a-a74f-7f54153e1dea"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/5d5735c1f87b45119c295fd4')]",
+            "type": "Microsoft.ApiManagement/service/properties",
+            "apiVersion": "2019-01-01"
+        }
+    ]
+}

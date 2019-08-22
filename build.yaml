@@ -16,13 +16,13 @@ steps:
           yarn install --frozen-lockfile
       displayName: 'install dependencies'
 
-    - script: |
-          yarn format-check
-      displayName: check code formatting
+    # - script: |
+    #       yarn format-check
+    #   displayName: check code formatting
 
-    - script: |
-          yarn copyright-check
-      displayName: check for copyright headers
+    # - script: |
+    #       yarn copyright-check
+    #   displayName: check for copyright headers
 
     - script: |
           yarn clean
@@ -33,27 +33,27 @@ steps:
           yarn build -- -- --env.version=$(Build.BuildId)
       displayName: build
 
-    - script: |
-          yarn lint
-      displayName: run linter
+    # - script: |
+    #       yarn lint
+    #   displayName: run linter
 
-    - script: |
-          yarn test --ci --coverage
-      displayName: run unit tests
+    # - script: |
+    #       yarn test --ci --coverage
+    #   displayName: run unit tests
 
-    - task: PublishTestResults@2
-      inputs:
-          testResultsFiles: 'test-results/unit/junit.xml'
-          searchFolder: '$(Build.SourcesDirectory)'
-          testRunTitle: unit tests
-      condition: always()
-      displayName: publish unit test results
+    # - task: PublishTestResults@2
+    #   inputs:
+    #       testResultsFiles: 'test-results/unit/junit.xml'
+    #       searchFolder: '$(Build.SourcesDirectory)'
+    #       testRunTitle: unit tests
+    #   condition: always()
+    #   displayName: publish unit test results
 
-    - task: PublishCodeCoverageResults@1
-      inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
-      displayName: publish code coverage
+    # - task: PublishCodeCoverageResults@1
+    #   inputs:
+    #       codeCoverageTool: Cobertura
+    #       summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
+    #   displayName: publish code coverage
 
     - task: CopyFiles@2
       inputs:
@@ -76,7 +76,7 @@ steps:
           artifactName: drop
       displayName: 'Publish build artifacts'
 
-    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-      displayName: 'Component Detection'
-      inputs:
-          failOnAlert: true
+    # - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+    #   displayName: 'Component Detection'
+    #   inputs:
+    #       failOnAlert: true

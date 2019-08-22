@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ApimServiceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "loggerType": "applicationInsights",
+                "credentials": {
+                    "instrumentationKey": "{{Logger-Credentials-5d5735c1f87b45119c295fd5}}"
+                },
+                "isBuffered": true,
+                "resourceId": "/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/askalbho-test/providers/microsoft.insights/components/a11y-sample-win-app"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/a11y-sample-win-app')]",
+            "type": "Microsoft.ApiManagement/service/loggers",
+            "apiVersion": "2019-01-01"
+        }
+    ]
+}
