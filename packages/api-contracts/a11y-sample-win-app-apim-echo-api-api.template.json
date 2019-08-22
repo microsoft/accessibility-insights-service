@@ -1,0 +1,346 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "ApimServiceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "authenticationSettings": {
+                    "oAuth2": {
+                        "authorizationServerId": "testing-oauth-2"
+                    },
+                    "subscriptionKeyRequired": false
+                },
+                "subscriptionKeyParameterNames": {
+                    "header": "Ocp-Apim-Subscription-Key",
+                    "query": "subscription-key"
+                },
+                "apiRevision": "1",
+                "isCurrent": true,
+                "subscriptionRequired": false,
+                "displayName": "Echo API",
+                "serviceUrl": "http://echoapi.cloudapp.net/api",
+                "path": "echo",
+                "protocols": ["https"]
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api')]",
+            "type": "Microsoft.ApiManagement/service/apis",
+            "apiVersion": "2019-01-01",
+            "dependsOn": []
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "A demonstration of a POST call based on the echo backend above. The request body is expected to contain JSON-formatted data (see example below). A policy is used to automatically transform any request sent in JSON directly to XML. In a real-world scenario this could be used to enable modern clients to speak to a legacy backend.",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": [
+                        {
+                            "contentType": "application/json",
+                            "sample": "{\r\n\t\"vehicleType\": \"train\",\r\n\t\"maxSpeed\": 125,\r\n\t\"avgSpeed\": 90,\r\n\t\"speedUnit\": \"mph\"\r\n}"
+                        }
+                    ]
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Create resource",
+                "method": "POST",
+                "urlTemplate": "/resource"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/create-resource')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "value": "<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<json-to-xml apply=\"always\" consider-accept-header=\"false\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/create-resource/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), 'echo-api', 'create-resource')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [],
+                "displayName": "HttpTrigger1",
+                "method": "GET",
+                "urlTemplate": "/HttpTrigger1"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/get-httptrigger1')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "value": "<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"a11y-sample-win-app\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/get-httptrigger1/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), 'echo-api', 'get-httptrigger1')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [],
+                "displayName": "HttpTrigger1",
+                "method": "POST",
+                "urlTemplate": "/HttpTrigger1"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/post-httptrigger1')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "value": "<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"a11y-sample-win-app\" />\r\n\t\t<validate-jwt header-name=\"Authorization\" failed-validation-httpcode=\"401\" failed-validation-error-message=\"Unauthorized. Access token is missing or invalid.\">\r\n\t\t\t<openid-config url=\"https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/.well-known/openid-configuration\" />\r\n\t\t\t<required-claims>\r\n\t\t\t\t<claim name=\"aud\">\r\n\t\t\t\t\t<value>https://a11y-sample-win-app.azurewebsites.net</value>\r\n\t\t\t\t</claim>\r\n\t\t\t</required-claims>\r\n\t\t</validate-jwt>\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/post-httptrigger1/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), 'echo-api', 'post-httptrigger1')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "A demonstration of a PUT call handled by the same \"echo\" backend as above. You can now specify a request body in addition to headers and it will be returned as well.",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Modify Resource",
+                "method": "PUT",
+                "urlTemplate": "/resource"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/modify-resource')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "A demonstration of a DELETE call which traditionally deletes the resource. It is based on the same \"echo\" backend as in all other operations so nothing is actually deleted.",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Remove resource",
+                "method": "DELETE",
+                "urlTemplate": "/resource"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/remove-resource')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "The HEAD operation returns only headers. In this demonstration a policy is used to set additional headers when the response is returned and to enable JSONP.",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Retrieve header only",
+                "method": "HEAD",
+                "urlTemplate": "/resource"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/retrieve-header-only')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "value": "<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<set-header name=\"X-My-Sample\" exists-action=\"override\">\r\n\t\t\t<value>This is a sample</value>\r\n\t\t\t<!-- for multiple headers with the same name add additional value elements -->\r\n\t\t</set-header>\r\n\t\t<jsonp callback-parameter-name=\"ProcessResponse\" />\r\n\t</outbound>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/retrieve-header-only/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), 'echo-api', 'retrieve-header-only')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "A demonstration of a GET call on a sample resource. It is handled by an \"echo\" backend which returns a response equal to the request (the supplied headers and body are being returned as received).",
+                "request": {
+                    "queryParameters": [
+                        {
+                            "name": "param1",
+                            "description": "A sample parameter that is required and has a default value of \"sample\".",
+                            "type": "string",
+                            "defaultValue": "sample",
+                            "required": true,
+                            "values": ["sample"]
+                        },
+                        {
+                            "name": "param2",
+                            "description": "Another sample parameter, set to not required.",
+                            "type": "number",
+                            "required": false,
+                            "values": []
+                        }
+                    ],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "description": "Returned in all cases.",
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Retrieve resource",
+                "method": "GET",
+                "urlTemplate": "/resource"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/retrieve-resource')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "templateParameters": [],
+                "description": "A demonstration of a GET call with caching enabled on the same \"echo\" backend as above. Cache TTL is set to 1 hour. When you make the first request the headers you supplied will be cached. Subsequent calls will return the same headers as the first time even if you change them in your request.",
+                "request": {
+                    "queryParameters": [
+                        {
+                            "name": "param1",
+                            "description": "A sample parameter that is required and has a default value of \"sample\".",
+                            "type": "string",
+                            "defaultValue": "sample",
+                            "required": true,
+                            "values": ["sample"]
+                        },
+                        {
+                            "name": "param2",
+                            "description": "Another sample parameter, set to not required.",
+                            "type": "string",
+                            "required": false,
+                            "values": []
+                        }
+                    ],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "headers": [],
+                        "representations": []
+                    }
+                ],
+                "displayName": "Retrieve resource (cached)",
+                "method": "GET",
+                "urlTemplate": "/resource-cached"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/retrieve-resource-cached')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {
+                "value": "<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<cache-lookup vary-by-developer=\"false\" vary-by-developer-groups=\"false\">\r\n\t\t\t<vary-by-header>Accept</vary-by-header>\r\n\t\t\t<vary-by-header>Accept-Charset</vary-by-header>\r\n\t\t</cache-lookup>\r\n\t\t<rewrite-uri template=\"/resource\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<cache-store duration=\"3600\" />\r\n\t</outbound>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/retrieve-resource-cached/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('ApimServiceName'), 'echo-api', 'retrieve-resource-cached')]"
+            ]
+        },
+        {
+            "properties": {
+                "value": "<!--\r\n    IMPORTANT:\r\n    - Policy elements can appear only within the <inbound>, <outbound>, <backend> section elements.\r\n    - To apply a policy to the incoming request (before it is forwarded to the backend service), place a corresponding policy element within the <inbound> section element.\r\n    - To apply a policy to the outgoing response (before it is sent back to the caller), place a corresponding policy element within the <outbound> section element.\r\n    - To add a policy, place the cursor at the desired insertion point and select a policy from the sidebar.\r\n    - To remove a policy, delete the corresponding policy statement from the policy document.\r\n    - Position the <base> element within a section element to inherit all policies from the corresponding section element in the enclosing scope.\r\n    - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.\r\n    - Policies are applied in the order of their appearance, from the top down.\r\n    - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.\r\n-->\r\n<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>",
+                "format": "xml"
+            },
+            "name": "[concat(parameters('ApimServiceName'), '/echo-api/policy')]",
+            "type": "Microsoft.ApiManagement/service/apis/policies",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {},
+            "name": "[concat(parameters('ApimServiceName'), '/starter/echo-api')]",
+            "type": "Microsoft.ApiManagement/service/products/apis",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        },
+        {
+            "properties": {},
+            "name": "[concat(parameters('ApimServiceName'), '/unlimited/echo-api')]",
+            "type": "Microsoft.ApiManagement/service/products/apis",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/apis', parameters('ApimServiceName'), 'echo-api')]"]
+        }
+    ]
+}

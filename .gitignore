@@ -11,3 +11,5 @@ out/
 **/*.generated.template.json
 
 yarn-error.log
+**/*.DS_Store
+packages/resource-deployment/.DS_Store
