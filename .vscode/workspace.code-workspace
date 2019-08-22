@@ -9,6 +9,10 @@
             "path": "../packages/runner"
         },
         {
+            "name": "scanner",
+            "path": "../packages/scanner"
+        },
+        {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
         },
@@ -87,7 +91,8 @@
             "rbbit.typescript-hero",
             "foxundermoon.shell-format",
             "rogalmic.bash-debug",
-            "streetsidesoftware.code-spell-checker"
+            "streetsidesoftware.code-spell-checker",
+            "ms-azuretools.vscode-azurefunctions"
         ]
     },
     "launch": {

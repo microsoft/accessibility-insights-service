@@ -2,15 +2,14 @@
 // Licensed under the MIT License.
 // tslint:disable:no-import-side-effect no-unnecessary-class
 import 'reflect-metadata';
-import '../../test-utilities/common-mock-methods';
 
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
 
 class PuppeteerPageMock {
@@ -106,7 +105,7 @@ describe('Page', () => {
 
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(async apfm => apfm.createAxePuppteteer(page.puppeteerPage))
+            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
             .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
@@ -140,7 +139,7 @@ describe('Page', () => {
 
         axePuppeteerFactoryMock
             // tslint:disable-next-line: no-unsafe-any
-            .setup(async o => o.createAxePuppteteer(It.isAny()))
+            .setup(async o => o.createAxePuppeteer(It.isAny()))
             // tslint:disable-next-line: no-any
             .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
             .verifiable(Times.once());

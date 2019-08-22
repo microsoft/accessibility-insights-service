@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Browser } from 'puppeteer';
-import { WebDriver } from '../web-driver/web-driver';
+import { WebDriver } from 'service-library';
 
 @injectable()
 export class WebDriverTask {

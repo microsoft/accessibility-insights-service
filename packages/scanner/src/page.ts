@@ -3,8 +3,8 @@
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import * as Puppeteer from 'puppeteer';
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AxeScanResults } from './axe-scan-results';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 
 export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 
@@ -41,7 +41,7 @@ export class Page {
             // tslint:disable-next-line:no-empty
         } catch {}
 
-        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppteteer(this.puppeteerPage);
+        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
         return { results: scanResults };

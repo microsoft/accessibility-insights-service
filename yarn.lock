@@ -1854,9 +1854,9 @@ aws4@^1.6.0, aws4@^1.8.0:
   integrity sha512-ReZxvNHIOv88FlT7rxcXIIC0fPt4KZqZbOlivyWtXLt8ESx84zd3kMC6iK5jVeS2qt+g7ftS7ye4fi06X5rtRQ==
 
 axe-core@3.2.2, axe-core@^3.1.2, axe-core@^3.2.2:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-3.3.0.tgz#3b32d7e54390d89ff4891b20394d33ad7a192776"
-  integrity sha512-54XaTd2VB7A6iBnXMUG2LnBOI7aRbnrVxC5Tz+rVUwYl9MX/cIJc/Ll32YUoFIE/e9UKWMZoQenQu9dFrQyZCg==
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-3.3.1.tgz#3d1fa78cca8ead1b78c350581501e4e37b97b826"
+  integrity sha512-gw1T0JptHPF4AdLLqE8yQq3Z7YvsYkpFmFWd84r6hnq/QoKRr8icYHFumhE7wYl5TVIHgVlchMyJsAYh0CfwCQ==
 
 axe-puppeteer@^1.0.0:
   version "1.0.0"
@@ -6727,9 +6727,9 @@ punycode@^2.1.0, punycode@^2.1.1:
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
 puppeteer@1.5.0, puppeteer@^1.12.2, puppeteer@^1.18.1:
-  version "1.18.1"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.18.1.tgz#4a66f3bdab01115ededf70443ec904c99917a815"
-  integrity sha512-luUy0HPSuWPsPZ1wAp6NinE0zgetWtudf5zwZ6dHjMWfYpTQcmKveFRox7VBNhQ98OjNA9PQ9PzQyX8k/KrxTg==
+  version "1.19.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.19.0.tgz#e3b7b448c2c97933517078d7a2c53687361bebea"
+  integrity sha512-2S6E6ygpoqcECaagDbBopoSOPDv0pAZvTbnBgUY+6hq0/XDFDOLEMNlHF/SKJlzcaZ9ckiKjKDuueWI3FN/WXw==
   dependencies:
     debug "^4.1.0"
     extract-zip "^1.6.6"

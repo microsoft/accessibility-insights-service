@@ -1,15 +1,17 @@
 {
     "bindings": [
         {
-            "name": "scanRequest",
+            "name": "request",
             "type": "httpTrigger",
             "direction": "in",
-            "methods": ["get", "post"]
+            "route": "scans",
+            "methods": ["post"]
         },
         {
             "type": "http",
             "direction": "out",
-            "name": "scanResponse"
+            "name": "response"
         }
-    ]
+    ],
+    "scriptFile": "../post-scans-func/index.js"
 }
