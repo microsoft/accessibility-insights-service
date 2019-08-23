@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-export declare type LinkType = 'self';
+import { StorageDocument } from '.';
+
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
 export declare type RunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
-export interface ScanResultResponse {
+/**
+ * The web page scan run result document.
+ */
+export interface PageScanRunResult extends StorageDocument {
     scanId: string;
     url: string;
     scanResult?: ScanResult;
@@ -21,16 +25,11 @@ export interface ScanResult {
 export interface ScanReport {
     reportId: string;
     format: ReportFormat;
-    links?: Links;
+    href: string;
 }
 
 export interface ScanRun {
     state: RunState;
     timestamp?: string;
     error?: string;
-}
-
-export interface Links {
-    rel: LinkType;
-    href: string;
 }
