@@ -78,11 +78,17 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ScanResultResponses'
-    /reports/{reportid}:
+    /scans/{scanid}/reports/{reportid}:
         get:
             summary: Get accessibility scan report
             operationId: getReport
             parameters:
+                - name: scanid
+                  in: path
+                  required: true
+                  description: The scan request ID
+                  schema:
+                      type: string
                 - name: reportid
                   in: path
                   required: true
