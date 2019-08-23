@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, Logger } from 'logger';
+import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 
 export class WebApiScanRunnerEntryPoint extends ProcessEntryPointBase {
