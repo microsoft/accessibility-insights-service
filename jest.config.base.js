@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 module.exports = {
     clearMocks: true,
-    displayName: 'storage unit tests',
+    collectCoverage: true,
+    displayName: 'all unit tests',
     globals: {
         'ts-jest': {
             tsConfig: '<rootDir>/tsconfig.json',
