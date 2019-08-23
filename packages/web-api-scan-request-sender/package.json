@@ -1,0 +1,50 @@
+{
+    "name": "web-api-scan-request-sender",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "webpack --config ./webpack.config.js --colors --progress",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/web-api-scan-request-sender#readme",
+    "devDependencies": {
+        "@types/jest": "^24.0.11",
+        "copy-webpack-plugin": "^4.6.0",
+        "fork-ts-checker-webpack-plugin": "^0.5.2",
+        "jest": "^24.7.1",
+        "jest-circus": "^24.7.1",
+        "jest-junit": "^6.3.0",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^24.0.2",
+        "ts-loader": "^5.3.3",
+        "tslint": "5.12.1",
+        "tslint-microsoft-contrib": "6.0.0",
+        "typemoq": "^2.1.0",
+        "typescript": "^3.4.3",
+        "webpack": "^4.29.4",
+        "webpack-cli": "^3.2.3"
+    },
+    "dependencies": {
+        "azure-services": "^1.0.0",
+        "common": "1.0.0",
+        "inversify": "^5.0.1",
+        "logger": "1.0.0",
+        "reflect-metadata": "^0.1.13",
+        "service-library": "1.0.0",
+        "storage-documents": "1.0.0"
+    }
+}
