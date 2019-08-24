@@ -24,6 +24,11 @@ createCosmosAccount() {
 createCosmosCollection() {
     local collectionName=$1
     local dbName=$2
+    local ttl=$3
+
+    if [[ -z $ttl ]]; then
+        ttl=-1
+    fi
 
     echo "Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
     collectionExists=$(az cosmosdb collection exists --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
@@ -32,7 +37,7 @@ createCosmosCollection() {
         echo "Collection '$collectionName' already exists"
     else
         echo "Creating DB collection '$collectionName'"
-        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 1>/dev/null
+        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 --default-ttl "$ttl" 1>/dev/null
         echo "Successfully created DB collection '$collectionName'"
     fi
 }
@@ -60,22 +65,24 @@ Usage: $0 -r <resource group>
 }
 
 # Read script arguments
-while getopts "r:" option; do
+while getopts "r:c:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    c) cosmosAccountName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $cosmosAccountName ]]; then
     exitWithUsageInfo
 fi
 
-cosmosAccountName=""
 createCosmosAccount
 
 dbName="scanner"
 createCosmosDatabase "$dbName"
 createCosmosCollection "a11yIssues" "$dbName"
 createCosmosCollection "webPagesToScan" "$dbName"
+# Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
+createCosmosCollection "scanRuns" "$dbName" "2592000" # 30 days
