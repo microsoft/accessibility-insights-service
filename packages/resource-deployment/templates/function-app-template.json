@@ -6,7 +6,7 @@
             "type": "string",
             "defaultValue": "a11yfunctionapp",
             "metadata": {
-                "description": "The location in which the Azure Storage resources should be deployed."
+                "description": "The Function App name"
             }
         },
         "storageAccountName": {
