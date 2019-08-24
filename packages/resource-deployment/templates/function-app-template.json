@@ -4,7 +4,7 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "a11yfunctionapp",
+            "defaultValue": "allyfunctionapp",
             "metadata": {
                 "description": "The Function App name"
             }
@@ -18,7 +18,7 @@
         },
         "appInsightsName": {
             "type": "string",
-            "defaultValue": "[concat('a11yinsights',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[concat('allyinsights',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The app insights resource name."
             }
@@ -72,32 +72,9 @@
                 "clientAffinityEnabled": false,
                 "reserved": false
             },
-            "dependsOn": [
-                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-                "[resourceId('microsoft.insights/components', parameters('appInsightsName'))]"
-            ],
             "apiVersion": "2016-03-01",
-            "location": "Central US",
+            "location": "[parameters('location')]",
             "kind": "functionapp"
-        },
-        {
-            "apiVersion": "2015-05-01-preview",
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[parameters('storageAccountName')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "accountType": "Standard_LRS"
-            }
-        },
-        {
-            "apiVersion": "2015-05-01",
-            "name": "[parameters('appInsightsName')]",
-            "type": "microsoft.insights/components",
-            "location": "[parameters('location')]",
-            "properties": {
-                "ApplicationId": "[parameters('name')]",
-                "Request_Source": "IbizaWebAppExtensionCreate"
-            }
         }
     ]
 }
