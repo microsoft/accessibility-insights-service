@@ -29,7 +29,6 @@ while getopts "r:"  option; do
 done
 
 if [ -z "$resourceGroupName" ]; then
-	echo "Resource group name is empty"
 	exitWithUsageInfo
 fi
 
