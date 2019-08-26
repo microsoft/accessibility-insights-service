@@ -4,7 +4,7 @@
     "parameters": {
         "name": {
             "type": "string",
-            "defaultValue": "allyfunctionapp",
+            "defaultValue": "[concat('allyfunction',toLower(uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The Function App name"
             }
