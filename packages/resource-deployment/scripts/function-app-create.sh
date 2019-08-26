@@ -6,7 +6,7 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export resourceGroupName=""
+export resourceGroupName
 export functionAppName
 export resourceName
 
@@ -29,7 +29,7 @@ while getopts "r:"  option; do
 done
 
 if [ -z "$resourceGroupName" ]; then
-	echo "Either one of subscription, resourceGroupName or location is empty"
+	echo "Resource group name is empty"
 	exitWithUsageInfo
 fi
 
@@ -47,7 +47,7 @@ functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
 # Start publishing
-echo "Publishing API Functions to '$functionAppName' Function App"
+echo "Publishing API functions to '$functionAppName' Function App"
 
 # Install the Azure Functions Core Tools
 
@@ -66,6 +66,6 @@ sudo apt-get install azure-functions-core-tools
 cd "${0%/*}/../../web-api/dist"
 
 #publish the functions to the functionAppName
-func azure functionapp publish $functionAppName --javascript
+func azure functionapp publish $functionAppName --node
 
-echo "Successfully published"
+echo "Successfully published API functions to '$functionAppName' Function App"
