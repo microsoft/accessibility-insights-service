@@ -26,8 +26,8 @@ where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
 Environment - The environment in which the set up is running.
-Publisher email - The email for notifications
-Resource group - The resource group that this API instance needs to be added to
+Publisher email - The email for notifications.
+Resource group - The resource group that this API instance needs to be added to.
 Azure region - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
