@@ -5,7 +5,7 @@
 import * as jumphash from 'jumphash';
 
 /**
- * Based on white paper 'A Fast, Minimal Memory, Consistent Hash Algorithm' https://arxiv.org/abs/1406.2294
+ * Based on whitepaper 'A Fast, Minimal Memory, Consistent Hash Algorithm' https://arxiv.org/abs/1406.2294
  * (PDF only https://arxiv.org/pdf/1406.2294.pdf)
  */
 export class JumpConsistentHash {
