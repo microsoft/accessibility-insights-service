@@ -104,6 +104,8 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
+. "${0%/*}/function-app-create.sh"
+
 # shellcheck disable=SC2154
 keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
 echo "Fetched keyvault url $keyVaultUrl"

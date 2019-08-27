@@ -17,6 +17,18 @@
             "path": "../packages/scan-request-sender"
         },
         {
+            "name": "web-api-scan-request-sender",
+            "path": "../packages/web-api-scan-request-sender"
+        },
+        {
+            "name": "web-api-scan-runner",
+            "path": "../packages/web-api-scan-runner"
+        },
+        {
+            "name": "web-api-scan-job-manager",
+            "path": "../packages/web-api-scan-job-manager"
+        },
+        {
             "name": "service-library",
             "path": "../packages/service-library"
         },
