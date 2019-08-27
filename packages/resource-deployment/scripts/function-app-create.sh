@@ -49,7 +49,6 @@ echo "Successfully deployed Function App '$functionAppName'"
 echo "Publishing API functions to '$functionAppName' Function App"
 
 # Install the Azure Functions Core Tools
-# https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
 
 # Install the Microsoft package repository GPG key, to validate package integrity
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
