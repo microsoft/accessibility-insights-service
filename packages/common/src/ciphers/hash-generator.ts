@@ -3,6 +3,7 @@
 import * as fnv1a from '@sindresorhus/fnv1a';
 import { injectable } from 'inversify';
 import * as sha256 from 'sha.js';
+import { JumpConsistentHash } from './jump-consistent-hash';
 
 @injectable()
 export class HashGenerator {
@@ -36,11 +37,16 @@ export class HashGenerator {
         return this.generateBase64Hash(baseUrl, url);
     }
 
-    public getHashBucket(prefix: string, bucketRange: number, ...values: string[]): string {
+    public getDbHashBucket(prefix: string, ...values: string[]): string {
+        // change of buckets count may affect bucket generation of the same values
+        return this.getHashBucket(prefix, 10000, ...values);
+    }
+
+    public getHashBucket(prefix: string, buckets: number, ...values: string[]): string {
         const hashSeed: string = values.join('|').toLowerCase();
-        let hash = fnv1a(hashSeed);
-        hash = hash <= Number.MIN_VALUE ? hash + 1 : hash;
-        const bucket = hash % bucketRange;
+        const hash = fnv1a(hashSeed);
+        const hashGenerator = new JumpConsistentHash();
+        const bucket = hashGenerator.getBucket(hash, buckets);
 
         return `${prefix}-${bucket}`;
     }
