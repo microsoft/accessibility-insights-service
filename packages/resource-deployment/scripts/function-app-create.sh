@@ -62,7 +62,7 @@ sudo apt-get update
 sudo apt-get install azure-functions-core-tools
 
 # change directory to the functions folder to publish
-cd "${0%/*}/../../web-api/dist"
+cd "${0%/*}/../../../web-api/dist"
 
 #publish the functions to the functionAppName
 func azure functionapp publish $functionAppName --node
