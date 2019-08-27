@@ -65,16 +65,15 @@ Usage: $0 -r <resource group>
 }
 
 # Read script arguments
-while getopts "r:c:" option; do
+while getopts "r:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) cosmosAccountName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $cosmosAccountName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
