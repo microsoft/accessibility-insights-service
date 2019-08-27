@@ -10,9 +10,8 @@ export resourceGroupName
 export resourceName
 exitWithUsageInfo() {
     echo "
-Usage: $0 -l <location> -o <organisation name> -p <publisher email> -r <resource group> 
+Usage: $0 -o <organisation name> -p <publisher email> -r <resource group> 
     where 
-    Location - Geo location where the API managment instance needs to be deployed
     Organisation Name - This name will be used in customer interactions
     Publisher email - The email for notifications
     Resource group - The resource group that this API instance needs to be added to
@@ -24,17 +23,16 @@ Usage: $0 -l <location> -o <organisation name> -p <publisher email> -r <resource
 templateFilePath="${0%/*}/../templates/api-management.template.json"
 
 # Read script arguments
-while getopts "l:o:p:r:"  option; do
+while getopts "o:p:r:"  option; do
     case $option in
-        l) location=${OPTARG} ;;
         o) orgName=${OPTARG} ;;
         p) publisherEmail=${OPTARG} ;;
-		r) resourceGroupName=${OPTARG} ;;
-		*) exitWithUsageInfo ;;
-		esac
+        r) resourceGroupName=${OPTARG} ;;
+        *) exitWithUsageInfo ;;
+    esac
 done
 
-if [[ -z $location ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
