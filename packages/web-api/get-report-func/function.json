@@ -1,0 +1,17 @@
+{
+    "bindings": [
+        {
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "scans/{scanId:guid}/reports/{reportId:guid}",
+            "methods": ["get"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../get-report-func/index.js"
+}

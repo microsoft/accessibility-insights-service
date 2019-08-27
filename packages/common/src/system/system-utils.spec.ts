@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
+
 import { System } from './system-utils';
 
 describe('create instance if nil', () => {
@@ -62,5 +64,15 @@ describe('chunkArray()', () => {
         expect(result[0]).toEqual([1, 2, 3]);
         expect(result[1]).toEqual([4, 5, 6]);
         expect(result[2]).toEqual([7]);
+    });
+});
+
+describe('createRandomString()', () => {
+    it('create random string', () => {
+        let id = System.createRandomString(33);
+        expect(id.length).toEqual(33);
+
+        id = System.createRandomString();
+        expect(id.length).toEqual(32);
     });
 });

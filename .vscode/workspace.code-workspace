@@ -9,17 +9,33 @@
             "path": "../packages/runner"
         },
         {
+            "name": "scanner",
+            "path": "../packages/scanner"
+        },
+        {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
+        },
+        {
+            "name": "web-api-scan-request-sender",
+            "path": "../packages/web-api-scan-request-sender"
+        },
+        {
+            "name": "web-api-scan-runner",
+            "path": "../packages/web-api-scan-runner"
+        },
+        {
+            "name": "web-api-scan-job-manager",
+            "path": "../packages/web-api-scan-job-manager"
         },
         {
             "name": "service-library",
             "path": "../packages/service-library"
         },
-      {
-        "name": "azure-services",
-        "path": "../packages/azure-services"
-      },
+        {
+            "name": "azure-services",
+            "path": "../packages/azure-services"
+        },
         {
             "name": "storage-documents",
             "path": "../packages/storage-documents"
@@ -37,9 +53,17 @@
             "path": "../packages/resource-deployment"
         },
         {
-            "name": "root",
-            "path": "../",
+            "name": "api-contracts",
+            "path": "../packages/api-contracts"
         },
+        {
+            "name": "web-api",
+            "path": "../packages/web-api"
+        },
+        {
+            "name": "root",
+            "path": "../"
+        }
     ],
     "settings": {
         "editor.formatOnSave": true,
@@ -61,6 +85,7 @@
         },
         "cSpell.words": [
             "Rescan",
+            "SARIF",
             "backlink",
             "cout",
             "coutd",
@@ -78,7 +103,8 @@
             "rbbit.typescript-hero",
             "foxundermoon.shell-format",
             "rogalmic.bash-debug",
-            "streetsidesoftware.code-spell-checker"
+            "streetsidesoftware.code-spell-checker",
+            "ms-azuretools.vscode-azurefunctions"
         ]
     },
     "launch": {

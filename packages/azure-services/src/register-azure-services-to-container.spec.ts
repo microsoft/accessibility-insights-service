@@ -7,7 +7,6 @@ import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
-import { Activator } from 'common';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
@@ -32,7 +31,6 @@ describe(registerAzureServicesToContainer, () => {
     it('verify singleton resolution', async () => {
         registerAzureServicesToContainer(container);
 
-        verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
         verifySingletonDependencyResolution(CredentialsProvider);

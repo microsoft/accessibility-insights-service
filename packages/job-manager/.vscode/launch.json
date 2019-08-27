@@ -8,7 +8,7 @@
             "name": "Start debugging job-manager",
             "type": "node",
             "request": "launch",
-            "outFiles": ["${workspaceFolder}/out/**/*.js"],
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
             "program": "${workspaceFolder}/src/index.ts",
             "preLaunchTask": "tsc",
