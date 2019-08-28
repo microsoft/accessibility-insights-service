@@ -7,9 +7,19 @@ describe('JumpConsistentHash', () => {
     it('Validate use of a stable underlying algorithm implementation', () => {
         const testCases = [
             {
-                key: 10863919174838991,
+                key: '10863919174838991',
                 buckets: 11,
                 result: 6,
+            },
+            {
+                key: '2016238256797177309',
+                buckets: 11,
+                result: 3,
+            },
+            {
+                key: '1673758223894951030',
+                buckets: 11,
+                result: 5,
             },
             {
                 key: 2,

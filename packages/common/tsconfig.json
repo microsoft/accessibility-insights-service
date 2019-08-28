@@ -4,6 +4,7 @@
     "types": ["reflect-metadata"],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
     "compilerOptions": {
         "outDir": "dist"
     }
