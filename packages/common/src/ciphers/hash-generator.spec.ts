@@ -28,15 +28,6 @@ describe('HashGenerator', () => {
         expect(bucket).toEqual('bucket-425');
     });
 
-    it('generate hash bucket with buckets range change', () => {
-        hashGenerator = new HashGenerator(sha256);
-        let bucket = hashGenerator.getHashBucket('bucket', 8000, '1');
-        expect(bucket).toEqual('bucket-6762');
-
-        bucket = hashGenerator.getHashBucket('bucket', 12000, '1');
-        expect(bucket).toEqual('bucket-6762');
-    });
-
     it('generate DB hash bucket', () => {
         hashGenerator = new HashGenerator(sha256);
         const bucket = hashGenerator.getDbHashBucket('bucket', 'id1', 'id2', 'id3');

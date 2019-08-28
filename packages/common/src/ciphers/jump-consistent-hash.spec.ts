@@ -3,6 +3,12 @@
 
 import { JumpConsistentHash } from './jump-consistent-hash';
 
+let hashGenerator: JumpConsistentHash;
+
+beforeEach(() => {
+    hashGenerator = new JumpConsistentHash();
+});
+
 describe('JumpConsistentHash', () => {
     it('Validate use of a stable underlying algorithm implementation', () => {
         const testCases = [
@@ -43,7 +49,6 @@ describe('JumpConsistentHash', () => {
             },
         ];
 
-        const hashGenerator = new JumpConsistentHash();
         testCases.forEach(testCase => {
             const bucket = hashGenerator.getBucket(testCase.key, testCase.buckets);
             expect(bucket).toEqual(testCase.result);
@@ -52,10 +57,16 @@ describe('JumpConsistentHash', () => {
 
     it('Validate golden 100 keys of the algorithm', () => {
         const golden100: number[] = [0, 55, 62, 8, 45, 59, 86, 97, 82, 59, 73, 37, 17, 56, 86, 21, 90, 37, 38, 83];
-        const hashGenerator = new JumpConsistentHash();
         for (let key: number = 0; key < golden100.length; key += 1) {
             const bucket = hashGenerator.getBucket(key, 100);
             expect(bucket).toEqual(golden100[key]);
         }
+    });
+
+    it('Validate bucket consistency with range changed', () => {
+        let bucket = hashGenerator.getBucket(873244444, 8000);
+        expect(bucket).toEqual(6762);
+        bucket = hashGenerator.getBucket(873244444, 12000);
+        expect(bucket).toEqual(6762);
     });
 });
