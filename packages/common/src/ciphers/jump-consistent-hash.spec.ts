@@ -36,6 +36,11 @@ describe('JumpConsistentHash', () => {
                 buckets: 100001,
                 result: 15018,
             },
+            {
+                key: -2202.98,
+                buckets: 100001,
+                result: 15018,
+            },
         ];
 
         const hashGenerator = new JumpConsistentHash();

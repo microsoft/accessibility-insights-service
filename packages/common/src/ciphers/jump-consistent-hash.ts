@@ -30,6 +30,6 @@ export class JumpConsistentHash {
             return new BN(Math.floor(Math.abs(key))).toRed(this.modulo64);
         }
 
-        return new BN(key, 10).toRed(this.modulo64);
+        return new BN(key.replace('-', '').split('.')[0], 10).toRed(this.modulo64);
     }
 }
