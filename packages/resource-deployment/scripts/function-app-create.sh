@@ -21,15 +21,15 @@ Usage: $0 -r <resource group>
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:"  option; do
+while getopts "r:" option; do
     case $option in
-		r) resourceGroupName=${OPTARG} ;;
-		*) exitWithUsageInfo ;;
-		esac
+    r) resourceGroupName=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
 done
 
 if [ -z "$resourceGroupName" ]; then
-	exitWithUsageInfo
+    exitWithUsageInfo
 fi
 
 # Start deployment
@@ -40,10 +40,15 @@ resources=$(az group deployment create \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
+
+# Add system-assigned managed identity to function app
+
+echo "Adding managed identity to Function App '$functionAppName'"
+az webapp identity assign --name "$functionAppName" --resource-group "$resourceGroupName"
+echo "Successfully Added managed identity to Function App '$functionAppName'"
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
@@ -51,7 +56,7 @@ echo "Publishing API functions to '$functionAppName' Function App"
 # Install the Azure Functions Core Tools: https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
 
 # Install the Microsoft package repository GPG key, to validate package integrity
-curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
 sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 
 # Verify your Ubuntu server is running one of the appropriate versions from the table below. To add the apt source, run
