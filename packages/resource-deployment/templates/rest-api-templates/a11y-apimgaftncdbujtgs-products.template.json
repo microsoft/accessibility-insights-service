@@ -1,0 +1,24 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimServiceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "description": "Subscribers have completely unlimited access to the API. Administrator approval is required.",
+                "subscriptionRequired": true,
+                "approvalRequired": true,
+                "subscriptionsLimit": 1,
+                "state": "published",
+                "displayName": "Unlimited"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/unlimited')]",
+            "type": "Microsoft.ApiManagement/service/products",
+            "apiVersion": "2019-01-01"
+        }
+    ]
+}

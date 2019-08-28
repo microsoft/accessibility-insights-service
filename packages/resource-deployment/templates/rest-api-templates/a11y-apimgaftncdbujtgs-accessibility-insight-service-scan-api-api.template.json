@@ -1,0 +1,257 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimServiceName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "authenticationSettings": {
+                    "subscriptionKeyRequired": false
+                },
+                "subscriptionKeyParameterNames": {
+                    "header": "Ocp-Apim-Subscription-Key",
+                    "query": "subscription-key"
+                },
+                "apiRevision": "1",
+                "isCurrent": true,
+                "displayName": "Accessibility Insight Service – Scan API",
+                "path": "",
+                "protocols": ["https"]
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api')]",
+            "type": "Microsoft.ApiManagement/service/apis",
+            "apiVersion": "2019-01-01",
+            "dependsOn": []
+        },
+        {
+            "properties": {
+                "contentType": "application/vnd.oai.openapi.components+json",
+                "document": {
+                    "value": "{\"components\":{\"schemas\":{\"ScanRunRequest\":{\"required\":[\"url\"],\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"string\"},\"priority\":{\"type\":\"integer\",\"description\":\"Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority. The default value is 0.\",\"default\":0}}},\"ScanRunRequests\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ScanRunRequest\"}},\"ScanRunResponse\":{\"required\":[\"url\"],\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"string\"},\"scanId\":{\"type\":\"string\"},\"error\":{\"type\":\"string\"}}},\"ScanRunResponses\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ScanRunResponse\"}},\"ScanResult\":{\"required\":[\"state\"],\"type\":\"object\",\"properties\":{\"state\":{\"enum\":[\"unknown\",\"pass\",\"fail\"],\"type\":\"string\",\"default\":\"unknown\"},\"issueCount\":{\"minimum\":0,\"type\":\"integer\",\"format\":\"int32\"}}},\"Links\":{\"required\":[\"rel\",\"href\"],\"type\":\"object\",\"properties\":{\"rel\":{\"enum\":[\"self\"],\"type\":\"string\",\"default\":\"self\"},\"href\":{\"type\":\"string\"}}},\"Run\":{\"required\":[\"state\"],\"type\":\"object\",\"properties\":{\"timestamp\":{\"type\":\"string\",\"description\":\"Full date and time string format as defined by ISO 8601\"},\"error\":{\"type\":\"string\"},\"state\":{\"enum\":[\"unknown\",\"queued\",\"running\",\"completed\",\"failed\"],\"type\":\"string\",\"default\":\"unknown\"}}},\"Report\":{\"required\":[\"reportId\",\"format\",\"links\"],\"type\":\"object\",\"properties\":{\"reportId\":{\"type\":\"string\"},\"format\":{\"enum\":[\"sarif\"],\"type\":\"string\",\"description\":\"SARIF format specification https://www.oasis-open.org/committees/sarif/charter.php\\n\"},\"links\":{\"$ref\":\"#/components/schemas/Links\"}}},\"Reports\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/Report\"}},\"ScanRun\":{\"required\":[\"scanId\"],\"type\":\"object\",\"properties\":{\"scanId\":{\"type\":\"string\"}}},\"ScanRuns\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ScanRun\"}},\"ScanResultResponse\":{\"required\":[\"scanId\",\"url\",\"run\"],\"type\":\"object\",\"properties\":{\"scanId\":{\"type\":\"string\"},\"url\":{\"type\":\"string\"},\"scanResult\":{\"$ref\":\"#/components/schemas/ScanResult\"},\"run\":{\"$ref\":\"#/components/schemas/Run\"},\"reports\":{\"$ref\":\"#/components/schemas/Reports\"}}},\"ScanResultResponses\":{\"type\":\"array\",\"items\":{\"$ref\":\"#/components/schemas/ScanResultResponse\"}}}}}"
+                }
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/5d65a7add888c31128385485')]",
+            "type": "Microsoft.ApiManagement/service/apis/schemas",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [
+                    {
+                        "name": "api-version",
+                        "description": "The client API version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "description": "Create accessibility scan requests",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": [
+                        {
+                            "contentType": "application/json",
+                            "schemaId": "5d65a7add888c31128385485",
+                            "typeName": "ScanRunRequests"
+                        }
+                    ]
+                },
+                "responses": [
+                    {
+                        "statusCode": 202,
+                        "description": "Accepted",
+                        "headers": [],
+                        "representations": [
+                            {
+                                "contentType": "application/json",
+                                "schemaId": "5d65a7add888c31128385485",
+                                "typeName": "ScanRunResponses"
+                            }
+                        ]
+                    }
+                ],
+                "displayName": "Create accessibility scan requests",
+                "method": "POST",
+                "urlTemplate": "/scans?api-version={api-version}"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/createScans')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
+                "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d65a7add888c31128385485')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [
+                    {
+                        "name": "scanid",
+                        "description": "The scan request ID",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    },
+                    {
+                        "name": "reportid",
+                        "description": "The report ID",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    },
+                    {
+                        "name": "api-version",
+                        "description": "The client API version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "description": "Get accessibility scan report",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "description": "OK",
+                        "headers": [],
+                        "representations": [
+                            {
+                                "contentType": "application/json",
+                                "sample": "{\n  \"href\": \"https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html\"\n}"
+                            }
+                        ]
+                    }
+                ],
+                "displayName": "Get accessibility scan report",
+                "method": "GET",
+                "urlTemplate": "/scans/{scanid}/reports/{reportid}?api-version={api-version}"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getReport')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [
+                    {
+                        "name": "scanid",
+                        "description": "The scan request ID",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    },
+                    {
+                        "name": "api-version",
+                        "description": "The client API version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "description": "Get accessibility scan result",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": []
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "description": "OK",
+                        "headers": [],
+                        "representations": [
+                            {
+                                "contentType": "application/json",
+                                "schemaId": "5d65a7add888c31128385485",
+                                "typeName": "ScanResultResponse"
+                            }
+                        ]
+                    }
+                ],
+                "displayName": "Get accessibility scan result",
+                "method": "GET",
+                "urlTemplate": "/scans/{scanid}?api-version={api-version}"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScan')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
+                "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d65a7add888c31128385485')]"
+            ]
+        },
+        {
+            "properties": {
+                "templateParameters": [
+                    {
+                        "name": "api-version",
+                        "description": "The client API version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "description": "Get accessibility scan results",
+                "request": {
+                    "queryParameters": [],
+                    "headers": [],
+                    "representations": [
+                        {
+                            "contentType": "application/json",
+                            "schemaId": "5d65a7add888c31128385485",
+                            "typeName": "ScanRuns"
+                        }
+                    ]
+                },
+                "responses": [
+                    {
+                        "statusCode": 200,
+                        "description": "OK",
+                        "headers": [],
+                        "representations": [
+                            {
+                                "contentType": "application/json",
+                                "schemaId": "5d65a7add888c31128385485",
+                                "typeName": "ScanResultResponses"
+                            }
+                        ]
+                    }
+                ],
+                "displayName": "Get accessibility scan results",
+                "method": "POST",
+                "urlTemplate": "/scans/$batch?api-version={api-version}"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getScanBatch')]",
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
+                "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d65a7add888c31128385485')]"
+            ]
+        },
+        {
+            "properties": {},
+            "name": "[concat(parameters('apimServiceName'), '/unlimited/accessibility-insight-service-scan-api')]",
+            "type": "Microsoft.ApiManagement/service/products/apis",
+            "apiVersion": "2019-01-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
+            ]
+        }
+    ]
+}
