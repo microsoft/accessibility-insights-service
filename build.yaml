@@ -81,4 +81,4 @@ steps:
       displayName: 'Component Detection'
       inputs:
           failOnAlert: true
-      condition: and(in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
+      condition: and(always(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
