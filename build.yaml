@@ -76,3 +76,9 @@ steps:
           pathtoPublish: '$(Build.ArtifactStagingDirectory)'
           artifactName: drop
       displayName: 'Publish build artifacts'
+
+    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+      displayName: 'Component Detection'
+      inputs:
+          failOnAlert: true
+      conditions: and(in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI'))
