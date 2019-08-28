@@ -15,9 +15,5 @@ export function setupRunnerContainer(): inversify.Container {
     registerScannerToContainer(container);
     registerServiceLibraryToContainer(container);
 
-    container.bind(StorageClient).toDynamicValue(context => {
-        return new StorageClient(context.container.get(CosmosClientWrapper), 'scanner', 'a11yIssues', context.container.get(Logger));
-    });
-
     return container;
 }

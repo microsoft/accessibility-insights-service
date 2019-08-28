@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { StorageClient } from 'azure-services';
+import { StorageClient, storageClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
 
 @injectable()
 export class StorageTask {
-    constructor(@inject(StorageClient) private readonly storageClient: StorageClient) {}
+    constructor(@inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient) {}
 
     public async writeResults<T>(results: T[], partitionKey?: string): Promise<void> {
         await this.storageClient.writeDocuments<T>(results, partitionKey);

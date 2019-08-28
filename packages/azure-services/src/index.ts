@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 export { StorageClient } from './storage/storage-client';
+export * from './storage/storage-client-factory';
 export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';
 export { Message } from './azure-queue/message';
@@ -13,3 +14,4 @@ export { secretNames } from './key-vault/secret-names';
 export { SecretProvider } from './key-vault/secret-provider';
 export { Credentials, CredentialsProvider } from './credentials/credentials-provider';
 export { client } from './storage/client';
+export { storageClientTypes } from './ioc-types';

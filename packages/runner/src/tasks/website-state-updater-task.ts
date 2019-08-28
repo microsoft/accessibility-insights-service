@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RetryOptions, StorageClient } from 'azure-services';
+import { RetryOptions, StorageClient, storageClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
@@ -12,7 +12,7 @@ const websiteRootPartitionKey = 'website';
 @injectable()
 export class WebsiteStateUpdaterTask {
     constructor(
-        @inject(StorageClient) private readonly storageClient: StorageClient,
+        @inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient,
         @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
         @inject(Logger) private readonly logger: Logger,
         private readonly retryOptions: RetryOptions = {

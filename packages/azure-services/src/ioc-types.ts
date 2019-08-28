@@ -21,3 +21,7 @@ export type QueueURLProvider = typeof QueueURL.fromServiceURL;
 export type MessagesURLProvider = typeof MessagesURL.fromQueueURL;
 export type MessageIdURLProvider = typeof MessageIdURL.fromMessagesURL;
 export type QueueServiceURLProvider = () => Promise<ServiceURL>;
+
+export const storageClientTypes = {
+    LegacyScanStorageClient: 'LegacyScanStorageClient',
+};

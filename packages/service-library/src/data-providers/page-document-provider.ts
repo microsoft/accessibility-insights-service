@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { client, CosmosOperationResponse, StorageClient } from 'azure-services';
+import { client, CosmosOperationResponse, StorageClient, storageClientTypes } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -11,7 +11,7 @@ import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageE
 export class PageDocumentProvider {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(StorageClient) private readonly storageClient: StorageClient,
+        @inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient,
     ) {}
 
     public async getReadyToScanPages(

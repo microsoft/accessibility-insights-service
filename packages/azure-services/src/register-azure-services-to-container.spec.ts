@@ -15,10 +15,11 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
+import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider, storageClientTypes } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
+import { StorageClient } from './storage/storage-client';
 
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
@@ -45,6 +46,14 @@ describe(registerAzureServicesToContainer, () => {
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
+    });
+
+    it('resolves StorageClient', () => {
+        registerAzureServicesToContainer(container);
+
+        const storageClient = container.get<StorageClient>(storageClientTypes.LegacyScanStorageClient);
+
+        verifyStorageClient(storageClient, 'scanner', 'a11yIssues');
     });
 
     describe('QueueServiceURLProvider', () => {
@@ -179,5 +188,10 @@ describe(registerAzureServicesToContainer, () => {
     function verifyNonSingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).not.toBe(container.get(key));
+    }
+
+    function verifyStorageClient(storageClient: StorageClient, dbName: string, collectionName: string): void {
+        expect((storageClient as any).dbName).toBe('scanner');
+        expect((storageClient as any).collectionName).toBe('a11yIssues');
     }
 });
