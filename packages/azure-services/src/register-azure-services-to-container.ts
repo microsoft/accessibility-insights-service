@@ -6,13 +6,15 @@ import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
+import { Logger } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
-import { iocTypeNames } from './ioc-types';
+import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
+import { CosmosContainerClient } from './storage/storage-client';
 
 export function registerAzureServicesToContainer(container: Container): void {
     setupAuthenticationMethod(container);
@@ -45,7 +47,15 @@ export function registerAzureServicesToContainer(container: Container): void {
 
     setupSingletonQueueServiceURLProvider(container);
 
+    container.bind(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'scanner', 'a11yIssues');
+    });
+
     container.bind(Queue).toSelf();
+}
+
+function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
+    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(Logger));
 }
 
 function setupAuthenticationMethod(container: interfaces.Container): void {

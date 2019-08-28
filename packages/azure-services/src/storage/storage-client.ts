@@ -13,7 +13,7 @@ import { RetryOptions } from './retry-options';
 
 // tslint:disable: no-any
 
-export class StorageClient {
+export class CosmosContainerClient {
     constructor(
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,

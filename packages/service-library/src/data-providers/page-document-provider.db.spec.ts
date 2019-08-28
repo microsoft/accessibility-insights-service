@@ -3,7 +3,7 @@
 // tslint:disable: no-any no-unsafe-any no-null-keyword no-object-literal-type-assertion
 import 'reflect-metadata';
 
-import { StorageClient } from 'azure-services';
+import { CosmosContainerClient } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
@@ -63,7 +63,7 @@ describe(PageDocumentProvider, () => {
 
             website = dbHelper.createWebsiteDocument({ websiteId: dbHelper.createRandomString('websiteId') });
             loggerMock = Mock.ofType<Logger>();
-            const storageClient = new StorageClient(
+            const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,
                 dbHelper.dbContainer.collectionName,
@@ -93,7 +93,7 @@ describe(PageDocumentProvider, () => {
                 .subtract(scanConfig.failedPageRescanIntervalInHours - 1, 'hour')
                 .toJSON();
 
-            testSubject = new PageDocumentProvider(serviceConfigMock.object, storageClient);
+            testSubject = new PageDocumentProvider(serviceConfigMock.object, cosmosContainerClient);
         });
 
         function createPageWithLastRunInfo(
