@@ -47,7 +47,7 @@ echo "Successfully deployed Function App '$functionAppName'"
 # Add system-assigned managed identity to function app
 
 echo "Adding managed identity to Function App '$functionAppName'"
-az webapp identity assign --name "$functionAppName" --resource-group "$resourceGroupName"
+principalId=$(az webapp identity assign --name "$functionAppName" --resource-group "$resourceGroupName" --query principalId -o tsv)
 echo "Successfully Added managed identity to Function App '$functionAppName'"
 
 # Start publishing
