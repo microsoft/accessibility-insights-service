@@ -24,8 +24,8 @@ describe('HashGenerator', () => {
 
     it('generate hash bucket', () => {
         hashGenerator = new HashGenerator(sha256);
-        const bucket = hashGenerator.getHashBucket('bucket', 10000, 'id1', 'id2', 'id3');
-        expect(bucket).toEqual('bucket-5553');
+        const bucket = hashGenerator.getHashBucket('bucket', 1000, 'id1', 'id2', 'id3');
+        expect(bucket).toEqual('bucket-425');
     });
 
     it('generate hash bucket with buckets range change', () => {
@@ -40,7 +40,7 @@ describe('HashGenerator', () => {
     it('generate DB hash bucket', () => {
         hashGenerator = new HashGenerator(sha256);
         const bucket = hashGenerator.getDbHashBucket('bucket', 'id1', 'id2', 'id3');
-        expect(bucket).toEqual('bucket-5553');
+        expect(bucket).toEqual('bucket-425');
     });
 
     it('generate WebsitePageDocumentId', () => {

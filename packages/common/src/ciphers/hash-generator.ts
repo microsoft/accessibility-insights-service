@@ -39,7 +39,7 @@ export class HashGenerator {
 
     public getDbHashBucket(prefix: string, ...values: string[]): string {
         // change of buckets count may affect bucket generation of the same values
-        return this.getHashBucket(prefix, 10000, ...values);
+        return this.getHashBucket(prefix, 1000, ...values);
     }
 
     public getHashBucket(prefix: string, buckets: number, ...values: string[]): string {
