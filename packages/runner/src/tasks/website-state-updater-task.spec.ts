@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 import '../../test-utilities/common-mock-methods';
 
-import { CosmosOperationResponse, RetryOptions, StorageClient } from 'azure-services';
+import { CosmosContainerClient, CosmosOperationResponse, RetryOptions } from 'azure-services';
 import { Logger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -12,7 +12,7 @@ import { WebsiteFactory } from '../factories/website-factory';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteStateUpdaterTask } from './website-state-updater-task';
 
-let storageClientMock: IMock<StorageClient>;
+let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let websiteFactoryMock: IMock<WebsiteFactory>;
 const retryOptions: RetryOptions = {
     timeoutMilliseconds: 15000,
@@ -32,13 +32,13 @@ let loggerMock: IMock<Logger>;
 const websitePartitioningKey = 'website';
 
 beforeEach(() => {
-    storageClientMock = Mock.ofType<StorageClient>();
+    cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
     websiteFactoryMock = Mock.ofType<WebsiteFactory>();
 
     pageScanResult = <PageScanResult>(<unknown>{ type: 'PageScanResult' });
 
     let targetWebsiteServerItem: Website;
-    storageClientMock
+    cosmosContainerClientMock
         .setup(async o => o.writeDocument<Website>(It.isAny(), websitePartitioningKey))
         .callback(item => {
             targetWebsiteServerItem = item;
@@ -54,7 +54,7 @@ beforeEach(() => {
     loggerMock = Mock.ofType(Logger);
 
     websiteStateUpdaterTask = new WebsiteStateUpdaterTask(
-        storageClientMock.object,
+        cosmosContainerClientMock.object,
         websiteFactoryMock.object,
         loggerMock.object,
         retryOptions,
@@ -62,7 +62,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-    storageClientMock.verifyAll();
+    cosmosContainerClientMock.verifyAll();
     websiteFactoryMock.verifyAll();
 });
 
@@ -70,7 +70,7 @@ describe('WebsiteStateUpdaterTask', () => {
     it('create new website document', async () => {
         const websiteCreatedItem = <Website>(<unknown>{ type: 'Website', operation: 'created' });
         const websiteServerItem = createWebsiteServerItem(404);
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
@@ -93,7 +93,7 @@ describe('WebsiteStateUpdaterTask', () => {
     it('update existing website document', async () => {
         const websiteUpdatedItem = <Website>(<unknown>{ type: 'Website', operation: 'updated' });
         const websiteServerItem = createWebsiteServerItem(200);
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
@@ -117,7 +117,7 @@ describe('WebsiteStateUpdaterTask', () => {
 async function setupTryExecuteOperationCallback(): Promise<CosmosOperationResponse<Website>> {
     return new Promise(async (resolve, reject) => {
         let operationResult: CosmosOperationResponse<Website>;
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.tryExecuteOperation(It.isAny(), retryOptions, pageScanResult, scanMetadata, It.isAny()))
             .callback(async (operation, options, scanResult, metadata, timestamp) => {
                 try {

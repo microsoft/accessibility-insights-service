@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RetryOptions, StorageClient, storageClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes, RetryOptions } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
@@ -12,7 +12,7 @@ const websiteRootPartitionKey = 'website';
 @injectable()
 export class WebsiteStateUpdaterTask {
     constructor(
-        @inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient,
+        @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
         @inject(Logger) private readonly logger: Logger,
         private readonly retryOptions: RetryOptions = {
@@ -23,11 +23,11 @@ export class WebsiteStateUpdaterTask {
     ) {}
 
     public async update(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
-        await this.storageClient.tryExecuteOperation(
+        await this.cosmosContainerClient.tryExecuteOperation(
             async (scanResult: PageScanResult, metadata: ScanMetadata, timestamp: Date) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
 
-                return this.storageClient.writeDocument<Website>(targetWebsiteItem, websiteRootPartitionKey);
+                return this.cosmosContainerClient.writeDocument<Website>(targetWebsiteItem, websiteRootPartitionKey);
             },
             this.retryOptions,
             pageScanResult,
@@ -39,7 +39,7 @@ export class WebsiteStateUpdaterTask {
     private async getWebsiteItemToUpdate(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<Website> {
         let targetWebsiteItem: Website;
         const websiteDocumentId = this.websiteFactory.createWebsiteDocumentId(scanMetadata.baseUrl);
-        const sourceWebsiteItem = await this.storageClient.readDocument<Website>(websiteDocumentId, websiteRootPartitionKey);
+        const sourceWebsiteItem = await this.cosmosContainerClient.readDocument<Website>(websiteDocumentId, websiteRootPartitionKey);
 
         if (sourceWebsiteItem.statusCode === 200) {
             this.logger.logInfo(

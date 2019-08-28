@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { StorageClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { ScanRequestSender } from './sender/scan-request-sender';
 import { setupScanRequestSenderContainer } from './setup-scan-request-sender-container';

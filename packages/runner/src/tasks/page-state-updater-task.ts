@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { StorageClient, storageClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { PageObjectFactory } from 'service-library';
 import { PageScanResult, RunState, WebsitePage } from 'storage-documents';
@@ -10,7 +10,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 @injectable()
 export class PageStateUpdaterTask {
     constructor(
-        @inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient,
+        @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(PageObjectFactory) private readonly pageObjectFactory: PageObjectFactory,
     ) {}
 
@@ -21,7 +21,7 @@ export class PageStateUpdaterTask {
             runTime: runTime.toJSON(),
         };
 
-        await this.storageClient.mergeOrWriteDocument(websitePage);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
     }
 
     public async setPageLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata): Promise<void> {
@@ -32,7 +32,7 @@ export class PageStateUpdaterTask {
             const scanResult = crawlerScanResults.results.find(result => result.scanUrl === scanMetadata.scanUrl);
             websitePage.links = scanResult !== undefined ? scanResult.links : [];
 
-            await this.storageClient.mergeOrWriteDocument(websitePage);
+            await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
         }
     }
 
@@ -50,7 +50,7 @@ export class PageStateUpdaterTask {
             unscannable,
         };
 
-        await this.storageClient.mergeOrWriteDocument(websitePage);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
     }
 
     private createWebsitePageInstance(scanMetadata: ScanMetadata): WebsitePage {

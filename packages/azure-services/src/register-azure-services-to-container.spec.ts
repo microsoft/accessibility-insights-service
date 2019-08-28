@@ -15,11 +15,17 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider, storageClientTypes } from './ioc-types';
+import {
+    AzureKeyVaultClientProvider,
+    CosmosClientProvider,
+    cosmosContainerClientTypes,
+    iocTypeNames,
+    QueueServiceURLProvider,
+} from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
-import { StorageClient } from './storage/storage-client';
+import { CosmosContainerClient } from './storage/storage-client';
 
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
@@ -48,12 +54,12 @@ describe(registerAzureServicesToContainer, () => {
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
     });
 
-    it('resolves StorageClient', () => {
+    it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
-        const storageClient = container.get<StorageClient>(storageClientTypes.LegacyScanStorageClient);
+        const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient);
 
-        verifyStorageClient(storageClient, 'scanner', 'a11yIssues');
+        verifyCosmosContainerClient(cosmosContainerClient, 'scanner', 'a11yIssues');
     });
 
     describe('QueueServiceURLProvider', () => {
@@ -190,8 +196,8 @@ describe(registerAzureServicesToContainer, () => {
         expect(container.get(key)).not.toBe(container.get(key));
     }
 
-    function verifyStorageClient(storageClient: StorageClient, dbName: string, collectionName: string): void {
-        expect((storageClient as any).dbName).toBe('scanner');
-        expect((storageClient as any).collectionName).toBe('a11yIssues');
+    function verifyCosmosContainerClient(cosmosContainerClient: CosmosContainerClient, dbName: string, collectionName: string): void {
+        expect((cosmosContainerClient as any).dbName).toBe('scanner');
+        expect((cosmosContainerClient as any).collectionName).toBe('a11yIssues');
     }
 });

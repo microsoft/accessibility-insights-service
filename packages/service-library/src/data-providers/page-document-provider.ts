@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { client, CosmosOperationResponse, StorageClient, storageClientTypes } from 'azure-services';
+import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
@@ -11,7 +11,7 @@ import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageE
 export class PageDocumentProvider {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(storageClientTypes.LegacyScanStorageClient) private readonly storageClient: StorageClient,
+        @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
     public async getReadyToScanPages(
@@ -50,7 +50,7 @@ export class PageDocumentProvider {
         const partitionKey = 'website';
         const query = `SELECT * FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
 
-        const response = await this.storageClient.queryDocuments<Website>(query, continuationToken, partitionKey);
+        const response = await this.cosmosContainerClient.queryDocuments<Website>(query, continuationToken, partitionKey);
 
         client.ensureSuccessStatusCode(response);
 
@@ -72,7 +72,7 @@ export class PageDocumentProvider {
 
         _.merge(propertiesToUpdate, properties);
 
-        return this.storageClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
+        return this.cosmosContainerClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
     }
 
     public async getPagesNeverScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
@@ -83,7 +83,7 @@ export class PageDocumentProvider {
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.storageClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
 
@@ -110,7 +110,7 @@ export class PageDocumentProvider {
     ) order by c.lastRun.runTime asc`;
 
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.storageClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
 

@@ -3,7 +3,7 @@
 // tslint:disable: no-import-side-effect no-any no-unsafe-any max-func-body-length no-null-keyword no-object-literal-type-assertion
 import 'reflect-metadata';
 
-import { CosmosOperationResponse, StorageClient } from 'azure-services';
+import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import * as moment from 'moment';
 import { ItemType, RunState, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
@@ -25,7 +25,7 @@ jest.mock('moment', () => {
 });
 
 describe('PageDocumentProvider', () => {
-    let storageClientMock: IMock<StorageClient>;
+    let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let pageDocumentProvider: PageDocumentProvider;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let scanConfig: ScanRunTimeConfig;
@@ -39,10 +39,10 @@ describe('PageDocumentProvider', () => {
             accessibilityRuleExclusionList: [],
         };
 
-        storageClientMock = Mock.ofType<StorageClient>();
+        cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
-        pageDocumentProvider = new PageDocumentProvider(serviceConfigMock.object, storageClientMock.object);
+        pageDocumentProvider = new PageDocumentProvider(serviceConfigMock.object, cosmosContainerClientMock.object);
     });
 
     describe('getWebsites', () => {
@@ -52,7 +52,7 @@ describe('PageDocumentProvider', () => {
         it('returns website ids when success', async () => {
             const response: any = { item: ['web site id'], statusCode: 200 };
 
-            storageClientMock
+            cosmosContainerClientMock
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
                 .returns(() => Promise.resolve(response));
             await expect(pageDocumentProvider.getWebsites(token)).resolves.toBe(response);
@@ -61,7 +61,7 @@ describe('PageDocumentProvider', () => {
         it('throws on response with invalid status code', async () => {
             const response: any = { item: ['web site id'], statusCode: 401 };
 
-            storageClientMock
+            cosmosContainerClientMock
                 .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
                 .returns(() => Promise.resolve(response));
             await expect(pageDocumentProvider.getWebsites(token)).rejects.not.toBeNull();
@@ -78,10 +78,10 @@ describe('PageDocumentProvider', () => {
                 const pageResultsFor2ndCall = ['pageId3', 'pageId4'];
                 const query = getPagesNeverScannedQuery(website, 5);
 
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor1stCall.slice(0), statusCode: 200, continuationToken: 'token1' }));
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
 
@@ -97,7 +97,7 @@ describe('PageDocumentProvider', () => {
                 const pageResultsFor1stCall = ['pageId1', 'pageId2'];
                 const query = getPagesNeverScannedQuery(website, 5);
 
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
 
@@ -116,10 +116,10 @@ describe('PageDocumentProvider', () => {
                 const pageResultsFor2ndCall = ['pageId3', 'pageId4'];
                 const query = getPagesScannedQuery(website, itemCount);
 
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor1stCall.slice(0), statusCode: 200, continuationToken: 'token1' }));
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
 
@@ -135,7 +135,7 @@ describe('PageDocumentProvider', () => {
                 const pageResultsFor1stCall = ['pageId1', 'pageId2'];
                 const query = getPagesScannedQuery(website, itemCount);
 
-                storageClientMock
+                cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
                     .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
 
@@ -277,7 +277,7 @@ describe('PageDocumentProvider', () => {
             },
         };
 
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.mergeOrWriteDocument(websitePageToWrite))
             .returns(async () => Promise.resolve({ item: websitePageToWrite, statusCode: 200 }))
             .verifiable(Times.once());

@@ -8,7 +8,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
-import { StorageClient } from './storage-client';
+import { CosmosContainerClient } from './storage-client';
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 
@@ -17,7 +17,7 @@ const collectionName = 'collectionName';
 const partitionKey = 'default-partitionKey';
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
-let storageClient: StorageClient;
+let cosmosContainerClient: CosmosContainerClient;
 let operationCallbackMock: IMock<OperationCallback>;
 let loggerMock: IMock<Logger>;
 
@@ -31,7 +31,7 @@ beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
     operationCallbackMock = Mock.ofType<OperationCallback>();
     loggerMock = Mock.ofType(Logger);
-    storageClient = new StorageClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
+    cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
 });
 
 describe('mergeOrWriteDocument()', () => {
@@ -40,7 +40,7 @@ describe('mergeOrWriteDocument()', () => {
             value: 'value',
         };
 
-        const op = storageClient.mergeOrWriteDocument(item as CosmosDocument, partitionKey);
+        const op = cosmosContainerClient.mergeOrWriteDocument(item as CosmosDocument, partitionKey);
 
         await expect(op).rejects.toEqual(
             'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
@@ -63,7 +63,7 @@ describe('mergeOrWriteDocument()', () => {
             .returns(async () => Promise.resolve({ statusCode: 202, item: item }))
             .verifiable(Times.once());
 
-        const response = await storageClient.mergeOrWriteDocument(item);
+        const response = await cosmosContainerClient.mergeOrWriteDocument(item);
 
         expect(response.item).toEqual(item);
         cosmosClientWrapperMock.verifyAll();
@@ -84,7 +84,7 @@ describe('mergeOrWriteDocument()', () => {
             .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, item.partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 202, item: { storageItem: true } }))
             .verifiable(Times.once());
-        const response = await storageClient.mergeOrWriteDocument(item);
+        const response = await cosmosContainerClient.mergeOrWriteDocument(item);
 
         expect(response.item).toEqual({ storageItem: true });
         cosmosClientWrapperMock.verifyAll();
@@ -105,7 +105,7 @@ describe('mergeOrWriteDocument()', () => {
             .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, partitionKey))
             .returns(async () => Promise.resolve({ statusCode: 202, item: { storageItem: true } }))
             .verifiable(Times.once());
-        const response = await storageClient.mergeOrWriteDocument(item, partitionKey);
+        const response = await cosmosContainerClient.mergeOrWriteDocument(item, partitionKey);
         expect(response.item).toEqual({ storageItem: true });
 
         cosmosClientWrapperMock.verifyAll();
@@ -151,14 +151,14 @@ describe('mergeOrWriteDocument()', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: mergedItem }))
             .verifiable(Times.once());
 
-        const response = await storageClient.mergeOrWriteDocument(documentItem, partitionKey);
+        const response = await cosmosContainerClient.mergeOrWriteDocument(documentItem, partitionKey);
 
         expect(response.item).toEqual(expectedItem);
         cosmosClientWrapperMock.verifyAll();
     });
 });
 
-describe('StorageClient.tryExecuteOperation()', () => {
+describe('CosmosContainerClient.tryExecuteOperation()', () => {
     it('invoke operation callback with timeout', async () => {
         const item = {
             value: 'value',
@@ -177,7 +177,7 @@ describe('StorageClient.tryExecuteOperation()', () => {
             )
             .verifiable(Times.atLeast(5));
 
-        const resultPromise = storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
+        const resultPromise = cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
 
         await expect(resultPromise).rejects.toEqual(expectedResult);
         operationCallbackMock.verifyAll();
@@ -214,7 +214,7 @@ describe('StorageClient.tryExecuteOperation()', () => {
             )
             .verifiable(Times.exactly(3));
 
-        const result = await storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
+        const result = await cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
 
         expect(result).toEqual(expectedResult);
         operationCallbackMock.verifyAll();
@@ -233,14 +233,14 @@ describe('StorageClient.tryExecuteOperation()', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
+        const result = await cosmosContainerClient.tryExecuteOperation(operationCallbackMock.object, retryOptions, 'arg1', 'arg2');
 
         expect(result).toEqual(expectedResult);
         operationCallbackMock.verifyAll();
     });
 });
 
-describe('StorageClient', () => {
+describe('CosmosContainerClient', () => {
     it('writeDocuments()', async () => {
         const items = [
             {
@@ -255,7 +255,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
-        await storageClient.writeDocuments(items, partitionKey);
+        await cosmosContainerClient.writeDocuments(items, partitionKey);
 
         cosmosClientWrapperMock.verifyAll();
     });
@@ -275,7 +275,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.writeDocument(item);
+        const result = await cosmosContainerClient.writeDocument(item);
 
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();
@@ -296,7 +296,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.writeDocument(item, partitionKey);
+        const result = await cosmosContainerClient.writeDocument(item, partitionKey);
 
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();
@@ -315,7 +315,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
-        const result = await storageClient.readDocument('id', partitionKey);
+        const result = await cosmosContainerClient.readDocument('id', partitionKey);
 
         expect(result).toEqual(expectedResult);
         cosmosClientWrapperMock.verifyAll();
@@ -351,7 +351,7 @@ describe('StorageClient', () => {
             .returns(async () => Promise.resolve({ statusCode: 200, item: items[1] }))
             .verifiable(Times.once());
 
-        await storageClient.mergeOrWriteDocuments(items);
+        await cosmosContainerClient.mergeOrWriteDocuments(items);
 
         cosmosClientWrapperMock.verifyAll();
     });
