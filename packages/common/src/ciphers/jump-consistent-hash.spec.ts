@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 describe('JumpConsistentHash', () => {
-    it('Validate use of a stable underlying algorithm implementation', () => {
+    it('Validate base algorithm implementation', () => {
         const testCases = [
             {
                 key: '10863919174838991',
@@ -50,7 +50,7 @@ describe('JumpConsistentHash', () => {
         });
     });
 
-    it('Validate golden 100 keys of the algorithm', () => {
+    it('Validate algorithm for fixed buckets range', () => {
         const golden100: number[] = [0, 55, 62, 8, 45, 59, 86, 97, 82, 59, 73, 37, 17, 56, 86, 21, 90, 37, 38, 83];
         for (let key: number = 0; key < golden100.length; key += 1) {
             const bucket = hashGenerator.getBucket(key, 100);
