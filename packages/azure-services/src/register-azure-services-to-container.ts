@@ -14,7 +14,7 @@ import { AuthenticationMethod, CredentialsProvider } from './credentials/credent
 import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
-import { CosmosContainerClient } from './storage/storage-client';
+import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 export function registerAzureServicesToContainer(container: Container): void {
     setupAuthenticationMethod(container);

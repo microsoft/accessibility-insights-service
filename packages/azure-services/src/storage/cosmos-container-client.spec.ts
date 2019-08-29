@@ -8,7 +8,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
-import { CosmosContainerClient } from './storage-client';
+import { CosmosContainerClient } from './cosmos-container-client';
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 

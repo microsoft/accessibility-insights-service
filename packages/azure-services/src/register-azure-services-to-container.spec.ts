@@ -25,7 +25,7 @@ import {
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
-import { CosmosContainerClient } from './storage/storage-client';
+import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
