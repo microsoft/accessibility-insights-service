@@ -57,11 +57,4 @@ describe('JumpConsistentHash', () => {
             expect(bucket).toEqual(golden100[key]);
         }
     });
-
-    it('Validate bucket consistency with range changed', () => {
-        let bucket = hashGenerator.getBucket(873244444, 8000);
-        expect(bucket).toEqual(6762);
-        bucket = hashGenerator.getBucket(873244444, 12000);
-        expect(bucket).toEqual(6762);
-    });
 });

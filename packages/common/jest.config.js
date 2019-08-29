@@ -6,5 +6,4 @@ const package = require('./package');
 module.exports = {
     ...baseConfig,
     displayName: package.name,
-    collectCoverageFrom: [...baseConfig.collectCoverageFrom, '!<rootDir>/**/jump-consistent-hash.ts'],
 };

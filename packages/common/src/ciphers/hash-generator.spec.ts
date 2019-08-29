@@ -24,11 +24,11 @@ describe('HashGenerator', () => {
 
     it('generate hash bucket', () => {
         hashGenerator = new HashGenerator(sha256);
-        const bucket = hashGenerator.getHashBucket('bucket', 1000, 'id1', 'id2', 'id3');
-        expect(bucket).toEqual('bucket-425');
+        const bucket = hashGenerator.getHashBucket('bucket', 300, 'id1', 'id2', 'id3');
+        expect(bucket).toEqual('bucket-101');
     });
 
-    it('generate DB hash bucket', () => {
+    it('generate DB hash bucket with preset range', () => {
         hashGenerator = new HashGenerator(sha256);
         const bucket = hashGenerator.getDbHashBucket('bucket', 'id1', 'id2', 'id3');
         expect(bucket).toEqual('bucket-425');
