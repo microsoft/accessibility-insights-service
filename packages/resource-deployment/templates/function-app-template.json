@@ -29,12 +29,32 @@
             "metadata": {
                 "description": "The location in which the Azure Function App and its resources should be deployed."
             }
+        },
+        "clientId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The App registration client ID"
+            }
+        },
+        "tenantId": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "The App registration tenant ID"
+            }
         }
     },
     "resources": [
         {
-            "name": "[parameters('name')]",
+            "apiVersion": "2016-03-01",
             "type": "Microsoft.Web/sites",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "kind": "functionapp",
+            "identity": {
+                "type": "SystemAssigned"
+            },
             "properties": {
                 "siteConfig": {
                     "appSettings": [
@@ -72,9 +92,23 @@
                 "clientAffinityEnabled": false,
                 "reserved": false
             },
-            "apiVersion": "2016-03-01",
-            "location": "[parameters('location')]",
-            "kind": "functionapp"
+            "resources": [
+                {
+                    "name": "[concat(parameters('name'), '/authsettings')]",
+                    "apiVersion": "2016-08-01",
+                    "type": "Microsoft.Web/sites/config",
+                    "location": "[parameters('location')]",
+                    "dependsOn": ["[resourceId('Microsoft.Web/sites', parameters('name'))]"],
+                    "properties": {
+                        "enabled": true,
+                        "unauthenticatedClientAction": "RedirectToLoginPage",
+                        "tokenStoreEnabled": true,
+                        "defaultProvider": "AzureActiveDirectory",
+                        "clientId": "[parameters('clientId')]",
+                        "issuer": "[concat('https://sts.windows.net/', parameters('tenantId'), '/')]"
+                    }
+                }
+            ]
         }
     ]
 }

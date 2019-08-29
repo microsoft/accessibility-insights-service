@@ -7,12 +7,14 @@
 set -eo pipefail
 
 export resourceGroupName
+export clientId
+export tenantId
 export functionAppName
 export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 -r <resource group> -c <client id> -t <tenant id>
 "
     exit 1
 }
@@ -21,9 +23,11 @@ Usage: $0 -r <resource group>
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:" option; do
+while getopts "r:c:t:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    c) clientId=${OPTARG} ;;
+    t) tenantId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -37,18 +41,13 @@ echo "Deploying Function App using ARM template"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
+    --parameters '{ "clientId": {"value":"'$clientId'"}, "tenantId": {"value":"'$tenantId'"}}' \
     --query "properties.outputResources[].id" \
     -o tsv)
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
-
-# Add system-assigned managed identity to function app
-
-echo "Adding managed identity to Function App '$functionAppName'"
-principalId=$(az webapp identity assign --name "$functionAppName" --resource-group "$resourceGroupName" --query principalId -o tsv)
-echo "Successfully Added managed identity to Function App '$functionAppName'"
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"

@@ -21,7 +21,7 @@ export environment
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> 
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <tenant id>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
@@ -71,13 +71,15 @@ while getopts "r:s:l:e:o:p:" option; do
     e) environment=${OPTARG} ;;
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
+    c) clientId=${OPTARG} ;;
+    t) tenantId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $client ]] || [[ -z $tenantId ]]; then
     exitWithUsageInfo
 fi
 
