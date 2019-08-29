@@ -11,9 +11,10 @@ export class JumpConsistentHash {
         let keyBigInt = BigInt(key);
         let b = -1n;
         let j = 0n;
+        const div = 2n ** 64n;
         while (j < buckets) {
             b = j;
-            keyBigInt = ((keyBigInt * 2862933555777941757n) % 2n ** 64n) + 1n;
+            keyBigInt = ((keyBigInt * 2862933555777941757n) % div) + 1n;
             j = BigInt(Math.floor(((Number(b) + 1) * Number(1n << 31n)) / Number((keyBigInt >> 33n) + 1n)));
         }
 
