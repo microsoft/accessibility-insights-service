@@ -4,32 +4,32 @@ import { StorageDocument } from '.';
 
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
-export declare type RunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type OnDemandPageScanRunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
 /**
  * The web page scan run result document.
  */
-export interface PageScanRunResult extends StorageDocument {
+export interface OnDemandPageScan extends StorageDocument {
     scanId: string;
     url: string;
-    scanResult?: ScanResult;
-    reports?: ScanReport[];
-    run: ScanRun;
+    scanResult?: OnDemandScanResult;
+    reports?: OnDemandPageScanReport[];
+    run: OnDemandPageScanRunResult;
 }
 
-export interface ScanResult {
+export interface OnDemandScanResult {
     state: ScanState;
     issueCount?: number;
 }
 
-export interface ScanReport {
+export interface OnDemandPageScanReport {
     reportId: string;
     format: ReportFormat;
     href: string;
 }
 
-export interface ScanRun {
-    state: RunState;
+export interface OnDemandPageScanRunResult {
+    state: OnDemandPageScanRunState;
     timestamp?: string;
     error?: string;
 }
