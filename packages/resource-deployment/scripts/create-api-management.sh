@@ -8,6 +8,7 @@ set -eo pipefail
 
 export resourceGroupName
 export resourceName
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 -o <organisation name> -p <publisher email> -r <resource group> 
@@ -48,4 +49,5 @@ resources=$(az group deployment create \
 
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.ApiManagement/service" -r "$resources"
+apiManagementName=$resourceName
 echo "Successfully deployed API Managment instance - $resourceName"

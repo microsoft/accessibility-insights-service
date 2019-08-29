@@ -1,0 +1,163 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "apimServiceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the API Management"
+      }
+    },
+    "LinkedTemplatesBaseUrl": {
+      "type": "string",
+      "metadata": {
+        "description": "Base URL of the repository that contains the generated templates"
+      }
+    }
+  },
+  "resources": [
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-namedValues.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "namedValuesTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": []
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-apiVersionSets.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "versionSetTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]"
+      ]
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-products.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "productsTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]"
+      ]
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-loggers.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "loggersTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]"
+      ]
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-backends.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "backendsTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]"
+      ]
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-authorizationServers.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "authorizationServersTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]"
+      ]
+    },
+    {
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('LinkedTemplatesBaseUrl'), '/model-accessibility-insight-service-scan-api-api.template.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "apimServiceName": {
+            "value": "[parameters('apimServiceName')]"
+          }
+        }
+      },
+      "name": "apisTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-01-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/deployments', 'namedValuesTemplate')]",
+        "[resourceId('Microsoft.Resources/deployments', 'versionSetTemplate')]",
+        "[resourceId('Microsoft.Resources/deployments', 'productsTemplate')]",
+        "[resourceId('Microsoft.Resources/deployments', 'loggersTemplate')]",
+        "[resourceId('Microsoft.Resources/deployments', 'backendsTemplate')]",
+        "[resourceId('Microsoft.Resources/deployments', 'authorizationServersTemplate')]"
+      ]
+    }
+  ]
+}

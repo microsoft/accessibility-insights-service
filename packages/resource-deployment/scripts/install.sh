@@ -6,18 +6,21 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export resourceGroupName
-export subscription
-export location
-export storageAccountName
+export appInsightsKey
+export apiManagementName
 export batchAccountName
-export keyVault
-export keyVaultUrl
 export cosmosAccountName
 export dropFolder="${0%/*}/../../../"
-export templatesFolder="${0%/*}/../templates/"
-export appInsightsKey
 export environment
+export functionAppName
+export keyVault
+export keyVaultUrl
+export location
+export resourceGroupName
+export subscription
+export storageAccountName
+export templatesFolder="${0%/*}/../templates/"
+export apiTemplates="$templatesFolder"rest-api-templates
 
 exitWithUsageInfo() {
     echo "
@@ -75,13 +78,11 @@ while getopts "r:s:l:e:o:p:" option; do
     esac
 done
 
-
-
 if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
     exitWithUsageInfo
 fi
 
-# Login to Azure if required
+# # Login to Azure if required
 if ! az account show 1>/dev/null; then
     az login
 fi
@@ -113,3 +114,5 @@ echo "Fetched keyvault url $keyVaultUrl"
 . "${0%/*}/job-schedule-create.sh"
 
 . "${0%/*}/create-api-management.sh"
+
+. "${0%/*}/deploy-rest-api.sh"
