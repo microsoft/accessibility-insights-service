@@ -6,6 +6,7 @@
     "emitDecoratorMetadata": true,
     "esModuleInterop": true,
     "compilerOptions": {
-        "outDir": "dist"
+        "outDir": "dist",
+        "target": "esnext"
     }
 }

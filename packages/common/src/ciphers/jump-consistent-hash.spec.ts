@@ -18,7 +18,7 @@ describe('JumpConsistentHash', () => {
                 result: 6,
             },
             {
-                key: '2016238256797177309',
+                key: 2016238256797177309n,
                 buckets: 11,
                 result: 3,
             },
@@ -39,11 +39,6 @@ describe('JumpConsistentHash', () => {
             },
             {
                 key: 2202,
-                buckets: 100001,
-                result: 15018,
-            },
-            {
-                key: -2202.98,
                 buckets: 100001,
                 result: 15018,
             },
