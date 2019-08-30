@@ -8,13 +8,12 @@ set -eo pipefail
 
 export resourceGroupName
 export clientId
-export tenantId
 export functionAppName
 export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <client id> -t <tenant id>
+Usage: $0 -r <resource group> -c <client id>
 "
     exit 1
 }
@@ -23,11 +22,10 @@ Usage: $0 -r <resource group> -c <client id> -t <tenant id>
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:c:t:" option; do
+while getopts "r:c:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) clientId=${OPTARG} ;;
-    t) tenantId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -36,18 +34,30 @@ if [ -z "$resourceGroupName" ]; then
     exitWithUsageInfo
 fi
 
+appRegistrationName="allyappregistration"
+
+# create the app registration if it doesn't exist
+if ! az ad app show --id $clientId 1>/dev/null; then
+    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
+    echo "id is $clientId"
+    echo "created"
+fi
+
 # Start deployment
 echo "Deploying Function App using ARM template"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
-    --parameters '{ "clientId": {"value":"'$clientId'"}, "tenantId": {"value":"'$tenantId'"}}' \
+    --parameters '{ "clientId": {"value":"'$clientId'"}}' \
     --query "properties.outputResources[].id" \
     -o tsv)
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
+
+# add the reply url to the app registration reply urls
+az ad app update --id $clientId   --add replyUrls "https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
