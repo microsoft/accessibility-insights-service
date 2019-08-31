@@ -10,3 +10,4 @@ export { PageLastScanResult, Website } from './website';
 export { RunResult } from './run-result';
 export { StorageDocument } from './storage-document';
 export { ScanRequestMessage } from './scan-request-message';
+export * from './unprocessed-page-scan-request';

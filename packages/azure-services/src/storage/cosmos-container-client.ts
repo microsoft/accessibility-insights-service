@@ -37,6 +37,10 @@ export class CosmosContainerClient {
         return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
     }
 
+    public async deleteDocument(id: string, partitionKey: string): Promise<void> {
+        await this.cosmosClientWrapper.deleteItem(id, this.dbName, this.collectionName, partitionKey);
+    }
+
     /**
      * Writes document to a storage.
      *

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { StorageDocument } from '.';
+import { ItemType } from './item-type';
 
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
@@ -15,6 +16,8 @@ export interface OnDemandPageScanResult extends StorageDocument {
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
+    priority: number;
+    itemType: ItemType.onDemandPageScanRunResult;
 }
 
 export interface OnDemandScanResult {

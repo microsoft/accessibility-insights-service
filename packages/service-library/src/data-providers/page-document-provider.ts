@@ -6,13 +6,16 @@ import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
+import { DocumentProvider } from './document-provider';
 
 @injectable()
-export class PageDocumentProvider {
+export class PageDocumentProvider extends DocumentProvider {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
-    ) {}
+    ) {
+        super();
+    }
 
     public async getReadyToScanPages(
         continuationToken?: string,
@@ -112,20 +115,6 @@ export class PageDocumentProvider {
         return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
             return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
-    }
-
-    private async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
-        let token: string;
-        const result = [];
-
-        do {
-            const response = await execute(token);
-            client.ensureSuccessStatusCode(response);
-            token = response.continuationToken;
-            result.push(...response.item);
-        } while (token !== undefined);
-
-        return result;
     }
 
     private getPageScanningCondition(website: Website): string {
