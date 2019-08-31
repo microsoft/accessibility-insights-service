@@ -10,6 +10,7 @@ export resourceGroupName
 export subscription
 export location
 export storageAccountName
+export datalakeStorageAccountName
 export batchAccountName
 export keyVault
 export keyVaultUrl
@@ -75,8 +76,6 @@ while getopts "r:s:l:e:o:p:" option; do
     esac
 done
 
-
-
 if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
     exitWithUsageInfo
 fi
@@ -91,6 +90,8 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-resource-group.sh"
 
 . "${0%/*}/create-storage-account.sh"
+
+. "${0%/*}/create-datalake-storage-account.sh"
 
 . "${0%/*}/upload-files.sh"
 
