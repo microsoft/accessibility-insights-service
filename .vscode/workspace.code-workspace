@@ -84,6 +84,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Newable",
             "Rescan",
             "SARIF",
             "backlink",

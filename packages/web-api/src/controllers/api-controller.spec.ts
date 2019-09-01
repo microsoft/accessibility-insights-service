@@ -3,14 +3,20 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { Logger } from 'logger';
 import { ApiController } from './api-controller';
 
 export class ApiControllerMock extends ApiController {
     public readonly apiVersion = '1.0';
-    public invoked = false;
+    public readonly apiName = 'web-api-test';
+    protected readonly logger: Logger;
 
-    protected invokeImpl(): void {
-        this.invoked = true;
+    public constructor(public readonly context: Context) {
+        super();
+    }
+
+    public async handleRequest(): Promise<void> {
+        return;
     }
 }
 
