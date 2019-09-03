@@ -9,14 +9,15 @@ import { ApiController } from './api-controller';
 export class ApiControllerMock extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-test';
-    protected readonly logger: Logger;
+    public readonly logger: Logger;
+    public handleRequestInvoked = false;
 
     public constructor(public readonly context: Context) {
         super();
     }
 
     public async handleRequest(): Promise<void> {
-        return;
+        this.handleRequestInvoked = true;
     }
 }
 
@@ -204,6 +205,35 @@ describe('validateRequest()', () => {
         const apiControllerMock = new ApiControllerMock(context);
         const valid = apiControllerMock.validateRequest();
         expect(valid).toEqual(true);
+    });
+});
+
+describe('invoke()', () => {
+    it('should not handle invalid request', async () => {
+        const context = <Context>(<unknown>{
+            req: {
+                method: 'POST',
+            },
+        });
+        const apiControllerMock = new ApiControllerMock(context);
+        await apiControllerMock.invoke();
+        expect(apiControllerMock.handleRequestInvoked).toEqual(false);
+    });
+
+    it('should handle valid request', async () => {
+        const context = <Context>(<unknown>{
+            req: {
+                method: 'POST',
+                rawBody: `{ id: '1' }`,
+                headers: {},
+                query: {},
+            },
+        });
+        context.req.query['api-version'] = '1.0';
+        context.req.headers['content-type'] = 'application/json';
+        const apiControllerMock = new ApiControllerMock(context);
+        await apiControllerMock.invoke();
+        expect(apiControllerMock.handleRequestInvoked).toEqual(true);
     });
 });
 

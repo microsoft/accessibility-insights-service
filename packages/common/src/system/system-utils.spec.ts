@@ -76,3 +76,18 @@ describe('createRandomString()', () => {
         expect(id.length).toEqual(32);
     });
 });
+
+describe('createGuid()', () => {
+    it('create new UUID', () => {
+        const guid = System.createGuid();
+        expect(guid.length).toEqual(36);
+        expect(guid.substr(13, 2)).toEqual('-6');
+    });
+});
+
+describe('getGuidTimestamp()', () => {
+    it('get creation timestamp of UUID', () => {
+        const timestamp = System.getGuidTimestamp('1e9ce66b-fb58-6080-1a9d-ed3459ab8b4f').valueOf();
+        expect(timestamp).toEqual(1567527630984);
+    });
+});

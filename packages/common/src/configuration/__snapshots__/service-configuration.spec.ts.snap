@@ -38,6 +38,13 @@ Object {
       "format": "int",
     },
   },
+  "restApiConfig": Object {
+    "maxScanRequestBatchCount": Object {
+      "default": 1000,
+      "doc": "Maximum number of scan requests in a single HTTP client request.",
+      "format": "int",
+    },
+  },
   "scanConfig": Object {
     "accessibilityRuleExclusionList": Object {
       "default": Array [],
@@ -110,6 +117,13 @@ Object {
     "messageVisibilityTimeoutInSeconds": Object {
       "default": 180,
       "doc": "Message visibility timeout in seconds",
+      "format": "int",
+    },
+  },
+  "restApiConfig": Object {
+    "maxScanRequestBatchCount": Object {
+      "default": 1000,
+      "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
   },

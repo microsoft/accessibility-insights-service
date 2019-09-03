@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
-import { ServiceConfiguration } from 'common';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { webApiIocTypes } from '../setupIoContainer';
 import { ApiController } from './api-controller';
 
@@ -23,6 +24,28 @@ export class ScanRequestController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
-        return;
+        const payload = this.tryGetPayload<ScanRunRequest[]>();
+        if (payload === undefined) {
+            this.context.res = {
+                status: 400, // Bad Request
+                body: 'Invalid request syntax',
+            };
+
+            return;
+        }
+
+        const maxLength = (await this.getRestApiConfig()).maxScanRequestBatchCount;
+        if (payload.length > maxLength) {
+            this.context.res = {
+                status: 413, // Payload Too Large
+                body: 'Request size is too large',
+            };
+
+            return;
+        }
+    }
+
+    private async getRestApiConfig(): Promise<RestApiConfig> {
+        return this.serviceConfig.getConfigValue('restApiConfig');
     }
 }
