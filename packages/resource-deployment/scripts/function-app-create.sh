@@ -30,17 +30,17 @@ while getopts "r:c:" option; do
     esac
 done
 
-if [ -z "$resourceGroupName" ]; then
+if [ -z $resourceGroupName ]; then
     exitWithUsageInfo
 fi
 
-appRegistrationName="allyappregistration"
+appRegistrationName="allyappregistration_${resourceGroupName}"
 
 # create the app registration if it doesn't exist
-if ! az ad app show --id $clientId 1>/dev/null; then
+if [ -z $clientId ] || [! az ad app show --id $clientId 1>/dev/null]; then
+    echo "id before is '$clientId'" 
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
-    echo "id is $clientId"
-    echo "created"
+    echo "Successfully created '$appRegistrationName' App Registeration with Client ID '$clientId'"
 fi
 
 # Start deployment
