@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Logger } from 'logger';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
@@ -354,5 +354,60 @@ describe('CosmosContainerClient', () => {
         await cosmosContainerClient.mergeOrWriteDocuments(items);
 
         cosmosClientWrapperMock.verifyAll();
+    });
+});
+
+describe('executeQueryWithContinuationToken', () => {
+    it('runs till end of page', async () => {
+        const executeMock: IMock<(token: string) => Promise<CosmosOperationResponse<string[]>>> = Mock.ofInstance(
+            (() => {
+                return 0;
+            }) as any,
+            MockBehavior.Strict,
+        );
+        const response1: CosmosOperationResponse<string[]> = {
+            continuationToken: 'token1',
+            statusCode: 200,
+            item: ['val1'],
+        };
+
+        const response2: CosmosOperationResponse<string[]> = {
+            continuationToken: 'token2',
+            statusCode: 200,
+            item: ['val2'],
+        };
+        const response3: CosmosOperationResponse<string[]> = {
+            statusCode: 200,
+            item: ['val3', 'val4'],
+        };
+
+        executeMock.setup(async e => e(undefined)).returns(async () => Promise.resolve(response1));
+        executeMock.setup(async e => e('token1')).returns(async () => Promise.resolve(response2));
+        executeMock.setup(async e => e('token2')).returns(async () => Promise.resolve(response3));
+
+        const result = await cosmosContainerClient.executeQueryWithContinuationToken(executeMock.object);
+
+        expect(result).toEqual(['val1', 'val2', 'val3', 'val4']);
+        executeMock.verifyAll();
+    });
+
+    it('fails on error response', async () => {
+        const executeMock: IMock<(token: string) => Promise<CosmosOperationResponse<string[]>>> = Mock.ofInstance(
+            (() => {
+                return 0;
+            }) as any,
+            MockBehavior.Strict,
+        );
+        const response1: CosmosOperationResponse<string[]> = {
+            continuationToken: 'token2',
+            statusCode: 401,
+        };
+
+        executeMock.setup(async e => e(undefined)).returns(async () => Promise.resolve(response1));
+
+        await expect(cosmosContainerClient.executeQueryWithContinuationToken(executeMock.object)).rejects.toThrowError(
+            'Invalid HTTP response.',
+        );
+        executeMock.verifyAll();
     });
 });

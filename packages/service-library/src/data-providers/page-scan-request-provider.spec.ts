@@ -3,34 +3,34 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
-import { ItemType, UnProcessedPageScanRequest } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
-import { UnProcessedScanRequestProvider } from './unprocessed-scan-request-provider';
+import { PageScanRequestProvider } from './page-scan-request-provider';
 
 // tslint:disable: no-any no-object-literal-type-assertion
 
-describe(UnProcessedScanRequestProvider, () => {
-    let testSubject: UnProcessedScanRequestProvider;
+describe(PageScanRequestProvider, () => {
+    let testSubject: PageScanRequestProvider;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 
     beforeEach(() => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>(undefined, MockBehavior.Strict);
-        testSubject = new UnProcessedScanRequestProvider(cosmosContainerClientMock.object);
+        testSubject = new PageScanRequestProvider(cosmosContainerClientMock.object);
     });
 
     it('stores requests', async () => {
-        const request1: UnProcessedPageScanRequest = {
+        const request1: OnDemandPageScanRequest = {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.UnProcessedPageScanRequests,
+            itemType: ItemType.OnDemandPageScanRequests,
             partitionKey: 'unProcessedScanRequestDocuments',
         };
-        const request2: UnProcessedPageScanRequest = {
+        const request2: OnDemandPageScanRequest = {
             id: 'id2',
             url: 'url2',
             priority: 0,
-            itemType: ItemType.UnProcessedPageScanRequests,
+            itemType: ItemType.OnDemandPageScanRequests,
             partitionKey: 'unProcessedScanRequestDocuments',
         };
         const requests = [request1, request2];
@@ -45,12 +45,12 @@ describe(UnProcessedScanRequestProvider, () => {
     });
 
     it('retrieves scan results sorted by priority', async () => {
-        const request1: UnProcessedPageScanRequest = {
+        const request1: OnDemandPageScanRequest = {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.UnProcessedPageScanRequests,
-            partitionKey: 'unProcessedScanRequestDocuments',
+            itemType: ItemType.OnDemandPageScanRequests,
+            partitionKey: PageScanRequestProvider.partitionKey,
         };
         const itemCount = 5;
         const continuationToken = 'token1';
@@ -59,14 +59,14 @@ describe(UnProcessedScanRequestProvider, () => {
             item: [request1],
             response: 201,
             statusCode: 200,
-        } as CosmosOperationResponse<UnProcessedPageScanRequest[]>;
+        } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
 
         cosmosContainerClientMock
             .setup(c =>
                 c.queryDocuments(
-                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.UnProcessedPageScanRequests}' ORDER BY c.priority`,
+                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.OnDemandPageScanRequests}' ORDER BY c.priority`,
                     continuationToken,
-                    'unProcessedScanRequestDocuments',
+                    PageScanRequestProvider.partitionKey,
                 ),
             )
             .returns(() => Promise.resolve(response))
@@ -83,11 +83,11 @@ describe(UnProcessedScanRequestProvider, () => {
         const request2Id = 'id2';
 
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request1Id, UnProcessedScanRequestProvider.partitionKey))
+            .setup(c => c.deleteDocument(request1Id, PageScanRequestProvider.partitionKey))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request2Id, UnProcessedScanRequestProvider.partitionKey))
+            .setup(c => c.deleteDocument(request2Id, PageScanRequestProvider.partitionKey))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 

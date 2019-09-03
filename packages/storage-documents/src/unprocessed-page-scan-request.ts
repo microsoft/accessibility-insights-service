@@ -4,8 +4,8 @@
 import { StorageDocument } from '.';
 import { ItemType } from './item-type';
 
-export interface UnProcessedPageScanRequest extends StorageDocument {
+export interface OnDemandPageScanRequest extends StorageDocument {
     url: string;
     priority: number;
-    itemType: ItemType.UnProcessedPageScanRequests;
+    itemType: ItemType.OnDemandPageScanRequests;
 }

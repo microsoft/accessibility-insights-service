@@ -58,7 +58,7 @@ describe(registerAzureServicesToContainer, () => {
         registerAzureServicesToContainer(container);
 
         verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'a11yIssues');
-        verifyCosmosContainerClient(cosmosContainerClientTypes.UnProcessedPageScanRequestsCosmosContainerClient, 'unprocessedScanRequests');
+        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient, 'pageScanRequests');
         verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandPageScanRunResults, 'onDemandPageScanRunResults');
     });
 

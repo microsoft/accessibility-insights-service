@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
 import { Logger } from 'logger';
-import { ItemType, UnProcessedPageScanRequest } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest } from 'storage-documents';
 import { Mock } from 'typemoq';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
-import { UnProcessedScanRequestProvider } from './unprocessed-scan-request-provider';
+import { PageScanRequestProvider } from './page-scan-request-provider';
 
 describe('UnProcessedScanRequestProvider.Db', () => {
     // tslint:disable-next-line: mocha-no-side-effect-code
@@ -19,7 +19,7 @@ describe('UnProcessedScanRequestProvider.Db', () => {
 
     // tslint:disable-next-line: mocha-no-side-effect-code
     if (dbHelper.isDbTestSupported()) {
-        let testSubject: UnProcessedScanRequestProvider;
+        let testSubject: PageScanRequestProvider;
 
         beforeAll(async () => {
             await dbHelper.init('test-db', 'unprocessed-scans');
@@ -34,7 +34,7 @@ describe('UnProcessedScanRequestProvider.Db', () => {
                 loggerMock.object,
             );
 
-            testSubject = new UnProcessedScanRequestProvider(cosmosContainerClient);
+            testSubject = new PageScanRequestProvider(cosmosContainerClient);
         });
 
         afterEach(async () => {
@@ -42,26 +42,26 @@ describe('UnProcessedScanRequestProvider.Db', () => {
         });
 
         it('stores & retrieve scan results sorted by priority', async () => {
-            const request1: UnProcessedPageScanRequest = {
+            const request1: OnDemandPageScanRequest = {
                 id: 'id1',
                 url: 'url1',
                 priority: 10,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
-            const request2: UnProcessedPageScanRequest = {
+            const request2: OnDemandPageScanRequest = {
                 id: 'id2',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
 
-            const request3: UnProcessedPageScanRequest = {
+            const request3: OnDemandPageScanRequest = {
                 id: 'id3',
                 url: 'url3',
                 priority: 5,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
 
@@ -76,26 +76,26 @@ describe('UnProcessedScanRequestProvider.Db', () => {
         });
 
         it('deletes document', async () => {
-            const request1: UnProcessedPageScanRequest = {
+            const request1: OnDemandPageScanRequest = {
                 id: 'id1',
                 url: 'url1',
                 priority: 10,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
-            const request2: UnProcessedPageScanRequest = {
+            const request2: OnDemandPageScanRequest = {
                 id: 'id2',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
 
-            const requestNotToBeDeleted: UnProcessedPageScanRequest = {
+            const requestNotToBeDeleted: OnDemandPageScanRequest = {
                 id: 'id-not-to-be-deleted',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.UnProcessedPageScanRequests,
+                itemType: ItemType.OnDemandPageScanRequests,
                 partitionKey: 'unProcessedScanRequestDocuments',
             };
 

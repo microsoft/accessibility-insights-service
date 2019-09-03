@@ -6,16 +6,13 @@ import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
-import { DocumentProvider } from './document-provider';
 
 @injectable()
-export class PageDocumentProvider extends DocumentProvider {
+export class PageDocumentProvider {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
-    ) {
-        super();
-    }
+    ) {}
 
     public async getReadyToScanPages(
         continuationToken?: string,
@@ -85,7 +82,7 @@ export class PageDocumentProvider extends DocumentProvider {
         }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
-        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+        return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
             return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
@@ -112,7 +109,7 @@ export class PageDocumentProvider extends DocumentProvider {
     or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
     ) order by c.lastRun.runTime asc`;
 
-        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+        return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
             return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
