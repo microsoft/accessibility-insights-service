@@ -7,13 +7,11 @@
 set -eo pipefail
 
 export resourceGroupName
-export clientId
-export functionAppName
 export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <client id>
+Usage: $0 -r <resource group>
 "
     exit 1
 }
@@ -22,10 +20,9 @@ Usage: $0 -r <resource group> -c <client id>
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:c:" option; do
+while getopts "r:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -34,13 +31,30 @@ if [ -z $resourceGroupName ]; then
     exitWithUsageInfo
 fi
 
-appRegistrationName="allyappregistration_${resourceGroupName}"
+# Will return the function name if we deployed before the function app template on this resource group
+functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template"  --query "properties.parameters.name.value" -o tsv)
 
-# create the app registration if it doesn't exist
-if [ -z $clientId ] || [! az ad app show --id $clientId 1>/dev/null]; then
-    echo "id before is '$clientId'" 
+# Boolean to track if we should create a new App Registration or there's one already existing
+createNewApp=true
+ 
+# Check if the Function App name is valid and the Function App exists
+if [ ! -z "$functionAppName" ] && (az functionapp show -n "$functionAppName" -g "$resourceGroupName" 1>/dev/null); then
+    # Get the Client (App) ID for the App Registration that's used for this Function App authentication
+    clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv)
+    # Check if the App Registration name is valid and the App Registration exists
+    if [ ! -z "$clientId" ] && (az ad app show --id "$clientId" 1>/dev/null); then
+        # If we hit this line, that means we don't need to create a new App Registration
+        createNewApp=false
+    fi
+fi
+
+if ("$createNewApp" = true); then
+    appRegistrationName="allyappregistration_${resourceGroupName}"
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
-    echo "Successfully created '$appRegistrationName' App Registeration with Client ID '$clientId'"
+    echo "Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
+else
+    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv)
+    echo "'$appRegistrationName' App Registration with Client ID '$clientId' already exists"
 fi
 
 # Start deployment
@@ -56,8 +70,12 @@ resources=$(az group deployment create \
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
+# Enable continue on error in case the redirect URl was already added before
+set +e
 # add the reply url to the app registration reply urls
-az ad app update --id $clientId   --add replyUrls "https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
+az ad app update --id $clientId --add replyUrls "https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
+# Disable continue on error in case the redirect URl was already added before
+set -e
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"

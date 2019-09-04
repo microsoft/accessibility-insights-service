@@ -18,18 +18,16 @@ export dropFolder="${0%/*}/../../../"
 export templatesFolder="${0%/*}/../templates/"
 export appInsightsKey
 export environment
-export clientId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id>
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
 Environment - The environment in which the set up is running.
 Publisher email - The email for notifications.
 Resource group - The resource group that this API instance needs to be added to.
-Client Id - The app registration Id that will be used in the Function App Authentication/Authorization
 Azure region - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
@@ -65,7 +63,7 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 }
 
 # Read script arguments
-while getopts "r:s:l:e:o:p:c:" option; do
+while getopts "r:s:l:e:o:p:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -73,7 +71,6 @@ while getopts "r:s:l:e:o:p:c:" option; do
     e) environment=${OPTARG} ;;
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
