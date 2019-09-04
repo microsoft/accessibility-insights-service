@@ -82,6 +82,5 @@ createCosmosAccount
 dbName="scanner"
 createCosmosDatabase "$dbName"
 createCosmosCollection "a11yIssues" "$dbName"
-createCosmosCollection "webPagesToScan" "$dbName"
 # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
 createCosmosCollection "scanRuns" "$dbName" "2592000" # 30 days
