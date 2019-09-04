@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
-import { RestApiConfig, ServiceConfiguration } from 'common';
+import { RestApiConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
+import { ScanRunResponse } from '../api-contracts/scan-run-response';
+import { ScanDataProvider } from '../providers/scan-data-provider';
 import { webApiIocTypes } from '../setupIoContainer';
 import { ApiController } from './api-controller';
 
@@ -16,7 +17,7 @@ export class ScanRequestController extends ApiController {
 
     public constructor(
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
-        @inject(cosmosContainerClientTypes.ScanBatchesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
+        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
@@ -43,6 +44,30 @@ export class ScanRequestController extends ApiController {
 
             return;
         }
+
+        const response = this.createScanRunBatchResponse(payload);
+        await this.scanDataProvider.writeScanRunBatchRequest(response);
+
+        this.context.res = {
+            status: 202, // Accepted
+            body: response,
+        };
+    }
+
+    private createScanRunBatchResponse(scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {
+        return scanRunRequests.map(scanRunRequest => {
+            if (System.tryParseUrlString(scanRunRequest.url) !== undefined) {
+                return {
+                    scanId: System.createGuid(),
+                    url: scanRunRequest.url,
+                };
+            } else {
+                return {
+                    url: scanRunRequest.url,
+                    error: 'Invalid URL',
+                };
+            }
+        });
     }
 
     private async getRestApiConfig(): Promise<RestApiConfig> {

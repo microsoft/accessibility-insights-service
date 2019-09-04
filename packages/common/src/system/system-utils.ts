@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import * as crypto from 'crypto';
 import { isNil } from 'lodash';
+import * as nodeUrl from 'url';
 // @ts-ignore
 import * as uuid from 'uuid-with-v6';
 
@@ -55,5 +56,19 @@ export namespace System {
         const baseDate = BigInt(Math.abs(new Date(Date.UTC(1582, 9, 15)).valueOf()));
 
         return new Date(Number(timestampMilliseconds - baseDate));
+    }
+
+    export function tryParseUrlString(url: string, absoluteUrlOnly: boolean = true): nodeUrl.Url {
+        const absoluteUrlRegEx = /^(?:[a-z]+:)?\/\//i;
+        try {
+            const urlParsed = nodeUrl.parse(url);
+            if (absoluteUrlOnly && urlParsed.href.match(absoluteUrlRegEx) === null) {
+                return undefined;
+            }
+
+            return urlParsed;
+        } catch (error) {
+            return undefined;
+        }
     }
 }
