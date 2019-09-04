@@ -27,11 +27,6 @@ export class ScanRequestController extends ApiController {
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanRunRequest[]>();
         if (payload === undefined) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: 'Invalid request syntax',
-            };
-
             return;
         }
 
@@ -46,12 +41,20 @@ export class ScanRequestController extends ApiController {
         }
 
         const response = this.createScanRunBatchResponse(payload);
-        await this.scanDataProvider.writeScanRunBatchRequest(response);
+
+        const batchId = System.createGuid();
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
 
         this.context.res = {
             status: 202, // Accepted
             body: response,
         };
+
+        this.logger.logInfo('Accepted scan run batch request', {
+            batchId: batchId,
+            totalUrls: response.length.toString(),
+            invalidUrls: response.filter(i => i.error !== undefined).length.toString(),
+        });
     }
 
     private createScanRunBatchResponse(scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {

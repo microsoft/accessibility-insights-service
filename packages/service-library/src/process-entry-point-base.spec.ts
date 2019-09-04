@@ -125,7 +125,7 @@ describe(ProcessEntryPointBase, () => {
                 testSubject.customActionToBeInvoked = () => {
                     throw error;
                 };
-                loggerMock.setup(l => l.trackExceptionAny(error, 'Error occurred while executing job')).verifiable();
+                loggerMock.setup(l => l.trackExceptionAny(error, 'Error occurred while executing action.')).verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
 
