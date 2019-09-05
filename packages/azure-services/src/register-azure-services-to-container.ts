@@ -58,7 +58,7 @@ export function registerAzureServicesToContainer(container: Container): void {
     container.bind(cosmosContainerClientTypes.ScanRunsCosmosContainerClient).toDynamicValue(context => {
         return createCosmosContainerClient(context.container, 'scanner', 'scanRuns');
     });
-  
+
     container.bind(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient).toDynamicValue(context => {
         return createCosmosContainerClient(context.container, 'scanner', 'pageScanRequests');
     });
