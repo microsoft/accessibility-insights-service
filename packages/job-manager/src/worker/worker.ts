@@ -39,9 +39,8 @@ export class Worker {
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
                     if (poolMetricsInfo.load.activeTasks === 0) {
+                        this.logger.logInfo(`exiting since there are no activeTasks tasks.`);
                         break;
-                    } else {
-                        this.logger.logInfo(`Waiting for  '${poolMetricsInfo.load.activeTasks}' tasks to get completed.`);
                     }
                 }
                 if (scanMessages.length > 0) {
