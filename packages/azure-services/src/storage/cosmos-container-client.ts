@@ -9,6 +9,7 @@ import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
+import { client } from './client';
 import { RetryOptions } from './retry-options';
 
 // tslint:disable: no-any
@@ -35,6 +36,10 @@ export class CosmosContainerClient {
         partitionKey?: string,
     ): Promise<CosmosOperationResponse<T[]>> {
         return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
+    }
+
+    public async deleteDocument(id: string, partitionKey: string): Promise<void> {
+        await this.cosmosClientWrapper.deleteItem(id, this.dbName, this.collectionName, partitionKey);
     }
 
     /**
@@ -166,6 +171,20 @@ export class CosmosContainerClient {
                 await System.wait(retryOptions.intervalMilliseconds);
             }
         });
+    }
+
+    public async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
+        let token: string;
+        const result = [];
+
+        do {
+            const response = await execute(token);
+            client.ensureSuccessStatusCode(response);
+            token = response.continuationToken;
+            result.push(...response.item);
+        } while (token !== undefined);
+
+        return result;
     }
 
     private getEffectivePartitionKey<T extends CosmosDocument>(document: T, partitionKey: string): string {
