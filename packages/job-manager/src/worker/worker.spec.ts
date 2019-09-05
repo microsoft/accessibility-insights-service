@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import { Message, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
+import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Batch } from '../batch/batch';
@@ -189,6 +190,54 @@ describe(Worker, () => {
             .verifiable(Times.once());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
 
+        await worker.run();
+    });
+    it('Continue waiting until all active tasks are completed', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 4,
+                runningTasks: 4,
+            },
+        };
+        let poolMetricsInfoCallbackCount = 0;
+        poolLoadGeneratorMock
+            .setup(async o =>
+                o.getTasksIncrementCount(
+                    It.is(actualMetrics => {
+                        return _.isEqual(poolMetricsInfo, actualMetrics);
+                    }),
+                ),
+            )
+            .returns(async () => Promise.resolve(8))
+            .verifiable(Times.exactly(2));
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .callback(q => {
+                poolMetricsInfoCallbackCount += 1;
+            })
+            .returns(async () => {
+                if (poolMetricsInfoCallbackCount > 1) {
+                    poolMetricsInfo.load.activeTasks = 0;
+
+                    return Promise.resolve(poolMetricsInfo);
+                } else {
+                    return Promise.resolve(poolMetricsInfo);
+                }
+            })
+            .verifiable(Times.exactly(2));
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.exactly(2));
+        // let it exit by itself
+        worker.runOnce = false;
         await worker.run();
     });
 });

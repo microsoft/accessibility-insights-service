@@ -38,11 +38,14 @@ export class Worker {
                 const scanMessages = await this.getMessages(tasksIncrementCount);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-
-                    break;
+                    if (poolMetricsInfo.load.activeTasks === 0) {
+                        this.logger.logInfo(`exiting since there are no activeTasks tasks.`);
+                        break;
+                    }
                 }
-
-                tasksQueuedCount = await this.addTasksToJob(scanMessages);
+                if (scanMessages.length > 0) {
+                    tasksQueuedCount = await this.addTasksToJob(scanMessages);
+                }
             }
 
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
