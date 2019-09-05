@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { System } from './system-utils';
-
-// tslint:disable: no-http-string
+import { System } from './system';
 
 describe('create instance if nil', () => {
     // tslint:disable-next-line: no-null-keyword
@@ -76,39 +74,5 @@ describe('createRandomString()', () => {
 
         id = System.createRandomString();
         expect(id.length).toEqual(32);
-    });
-});
-
-describe('createGuid()', () => {
-    it('create new UUID', () => {
-        const guid = System.createGuid();
-        expect(guid.length).toEqual(36);
-        expect(guid.substr(13, 2)).toEqual('-6');
-    });
-});
-
-describe('getGuidTimestamp()', () => {
-    it('get creation timestamp of UUID', () => {
-        const timestamp = System.getGuidTimestamp('1e9ce66b-fb58-6080-1a9d-ed3459ab8b4f').valueOf();
-        expect(timestamp).toEqual(1567527630984);
-    });
-});
-
-describe('tryParseUrlString()', () => {
-    it('validate url string', () => {
-        let url = System.tryParseUrlString('abc/path/');
-        expect(url).toEqual(undefined);
-
-        url = System.tryParseUrlString('abc/path/', false);
-        expect(url.href).toEqual('abc/path/');
-
-        url = System.tryParseUrlString('{a: b}');
-        expect(url).toEqual(undefined);
-
-        url = System.tryParseUrlString('http://abc/path/');
-        expect(url.href).toEqual('http://abc/path/');
-
-        url = System.tryParseUrlString('https://abc/');
-        expect(url.href).toEqual('https://abc/');
     });
 });

@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 export { HashGenerator } from './ciphers/hash-generator';
 export { IoC } from './dependency-injection/setup-singleton-provider';
-export { System } from './system/system-utils';
+export { System } from './system/system';
+export { Guid } from './system/guid';
+export { Url } from './system/url';
 export {
     QueueRuntimeConfig,
     RuntimeConfig,

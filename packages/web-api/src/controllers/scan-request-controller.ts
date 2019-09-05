@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { RestApiConfig, ServiceConfiguration, System } from 'common';
+import { Guid, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
@@ -42,7 +42,7 @@ export class ScanRequestController extends ApiController {
 
         const response = this.createScanRunBatchResponse(payload);
 
-        const batchId = System.createGuid();
+        const batchId = Guid.createGuid();
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
 
         this.context.res = {
@@ -59,9 +59,9 @@ export class ScanRequestController extends ApiController {
 
     private createScanRunBatchResponse(scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {
         return scanRunRequests.map(scanRunRequest => {
-            if (System.tryParseUrlString(scanRunRequest.url) !== undefined) {
+            if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
                 return {
-                    scanId: System.createGuid(),
+                    scanId: Guid.createGuid(),
                     url: scanRunRequest.url,
                 };
             } else {

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { RestApiConfig, ServiceConfiguration, System } from 'common';
+import { Guid, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from '../providers/scan-data-provider';
@@ -71,7 +71,7 @@ describe(ScanRequestController, () => {
 
     it('accept valid request', async () => {
         const guid = '1e9cefa6-538a-6df0-f540-ffffffffffff';
-        System.createGuid = () => guid;
+        Guid.createGuid = () => guid;
         context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
         const response = [{ scanId: guid, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
         scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid, response)).verifiable(Times.once());
