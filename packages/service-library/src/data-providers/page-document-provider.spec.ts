@@ -74,34 +74,27 @@ describe('PageDocumentProvider', () => {
         test.each([createWebsiteDocument('website1'), createWebsiteDocument('website1', true), createWebsiteDocument('website1', false)])(
             'returns pages across multiple calls',
             async (website: Website) => {
-                const pageResultsFor1stCall = ['pageId1', 'pageId2'];
-                const pageResultsFor2ndCall = ['pageId3', 'pageId4'];
-                const query = getPagesNeverScannedQuery(website, 5);
+                const query = getPagesNeverScannedQuery(website, itemCount);
+                let executeWithTokenCallback: (token: string) => Promise<any> = null;
+                const expectedResponse: any = 'expected response';
+                const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
-                cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor1stCall.slice(0), statusCode: 200, continuationToken: 'token1' }));
                 cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
-
-                const results = await pageDocumentProvider.getPagesNeverScanned(website, itemCount);
-
-                expect(results).toEqual(pageResultsFor1stCall.concat(pageResultsFor2ndCall));
-            },
-        );
-
-        test.each([createWebsiteDocument('website1'), createWebsiteDocument('website1', true), createWebsiteDocument('website1', false)])(
-            'throws on response with invalid status code',
-            async (website: Website) => {
-                const pageResultsFor1stCall = ['pageId1', 'pageId2'];
-                const query = getPagesNeverScannedQuery(website, 5);
+                    .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
+                    .setup(s => s.executeQueryWithContinuationToken(It.isAny()))
+                    .callback(func => {
+                        executeWithTokenCallback = func;
+                    })
+                    .returns(() => Promise.resolve(expectedResponse))
+                    .verifiable();
 
-                await expect(pageDocumentProvider.getPagesNeverScanned(website, itemCount)).rejects.not.toBeNull();
+                await expect(pageDocumentProvider.getPagesNeverScanned(website, itemCount)).resolves.toBe(expectedResponse);
+                await expect(executeWithTokenCallback('token1')).resolves.toBe(queryResponse);
+
+                cosmosContainerClientMock.verifyAll();
             },
         );
     });
@@ -112,34 +105,27 @@ describe('PageDocumentProvider', () => {
         test.each([createWebsiteDocument('website1'), createWebsiteDocument('website1', true), createWebsiteDocument('website1', false)])(
             'returns pages across multiple calls',
             async (website: Website) => {
-                const pageResultsFor1stCall = ['pageId1', 'pageId2'];
-                const pageResultsFor2ndCall = ['pageId3', 'pageId4'];
                 const query = getPagesScannedQuery(website, itemCount);
+                let executeWithTokenCallback: (token: string) => Promise<any> = null;
+                const expectedResponse: any = 'expected response';
+                const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
-                cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor1stCall.slice(0), statusCode: 200, continuationToken: 'token1' }));
                 cosmosContainerClientMock
                     .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor2ndCall.slice(0), statusCode: 200 }));
-
-                const results = await pageDocumentProvider.getPagesScanned(website, itemCount);
-
-                expect(results).toEqual(pageResultsFor1stCall.concat(pageResultsFor2ndCall));
-            },
-        );
-
-        test.each([createWebsiteDocument('website1'), createWebsiteDocument('website1', true), createWebsiteDocument('website1', false)])(
-            'returns pages across multiple calls',
-            async (website: Website) => {
-                const pageResultsFor1stCall = ['pageId1', 'pageId2'];
-                const query = getPagesScannedQuery(website, itemCount);
+                    .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), undefined, website.websiteId))
-                    .returns(() => Promise.resolve({ item: pageResultsFor1stCall, statusCode: 401, continuationToken: 'token1' }));
+                    .setup(s => s.executeQueryWithContinuationToken(It.isAny()))
+                    .callback(func => {
+                        executeWithTokenCallback = func;
+                    })
+                    .returns(() => Promise.resolve(expectedResponse))
+                    .verifiable();
 
-                await expect(pageDocumentProvider.getPagesNeverScanned(website, itemCount)).rejects.not.toBeNull();
+                await expect(pageDocumentProvider.getPagesScanned(website, itemCount)).resolves.toBe(expectedResponse);
+                await expect(executeWithTokenCallback('token1')).resolves.toBe(queryResponse);
+
+                cosmosContainerClientMock.verifyAll();
             },
         );
     });
