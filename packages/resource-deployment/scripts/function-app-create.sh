@@ -11,7 +11,7 @@ export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 -r <resource group> -e <environment>
 "
     exit 1
 }
@@ -20,14 +20,15 @@ Usage: $0 -r <resource group>
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:" option; do
+while getopts "r:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z $resourceGroupName ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ]; then
     exitWithUsageInfo
 fi
 
@@ -49,7 +50,7 @@ if [ ! -z "$functionAppName" ] && (az functionapp show -n "$functionAppName" -g 
 fi
 
 if ("$createNewApp" = true); then
-    appRegistrationName="allyappregistration_${resourceGroupName}"
+    appRegistrationName="allyappregistration_${environment}_${resourceGroupName}"
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 else
