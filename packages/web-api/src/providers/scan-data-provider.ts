@@ -8,7 +8,8 @@ import { ScanRunResponse } from '../api-contracts/scan-run-response';
 @injectable()
 export class ScanDataProvider {
     public constructor(
-        @inject(cosmosContainerClientTypes.ScanBatchesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
+        @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
+        private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
     public async writeScanRunBatchRequest(batchId: string, scanRunBatchResponse: ScanRunResponse[]): Promise<void> {

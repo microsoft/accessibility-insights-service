@@ -79,9 +79,14 @@ fi
 
 createCosmosAccount
 
-dbName="scanner"
-createCosmosDatabase "$dbName"
-createCosmosCollection "a11yIssues" "$dbName"
+scannerDbName="scanner"
+onDemandScannerDbName="onDemandScanner"
+
+createCosmosDatabase "$scannerDbName"
+createCosmosDatabase "$onDemandScannerDbName"
+
+createCosmosCollection "a11yIssues" "$scannerDbName"
 # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
-createCosmosCollection "scanRuns" "$dbName" "2592000"   # 30 days
-createCosmosCollection "scanBatches" "$dbName" "604800" # 7 days
+createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000"         # 30 days
+createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" # 7 days
+createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800"      # 7 days

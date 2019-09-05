@@ -9,7 +9,7 @@ export class PageScanRequestProvider {
     public static readonly partitionKey: string = 'pageScanRequestDocuments';
 
     constructor(
-        @inject(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient)
+        @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 

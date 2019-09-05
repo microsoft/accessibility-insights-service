@@ -24,8 +24,7 @@ export type QueueServiceURLProvider = () => Promise<ServiceURL>;
 
 export const cosmosContainerClientTypes = {
     A11yIssuesCosmosContainerClient: 'a11yIssuesCosmosContainerClient',
-    ScanBatchesCosmosContainerClient: 'scanBatchesCosmosContainerClient',
-    ScanRunsCosmosContainerClient: 'scanRunsCosmosContainerClient',
-    OnDemandPageScanRequestsCosmosContainerClient: 'OnDemandPageScanRequestsCosmosContainerClient',
-    OnDemandPageScanRunResults: 'onDemandPageScanRunResults',
+    OnDemandScanBatchRequestsCosmosContainerClient: 'scanBatchRequestsCosmosContainerClient',
+    OnDemandScanRunsCosmosContainerClient: 'scanRunsCosmosContainerClient',
+    OnDemandScanRequestsCosmosContainerClient: 'scanRequestsCosmosContainerClient',
 };

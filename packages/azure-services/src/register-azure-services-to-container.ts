@@ -51,20 +51,16 @@ export function registerAzureServicesToContainer(container: Container): void {
         return createCosmosContainerClient(context.container, 'scanner', 'a11yIssues');
     });
 
-    container.bind(cosmosContainerClientTypes.ScanBatchesCosmosContainerClient).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'scanBatches');
+    container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
     });
 
-    container.bind(cosmosContainerClientTypes.ScanRunsCosmosContainerClient).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'scanRuns');
+    container.bind(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRuns');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'pageScanRequests');
-    });
-
-    container.bind(cosmosContainerClientTypes.OnDemandPageScanRunResults).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'onDemandPageScanRunResults');
+    container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
     container.bind(Queue).toSelf();
