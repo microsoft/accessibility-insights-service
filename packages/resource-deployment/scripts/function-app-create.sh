@@ -17,6 +17,9 @@ Usage: $0 -r <resource group> -e <environment>
 }
 
 addReplyUrlIfNotExist() {
+    clientId=$1
+    functionAppName=$2
+
     # Get existing reply urls of the app registration
     replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv)
     replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
@@ -34,6 +37,11 @@ addReplyUrlIfNotExist() {
 }
 
 createAppRegistrationIfNotExist() {
+    clientId=$1
+    appRegistrationName=$2
+    resourceGroupName=$3
+    environment=$4
+
     if [ ! -z "$clientId" ] && (az ad app show --id "$clientId" 1>/dev/null); then
         appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv)
         echo "'$appRegistrationName' App Registration with Client ID '$clientId' already exists"
@@ -61,13 +69,15 @@ if [ -z $resourceGroupName ] || [ -z $environment ]; then
 fi
 
 # Will return the function name if we deployed before the function app template on this resource group
+echo "Checking if the function app already exists..."
 functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv)
 
 # Check if the Function App name is valid and the Function App exists
 if [ ! -z "$functionAppName" ] && (az functionapp show -n "$functionAppName" -g "$resourceGroupName" 1>/dev/null); then
+    echo "function app does not exist, creating a new one..."
     # Get the Client (App) ID for the App Registration that's used for this Function App authentication
     clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv)
-    createAppRegistrationIfNotExist
+    createAppRegistrationIfNotExist $clientId $appRegistrationName $resourceGroupName $environment
 fi
 
 # Start function app deployment
@@ -83,7 +93,7 @@ resources=$(az group deployment create \
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
-addReplyUrlIfNotExist
+addReplyUrlIfNotExist $clientId $functionAppName
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
