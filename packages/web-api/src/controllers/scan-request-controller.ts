@@ -40,9 +40,9 @@ export class ScanRequestController extends ApiController {
             return;
         }
 
-        const response = this.createScanRunBatchResponse(payload);
-
         const batchId = Guid.createGuid();
+        const response = this.createScanRunBatchResponse(batchId, payload);
+
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
 
         this.context.res = {
@@ -57,11 +57,12 @@ export class ScanRequestController extends ApiController {
         });
     }
 
-    private createScanRunBatchResponse(scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {
+    private createScanRunBatchResponse(batchId: string, scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {
         return scanRunRequests.map(scanRunRequest => {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
                 return {
-                    scanId: Guid.createGuid(),
+                    // preserve guid origin for a single batch scope
+                    scanId: Guid.createGuid(batchId),
                     url: scanRunRequest.url,
                 };
             } else {

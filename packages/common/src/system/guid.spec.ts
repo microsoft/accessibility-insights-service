@@ -10,6 +10,20 @@ describe('createGuid()', () => {
         expect(guid.length).toEqual(36);
         expect(guid.substr(13, 2)).toEqual('-6');
     });
+
+    it('create new UUID with fixed node part', () => {
+        const guid = Guid.createGuid();
+        const nextGuid = Guid.createGuid(guid);
+        expect(guid.length).toEqual(36);
+        expect(guid.substr(24, 6)).toEqual(nextGuid.substr(24, 6));
+    });
+});
+
+describe('createGuid()', () => {
+    it('get UUID node part', () => {
+        const guidNode = Guid.getGuidNode('1e9d0176-8301-6e80-bfb4-e55503791248');
+        expect(guidNode).toEqual('e55503791248');
+    });
 });
 
 describe('getGuidTimestamp()', () => {
