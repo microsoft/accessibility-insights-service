@@ -16,6 +16,34 @@ Usage: $0 -r <resource group> -e <environment>
     exit 1
 }
 
+addReplyUrlIfNotExist() {
+    # Get existing reply urls of the app registration
+    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv)
+    replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
+
+    for url in $replyUrls; do
+        if [[ $url == $replyUrl ]]; then
+            echo "replyUrl ${replyUrl} already exsits."
+            return
+        fi
+    done
+
+    echo "Adding replyUrl to app registration..."
+    az ad app update --id $clientId --add replyUrls $replyUrl
+    echo "  Successfully added replyUrl."
+}
+
+createAppRegistrationIfNotExist() {
+    if [ ! -z "$clientId" ] && (az ad app show --id "$clientId" 1>/dev/null); then
+        appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv)
+        echo "'$appRegistrationName' App Registration with Client ID '$clientId' already exists"
+    else
+        appRegistrationName="allyappregistration-${resourceGroupName}-${environment}"
+        clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
+        echo "Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
+    fi
+}
+
 # Set default ARM Function App template files
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
@@ -33,32 +61,16 @@ if [ -z $resourceGroupName ] || [ -z $environment ]; then
 fi
 
 # Will return the function name if we deployed before the function app template on this resource group
-functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template"  --query "properties.parameters.name.value" -o tsv)
+functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv)
 
-# Boolean to track if we should create a new App Registration or there's one already existing
-createNewApp=true
- 
 # Check if the Function App name is valid and the Function App exists
 if [ ! -z "$functionAppName" ] && (az functionapp show -n "$functionAppName" -g "$resourceGroupName" 1>/dev/null); then
     # Get the Client (App) ID for the App Registration that's used for this Function App authentication
     clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv)
-    # Check if the App Registration name is valid and the App Registration exists
-    if [ ! -z "$clientId" ] && (az ad app show --id "$clientId" 1>/dev/null); then
-        # If we hit this line, that means we don't need to create a new App Registration
-        createNewApp=false
-    fi
+    createAppRegistrationIfNotExist
 fi
 
-if ("$createNewApp" = true); then
-    appRegistrationName="allyappregistration_${environment}_${resourceGroupName}"
-    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
-    echo "Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
-else
-    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv)
-    echo "'$appRegistrationName' App Registration with Client ID '$clientId' already exists"
-fi
-
-# Start deployment
+# Start function app deployment
 echo "Deploying Function App using ARM template"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
@@ -71,12 +83,7 @@ resources=$(az group deployment create \
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
-# Enable continue on error in case the redirect URl was already added before
-set +e
-# add the reply url to the app registration reply urls
-az ad app update --id $clientId --add replyUrls "https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
-# Disable continue on error in case the redirect URl was already added before
-set -e
+addReplyUrlIfNotExist
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
