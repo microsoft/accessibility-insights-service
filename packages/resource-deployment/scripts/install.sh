@@ -83,7 +83,7 @@ if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]
     exitWithUsageInfo
 fi
 
-# # Login to Azure if required
+# Login to Azure if required
 if ! az account show 1>/dev/null; then
     az login
 fi

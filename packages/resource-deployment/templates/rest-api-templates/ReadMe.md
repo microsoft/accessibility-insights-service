@@ -1,112 +1,109 @@
-// TODO
-# Create templates with the live configs.
-# Follow instructions to make sure that you can use scrip tp deploy
-# Test out in the deploy env
-# Check out in the install script.
-# set up jobs as necessary.
+# How to re-create deployable API templates from an API management instance.
 
-1. Clone the [extractor tool repo](https://github.com/Azure/azure-api-management-devops-resource-kit).
+1.  Clone the [extractor tool repo](https://github.com/Azure/azure-api-management-devops-resource-kit).
 
-2. Ensure that dotnet is installed. Run `dotnet` from the terminal to see if it is installed.
+2.  Ensure that dotnet is installed. Run `dotnet` from the terminal to see if it is installed.
 
-3. Navigate to `azure-api-management-devops-resource-kit/src/APIM_ARMTemplate/apimtemplate`
+3.  Navigate to `azure-api-management-devops-resource-kit/src/APIM_ARMTemplate/apimtemplate`
 
 4.  Run the following command with values substituted as appropriate.  
-`dotnet run extract --sourceApimName a11y-insights --destinationApimName modelGateway --resourceGroup a11y-test --fileFolder ./ExtractedApi --linkedTemplatesBaseUrl https://publicStorage --apiName accessibility-insight-service-scan-api`  
-where:  
-  `SourceApimName`: The name of the API management instance that is being targeted fro extraction.  
-  `DestinationApimName`: The name of the destination API management instance. A random value can be put in here since it is parameterized and can be overridden at deploy time.  
- `ResourceGroup`: The resource group.  
- `FileFolder`: Folder location to dump the generated files  
- `LinkedTemplates`: Can use any value here. Using a value here force the tool to generate a master template that has the order of execution.   
- `apiName`: Name of the api to extract.
+    `dotnet run extract --sourceApimName a11y-insights --destinationApimName modelGateway --resourceGroup a11y-test --fileFolder ./ExtractedApi --linkedTemplatesBaseUrl https://publicStorage --apiName accessibility-insight-service-scan-api`  
+    where:  
+     `SourceApimName`: The name of the API management instance that is being targeted fro extraction.  
+     `DestinationApimName`: The name of the destination API management instance. A random value can be put in here since it is parameterized and can be overridden at deploy time.  
+     `ResourceGroup`: The resource group.  
+     `FileFolder`: Folder location to dump the generated files  
+     `LinkedTemplates`: Can use any value here. Using a value here force the tool to generate a master template that has the order of execution.  
+     `apiName`: Name of the api to extract.
 
-5. After the templates have been extracted, the endpoints that refer to a function backend need to parameterized.
-   1. Open the `*.backends.template.json` file and add the following to the `parameters` section.  
-      ```json
-      "functionName":{
-          "value" : "your-function-app-value"
-      }
-      ```
-   2. Replace all occurrences of the function name with the parameter `$functionName`.
-Replace the group name in `properties>resourceId` from "`randomResourceGroup`" (Or your equivalent, see example) to `resourceGroup().name`
+5.  After the templates have been extracted, the endpoints that refer to a function backend need to parameterized.
 
-       For example - 
-      Before  
-      ```json
-      {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-          "ApimServiceName": {
-            "type": "string"
-          }
-        },
-        "resources": [
-          {
-            "properties": {
-              "description": "clean-function-app",
-              "resourceId": "https://management.azure.com/subscriptions/tenant-ID/resourceGroups/<randomResourcegroup>/providers/Microsoft.Web/sites/<clean-function-app>",
-              "credentials": {
-                "header": {
-                  "x-functions-key": [
-                    "{{clean-function-app-key}}"
-                  ]
-                }
-              },
-              "url": "https://clean-function-app.azurewebsites.net/api",
-              "protocol": "http"
-            },
-            "name": "[concat(parameters('ApimServiceName'), '/clean-function-app')]",
-            "type": "Microsoft.ApiManagement/service/backends",
-            "apiVersion": "2019-01-01"
-          }
-        ]
-      }
-      ```
-      After
-      ```json
-      {
-        "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-        "contentVersion": "1.0.0.0",
-        "parameters": {
-          "apimServiceName": {
-            "type": "string"
-          },
-          "functionName":{
-            "type": "string"
-          }
-        },
-        "resources": [
-          {
-            "properties": {
-              "description": "[parameters('functionName')]",
-              "resourceId": "[concat('https://management.azure.com/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
-              "credentials": {
-                "header": {
-                }
-              },
-              "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
-              "protocol": "http"
-            },
-            "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
-            "type": "Microsoft.ApiManagement/service/backends",
-            "apiVersion": "2019-01-01"
-          }
-        ]
-      }
-      ```
-    3. Open the `*apis.template.json` file  
-       1. Add the following to the parameters
-          ```json
-          "functionName":{
-              "type" : "string"
-          }
-          ```
-        2. Change the value of the function app name wherever it is set in the policies. Search for `<set-backend-service` and change the `backend-id` property to use `$functionName` instead.
+    1.  Open the `*.backends.template.json` file and add the following to the `parameters` section.
+        ```json
+        "functionName":{
+            "value" : "your-function-app-value"
+        }
+        ```
+    2.  Replace all occurrences of the function name with the parameter `$functionName`.
+        Replace the group name in `properties>resourceId` from "`randomResourceGroup`" (Or your equivalent, see example) to `resourceGroup().name`
 
-6. Change the files to ensure that they are named as follows.  
+               For example -
+              Before
+              ```json
+              {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "ApimServiceName": {
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "properties": {
+                      "description": "clean-function-app",
+                      "resourceId": "https://management.azure.com/subscriptions/tenant-ID/resourceGroups/<randomResourcegroup>/providers/Microsoft.Web/sites/<clean-function-app>",
+                      "credentials": {
+                        "header": {
+                          "x-functions-key": [
+                            "{{clean-function-app-key}}"
+                          ]
+                        }
+                      },
+                      "url": "https://clean-function-app.azurewebsites.net/api",
+                      "protocol": "http"
+                    },
+                    "name": "[concat(parameters('ApimServiceName'), '/clean-function-app')]",
+                    "type": "Microsoft.ApiManagement/service/backends",
+                    "apiVersion": "2019-01-01"
+                  }
+                ]
+              }
+              ```
+              After
+              ```json
+              {
+                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                "contentVersion": "1.0.0.0",
+                "parameters": {
+                  "apimServiceName": {
+                    "type": "string"
+                  },
+                  "functionName":{
+                    "type": "string"
+                  }
+                },
+                "resources": [
+                  {
+                    "properties": {
+                      "description": "[parameters('functionName')]",
+                      "resourceId": "[concat('https://management.azure.com/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
+                      "credentials": {
+                        "header": {
+                        }
+                      },
+                      "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
+                      "protocol": "http"
+                    },
+                    "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
+                    "type": "Microsoft.ApiManagement/service/backends",
+                    "apiVersion": "2019-01-01"
+                  }
+                ]
+              }
+              ```
+            3. Open the `*apis.template.json` file
+               1. Add the following to the parameters
+                  ```json
+                  "functionName":{
+                      "type" : "string"
+                  }
+                  ```
+                2. Change the value of the function app name wherever it is set in the policies. Search for `<set-backend-service` and change the `backend-id` property to use `$functionName` instead.
+
+6.  Change the files to ensure that they are named as follows.  
     `Note: This is necessary to ensure that the deploy scripts work.`
+
     ```
     model-accessibility-insight-service-scan-api-api.template.json
     model-apiVersionSets.template.json
@@ -117,10 +114,6 @@ Replace the group name in `properties>resourceId` from "`randomResourceGroup`" (
     model-namedValues.template.json
     model-parameters.json
     model-products.template.json
-    ```  
+    ```
 
-  7. Open `*.namedValues.template.json` and delete the key.
-
-
-
-
+7.  Open `*.namedValues.template.json` and delete the key.

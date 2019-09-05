@@ -22,22 +22,23 @@ deployResourceWithFunctionName() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -a <API management name> -t <Template Location> -r <resource group> 
+Usage: $0 -a <API management name> -t <Template Location> -r <resource group> -f <function app name>
     where 
     API management name - The target API Managment instance name.
     Template location - The location for the templates.
     Resource group - The resource group that the REST API needs to be deployed to.
+    Function app name - The backed for the apis.
 "
     exit 1
 }
 
 # Read script arguments
-while getopts "a:t:r:f:" option; do
+while getopts "a:f:r:t:" option; do
     case $option in
         a) apiManagementName=${OPTARG} ;;
-        t) apiTemplates=${OPTARG} ;;
-        r) resourceGroupName=${OPTARG} ;;
         f) functionAppName=${OPTARG} ;;
+        r) resourceGroupName=${OPTARG} ;;
+        t) apiTemplates=${OPTARG} ;;
         *) exitWithUsageInfo ;;
     esac
 done
