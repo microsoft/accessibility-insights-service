@@ -1,3 +1,8 @@
+<!--
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the MIT License.
+-->
+
 # How to re-create deployable API templates from an API management instance.
 
 1.  Clone the [extractor tool repo](https://github.com/Azure/azure-api-management-devops-resource-kit).
