@@ -298,15 +298,6 @@
         },
         {
             "properties": {},
-            "name": "[concat(parameters('apimServiceName'), '/starter/accessibility-insight-service-scan-api')]",
-            "type": "Microsoft.ApiManagement/service/products/apis",
-            "apiVersion": "2019-01-01",
-            "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
-            ]
-        },
-        {
-            "properties": {},
             "name": "[concat(parameters('apimServiceName'), '/unlimited/accessibility-insight-service-scan-api')]",
             "type": "Microsoft.ApiManagement/service/products/apis",
             "apiVersion": "2019-01-01",
