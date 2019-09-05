@@ -5,7 +5,7 @@ export declare type OnDemandPageScanDocumentType = 'pageScanRunResult' | 'pageSc
 /**
  * The mapping document between scan run ID and all scan run corresponding documents.
  */
-export interface OnDemandPageScanMap {
+export interface OnDemandPageScanResultMap {
     scanId: string;
     url: string;
     links: Link[];

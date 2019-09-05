@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { StorageDocument } from '.';
+import { ItemType } from './item-type';
 
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
@@ -9,12 +10,14 @@ export declare type OnDemandPageScanRunState = 'unknown' | 'accepted' | 'queued'
 /**
  * The web page scan run result document.
  */
-export interface OnDemandPageScan extends StorageDocument {
+export interface OnDemandPageScanResult extends StorageDocument {
     scanId: string;
     url: string;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
+    priority: number;
+    itemType: ItemType.onDemandPageScanRunResult;
 }
 
 export interface OnDemandScanResult {

@@ -82,7 +82,7 @@ export class PageDocumentProvider {
         }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
-        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+        return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
             return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
     }
@@ -109,23 +109,9 @@ export class PageDocumentProvider {
     or (c.lastRun.state = '${RunState.completed}' and c.lastRun.runTime <= '${maxRescanTime}')
     ) order by c.lastRun.runTime asc`;
 
-        return this.executeQueryWithContinuationToken<WebsitePage>(async token => {
+        return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
             return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
         });
-    }
-
-    private async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
-        let token: string;
-        const result = [];
-
-        do {
-            const response = await execute(token);
-            client.ensureSuccessStatusCode(response);
-            token = response.continuationToken;
-            result.push(...response.item);
-        } while (token !== undefined);
-
-        return result;
     }
 
     private getPageScanningCondition(website: Website): string {

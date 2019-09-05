@@ -51,7 +51,7 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async readAllItem<T>(dbName: string, collectionName: string): Promise<CosmosOperationResponse<T[]>> {
+    public async readAllItem<T extends CosmosDocument>(dbName: string, collectionName: string): Promise<CosmosOperationResponse<T[]>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
@@ -172,6 +172,13 @@ export class CosmosClientWrapper {
                 throw error;
             }
         }
+    }
+
+    public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
+        const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
+        const container = await this.getContainer(dbName, collectionName);
+
+        await container.item(id).delete(options);
     }
 
     public async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {

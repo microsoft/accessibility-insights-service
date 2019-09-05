@@ -9,7 +9,7 @@ import { Logger } from 'logger';
 import * as moment from 'moment';
 import { RunState, Website, WebsitePage } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
-import * as dbHelper from '../test-utilities/db-mock-helpers';
+import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { PageDocumentProvider } from './page-document-provider';
 
 // tslint:disable-next-line: mocha-no-side-effect-code
@@ -26,6 +26,9 @@ jest.mock('moment', () => {
 });
 
 describe(PageDocumentProvider, () => {
+    // tslint:disable-next-line: mocha-no-side-effect-code
+    const dbHelper = new DbMockHelper();
+
     it('no-op', () => {
         // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
     });
@@ -49,6 +52,10 @@ describe(PageDocumentProvider, () => {
         beforeAll(async () => {
             await dbHelper.init('test-db', 'page-tests-collection');
         }, 30000);
+
+        afterEach(async () => {
+            await dbHelper.deleteAllDocuments();
+        });
 
         beforeEach(() => {
             scanConfig = {

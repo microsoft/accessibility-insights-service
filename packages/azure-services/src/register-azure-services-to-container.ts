@@ -14,7 +14,7 @@ import { AuthenticationMethod, CredentialsProvider } from './credentials/credent
 import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
-import { CosmosContainerClient } from './storage/storage-client';
+import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 export function registerAzureServicesToContainer(container: Container): void {
     setupAuthenticationMethod(container);
@@ -49,6 +49,14 @@ export function registerAzureServicesToContainer(container: Container): void {
 
     container.bind(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient).toDynamicValue(context => {
         return createCosmosContainerClient(context.container, 'scanner', 'a11yIssues');
+    });
+
+    container.bind(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'scanner', 'pageScanRequests');
+    });
+
+    container.bind(cosmosContainerClientTypes.OnDemandPageScanRunResults).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'scanner', 'onDemandPageScanRunResults');
     });
 
     container.bind(Queue).toSelf();

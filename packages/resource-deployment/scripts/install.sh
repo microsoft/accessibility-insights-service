@@ -8,8 +8,10 @@ set -eo pipefail
 
 export appInsightsKey
 export apiManagementName
+export apiTemplates="$templatesFolder"rest-api-templates
 export batchAccountName
 export cosmosAccountName
+export datalakeStorageAccountName
 export dropFolder="${0%/*}/../../../"
 export environment
 export functionAppName
@@ -20,7 +22,6 @@ export resourceGroupName
 export subscription
 export storageAccountName
 export templatesFolder="${0%/*}/../templates/"
-export apiTemplates="$templatesFolder"rest-api-templates
 
 exitWithUsageInfo() {
     echo "
@@ -92,6 +93,8 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-resource-group.sh"
 
 . "${0%/*}/create-storage-account.sh"
+
+. "${0%/*}/create-datalake-storage-account.sh"
 
 . "${0%/*}/upload-files.sh"
 
