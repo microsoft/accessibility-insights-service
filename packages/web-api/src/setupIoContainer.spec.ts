@@ -12,6 +12,6 @@ describe(setupIoContainer, () => {
         const container = setupIoContainer();
         expect(container.get(ServiceConfiguration)).toBeDefined();
         expect(container.get(Logger)).toBeDefined();
-        expect(container.get(cosmosContainerClientTypes.ScanBatchesCosmosContainerClient)).toBeDefined();
+        expect(container.get(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)).toBeDefined();
     });
 });
