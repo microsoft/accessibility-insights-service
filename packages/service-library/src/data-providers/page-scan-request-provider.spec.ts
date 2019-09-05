@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
+import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, OnDemandPageScanRequest } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { PageScanRequestProvider } from './page-scan-request-provider';
@@ -23,15 +23,15 @@ describe(PageScanRequestProvider, () => {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.OnDemandPageScanRequests,
-            partitionKey: 'unProcessedScanRequestDocuments',
+            itemType: ItemType.onDemandPageScanRequests,
+            partitionKey: PageScanRequestProvider.partitionKey,
         };
         const request2: OnDemandPageScanRequest = {
             id: 'id2',
             url: 'url2',
             priority: 0,
-            itemType: ItemType.OnDemandPageScanRequests,
-            partitionKey: 'unProcessedScanRequestDocuments',
+            itemType: ItemType.onDemandPageScanRequests,
+            partitionKey: PageScanRequestProvider.partitionKey,
         };
         const requests = [request1, request2];
         cosmosContainerClientMock
@@ -49,7 +49,7 @@ describe(PageScanRequestProvider, () => {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.OnDemandPageScanRequests,
+            itemType: ItemType.onDemandPageScanRequests,
             partitionKey: PageScanRequestProvider.partitionKey,
         };
         const itemCount = 5;
@@ -64,7 +64,7 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock
             .setup(c =>
                 c.queryDocuments(
-                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.OnDemandPageScanRequests}' ORDER BY c.priority`,
+                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequests}' ORDER BY c.priority`,
                     continuationToken,
                     PageScanRequestProvider.partitionKey,
                 ),

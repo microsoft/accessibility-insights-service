@@ -6,5 +6,5 @@ export enum ItemType {
     pageScanResult = 'pageScanResult',
     issueScanResult = 'issueScanResult',
     onDemandPageScanRunResult = 'pageScanRunResult',
-    OnDemandPageScanRequests = 'pageScanRequests',
+    onDemandPageScanRequests = 'pageScanRequests',
 }

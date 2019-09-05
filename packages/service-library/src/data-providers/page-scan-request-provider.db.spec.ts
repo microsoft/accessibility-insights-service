@@ -9,7 +9,7 @@ import { Mock } from 'typemoq';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
-describe('UnProcessedScanRequestProvider.Db', () => {
+describe('PageScanRequestProvider.Db', () => {
     // tslint:disable-next-line: mocha-no-side-effect-code
     const dbHelper = new DbMockHelper();
 
@@ -22,7 +22,7 @@ describe('UnProcessedScanRequestProvider.Db', () => {
         let testSubject: PageScanRequestProvider;
 
         beforeAll(async () => {
-            await dbHelper.init('test-db', 'unprocessed-scans');
+            await dbHelper.init('test-db', ' page-scan-requests');
         }, 30000);
 
         beforeEach(() => {
@@ -46,23 +46,23 @@ describe('UnProcessedScanRequestProvider.Db', () => {
                 id: 'id1',
                 url: 'url1',
                 priority: 10,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
             const request2: OnDemandPageScanRequest = {
                 id: 'id2',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
 
             const request3: OnDemandPageScanRequest = {
                 id: 'id3',
                 url: 'url3',
                 priority: 5,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
 
             await testSubject.insertRequests([request1, request2, request3]);
@@ -80,23 +80,23 @@ describe('UnProcessedScanRequestProvider.Db', () => {
                 id: 'id1',
                 url: 'url1',
                 priority: 10,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
             const request2: OnDemandPageScanRequest = {
                 id: 'id2',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
 
             const requestNotToBeDeleted: OnDemandPageScanRequest = {
                 id: 'id-not-to-be-deleted',
                 url: 'url2',
                 priority: 0,
-                itemType: ItemType.OnDemandPageScanRequests,
-                partitionKey: 'unProcessedScanRequestDocuments',
+                itemType: ItemType.onDemandPageScanRequests,
+                partitionKey: PageScanRequestProvider.partitionKey,
             };
 
             await testSubject.insertRequests([request1, request2, requestNotToBeDeleted]);
