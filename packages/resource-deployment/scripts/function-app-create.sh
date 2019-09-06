@@ -10,9 +10,13 @@ export resourceGroupName
 export resourceName
 export keyVault
 
+if [[ -z $dropFolder ]]; then
+    dropFolder="${0%/*}/../../../"
+fi
+
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to>
+Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
@@ -48,6 +52,19 @@ createAppRegistration() {
     echo "  Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 }
 
+copyConfigFile() {
+    dropFolder=$1
+    environment=$2
+
+    echo "Copying config file to function dist folders..."
+    for folderName in $dropFolder/web-api/dist/*-func; do
+        if [[ -d $folderName ]]; then
+            cp "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$folderName/runtime-config.json"
+            echo "  Successfully copied config file to $folderName"
+        fi
+    done
+}
+
 # Set default ARM Function App template files
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
@@ -64,6 +81,9 @@ done
 if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
+
+# Copy config file to function dist folder
+copyConfigFile $dropFolder $environment
 
 # Create app registration if not exists
 echo "Checking if the function app already exists..."
