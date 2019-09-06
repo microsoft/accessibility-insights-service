@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { ItemType, OnDemandPageScanRequest } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
@@ -24,14 +24,14 @@ describe(PageScanRequestProvider, () => {
             url: 'url1',
             priority: 10,
             itemType: ItemType.onDemandPageScanRequests,
-            partitionKey: PageScanRequestProvider.partitionKey,
+            partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const request2: OnDemandPageScanRequest = {
             id: 'id2',
             url: 'url2',
             priority: 0,
             itemType: ItemType.onDemandPageScanRequests,
-            partitionKey: PageScanRequestProvider.partitionKey,
+            partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const requests = [request1, request2];
         cosmosContainerClientMock
@@ -50,7 +50,7 @@ describe(PageScanRequestProvider, () => {
             url: 'url1',
             priority: 10,
             itemType: ItemType.onDemandPageScanRequests,
-            partitionKey: PageScanRequestProvider.partitionKey,
+            partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const itemCount = 5;
         const continuationToken = 'token1';
@@ -66,7 +66,7 @@ describe(PageScanRequestProvider, () => {
                 c.queryDocuments(
                     `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequests}' ORDER BY c.priority`,
                     continuationToken,
-                    PageScanRequestProvider.partitionKey,
+                    PartitionKey.pageScanRequestDocuments,
                 ),
             )
             .returns(() => Promise.resolve(response))
@@ -83,11 +83,11 @@ describe(PageScanRequestProvider, () => {
         const request2Id = 'id2';
 
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request1Id, PageScanRequestProvider.partitionKey))
+            .setup(c => c.deleteDocument(request1Id, PartitionKey.pageScanRequestDocuments))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request2Id, PageScanRequestProvider.partitionKey))
+            .setup(c => c.deleteDocument(request2Id, PartitionKey.pageScanRequestDocuments))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 

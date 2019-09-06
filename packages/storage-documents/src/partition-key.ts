@@ -2,4 +2,5 @@
 // Licensed under the MIT License.
 export enum PartitionKey {
     scanRunBatchRequests = 'scanRunBatchRequests',
+    pageScanRequestDocuments = 'pageScanRequestDocuments',
 }
