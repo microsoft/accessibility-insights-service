@@ -3,13 +3,11 @@
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject } from 'inversify';
-import { ItemType, OnDemandPageScanRequest } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 
 export class PageScanRequestProvider {
-    public static readonly partitionKey: string = 'pageScanRequestDocuments';
-
     constructor(
-        @inject(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient)
+        @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
@@ -22,7 +20,7 @@ export class PageScanRequestProvider {
         return this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(
             query,
             continuationToken,
-            PageScanRequestProvider.partitionKey,
+            PartitionKey.pageScanRequestDocuments,
         );
     }
 
@@ -33,7 +31,7 @@ export class PageScanRequestProvider {
     public async deleteRequests(ids: string[]): Promise<void> {
         await Promise.all(
             ids.map(async id => {
-                await this.cosmosContainerClient.deleteDocument(id, PageScanRequestProvider.partitionKey);
+                await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);
             }),
         );
     }

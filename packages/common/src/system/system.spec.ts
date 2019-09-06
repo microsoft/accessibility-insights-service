@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { System } from './system-utils';
+import { System } from './system';
 
 describe('create instance if nil', () => {
     // tslint:disable-next-line: no-null-keyword

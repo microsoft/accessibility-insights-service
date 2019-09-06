@@ -39,10 +39,11 @@ export class Worker {
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
                     if (poolMetricsInfo.load.activeTasks === 0) {
-                        this.logger.logInfo(`exiting since there are no activeTasks tasks.`);
+                        this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active tasks.`);
                         break;
                     }
                 }
+
                 if (scanMessages.length > 0) {
                     tasksQueuedCount = await this.addTasksToJob(scanMessages);
                 }

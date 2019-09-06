@@ -22,7 +22,7 @@ export abstract class ProcessEntryPointBase {
             await this.invokeCustomActionWithLogging(this.container, logger);
         } catch (error) {
             if (loggerInitialized === false) {
-                console.log('Unable to setup logger', error);
+                console.log('Unable to setup logger.', error);
             }
 
             throw error;
@@ -41,7 +41,7 @@ export abstract class ProcessEntryPointBase {
         try {
             await this.runCustomAction(container);
         } catch (error) {
-            logger.trackExceptionAny(error, 'Error occurred while executing job');
+            logger.trackExceptionAny(error, 'Error occurred while executing action.');
             throw error;
         }
     }
