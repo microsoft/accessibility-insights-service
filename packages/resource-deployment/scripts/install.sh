@@ -6,19 +6,22 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export resourceGroupName
-export subscription
-export location
-export storageAccountName
-export datalakeStorageAccountName
+export appInsightsKey
+export apiManagementName
+export apiTemplates="$templatesFolder"rest-api-templates
 export batchAccountName
+export cosmosAccountName
+export datalakeStorageAccountName
+export dropFolder="${0%/*}/../../../"
+export environment
+export functionAppName
 export keyVault
 export keyVaultUrl
-export cosmosAccountName
-export dropFolder="${0%/*}/../../../"
+export location
+export resourceGroupName
+export subscription
+export storageAccountName
 export templatesFolder="${0%/*}/../templates/"
-export appInsightsKey
-export environment
 
 exitWithUsageInfo() {
     echo "
@@ -114,3 +117,5 @@ echo "Fetched keyvault url $keyVaultUrl"
 . "${0%/*}/job-schedule-create.sh"
 
 . "${0%/*}/create-api-management.sh"
+
+. "${0%/*}/deploy-rest-api.sh"
