@@ -65,7 +65,7 @@ fi
 
 # Will return the function name if we deployed before the function app template on this resource group
 echo "Checking if the function app already exists..."
-functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv)
+functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
 echo "Checking if the App Registration exists..."
 clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
 appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
