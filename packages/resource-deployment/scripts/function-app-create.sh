@@ -64,16 +64,16 @@ if [ -z $resourceGroupName ] || [ -z $environment ]; then
 fi
 
 # Will return the function name if we deployed before the function app template on this resource group
-echo "Checking if the function app and AppRegistration already exists..."
+echo "Checking if the function app already exists..."
 functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv)
+echo "Checking if the App Registration exists..."
 clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
+appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
 
-if [[ ! -n $clientId ]]; then
+if [[ ! -n $appRegistrationName ]]; then
     createAppRegistration $resourceGroupName $environment
 else
-    echo "AppRegistration already exists. Fetching displayName of the AppRegistration..."
-    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv)
-    echo "  Successfully got AppRegistration display name: $appRegistrationName"
+    echo "AppRegistration already exists, display name: $appRegistrationName."
 fi
 
 # Start function app deployment
