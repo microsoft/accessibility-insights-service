@@ -13,7 +13,7 @@ import { ApiController } from './api-controller';
 @injectable()
 export class ScanRequestController extends ApiController {
     public readonly apiVersion = '1.0';
-    public readonly apiName = 'web-api-post-scans';
+    public readonly apiName = 'post-scans';
 
     public constructor(
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
