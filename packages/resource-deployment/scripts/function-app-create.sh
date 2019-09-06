@@ -16,7 +16,7 @@ Usage: $0 -r <resource group> -e <environment>
     exit 1
 }
 
-addReplyUrlIfNotExist() {
+addReplyUrlIfNotExists() {
     clientId=$1
     functionAppName=$2
 
@@ -89,7 +89,7 @@ resources=$(az group deployment create \
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
-addReplyUrlIfNotExist $clientId $functionAppName
+addReplyUrlIfNotExists $clientId $functionAppName
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
