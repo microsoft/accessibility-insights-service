@@ -5,7 +5,7 @@ import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { ApiController } from './controllers/api-controller';
-import { Newable, webApiIocTypes } from './setupIoContainer';
+import { Newable, webApiIocTypes } from './setup-ioc-container';
 
 // tslint:disable: no-any no-unsafe-any
 

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { cosmosContainerClientTypes } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { setupIoContainer } from './setupIoContainer';
+import { setupIoContainer } from './setup-ioc-container';
 
 describe(setupIoContainer, () => {
     it('verify dependencies resolution', () => {

@@ -7,7 +7,7 @@ import { Logger } from 'logger';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
-import { webApiIocTypes } from '../setupIoContainer';
+import { webApiIocTypes } from '../setup-ioc-container';
 import { ApiController } from './api-controller';
 
 @injectable()
