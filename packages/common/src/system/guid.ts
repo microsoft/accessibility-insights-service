@@ -10,6 +10,10 @@ export namespace Guid {
         return uuid.v6();
     }
 
+    /**
+     * Creates UUID with the same UUID node part (last 12 bytes) as base UUID.
+     * @param baseGuid The UUID to match the UUID node.
+     */
     export function createGuidForNode(baseGuid: string): string {
         const guid = <string>uuid.v6();
         const guidNode = getGuidNode(baseGuid);
