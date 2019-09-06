@@ -16,7 +16,8 @@ fi
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
+Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to> \
+-d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
@@ -69,11 +70,12 @@ copyConfigFile() {
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:e:k:" option; do
+while getopts "r:e:k:d" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
+    d) dropFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
