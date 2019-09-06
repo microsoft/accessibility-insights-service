@@ -6,23 +6,26 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export resourceGroupName
-export subscription
-export location
-export storageAccountName
-export datalakeStorageAccountName
+export appInsightsKey
+export apiManagementName
+export apiTemplates="$templatesFolder"rest-api-templates
 export batchAccountName
+export cosmosAccountName
+export datalakeStorageAccountName
+export dropFolder="${0%/*}/../../../"
+export environment
+export functionAppName
 export keyVault
 export keyVaultUrl
-export cosmosAccountName
-export dropFolder="${0%/*}/../../../"
+export location
+export resourceGroupName
+export subscription
+export storageAccountName
 export templatesFolder="${0%/*}/../templates/"
-export appInsightsKey
-export environment
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> 
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
@@ -114,3 +117,5 @@ echo "Fetched keyvault url $keyVaultUrl"
 . "${0%/*}/job-schedule-create.sh"
 
 . "${0%/*}/create-api-management.sh"
+
+. "${0%/*}/deploy-rest-api.sh"

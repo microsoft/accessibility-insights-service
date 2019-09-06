@@ -1,6 +1,7 @@
 {
     "bindings": [
         {
+            "authLevel": "anonymous",
             "name": "request",
             "type": "httpTrigger",
             "direction": "in",
