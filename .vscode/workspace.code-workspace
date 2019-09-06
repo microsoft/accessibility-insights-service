@@ -61,6 +61,10 @@
             "path": "../packages/web-api"
         },
         {
+            "name": "workers",
+            "path": "../packages/workers"
+        },
+        {
             "name": "root",
             "path": "../"
         }
