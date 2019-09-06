@@ -35,8 +35,6 @@
             "properties": {
                 "description": "Subscribers have completely unlimited access to the API. Administrator approval is required.",
                 "subscriptionRequired": false,
-                "approvalRequired": false,
-                "subscriptionsLimit": 1,
                 "state": "published",
                 "displayName": "Unlimited"
             },
