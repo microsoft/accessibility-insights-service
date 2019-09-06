@@ -24,7 +24,9 @@ export class ControllerDispatcher extends ProcessEntryPointBase {
 
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
         return {
-            source: this.controller.apiName,
+            source: 'web-api',
+            api: this.controller.apiName,
+            controller: this.controllerType.name,
         };
     }
 }

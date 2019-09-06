@@ -70,11 +70,13 @@ describe(ScanRequestController, () => {
     });
 
     it('accept valid request', async () => {
-        const guid = '1e9cefa6-538a-6df0-f540-ffffffffffff';
-        Guid.createGuid = () => guid;
+        const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+        const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+        Guid.createGuid = () => guid1;
+        Guid.createGuidForNode = () => guid2;
         context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
-        const response = [{ scanId: guid, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
-        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid, response)).verifiable(Times.once());
+        const response = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
+        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, response)).verifiable(Times.once());
 
         scanRequestController = createScanRequestController(context);
 

@@ -62,7 +62,7 @@ export class ScanRequestController extends ApiController {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
                 return {
                     // preserve guid origin for a single batch scope
-                    scanId: Guid.createGuid(batchId),
+                    scanId: Guid.createGuidForNode(batchId),
                     url: scanRunRequest.url,
                 };
             } else {

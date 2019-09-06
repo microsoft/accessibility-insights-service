@@ -6,13 +6,13 @@ import * as uuid from 'uuid-with-v6';
 // tslint:disable: no-unsafe-any
 
 export namespace Guid {
-    export function createGuid(lastGuid?: string): string {
-        if (lastGuid === undefined) {
-            return uuid.v6();
-        }
+    export function createGuid(): string {
+        return uuid.v6();
+    }
 
+    export function createGuidForNode(baseGuid: string): string {
         const guid = <string>uuid.v6();
-        const guidNode = getGuidNode(lastGuid);
+        const guidNode = getGuidNode(baseGuid);
 
         return `${guid.substr(0, 24)}${guidNode}`;
     }

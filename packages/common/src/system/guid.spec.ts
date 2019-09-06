@@ -13,7 +13,8 @@ describe('createGuid()', () => {
 
     it('create new UUID with fixed node part', () => {
         const guid = Guid.createGuid();
-        const nextGuid = Guid.createGuid(guid);
+        const nextGuid = Guid.createGuidForNode(guid);
+        expect(guid).not.toEqual(nextGuid);
         expect(guid.length).toEqual(36);
         expect(guid.substr(24, 6)).toEqual(nextGuid.substr(24, 6));
     });
