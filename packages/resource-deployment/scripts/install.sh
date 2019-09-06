@@ -25,7 +25,7 @@ export templatesFolder="${0%/*}/../templates/"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> 
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
