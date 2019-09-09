@@ -15,10 +15,17 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
+import {
+    AzureKeyVaultClientProvider,
+    CosmosClientProvider,
+    cosmosContainerClientTypes,
+    iocTypeNames,
+    QueueServiceURLProvider,
+} from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
+import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
@@ -45,6 +52,18 @@ describe(registerAzureServicesToContainer, () => {
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
+    });
+
+    it('resolves CosmosContainerClient', () => {
+        registerAzureServicesToContainer(container);
+
+        verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
     });
 
     describe('QueueServiceURLProvider', () => {
@@ -179,5 +198,11 @@ describe(registerAzureServicesToContainer, () => {
     function verifyNonSingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).not.toBe(container.get(key));
+    }
+
+    function verifyCosmosContainerClient(cosmosContainerType: string, dbName: string, collectionName: string): void {
+        const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
+        expect((cosmosContainerClient as any).dbName).toBe(dbName);
+        expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
     }
 });

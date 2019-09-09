@@ -24,6 +24,11 @@ createCosmosAccount() {
 createCosmosCollection() {
     local collectionName=$1
     local dbName=$2
+    local ttl=$3
+
+    if [[ -z $ttl ]]; then
+        ttl=-1
+    fi
 
     echo "Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
     collectionExists=$(az cosmosdb collection exists --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
@@ -32,7 +37,7 @@ createCosmosCollection() {
         echo "Collection '$collectionName' already exists"
     else
         echo "Creating DB collection '$collectionName'"
-        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 1>/dev/null
+        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 --default-ttl "$ttl" 1>/dev/null
         echo "Successfully created DB collection '$collectionName'"
     fi
 }
@@ -72,10 +77,16 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-cosmosAccountName=""
 createCosmosAccount
 
-dbName="scanner"
-createCosmosDatabase "$dbName"
-createCosmosCollection "a11yIssues" "$dbName"
-createCosmosCollection "webPagesToScan" "$dbName"
+scannerDbName="scanner"
+onDemandScannerDbName="onDemandScanner"
+
+createCosmosDatabase "$scannerDbName"
+createCosmosDatabase "$onDemandScannerDbName"
+
+createCosmosCollection "a11yIssues" "$scannerDbName"
+# Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
+createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000"         # 30 days
+createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" # 7 days
+createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800"      # 7 days

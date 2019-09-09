@@ -3,7 +3,7 @@
 // tslint:disable: no-unsafe-any
 import 'reflect-metadata';
 
-import { StorageClient } from 'azure-services';
+import { CosmosContainerClient } from 'azure-services';
 import { PageObjectFactory } from 'service-library';
 import { ItemType, PageScanResult, RunResult, RunState, ScanLevel, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
@@ -12,7 +12,7 @@ import { ScanMetadata } from '../types/scan-metadata';
 import { PageStateUpdaterTask } from './page-state-updater-task';
 
 let pageObjectFactoryMock: IMock<PageObjectFactory>;
-let storageClientMock: IMock<StorageClient>;
+let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let pageStateUpdaterTask: PageStateUpdaterTask;
 
 const scanMetadata: ScanMetadata = {
@@ -25,13 +25,13 @@ const scanMetadata: ScanMetadata = {
 
 beforeEach(() => {
     pageObjectFactoryMock = Mock.ofType<PageObjectFactory>();
-    storageClientMock = Mock.ofType<StorageClient>();
-    pageStateUpdaterTask = new PageStateUpdaterTask(storageClientMock.object, pageObjectFactoryMock.object);
+    cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
+    pageStateUpdaterTask = new PageStateUpdaterTask(cosmosContainerClientMock.object, pageObjectFactoryMock.object);
 });
 
 afterEach(() => {
     pageObjectFactoryMock.verifyAll();
-    storageClientMock.verifyAll();
+    cosmosContainerClientMock.verifyAll();
 });
 
 describe('PageStateUpdaterTask', () => {
@@ -47,7 +47,7 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.mergeOrWriteDocument(websitePage))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
@@ -79,7 +79,7 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.mergeOrWriteDocument(websitePage))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
@@ -101,7 +101,7 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.mergeOrWriteDocument(websitePage))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
@@ -124,7 +124,7 @@ describe('PageStateUpdaterTask', () => {
             .setup(o => o.createImmutableInstance(websitePage.websiteId, websitePage.baseUrl, websitePage.url))
             .returns(() => websitePage)
             .verifiable(Times.once());
-        storageClientMock
+        cosmosContainerClientMock
             .setup(async o => o.mergeOrWriteDocument(websitePage))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());

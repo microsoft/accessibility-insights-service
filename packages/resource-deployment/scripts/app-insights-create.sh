@@ -26,6 +26,11 @@ while getopts "r:s:" option; do
     esac
 done
 
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+    exitWithUsageInfo
+    exit 1
+fi
+
 echo "Installing microsoft.insights extension for azure-cli"
 az extension add -n application-insights
 

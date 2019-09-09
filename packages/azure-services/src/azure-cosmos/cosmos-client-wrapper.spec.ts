@@ -175,6 +175,21 @@ describe('CosmosClientWrapper', () => {
         });
     });
 
+    describe('delete()', () => {
+        it('deletes item', async () => {
+            collectionMock.setup(c => c.item('id')).returns(() => itemMock.object);
+            itemMock
+                .setup(async i => i.delete({ partitionKey: partitionKey }))
+                .returns(async () => Promise.resolve({} as any))
+                .verifiable();
+
+            await testSubject.deleteItem('id', dbName, collectionName, partitionKey);
+
+            itemMock.verifyAll();
+            verifyMocks();
+        });
+    });
+
     describe('upsertItem()', () => {
         it('upsert item with failed response', async () => {
             const item = {

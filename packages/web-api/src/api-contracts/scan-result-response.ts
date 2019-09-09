@@ -3,7 +3,7 @@
 export declare type LinkType = 'self';
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
-export declare type RunState = 'unknown' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type RunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
 export interface ScanResultResponse {
     scanId: string;

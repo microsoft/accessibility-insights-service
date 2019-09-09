@@ -15,195 +15,206 @@ export interface DbContainer {
     collectionName: string;
 }
 
-export let dbContainer: DbContainer;
-export let cosmosClient: CosmosClientWrapper;
-
 const warningMessage = `Warning: To use the Azure Cosmos DB based tests provide Cosmos DB Url and key.
-    The Azure Cosmos DB or Azure Cosmos DB emulator https://aka.ms/cosmosdb-emulator (Windows only) can be used.`;
-
+        The Azure Cosmos DB or Azure Cosmos DB emulator https://aka.ms/cosmosdb-emulator (Windows only) can be used.`;
 const cosmosDbUrl: string = undefined;
 const cosmosDbKey: string = undefined;
 
-const pageFactory = new PageObjectFactory(new HashGenerator());
-let azureCosmosClient: cosmos.CosmosClient;
+export class DbMockHelper {
+    public dbContainer: DbContainer;
+    public cosmosClient: CosmosClientWrapper;
+    private readonly pageFactory = new PageObjectFactory(new HashGenerator());
+    private azureCosmosClient: cosmos.CosmosClient;
 
-export function isDbTestSupported(): boolean {
-    if (cosmosDbUrl === undefined || cosmosDbKey === undefined) {
-        console.log('\x1b[31m', warningMessage);
+    public isDbTestSupported(): boolean {
+        if (cosmosDbUrl === undefined || cosmosDbKey === undefined) {
+            console.log('\x1b[31m', warningMessage);
 
-        return false;
+            return false;
+        }
+
+        return true;
     }
 
-    return true;
-}
+    public async init(dbName?: string, collectionName?: string): Promise<boolean> {
+        this.dbContainer = {
+            dbName: dbName === undefined ? 'test-db' : dbName,
+            collectionName: collectionName === undefined ? this.createRandomString('col') : collectionName,
+        };
 
-export async function init(dbName?: string, collectionName?: string): Promise<boolean> {
-    dbContainer = {
-        dbName: dbName === undefined ? 'test-db' : dbName,
-        collectionName: collectionName === undefined ? createRandomString('col') : collectionName,
-    };
+        this.azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
+        this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient));
 
-    azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
-    cosmosClient = new CosmosClientWrapper(() => Promise.resolve(azureCosmosClient));
+        await this.deleteDbContainer(this.dbContainer);
+        await this.createDbContainer(this.dbContainer);
 
-    await deleteDbContainer(dbContainer);
-    await createDbContainer(dbContainer);
-
-    return true;
-}
-
-export function createPageDocument(options?: {
-    label?: string;
-    extra?: WebsitePageExtra;
-    websiteId?: string;
-    baseUrl?: string;
-    url?: string;
-}): WebsitePage {
-    const websiteId = options === undefined || options.websiteId === undefined ? createRandomString('websiteId') : options.websiteId;
-    const baseUrl = options === undefined || options.baseUrl === undefined ? createBaseUrl() : options.baseUrl;
-    const url = options === undefined || options.url === undefined ? createUrl(baseUrl) : options.url;
-    const page = pageFactory.createImmutableInstance(websiteId, baseUrl, url);
-    (<any>page).label = options === undefined || options.label === undefined ? undefined : options.label;
-
-    if (options.extra !== undefined) {
-        _.merge(page, options.extra);
+        return true;
     }
 
-    return page;
-}
+    public createPageDocument(options?: {
+        label?: string;
+        extra?: WebsitePageExtra;
+        websiteId?: string;
+        baseUrl?: string;
+        url?: string;
+    }): WebsitePage {
+        const websiteId =
+            options === undefined || options.websiteId === undefined ? this.createRandomString('websiteId') : options.websiteId;
+        const baseUrl = options === undefined || options.baseUrl === undefined ? this.createBaseUrl() : options.baseUrl;
+        const url = options === undefined || options.url === undefined ? this.createUrl(baseUrl) : options.url;
+        const page = this.pageFactory.createImmutableInstance(websiteId, baseUrl, url);
+        (<any>page).label = options === undefined || options.label === undefined ? undefined : options.label;
 
-export function createWebsiteDocument(options?: {
-    label?: string;
-    websiteId?: string;
-    baseUrl?: string;
-    deepScanningEnabled?: boolean;
-}): Website {
-    const website = {
-        id: createRandomString('id'),
-        itemType: ItemType.website,
-        partitionKey: 'website',
-        websiteId: options === undefined || options.websiteId === undefined ? createRandomString('websiteId') : options.websiteId,
-        name: createRandomString('name'),
-        baseUrl: options === undefined || options.baseUrl === undefined ? createBaseUrl() : options.baseUrl,
-        serviceTreeId: createRandomString('serviceTreeId'),
-    };
-    (<any>website).label = options === undefined || options.label === undefined ? undefined : options.label;
+        if (options.extra !== undefined) {
+            _.merge(page, options.extra);
+        }
 
-    if (options !== undefined && options.deepScanningEnabled) {
-        (<any>website).deepScanningEnabled = options.deepScanningEnabled;
+        return page;
     }
 
-    return website;
-}
+    public createWebsiteDocument(options?: {
+        label?: string;
+        websiteId?: string;
+        baseUrl?: string;
+        deepScanningEnabled?: boolean;
+    }): Website {
+        const website = {
+            id: this.createRandomString('id'),
+            itemType: ItemType.website,
+            partitionKey: 'website',
+            websiteId: options === undefined || options.websiteId === undefined ? this.createRandomString('websiteId') : options.websiteId,
+            name: this.createRandomString('name'),
+            baseUrl: options === undefined || options.baseUrl === undefined ? this.createBaseUrl() : options.baseUrl,
+            serviceTreeId: this.createRandomString('serviceTreeId'),
+        };
+        (<any>website).label = options === undefined || options.label === undefined ? undefined : options.label;
 
-export function createDocument(itemType: ItemType = ItemType.website, id?: string, partitionKey?: string): StorageDocument {
-    return {
-        id: id === undefined ? createRandomString('id') : id,
-        itemType: itemType,
-        partitionKey: partitionKey === undefined ? createRandomString('pk') : partitionKey,
-    };
-}
+        if (options !== undefined && options.deepScanningEnabled) {
+            (<any>website).deepScanningEnabled = options.deepScanningEnabled;
+        }
 
-export function createRandomString(prefix: string = ''): string {
-    return `${prefix}-${crypto.randomBytes(5).toString('hex')}`;
-}
+        return website;
+    }
 
-export function createBaseUrl(): string {
-    return `https://${createRandomString()}.localhost/`;
-}
+    public createDocument(itemType: ItemType = ItemType.website, id?: string, partitionKey?: string): StorageDocument {
+        return {
+            id: id === undefined ? this.createRandomString('id') : id,
+            itemType: itemType,
+            partitionKey: partitionKey === undefined ? this.createRandomString('pk') : partitionKey,
+        };
+    }
 
-export function createUrl(baseUrl: string): string {
-    return `${baseUrl}page-${createRandomString()}.html`;
-}
+    public createRandomString(prefix: string = ''): string {
+        return `${prefix}-${crypto.randomBytes(5).toString('hex')}`;
+    }
 
-export async function createDbContainer(container: DbContainer): Promise<DbContainer> {
-    console.log(`Creating database '${container.dbName}..`);
-    const dbResponse = await azureCosmosClient.databases.createIfNotExists({ id: container.dbName });
-    const db = dbResponse.database;
+    public createBaseUrl(): string {
+        return `https://${this.createRandomString()}.localhost/`;
+    }
 
-    await waitForDbCreation(container.dbName);
+    public createUrl(baseUrl: string): string {
+        return `${baseUrl}page-${this.createRandomString()}.html`;
+    }
 
-    await db.containers.createIfNotExists(
-        {
-            id: container.collectionName,
-            partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
-        },
-        { offerThroughput: 1000 },
-    );
+    public async createDbContainer(container: DbContainer): Promise<DbContainer> {
+        console.log(`Creating database '${container.dbName}..`);
+        const dbResponse = await this.azureCosmosClient.databases.createIfNotExists({ id: container.dbName });
+        const db = dbResponse.database;
 
-    console.log('.created');
+        await this.waitForDbCreation(container.dbName);
 
-    console.log(`Cosmos container:
+        await db.containers.createIfNotExists(
+            {
+                id: container.collectionName,
+                partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
+            },
+            { offerThroughput: 1000 },
+        );
+
+        console.log('.created');
+
+        console.log(`Cosmos container:
     DB: ${container.dbName}
     Collection: ${container.collectionName}`);
 
-    return dbContainer;
-}
-
-async function waitForDbCreation(dbName: string): Promise<void> {
-    sleep(2000);
-
-    while (true) {
-        try {
-            await azureCosmosClient.database(dbName).read();
-            break;
-        } catch (error) {
-            if ((<cosmos.ErrorResponse>error).code === 404) {
-                continue;
-            }
-
-            throw error;
-        }
+        return this.dbContainer;
     }
-}
 
-export async function deleteDbContainer(container: DbContainer): Promise<void> {
-    try {
-        console.log(`Deleting database '${container.dbName}..`);
-        await azureCosmosClient.database(container.dbName).delete();
-        sleep(2000);
+    public async waitForDbCreation(dbName: string): Promise<void> {
+        this.sleep(2000);
 
         while (true) {
             try {
-                await azureCosmosClient.database(container.dbName).read();
+                await this.azureCosmosClient.database(dbName).read();
+                break;
             } catch (error) {
                 if ((<cosmos.ErrorResponse>error).code === 404) {
-                    break;
+                    continue;
                 }
 
                 throw error;
             }
         }
-        console.log('.deleted');
-    } catch (error) {
-        if ((<cosmos.ErrorResponse>error).code !== 404) {
-            throw error;
+    }
+
+    public async deleteAllDocuments(): Promise<void> {
+        const items = await this.cosmosClient.readAllItem(this.dbContainer.dbName, this.dbContainer.collectionName);
+
+        await Promise.all(
+            items.item.map(async item => {
+                await this.cosmosClient.deleteItem(item.id, this.dbContainer.dbName, this.dbContainer.collectionName, item.partitionKey);
+            }),
+        );
+    }
+
+    public async upsertItem<T>(item: T): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClient.upsertItem(item, this.dbContainer.dbName, this.dbContainer.collectionName, (<any>item).partitionKey);
+    }
+
+    public async upsertItems<T>(items: T[]): Promise<void> {
+        await Promise.all(
+            items.map(async item => {
+                await this.upsertItem(item);
+            }),
+        );
+    }
+
+    public getDocumentProjections(documents: any[]): any[] {
+        return documents.map(d => {
+            return { id: d.id, label: d.label };
+        });
+    }
+
+    private async deleteDbContainer(container: DbContainer): Promise<void> {
+        try {
+            console.log(`Deleting database '${container.dbName}..`);
+            await this.azureCosmosClient.database(container.dbName).delete();
+            this.sleep(2000);
+
+            while (true) {
+                try {
+                    await this.azureCosmosClient.database(container.dbName).read();
+                } catch (error) {
+                    if ((<cosmos.ErrorResponse>error).code === 404) {
+                        break;
+                    }
+
+                    throw error;
+                }
+            }
+            console.log('.deleted');
+        } catch (error) {
+            if ((<cosmos.ErrorResponse>error).code !== 404) {
+                throw error;
+            }
         }
     }
-}
 
-export async function upsertItem<T>(item: T): Promise<CosmosOperationResponse<T>> {
-    return cosmosClient.upsertItem(item, dbContainer.dbName, dbContainer.collectionName, (<any>item).partitionKey);
-}
-
-export async function upsertItems<T>(items: T[]): Promise<void> {
-    await Promise.all(
-        items.map(async item => {
-            await upsertItem(item);
-        }),
-    );
-}
-
-export function getDocumentProjections(documents: any[]): any[] {
-    return documents.map(d => {
-        return { id: d.id, label: d.label };
-    });
-}
-
-export function sleep(time: number): void {
-    const stop = new Date().getTime();
-    let i = 0;
-    while (new Date().getTime() < stop + time) {
-        i = i + 1;
+    private sleep(time: number): void {
+        const stop = new Date().getTime();
+        let i = 0;
+        while (new Date().getTime() < stop + time) {
+            i = i + 1;
+        }
     }
 }

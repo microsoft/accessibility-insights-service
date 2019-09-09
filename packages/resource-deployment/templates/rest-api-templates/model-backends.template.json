@@ -1,0 +1,28 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "apimServiceName": {
+            "type": "string"
+        },
+        "functionName": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "properties": {
+                "description": "[parameters('functionName')]",
+                "resourceId": "[concat('https://management.azure.com/subscriptions/',subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
+                "credentials": {
+                    "header": {}
+                },
+                "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
+                "protocol": "http"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
+            "type": "Microsoft.ApiManagement/service/backends",
+            "apiVersion": "2019-01-01"
+        }
+    ]
+}
