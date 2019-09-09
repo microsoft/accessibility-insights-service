@@ -8,13 +8,11 @@ set -eo pipefail
 
 export resourceGroupName
 export resourceName
-export clientId
-export environment
 export keyVault
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <client id> -e <environment> -k <the keyVault azure function app needs access to>
+Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to>
 "
     exit 1
 }
@@ -25,7 +23,7 @@ addReplyUrlIfNotExists() {
 
     # Get existing reply urls of the app registration
     echo "Fetching existing replyUrls..."
-    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv) || true
+    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv)
     replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
 
     for url in $replyUrls; do
@@ -36,7 +34,7 @@ addReplyUrlIfNotExists() {
     done
 
     echo "Adding replyUrl $replyUrl to app registration..."
-    (az ad app update --id $clientId --add replyUrls $replyUrl) || true
+    az ad app update --id $clientId --add replyUrls $replyUrl
     echo "  Successfully added replyUrl."
 }
 
@@ -46,7 +44,7 @@ createAppRegistration() {
 
     appRegistrationName="allyappregistration-$resourceGroupName-$environment"
     echo "Creating a new AppRegistration with display name $appRegistrationName..."
-    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv) || true
+    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "  Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 }
 
@@ -54,33 +52,30 @@ createAppRegistration() {
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:c:e:k:" option; do
+while getopts "r:e:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $clientId ] || [ -z $environment ] || [ -z $keyVault ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
 # Create app registration if not exists
-if [ -z $clientId ]; then
-    echo "Checking if the function app already exists..."
-    functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
-    echo "Checking if the App Registration exists..."
-    clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
-    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
+echo "Checking if the function app already exists..."
+functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
+echo "Checking if the App Registration exists..."
+clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
+appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
 
-    if [[ ! -n $appRegistrationName ]]; then
-        createAppRegistration $resourceGroupName $environment
-    else
-        echo "AppRegistration already exists, display name: $appRegistrationName."
-    fi
+if [[ ! -n $appRegistrationName ]]; then
+    createAppRegistration $resourceGroupName $environment
+else
+    echo "AppRegistration already exists, display name: $appRegistrationName."
 fi
 
 # Start function app deployment
