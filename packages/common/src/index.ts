@@ -3,7 +3,7 @@
 export { HashGenerator } from './ciphers/hash-generator';
 export { IoC } from './dependency-injection/setup-singleton-provider';
 export { System } from './system/system';
-export { Guid } from './system/guid';
+export { GuidUtils } from './system/guid-utils';
 export { Url } from './system/url';
 export {
     QueueRuntimeConfig,

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { Guid, RestApiConfig, ServiceConfiguration, Url } from 'common';
+import { GuidUtils, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
@@ -18,6 +18,7 @@ export class ScanRequestController extends ApiController {
     public constructor(
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
+        @inject(GuidUtils) private readonly guidUtils: GuidUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
@@ -40,7 +41,7 @@ export class ScanRequestController extends ApiController {
             return;
         }
 
-        const batchId = Guid.createGuid();
+        const batchId = this.guidUtils.createGuid();
         const response = this.createScanRunBatchResponse(batchId, payload);
 
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
@@ -62,7 +63,7 @@ export class ScanRequestController extends ApiController {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
                 return {
                     // preserve guid origin for a single batch scope
-                    scanId: Guid.createGuidForNode(batchId),
+                    scanId: this.guidUtils.createGuidForNode(batchId),
                     url: scanRunRequest.url,
                 };
             } else {

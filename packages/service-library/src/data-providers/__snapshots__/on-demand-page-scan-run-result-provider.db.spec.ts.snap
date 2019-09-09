@@ -1,0 +1,98 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OnDemandPageScanRunResultProvider.Db stores & retrieve scan results sorted by priority 1`] = `
+Array [
+  Object {
+    "_attachments": undefined,
+    "_etag": undefined,
+    "_rid": undefined,
+    "_self": undefined,
+    "_ts": undefined,
+    "id": "1e9d35cb-ce0c-6590-4455-6b753f5e8e18",
+    "itemType": "pageScanRunResult",
+    "partitionKey": "pageScanRunResult-605",
+    "priority": 1,
+    "reports": Array [
+      Object {
+        "format": "sarif",
+        "href": "ref1",
+        "reportId": "rep-id1",
+      },
+    ],
+    "run": Object {
+      "state": "failed",
+    },
+    "scanResult": Object {
+      "state": "unknown",
+    },
+    "url": "url1",
+  },
+  Object {
+    "_attachments": undefined,
+    "_etag": undefined,
+    "_rid": undefined,
+    "_self": undefined,
+    "_ts": undefined,
+    "id": "1e9d35cc-a3d0-6780-5a65-6b753f5e8e18",
+    "itemType": "pageScanRunResult",
+    "partitionKey": "pageScanRunResult-605",
+    "priority": 2,
+    "run": Object {
+      "state": "running",
+    },
+    "scanResult": Object {
+      "state": "unknown",
+    },
+    "url": "url2",
+  },
+  Object {
+    "_attachments": undefined,
+    "_etag": undefined,
+    "_rid": undefined,
+    "_self": undefined,
+    "_ts": undefined,
+    "id": "1e9d35cc-ef1b-65f0-9b5b-b4a0d6006e92",
+    "itemType": "pageScanRunResult",
+    "partitionKey": "pageScanRunResult-3",
+    "priority": 2,
+    "reports": Array [],
+    "run": Object {
+      "state": "completed",
+    },
+    "scanResult": Object {
+      "state": "pass",
+    },
+    "url": "url3",
+  },
+]
+`;
+
+exports[`OnDemandPageScanRunResultProvider.Db update scan run 1`] = `
+Array [
+  Object {
+    "_attachments": undefined,
+    "_etag": undefined,
+    "_rid": undefined,
+    "_self": undefined,
+    "_ts": undefined,
+    "id": "1e9d35ce-d95f-62f0-7f39-36c97852967f",
+    "itemType": "pageScanRunResult",
+    "partitionKey": "pageScanRunResult-995",
+    "priority": 1,
+    "reports": Array [
+      Object {
+        "format": "sarif",
+        "href": "ref1",
+        "reportId": "rep-id1",
+      },
+    ],
+    "run": Object {
+      "state": "failed",
+    },
+    "scanResult": Object {
+      "state": "unknown",
+    },
+    "url": "url1",
+  },
+]
+`;
