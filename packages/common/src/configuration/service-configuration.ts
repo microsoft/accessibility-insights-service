@@ -32,12 +32,17 @@ export interface ScanRunTimeConfig {
     accessibilityRuleExclusionList: string[];
 }
 
+export interface RestApiConfig {
+    maxScanRequestBatchCount: number;
+}
+
 export interface RuntimeConfig {
     logConfig: LogRuntimeConfig;
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
     jobManagerConfig: JobManagerConfig;
+    restApiConfig: RestApiConfig;
 }
 
 @injectable()
@@ -151,6 +156,13 @@ export class ServiceConfiguration {
                     format: Array,
                     default: [],
                     doc: 'Axe core rule exclusion list',
+                },
+            },
+            restApiConfig: {
+                maxScanRequestBatchCount: {
+                    format: 'int',
+                    default: 1000,
+                    doc: 'Maximum number of scan requests in a single HTTP client request.',
                 },
             },
         };

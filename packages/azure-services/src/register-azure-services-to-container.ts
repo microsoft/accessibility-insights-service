@@ -51,12 +51,16 @@ export function registerAzureServicesToContainer(container: Container): void {
         return createCosmosContainerClient(context.container, 'scanner', 'a11yIssues');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'pageScanRequests');
+    container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandPageScanRunResults).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'onDemandPageScanRunResults');
+    container.bind(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRuns');
+    });
+
+    container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
     container.bind(Queue).toSelf();
@@ -96,10 +100,14 @@ function setupSingletonQueueServiceURLProvider(container: interfaces.Container):
 
 function setupSingletonCosmosClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async context => {
-        const secretProvider = context.container.get(SecretProvider);
-        const cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
-        const cosmosDbKey = await secretProvider.getSecret(secretNames.cosmosDbKey);
+        if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
+            return new CosmosClient({ endpoint: process.env.COSMOS_DB_URL, auth: { masterKey: process.env.COSMOS_DB_KEY } });
+        } else {
+            const secretProvider = context.container.get(SecretProvider);
+            const cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
+            const cosmosDbKey = await secretProvider.getSecret(secretNames.cosmosDbKey);
 
-        return new CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
+            return new CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
+        }
     });
 }

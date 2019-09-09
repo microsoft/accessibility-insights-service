@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { interfaces } from 'inversify';
-import { System } from '../system/system-utils';
+import { System } from '../system/system';
 
 export namespace IoC {
     export function setupSingletonProvider<T>(

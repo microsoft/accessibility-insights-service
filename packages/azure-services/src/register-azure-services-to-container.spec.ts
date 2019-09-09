@@ -57,9 +57,13 @@ describe(registerAzureServicesToContainer, () => {
     it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
-        verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'a11yIssues');
-        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandPageScanRequestsCosmosContainerClient, 'pageScanRequests');
-        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandPageScanRunResults, 'onDemandPageScanRunResults');
+        verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
     });
 
     describe('QueueServiceURLProvider', () => {
@@ -196,9 +200,9 @@ describe(registerAzureServicesToContainer, () => {
         expect(container.get(key)).not.toBe(container.get(key));
     }
 
-    function verifyCosmosContainerClient(cosmosContainerType: string, collectionName: string): void {
+    function verifyCosmosContainerClient(cosmosContainerType: string, dbName: string, collectionName: string): void {
         const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
-        expect((cosmosContainerClient as any).dbName).toBe('scanner');
+        expect((cosmosContainerClient as any).dbName).toBe(dbName);
         expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
     }
 });

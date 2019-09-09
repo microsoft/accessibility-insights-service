@@ -7,36 +7,83 @@
 set -eo pipefail
 
 export resourceGroupName
-export functionAppName
 export resourceName
+export keyVault
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to>
 "
     exit 1
+}
+
+addReplyUrlIfNotExists() {
+    clientId=$1
+    functionAppName=$2
+
+    # Get existing reply urls of the app registration
+    echo "Fetching existing replyUrls..."
+    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv)
+    replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
+
+    for url in $replyUrls; do
+        if [[ $url == $replyUrl ]]; then
+            echo "replyUrl ${replyUrl} already exsits."
+            return
+        fi
+    done
+
+    echo "Adding replyUrl $replyUrl to app registration..."
+    az ad app update --id $clientId --add replyUrls $replyUrl
+    echo "  Successfully added replyUrl."
+}
+
+createAppRegistration() {
+    resourceGroupName=$1
+    environment=$2
+
+    appRegistrationName="allyappregistration-$resourceGroupName-$environment"
+    echo "Creating a new AppRegistration with display name $appRegistrationName..."
+    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
+    echo "  Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 }
 
 # Set default ARM Function App template files
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:" option; do
+while getopts "r:e:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z "$resourceGroupName" ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
-# Start deployment
+# Create app registration if not exists
+echo "Checking if the function app already exists..."
+functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
+echo "Checking if the App Registration exists..."
+clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
+appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
+
+if [[ ! -n $appRegistrationName ]]; then
+    createAppRegistration $resourceGroupName $environment
+else
+    echo "AppRegistration already exists, display name: $appRegistrationName."
+fi
+
+# Start function app deployment
 echo "Deploying Function App using ARM template"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
+    --parameters '{ "clientId": {"value":"'$clientId'"}}' \
     --query "properties.outputResources[].id" \
     -o tsv)
 
@@ -44,11 +91,15 @@ resources=$(az group deployment create \
 functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
-# Add system-assigned managed identity to function app
+# Add reply url to app registration
+addReplyUrlIfNotExists $clientId $functionAppName
 
-echo "Adding managed identity to Function App '$functionAppName'"
-principalId=$(az webapp identity assign --name "$functionAppName" --resource-group "$resourceGroupName" --query principalId -o tsv)
-echo "Successfully Added managed identity to Function App '$functionAppName'"
+# Grant key vault access to function app
+echo "Fetching principalId of the azure function..."
+principalId=$(az functionapp identity show --name $functionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
+echo "  Successfully fetched principalId $principalId"
+
+. "${0%/*}/key-vault-enable-msi.sh"
 
 # Start publishing
 echo "Publishing API functions to '$functionAppName' Function App"
