@@ -83,7 +83,7 @@ while getopts "r:c:e:k:d:" option; do
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $clientId ] || [ -z $environment ] || [ -z $keyVault ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
