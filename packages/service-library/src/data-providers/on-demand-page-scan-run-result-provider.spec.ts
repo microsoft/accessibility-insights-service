@@ -56,7 +56,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
-        await testSubject.createScanRuns([partition1Result1, partition2Result1, partition1Result2]);
+        await testSubject.writeScanRuns([partition1Result1, partition2Result1, partition1Result2]);
         verifyAll();
     });
 
@@ -77,39 +77,52 @@ describe(OnDemandPageScanRunResultProvider, () => {
         verifyAll();
     });
 
-    it('retrieves scan run documents', async () => {
-        const scanIdsToFetch = ['partition1id1', 'partition2id1', 'partition1id2'];
-        const call1Result: any[] = [{ id: 'result 1' }, { id: 'result 2' }];
-        const call2Result: any[] = [{ id: 'result 3' }];
+    describe('readScanRuns', () => {
+        it('throws if scan runs size > 1000', async () => {
+            const scanIdsToFetch = [];
+            for (let i = 0; i < 1001; i += 1) {
+                scanIdsToFetch.push(`scanId-${i}`);
+            }
 
-        setupVerifiableGetNodeCall('bucket1', 'partition1id1', 'partition1id2');
-        setupVerifiableGetNodeCall('bucket2', 'partition2id1');
+            await expect(testSubject.readScanRuns(scanIdsToFetch)).rejects.toEqual(
+                new Error("Can't read more than 1000 scan documents per query"),
+            );
+        });
 
-        cosmosContainerClientMock
-            .setup(c => c.executeQueryWithContinuationToken(It.isAny()))
-            .returns(async (cb: (token: string) => Promise<CosmosOperationResponse<any[]>>) => {
-                const resultsFromCallback = await cb('token1');
+        it('retrieves scan run documents', async () => {
+            const scanIdsToFetch = ['partition1id1', 'partition2id1', 'partition1id2'];
+            const call1Result: any[] = [{ id: 'result 1' }, { id: 'result 2' }];
+            const call2Result: any[] = [{ id: 'result 3' }];
 
-                return resultsFromCallback.item;
-            })
-            .verifiable(Times.exactly(2));
+            setupVerifiableGetNodeCall('bucket1', 'partition1id1', 'partition1id2');
+            setupVerifiableGetNodeCall('bucket2', 'partition2id1');
 
-        cosmosContainerClientMock
-            .setup(c => c.queryDocuments("select * from c where c.id = 'partition1id1' or c.id = 'partition1id2'", 'token1', 'bucket1'))
-            .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
-            .verifiable();
+            cosmosContainerClientMock
+                .setup(c => c.executeQueryWithContinuationToken(It.isAny()))
+                .returns(async (cb: (token: string) => Promise<CosmosOperationResponse<any[]>>) => {
+                    const resultsFromCallback = await cb('token1');
 
-        cosmosContainerClientMock
-            .setup(c => c.queryDocuments("select * from c where c.id = 'partition2id1'", 'token1', 'bucket2'))
-            .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
-            .verifiable();
+                    return resultsFromCallback.item;
+                })
+                .verifiable(Times.exactly(2));
 
-        const results = await testSubject.readScanRuns(scanIdsToFetch);
+            cosmosContainerClientMock
+                .setup(c => c.queryDocuments("select * from c where c.id = 'partition1id1' or c.id = 'partition1id2'", 'token1', 'bucket1'))
+                .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
+                .verifiable();
 
-        expect(results.length).toBe(3);
-        expect(results).toEqual(call1Result.concat(call2Result));
+            cosmosContainerClientMock
+                .setup(c => c.queryDocuments("select * from c where c.id = 'partition2id1'", 'token1', 'bucket2'))
+                .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
+                .verifiable();
 
-        verifyAll();
+            const results = await testSubject.readScanRuns(scanIdsToFetch);
+
+            expect(results.length).toBe(3);
+            expect(results).toEqual(call1Result.concat(call2Result));
+
+            verifyAll();
+        });
     });
 
     function verifyAll(): void {

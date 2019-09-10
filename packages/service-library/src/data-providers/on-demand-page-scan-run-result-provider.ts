@@ -20,7 +20,7 @@ export class OnDemandPageScanRunResultProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async createScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
+    public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
         const scanRunsByPartition = groupBy(scanRuns, scanRun => {
             this.setSystemProperties(scanRun);
 
@@ -35,6 +35,11 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     public async readScanRuns(scanIds: string[]): Promise<OnDemandPageScanResult[]> {
+        // we need this check for query limits - https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#sql-query-limits
+        if (scanIds.length > 1000) {
+            throw new Error("Can't read more than 1000 scan documents per query");
+        }
+
         const scanIdsByPartition = groupBy(scanIds, scanId => {
             return this.getPartitionKey(scanId);
         });

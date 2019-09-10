@@ -92,7 +92,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 ...result3,
                 partitionKey: 'pageScanRunResult-605',
             };
-            await testSubject.createScanRuns([result1, result2, result3]);
+            await testSubject.writeScanRuns([result1, result2, result3]);
 
             const itemsInDb = await testSubject.readScanRuns([partitionKey1Guid1, partitionKey2Guid1, partitionKey1Guid2]);
 
@@ -120,7 +120,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
             const resultUpdate = cloneDeep(result);
             resultUpdate.scanResult = { state: 'pass', issueCount: 3 };
 
-            await testSubject.createScanRuns([result]);
+            await testSubject.writeScanRuns([result]);
             await testSubject.updateScanRun(result);
             const itemsInDb = await testSubject.readScanRuns([result.id]);
 
