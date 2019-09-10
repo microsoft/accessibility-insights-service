@@ -66,11 +66,7 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     private getReadScanQueryForScanIds(scanIds: string[]): string {
-        const orConditions = scanIds.map(scanId => {
-            return `c.id = '${scanId}'`;
-        });
-
-        return `select * from c where ${orConditions.join(' or ')}`;
+        return `select * from c where c.id in (\"${scanIds.join('", "')}\")`;
     }
 
     private setSystemProperties(pageScanResult: OnDemandPageScanResult): void {
