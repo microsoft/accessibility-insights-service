@@ -5,6 +5,7 @@ import { Guid, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 
+import { OnDemandPageScanResult } from 'storage-documents';
 import { ScanResultResponse } from '../api-contracts/scan-result-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
 import { webApiIocTypes } from '../setup-ioc-container';
@@ -58,5 +59,9 @@ export class ScanResultController extends ApiController {
         };
 
         this.logger.logInfo('scan result fetched');
+    }
+
+    private getDefaultResponse(scanId: string): OnDemandPageScanResult {
+        return undefined;
     }
 }
