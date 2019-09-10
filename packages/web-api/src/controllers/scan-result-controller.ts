@@ -48,7 +48,7 @@ export class ScanResultController extends ApiController {
             return;
         }
 
-        const response = await this.scanDataProvider.readScanResult();
+        const response = await this.scanDataProvider.readScanResult(scanId);
         this.context.res = {
             status: 200, // OK
             body: response,

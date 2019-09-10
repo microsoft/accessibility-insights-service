@@ -26,8 +26,12 @@ export class ScanDataProvider {
         return;
     }
 
-    public async readScanResult(): Promise<ScanResultResponse> {
-        //implement this
-        return undefined;
+    public async readScanResult(scanId: string): Promise<ScanResultResponse> {
+        const scanResultItem = await this.cosmosContainerClient.readDocument<ScanResultResponse>(scanId);
+        if (scanResultItem.statusCode === 200) {
+            return scanResultItem.item;
+        } else {
+            return undefined;
+        }
     }
 }
