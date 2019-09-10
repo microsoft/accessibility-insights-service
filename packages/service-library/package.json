@@ -26,6 +26,7 @@
         "@types/jest": "^24.0.11",
         "@types/node": "^11.13.4",
         "@types/sha.js": "^2.4.0",
+        "@types/puppeteer": "^1.12.1",
         "jest": "^24.7.1",
         "jest-circus": "^24.7.1",
         "jest-junit": "^6.3.0",
@@ -37,6 +38,7 @@
         "typescript": "^3.4.3"
     },
     "dependencies": {
+        "puppeteer": "^1.12.2",
         "azure-services": "1.0.0",
         "common": "1.0.0",
         "dotenv": "^6.2.0",

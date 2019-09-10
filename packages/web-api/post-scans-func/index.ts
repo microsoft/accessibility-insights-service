@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ScanController } from '../src/controllers/scan-controller';
+import { ControllerDispatcher } from '../src/controller-dispatcher';
+import { ScanRequestController } from '../src/controllers/scan-request-controller';
+import { setupIoContainer } from '../src/setup-ioc-container';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new ScanController(context);
-    if (controller.validateRequest()) {
-        controller.postScanRunRequests();
-    }
+    const dispatcher = new ControllerDispatcher(ScanRequestController, context, setupIoContainer());
+    await dispatcher.start();
 }

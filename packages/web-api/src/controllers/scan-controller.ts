@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
+import { Logger } from 'logger';
 import { ScanBatchRequest } from '../api-contracts/scan-batch-request';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { MockScanDataProvider } from '../providers/mock-scan-data-provider';
@@ -8,12 +9,18 @@ import { ApiController } from './api-controller';
 
 export class ScanController extends ApiController {
     public readonly apiVersion = '1.0';
+    public readonly apiName = 'web-api-mock';
+    protected readonly logger: Logger;
 
     constructor(
-        public readonly context: Context,
+        protected readonly context: Context,
         private readonly mockScanDataProvider: MockScanDataProvider = new MockScanDataProvider(),
     ) {
-        super(context);
+        super();
+    }
+
+    public async handleRequest(): Promise<void> {
+        return;
     }
 
     public getScanResult(): void {

@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 module.exports = {
     clearMocks: true,
-    displayName: 'storage unit tests',
+    collectCoverage: true,
+    displayName: 'all unit tests',
     globals: {
         'ts-jest': {
             tsConfig: '<rootDir>/tsconfig.json',
@@ -33,6 +34,8 @@ module.exports = {
         '!<rootDir>/**/test-results/**',
         '!<rootDir>/**/test-utilities/**',
         '!<rootDir>/**/dev-scripts/**',
+        '!<rootDir>/**/jump-consistent-hash.*',
+        '!<rootDir>/**/guid.*',
     ],
     reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
     testEnvironment: 'node',

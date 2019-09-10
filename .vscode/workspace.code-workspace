@@ -9,8 +9,24 @@
             "path": "../packages/runner"
         },
         {
+            "name": "scanner",
+            "path": "../packages/scanner"
+        },
+        {
             "name": "scan-request-sender",
             "path": "../packages/scan-request-sender"
+        },
+        {
+            "name": "web-api-scan-request-sender",
+            "path": "../packages/web-api-scan-request-sender"
+        },
+        {
+            "name": "web-api-scan-runner",
+            "path": "../packages/web-api-scan-runner"
+        },
+        {
+            "name": "web-api-scan-job-manager",
+            "path": "../packages/web-api-scan-job-manager"
         },
         {
             "name": "service-library",
@@ -68,6 +84,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Newable",
             "Rescan",
             "SARIF",
             "backlink",

@@ -1,11 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
+import { injectable } from 'inversify';
+import { Logger } from 'logger';
 
+@injectable()
 export abstract class ApiController {
     public abstract readonly apiVersion: string;
+    public abstract readonly apiName: string;
+    protected abstract readonly context: Context;
+    protected abstract readonly logger: Logger;
 
-    constructor(public readonly context: Context) {}
+    public abstract async handleRequest(): Promise<void>;
+
+    public async invoke(): Promise<void> {
+        if (this.validateRequest()) {
+            await this.handleRequest();
+        }
+    }
 
     public validateRequest(): boolean {
         if (!this.validateApiVersion() || !this.validateContentType()) {
