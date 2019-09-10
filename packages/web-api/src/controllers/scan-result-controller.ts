@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { Guid, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
-import { OnDemandPageScanResult } from 'storage-documents';
-import { ScanResultResponse } from '../api-contracts/scan-result-response';
-import { ScanDataProvider } from '../providers/scan-data-provider';
 import { webApiIocTypes } from '../setup-ioc-container';
 import { ApiController } from './api-controller';
 
@@ -18,8 +17,9 @@ export class ScanResultController extends ApiController {
 
     public constructor(
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
-        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
         super();
@@ -27,41 +27,61 @@ export class ScanResultController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-        const timeRequested = Guid.getGuidTimestamp(scanId);
+        const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
         const timeCurrent = new Date();
-        const scanResultQueryBufferInSeconds = (await this.serviceConfig.getConfigValue('restApiConfig')).scanResultQueryBufferInSeconds;
+        const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
 
         if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000) {
-            const nullResponse: ScanResultResponse = {
-                scanId,
-                url: undefined,
-                run: {
-                    state: 'accepted',
-                },
-            };
             this.context.res = {
                 status: 202, // Accepted
-                body: nullResponse,
+                body: this.getDefaultResponse(scanId),
             };
-            this.logger.logInfo('scan result queried too soon');
+            this.logger.logInfo('scan result queried too soon', { scanId });
 
             return;
         }
 
-        const scanResultItem = await this.scanDataProvider.readScanResult(scanId);
+        const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns([scanId]);
 
-        this.context.res = {
-            status: scanResultItem.statusCode,
-            body: scanResultItem.item,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
+        if (scanResultItems.length !== 1) {
+            this.context.res = {
+                status: 404,
+                body: this.getUnknownResponse(scanId),
+            };
+            this.logger.logInfo('scan result not found', { scanId });
+        } else {
+            this.context.res = {
+                status: 200,
+                body: scanResultItems[0],
+            };
 
-        this.logger.logInfo('scan result fetched');
+            this.logger.logInfo('scan result fetched', { scanId });
+        }
     }
 
     private getDefaultResponse(scanId: string): OnDemandPageScanResult {
-        return undefined;
+        return {
+            id: scanId,
+            partitionKey: undefined,
+            url: undefined,
+            run: {
+                state: 'accepted',
+            },
+            priority: undefined,
+            itemType: ItemType.onDemandPageScanRunResult,
+        };
+    }
+
+    private getUnknownResponse(scanId: string): OnDemandPageScanResult {
+        return {
+            id: scanId,
+            partitionKey: undefined,
+            url: undefined,
+            run: {
+                state: 'unknown',
+            },
+            priority: undefined,
+            itemType: ItemType.onDemandPageScanRunResult,
+        };
     }
 }

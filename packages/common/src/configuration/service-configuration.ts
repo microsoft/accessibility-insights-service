@@ -167,7 +167,7 @@ export class ServiceConfiguration {
                 },
                 scanResultQueryBufferInSeconds: {
                     format: 'int',
-                    default: 300,
+                    default: 120,
                     doc: 'Minimum time interval in seconds before a scan result query can be processed after requested.',
                 },
             },
