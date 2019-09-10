@@ -12,7 +12,7 @@ import * as uuid from 'uuid-with-v6';
  * UUID RFC 4122 https://tools.ietf.org/html/rfc4122
  */
 @injectable()
-export class GuidUtils {
+export class GuidGenerator {
     /**
      * Creates new UUID version 6.
      */
@@ -24,7 +24,7 @@ export class GuidUtils {
      * Creates UUID with the same UUID node part (the last 12 bytes) as base UUID.
      * @param baseGuid The UUID to match the UUID node with.
      */
-    public createGuidForNode(baseGuid: string): string {
+    public createGuidFromBaseGuid(baseGuid: string): string {
         const guid = <string>uuid.v6();
         const guidNode = this.getGuidNode(baseGuid);
 

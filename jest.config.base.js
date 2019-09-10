@@ -35,7 +35,7 @@ module.exports = {
         '!<rootDir>/**/test-utilities/**',
         '!<rootDir>/**/dev-scripts/**',
         '!<rootDir>/**/jump-consistent-hash.*',
-        '!<rootDir>/**/guid-utils.*',
+        '!<rootDir>/**/guid-generator.*',
     ],
     reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
     testEnvironment: 'node',

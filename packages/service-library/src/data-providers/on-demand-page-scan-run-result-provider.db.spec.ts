@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
-import { GuidUtils, HashGenerator } from 'common';
+import { GuidGenerator, HashGenerator } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
@@ -39,7 +39,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 loggerMock.object,
             );
 
-            testSubject = new OnDemandPageScanRunResultProvider(new HashGenerator(), new GuidUtils(), cosmosContainerClient);
+            testSubject = new OnDemandPageScanRunResultProvider(new HashGenerator(), new GuidGenerator(), cosmosContainerClient);
         });
 
         afterEach(async () => {

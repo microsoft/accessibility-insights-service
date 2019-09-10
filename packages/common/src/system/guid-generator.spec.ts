@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { GuidUtils } from './guid-utils';
+import { GuidGenerator } from './guid-generator';
 
-describe(GuidUtils, () => {
-    let testSubject: GuidUtils;
+describe(GuidGenerator, () => {
+    let testSubject: GuidGenerator;
 
     beforeEach(() => {
-        testSubject = new GuidUtils();
+        testSubject = new GuidGenerator();
     });
 
     describe('createGuid()', () => {
@@ -20,7 +20,7 @@ describe(GuidUtils, () => {
 
         it('create new UUID with fixed node part', () => {
             const guid = testSubject.createGuid();
-            const nextGuid = testSubject.createGuidForNode(guid);
+            const nextGuid = testSubject.createGuidFromBaseGuid(guid);
             expect(guid).not.toEqual(nextGuid);
             expect(guid.length).toEqual(36);
             expect(guid.substr(24, 6)).toEqual(nextGuid.substr(24, 6));

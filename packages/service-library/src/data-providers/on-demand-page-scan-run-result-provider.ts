@@ -3,7 +3,7 @@
 
 import { inject, injectable } from 'inversify';
 
-import { GuidUtils, HashGenerator } from 'common';
+import { GuidGenerator, HashGenerator } from 'common';
 
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
@@ -15,7 +15,7 @@ export class OnDemandPageScanRunResultProvider {
 
     constructor(
         @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
-        @inject(GuidUtils) private readonly guidUtils: GuidUtils,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
@@ -74,7 +74,7 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     private getPartitionKey(scanId: string): string {
-        const node = this.guidUtils.getGuidNode(scanId);
+        const node = this.guidGenerator.getGuidNode(scanId);
 
         return this.hashGenerator.getDbHashBucket(OnDemandPageScanRunResultProvider.partitionKeyPreFix, node);
     }

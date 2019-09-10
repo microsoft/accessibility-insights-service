@@ -3,7 +3,7 @@
 
 import { Container } from 'inversify';
 import { ServiceConfiguration } from './configuration/service-configuration';
-import { GuidUtils } from './system/guid-utils';
+import { GuidGenerator } from './system/guid-generator';
 
 export function setupRuntimeConfigContainer(container: Container): void {
     container
@@ -12,7 +12,7 @@ export function setupRuntimeConfigContainer(container: Container): void {
         .inSingletonScope();
 
     container
-        .bind<GuidUtils>(GuidUtils)
+        .bind<GuidGenerator>(GuidGenerator)
         .toSelf()
         .inSingletonScope();
 }

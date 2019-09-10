@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidUtils, RestApiConfig, ServiceConfiguration } from 'common';
+import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from '../providers/scan-data-provider';
@@ -16,7 +16,7 @@ describe(ScanRequestController, () => {
     let scanDataProviderMock: IMock<ScanDataProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
-    let guidUtilsMock: IMock<GuidUtils>;
+    let guidGeneratorMock: IMock<GuidGenerator>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{
@@ -33,7 +33,7 @@ describe(ScanRequestController, () => {
         scanDataProviderMock = Mock.ofType<ScanDataProvider>();
         scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
 
-        guidUtilsMock = Mock.ofType(GuidUtils);
+        guidGeneratorMock = Mock.ofType(GuidGenerator);
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
@@ -51,7 +51,7 @@ describe(ScanRequestController, () => {
         return new ScanRequestController(
             contextReq,
             scanDataProviderMock.object,
-            guidUtilsMock.object,
+            guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
         );
@@ -81,8 +81,8 @@ describe(ScanRequestController, () => {
         it('accept valid request', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidUtilsMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidUtilsMock.setup(g => g.createGuidForNode(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
             const response = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
@@ -95,7 +95,7 @@ describe(ScanRequestController, () => {
             expect(context.res.status).toEqual(202);
             expect(context.res.body).toEqual(response);
             scanDataProviderMock.verifyAll();
-            guidUtilsMock.verifyAll();
+            guidGeneratorMock.verifyAll();
         });
     });
 });

@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { GuidUtils, HashGenerator } from 'common';
+import { GuidGenerator, HashGenerator } from 'common';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
@@ -15,15 +15,15 @@ describe(OnDemandPageScanRunResultProvider, () => {
     let testSubject: OnDemandPageScanRunResultProvider;
     let hashGeneratorMock: IMock<HashGenerator>;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
-    let guidUtilsMock: IMock<GuidUtils>;
+    let guidGeneratorMock: IMock<GuidGenerator>;
 
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType(HashGenerator);
         cosmosContainerClientMock = Mock.ofType(CosmosContainerClient, MockBehavior.Strict);
-        guidUtilsMock = Mock.ofType(GuidUtils);
+        guidGeneratorMock = Mock.ofType(GuidGenerator);
         testSubject = new OnDemandPageScanRunResultProvider(
             hashGeneratorMock.object,
-            guidUtilsMock.object,
+            guidGeneratorMock.object,
             cosmosContainerClientMock.object,
         );
     });
@@ -113,7 +113,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
     });
 
     function verifyAll(): void {
-        guidUtilsMock.verifyAll();
+        guidGeneratorMock.verifyAll();
         hashGeneratorMock.verifyAll();
         cosmosContainerClientMock.verifyAll();
     }
@@ -129,7 +129,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
     function setupVerifiableGetNodeCall(bucket: string, ...scanIds: string[]): void {
         scanIds.forEach(scanId => {
             const scanIdNode = `${scanId}-node`;
-            guidUtilsMock
+            guidGeneratorMock
                 .setup(g => g.getGuidNode(scanId))
                 .returns(() => scanIdNode)
                 .verifiable();
