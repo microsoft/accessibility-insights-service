@@ -28,10 +28,9 @@ export class ScanResultController extends ApiController {
         const scanId = <string>this.context.bindingData.scanId;
         const timeRequested = Guid.getGuidTimestamp(scanId);
         const timeCurrent = new Date();
-        const scanResultQueryBufferInSeconds = (await this.serviceConfig.getConfigValue('restApiConfig')).maxScanRequestBatchCount;
+        const scanResultQueryBufferInSeconds = (await this.serviceConfig.getConfigValue('restApiConfig')).scanResultQueryBufferInSeconds;
 
-        if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds) {
-            // will not query db
+        if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000) {
             const nullResponse: ScanResultResponse = {
                 scanId,
                 url: undefined,
@@ -48,10 +47,11 @@ export class ScanResultController extends ApiController {
             return;
         }
 
-        const response = await this.scanDataProvider.readScanResult(scanId);
+        const scanResultItem = await this.scanDataProvider.readScanResult(scanId);
+
         this.context.res = {
-            status: 200, // OK
-            body: response,
+            status: scanResultItem.statusCode,
+            body: scanResultItem.item,
             headers: {
                 'Content-Type': 'application/json',
             },

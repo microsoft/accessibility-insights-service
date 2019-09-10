@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { ItemType, OnDemandPageScanBatchRequest, PartitionKey } from 'storage-documents';
 import { ScanResultResponse } from '../api-contracts/scan-result-response';
@@ -26,12 +26,7 @@ export class ScanDataProvider {
         return;
     }
 
-    public async readScanResult(scanId: string): Promise<ScanResultResponse> {
-        const scanResultItem = await this.cosmosContainerClient.readDocument<ScanResultResponse>(scanId);
-        if (scanResultItem.statusCode === 200) {
-            return scanResultItem.item;
-        } else {
-            return undefined;
-        }
+    public async readScanResult(scanId: string): Promise<CosmosOperationResponse<ScanResultResponse>> {
+        return this.cosmosContainerClient.readDocument<ScanResultResponse>(scanId);
     }
 }
