@@ -89,6 +89,38 @@ describe(OnDemandPageScanRunResultProvider, () => {
             );
         });
 
+        it('throws if one of the query call fails', async () => {
+            const scanIdsToFetch = ['partition1id1', 'partition2id1', 'partition1id2'];
+            const call1Result: any[] = [{ id: 'result 1' }, { id: 'result 2' }];
+            const call2Result: any[] = [{ id: 'result 3' }];
+
+            setupVerifiableGetNodeCall('bucket1', 'partition1id1', 'partition1id2');
+            setupVerifiableGetNodeCall('bucket2', 'partition2id1');
+
+            cosmosContainerClientMock
+                .setup(c => c.executeQueryWithContinuationToken(It.isAny()))
+                .returns(async (cb: (token: string) => Promise<CosmosOperationResponse<any[]>>) => {
+                    const resultsFromCallback = await cb('token1');
+
+                    return resultsFromCallback.item;
+                })
+                .verifiable(Times.exactly(2));
+
+            cosmosContainerClientMock
+                .setup(c => c.queryDocuments("select * from c where c.id = 'partition1id1' or c.id = 'partition1id2'", 'token1', 'bucket1'))
+                .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
+                .verifiable();
+
+            cosmosContainerClientMock
+                .setup(c => c.queryDocuments("select * from c where c.id = 'partition2id1'", 'token1', 'bucket2'))
+                .returns(() => Promise.reject('sample test error'))
+                .verifiable();
+
+            await expect(testSubject.readScanRuns(scanIdsToFetch)).rejects.toEqual('sample test error');
+
+            verifyAll();
+        });
+
         it('retrieves scan run documents', async () => {
             const scanIdsToFetch = ['partition1id1', 'partition2id1', 'partition1id2'];
             const call1Result: any[] = [{ id: 'result 1' }, { id: 'result 2' }];
