@@ -8,7 +8,6 @@ set -eo pipefail
 
 export appInsightsKey
 export apiManagementName
-export apiTemplates="$templatesFolder"rest-api-templates
 export batchAccountName
 export cosmosAccountName
 export datalakeStorageAccountName
@@ -23,6 +22,7 @@ export subscription
 export storageAccountName
 export clientId
 export templatesFolder="${0%/*}/../templates/"
+export apiTemplates="$templatesFolder"rest-api-templates
 
 exitWithUsageInfo() {
     echo "
