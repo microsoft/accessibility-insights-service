@@ -11,7 +11,6 @@ export declare type OnDemandPageScanRunState = 'unknown' | 'accepted' | 'queued'
  * The web page scan run result document.
  */
 export interface OnDemandPageScanResult extends StorageDocument {
-    scanId: string;
     url: string;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
