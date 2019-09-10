@@ -79,44 +79,43 @@ while getopts "r:s:l:e:o:p:" option; do
     esac
 done
 
-# if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
-#     exitWithUsageInfo
-# fi
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
+    exitWithUsageInfo
+fi
 
-echo "Templates folder - $templatesFolder .API templates folder - $apiTemplates"
 # Login to Azure if required
-# if ! az account show 1>/dev/null; then
-#     az login
-# fi
+if ! az account show 1>/dev/null; then
+    az login
+fi
 
-# az account set --subscription "$subscription"
+az account set --subscription "$subscription"
 
-# . "${0%/*}/create-resource-group.sh"
+. "${0%/*}/create-resource-group.sh"
 
-# . "${0%/*}/create-storage-account.sh"
+. "${0%/*}/create-storage-account.sh"
 
-# . "${0%/*}/create-datalake-storage-account.sh"
+. "${0%/*}/create-datalake-storage-account.sh"
 
-# . "${0%/*}/upload-files.sh"
+. "${0%/*}/upload-files.sh"
 
-# . "${0%/*}/create-queues.sh"
+. "${0%/*}/create-queues.sh"
 
-# . "${0%/*}/setup-cosmos-db.sh"
+. "${0%/*}/setup-cosmos-db.sh"
 
-# . "${0%/*}/app-insights-create.sh"
+. "${0%/*}/app-insights-create.sh"
 
-# . "${0%/*}/batch-account-create.sh"
+. "${0%/*}/batch-account-create.sh"
 
-# . "${0%/*}/push-secrets-to-key-vault.sh"
+. "${0%/*}/push-secrets-to-key-vault.sh"
 
-# . "${0%/*}/function-app-create.sh"
+. "${0%/*}/function-app-create.sh"
 
-# # shellcheck disable=SC2154
-# keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
-# echo "Fetched keyvault url $keyVaultUrl"
+# shellcheck disable=SC2154
+keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
+echo "Fetched keyvault url $keyVaultUrl"
 
-# . "${0%/*}/job-schedule-create.sh"
+. "${0%/*}/job-schedule-create.sh"
 
-# . "${0%/*}/create-api-management.sh"
+. "${0%/*}/create-api-management.sh"
 
-# . "${0%/*}/deploy-rest-api.sh"
+. "${0%/*}/deploy-rest-api.sh"
