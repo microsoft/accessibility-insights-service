@@ -32,6 +32,7 @@ export class ScanResultController extends ApiController {
         const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
 
         if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000) {
+            // user made the scan result query too soon after the scan request, will return a default response.
             this.context.res = {
                 status: 202, // Accepted
                 body: this.getDefaultResponse(scanId),
@@ -44,6 +45,7 @@ export class ScanResultController extends ApiController {
         const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns([scanId]);
 
         if (scanResultItems.length !== 1) {
+            // scan result not found
             this.context.res = {
                 status: 404,
                 body: this.getUnknownResponse(scanId),
