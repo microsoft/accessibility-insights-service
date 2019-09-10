@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { ServiceConfiguration } from 'common';
+import { Guid, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 
+import { ScanResultResponse } from '../api-contracts/scan-result-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
 import { webApiIocTypes } from '../setup-ioc-container';
 import { ApiController } from './api-controller';
 
 @injectable()
-export class ScanRequestController extends ApiController {
+export class ScanResultController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'get-scan';
 
@@ -25,8 +26,27 @@ export class ScanRequestController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-
+        const timeRequested = Guid.getGuidTimestamp(scanId);
+        const timeCurrent = new Date();
         const scanResultQueryBufferInSeconds = (await this.serviceConfig.getConfigValue('restApiConfig')).maxScanRequestBatchCount;
+
+        if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds) {
+            // will not query db
+            const nullResponse: ScanResultResponse = {
+                scanId,
+                url: undefined,
+                run: {
+                    state: 'accepted',
+                },
+            };
+            this.context.res = {
+                status: 202, // Accepted
+                body: nullResponse,
+            };
+            this.logger.logInfo('scan result queried too soon');
+
+            return;
+        }
 
         const response = await this.scanDataProvider.readScanResult();
         this.context.res = {
@@ -37,6 +57,6 @@ export class ScanRequestController extends ApiController {
             },
         };
 
-        this.logger.logInfo('Accepted scan run batch request');
+        this.logger.logInfo('scan result fetched');
     }
 }
