@@ -39,4 +39,5 @@ module.exports = {
     ],
     reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
     testEnvironment: 'node',
+    setupFilesAfterEnv: ['jest-extended'],
 };

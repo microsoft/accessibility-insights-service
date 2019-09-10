@@ -60,6 +60,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 priority: 1,
                 itemType: ItemType.onDemandPageScanRunResult,
             };
+            const expectedSavedResult1 = {
+                ...result1,
+                partitionKey: 'pageScanRunResult-605',
+            };
             const result2: OnDemandPageScanResult = {
                 id: partitionKey2Guid1,
                 partitionKey: undefined,
@@ -70,7 +74,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 priority: 2,
                 itemType: ItemType.onDemandPageScanRunResult,
             };
-
+            const expectedSavedResult2 = {
+                ...result2,
+                partitionKey: 'pageScanRunResult-3',
+            };
             const result3: OnDemandPageScanResult = {
                 id: partitionKey1Guid2,
                 partitionKey: undefined,
@@ -81,15 +88,17 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 priority: 2,
                 itemType: ItemType.onDemandPageScanRunResult,
             };
-
+            const expectedSavedResult3 = {
+                ...result3,
+                partitionKey: 'pageScanRunResult-605',
+            };
             await testSubject.createScanRuns([result1, result2, result3]);
 
             const itemsInDb = await testSubject.readScanRuns([partitionKey1Guid1, partitionKey2Guid1, partitionKey1Guid2]);
 
             expect(itemsInDb.length).toBe(3);
-
             maskSystemProperties(itemsInDb);
-            expect(itemsInDb.sort((item1, item2) => (item1.id > item2.id ? 1 : -1))).toMatchSnapshot();
+            expect(itemsInDb).toIncludeSameMembers([expectedSavedResult1, expectedSavedResult2, expectedSavedResult3]);
         });
 
         it('update scan run', async () => {
@@ -103,6 +112,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 priority: 1,
                 itemType: ItemType.onDemandPageScanRunResult,
             };
+            const expectedSavedResult = {
+                ...result,
+                partitionKey: 'pageScanRunResult-995',
+            };
 
             const resultUpdate = cloneDeep(result);
             resultUpdate.scanResult = { state: 'pass', issueCount: 3 };
@@ -112,7 +125,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
             const itemsInDb = await testSubject.readScanRuns([result.id]);
 
             maskSystemProperties(itemsInDb);
-            expect(itemsInDb).toMatchSnapshot();
+            expect(itemsInDb).toEqual([expectedSavedResult]);
         });
 
         function maskSystemProperties(results: OnDemandPageScanResult[]): void {
@@ -120,7 +133,8 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 const systemProperties = Object.keys(result).filter(key => key.startsWith('_'));
 
                 systemProperties.forEach(key => {
-                    (result as any)[key] = undefined;
+                    // tslint:disable-next-line: no-dynamic-delete
+                    delete (result as any)[key];
                 });
             });
         }
