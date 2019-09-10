@@ -36,6 +36,7 @@ export class OnDemandPageScanRunResultProvider {
 
     public async readScanRuns(scanIds: string[]): Promise<OnDemandPageScanResult[]> {
         // we need this check for query limits - https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#sql-query-limits
+        // even though 'IN' condition supports 6000, we are defaulting to a maximum of 1000. we will increase this if we have a need later.
         if (scanIds.length > 1000) {
             throw new Error("Can't read more than 1000 scan documents per query");
         }
