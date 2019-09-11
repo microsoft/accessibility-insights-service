@@ -28,16 +28,12 @@ export class ScanResultController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-        const timeRequested = this.tryGetScanRequestedTime(scanId);
-        if (timeRequested === undefined) {
-            // the scanId is invalid.
+        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
+        if (isRequestMadeTooSoon === undefined) {
             return;
         }
 
-        const timeCurrent = new Date();
-        const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
-
-        if (timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000) {
+        if (isRequestMadeTooSoon === true) {
             // user made the scan result query too soon after the scan request, will return a default response.
             this.context.res = {
                 status: 202, // Accepted
@@ -65,6 +61,18 @@ export class ScanResultController extends ApiController {
 
             this.logger.logInfo('scan result fetched', { scanId });
         }
+    }
+
+    private async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
+        const timeRequested = this.tryGetScanRequestedTime(scanId);
+        if (timeRequested === undefined) {
+            // the scanId is invalid.
+            return undefined;
+        }
+        const timeCurrent = new Date();
+        const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
+
+        return timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000;
     }
 
     private async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
