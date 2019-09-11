@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
+import { BaseTelemetryProperties, Logger } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
+import { DDispatcher } from './sender/dispatcher';
 
 export class WebApiScanRequestSenderEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
@@ -11,6 +12,12 @@ export class WebApiScanRequestSenderEntryPoint extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
-        throw new Error('Method not implemented.');
+        // Get dispatcher instance
+        // Kick off the queuing.
+        // Log the status
+        const dispatcher = container.get(DDispatcher);
+        const logger = container.get(Logger);
+        await dispatcher.dispatchOnDemandScanRequests();
+        logger.logInfo(`[Sender] Scan requests sent successfully`);
     }
 }

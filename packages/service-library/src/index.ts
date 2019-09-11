@@ -5,3 +5,4 @@ export { PageObjectFactory } from './factories/page-object-factory';
 export { ProcessEntryPointBase } from './process-entry-point-base';
 export { WebDriver } from './web-driver/web-driver';
 export { registerServiceLibraryToContainer } from './register-service-library-to-container';
+export { PageScanRequestProvider } from './data-providers/page-scan-request-provider';
