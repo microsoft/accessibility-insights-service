@@ -17,7 +17,7 @@ describe(PageScanRunReportService, () => {
     const time = new Date(2019, 2, 1, 10, 20, 30);
     const guid = 'some guid';
     // tslint:disable-next-line: mocha-no-side-effect-code
-    const expectedSarifBlobFilePath = `2019/3/1/10/${guid}.sarif`;
+    const expectedSarifBlobFilePath = `2019/3/1/18/${guid}.sarif`;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
