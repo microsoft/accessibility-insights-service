@@ -51,6 +51,7 @@ export class ScanResultController extends ApiController {
             // scan result not found
             this.context.res = {
                 status: 404,
+                body: this.get404Response(scanId),
             };
             this.logger.logInfo('scan result not found', { scanId });
         } else {
@@ -101,6 +102,19 @@ export class ScanResultController extends ApiController {
             url: undefined,
             run: {
                 state: 'accepted',
+            },
+            priority: undefined,
+            itemType: ItemType.onDemandPageScanRunResult,
+        };
+    }
+
+    private get404Response(scanId: string): OnDemandPageScanResult {
+        return {
+            id: scanId,
+            partitionKey: undefined,
+            url: undefined,
+            run: {
+                state: 'unknown',
             },
             priority: undefined,
             itemType: ItemType.onDemandPageScanRunResult,

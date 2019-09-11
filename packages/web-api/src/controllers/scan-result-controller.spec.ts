@@ -44,7 +44,7 @@ describe(ScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    scanResultQueryBufferInSeconds: 120,
+                    minimumWaitTimeforScanResultQueryInSeconds: 120,
                 } as RestApiConfig;
             });
 
@@ -116,7 +116,16 @@ describe(ScanResultController, () => {
             const scanId = 'scanId';
             context.bindingData.scanId = scanId;
             scanResultController = createScanResultController(context);
-
+            const response: OnDemandPageScanResult = {
+                id: scanId,
+                partitionKey: undefined,
+                url: undefined,
+                run: {
+                    state: 'unknown',
+                },
+                priority: undefined,
+                itemType: ItemType.onDemandPageScanRunResult,
+            };
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
@@ -135,7 +144,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(404);
-            expect(context.res.body).toBeUndefined();
+            expect(context.res.body).toEqual(response);
         });
 
         it('should return 200 if successfully fetched result', async () => {
