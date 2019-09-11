@@ -120,7 +120,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
-                    return new Date(1900);
+                    return new Date(0);
                 })
                 .verifiable(Times.once());
             onDemandPageScanRunResultProviderMock
