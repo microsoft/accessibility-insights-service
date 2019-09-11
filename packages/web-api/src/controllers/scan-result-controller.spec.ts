@@ -97,6 +97,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
+                    // make the time interval a negative number
                     const timeStamp = new Date();
                     timeStamp.setFullYear(timeStamp.getFullYear() + 1);
 
@@ -106,8 +107,72 @@ describe(ScanResultController, () => {
 
             await scanResultController.handleRequest();
 
+            guidGeneratorMock.verifyAll();
             expect(context.res.status).toEqual(202);
             expect(context.res.body).toEqual(defaultResponse);
+        });
+
+        it('should return 404 if the scan cannot be found', async () => {
+            const scanId = 'scanId';
+            context.bindingData.scanId = scanId;
+            scanResultController = createScanResultController(context);
+
+            guidGeneratorMock
+                .setup(gm => gm.getGuidTimestamp(scanId))
+                .returns(() => {
+                    return new Date(1900);
+                })
+                .verifiable(Times.once());
+            onDemandPageScanRunResultProviderMock
+                .setup(async om => om.readScanRuns([scanId]))
+                .returns(async () => {
+                    return Promise.resolve([]);
+                })
+                .verifiable(Times.once());
+
+            await scanResultController.handleRequest();
+
+            guidGeneratorMock.verifyAll();
+            onDemandPageScanRunResultProviderMock.verifyAll();
+            expect(context.res.status).toEqual(404);
+            expect(context.res.body).toBeUndefined();
+        });
+
+        it('should return 200 if successfully fetched result', async () => {
+            const scanId = 'scanId';
+            context.bindingData.scanId = scanId;
+            scanResultController = createScanResultController(context);
+            const scanResult: OnDemandPageScanResult = {
+                id: scanId,
+                partitionKey: 'pk',
+                url: 'url',
+                run: {
+                    state: 'running',
+                },
+                priority: 1,
+                itemType: ItemType.onDemandPageScanRunResult,
+            };
+            guidGeneratorMock
+                .setup(gm => gm.getGuidTimestamp(scanId))
+                .returns(() => {
+                    return new Date(0);
+                })
+                .verifiable(Times.once());
+            onDemandPageScanRunResultProviderMock.reset();
+            onDemandPageScanRunResultProviderMock
+                // tslint:disable-next-line: no-unsafe-any
+                .setup(async om => om.readScanRuns([scanId]))
+                .returns(async () => {
+                    return Promise.resolve([scanResult]);
+                })
+                .verifiable(Times.once());
+
+            await scanResultController.handleRequest();
+
+            guidGeneratorMock.verifyAll();
+            onDemandPageScanRunResultProviderMock.verifyAll();
+            expect(context.res.status).toEqual(200);
+            expect(context.res.body).toEqual(scanResult);
         });
     });
 });
