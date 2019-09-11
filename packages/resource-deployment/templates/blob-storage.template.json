@@ -47,6 +47,13 @@
                 "description": "The name of the blob container for pool startup script."
             }
         },
+        "pageScanRunSarifResultContainerName": {
+            "type": "string",
+            "defaultValue": "batch-pool-startup-script",
+            "metadata": {
+                "description": "The name of the blob container for storing sarif result of a page scan run"
+            }
+        },
         "runtimeConfigurationContainerName": {
             "type": "string",
             "defaultValue": "runtime-configuration",
@@ -135,6 +142,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('scanRequestContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('pageScanRunSarifResultContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
