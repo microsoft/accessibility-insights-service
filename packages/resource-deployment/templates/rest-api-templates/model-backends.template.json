@@ -13,7 +13,7 @@
         {
             "properties": {
                 "description": "[parameters('functionName')]",
-                "resourceId": "[concat('https://management.azure.com/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
+                "resourceId": "[concat('https://management.azure.com/subscriptions/',subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
                 "credentials": {
                     "header": {}
                 },
