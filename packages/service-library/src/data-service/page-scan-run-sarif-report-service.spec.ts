@@ -6,26 +6,26 @@ import 'reflect-metadata';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
-import { PageScanRunSarifResultService } from './page-scan-run-sarif-result-service';
+import { PageScanRunReportService } from './page-scan-run-report-service';
 
 // tslint:disable: no-any
 
-describe(PageScanRunSarifResultService, () => {
-    let testSubject: PageScanRunSarifResultService;
+describe(PageScanRunReportService, () => {
+    let testSubject: PageScanRunReportService;
     let blobStorageClientMock: IMock<BlobStorageClient>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const time = new Date(2019, 2, 1, 10, 20, 30);
     const guid = 'some guid';
     // tslint:disable-next-line: mocha-no-side-effect-code
-    const expectedBlobFilePath = `2019/3/1/10/${guid}.sarif`;
+    const expectedSarifBlobFilePath = `2019/3/1/10/${guid}.sarif`;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        testSubject = new PageScanRunSarifResultService(blobStorageClientMock.object, guidGeneratorMock.object);
+        testSubject = new PageScanRunReportService(blobStorageClientMock.object, guidGeneratorMock.object);
     });
 
-    it('saves result file', async () => {
+    it('saves sarif report', async () => {
         const blobContent = 'blob content1';
 
         guidGeneratorMock
@@ -34,15 +34,15 @@ describe(PageScanRunSarifResultService, () => {
             .verifiable();
 
         blobStorageClientMock
-            .setup(async b => b.uploadBlobContent(PageScanRunSarifResultService.blobContainerName, expectedBlobFilePath, blobContent))
+            .setup(async b => b.uploadBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath, blobContent))
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
-        await testSubject.saveResultFile(guid, blobContent);
+        await testSubject.saveSarifReport(guid, blobContent);
         verifyAll();
     });
 
-    it('read result file', async () => {
+    it('reads sarif report', async () => {
         const expectedResponse: BlobContentDownloadResponse = { content: 'blob content1' as any, notFound: false };
 
         guidGeneratorMock
@@ -51,11 +51,11 @@ describe(PageScanRunSarifResultService, () => {
             .verifiable();
 
         blobStorageClientMock
-            .setup(async b => b.getBlobContent(PageScanRunSarifResultService.blobContainerName, expectedBlobFilePath))
+            .setup(async b => b.getBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath))
             .returns(async () => Promise.resolve(expectedResponse))
             .verifiable();
 
-        await expect(testSubject.readResultFile(guid)).resolves.toBe(expectedResponse);
+        await expect(testSubject.readSarifReport(guid)).resolves.toBe(expectedResponse);
         verifyAll();
     });
 
