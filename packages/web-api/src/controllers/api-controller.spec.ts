@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { ApiController } from './api-controller';
 
@@ -11,6 +12,7 @@ export class ApiControllerMock extends ApiController {
     public readonly apiName = 'web-api-test';
     public readonly logger: Logger;
     public handleRequestInvoked = false;
+    public readonly serviceConfig: ServiceConfiguration;
 
     public constructor(public readonly context: Context) {
         super();
