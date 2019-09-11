@@ -30,6 +30,7 @@ export class ScanResultController extends ApiController {
         const scanId = <string>this.context.bindingData.scanId;
         const timeRequested = this.tryGetScanRequestedTime(scanId);
         if (timeRequested === undefined) {
+            // the scanId is invalid.
             return;
         }
 
