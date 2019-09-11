@@ -103,7 +103,7 @@ export abstract class ApiController {
         return undefined;
     }
 
-    public async getRestApiConfig(): Promise<RestApiConfig> {
+    protected async getRestApiConfig(): Promise<RestApiConfig> {
         return this.serviceConfig.getConfigValue('restApiConfig');
     }
 }

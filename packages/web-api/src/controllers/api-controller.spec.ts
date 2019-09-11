@@ -13,7 +13,6 @@ export class ApiControllerMock extends ApiController {
     public readonly apiName = 'web-api-test';
     public readonly logger: Logger;
     public handleRequestInvoked = false;
-    public getRestApiConfigInvoked: boolean;
 
     // tslint:disable-next-line: no-null-keyword
     public constructor(public readonly context: Context, public readonly serviceConfig: ServiceConfiguration = null) {
@@ -22,6 +21,10 @@ export class ApiControllerMock extends ApiController {
 
     public async handleRequest(): Promise<void> {
         this.handleRequestInvoked = true;
+    }
+
+    public getGetRestApiConfigFunc(): () => Promise<RestApiConfig> {
+        return this.getRestApiConfig;
     }
 }
 
@@ -289,7 +292,8 @@ describe('getRestApiConfig()', () => {
             })
             .verifiable(Times.once());
         const apiControllerMock = new ApiControllerMock(context, serviceConfigMock.object);
-        const actualConfig = await apiControllerMock.getRestApiConfig();
+        // tslint:disable-next-line: no-unsafe-any
+        const actualConfig = await apiControllerMock.getGetRestApiConfigFunc().call(apiControllerMock);
 
         expect(actualConfig).toEqual(configStub);
         serviceConfigMock.verifyAll();
