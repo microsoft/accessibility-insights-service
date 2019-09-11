@@ -1,16 +1,14 @@
 {
     "bindings": [
         {
-            "name": "request",
-            "type": "httpTrigger",
+            "type": "cosmosDBTrigger",
+            "name": "documents",
             "direction": "in",
-            "route": "scans",
-            "methods": ["post"]
-        },
-        {
-            "type": "http",
-            "direction": "out",
-            "name": "response"
+            "leaseCollectionName": "leases",
+            "connectionStringSetting": "cosmosDBConnection",
+            "databaseName": "scanner",
+            "collectionName": "scanBatches",
+            "createLeaseCollectionIfNotExists": true
         }
     ],
     "scriptFile": "../scan-batch-requests-feed-func/index.js"

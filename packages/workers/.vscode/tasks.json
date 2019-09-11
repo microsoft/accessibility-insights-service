@@ -4,9 +4,18 @@
         {
             "type": "func",
             "command": "host start",
+            "dependsOn": "install-func-extensions",
             "problemMatcher": "$func-watch",
             "isBackground": true,
+            "options": {
+                "cwd": "${workspaceRoot}/dist"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "install-func-extensions",
             "dependsOn": "copy-local-settings",
+            "command": "func extensions install",
             "options": {
                 "cwd": "${workspaceRoot}/dist"
             }
@@ -25,8 +34,14 @@
         {
             "type": "shell",
             "label": "tsc",
+            "dependsOn": "restore-dotnet-packages",
             "command": "tsc",
             "problemMatcher": "$tsc"
+        },
+        {
+            "type": "shell",
+            "label": "restore-dotnet-packages",
+            "command": "dotnet restore"
         }
     ]
 }

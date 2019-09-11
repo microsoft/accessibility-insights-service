@@ -99,11 +99,13 @@
             "inversify",
             "typemoq",
             "upsert"
-        ]
+        ],
+        "csharp.suppressDotnetRestoreNotification": true
     },
     "extensions": {
         "recommendations": [
             "ms-vscode.vscode-typescript-tslint-plugin",
+            "ms-vscode.csharp",
             "esbenp.prettier-vscode",
             "rbbit.typescript-hero",
             "foxundermoon.shell-format",
