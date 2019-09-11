@@ -23,8 +23,9 @@ export class ApiControllerMock extends ApiController {
         this.handleRequestInvoked = true;
     }
 
-    public getGetRestApiConfigFunc(): () => Promise<RestApiConfig> {
-        return this.getRestApiConfig;
+    // tslint:disable-next-line: no-unnecessary-override
+    public async getRestApiConfig(): Promise<RestApiConfig> {
+        return super.getRestApiConfig();
     }
 }
 
@@ -293,7 +294,7 @@ describe('getRestApiConfig()', () => {
             .verifiable(Times.once());
         const apiControllerMock = new ApiControllerMock(context, serviceConfigMock.object);
         // tslint:disable-next-line: no-unsafe-any
-        const actualConfig = await apiControllerMock.getGetRestApiConfigFunc().call(apiControllerMock);
+        const actualConfig = await apiControllerMock.getRestApiConfig();
 
         expect(actualConfig).toEqual(configStub);
         serviceConfigMock.verifyAll();
