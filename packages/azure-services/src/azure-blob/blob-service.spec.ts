@@ -3,19 +3,8 @@
 
 import 'reflect-metadata';
 
-import {
-    BlobClient,
-    BlobServiceClient,
-    BlockBlobClient,
-    ContainerClient,
-    Models,
-    RestError,
-    SharedKeyCredential,
-} from '@azure/storage-blob';
-import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
+import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient, Models, RestError } from '@azure/storage-blob';
 import { IMock, It, Mock } from 'typemoq';
-import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BlobContentDownloadResponse, BlobService } from './blob-service';
 
 // tslint:disable: no-any no-object-literal-type-assertion

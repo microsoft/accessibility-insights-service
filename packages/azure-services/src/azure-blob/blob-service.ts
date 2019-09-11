@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { BlobClient, BlobServiceClient, RestError } from '@azure/storage-blob';
+import { BlobClient, RestError } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
