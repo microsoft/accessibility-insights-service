@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
@@ -17,6 +18,7 @@ import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
 import {
     AzureKeyVaultClientProvider,
+    BlobServiceClientProvider,
     CosmosClientProvider,
     cosmosContainerClientTypes,
     iocTypeNames,
@@ -64,6 +66,32 @@ describe(registerAzureServicesToContainer, () => {
             'scanRequests',
         );
         verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
+    });
+
+    describe('BlobServiceClientProvider', () => {
+        const storageAccountName = 'test-storage-account-name';
+
+        it('creates singleton blob service client', async () => {
+            const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
+
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountName))
+                .returns(async () => storageAccountName)
+                .verifiable(Times.once());
+
+            registerAzureServicesToContainer(container);
+            stubBinding(SecretProvider, secretProviderMock.object);
+
+            const blobServiceClientProvider = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
+
+            const blobServiceClient1 = await blobServiceClientProvider();
+            const blobServiceClient2 = await blobServiceClientProvider();
+            const blobServiceClient3 = await container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider)();
+
+            expect(blobServiceClient1).toBeInstanceOf(BlobServiceClient);
+            expect(blobServiceClient2).toBe(blobServiceClient1);
+            expect(blobServiceClient3).toBe(blobServiceClient1);
+        });
     });
 
     describe('QueueServiceURLProvider', () => {

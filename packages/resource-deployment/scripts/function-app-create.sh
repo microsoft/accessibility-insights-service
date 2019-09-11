@@ -8,11 +8,18 @@ set -eo pipefail
 
 export resourceGroupName
 export resourceName
+export clientId
+export environment
 export keyVault
+
+if [[ -z $dropFolder ]]; then
+    dropFolder="${0%/*}/../../../"
+fi
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> -k <the keyVault azure function app needs access to>
+Usage: $0 -r <resource group> -c <client id> -e <environment> -k <the keyVault azure function app needs access to> \
+-d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
@@ -23,7 +30,7 @@ addReplyUrlIfNotExists() {
 
     # Get existing reply urls of the app registration
     echo "Fetching existing replyUrls..."
-    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv)
+    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv) || true
     replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
 
     for url in $replyUrls; do
@@ -48,15 +55,30 @@ createAppRegistration() {
     echo "  Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 }
 
+copyConfigFile() {
+    dropFolder=$1
+    environment=$2
+
+    echo "Copying config file to function dist folders..."
+    for folderName in $dropFolder/web-api/dist/*-func; do
+        if [[ -d $folderName ]]; then
+            cp "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$folderName/runtime-config.json"
+            echo "  Successfully copied config file to $folderName"
+        fi
+    done
+}
+
 # Set default ARM Function App template files
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:e:k:" option; do
+while getopts "r:c:e:k:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    c) clientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
+    d) dropFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -65,17 +87,27 @@ if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
-# Create app registration if not exists
-echo "Checking if the function app already exists..."
-functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
-echo "Checking if the App Registration exists..."
-clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
-appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
+if [ -z $clientId] && [ ! "${environment,,}" = "dev" ]; then
+    echo "Client ID is required if the environment is not Dev"
+    exitWithUsageInfo
+fi
 
-if [[ ! -n $appRegistrationName ]]; then
-    createAppRegistration $resourceGroupName $environment
-else
-    echo "AppRegistration already exists, display name: $appRegistrationName."
+# Copy config file to function dist folder
+copyConfigFile $dropFolder $environment
+
+# Create app registration if not exists
+if [ -z $clientId ]; then
+    echo "Checking if the function app already exists..."
+    functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv) || true
+    echo "Checking if the App Registration exists..."
+    clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv) || true
+    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv) || true
+
+    if [[ ! -n $appRegistrationName ]]; then
+        createAppRegistration $resourceGroupName $environment
+    else
+        echo "AppRegistration already exists, display name: $appRegistrationName."
+    fi
 fi
 
 # Start function app deployment
@@ -92,7 +124,9 @@ functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
 # Add reply url to app registration
-addReplyUrlIfNotExists $clientId $functionAppName
+if [ "${environment,,}" = "dev" ]; then
+    addReplyUrlIfNotExists $clientId $functionAppName
+fi
 
 # Grant key vault access to function app
 echo "Fetching principalId of the azure function..."
