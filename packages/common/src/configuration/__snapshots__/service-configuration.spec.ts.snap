@@ -44,7 +44,7 @@ Object {
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "scanResultQueryBufferInSeconds": Object {
+    "minimumWaitTimeforScanResultQueryInSeconds": Object {
       "default": 120,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
@@ -131,7 +131,7 @@ Object {
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "scanResultQueryBufferInSeconds": Object {
+    "minimumWaitTimeforScanResultQueryInSeconds": Object {
       "default": 120,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
