@@ -283,7 +283,7 @@ describe('getRestApiConfig()', () => {
         });
         const configStub = {
             maxScanRequestBatchCount: 1,
-            scanResultQueryBufferInSeconds: 2,
+            minimumWaitTimeforScanResultQueryInSeconds: 2,
         };
         const serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
