@@ -70,9 +70,9 @@ export class ScanResultController extends ApiController {
             return undefined;
         }
         const timeCurrent = new Date();
-        const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
+        const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
 
-        return timeCurrent.getTime() - timeRequested.getTime() <= scanResultQueryBufferInSeconds * 1000;
+        return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforScanResultQueryInSeconds * 1000;
     }
 
     private async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {

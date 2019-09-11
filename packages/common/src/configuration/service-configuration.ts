@@ -34,7 +34,7 @@ export interface ScanRunTimeConfig {
 
 export interface RestApiConfig {
     maxScanRequestBatchCount: number;
-    scanResultQueryBufferInSeconds: number;
+    minimumWaitTimeforScanResultQueryInSeconds: number;
 }
 
 export interface RuntimeConfig {
@@ -165,7 +165,7 @@ export class ServiceConfiguration {
                     default: 1000,
                     doc: 'Maximum number of scan requests in a single HTTP client request.',
                 },
-                scanResultQueryBufferInSeconds: {
+                minimumWaitTimeforScanResultQueryInSeconds: {
                     format: 'int',
                     default: 120,
                     doc: 'Minimum time interval in seconds before a scan result query can be processed after requested.',
