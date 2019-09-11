@@ -3,8 +3,9 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ServiceConfiguration } from 'common';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import { Mock, Times } from 'typemoq';
 import { ApiController } from './api-controller';
 
 export class ApiControllerMock extends ApiController {
@@ -12,9 +13,10 @@ export class ApiControllerMock extends ApiController {
     public readonly apiName = 'web-api-test';
     public readonly logger: Logger;
     public handleRequestInvoked = false;
-    public readonly serviceConfig: ServiceConfiguration;
+    public getRestApiConfigInvoked: boolean;
 
-    public constructor(public readonly context: Context) {
+    // tslint:disable-next-line: no-null-keyword
+    public constructor(public readonly context: Context, public readonly serviceConfig: ServiceConfiguration = null) {
         super();
     }
 
@@ -265,5 +267,31 @@ describe('tryGetPayload()', () => {
         const apiControllerMock = new ApiControllerMock(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
         expect(payload).toEqual({ id: 1 });
+    });
+});
+
+describe('getRestApiConfig()', () => {
+    it('should call getConfigValue', async () => {
+        const context = <Context>(<unknown>{
+            req: {
+                rawBody: `{ id: 1`,
+            },
+        });
+        const configStub = {
+            maxScanRequestBatchCount: 1,
+            scanResultQueryBufferInSeconds: 2,
+        };
+        const serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async sm => sm.getConfigValue('restApiConfig'))
+            .returns(async () => {
+                return Promise.resolve(configStub);
+            })
+            .verifiable(Times.once());
+        const apiControllerMock = new ApiControllerMock(context, serviceConfigMock.object);
+        const actualConfig = await apiControllerMock.getRestApiConfig();
+
+        expect(actualConfig).toEqual(configStub);
+        serviceConfigMock.verifyAll();
     });
 });
