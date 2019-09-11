@@ -7,6 +7,7 @@ import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
+import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { webApiIocTypes } from '../setup-ioc-container';
 import { ApiController } from './api-controller';
 
@@ -27,7 +28,11 @@ export class ScanResultController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-        const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
+        const timeRequested = this.tryGetScanRequestedTime(scanId);
+        if (timeRequested === undefined) {
+            return;
+        }
+
         const timeCurrent = new Date();
         const scanResultQueryBufferInSeconds = (await this.getRestApiConfig()).scanResultQueryBufferInSeconds;
 
@@ -42,23 +47,42 @@ export class ScanResultController extends ApiController {
             return;
         }
 
-        const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns([scanId]);
+        const scanResultItemMap = await this.getScanResultMapKeyByScanId([scanId]);
+        const scanResult = scanResultItemMap[scanId];
 
-        if (scanResultItems.length !== 1) {
+        if (isEmpty(scanResult)) {
             // scan result not found
             this.context.res = {
                 status: 404,
-                body: this.getUnknownResponse(scanId),
             };
             this.logger.logInfo('scan result not found', { scanId });
         } else {
             this.context.res = {
                 status: 200,
-                body: scanResultItems[0],
+                body: scanResult,
             };
 
             this.logger.logInfo('scan result fetched', { scanId });
         }
+    }
+
+    private async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
+        const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
+
+        return keyBy(scanResultItems, item => item.id);
+    }
+
+    private tryGetScanRequestedTime(scanId: string): Date {
+        try {
+            return this.guidGenerator.getGuidTimestamp(scanId);
+        } catch (error) {
+            this.context.res = {
+                status: 422, // Unprocessable Entity,
+                body: `Unprocessable Entity: ${scanId}. ${error}`,
+            };
+        }
+
+        return undefined;
     }
 
     private getDefaultResponse(scanId: string): OnDemandPageScanResult {
@@ -68,19 +92,6 @@ export class ScanResultController extends ApiController {
             url: undefined,
             run: {
                 state: 'accepted',
-            },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
-        };
-    }
-
-    private getUnknownResponse(scanId: string): OnDemandPageScanResult {
-        return {
-            id: scanId,
-            partitionKey: undefined,
-            url: undefined,
-            run: {
-                state: 'unknown',
             },
             priority: undefined,
             itemType: ItemType.onDemandPageScanRunResult,
