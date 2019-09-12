@@ -54,4 +54,14 @@ export class GuidGenerator {
 
         return new Date(Number(timestampMilliseconds - baseDate));
     }
+
+    /**
+     * Returns if input string is a valid version 6 UUID.
+     * @param guid The UUID to validate.
+     */
+    public isValidV6Guid(guid: string): boolean {
+        const guidV6Regex = new RegExp('/^[0-9A-F]{8}-[0-9A-F]{4}-6[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i');
+
+        return guidV6Regex.test(guid);
+    }
 }

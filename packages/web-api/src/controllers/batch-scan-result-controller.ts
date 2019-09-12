@@ -34,11 +34,13 @@ export class BatchScanResultController extends BaseScanResultController {
         const scanIdsToQuery: string[] = [];
 
         for (const scanId of scanIds) {
+            if (!this.isScanIdValid(scanId)) {
+                responseBody.push(this.getInvalidRequestResponse(scanId));
+                continue;
+            }
             const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
             if (isRequestMadeTooSoon === true) {
                 responseBody.push(this.getTooSoonRequestResponse(scanId));
-            } else if (isRequestMadeTooSoon === undefined) {
-                responseBody.push(this.getInvalidRequestResponse(scanId));
             } else {
                 scanIdsToQuery.push(scanId);
             }

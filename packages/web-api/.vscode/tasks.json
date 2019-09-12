@@ -16,7 +16,7 @@
             "label": "copy-local-settings",
             "dependsOn": "tsc",
             "windows": {
-                "command": ""
+                "command": "xcopy /Y local.settings.json .\\dist\\ & xcopy /Y .env .\\dist\\"
             },
             "osx": {
                 "command": "cp local.settings.json ./dist ; cp .env ./dist"

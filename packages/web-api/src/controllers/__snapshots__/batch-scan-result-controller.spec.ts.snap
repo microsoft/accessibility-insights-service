@@ -3,7 +3,7 @@
 exports[`BatchScanResultController handleRequest should return different response for different kind of scanIds 1`] = `
 Array [
   Object {
-    "error": "Unprocessable Entity: invalid-scan-id. ",
+    "error": "Unprocessable Entity: invalid-scan-id.",
     "id": "invalid-scan-id",
   },
   Object {
