@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BatchScanResultController handleRequest should return different response for different kind of scanIds 1`] = `
+Array [
+  Object {
+    "error": "Unprocessable Entity: invalid-scan-id. ",
+    "id": "invalid-scan-id",
+  },
+  Object {
+    "id": "requested-too-soon-scan-id",
+    "itemType": "pageScanRunResult",
+    "partitionKey": undefined,
+    "priority": undefined,
+    "run": Object {
+      "state": "accepted",
+    },
+    "url": undefined,
+  },
+  Object {
+    "id": "valid-scan-id",
+    "itemType": "pageScanRunResult",
+    "partitionKey": "pk",
+    "priority": 1,
+    "run": Object {
+      "state": "running",
+    },
+    "url": "url",
+  },
+  Object {
+    "id": "not-found-scan-id",
+    "itemType": "pageScanRunResult",
+    "partitionKey": undefined,
+    "priority": undefined,
+    "run": Object {
+      "state": "unknown",
+    },
+    "url": undefined,
+  },
+]
+`;

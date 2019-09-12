@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { InvalidOnDemandPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { InvalidOnDemandPageScanResultResponse, ItemType, OnDemandPageScanResult, OnDemandPageScanResultResponse } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
 describe(BatchScanResultController, () => {
@@ -17,30 +18,18 @@ describe(BatchScanResultController, () => {
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
-    const scanId1 = 'scan-id-1';
-    const scanId2 = 'scan-id-2';
-    const tooSoonRequestResponse: OnDemandPageScanResult = {
-        id: scanId1,
-        partitionKey: undefined,
-        url: undefined,
-        run: {
-            state: 'accepted',
-        },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
-    };
-    const scanNotFoundResponse: OnDemandPageScanResult = {
-        id: scanId1,
-        partitionKey: undefined,
-        url: undefined,
-        run: {
-            state: 'unknown',
-        },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
-    };
-    const response: OnDemandPageScanResult = {
-        id: scanId1,
+    const validScanId = 'valid-scan-id';
+    const notFoundScanId = 'not-found-scan-id';
+    const invalidScanId = 'invalid-scan-id';
+    const requestedTooSoonScanId = 'requested-too-soon-scan-id';
+    const batchRequestBody: ScanBatchRequest[] = [
+        { scanId: validScanId },
+        { scanId: notFoundScanId },
+        { scanId: invalidScanId },
+        { scanId: requestedTooSoonScanId },
+    ];
+    const scanFetchedResponse: OnDemandPageScanResult = {
+        id: validScanId,
         partitionKey: 'pk',
         url: 'url',
         run: {
@@ -61,10 +50,11 @@ describe(BatchScanResultController, () => {
         });
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
-
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        // tslint:disable-next-line: no-unsafe-any
-        onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
+        onDemandPageScanRunResultProviderMock
+            // tslint:disable-next-line: no-unsafe-any
+            .setup(async o => o.readScanRuns(It.isAny()))
+            .returns(async () => Promise.resolve([scanFetchedResponse]));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
@@ -92,22 +82,36 @@ describe(BatchScanResultController, () => {
         );
     }
 
-    function setupGetGuidTimestamp(time: Date): void {
+    function setupGetGuidTimestamp(scanId: string, time: Date): void {
         guidGeneratorMock
-            .setup(gm => gm.getGuidTimestamp(scanId1))
+            .setup(gm => gm.getGuidTimestamp(scanId))
             .returns(() => time)
             .verifiable(Times.once());
     }
 
     describe('handleRequest', () => {
-        it('should return 422 for invalid scanId', async () => {
-            const invalidRequestResponse: InvalidOnDemandPageScanResultResponse = {
-                id: scanId1,
-                error: `Unprocessable Entity: ${scanId1}. Error: Only version 6 of UUID is supported`,
-            };
+        it('should return empty array if request body is empty array', async () => {
+            const emptyResponse: OnDemandPageScanResultResponse[] = [];
             batchScanResultController = createScanResultController(context);
+
+            await batchScanResultController.handleRequest();
+
+            expect(context.res.status).toEqual(200);
+            expect(context.res.body).toEqual(emptyResponse);
+        });
+
+        it('should return different response for different kind of scanIds', async () => {
+            context.req.rawBody = JSON.stringify(batchRequestBody);
+            batchScanResultController = createScanResultController(context);
+            const requestTooSoonTimeStamp = new Date();
+            requestTooSoonTimeStamp.setFullYear(requestTooSoonTimeStamp.getFullYear() + 1);
+            const validTimeStamp = new Date(0);
+
+            setupGetGuidTimestamp(validScanId, validTimeStamp);
+            setupGetGuidTimestamp(requestedTooSoonScanId, requestTooSoonTimeStamp);
+            setupGetGuidTimestamp(notFoundScanId, validTimeStamp);
             guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId1))
+                .setup(gm => gm.getGuidTimestamp(invalidScanId))
                 .returns(() => {
                     throw new Error('Only version 6 of UUID is supported');
                 })
@@ -116,59 +120,8 @@ describe(BatchScanResultController, () => {
             await batchScanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(invalidRequestResponse);
-        });
-
-        it('should return a default response for requests made too early', async () => {
-            batchScanResultController = createScanResultController(context);
-            const timeStamp = new Date();
-            timeStamp.setFullYear(timeStamp.getFullYear() + 1);
-            setupGetGuidTimestamp(timeStamp);
-
-            await batchScanResultController.handleRequest();
-
-            guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(202);
-            expect(context.res.body).toEqual(tooSoonRequestResponse);
-        });
-
-        it('should return 404 if the scan cannot be found', async () => {
-            batchScanResultController = createScanResultController(context);
-            setupGetGuidTimestamp(new Date(0));
-            onDemandPageScanRunResultProviderMock
-                .setup(async om => om.readScanRuns([scanId1]))
-                .returns(async () => {
-                    return Promise.resolve([]);
-                })
-                .verifiable(Times.once());
-
-            await batchScanResultController.handleRequest();
-
-            guidGeneratorMock.verifyAll();
-            onDemandPageScanRunResultProviderMock.verifyAll();
-            expect(context.res.status).toEqual(404);
-            expect(context.res.body).toEqual(scanNotFoundResponse);
-        });
-
-        it('should return 200 if successfully fetched result', async () => {
-            batchScanResultController = createScanResultController(context);
-            setupGetGuidTimestamp(new Date(0));
-            onDemandPageScanRunResultProviderMock.reset();
-            onDemandPageScanRunResultProviderMock
-                // tslint:disable-next-line: no-unsafe-any
-                .setup(async om => om.readScanRuns([scanId1]))
-                .returns(async () => {
-                    return Promise.resolve([response]);
-                })
-                .verifiable(Times.once());
-
-            await batchScanResultController.handleRequest();
-
-            guidGeneratorMock.verifyAll();
-            onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(response);
+            expect(context.res.body).toMatchSnapshot();
         });
     });
 });
