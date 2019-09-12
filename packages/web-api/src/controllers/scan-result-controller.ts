@@ -3,23 +3,22 @@
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
-import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { webApiIocTypes } from '../setup-ioc-container';
-import { ApiController } from './api-controller';
+import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
-export class ScanResultController extends ApiController {
+export class ScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'get-scan';
 
     public constructor(
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
-        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
@@ -62,62 +61,5 @@ export class ScanResultController extends ApiController {
 
             this.logger.logInfo('scan result fetched', { scanId });
         }
-    }
-
-    private async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.tryGetScanRequestedTime(scanId);
-        if (timeRequested === undefined) {
-            // the scanId is invalid.
-            return undefined;
-        }
-        const timeCurrent = new Date();
-        const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
-
-        return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforScanResultQueryInSeconds * 1000;
-    }
-
-    private async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
-        const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
-
-        return keyBy(scanResultItems, item => item.id);
-    }
-
-    private tryGetScanRequestedTime(scanId: string): Date {
-        try {
-            return this.guidGenerator.getGuidTimestamp(scanId);
-        } catch (error) {
-            this.context.res = {
-                status: 422, // Unprocessable Entity,
-                body: `Unprocessable Entity: ${scanId}. ${error}`,
-            };
-        }
-
-        return undefined;
-    }
-
-    private getTooSoonRequestResponse(scanId: string): OnDemandPageScanResult {
-        return {
-            id: scanId,
-            partitionKey: undefined,
-            url: undefined,
-            run: {
-                state: 'accepted',
-            },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
-        };
-    }
-
-    private get404Response(scanId: string): OnDemandPageScanResult {
-        return {
-            id: scanId,
-            partitionKey: undefined,
-            url: undefined,
-            run: {
-                state: 'unknown',
-            },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
-        };
     }
 }
