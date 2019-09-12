@@ -3,17 +3,12 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ItemType, OnDemandPageScanBatchRequest } from 'storage-documents';
+import { WebControllerDispatcher } from 'service-library';
+import { OnDemandPageScanBatchRequest } from 'storage-documents';
+import { ScanBatchRequestFeedController } from '../src/controllers/scan-batch-request-feed-controller';
+import { setupIoContainer } from '../src/setup-ioc-container';
 
-// tslint:disable-next-line: no-any
 export async function run(context: Context, documents: OnDemandPageScanBatchRequest[]): Promise<void> {
-    if (documents.length === 0) {
-        return;
-    }
-
-    const batchRequestDocuments = documents.find(d => d.itemType === ItemType.scanRunBatchRequest);
-
-    console.log(JSON.stringify(batchRequestDocuments));
-
-    return;
+    const dispatcher = new WebControllerDispatcher(ScanBatchRequestFeedController, setupIoContainer());
+    await dispatcher.start(context, documents);
 }

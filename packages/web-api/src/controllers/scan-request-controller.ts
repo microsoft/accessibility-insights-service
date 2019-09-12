@@ -1,26 +1,23 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+import { ApiController } from 'service-library';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
-import { webApiIocTypes } from '../setup-ioc-container';
-import { ApiController } from './api-controller';
 
 @injectable()
 export class ScanRequestController extends ApiController {
     public readonly apiVersion = '1.0';
-    public readonly apiName = 'post-scans';
+    public readonly apiName = 'web-api-post-scans';
 
     public constructor(
-        @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(Logger) private readonly logger: Logger,
     ) {
         super();
     }

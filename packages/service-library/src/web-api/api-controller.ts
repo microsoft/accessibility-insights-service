@@ -2,24 +2,40 @@
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
 import { injectable } from 'inversify';
-import { Logger } from 'logger';
+import { WebController } from './web-controller';
+
+// tslint:disable: no-any
 
 @injectable()
-export abstract class ApiController {
-    public abstract readonly apiVersion: string;
-    public abstract readonly apiName: string;
-    protected abstract readonly context: Context;
-    protected abstract readonly logger: Logger;
+export abstract class ApiController extends WebController {
+    public abstract async handleRequest(...args: any[]): Promise<void>;
 
-    public abstract async handleRequest(): Promise<void>;
-
-    public async invoke(): Promise<void> {
+    public async invoke(requestContext: Context, ...args: any[]): Promise<void> {
+        this.context = requestContext;
         if (this.validateRequest()) {
-            await this.handleRequest();
+            await this.handleRequest(...args);
         }
     }
 
-    public validateRequest(): boolean {
+    public hasPayload(): boolean {
+        return this.context.req.rawBody !== undefined;
+    }
+
+    public tryGetPayload<T>(): T {
+        try {
+            // tslint:disable-next-line: no-unsafe-any
+            return JSON.parse(this.context.req.rawBody);
+        } catch (error) {
+            this.context.res = {
+                status: 400, // Bad Request
+                body: `Malformed request body. ${error}`,
+            };
+        }
+
+        return undefined;
+    }
+
+    protected validateRequest(): boolean {
         if (!this.validateApiVersion() || !this.validateContentType()) {
             return false;
         }
@@ -27,7 +43,7 @@ export abstract class ApiController {
         return true;
     }
 
-    public validateContentType(): boolean {
+    protected validateContentType(): boolean {
         if (this.context.req.method !== 'POST' && this.context.req.method !== 'PUT') {
             return true;
         }
@@ -61,7 +77,7 @@ export abstract class ApiController {
         return true;
     }
 
-    public validateApiVersion(): boolean {
+    protected validateApiVersion(): boolean {
         if (this.context.req.query === undefined || this.context.req.query['api-version'] === undefined) {
             this.context.res = {
                 status: 400, // Bad Request
@@ -81,23 +97,5 @@ export abstract class ApiController {
         }
 
         return true;
-    }
-
-    public hasPayload(): boolean {
-        return this.context.req.rawBody !== undefined;
-    }
-
-    public tryGetPayload<T>(): T {
-        try {
-            // tslint:disable-next-line: no-unsafe-any
-            return JSON.parse(this.context.req.rawBody);
-        } catch (error) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: `Malformed request body. ${error}`,
-            };
-        }
-
-        return undefined;
     }
 }
