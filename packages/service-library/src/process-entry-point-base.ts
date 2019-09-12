@@ -4,10 +4,12 @@ import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 
+// tslint:disable: no-any
+
 export abstract class ProcessEntryPointBase {
     constructor(private readonly container: Container) {}
 
-    public async start(): Promise<void> {
+    public async start(...args: any[]): Promise<void> {
         let loggerInitialized = false;
         let logger: Logger;
 
@@ -19,7 +21,7 @@ export abstract class ProcessEntryPointBase {
             loggerInitialized = true;
             this.verifyDotEnvParsing(dotEnvConfig, logger);
 
-            await this.invokeCustomActionWithLogging(this.container, logger);
+            await this.invokeCustomActionWithLogging(this.container, logger, ...args);
         } catch (error) {
             if (loggerInitialized === false) {
                 console.log('Unable to setup logger.', error);
@@ -35,11 +37,11 @@ export abstract class ProcessEntryPointBase {
 
     protected abstract getTelemetryBaseProperties(): BaseTelemetryProperties;
 
-    protected abstract async runCustomAction(container: Container): Promise<void>;
+    protected abstract async runCustomAction(container: Container, ...args: any[]): Promise<void>;
 
-    private async invokeCustomActionWithLogging(container: Container, logger: Logger): Promise<void> {
+    private async invokeCustomActionWithLogging(container: Container, logger: Logger, ...args: any[]): Promise<void> {
         try {
-            await this.runCustomAction(container);
+            await this.runCustomAction(container, ...args);
         } catch (error) {
             logger.trackExceptionAny(error, 'Error occurred while executing action.');
             throw error;
