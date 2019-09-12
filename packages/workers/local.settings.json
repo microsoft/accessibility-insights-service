@@ -3,6 +3,6 @@
     "Values": {
         "FUNCTIONS_WORKER_RUNTIME": "node",
         "AzureWebJobsStorage": "{AzureWebJobsStorage}",
-        "COSMOS_CONNECTION_STRING": ""
+        "COSMOS_CONNECTION_STRING": "AccountEndpoint=https://maxl-cosmos-db.documents.azure.com:443/;AccountKey=yg7GEOGiJTBadsSWGId2wsXaHEvpC2cPUjMvCiY9xUAY4KNPAZ7UZjNs72J6y01V8KX7SUgknK3BHs5nZ4dLWw==;"
     }
 }
