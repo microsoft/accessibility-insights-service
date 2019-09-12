@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
+import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
@@ -19,7 +20,7 @@ export class ScanRequestController extends ApiController {
         @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
         super();
@@ -73,9 +74,5 @@ export class ScanRequestController extends ApiController {
                 };
             }
         });
-    }
-
-    private async getRestApiConfig(): Promise<RestApiConfig> {
-        return this.serviceConfig.getConfigValue('restApiConfig');
     }
 }

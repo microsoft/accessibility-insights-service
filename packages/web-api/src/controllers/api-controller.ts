@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 
@@ -10,6 +11,7 @@ export abstract class ApiController {
     public abstract readonly apiName: string;
     protected abstract readonly context: Context;
     protected abstract readonly logger: Logger;
+    protected abstract readonly serviceConfig: ServiceConfiguration;
 
     public abstract async handleRequest(): Promise<void>;
 
@@ -99,5 +101,9 @@ export abstract class ApiController {
         }
 
         return undefined;
+    }
+
+    protected async getRestApiConfig(): Promise<RestApiConfig> {
+        return this.serviceConfig.getConfigValue('restApiConfig');
     }
 }

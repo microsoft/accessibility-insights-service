@@ -3,21 +3,29 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import { Mock, Times } from 'typemoq';
 import { ApiController } from './api-controller';
 
-export class ApiControllerMock extends ApiController {
+export class TestableApiController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-test';
     public readonly logger: Logger;
     public handleRequestInvoked = false;
 
-    public constructor(public readonly context: Context) {
+    // tslint:disable-next-line: no-null-keyword
+    public constructor(public readonly context: Context, public readonly serviceConfig: ServiceConfiguration = null) {
         super();
     }
 
     public async handleRequest(): Promise<void> {
         this.handleRequestInvoked = true;
+    }
+
+    // tslint:disable-next-line: no-unnecessary-override
+    public async getRestApiConfig(): Promise<RestApiConfig> {
+        return super.getRestApiConfig();
     }
 }
 
@@ -28,7 +36,7 @@ describe('validateContentType()', () => {
                 method: 'GET',
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual(undefined);
         expect(valid).toEqual(true);
@@ -40,7 +48,7 @@ describe('validateContentType()', () => {
                 method: 'POST',
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual({ status: 204 });
         expect(valid).toEqual(false);
@@ -52,7 +60,7 @@ describe('validateContentType()', () => {
                 method: 'PUT',
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual({ status: 204 });
         expect(valid).toEqual(false);
@@ -65,7 +73,7 @@ describe('validateContentType()', () => {
                 rawBody: `{ id: '1' }`,
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual({ status: 400, body: 'Content type was not specified' });
         expect(valid).toEqual(false);
@@ -82,7 +90,7 @@ describe('validateContentType()', () => {
                 headers: { host: 'localhost' },
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual({ status: 400, body: 'Content type was not specified' });
         expect(valid).toEqual(false);
@@ -97,7 +105,7 @@ describe('validateContentType()', () => {
             },
         });
         context.req.headers['content-type'] = 'text/plain';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual({ status: 415, body: 'Content type is not supported' });
         expect(valid).toEqual(false);
@@ -112,7 +120,7 @@ describe('validateContentType()', () => {
             },
         });
         context.req.headers['content-type'] = 'application/json';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
         expect(context.res).toEqual(undefined);
         expect(valid).toEqual(true);
@@ -124,7 +132,7 @@ describe('validateApiVersion()', () => {
         const context = <Context>(<unknown>{
             req: {},
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateApiVersion();
         expect(context.res).toEqual({ status: 400, body: 'Client API version was not specified' });
         expect(valid).toEqual(false);
@@ -137,7 +145,7 @@ describe('validateApiVersion()', () => {
             },
         });
         context.req.query['api-version'] = '2.0';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateApiVersion();
         expect(context.res).toEqual({ status: 400, body: 'Client API version is not supported' });
         expect(valid).toEqual(false);
@@ -150,7 +158,7 @@ describe('validateApiVersion()', () => {
             },
         });
         context.req.query['api-version'] = '1.0';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateApiVersion();
         expect(context.res).toEqual(undefined);
         expect(valid).toEqual(true);
@@ -162,7 +170,7 @@ describe('hasPayload()', () => {
         const context = <Context>(<unknown>{
             req: {},
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.hasPayload();
         expect(valid).toEqual(false);
     });
@@ -173,7 +181,7 @@ describe('hasPayload()', () => {
                 rawBody: `{ id: '1' }`,
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.hasPayload();
         expect(valid).toEqual(true);
     });
@@ -186,7 +194,7 @@ describe('validateRequest()', () => {
                 method: 'POST',
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateRequest();
         expect(valid).toEqual(false);
     });
@@ -202,7 +210,7 @@ describe('validateRequest()', () => {
         });
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateRequest();
         expect(valid).toEqual(true);
     });
@@ -215,7 +223,7 @@ describe('invoke()', () => {
                 method: 'POST',
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         await apiControllerMock.invoke();
         expect(apiControllerMock.handleRequestInvoked).toEqual(false);
     });
@@ -231,7 +239,7 @@ describe('invoke()', () => {
         });
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         await apiControllerMock.invoke();
         expect(apiControllerMock.handleRequestInvoked).toEqual(true);
     });
@@ -248,7 +256,7 @@ describe('tryGetPayload()', () => {
                 rawBody: `{ id: 1`,
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
         expect(payload).toEqual(undefined);
         expect(context.res.status).toEqual(400);
@@ -260,8 +268,31 @@ describe('tryGetPayload()', () => {
                 rawBody: `{ "id": 1 }`,
             },
         });
-        const apiControllerMock = new ApiControllerMock(context);
+        const apiControllerMock = new TestableApiController(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
         expect(payload).toEqual({ id: 1 });
+    });
+});
+
+describe('getRestApiConfig()', () => {
+    it('should call getConfigValue', async () => {
+        const context = <Context>(<unknown>{});
+        const configStub = {
+            maxScanRequestBatchCount: 1,
+            minimumWaitTimeforScanResultQueryInSeconds: 2,
+        };
+        const serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async sm => sm.getConfigValue('restApiConfig'))
+            .returns(async () => {
+                return Promise.resolve(configStub);
+            })
+            .verifiable(Times.once());
+        const apiControllerMock = new TestableApiController(context, serviceConfigMock.object);
+        // tslint:disable-next-line: no-unsafe-any
+        const actualConfig = await apiControllerMock.getRestApiConfig();
+
+        expect(actualConfig).toEqual(configStub);
+        serviceConfigMock.verifyAll();
     });
 });
