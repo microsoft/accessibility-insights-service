@@ -93,13 +93,18 @@ describe(ScanResultController, () => {
         );
     }
 
+    function setupGetGuidTimestamp(time: Date): void {
+        guidGeneratorMock
+            .setup(gm => gm.getGuidTimestamp(scanId))
+            .returns(() => time)
+            .verifiable(Times.once());
+    }
+
     describe('handleRequest', () => {
         it('should return 422 for invalid scanId', async () => {
-            const invalidId = 'invalid-id-1';
-            context.bindingData.scanId = invalidId;
             scanResultController = createScanResultController(context);
             guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(invalidId))
+                .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
                     throw new Error('Only version 6 of UUID is supported');
                 })
@@ -109,21 +114,14 @@ describe(ScanResultController, () => {
 
             guidGeneratorMock.verifyAll();
             expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(`Unprocessable Entity: ${invalidId}. Error: Only version 6 of UUID is supported`);
+            expect(context.res.body).toEqual(`Unprocessable Entity: ${scanId}. Error: Only version 6 of UUID is supported`);
         });
 
         it('should return a default response for requests made too early', async () => {
             scanResultController = createScanResultController(context);
-            guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId))
-                .returns(() => {
-                    // make the time interval a negative number
-                    const timeStamp = new Date();
-                    timeStamp.setFullYear(timeStamp.getFullYear() + 1);
-
-                    return timeStamp;
-                })
-                .verifiable(Times.once());
+            const timeStamp = new Date();
+            timeStamp.setFullYear(timeStamp.getFullYear() + 1);
+            setupGetGuidTimestamp(timeStamp);
 
             await scanResultController.handleRequest();
 
@@ -134,12 +132,7 @@ describe(ScanResultController, () => {
 
         it('should return 404 if the scan cannot be found', async () => {
             scanResultController = createScanResultController(context);
-            guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId))
-                .returns(() => {
-                    return new Date(0);
-                })
-                .verifiable(Times.once());
+            setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
@@ -157,12 +150,7 @@ describe(ScanResultController, () => {
 
         it('should return 200 if successfully fetched result', async () => {
             scanResultController = createScanResultController(context);
-            guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId))
-                .returns(() => {
-                    return new Date(0);
-                })
-                .verifiable(Times.once());
+            setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock.reset();
             onDemandPageScanRunResultProviderMock
                 // tslint:disable-next-line: no-unsafe-any
