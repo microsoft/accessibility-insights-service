@@ -31,12 +31,20 @@ export class TestableWebController extends WebController {
 
         return;
     }
+
+    protected validateRequest(...args: any[]): boolean {
+        return true;
+    }
+
+    protected async handleRequest(...args: any[]): Promise<void> {
+        return;
+    }
 }
 
 beforeEach(() => {
     dotEnvConfigStub = {};
     baseTelemetryProperties = { source: 'azure-function', api: 'controller-mock-api', version: '1.0', controller: 'TestableWebController' };
-    context = <Context>(<unknown>{ req: {} });
+    context = <Context>(<unknown>{ bindingDefinitions: {} });
     testableWebController = new TestableWebController();
 
     containerMock = Mock.ofType(Container);

@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 
+@injectable()
 export class PageScanRequestProvider {
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)

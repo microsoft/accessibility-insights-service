@@ -19,7 +19,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container, ...args: any[]): Promise<void> {
-        if ((args[0] as Context).req !== undefined) {
+        if ((args[0] as Context).bindingDefinitions !== undefined) {
             await this.controller.invoke(<Context>args[0], ...args.slice(1));
         } else {
             throw new Error('The first argument should be type of Azure Functions Context.');

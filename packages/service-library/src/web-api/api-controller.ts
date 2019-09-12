@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
 import { WebController } from './web-controller';
@@ -10,13 +9,6 @@ import { WebController } from './web-controller';
 @injectable()
 export abstract class ApiController extends WebController {
     protected abstract readonly serviceConfig: ServiceConfiguration;
-
-    public async invoke(requestContext: Context, ...args: any[]): Promise<void> {
-        this.context = requestContext;
-        if (this.validateRequest()) {
-            await this.handleRequest(...args);
-        }
-    }
 
     public hasPayload(): boolean {
         return this.context.req.rawBody !== undefined;
@@ -36,9 +28,7 @@ export abstract class ApiController extends WebController {
         return undefined;
     }
 
-    protected abstract async handleRequest(...args: any[]): Promise<void>;
-
-    protected validateRequest(): boolean {
+    protected validateRequest(...args: any[]): boolean {
         if (!this.validateApiVersion() || !this.validateContentType()) {
             return false;
         }

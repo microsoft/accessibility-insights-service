@@ -4,7 +4,7 @@ import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-service
 import { GuidGenerator, HashGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { ApiController, OnDemandPageScanRunResultProvider, PageScanRequestProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, WebController } from 'service-library';
 import {
     ItemType,
     OnDemandPageScanBatchRequest,
@@ -14,8 +14,10 @@ import {
     ScanRunBatchRequest,
 } from 'storage-documents';
 
+// tslint:disable: no-any
+
 @injectable()
-export class ScanBatchRequestFeedController extends ApiController {
+export class ScanBatchRequestFeedController extends WebController {
     public static readonly partitionKeyPreFix = 'pageScanRequest';
     public readonly apiVersion = '1.0';
     public readonly apiName = 'scan-batch-request-feed';
@@ -26,25 +28,26 @@ export class ScanBatchRequestFeedController extends ApiController {
         @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(PageScanRequestProvider) protected readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
         super();
     }
 
-    // tslint:disable-next-line: no-any
     public async handleRequest(...args: any[]): Promise<void> {
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
-        if (!this.validateRequestData(batchDocuments)) {
-            return;
-        }
-
         await Promise.all(
             batchDocuments.map(async document => {
                 await this.processDocument(document);
             }),
         );
+    }
+
+    protected validateRequest(...args: any[]): boolean {
+        const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
+
+        return this.validateRequestData(batchDocuments);
     }
 
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<void> {
