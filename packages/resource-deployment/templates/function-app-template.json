@@ -43,6 +43,13 @@
             "metadata": {
                 "description": "The App registration tenant ID"
             }
+        },
+        "cosmosAccountName": {
+            "type": "string",
+            "defaultValue": "[concat('allycosmos',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "Name of the cosmos account that have the scan related data"
+            }
         }
     },
     "resources": [
@@ -85,6 +92,10 @@
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                             "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "COSMOS_CONNECTION_STRING",
+                            "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
                         }
                     ]
                 },

@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+import { ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ApiController } from 'service-library';
@@ -11,29 +13,10 @@ export class ScanController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-mock';
     protected readonly logger: Logger;
+    protected readonly serviceConfig: ServiceConfiguration;
 
     constructor(private readonly mockScanDataProvider: MockScanDataProvider = new MockScanDataProvider()) {
         super();
-    }
-
-    public async handleRequest(): Promise<void> {
-        if (this.context.req.url.indexOf('/api/scans/$batch') > 0) {
-            this.getScanResults();
-
-            return;
-        }
-
-        if (this.context.req.url.indexOf('/api/scans/') > 0) {
-            this.getScanResult();
-
-            return;
-        }
-
-        this.context.res = {
-            status: 404,
-        };
-
-        return;
     }
 
     public getScanResult(): void {
@@ -60,5 +43,25 @@ export class ScanController extends ApiController {
                 },
             };
         }
+    }
+
+    public async handleRequest(): Promise<void> {
+        if (this.context.req.url.indexOf('/api/scans/$batch') > 0) {
+            this.getScanResults();
+
+            return;
+        }
+
+        if (this.context.req.url.indexOf('/api/scans/') > 0) {
+            this.getScanResult();
+
+            return;
+        }
+
+        this.context.res = {
+            status: 404,
+        };
+
+        return;
     }
 }

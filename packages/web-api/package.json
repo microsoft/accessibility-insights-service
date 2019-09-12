@@ -55,6 +55,7 @@
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
-        "storage-documents": "1.0.0"
+        "storage-documents": "1.0.0",
+        "lodash": "^4.17.14"
     }
 }

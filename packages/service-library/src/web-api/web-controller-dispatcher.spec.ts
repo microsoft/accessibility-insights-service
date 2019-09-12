@@ -18,9 +18,9 @@ let loggerMock: IMock<Logger>;
 let dotEnvConfigStub: DotenvConfigOutput;
 let baseTelemetryProperties: BaseTelemetryProperties;
 let context: Context;
-let controllerMock: ControllerMock;
+let testableWebController: TestableWebController;
 
-export class ControllerMock extends WebController {
+export class TestableWebController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'controller-mock-api';
     public requestArgs: any[];
@@ -35,9 +35,9 @@ export class ControllerMock extends WebController {
 
 beforeEach(() => {
     dotEnvConfigStub = {};
-    baseTelemetryProperties = { source: 'azure-function', api: 'controller-mock-api', version: '1.0', controller: 'ControllerMock' };
+    baseTelemetryProperties = { source: 'azure-function', api: 'controller-mock-api', version: '1.0', controller: 'TestableWebController' };
     context = <Context>(<unknown>{ req: {} });
-    controllerMock = new ControllerMock();
+    testableWebController = new TestableWebController();
 
     containerMock = Mock.ofType(Container);
     containerMock
@@ -49,8 +49,8 @@ beforeEach(() => {
         .returns(() => loggerMock.object)
         .verifiable();
     containerMock
-        .setup(c => c.get(ControllerMock))
-        .returns(() => controllerMock)
+        .setup(c => c.get(TestableWebController))
+        .returns(() => testableWebController)
         .verifiable();
 
     loggerMock = Mock.ofType(Logger);
@@ -67,20 +67,20 @@ afterEach(() => {
 
 describe(WebControllerDispatcher, () => {
     it('should invoke controller instance', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(ControllerMock, containerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
         await webControllerDispatcher.start(context);
-        expect(controllerMock.context).toEqual(context);
+        expect(testableWebController.context).toEqual(context);
     });
 
     it('should invoke controller instance with args', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(ControllerMock, containerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
         await webControllerDispatcher.start(context, 1, 'a');
-        expect(controllerMock.context).toEqual(context);
-        expect(controllerMock.requestArgs).toEqual([1, 'a']);
+        expect(testableWebController.context).toEqual(context);
+        expect(testableWebController.requestArgs).toEqual([1, 'a']);
     });
 
     it('should fail when no context provided', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(ControllerMock, containerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
         await expect(webControllerDispatcher.start({ prop: 'prop-a' })).rejects.toThrowError(
             /The first argument should be type of Azure Functions Context./,
         );

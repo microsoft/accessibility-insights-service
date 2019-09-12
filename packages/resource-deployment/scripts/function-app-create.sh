@@ -41,7 +41,7 @@ addReplyUrlIfNotExists() {
     done
 
     echo "Adding replyUrl $replyUrl to app registration..."
-    (az ad app update --id $clientId --add replyUrls $replyUrl) || true
+    az ad app update --id $clientId --add replyUrls $replyUrl
     echo "  Successfully added replyUrl."
 }
 
@@ -51,7 +51,7 @@ createAppRegistration() {
 
     appRegistrationName="allyappregistration-$resourceGroupName-$environment"
     echo "Creating a new AppRegistration with display name $appRegistrationName..."
-    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv) || true
+    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "  Successfully created '$appRegistrationName' App Registration with Client ID '$clientId'"
 }
 
@@ -83,7 +83,12 @@ while getopts "r:c:e:k:d:" option; do
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $clientId ] || [ -z $environment ] || [ -z $keyVault ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
+    exitWithUsageInfo
+fi
+
+if [ -z $clientId] && [ ! "${environment,,}" = "dev" ]; then
+    echo "Client ID is required if the environment is not Dev"
     exitWithUsageInfo
 fi
 
@@ -119,7 +124,9 @@ functionAppName=$resourceName
 echo "Successfully deployed Function App '$functionAppName'"
 
 # Add reply url to app registration
-addReplyUrlIfNotExists $clientId $functionAppName
+if [ "${environment,,}" = "dev" ]; then
+    addReplyUrlIfNotExists $clientId $functionAppName
+fi
 
 # Grant key vault access to function app
 echo "Fetching principalId of the azure function..."
