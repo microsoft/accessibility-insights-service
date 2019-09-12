@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { WebControllerDispatcher } from 'service-library';
 import { ReportController } from '../src/controllers/report-controller';
+import { setupIoContainer } from '../src/setup-ioc-container';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new ReportController(context);
-    if (controller.validateRequest()) {
-        controller.getReport();
-    }
+    const dispatcher = new WebControllerDispatcher(ReportController, setupIoContainer());
+    await dispatcher.start(context);
 }

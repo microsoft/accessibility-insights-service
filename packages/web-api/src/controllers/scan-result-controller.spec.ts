@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResultController } from './scan-result-controller';
 
@@ -84,13 +84,15 @@ describe(ScanResultController, () => {
     });
 
     function createScanResultController(contextReq: Context): ScanResultController {
-        return new ScanResultController(
-            contextReq,
+        const controller = new ScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
         );
+        controller.context = contextReq;
+
+        return controller;
     }
 
     function setupGetGuidTimestamp(time: Date): void {

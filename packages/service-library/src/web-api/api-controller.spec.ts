@@ -4,26 +4,39 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
 import { Mock, Times } from 'typemoq';
 import { ApiController } from './api-controller';
+
+// tslint:disable: no-any no-unnecessary-override no-null-keyword no-unsafe-any
 
 export class TestableApiController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-test';
-    public readonly logger: Logger;
     public handleRequestInvoked = false;
+    public args: any[];
 
-    // tslint:disable-next-line: no-null-keyword
-    public constructor(public readonly context: Context, public readonly serviceConfig: ServiceConfiguration = null) {
+    public constructor(public requestContext: Context = null, public readonly serviceConfig: ServiceConfiguration = null) {
         super();
+        this.context = requestContext;
     }
 
-    public async handleRequest(): Promise<void> {
+    public async handleRequest(...requestArgs: any[]): Promise<void> {
         this.handleRequestInvoked = true;
+        this.args = requestArgs;
     }
 
-    // tslint:disable-next-line: no-unnecessary-override
+    public validateRequest(): boolean {
+        return super.validateRequest();
+    }
+
+    public validateContentType(): boolean {
+        return super.validateContentType();
+    }
+
+    public validateApiVersion(): boolean {
+        return super.validateApiVersion();
+    }
+
     public async getRestApiConfig(): Promise<RestApiConfig> {
         return super.getRestApiConfig();
     }
@@ -223,8 +236,9 @@ describe('invoke()', () => {
                 method: 'POST',
             },
         });
-        const apiControllerMock = new TestableApiController(context);
-        await apiControllerMock.invoke();
+        const apiControllerMock = new TestableApiController();
+        expect(apiControllerMock.context).toBeNull();
+        await apiControllerMock.invoke(context);
         expect(apiControllerMock.handleRequestInvoked).toEqual(false);
     });
 
@@ -239,9 +253,27 @@ describe('invoke()', () => {
         });
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
-        const apiControllerMock = new TestableApiController(context);
-        await apiControllerMock.invoke();
+        const apiControllerMock = new TestableApiController();
+        expect(apiControllerMock.context).toBeNull();
+        await apiControllerMock.invoke(context);
         expect(apiControllerMock.handleRequestInvoked).toEqual(true);
+    });
+
+    it('should pass request args', async () => {
+        const context = <Context>(<unknown>{
+            req: {
+                method: 'POST',
+                rawBody: `{ id: '1' }`,
+                headers: {},
+                query: {},
+            },
+        });
+        context.req.query['api-version'] = '1.0';
+        context.req.headers['content-type'] = 'application/json';
+        const apiControllerMock = new TestableApiController();
+        await apiControllerMock.invoke(context, 'a', 1);
+        expect(apiControllerMock.handleRequestInvoked).toEqual(true);
+        expect(apiControllerMock.args).toEqual(['a', 1]);
     });
 });
 
@@ -275,12 +307,13 @@ describe('tryGetPayload()', () => {
 });
 
 describe('getRestApiConfig()', () => {
-    it('should call getConfigValue', async () => {
+    it('should get config value', async () => {
         const context = <Context>(<unknown>{});
         const configStub = {
             maxScanRequestBatchCount: 1,
             minimumWaitTimeforScanResultQueryInSeconds: 2,
         };
+
         const serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
             .setup(async sm => sm.getConfigValue('restApiConfig'))
@@ -288,8 +321,8 @@ describe('getRestApiConfig()', () => {
                 return Promise.resolve(configStub);
             })
             .verifiable(Times.once());
+
         const apiControllerMock = new TestableApiController(context, serviceConfigMock.object);
-        // tslint:disable-next-line: no-unsafe-any
         const actualConfig = await apiControllerMock.getRestApiConfig();
 
         expect(actualConfig).toEqual(configStub);

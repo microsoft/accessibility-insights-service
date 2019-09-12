@@ -23,14 +23,14 @@ describe(PageScanRequestProvider, () => {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.onDemandPageScanRequests,
+            itemType: ItemType.onDemandPageScanRequest,
             partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const request2: OnDemandPageScanRequest = {
             id: 'id2',
             url: 'url2',
             priority: 0,
-            itemType: ItemType.onDemandPageScanRequests,
+            itemType: ItemType.onDemandPageScanRequest,
             partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const requests = [request1, request2];
@@ -49,7 +49,7 @@ describe(PageScanRequestProvider, () => {
             id: 'id1',
             url: 'url1',
             priority: 10,
-            itemType: ItemType.onDemandPageScanRequests,
+            itemType: ItemType.onDemandPageScanRequest,
             partitionKey: PartitionKey.pageScanRequestDocuments,
         };
         const itemCount = 5;
@@ -64,7 +64,7 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock
             .setup(c =>
                 c.queryDocuments(
-                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequests}' ORDER BY c.priority`,
+                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority`,
                     continuationToken,
                     PartitionKey.pageScanRequestDocuments,
                 ),

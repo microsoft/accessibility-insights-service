@@ -8,6 +8,7 @@ import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from '../providers/scan-data-provider';
 import { ScanRequestController } from './scan-request-controller';
+
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion
 
 describe(ScanRequestController, () => {
@@ -48,13 +49,15 @@ describe(ScanRequestController, () => {
     });
 
     function createScanRequestController(contextReq: Context): ScanRequestController {
-        return new ScanRequestController(
-            contextReq,
+        const controller = new ScanRequestController(
             scanDataProviderMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
         );
+        controller.context = contextReq;
+
+        return controller;
     }
 
     describe(ScanRequestController, () => {
