@@ -31,3 +31,8 @@ export const cosmosContainerClientTypes = {
     OnDemandScanRunsCosmosContainerClient: 'onDemandScanRunsCosmosContainerClient',
     OnDemandScanRequestsCosmosContainerClient: 'onDemandScanRequestsCosmosContainerClient',
 };
+
+export const queueClientType = {
+    scanReqClient: 'scanReqClient',
+    onDemandScanReqClient: 'onDemandScanReqClient',
+};

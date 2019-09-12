@@ -11,12 +11,14 @@ import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
+import { QueueWrapper } from './azure-queue/queue-wrapper';
 import { StorageConfig } from './azure-queue/storage-config';
 import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
-import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
+import { cosmosContainerClientTypes, iocTypeNames, queueClientType } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+import { QueueClient } from './storage/queue-client';
 
 export function registerAzureServicesToContainer(container: Container): void {
     setupAuthenticationMethod(container);
@@ -42,7 +44,7 @@ export function registerAzureServicesToContainer(container: Container): void {
     setupSingletonCosmosClientProvider(container);
 
     container.bind(CosmosClientWrapper).toSelf();
-
+    container.bind(QueueWrapper).toSelf();
     container.bind(iocTypeNames.QueueURLProvider).toConstantValue(QueueURL.fromServiceURL);
     container.bind(iocTypeNames.MessagesURLProvider).toConstantValue(MessagesURL.fromQueueURL);
     container.bind(iocTypeNames.MessageIdURLProvider).toConstantValue(MessageIdURL.fromMessagesURL);
@@ -65,6 +67,14 @@ export function registerAzureServicesToContainer(container: Container): void {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
+    container.bind(queueClientType.scanReqClient).toDynamicValue(context => {
+        return createQueueClient(context.container, 'scanrequest');
+    });
+
+    container.bind(queueClientType.onDemandScanReqClient).toDynamicValue(context => {
+        return createQueueClient(context.container, 'ondemandscanrequest');
+    });
+
     setupBlobServiceClientProvider(container);
 
     container.bind(Queue).toSelf();
@@ -81,6 +91,10 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
 
 function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
     return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(Logger));
+}
+
+function createQueueClient(container: interfaces.Container, queueName: string): QueueClient {
+    return new QueueClient(container.get(QueueWrapper), queueName, container.get(Logger));
 }
 
 function setupAuthenticationMethod(container: interfaces.Container): void {
