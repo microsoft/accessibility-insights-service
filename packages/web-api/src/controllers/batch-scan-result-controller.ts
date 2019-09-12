@@ -31,10 +31,9 @@ export class BatchScanResultController extends BaseScanResultController {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
         const scanIds = payload.map(request => request.scanId);
         const responseBody: OnDemandPageScanResultResponse[] = [];
-
         const scanIdsToQuery: string[] = [];
-        // partition the array into three collections
-        scanIds.forEach(async scanId => {
+
+        for (const scanId of scanIds) {
             const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
             if (isRequestMadeTooSoon === true) {
                 responseBody.push(this.getTooSoonRequestResponse(scanId));
@@ -43,7 +42,7 @@ export class BatchScanResultController extends BaseScanResultController {
             } else {
                 scanIdsToQuery.push(scanId);
             }
-        });
+        }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQuery);
 

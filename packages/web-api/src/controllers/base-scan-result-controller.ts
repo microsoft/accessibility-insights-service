@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
-import { Dictionary, keyBy } from 'lodash';
+import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { InvalidOnDemandPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
 
@@ -72,7 +72,7 @@ export abstract class BaseScanResultController extends ApiController {
     protected getInvalidRequestResponse(scanId: string, error?: any): InvalidOnDemandPageScanResultResponse {
         return {
             id: scanId,
-            error: `Unprocessable Entity: ${scanId}. ${error}`,
+            error: `Unprocessable Entity: ${scanId}. ${isEmpty(error) ? '' : error}`,
         };
     }
 }

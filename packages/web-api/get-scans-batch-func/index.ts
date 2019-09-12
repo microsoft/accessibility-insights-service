@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ScanController } from '../src/controllers/scan-controller';
+import { setupIoContainer } from '../src/setup-ioc-container';
+import { ControllerDispatcher } from './../src/controller-dispatcher';
+import { BatchScanResultController } from './../src/controllers/batch-scan-result-controller';
 
 export async function run(context: Context): Promise<void> {
-    const controller = new ScanController(context);
-    if (controller.validateRequest()) {
-        controller.getScanResults();
-    }
+    const dispatcher = new ControllerDispatcher(BatchScanResultController, context, setupIoContainer());
+    await dispatcher.start();
 }
