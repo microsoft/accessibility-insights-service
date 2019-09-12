@@ -62,4 +62,12 @@ export class ScanResultController extends BaseScanResultController {
             this.logger.logInfo('scan result fetched', { scanId });
         }
     }
+
+    // tslint:disable-next-line: no-any
+    protected handleInvalidRequest(scanId: string, error: any): void {
+        this.context.res = {
+            status: 422, // Unprocessable Entity,
+            body: this.getInvalidRequestResponse(scanId, error),
+        };
+    }
 }

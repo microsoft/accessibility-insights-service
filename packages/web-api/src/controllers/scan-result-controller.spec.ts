@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { InvalidOnDemandPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
@@ -102,6 +102,10 @@ describe(ScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return 422 for invalid scanId', async () => {
+            const invalidRequestResponse: InvalidOnDemandPageScanResultResponse = {
+                id: scanId,
+                error: `Unprocessable Entity: ${scanId}. Error: Only version 6 of UUID is supported`,
+            };
             scanResultController = createScanResultController(context);
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
@@ -114,7 +118,7 @@ describe(ScanResultController, () => {
 
             guidGeneratorMock.verifyAll();
             expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(`Unprocessable Entity: ${scanId}. Error: Only version 6 of UUID is supported`);
+            expect(context.res.body).toEqual(invalidRequestResponse);
         });
 
         it('should return a default response for requests made too early', async () => {

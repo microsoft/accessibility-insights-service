@@ -3,13 +3,16 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { InvalidOnDemandPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { ApiController } from './api-controller';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
     protected abstract readonly guidGenerator: GuidGenerator;
+
+    // tslint:disable-next-line: no-any
+    protected abstract handleInvalidRequest(scanId: string, error: any): void;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
         const timeRequested = this.tryGetScanRequestedTime(scanId);
@@ -33,10 +36,7 @@ export abstract class BaseScanResultController extends ApiController {
         try {
             return this.guidGenerator.getGuidTimestamp(scanId);
         } catch (error) {
-            this.context.res = {
-                status: 422, // Unprocessable Entity,
-                body: `Unprocessable Entity: ${scanId}. ${error}`,
-            };
+            this.handleInvalidRequest(scanId, error);
         }
 
         return undefined;
@@ -65,6 +65,14 @@ export abstract class BaseScanResultController extends ApiController {
             },
             priority: undefined,
             itemType: ItemType.onDemandPageScanRunResult,
+        };
+    }
+
+    // tslint:disable-next-line: no-any
+    protected getInvalidRequestResponse(scanId: string, error?: any): InvalidOnDemandPageScanResultResponse {
+        return {
+            id: scanId,
+            error: `Unprocessable Entity: ${scanId}. ${error}`,
         };
     }
 }
