@@ -9,6 +9,7 @@ import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResultController } from './scan-result-controller';
+
 describe(ScanResultController, () => {
     let scanResultController: ScanResultController;
     let context: Context;
@@ -16,6 +17,37 @@ describe(ScanResultController, () => {
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
+    const scanId = 'scan-id-1';
+    const tooSoonRequestResponse: OnDemandPageScanResult = {
+        id: scanId,
+        partitionKey: undefined,
+        url: undefined,
+        run: {
+            state: 'accepted',
+        },
+        priority: undefined,
+        itemType: ItemType.onDemandPageScanRunResult,
+    };
+    const scanNotFoundResponse: OnDemandPageScanResult = {
+        id: scanId,
+        partitionKey: undefined,
+        url: undefined,
+        run: {
+            state: 'unknown',
+        },
+        priority: undefined,
+        itemType: ItemType.onDemandPageScanRunResult,
+    };
+    const response: OnDemandPageScanResult = {
+        id: scanId,
+        partitionKey: 'pk',
+        url: 'url',
+        run: {
+            state: 'running',
+        },
+        priority: 1,
+        itemType: ItemType.onDemandPageScanRunResult,
+    };
 
     beforeEach(() => {
         context = <Context>(<unknown>{
@@ -25,7 +57,7 @@ describe(ScanResultController, () => {
                 query: {},
             },
             bindingData: {
-                scanId: 'scan-id-1',
+                scanId,
             },
         });
         context.req.query['api-version'] = '1.0';
@@ -81,19 +113,7 @@ describe(ScanResultController, () => {
         });
 
         it('should return a default response for requests made too early', async () => {
-            const scanId = 'scanId';
-            context.bindingData.scanId = scanId;
             scanResultController = createScanResultController(context);
-            const defaultResponse: OnDemandPageScanResult = {
-                id: scanId,
-                partitionKey: undefined,
-                url: undefined,
-                run: {
-                    state: 'accepted',
-                },
-                priority: undefined,
-                itemType: ItemType.onDemandPageScanRunResult,
-            };
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
@@ -109,23 +129,11 @@ describe(ScanResultController, () => {
 
             guidGeneratorMock.verifyAll();
             expect(context.res.status).toEqual(202);
-            expect(context.res.body).toEqual(defaultResponse);
+            expect(context.res.body).toEqual(tooSoonRequestResponse);
         });
 
         it('should return 404 if the scan cannot be found', async () => {
-            const scanId = 'scanId';
-            context.bindingData.scanId = scanId;
             scanResultController = createScanResultController(context);
-            const response: OnDemandPageScanResult = {
-                id: scanId,
-                partitionKey: undefined,
-                url: undefined,
-                run: {
-                    state: 'unknown',
-                },
-                priority: undefined,
-                itemType: ItemType.onDemandPageScanRunResult,
-            };
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
@@ -144,23 +152,11 @@ describe(ScanResultController, () => {
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(404);
-            expect(context.res.body).toEqual(response);
+            expect(context.res.body).toEqual(scanNotFoundResponse);
         });
 
         it('should return 200 if successfully fetched result', async () => {
-            const scanId = 'scanId';
-            context.bindingData.scanId = scanId;
             scanResultController = createScanResultController(context);
-            const scanResult: OnDemandPageScanResult = {
-                id: scanId,
-                partitionKey: 'pk',
-                url: 'url',
-                run: {
-                    state: 'running',
-                },
-                priority: 1,
-                itemType: ItemType.onDemandPageScanRunResult,
-            };
             guidGeneratorMock
                 .setup(gm => gm.getGuidTimestamp(scanId))
                 .returns(() => {
@@ -172,7 +168,7 @@ describe(ScanResultController, () => {
                 // tslint:disable-next-line: no-unsafe-any
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
-                    return Promise.resolve([scanResult]);
+                    return Promise.resolve([response]);
                 })
                 .verifiable(Times.once());
 
@@ -181,7 +177,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(scanResult);
+            expect(context.res.body).toEqual(response);
         });
     });
 });

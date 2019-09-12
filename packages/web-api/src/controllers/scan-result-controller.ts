@@ -37,7 +37,7 @@ export class ScanResultController extends ApiController {
             // user made the scan result query too soon after the scan request, will return a default response.
             this.context.res = {
                 status: 202, // Accepted
-                body: this.getDefaultResponse(scanId),
+                body: this.getTooSoonRequestResponse(scanId),
             };
             this.logger.logInfo('scan result queried too soon', { scanId });
 
@@ -95,7 +95,7 @@ export class ScanResultController extends ApiController {
         return undefined;
     }
 
-    private getDefaultResponse(scanId: string): OnDemandPageScanResult {
+    private getTooSoonRequestResponse(scanId: string): OnDemandPageScanResult {
         return {
             id: scanId,
             partitionKey: undefined,
