@@ -12,7 +12,7 @@ export interface BlobContentDownloadResponse {
 }
 
 @injectable()
-export class BlobService {
+export class BlobStorageClient {
     constructor(@inject(iocTypeNames.BlobServiceClientProvider) private readonly blobServiceClientProvider: BlobServiceClientProvider) {}
 
     public async getBlobContent(containerName: string, blobName: string): Promise<BlobContentDownloadResponse> {
