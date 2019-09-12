@@ -16,11 +16,15 @@ export class QueueClient {
         return this.queueWrapper.deleteMessage(message, this.queueName);
     }
 
-    public async getMessageCount(message: unknown): Promise<number> {
+    public async getMessageCount(): Promise<number> {
         return this.queueWrapper.getMessageCount(this.queueName);
     }
 
-    public async getMessages(message: unknown): Promise<Message[]> {
+    public async getMessages(): Promise<Message[]> {
         return this.queueWrapper.getMessages(this.queueName);
+    }
+
+    public get getScanQueue(): string {
+        return this.queueName;
     }
 }

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Message, Queue } from 'azure-services';
+import { Message, QueueClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
@@ -16,7 +16,7 @@ import { Worker } from './worker';
 
 let worker: Worker;
 let batchMock: IMock<Batch>;
-let queueMock: IMock<Queue>;
+let queueMock: IMock<QueueClient>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
@@ -27,12 +27,12 @@ describe(Worker, () => {
     beforeEach(() => {
         process.env.AZ_BATCH_JOB_ID = 'batch-job-id';
         batchMock = Mock.ofType(Batch);
-        queueMock = Mock.ofType(Queue);
+        queueMock = Mock.ofType(QueueClient);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(Logger);
 
-        queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
+        queueMock.setup(o => o.getScanQueue).returns(() => 'scan-queue');
 
         serviceConfigMock
             .setup(async s => s.getConfigValue('jobManagerConfig'))

@@ -3,26 +3,21 @@
 // tslint:disable: no-import-side-effect no-any no-unsafe-any
 import 'reflect-metadata';
 
-import { Queue, StorageConfig } from 'azure-services';
+import { QueueClient, StorageConfig } from 'azure-services';
 import { PageDocumentProvider } from 'service-library';
 import { ItemType, RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanRequestSender } from './scan-request-sender';
 
 describe('Scan request Sender', () => {
-    let queueMock: IMock<Queue>;
+    let queueMock: IMock<QueueClient>;
     let testSubject: ScanRequestSender;
-    let storageConfigStub: StorageConfig;
     let pageDocumentProviderMock: IMock<PageDocumentProvider>;
 
     beforeEach(() => {
-        storageConfigStub = {
-            scanQueue: 'test-scan-queue',
-        };
-
-        queueMock = Mock.ofType<Queue>();
+        queueMock = Mock.ofType<QueueClient>();
         pageDocumentProviderMock = Mock.ofType<PageDocumentProvider>();
-        testSubject = new ScanRequestSender(pageDocumentProviderMock.object, queueMock.object, storageConfigStub);
+        testSubject = new ScanRequestSender(pageDocumentProviderMock.object, queueMock.object);
     });
 
     afterEach(() => {
@@ -37,7 +32,7 @@ describe('Scan request Sender', () => {
         websitePages.forEach(page => {
             const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .setup(async q => q.createMessage(message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
@@ -63,7 +58,7 @@ describe('Scan request Sender', () => {
         websitePages.forEach(page => {
             const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .setup(async q => q.createMessage(message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 

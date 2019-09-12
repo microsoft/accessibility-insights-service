@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Message, Queue } from 'azure-services';
+import { Message, QueueClient, queueClientType } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
@@ -19,7 +19,7 @@ export class Worker {
 
     public constructor(
         @inject(Batch) private readonly batch: Batch,
-        @inject(Queue) private readonly queue: Queue,
+        @inject(queueClientType.scanReqClient) private readonly queue: QueueClient,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
@@ -37,7 +37,7 @@ export class Worker {
             if (tasksIncrementCount > 0) {
                 const scanMessages = await this.getMessages(tasksIncrementCount);
                 if (scanMessages.length === 0) {
-                    this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
+                    // this.logger.logInfo(`The storage queue '${this.queue.getScanQueue()}' has no message to process.`);
                     if (poolMetricsInfo.load.activeTasks === 0) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active tasks.`);
                         break;

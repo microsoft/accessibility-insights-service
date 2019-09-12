@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Queue, StorageConfig } from 'azure-services';
+
+import { QueueClient, queueClientType } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { PageDocumentProvider } from 'service-library';
@@ -10,8 +11,7 @@ import { RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'sto
 export class ScanRequestSender {
     constructor(
         @inject(PageDocumentProvider) private readonly pageDocumentProvider: PageDocumentProvider,
-        @inject(Queue) private readonly queue: Queue,
-        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
+        @inject(queueClientType.scanReqClient) private readonly queue: QueueClient,
     ) {}
 
     public async sendRequestToScan(websitePage: WebsitePage[]): Promise<void> {
@@ -19,7 +19,7 @@ export class ScanRequestSender {
             websitePage.map(async page => {
                 await this.updatePageState(page);
                 const message = this.createScanRequestMessage(page);
-                await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                await this.queue.createMessage(message);
             }),
         );
     }

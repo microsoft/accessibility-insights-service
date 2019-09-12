@@ -7,6 +7,7 @@ export { Message } from './azure-queue/message';
 export { ScanMessage } from './azure-queue/scan-message';
 export { Queue } from './azure-queue/queue';
 export { QueueWrapper } from './azure-queue/queue-wrapper';
+export { QueueClient } from './storage/queue-client';
 export { RetryOptions } from './storage/retry-options';
 export { registerAzureServicesToContainer } from './register-azure-services-to-container';
 export { StorageConfig } from './azure-queue/storage-config';
