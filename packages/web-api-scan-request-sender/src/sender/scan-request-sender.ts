@@ -3,13 +3,13 @@
 import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { PageScanRequestProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanRequest, RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class ScanRequestSender {
     constructor(
-        @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(Queue) private readonly queue: Queue,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
     ) {}
