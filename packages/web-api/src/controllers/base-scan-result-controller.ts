@@ -4,7 +4,7 @@ import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
-import { InvalidScanResultResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
+import { ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
@@ -56,7 +56,7 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     // tslint:disable-next-line: no-any
-    protected getInvalidRequestResponse(scanId: string): InvalidScanResultResponse {
+    protected getInvalidRequestResponse(scanId: string): ScanResultErrorResponse {
         return {
             scanId: scanId,
             error: `Unprocessable Entity: ${scanId}.`,

@@ -8,7 +8,7 @@ import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { InvalidScanResultResponse } from '../api-contracts/scan-result-response';
+import { ScanResultErrorResponse } from '../api-contracts/scan-result-response';
 import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { ScanResultController } from './scan-result-controller';
 
@@ -110,7 +110,7 @@ describe(ScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return 422 for invalid scanId', async () => {
-            const invalidRequestResponse: InvalidScanResultResponse = {
+            const invalidRequestResponse: ScanResultErrorResponse = {
                 scanId: scanId,
                 error: `Unprocessable Entity: ${scanId}.`,
             };

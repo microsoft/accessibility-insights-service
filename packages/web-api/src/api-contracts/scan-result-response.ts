@@ -5,7 +5,7 @@ export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
 export declare type RunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
-export interface InvalidScanResultResponse {
+export interface ScanResultErrorResponse {
     scanId: string;
     error: string;
 }
@@ -18,7 +18,7 @@ export type ScanResultResponse =
           reports?: ScanReport[];
           run: ScanRun;
       }
-    | InvalidScanResultResponse;
+    | ScanResultErrorResponse;
 
 export interface ScanResult {
     state: ScanState;
