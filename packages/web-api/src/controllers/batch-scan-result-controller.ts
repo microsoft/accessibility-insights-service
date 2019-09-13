@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { OnDemandPageScanResultResponse } from 'storage-documents';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 
 import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
 import { BaseScanResultController } from './base-scan-result-controller';
@@ -27,7 +27,7 @@ export class BatchScanResultController extends BaseScanResultController {
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
         const scanIds = payload.map(request => request.scanId);
-        const responseBody: OnDemandPageScanResultResponse[] = [];
+        const responseBody: ScanResultResponse[] = [];
         const scanIdsToQuery: string[] = [];
 
         for (const scanId of scanIds) {
@@ -49,7 +49,7 @@ export class BatchScanResultController extends BaseScanResultController {
             if (isEmpty(scanResultItemMap[scanId])) {
                 responseBody.push(this.get404Response(scanId));
             } else {
-                responseBody.push(scanResultItemMap[scanId]);
+                responseBody.push(this.getResponseFromDbDocument(scanResultItemMap[scanId]));
             }
         });
 

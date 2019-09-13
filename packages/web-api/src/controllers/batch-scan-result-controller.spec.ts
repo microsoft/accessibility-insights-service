@@ -1,14 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { InvalidPageScanResultResponse, ItemType, OnDemandPageScanResult, OnDemandPageScanResultResponse } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+
 import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
 describe(BatchScanResultController, () => {
@@ -98,7 +100,7 @@ describe(BatchScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return empty array if request body is empty array', async () => {
-            const emptyResponse: OnDemandPageScanResultResponse[] = [];
+            const emptyResponse: ScanResultResponse[] = [];
             batchScanResultController = createScanResultController(context);
 
             await batchScanResultController.handleRequest();

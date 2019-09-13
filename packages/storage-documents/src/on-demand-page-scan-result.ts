@@ -10,14 +10,6 @@ export declare type OnDemandPageScanRunState = 'unknown' | 'accepted' | 'queued'
 /**
  * The web page scan run result document.
  */
-
-export type OnDemandPageScanResultResponse = InvalidPageScanResultResponse | OnDemandPageScanResult;
-
-export interface InvalidPageScanResultResponse {
-    id: string;
-    error: string;
-}
-
 export interface OnDemandPageScanResult extends StorageDocument {
     url: string;
     scanResult?: OnDemandScanResult;

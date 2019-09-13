@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { InvalidPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { InvalidScanResultResponse } from '../api-contracts/scan-result-response';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { ScanResultController } from './scan-result-controller';
 
 describe(ScanResultController, () => {
@@ -18,27 +20,21 @@ describe(ScanResultController, () => {
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const scanId = 'scan-id-1';
-    const tooSoonRequestResponse: OnDemandPageScanResult = {
-        id: scanId,
-        partitionKey: undefined,
+    const tooSoonRequestResponse: ScanResultResponse = {
+        scanId,
         url: undefined,
         run: {
             state: 'accepted',
         },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
     };
-    const scanNotFoundResponse: OnDemandPageScanResult = {
-        id: scanId,
-        partitionKey: undefined,
+    const scanNotFoundResponse: ScanResultResponse = {
+        scanId,
         url: undefined,
         run: {
             state: 'unknown',
         },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
     };
-    const response: OnDemandPageScanResult = {
+    const dbResponse: OnDemandPageScanResult = {
         id: scanId,
         partitionKey: 'pk',
         url: 'url',
@@ -47,6 +43,13 @@ describe(ScanResultController, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
+    };
+    const scanResponse: ScanResultResponse = {
+        scanId,
+        url: 'url',
+        run: {
+            state: 'running',
+        },
     };
 
     beforeEach(() => {
@@ -107,8 +110,8 @@ describe(ScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return 422 for invalid scanId', async () => {
-            const invalidRequestResponse: InvalidPageScanResultResponse = {
-                id: scanId,
+            const invalidRequestResponse: InvalidScanResultResponse = {
+                scanId: scanId,
                 error: `Unprocessable Entity: ${scanId}.`,
             };
             scanResultController = createScanResultController(context);
@@ -160,11 +163,12 @@ describe(ScanResultController, () => {
             scanResultController = createScanResultController(context);
             setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock.reset();
+
             onDemandPageScanRunResultProviderMock
                 // tslint:disable-next-line: no-unsafe-any
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
-                    return Promise.resolve([response]);
+                    return Promise.resolve([dbResponse]);
                 })
                 .verifiable(Times.once());
 
@@ -173,7 +177,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(response);
+            expect(context.res.body).toEqual(scanResponse);
         });
     });
 });

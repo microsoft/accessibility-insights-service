@@ -3,7 +3,8 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { InvalidPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { InvalidScanResultResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
@@ -30,29 +31,23 @@ export abstract class BaseScanResultController extends ApiController {
         return this.guidGenerator.getGuidTimestamp(scanId);
     }
 
-    protected getTooSoonRequestResponse(scanId: string): OnDemandPageScanResult {
+    protected getTooSoonRequestResponse(scanId: string): ScanResultResponse {
         return {
-            id: scanId,
-            partitionKey: undefined,
+            scanId,
             url: undefined,
             run: {
                 state: 'accepted',
             },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
         };
     }
 
-    protected get404Response(scanId: string): OnDemandPageScanResult {
+    protected get404Response(scanId: string): ScanResultResponse {
         return {
-            id: scanId,
-            partitionKey: undefined,
+            scanId,
             url: undefined,
             run: {
                 state: 'unknown',
             },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
         };
     }
 
@@ -61,10 +56,20 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     // tslint:disable-next-line: no-any
-    protected getInvalidRequestResponse(scanId: string): InvalidPageScanResultResponse {
+    protected getInvalidRequestResponse(scanId: string): InvalidScanResultResponse {
         return {
-            id: scanId,
+            scanId: scanId,
             error: `Unprocessable Entity: ${scanId}.`,
+        };
+    }
+
+    protected getResponseFromDbDocument(dbDocument: OnDemandPageScanResult): ScanResultResponse {
+        return {
+            scanId: dbDocument.id,
+            url: dbDocument.url,
+            scanResult: dbDocument.scanResult,
+            reports: dbDocument.reports,
+            run: dbDocument.run,
         };
     }
 }

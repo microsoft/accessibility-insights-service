@@ -56,7 +56,7 @@ export class ScanResultController extends BaseScanResultController {
         } else {
             this.context.res = {
                 status: 200,
-                body: scanResult,
+                body: this.getResponseFromDbDocument(scanResult),
             };
 
             this.logger.logInfo('scan result fetched', { scanId });
