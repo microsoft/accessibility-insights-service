@@ -10,7 +10,6 @@ import { BatchConfig } from './batch/batch-config';
 import { RunnerTaskConfig } from './batch/runner-task-config';
 import { webAPIJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
 
-
 export function setupWebApiScanJobManagerContainer(): Container {
     const container = new Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);

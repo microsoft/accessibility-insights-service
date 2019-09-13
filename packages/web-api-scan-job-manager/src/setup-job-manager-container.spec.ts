@@ -47,7 +47,7 @@ describe(setupWebApiScanJobManagerContainer, () => {
 
         it('resolves BatchServiceClient', async () => {
             const batchServiceClientProvider: BatchServiceClientProvider = container.get(
-                webAPIJobManagerIocTypeNames.BatchServiceClientProvider
+                webAPIJobManagerIocTypeNames.BatchServiceClientProvider,
             );
 
             const batchServiceClient = await batchServiceClientProvider();
