@@ -68,7 +68,10 @@ describe(ScanResultController, () => {
         onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-
+        guidGeneratorMock
+            .setup(gm => gm.isValidV6Guid(scanId))
+            .returns(() => true)
+            .verifiable(Times.once());
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
             .setup(async s => s.getConfigValue('restApiConfig'))
@@ -109,11 +112,10 @@ describe(ScanResultController, () => {
                 error: `Unprocessable Entity: ${scanId}.`,
             };
             scanResultController = createScanResultController(context);
+            guidGeneratorMock.reset();
             guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId))
-                .returns(() => {
-                    throw new Error('Only version 6 of UUID is supported');
-                })
+                .setup(gm => gm.isValidV6Guid(scanId))
+                .returns(() => false)
                 .verifiable(Times.once());
 
             await scanResultController.handleRequest();

@@ -24,10 +24,13 @@ export class ScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
-        if (isRequestMadeTooSoon === undefined) {
+        if (!this.isScanIdValid(scanId)) {
+            this.handleInvalidRequest(scanId);
+
             return;
         }
+
+        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
 
         if (isRequestMadeTooSoon === true) {
             // user made the scan result query too soon after the scan request, will return a default response.

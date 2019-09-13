@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
 import { InvalidPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
-
-import { ApiController } from 'service-library';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
@@ -15,11 +13,7 @@ export abstract class BaseScanResultController extends ApiController {
     protected abstract handleInvalidRequest(scanId: string): void;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.tryGetScanRequestedTime(scanId);
-        if (timeRequested === undefined) {
-            // the scanId is invalid.
-            return undefined;
-        }
+        const timeRequested = this.getScanRequestedTime(scanId);
         const timeCurrent = new Date();
         const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
 
@@ -32,14 +26,8 @@ export abstract class BaseScanResultController extends ApiController {
         return keyBy(scanResultItems, item => item.id);
     }
 
-    protected tryGetScanRequestedTime(scanId: string): Date {
-        try {
-            return this.guidGenerator.getGuidTimestamp(scanId);
-        } catch (error) {
-            this.handleInvalidRequest(scanId);
-        }
-
-        return undefined;
+    protected getScanRequestedTime(scanId: string): Date {
+        return this.guidGenerator.getGuidTimestamp(scanId);
     }
 
     protected getTooSoonRequestResponse(scanId: string): OnDemandPageScanResult {
