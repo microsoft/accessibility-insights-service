@@ -4,7 +4,7 @@ import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { OnDemandPageScanRequest, RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { OnDemandPageScanRequest, OnDemandScanRequestMessage, RunState, WebsitePage, WebsitePageExtra } from 'storage-documents';
 
 @injectable()
 export class ScanRequestSender {
@@ -15,28 +15,28 @@ export class ScanRequestSender {
     ) {}
 
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
-        // await Promise.all(
-        //     onDemandPageScanRequests.map(async page => {
-        //         // await this.updatePageState(page);
-        //         // const message = this.createScanRequestMessage(page);
-        //         await this.queue.createMessage(this.storageConfig.scanQueue, message);
-        //     }),
-        // );
+        await Promise.all(
+            onDemandPageScanRequests.map(async page => {
+                await this.updatePageState(page);
+                const message = this.createScanRequestMessage(page);
+                await this.queue.createMessage(this.storageConfig.scanQueue, message);
+            }),
+        );
     }
 
     public async getCurrentQueueSize(): Promise<number> {
         return this.queue.getMessageCount();
     }
 
-    private createScanRequestMessage(page: WebsitePage): ScanRequestMessage {
+    private createScanRequestMessage(page: OnDemandPageScanRequest): OnDemandScanRequestMessage {
         return {
-            baseUrl: page.baseUrl,
+            id: page.id,
             url: page.url,
-            websiteId: page.websiteId,
+            priority: page.priority,
         };
     }
 
-    private async updatePageState(websitePage: WebsitePage): Promise<void> {
+    private async updatePageState(websitePage: OnDemandPageScanRequest): Promise<void> {
         // let retryCount;
         // if (!_.isNil(websitePage.lastRun) && websitePage.lastRun.state !== RunState.completed) {
         //     retryCount = _.defaultTo(websitePage.lastRun.retries, 0) + 1;
