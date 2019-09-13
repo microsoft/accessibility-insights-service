@@ -99,14 +99,13 @@ describe(BatchScanResultController, () => {
     }
 
     describe('handleRequest', () => {
-        it('should return empty array if request body is empty array', async () => {
-            const emptyResponse: ScanResultResponse[] = [];
+        it('should return 422 if request body is empty array', async () => {
+            context.req.rawBody = undefined;
             batchScanResultController = createScanResultController(context);
 
             await batchScanResultController.handleRequest();
 
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(emptyResponse);
+            expect(context.res.status).toEqual(422);
         });
 
         it('should return different response for different kind of scanIds', async () => {

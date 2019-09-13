@@ -13,7 +13,7 @@ import { BaseScanResultController } from './base-scan-result-controller';
 @injectable()
 export class BatchScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
-    public readonly apiName = 'get-scans';
+    public readonly apiName = 'wep-api-get-scans';
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
@@ -26,6 +26,14 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
+        if (isEmpty(payload)) {
+            this.context.res = {
+                status: 422, // Unprocessable Entity,
+            };
+
+            return;
+        }
+
         const scanIds = payload.map(request => request.scanId);
         const responseBody: ScanResultResponse[] = [];
         const scanIdsToQuery: string[] = [];
