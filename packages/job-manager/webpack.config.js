@@ -59,6 +59,7 @@ module.exports = env => {
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
+            mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397
         },
         target: 'node',
     };
