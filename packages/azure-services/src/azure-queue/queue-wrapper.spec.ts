@@ -14,6 +14,7 @@ import { Message } from './message';
 import { QueueWrapper } from './queue-wrapper';
 
 describe(QueueWrapper, () => {
+    const queueName = 'scanQueue';
     const messageVisibilityTimeout = 30;
     let testSubject: QueueWrapper;
     let queueServiceURLProviderMock: IMock<QueueServiceURLProvider>;
@@ -60,8 +61,8 @@ describe(QueueWrapper, () => {
         getPromisableDynamicMock(messageIdUrlMock);
 
         queueServiceURLProviderMock.setup(async q => q()).returns(async () => serviceURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, 'scanQueue')).returns(() => queueURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, 'scanQueue-dead')).returns(() => deadQueueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, queueName)).returns(() => queueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${queueName}-dead`)).returns(() => deadQueueURLMock.object);
         messagesURLProviderMock.setup(m => m(queueURLMock.object)).returns(() => messagesURLMock.object);
         messagesURLProviderMock.setup(m => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
 
@@ -98,7 +99,7 @@ describe(QueueWrapper, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages('scanQueue');
+            const queueMessageResultActual = await testSubject.getMessages(queueName);
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -119,7 +120,7 @@ describe(QueueWrapper, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages('scanQueue');
+            const queueMessageResultActual = await testSubject.getMessages(queueName);
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -134,7 +135,7 @@ describe(QueueWrapper, () => {
             setupQueueCreationCallWhenQueueDoesNotExist();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage('scanQueue', messageText);
+            await testSubject.createMessage(queueName, messageText);
 
             verifyAll();
         });
@@ -145,7 +146,7 @@ describe(QueueWrapper, () => {
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage('scanQueue', messageText);
+            await testSubject.createMessage(queueName, messageText);
 
             verifyAll();
         });
@@ -160,7 +161,7 @@ describe(QueueWrapper, () => {
             } as Models.DequeuedMessageItem;
 
             setupVerifyCallToDeleteMessage(message);
-            await testSubject.deleteMessage(message, 'scanQueue');
+            await testSubject.deleteMessage(message, queueName);
 
             verifyAll();
         });
