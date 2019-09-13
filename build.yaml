@@ -61,6 +61,7 @@ steps:
           SourceFolder: packages
           Contents: |
               job-manager/dist/**/*
+              web-api-scan-job-manager/dist/**/*
               runner/dist/**/*
               scan-request-sender/dist/**/*
               resource-deployment/dist/**/*
