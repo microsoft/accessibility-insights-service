@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
-import { GuidGenerator, HashGenerator, ServiceConfiguration } from 'common';
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, WebController } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, WebController } from 'service-library';
 import {
     ItemType,
     OnDemandPageScanBatchRequest,
@@ -18,17 +18,15 @@ import {
 
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
-    public static readonly partitionKeyPreFix = 'pageScanRequest';
     public readonly apiVersion = '1.0';
     public readonly apiName = 'scan-batch-request-feed';
 
     public constructor(
-        @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
@@ -66,7 +64,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 url: request.url,
                 priority: 0,
                 itemType: ItemType.onDemandPageScanRunResult,
-                partitionKey: this.getPartitionKey(request.scanId),
+                partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 run: {
                     state: 'accepted',
                     timestamp: new Date().toJSON(),
@@ -97,11 +95,5 @@ export class ScanBatchRequestFeedController extends WebController {
         }
 
         return true;
-    }
-
-    private getPartitionKey(scanId: string): string {
-        const node = this.guidGenerator.getGuidNode(scanId);
-
-        return this.hashGenerator.getDbHashBucket(OnDemandPageScanRunResultProvider.partitionKeyPreFix, node);
     }
 }
