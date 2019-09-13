@@ -1,22 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 
-import { webApiIocTypes } from '../setup-ioc-container';
 import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
 export class ScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
-    public readonly apiName = 'get-scan';
+    public readonly apiName = 'web-api-get-scan';
 
     public constructor(
-        @inject(webApiIocTypes.azureFunctionContext) protected readonly context: Context,
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,

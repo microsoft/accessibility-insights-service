@@ -5,7 +5,7 @@ import { Dictionary, keyBy } from 'lodash';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { InvalidPageScanResultResponse, ItemType, OnDemandPageScanResult } from 'storage-documents';
 
-import { ApiController } from './api-controller';
+import { ApiController } from 'service-library';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;

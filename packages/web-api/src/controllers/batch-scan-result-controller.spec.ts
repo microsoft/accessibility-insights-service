@@ -78,13 +78,15 @@ describe(BatchScanResultController, () => {
     });
 
     function createScanResultController(contextReq: Context): BatchScanResultController {
-        return new BatchScanResultController(
-            contextReq,
+        const controller = new BatchScanResultController(
             onDemandPageScanRunResultProviderMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
         );
+        controller.context = contextReq;
+
+        return controller;
     }
 
     function setupGetGuidTimestamp(scanId: string, time: Date): void {
@@ -95,15 +97,15 @@ describe(BatchScanResultController, () => {
     }
 
     describe('handleRequest', () => {
-        // it('should return empty array if request body is empty array', async () => {
-        //     const emptyResponse: OnDemandPageScanResultResponse[] = [];
-        //     batchScanResultController = createScanResultController(context);
+        it('should return empty array if request body is empty array', async () => {
+            const emptyResponse: OnDemandPageScanResultResponse[] = [];
+            batchScanResultController = createScanResultController(context);
 
-        //     await batchScanResultController.handleRequest();
+            await batchScanResultController.handleRequest();
 
-        //     expect(context.res.status).toEqual(200);
-        //     expect(context.res.body).toEqual(emptyResponse);
-        // });
+            expect(context.res.status).toEqual(200);
+            expect(context.res.body).toEqual(emptyResponse);
+        });
 
         it('should return different response for different kind of scanIds', async () => {
             context.req.rawBody = JSON.stringify(batchRequestBody);
