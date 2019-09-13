@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';

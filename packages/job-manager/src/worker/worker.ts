@@ -37,7 +37,7 @@ export class Worker {
             if (tasksIncrementCount > 0) {
                 const scanMessages = await this.getMessages(tasksIncrementCount);
                 if (scanMessages.length === 0) {
-                    // this.logger.logInfo(`The storage queue '${this.queue.getScanQueue()}' has no message to process.`);
+                    this.logger.logInfo(`The storage queue '${this.queue.getScanQueue}' has no message to process.`);
                     if (poolMetricsInfo.load.activeTasks === 0) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active tasks.`);
                         break;

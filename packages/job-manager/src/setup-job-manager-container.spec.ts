@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { CredentialsProvider, Queue, SecretProvider } from 'azure-services';
+import { CredentialsProvider, QueueWrapper, SecretProvider } from 'azure-services';
 import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 import { Batch } from './batch/batch';
@@ -76,7 +76,7 @@ describe(setupJobManagerContainer, () => {
     it('verify JobManager dependencies resolution', () => {
         const container = setupJobManagerContainer();
 
-        verifyNonSingletonDependencyResolution(container, Queue);
+        verifyNonSingletonDependencyResolution(container, QueueWrapper);
         verifySingletonDependencyResolution(container, Batch);
     });
 

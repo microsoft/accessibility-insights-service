@@ -5,7 +5,6 @@ export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';
 export { Message } from './azure-queue/message';
 export { ScanMessage } from './azure-queue/scan-message';
-export { Queue } from './azure-queue/queue';
 export { QueueWrapper } from './azure-queue/queue-wrapper';
 export { QueueClient } from './storage/queue-client';
 export { RetryOptions } from './storage/retry-options';

@@ -10,7 +10,6 @@ import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
-// import { Queue } from './azure-queue/queue';
 import { QueueWrapper } from './azure-queue/queue-wrapper';
 import { StorageConfig } from './azure-queue/storage-config';
 import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
@@ -76,8 +75,6 @@ export function registerAzureServicesToContainer(container: Container): void {
     });
 
     setupBlobServiceClientProvider(container);
-
-    // container.bind(Queue).toSelf();
 }
 
 function setupBlobServiceClientProvider(container: interfaces.Container): void {

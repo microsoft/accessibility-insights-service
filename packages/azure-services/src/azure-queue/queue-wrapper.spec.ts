@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-empty no-null-keyword
+
 import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
@@ -10,13 +11,11 @@ import { IMock, Mock, Times } from 'typemoq';
 import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { Message } from './message';
-import { Queue } from './queue';
-import { StorageConfig } from './storage-config';
+import { QueueWrapper } from './queue-wrapper';
 
-describe(Queue, () => {
+describe(QueueWrapper, () => {
     const messageVisibilityTimeout = 30;
-    let config: StorageConfig;
-    let testSubject: Queue;
+    let testSubject: QueueWrapper;
     let queueServiceURLProviderMock: IMock<QueueServiceURLProvider>;
     let queueURLProviderMock: IMock<QueueURLProvider>;
     let messagesURLProviderMock: IMock<MessagesURLProvider>;
@@ -31,9 +30,6 @@ describe(Queue, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
-        config = {
-            scanQueue: 'queue-1',
-        };
         queueServiceURLProviderMock = Mock.ofInstance((() => {}) as any);
         queueURLProviderMock = Mock.ofInstance((() => {}) as any);
         messagesURLProviderMock = Mock.ofInstance((() => {}) as any);
@@ -64,13 +60,12 @@ describe(Queue, () => {
         getPromisableDynamicMock(messageIdUrlMock);
 
         queueServiceURLProviderMock.setup(async q => q()).returns(async () => serviceURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, config.scanQueue)).returns(() => queueURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${config.scanQueue}-dead`)).returns(() => deadQueueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, 'scanQueue')).returns(() => queueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, 'scanQueue-dead')).returns(() => deadQueueURLMock.object);
         messagesURLProviderMock.setup(m => m(queueURLMock.object)).returns(() => messagesURLMock.object);
         messagesURLProviderMock.setup(m => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
 
-        testSubject = new Queue(
-            config,
+        testSubject = new QueueWrapper(
             queueServiceURLProviderMock.object,
             queueURLProviderMock.object,
             messagesURLProviderMock.object,
@@ -103,7 +98,7 @@ describe(Queue, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages();
+            const queueMessageResultActual = await testSubject.getMessages('scanQueue');
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -124,7 +119,7 @@ describe(Queue, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages();
+            const queueMessageResultActual = await testSubject.getMessages('scanQueue');
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -139,7 +134,7 @@ describe(Queue, () => {
             setupQueueCreationCallWhenQueueDoesNotExist();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage(config.scanQueue, messageText);
+            await testSubject.createMessage('scanQueue', messageText);
 
             verifyAll();
         });
@@ -150,7 +145,7 @@ describe(Queue, () => {
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage(config.scanQueue, messageText);
+            await testSubject.createMessage('scanQueue', messageText);
 
             verifyAll();
         });
@@ -165,7 +160,7 @@ describe(Queue, () => {
             } as Models.DequeuedMessageItem;
 
             setupVerifyCallToDeleteMessage(message);
-            await testSubject.deleteMessage(message);
+            await testSubject.deleteMessage(message, 'scanQueue');
 
             verifyAll();
         });

@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
-import { Queue } from './azure-queue/queue';
+import { QueueWrapper } from './azure-queue/queue-wrapper';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
 import {
@@ -52,7 +52,7 @@ describe(registerAzureServicesToContainer, () => {
     it('verify non-singleton resolution', () => {
         registerAzureServicesToContainer(container);
 
-        verifyNonSingletonDependencyResolution(Queue);
+        verifyNonSingletonDependencyResolution(QueueWrapper);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
     });
 
