@@ -4,6 +4,7 @@
 import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
+import { Worker } from './worker/worker';
 
 export class WebApiScanJobManagerEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
@@ -11,6 +12,7 @@ export class WebApiScanJobManagerEntryPoint extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
-        throw new Error('Method not implemented.');
+        const worker = container.get<Worker>(Worker);
+        await worker.run();
     }
 }

@@ -5,6 +5,9 @@
         "jobManagerContainerName": {
             "value": "batch-job-manager-script"
         },
+        "webAPIScanJobManagerContainerName": {
+            "value": "batch-web-api-scan-job-manager-script"
+        },
         "poolScriptContainerName": {
             "value": "batch-pool-startup-script"
         },

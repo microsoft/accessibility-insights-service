@@ -40,6 +40,13 @@
                 "description": "The name of the blob container for job manager script."
             }
         },
+        "webAPIScanJobManagerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-scan-job-manager-script",
+            "metadata": {
+                "description": "The name of the blob container for web api scan job manager script."
+            }
+        },
         "poolScriptContainerName": {
             "type": "string",
             "defaultValue": "batch-pool-startup-script",
@@ -118,6 +125,12 @@
             "resources": [
                 {
                     "name": "[concat('default/', parameters('jobManagerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('webAPIScanJobManagerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

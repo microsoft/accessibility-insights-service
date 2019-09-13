@@ -14,7 +14,7 @@ module.exports = env => {
         devtool: 'cheap-source-map',
         externals: ['yargs', 'applicationinsights'],
         entry: {
-            ['index']: path.resolve('./src/index.ts'),
+            ['web-api-scan-job-manager']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
