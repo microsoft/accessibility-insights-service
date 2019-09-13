@@ -1,5 +1,5 @@
 {
-    "id": "url-scan-schedule",
+    "id": "url-web-api-scan-scan-schedule",
     "schedule": {
         "recurrenceInterval": "PT10M"
     },
@@ -10,7 +10,7 @@
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {
-            "id": "url-scan-job-manager-task",
+            "id": "url-web-api-scan-job-manager-task",
             "commandLine": "/bin/bash -c run-web-api-scan-job-manager.sh",
             "resourceFiles": [
                 {

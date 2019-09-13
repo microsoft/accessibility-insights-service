@@ -87,7 +87,7 @@ if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
-if [ -z $clientId] && [ ! "${environment,,}" = "dev" ]; then
+if [ -z $clientId ] && [ ! "${environment,,}" = "dev" ]; then
     echo "Client ID is required if the environment is not Dev"
     exitWithUsageInfo
 fi
