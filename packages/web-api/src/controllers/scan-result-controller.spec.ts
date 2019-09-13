@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { ScanResultErrorResponse } from '../api-contracts/scan-result-response';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { ScanResultController } from './scan-result-controller';
 
 describe(ScanResultController, () => {
@@ -18,27 +20,21 @@ describe(ScanResultController, () => {
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const scanId = 'scan-id-1';
-    const tooSoonRequestResponse: OnDemandPageScanResult = {
-        id: scanId,
-        partitionKey: undefined,
+    const tooSoonRequestResponse: ScanResultResponse = {
+        scanId,
         url: undefined,
         run: {
             state: 'accepted',
         },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
     };
-    const scanNotFoundResponse: OnDemandPageScanResult = {
-        id: scanId,
-        partitionKey: undefined,
+    const scanNotFoundResponse: ScanResultResponse = {
+        scanId,
         url: undefined,
         run: {
             state: 'unknown',
         },
-        priority: undefined,
-        itemType: ItemType.onDemandPageScanRunResult,
     };
-    const response: OnDemandPageScanResult = {
+    const dbResponse: OnDemandPageScanResult = {
         id: scanId,
         partitionKey: 'pk',
         url: 'url',
@@ -47,6 +43,13 @@ describe(ScanResultController, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
+    };
+    const scanResponse: ScanResultResponse = {
+        scanId,
+        url: 'url',
+        run: {
+            state: 'running',
+        },
     };
 
     beforeEach(() => {
@@ -68,7 +71,10 @@ describe(ScanResultController, () => {
         onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-
+        guidGeneratorMock
+            .setup(gm => gm.isValidV6Guid(scanId))
+            .returns(() => true)
+            .verifiable(Times.once());
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
             .setup(async s => s.getConfigValue('restApiConfig'))
@@ -104,19 +110,22 @@ describe(ScanResultController, () => {
 
     describe('handleRequest', () => {
         it('should return 422 for invalid scanId', async () => {
+            const invalidRequestResponse: ScanResultErrorResponse = {
+                scanId: scanId,
+                error: `Unprocessable Entity: ${scanId}.`,
+            };
             scanResultController = createScanResultController(context);
+            guidGeneratorMock.reset();
             guidGeneratorMock
-                .setup(gm => gm.getGuidTimestamp(scanId))
-                .returns(() => {
-                    throw new Error('Only version 6 of UUID is supported');
-                })
+                .setup(gm => gm.isValidV6Guid(scanId))
+                .returns(() => false)
                 .verifiable(Times.once());
 
             await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
             expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(`Unprocessable Entity: ${scanId}. Error: Only version 6 of UUID is supported`);
+            expect(context.res.body).toEqual(invalidRequestResponse);
         });
 
         it('should return a default response for requests made too early', async () => {
@@ -154,11 +163,12 @@ describe(ScanResultController, () => {
             scanResultController = createScanResultController(context);
             setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock.reset();
+
             onDemandPageScanRunResultProviderMock
                 // tslint:disable-next-line: no-unsafe-any
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
-                    return Promise.resolve([response]);
+                    return Promise.resolve([dbResponse]);
                 })
                 .verifiable(Times.once());
 
@@ -167,7 +177,7 @@ describe(ScanResultController, () => {
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
             expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(response);
+            expect(context.res.body).toEqual(scanResponse);
         });
     });
 });

@@ -5,13 +5,20 @@ export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
 export declare type RunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
-export interface ScanResultResponse {
+export interface ScanResultErrorResponse {
     scanId: string;
-    url: string;
-    scanResult?: ScanResult;
-    reports?: ScanReport[];
-    run: ScanRun;
+    error: string;
 }
+
+export type ScanResultResponse =
+    | {
+          scanId: string;
+          url: string;
+          scanResult?: ScanResult;
+          reports?: ScanReport[];
+          run: ScanRun;
+      }
+    | ScanResultErrorResponse;
 
 export interface ScanResult {
     state: ScanState;

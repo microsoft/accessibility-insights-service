@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Dictionary, isEmpty, keyBy } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanRunResultProvider } from 'service-library';
+
+import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
-export class ScanResultController extends ApiController {
+export class ScanResultController extends BaseScanResultController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-get-scan';
 
     public constructor(
-        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
     ) {
@@ -23,10 +24,13 @@ export class ScanResultController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
-        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
-        if (isRequestMadeTooSoon === undefined) {
+        if (!this.isScanIdValid(scanId)) {
+            this.handleInvalidRequest(scanId);
+
             return;
         }
+
+        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
 
         if (isRequestMadeTooSoon === true) {
             // user made the scan result query too soon after the scan request, will return a default response.
@@ -52,67 +56,18 @@ export class ScanResultController extends ApiController {
         } else {
             this.context.res = {
                 status: 200,
-                body: scanResult,
+                body: this.getResponseFromDbDocument(scanResult),
             };
 
             this.logger.logInfo('scan result fetched', { scanId });
         }
     }
 
-    private async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.tryGetScanRequestedTime(scanId);
-        if (timeRequested === undefined) {
-            // the scanId is invalid.
-            return undefined;
-        }
-        const timeCurrent = new Date();
-        const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
-
-        return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforScanResultQueryInSeconds * 1000;
-    }
-
-    private async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
-        const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
-
-        return keyBy(scanResultItems, item => item.id);
-    }
-
-    private tryGetScanRequestedTime(scanId: string): Date {
-        try {
-            return this.guidGenerator.getGuidTimestamp(scanId);
-        } catch (error) {
-            this.context.res = {
-                status: 422, // Unprocessable Entity,
-                body: `Unprocessable Entity: ${scanId}. ${error}`,
-            };
-        }
-
-        return undefined;
-    }
-
-    private getTooSoonRequestResponse(scanId: string): OnDemandPageScanResult {
-        return {
-            id: scanId,
-            partitionKey: undefined,
-            url: undefined,
-            run: {
-                state: 'accepted',
-            },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
-        };
-    }
-
-    private get404Response(scanId: string): OnDemandPageScanResult {
-        return {
-            id: scanId,
-            partitionKey: undefined,
-            url: undefined,
-            run: {
-                state: 'unknown',
-            },
-            priority: undefined,
-            itemType: ItemType.onDemandPageScanRunResult,
+    // tslint:disable-next-line: no-any
+    protected handleInvalidRequest(scanId: string): void {
+        this.context.res = {
+            status: 422, // Unprocessable Entity,
+            body: this.getInvalidRequestResponse(scanId),
         };
     }
 }
