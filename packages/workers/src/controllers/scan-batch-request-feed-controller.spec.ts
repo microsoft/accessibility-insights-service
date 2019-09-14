@@ -6,11 +6,11 @@ import { Context } from '@azure/functions';
 import { CosmosContainerClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory } from 'service-library';
-import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanResult, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
+import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
-import * as MockDate from 'mockdate';
 
 // tslint:disable: no-any no-unsafe-any
 
