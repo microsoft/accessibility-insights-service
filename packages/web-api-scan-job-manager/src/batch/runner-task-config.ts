@@ -8,8 +8,7 @@ import { loggerTypes } from 'logger';
 
 @injectable()
 export class RunnerTaskConfig {
-    public readonly commandLineTemplate: string =
-        '/bin/bash -c \'start-runner.sh "%websiteId%" "%name%" "%baseUrl%" "%url%" "%serviceTreeId%"\'';
+    public readonly commandLineTemplate: string = '/bin/bash -c \'start-web-api-scan-runner.sh "%id%" "%url%" %priority%\'';
 
     private environmentSettings: BatchServiceModels.EnvironmentSetting[];
     private resourceFiles: BatchServiceModels.ResourceFile[];

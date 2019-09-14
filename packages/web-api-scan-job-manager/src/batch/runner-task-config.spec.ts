@@ -26,11 +26,11 @@ describe(RunnerTaskConfig, () => {
     });
 
     it('builds command line', () => {
-        const data = { websiteId: 'id1', name: 'name1', baseUrl: 'baseUrl1', url: 'scanUrl1', serviceTreeId: 'serviceTreeId1' };
+        const data = { id: 'id', url: 'url', priority: 1 };
 
         const commandLine = testSubject.getCommandLine(data);
 
-        expect(commandLine).toEqual('/bin/bash -c \'start-runner.sh "id1" "name1" "baseUrl1" "scanUrl1" "serviceTreeId1"\'');
+        expect(commandLine).toEqual('/bin/bash -c \'start-web-api-scan-runner.sh "id" "url" 1\'');
     });
 
     it('returns resourceFiles', () => {

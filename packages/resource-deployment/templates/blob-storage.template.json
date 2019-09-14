@@ -72,6 +72,13 @@
             "type": "string",
             "defaultValue": "batch-runner-script",
             "metadata": {
+                "description": "The name of the blob container for web api scan runner script."
+            }
+        },
+        "webAPIScanRunnerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-scan-runner-script",
+            "metadata": {
                 "description": "The name of the blob container for runner script."
             }
         },
@@ -149,6 +156,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('runnerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('webAPIScanRunnerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

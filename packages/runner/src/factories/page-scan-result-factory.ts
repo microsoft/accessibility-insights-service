@@ -11,22 +11,15 @@ import {
     RunState,
     ScanLevel,
 } from 'storage-documents';
-import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()
 export class PageScanResultFactory {
     public constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
-    public create(
-        crawlerScanResults: CrawlerScanResults,
-        issueScanResults: IssueScanResults,
-        scanMetadata: ScanMetadata,
-        runTime: Date,
-    ): PageScanResult {
+    public create(issueScanResults: IssueScanResults, scanMetadata: ScanMetadata, runTime: Date): PageScanResult {
         // preserve parameters order for the hash compatibility
         const id = this.hashGenerator.getPageScanResultDocumentId(scanMetadata.baseUrl, scanMetadata.scanUrl, runTime.valueOf());
-        const crawlResult = this.createCrawlResult(scanMetadata.scanUrl, crawlerScanResults, runTime);
         const scanResult = this.createScanResult(issueScanResults, runTime);
 
         return {
@@ -34,7 +27,7 @@ export class PageScanResultFactory {
             itemType: ItemType.pageScanResult,
             websiteId: scanMetadata.websiteId,
             url: scanMetadata.scanUrl,
-            crawl: crawlResult,
+            crawl: NULL,
             scan: scanResult,
             partitionKey: scanMetadata.websiteId,
         };
