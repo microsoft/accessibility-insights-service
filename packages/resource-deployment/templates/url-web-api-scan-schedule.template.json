@@ -49,7 +49,7 @@
             },
             {
                 "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
-                "value": "batch-runner-script"
+                "value": "batch-web-api-scan-runner-script"
             }
         ],
         "poolInfo": {

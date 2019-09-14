@@ -17,6 +17,9 @@
         "runnerContainerName": {
             "value": "batch-runner-script"
         },
+        "webAPIScanRunnerContainerName": {
+            "value": "batch-web-api-scan-runner-script"
+        },
         "scanRequestContainerName": {
             "value": "batch-scan-request-sender-script"
         },
