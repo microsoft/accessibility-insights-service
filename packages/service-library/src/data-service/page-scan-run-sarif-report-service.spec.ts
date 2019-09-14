@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
@@ -18,7 +17,7 @@ describe(PageScanRunReportService, () => {
     const guid = 'some guid';
     // tslint:disable-next-line: mocha-no-side-effect-code
     const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() +
-        1}/${time.getUTCDate()}/${time.getUTCHours()}/${guid}.sarif`;
+        1}/${time.getUTCDate()}/${time.getUTCHours()}/${guid}_sarif.json`;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
