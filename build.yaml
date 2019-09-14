@@ -63,6 +63,7 @@ steps:
               job-manager/dist/**/*
               web-api-scan-job-manager/dist/**/*
               runner/dist/**/*
+              web-api-scan-runner/dist/**/*
               scan-request-sender/dist/**/*
               resource-deployment/dist/**/*
               web-api/dist/**/*
