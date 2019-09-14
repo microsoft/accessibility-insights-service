@@ -22,7 +22,7 @@ export class ScanBatchRequestFeedController extends WebController {
     public readonly apiName = 'scan-batch-request-feed';
 
     public constructor(
-        @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
+        @inject(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,

@@ -6,8 +6,8 @@
             "direction": "in",
             "leaseCollectionName": "leases",
             "connectionStringSetting": "COSMOS_CONNECTION_STRING",
-            "databaseName": "scanner",
-            "collectionName": "scanBatches",
+            "databaseName": "onDemandScanner",
+            "collectionName": "scanBatchRequests",
             "createLeaseCollectionIfNotExists": true
         }
     ],
