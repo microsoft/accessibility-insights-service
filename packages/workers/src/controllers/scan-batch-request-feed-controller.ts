@@ -51,8 +51,8 @@ export class ScanBatchRequestFeedController extends WebController {
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<void> {
         const requests = batchDocument.scanRunBatchRequest.filter(request => request.scanId !== undefined);
         if (requests.length > 0) {
-            await this.writeRequestsToQueueContainer(requests);
             await this.writeRequestsToPermanentContainer(requests);
+            await this.writeRequestsToQueueContainer(requests);
             await this.cosmosContainerClient.deleteDocument(batchDocument.id, batchDocument.partitionKey);
         }
     }
