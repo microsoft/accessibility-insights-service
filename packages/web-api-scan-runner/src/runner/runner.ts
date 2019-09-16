@@ -36,7 +36,7 @@ export class Runner {
         try {
             const pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([
                 scanMetadata.id,
-            ]))[0] as OnDemandPageScanResult;
+            ]))[0];
 
             onDemandScanResult = {
                 state: 'unknown' as ScanState,
