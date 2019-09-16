@@ -33,7 +33,7 @@ export class Runner {
 
         try {
             const pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([
-                scanMetadata.url,
+                scanMetadata.id,
             ]))[0] as OnDemandPageScanResult;
 
             // tslint:disable-next-line:no-object-literal-type-assertion
