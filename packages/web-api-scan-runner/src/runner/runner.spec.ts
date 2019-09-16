@@ -10,15 +10,12 @@ import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     ItemType,
-    OnDemandPageScanReport,
     OnDemandPageScanResult,
-    OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
-    OnDemandScanResult,
     ReportFormat,
     ScanState,
 } from 'storage-documents';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';

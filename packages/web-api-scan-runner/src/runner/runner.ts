@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { Browser } from 'puppeteer';
-import { AxeScanResults } from 'scanner/dist';
+import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     OnDemandPageScanReport,
