@@ -3,5 +3,5 @@
 #!/bin/bash
 export NODE_PATH=$AZ_BATCH_NODE_SHARED_DIR/batch-scan-request-sender/node_modules
 
-echo "Running Scan request sender"
+echo "Running Scan request sender for on demand requests"
 nodejs sender.js
