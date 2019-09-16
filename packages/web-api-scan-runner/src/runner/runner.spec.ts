@@ -37,7 +37,7 @@ const scanMetadata: ScanMetadata = {
     id: 'id',
     url: 'url',
     priority: 1,
- };
+};
 
 // tslint:disable-next-line:mocha-no-side-effect-code
 const onDemandPageScanResult: OnDemandPageScanResult = {
