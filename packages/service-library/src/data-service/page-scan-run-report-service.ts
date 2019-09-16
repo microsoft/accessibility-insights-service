@@ -37,6 +37,6 @@ export class PageScanRunReportService {
     }
 
     private getBlobSarifFileName(fileId: string): string {
-        return `${fileId}_sarif.json`;
+        return `${fileId}.sarif`;
     }
 }
