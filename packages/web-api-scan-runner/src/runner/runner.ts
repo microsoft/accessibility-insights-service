@@ -29,35 +29,35 @@ export class Runner {
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
+        let onDemandScanResult: OnDemandScanResult;
+        let onDemandPageScanReport: OnDemandPageScanReport;
+        let onDemandPageScanRunResult: OnDemandPageScanRunResult;
 
         try {
             const pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([
                 scanMetadata.id,
             ]))[0] as OnDemandPageScanResult;
 
-            // tslint:disable-next-line:no-object-literal-type-assertion
-            const onDemandScanResult = {
+            onDemandScanResult = {
                 state: 'unknown' as ScanState,
                 issueCount: 0,
-            } as OnDemandScanResult;
+            };
 
-            // tslint:disable-next-line:no-object-literal-type-assertion
-            const onDemandPageScanReport = {
+            onDemandPageScanReport = {
                 reportId: '',
                 format: 'sarif' as ReportFormat,
                 href: '',
-            } as OnDemandPageScanReport;
+            };
 
             // set scanned page run state to running
-            // tslint:disable-next-line:no-object-literal-type-assertion
-            const onDemandPageScanRunResult = {
+            onDemandPageScanRunResult = {
                 state: 'running' as OnDemandPageScanRunState,
                 timestamp: new Date()
                     .toJSON()
                     .valueOf()
                     .toString(),
                 error: '',
-            } as OnDemandPageScanRunResult;
+            };
 
             pageScanRunResult.run = onDemandPageScanRunResult;
 
