@@ -8,13 +8,7 @@ import { Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import {
-    ItemType,
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState,
-    ReportFormat,
-    ScanState,
-} from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState, ReportFormat, ScanState } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
