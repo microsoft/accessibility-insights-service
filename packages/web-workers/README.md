@@ -3,7 +3,7 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 Licensed under the MIT License.
 -->
 
-# Accessibility Insights Service Function Apps
+# Accessibility Insights Service Web Workers
 
 The apps are implemented as Azure Functions App.
 
@@ -13,17 +13,17 @@ There are several options to deploy Azure Functions. Some of them are using [Vis
 
 The example below will use Azure Functions Core Tools. Install required packages following the steps from the guide [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools).
 
-Build the [apps](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/function-apps) package from a command console:
+Build the [apps](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/web-workers) package from a command console:
 
 ```bash
-        cd accessibility-insights-service/packages/function-apps
+        cd accessibility-insights-service/packages/web-workers
         yarn build
 ```
 
 Deploy Azure Functions binaries to the Azure Functions App. The Azure Functions App can be created following the steps from the guide [here](https://docs.microsoft.com/en-us/azure/azure-functions/scripts/functions-cli-create-serverless).
 
 ```bash
-        cd accessibility-insights-service/packages/function-apps/dist
+        cd accessibility-insights-service/packages/web-workers/dist
         func azure functionapp publish <FunctionAppName>
 ```
 

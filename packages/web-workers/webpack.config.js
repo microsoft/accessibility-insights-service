@@ -34,7 +34,7 @@ module.exports = env => {
                 },
             ],
         },
-        name: 'function-apps',
+        name: 'web-workers',
         node: {
             __dirname: false,
         },
