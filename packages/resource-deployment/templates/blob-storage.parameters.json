@@ -17,6 +17,9 @@
         "scanRequestContainerName": {
             "value": "batch-scan-request-sender-script"
         },
+        "onDemandScanRequestContainerName": {
+            "value": "batch-on-demand-scan-request-sender-script"
+        },
         "storageAccountSku": {
             "value": "Standard_RAGRS"
         },
