@@ -43,7 +43,7 @@ addReplyUrlIfNotExists() {
 
     for url in $replyUrls; do
         if [[ $url == $replyUrl ]]; then
-            echo "Reply Url '${replyUrl}' already exsits. Skip addidn reply URL to Azure Function AAD app application."
+            echo "Reply Url '${replyUrl}' already exsits. Skipping adding reply URL to Azure Function AAD app application."
             return
         fi
     done
