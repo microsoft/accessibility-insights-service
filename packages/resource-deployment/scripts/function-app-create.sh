@@ -11,8 +11,8 @@ export resourceName
 export clientId
 export environment
 export keyVault
-export packageName
-export functionAppNamePrefix
+# export packageName
+# export functionAppNamePrefix
 
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
@@ -24,8 +24,8 @@ Usage: $0 \
 -r <resource group> \
 -c <Azure AD application client id> \
 -e <environment> \
--f <function app name prefix> \
--p <function app package name> \
+-x <function app name prefix> \
+-g <function app package name> \
 -k <Key Vault to grant Azure Function App an access to> \
 -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
@@ -107,17 +107,19 @@ publishFunctionAppScripts() {
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-while getopts "r:c:e:k:d:f:p:" option; do
-    case $option in
-    r) resourceGroupName=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
-    e) environment=${OPTARG} ;;
-    k) keyVault=${OPTARG} ;;
-    d) dropFolder=${OPTARG} ;;
-    f) functionAppNamePrefix=${OPTARG} ;;
-    p) packageName=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
+previousFlag=""
+for arg in "$@"; do
+    case $previousFlag in
+    -r) resourceGroupName=$arg ;;
+    -c) clientId=$arg ;;
+    -e) environment=$arg ;;
+    -k) keyVault=$arg ;;
+    -d) dropFolder=$arg ;;
+    -x) functionAppNamePrefix=$arg ;;
+    -g) packageName=$arg ;;
+    -?) exitWithUsageInfo ;;
     esac
+    previousFlag=$arg
 done
 
 if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $packageName ]; then
@@ -128,7 +130,7 @@ if [ -z $functionAppNamePrefix ]; then
     functionAppNamePrefix="$packageName-allyfuncapp"
 fi
 
-if [ -z $clientId] && [ ! $environment = "dev" ]; then
+if [ -z $clientId ] && [ ! $environment = "dev" ]; then
     echo "AAD application client ID option is required for the non-dev environment."
     exitWithUsageInfo
 fi
