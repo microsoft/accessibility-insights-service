@@ -12,9 +12,9 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'applicationinsights'],
+        externals: ['@azure/functions'],
         entry: {
-            ['index']: path.resolve('./src/index.ts'),
+            ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
         },
         mode: 'development',
         module: {
@@ -34,13 +34,13 @@ module.exports = env => {
                 },
             ],
         },
-        name: 'web-api-scan-request-sender',
+        name: 'web-workers',
         node: {
             __dirname: false,
         },
         output: {
             path: path.resolve('./dist'),
-            filename: '[name].js',
+            filename: '[name]/index.js',
             libraryTarget: 'commonjs2',
         },
         plugins: [
@@ -55,11 +55,30 @@ module.exports = env => {
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },
+                {
+                    context: './',
+                    from: '**/function.json',
+                    to: '',
+                    ignore: ['dist/**'],
+                },
+                {
+                    context: './',
+                    from: 'host.json',
+                    to: '',
+                    ignore: ['dist/**'],
+                },
+                {
+                    from: 'package.json',
+                    to: '',
+                },
+                {
+                    from: '../../yarn.lock',
+                    to: '',
+                },
             ]),
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
-            mainFields: ['main'],
         },
         target: 'node',
     };

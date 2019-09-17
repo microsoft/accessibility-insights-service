@@ -14,7 +14,7 @@ module.exports = env => {
         devtool: 'cheap-source-map',
         externals: ['yargs', 'applicationinsights'],
         entry: {
-            ['index']: path.resolve('./src/index.ts'),
+            ['sender']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
@@ -59,6 +59,7 @@ module.exports = env => {
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
+            mainFields: ['main'],
         },
         target: 'node',
     };
