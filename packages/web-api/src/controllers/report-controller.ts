@@ -1,24 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Context } from '@azure/functions';
+import { ServiceConfiguration } from 'common';
+import { injectable } from 'inversify';
 import { Logger } from 'logger';
+import { ApiController } from 'service-library';
 import { getSarifReportMock } from '../providers/mock-sarif-report-provider';
-import { ApiController } from './api-controller';
 
+@injectable()
 export class ReportController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-mock';
     protected readonly logger: Logger;
-
-    constructor(protected readonly context: Context) {
-        super();
-    }
+    protected readonly serviceConfig: ServiceConfiguration;
 
     public async handleRequest(): Promise<void> {
-        return;
-    }
-
-    public getReport(): void {
         this.context.res = {
             status: 200, // OK
             body: getSarifReportMock(),

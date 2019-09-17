@@ -4,16 +4,16 @@
 import 'reflect-metadata';
 
 import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient, Models, RestError } from '@azure/storage-blob';
-import { IMock, It, Mock } from 'typemoq';
-import { BlobContentDownloadResponse, BlobService } from './blob-service';
+import { IMock, Mock } from 'typemoq';
+import { BlobContentDownloadResponse, BlobStorageClient } from './blob-storage-client';
 
 // tslint:disable: no-any no-object-literal-type-assertion
 
-describe(BlobService, () => {
+describe(BlobStorageClient, () => {
     let blobServiceClientMock: IMock<BlobServiceClient>;
     let blobClientMock: IMock<BlobClient>;
     let containerClientMock: IMock<ContainerClient>;
-    let testSubject: BlobService;
+    let testSubject: BlobStorageClient;
     const containerName = 'test-container';
     const blobName = 'blob name1';
 
@@ -25,7 +25,7 @@ describe(BlobService, () => {
         blobServiceClientMock.setup(b => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
         containerClientMock.setup(c => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
 
-        testSubject = new BlobService(async () => blobServiceClientMock.object);
+        testSubject = new BlobStorageClient(async () => blobServiceClientMock.object);
     });
 
     describe('getBlobContent', () => {

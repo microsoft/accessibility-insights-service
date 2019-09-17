@@ -228,12 +228,12 @@ components:
             type: object
             required:
                 - scanId
-                - url
-                - run
             properties:
                 scanId:
                     type: string
                 url:
+                    type: string
+                error:
                     type: string
                 scanResult:
                     $ref: '#/components/schemas/ScanResult'

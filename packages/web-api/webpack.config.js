@@ -82,6 +82,7 @@ module.exports = env => {
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
+            mainFields: ['main'],
         },
         target: 'node',
     };

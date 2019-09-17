@@ -14,7 +14,7 @@
         "test": "npx jest",
         "lint": "npx lerna run lint --stream",
         "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.base.json --force",
-        "precheckin": "npm-run-all --serial format lint build test copyright-check",
+        "precheckin": "npm-run-all --serial format build lint test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
         "copyright-check": "license-check-and-add"

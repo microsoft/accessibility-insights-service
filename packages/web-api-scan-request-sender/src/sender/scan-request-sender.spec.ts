@@ -125,7 +125,7 @@ describe('Scan request sender', () => {
                 id: 'scanGuid',
                 url: 'https://www.google.com',
                 priority: 1,
-                itemType: ItemType.onDemandPageScanRequests,
+                itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: 'partitionKey',
             },
         ];

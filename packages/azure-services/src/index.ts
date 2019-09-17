@@ -14,4 +14,4 @@ export { SecretProvider } from './key-vault/secret-provider';
 export { Credentials, CredentialsProvider } from './credentials/credentials-provider';
 export { client } from './storage/client';
 export { cosmosContainerClientTypes } from './ioc-types';
-export { BlobContentDownloadResponse, BlobService } from './azure-blob/blob-service';
+export { BlobContentDownloadResponse, BlobStorageClient } from './azure-blob/blob-storage-client';
