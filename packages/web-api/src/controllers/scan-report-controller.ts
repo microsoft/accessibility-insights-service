@@ -4,6 +4,7 @@ import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ApiController, PageScanRunReportService } from 'service-library';
+import { Stream } from 'stream';
 
 @injectable()
 export class ScanReportController extends ApiController {
@@ -40,9 +41,12 @@ export class ScanReportController extends ApiController {
             return;
         }
 
+        const stream = new Stream.PassThrough();
+        blobContentDownloadResponse.content.pipe(stream);
+
         this.context.res = {
             status: 200,
-            body: blobContentDownloadResponse.content,
+            body: stream,
         };
 
         this.logger.logInfo('Report fetched', { reportId });
