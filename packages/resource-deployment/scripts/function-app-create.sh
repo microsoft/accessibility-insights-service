@@ -58,7 +58,7 @@ createAppRegistration() {
     environment=$2
 
     appRegistrationName="allyappregistration-$resourceGroupName-$environment"
-    echo "Creating a new ADD application with display name $appRegistrationName..."
+    echo "Creating a new AAD application with display name $appRegistrationName..."
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "  Successfully created '$appRegistrationName' AAD application with client ID '$clientId'"
 }
