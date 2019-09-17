@@ -1,0 +1,55 @@
+{
+    "id": "on-demand-scan-req-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT2M"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "constraints": {
+            "maxWallClockTime": "PT1H",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "on-demand-scan-req-sender-task",
+            "commandLine": "/bin/bash -c run-scan-request-sender.sh",
+            "resourceFiles": [
+                {
+                    "autoStorageContainerName": "batch-on-demand-scan-request-sender-script"
+                },
+                {
+                    "autoStorageContainerName": "runtime-configuration"
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": "PT1H",
+                "retentionTime": "P7D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": true
+        },
+        "commonEnvironmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "%APP_INSIGHTS_TOKEN%"
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "ondemandscanrequest"
+            },
+            {
+                "name": "KEY_VAULT_URL",
+                "value": "%KEY_VAULT_TOKEN%"
+            }
+        ],
+        "poolInfo": {
+            "poolId": "on-demand-scan-request-pool"
+        }
+    }
+}
