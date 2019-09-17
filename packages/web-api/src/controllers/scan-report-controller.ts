@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ApiController, PageScanRunReportService } from 'service-library';
@@ -12,6 +12,7 @@ export class ScanReportController extends ApiController {
 
     public constructor(
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {
@@ -19,9 +20,17 @@ export class ScanReportController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
-        const scanId = <string>this.context.bindingData.scanId;
+        const reportId = <string>this.context.bindingData.reportId;
+        if (!this.guidGenerator.isValidV6Guid(reportId)) {
+            this.context.res = {
+                status: 422,
+                body: `Unprocessable Entity: ${reportId}.`,
+            };
 
-        const blobContentDownloadResponse = await this.pageScanRunReportService.readSarifReport(scanId);
+            return;
+        }
+
+        const blobContentDownloadResponse = await this.pageScanRunReportService.readSarifReport(reportId);
 
         if (blobContentDownloadResponse.notFound === true) {
             this.context.res = {
@@ -32,10 +41,10 @@ export class ScanReportController extends ApiController {
         }
 
         this.context.res = {
-            status: 404,
+            status: 200,
             body: blobContentDownloadResponse.content,
         };
 
-        this.logger.logInfo('Report fetched', { scanId });
+        this.logger.logInfo('Report fetched', { reportId });
     }
 }
