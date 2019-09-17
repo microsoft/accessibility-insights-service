@@ -103,9 +103,9 @@
             "./packages/web-api/dist",
             "./packages/web-api/node_modules",
             "./packages/web-api/test-results",
-            "./packages/workers/dist",
-            "./packages/workers/node_modules",
-            "./packages/workers/test-results"
+            "./packages/function-apps/dist",
+            "./packages/function-apps/node_modules",
+            "./packages/function-apps/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [

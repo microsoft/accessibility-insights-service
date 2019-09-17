@@ -12,7 +12,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'yargs-parser', 'applicationinsights', 'puppeteer', '@azure/functions'],
+        externals: ['@azure/functions'],
         entry: {
             ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
         },
@@ -34,7 +34,7 @@ module.exports = env => {
                 },
             ],
         },
-        name: 'workers',
+        name: 'function-apps',
         node: {
             __dirname: false,
         },

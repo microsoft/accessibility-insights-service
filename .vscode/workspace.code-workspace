@@ -61,8 +61,8 @@
             "path": "../packages/web-api"
         },
         {
-            "name": "workers",
-            "path": "../packages/workers"
+            "name": "function-apps",
+            "path": "../packages/function-apps"
         },
         {
             "name": "root",
