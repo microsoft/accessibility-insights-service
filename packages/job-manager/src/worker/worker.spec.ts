@@ -224,6 +224,7 @@ describe(Worker, () => {
             .returns(async () => {
                 if (poolMetricsInfoCallbackCount > 1) {
                     poolMetricsInfo.load.activeTasks = 0;
+                    poolMetricsInfo.load.runningTasks = 0;
 
                     return Promise.resolve(poolMetricsInfo);
                 } else {
