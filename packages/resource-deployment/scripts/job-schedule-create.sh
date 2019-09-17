@@ -82,6 +82,6 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
 
-adjustJob "$scanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
+adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."
