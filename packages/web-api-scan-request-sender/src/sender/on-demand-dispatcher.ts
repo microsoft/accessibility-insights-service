@@ -6,14 +6,14 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
-import { ScanRequestSender } from './scan-request-sender';
+import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 @injectable()
-export class Dispatcher {
+export class OnDemandDispatcher {
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(Logger) private readonly logger: Logger,
-        @inject(ScanRequestSender) private readonly sender: ScanRequestSender,
+        @inject(OnDemandScanRequestSender) private readonly sender: OnDemandScanRequestSender,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 

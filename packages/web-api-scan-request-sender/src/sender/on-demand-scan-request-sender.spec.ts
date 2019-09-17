@@ -13,11 +13,11 @@ import {
     OnDemandScanRequestMessage,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ScanRequestSender } from './scan-request-sender';
+import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 describe('Scan request sender', () => {
     let queueMock: IMock<Queue>;
-    let testSubject: ScanRequestSender;
+    let testSubject: OnDemandScanRequestSender;
     let storageConfigStub: StorageConfig;
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let onDemandPageScanRunResultProvider: IMock<OnDemandPageScanRunResultProvider>;
@@ -34,7 +34,7 @@ describe('Scan request sender', () => {
         queueMock = Mock.ofType<Queue>();
         pageScanRequestProvider = Mock.ofType<PageScanRequestProvider>();
         onDemandPageScanRunResultProvider = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        testSubject = new ScanRequestSender(
+        testSubject = new OnDemandScanRequestSender(
             pageScanRequestProvider.object,
             onDemandPageScanRunResultProvider.object,
             queueMock.object,

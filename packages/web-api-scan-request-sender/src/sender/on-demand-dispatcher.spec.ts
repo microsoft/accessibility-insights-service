@@ -9,8 +9,8 @@ import { Logger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { Dispatcher } from './dispatcher';
-import { ScanRequestSender } from './scan-request-sender';
+import { OnDemandDispatcher } from './on-demand-dispatcher';
+import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 interface QueryDataProviderStubResponse<T> {
     continuationToken: string;
@@ -43,8 +43,8 @@ class QueryDataProviderStub<T> {
 describe('Dispatcher', () => {
     let loggerMock: IMock<Logger>;
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
-    let scanRequestSenderMock: IMock<ScanRequestSender>;
-    let dispatcher: Dispatcher;
+    let scanRequestSenderMock: IMock<OnDemandScanRequestSender>;
+    let dispatcher: OnDemandDispatcher;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     const maxQueueSize = 10;
     let currentQueueSize: number;
@@ -58,8 +58,8 @@ describe('Dispatcher', () => {
 
         loggerMock = Mock.ofType(Logger);
         pageScanRequestProvider = Mock.ofType(PageScanRequestProvider);
-        scanRequestSenderMock = Mock.ofType(ScanRequestSender, MockBehavior.Strict);
-        dispatcher = new Dispatcher(
+        scanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
+        dispatcher = new OnDemandDispatcher(
             pageScanRequestProvider.object,
             loggerMock.object,
             scanRequestSenderMock.object,

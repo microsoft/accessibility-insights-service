@@ -6,7 +6,7 @@ import { OnDemandPageScanRunResultProvider, PageScanRequestProvider } from 'serv
 import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandScanRequestMessage } from 'storage-documents';
 
 @injectable()
-export class ScanRequestSender {
+export class OnDemandScanRequestSender {
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,

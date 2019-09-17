@@ -3,14 +3,14 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
-import { ScanRequestSender } from './sender/scan-request-sender';
+import { OnDemandScanRequestSender } from './sender/on-demand-scan-request-sender';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-request-sender-container';
 // tslint:disable: no-any
 
 describe(setupWebApiScanRequestSenderContainer, () => {
     it('verify scan request sender dependencies resolution', () => {
         const container = setupWebApiScanRequestSenderContainer();
-        expect(container.get(ScanRequestSender)).toBeDefined();
+        expect(container.get(OnDemandScanRequestSender)).toBeDefined();
     });
 
     it('resolves singleton dependencies', () => {
