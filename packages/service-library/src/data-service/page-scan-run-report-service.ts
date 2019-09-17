@@ -8,7 +8,6 @@ import { inject, injectable } from 'inversify';
 @injectable()
 export class PageScanRunReportService {
     public static readonly blobContainerName = 'page-scan-run-reports';
-    private static readonly sarifFileExtension = '.sarif';
 
     constructor(
         @inject(BlobStorageClient) private readonly blobStorageClient: BlobStorageClient,
@@ -18,7 +17,7 @@ export class PageScanRunReportService {
     public async saveSarifReport(fileId: string, content: string): Promise<void> {
         await this.blobStorageClient.uploadBlobContent(
             PageScanRunReportService.blobContainerName,
-            this.getBlobFilePath(fileId, PageScanRunReportService.sarifFileExtension),
+            this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId)),
             content,
         );
     }
@@ -26,14 +25,18 @@ export class PageScanRunReportService {
     public async readSarifReport(fileId: string): Promise<BlobContentDownloadResponse> {
         return this.blobStorageClient.getBlobContent(
             PageScanRunReportService.blobContainerName,
-            this.getBlobFilePath(fileId, PageScanRunReportService.sarifFileExtension),
+            this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId)),
         );
     }
 
-    private getBlobFilePath(fileId: string, extension: string): string {
+    private getBlobFilePath(fileId: string, fileName: string): string {
         const fileCreatedTime = this.guidGenerator.getGuidTimestamp(fileId);
 
         return `${fileCreatedTime.getUTCFullYear()}/${fileCreatedTime.getUTCMonth() +
-            1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileId}${extension}`;
+            1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileName}`;
+    }
+
+    private getBlobSarifFileName(fileId: string): string {
+        return `${fileId}.sarif`;
     }
 }

@@ -12,3 +12,6 @@ out/
 
 yarn-error.log
 **/*.DS_Store
+
+**/bin
+**/obj
