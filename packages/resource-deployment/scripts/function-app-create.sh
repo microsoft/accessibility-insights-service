@@ -48,7 +48,7 @@ addReplyUrlIfNotExists() {
         fi
     done
 
-    echo "Adding reply URL '$replyUrl' to Azure Function AAD app application..."
+    echo "Adding reply URL '$replyUrl' to Azure Function AAD application..."
     az ad app update --id $clientId --add replyUrls $replyUrl
     echo "  Successfully added reply URL."
 }
