@@ -43,12 +43,12 @@ addReplyUrlIfNotExists() {
 
     for url in $replyUrls; do
         if [[ $url == $replyUrl ]]; then
-            echo "Reply Url '${replyUrl}' already exsits. Skip addidn reply URL to Azure Function AAD app application."
+            echo "Reply Url '${replyUrl}' already exsits. Skipping adding reply URL to Azure Function AAD app application."
             return
         fi
     done
 
-    echo "Adding reply URL '$replyUrl' to Azure Function AAD app application..."
+    echo "Adding reply URL '$replyUrl' to Azure Function AAD application..."
     az ad app update --id $clientId --add replyUrls $replyUrl
     echo "  Successfully added reply URL."
 }
@@ -58,7 +58,7 @@ createAppRegistration() {
     environment=$2
 
     appRegistrationName="allyappregistration-$resourceGroupName-$environment"
-    echo "Creating a new ADD application with display name $appRegistrationName..."
+    echo "Creating a new AAD application with display name $appRegistrationName..."
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "  Successfully created '$appRegistrationName' AAD application with client ID '$clientId'"
 }
@@ -143,7 +143,7 @@ if [ -z $clientId ]; then
     if [[ ! -n $appRegistrationName ]]; then
         createAppRegistration $resourceGroupName $environment
     else
-        echo "ADD application with display name '$appRegistrationName' already exists."
+        echo "AAD application with display name '$appRegistrationName' already exists."
     fi
 fi
 
