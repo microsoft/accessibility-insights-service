@@ -12,7 +12,7 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'yargs-parser', 'applicationinsights', 'puppeteer', '@azure/functions'],
+        externals: ['@azure/functions'],
         entry: {
             ['post-scans-func']: path.resolve('./post-scans-func/index.ts'),
             ['get-scan-func']: path.resolve('./get-scan-func/index.ts'),
