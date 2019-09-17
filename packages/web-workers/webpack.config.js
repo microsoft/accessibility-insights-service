@@ -14,10 +14,7 @@ module.exports = env => {
         devtool: 'cheap-source-map',
         externals: ['@azure/functions'],
         entry: {
-            ['post-scans-func']: path.resolve('./post-scans-func/index.ts'),
-            ['get-scan-func']: path.resolve('./get-scan-func/index.ts'),
-            ['get-scans-batch-func']: path.resolve('./get-scans-batch-func/index.ts'),
-            ['get-report-func']: path.resolve('./get-report-func/index.ts'),
+            ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
         },
         mode: 'development',
         module: {
@@ -37,7 +34,7 @@ module.exports = env => {
                 },
             ],
         },
-        name: 'web-api',
+        name: 'web-workers',
         node: {
             __dirname: false,
         },
@@ -82,7 +79,6 @@ module.exports = env => {
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
-            mainFields: ['main'],
         },
         target: 'node',
     };
