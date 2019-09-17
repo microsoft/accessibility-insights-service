@@ -1,31 +1,24 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
-
-import { GuidGenerator, HashGenerator } from 'common';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
+
 // tslint:disable: no-object-literal-type-assertion no-any no-unsafe-any
 
 describe(OnDemandPageScanRunResultProvider, () => {
     let testSubject: OnDemandPageScanRunResultProvider;
-    let hashGeneratorMock: IMock<HashGenerator>;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
-    let guidGeneratorMock: IMock<GuidGenerator>;
+    let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 
     beforeEach(() => {
-        hashGeneratorMock = Mock.ofType(HashGenerator);
         cosmosContainerClientMock = Mock.ofType(CosmosContainerClient, MockBehavior.Strict);
-        guidGeneratorMock = Mock.ofType(GuidGenerator);
-        testSubject = new OnDemandPageScanRunResultProvider(
-            hashGeneratorMock.object,
-            guidGeneratorMock.object,
-            cosmosContainerClientMock.object,
-        );
+        partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
+        testSubject = new OnDemandPageScanRunResultProvider(cosmosContainerClientMock.object, partitionKeyFactoryMock.object);
     });
 
     it('creates scan run documents', async () => {
@@ -85,7 +78,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
             }
 
             await expect(testSubject.readScanRuns(scanIdsToFetch)).rejects.toEqual(
-                new Error("Can't read more than 1000 scan documents per query"),
+                new Error("Can't read more than 1000 scan documents per query."),
             );
         });
 
@@ -158,8 +151,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
     });
 
     function verifyAll(): void {
-        guidGeneratorMock.verifyAll();
-        hashGeneratorMock.verifyAll();
+        partitionKeyFactoryMock.verifyAll();
         cosmosContainerClientMock.verifyAll();
     }
 
@@ -173,15 +165,10 @@ describe(OnDemandPageScanRunResultProvider, () => {
 
     function setupVerifiableGetNodeCall(bucket: string, ...scanIds: string[]): void {
         scanIds.forEach(scanId => {
-            const scanIdNode = `${scanId}-node`;
-            guidGeneratorMock
-                .setup(g => g.getGuidNode(scanId))
-                .returns(() => scanIdNode)
+            partitionKeyFactoryMock
+                .setup(o => o.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, scanId))
+                .returns(() => bucket)
                 .verifiable();
-
-            hashGeneratorMock
-                .setup(h => h.getDbHashBucket(OnDemandPageScanRunResultProvider.partitionKeyPreFix, scanIdNode))
-                .returns(() => bucket);
         });
     }
 });
