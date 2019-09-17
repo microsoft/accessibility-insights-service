@@ -143,7 +143,7 @@ if [ -z $clientId ]; then
     if [[ ! -n $appRegistrationName ]]; then
         createAppRegistration $resourceGroupName $environment
     else
-        echo "ADD application with display name '$appRegistrationName' already exists."
+        echo "AAD application with display name '$appRegistrationName' already exists."
     fi
 fi
 
