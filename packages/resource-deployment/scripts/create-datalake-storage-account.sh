@@ -28,7 +28,7 @@ fi
 templateFile="${0%/*}/../templates/datalake-storage.template.json"
 parameters="${0%/*}/../templates/datalake-storage.parameters.json"
 
-echo "Creating datalake storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+echo "Creating Data Lake enabled storage account under resource group '$resourceGroupName' using ARM template $templateFile"
 resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "$templateFile" --parameters "$parameters" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName
@@ -40,4 +40,4 @@ if [[ -z $datalakeStorageAccountName ]]; then
     exit 1
 fi
 
-echo "Created datalake storage account '$datalakeStorageAccountName'"
+echo "Created Data Lake storage account '$datalakeStorageAccountName'"

@@ -2,9 +2,15 @@
     "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The Function App name prefix"
+            }
+        },
         "name": {
             "type": "string",
-            "defaultValue": "[concat('allyfunction',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[toLower(concat(parameters('namePrefix'),uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The Function App name"
             }
