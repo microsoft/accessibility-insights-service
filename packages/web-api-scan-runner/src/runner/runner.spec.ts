@@ -4,10 +4,11 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { GuidGenerator } from 'common';
 import { Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState, ReportFormat, ScanState } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -23,6 +24,8 @@ let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvid
 let scannerTaskMock: IMock<ScannerTask>;
 let scanMetadataConfig: IMock<ScanMetadataConfig>;
 let loggerMock: IMock<Logger>;
+let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
+let guidGeneratorMock: IMock<GuidGenerator>;
 
 const scanMetadata: ScanMetadata = {
     id: 'id',
@@ -94,6 +97,9 @@ beforeEach(() => {
     scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
     scannerTaskMock = Mock.ofType<ScannerTask>();
     scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
+    pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService);
+    guidGeneratorMock = Mock.ofType(GuidGenerator);
+    guidGeneratorMock.setup(g => g.createGuid()).returns(() => 'guid');
 });
 
 describe('runner', () => {
@@ -124,11 +130,13 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         runner = new Runner(
+            guidGeneratorMock.object,
             scanMetadataConfig.object,
             scannerTaskMock.object,
             onDemandPageScanRunResultProviderMock.object,
             webDriverTaskMock.object,
             loggerMock.object,
+            pageScanRunReportServiceMock.object,
         );
 
         await runner.run();

@@ -29,7 +29,7 @@ export class PageScanRunReportService {
         );
     }
 
-    private getBlobFilePath(fileId: string, fileName: string): string {
+    public getBlobFilePath(fileId: string, fileName: string): string {
         const fileCreatedTime = this.guidGenerator.getGuidTimestamp(fileId);
 
         return `${fileCreatedTime.getUTCFullYear()}/${fileCreatedTime.getUTCMonth() +

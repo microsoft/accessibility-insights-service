@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { convertAxeToSarif, SarifLog } from 'axe-sarif-converter';
+import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunResult, OnDemandScanResult } from 'storage-documents';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
@@ -13,11 +15,13 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 @injectable()
 export class Runner {
     constructor(
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
         @inject(ScannerTask) private readonly scannerTask: ScannerTask,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(Logger) private readonly logger: Logger,
+        @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
     ) {}
 
     public async run(): Promise<void> {
@@ -39,7 +43,7 @@ export class Runner {
             };
 
             onDemandPageScanReport = {
-                reportId: '',
+                reportId: this.guidGenerator.createGuid(),
                 format: 'sarif',
                 href: '',
             };
@@ -81,6 +85,16 @@ export class Runner {
                         onDemandScanResult.issueCount = axeScanResults.results.violations.length;
                         onDemandScanResult.state = 'fail';
                     }
+                    this.logger.logInfo(`Converting to Sarif...`);
+                    // Perform the conversion
+                    const sarifResults: SarifLog = convertAxeToSarif(axeScanResults.results);
+                    this.logger.logInfo(`Saving sarif results to Blobs...`);
+                    await this.pageScanRunReportService.saveSarifReport(onDemandPageScanReport.reportId, JSON.stringify(sarifResults));
+                    onDemandPageScanReport.href = this.pageScanRunReportService.getBlobFilePath(
+                        onDemandPageScanReport.reportId,
+                        onDemandPageScanReport.format,
+                    );
+                    this.logger.logInfo(`File saved at ${onDemandPageScanReport.href}`);
                 }
             }
 
