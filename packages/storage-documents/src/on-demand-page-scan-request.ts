@@ -7,5 +7,5 @@ import { ItemType } from './item-type';
 export interface OnDemandPageScanRequest extends StorageDocument {
     url: string;
     priority: number;
-    itemType: ItemType.onDemandPageScanRequests;
+    itemType: ItemType.onDemandPageScanRequest;
 }

@@ -12,8 +12,13 @@ export keyVaultUrl
 export templatesFolder
 
 templatesFolder="${0%/*}/../templates/"
+
 scanReqScheduleJobName="scan-req-schedule"
 parsedScanReqScheduleFileName="scan-req-schedule.generated.template.json"
+
+onDemandScanReqScheduleJobName="on-demand-scan-req-schedule"
+parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.template.json"
+
 urlScanScheduleJobName="url-scan-schedule"
 parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
 urlWebAPIScanScheduleJobName="url-web-api-scan-schedule"
@@ -70,6 +75,8 @@ sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVau
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-web-api-scan-schedule.template.json" >"$parsedUrlWebAPIScanScheduleFileName"
 
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
+
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
@@ -79,5 +86,7 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlWebAPIScanScheduleJobName" "$parsedUrlWebAPIScanScheduleFileName" "$allJobsScheduleList"
+
+adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."

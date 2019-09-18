@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-unsafe-any
 import 'reflect-metadata';
 
 import { DotenvConfigOutput } from 'dotenv';
@@ -10,10 +9,13 @@ import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ProcessEntryPointBase } from './process-entry-point-base';
 
+// tslint:disable: no-unsafe-any no-any
+
 describe(ProcessEntryPointBase, () => {
     class TestEntryPoint extends ProcessEntryPointBase {
         public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
         public customActionInvoked = false;
+        public customActionArgs: any[];
 
         public customActionToBeInvoked: () => void;
 
@@ -21,11 +23,12 @@ describe(ProcessEntryPointBase, () => {
             return this.baseTelemetryProperties;
         }
 
-        protected async runCustomAction(): Promise<void> {
+        protected async runCustomAction(container: Container, ...args: any[]): Promise<void> {
             if (!_.isNil(this.customActionToBeInvoked)) {
                 this.customActionToBeInvoked();
             }
             this.customActionInvoked = true;
+            this.customActionArgs = args;
         }
     }
 
@@ -115,6 +118,16 @@ describe(ProcessEntryPointBase, () => {
                 await expect(testSubject.start()).resolves.toBeUndefined();
 
                 expect(testSubject.customActionInvoked).toBe(true);
+
+                verifyLogFlushCall();
+                verifyMocks();
+            });
+
+            it('invoked when start is called with args', async () => {
+                await expect(testSubject.start(1, 2)).resolves.toBeUndefined();
+
+                expect(testSubject.customActionInvoked).toBe(true);
+                expect(testSubject.customActionArgs).toEqual([1, 2]);
 
                 verifyLogFlushCall();
                 verifyMocks();

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';

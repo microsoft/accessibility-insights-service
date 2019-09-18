@@ -40,4 +40,16 @@ describe(GuidGenerator, () => {
             expect(timestamp).toEqual(1567527630984);
         });
     });
+
+    describe('isValidV6Guid()', () => {
+        it('validates guid', () => {
+            const v6guid = '1e9ce66b-fb58-6080-1a9d-ed3459ab8b4f';
+            const v4guid = '1e9ce66b-fb58-4080-1a9d-ed3459ab8b4f';
+            const randomId = 'asf3245s-d1af43as-d4fga5s42-3dg';
+
+            expect(testSubject.isValidV6Guid(v6guid)).toEqual(true);
+            expect(testSubject.isValidV6Guid(v4guid)).toEqual(false);
+            expect(testSubject.isValidV6Guid(randomId)).toEqual(false);
+        });
+    });
 });

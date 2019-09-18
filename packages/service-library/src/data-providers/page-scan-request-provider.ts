@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 
+@injectable()
 export class PageScanRequestProvider {
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
@@ -15,7 +16,7 @@ export class PageScanRequestProvider {
         continuationToken?: string,
         itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
-        const query = `SELECT TOP ${itemsCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequests}' ORDER BY c.priority`;
+        const query = `SELECT TOP ${itemsCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority`;
 
         return this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(
             query,
