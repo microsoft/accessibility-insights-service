@@ -125,10 +125,10 @@ describe('runner', () => {
 
         runner = new Runner(
             scanMetadataConfig.object,
-            loggerMock.object,
             scannerTaskMock.object,
             onDemandPageScanRunResultProviderMock.object,
             webDriverTaskMock.object,
+            loggerMock.object,
         );
 
         await runner.run();
