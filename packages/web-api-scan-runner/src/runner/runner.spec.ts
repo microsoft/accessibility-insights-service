@@ -109,14 +109,14 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         onDemandPageScanRunResultProviderMock
-            .setup(async o => o.readScanRuns([onDemandPageScanResult.id]))
+            .setup(async o => o.readScanRuns(['id']))
             .returns(async () => Promise.resolve([onDemandPageScanResult]))
-            .verifiable(Times.call(2));
+            .verifiable(Times.atLeastOnce());
 
         onDemandPageScanRunResultProviderMock
             .setup(async o => o.updateScanRun(onDemandPageScanResult))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.call(2));
+            .verifiable(Times.never());
 
         scannerTaskMock
             .setup(async o => o.scan(scanMetadata.url))
