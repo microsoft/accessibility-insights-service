@@ -39,7 +39,7 @@ describe(registerAzureServicesToContainer, () => {
     });
 
     it('verify singleton resolution', async () => {
-        registerAzureServicesToContainer(container);
+        registerAzureServicesToContainer(container, CredentialType.AppService);
 
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
@@ -49,7 +49,7 @@ describe(registerAzureServicesToContainer, () => {
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
 
-        expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.VM);
+        expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
 
     it('verify non-singleton resolution', () => {

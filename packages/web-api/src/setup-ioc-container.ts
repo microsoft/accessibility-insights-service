@@ -9,10 +9,7 @@ export function setupIoContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);
     registerLoggerToContainer(container);
-    registerAzureServicesToContainer(container);
-
-    container.unbind(AzureServicesIocTypes.CredentialType);
-    container.bind(AzureServicesIocTypes.CredentialType).toConstantValue(CredentialType.AppService);
+    registerAzureServicesToContainer(container, CredentialType.AppService);
 
     return container;
 }

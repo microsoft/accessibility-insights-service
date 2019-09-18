@@ -19,7 +19,7 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 
-export function registerAzureServicesToContainer(container: Container): void {
+export function registerAzureServicesToContainer(container: Container, credentialType: CredentialType = CredentialType.VM): void {
     setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
@@ -70,7 +70,7 @@ export function registerAzureServicesToContainer(container: Container): void {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
-    container.bind(iocTypeNames.CredentialType).toConstantValue(CredentialType.VM);
+    container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
 
