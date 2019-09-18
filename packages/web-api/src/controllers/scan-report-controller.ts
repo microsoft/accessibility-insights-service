@@ -25,7 +25,7 @@ export class ScanReportController extends ApiController {
         if (!this.guidGenerator.isValidV6Guid(reportId)) {
             this.context.res = {
                 status: 422,
-                body: `Unprocessable Entity: ${reportId}.`,
+                body: `Invalid report id: ${reportId}.`,
             };
 
             return;
