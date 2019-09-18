@@ -97,28 +97,8 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/create-storage-account.sh"
 
-. "${0%/*}/create-datalake-storage-account.sh"
-
 . "${0%/*}/upload-files.sh"
 
 . "${0%/*}/create-queues.sh"
 
 . "${0%/*}/setup-cosmos-db.sh"
-
-. "${0%/*}/app-insights-create.sh"
-
-. "${0%/*}/batch-account-create.sh"
-
-. "${0%/*}/push-secrets-to-key-vault.sh"
-
-# shellcheck disable=SC2154
-keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
-echo "Fetched keyvault url $keyVaultUrl"
-
-. "${0%/*}/function-app-create.sh"
-
-. "${0%/*}/job-schedule-create.sh"
-
-. "${0%/*}/create-api-management.sh"
-
-. "${0%/*}/deploy-rest-api.sh"
