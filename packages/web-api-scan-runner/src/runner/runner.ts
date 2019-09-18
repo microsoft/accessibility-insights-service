@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
@@ -28,6 +29,7 @@ export class Runner {
     ) {}
 
     public async run(): Promise<void> {
+        let browser: Browser;
         const scanMetadata = this.scanMetadataConfig.getConfig();
         let onDemandScanResult: OnDemandScanResult;
         let onDemandPageScanReport: OnDemandPageScanReport;
@@ -37,19 +39,19 @@ export class Runner {
             const pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([scanMetadata.id]))[0];
 
             onDemandScanResult = {
-                state: 'unknown' as ScanState,
+                state: 'unknown',
                 issueCount: 0,
             };
 
             onDemandPageScanReport = {
                 reportId: '',
-                format: 'sarif' as ReportFormat,
+                format: 'sarif',
                 href: '',
             };
 
             // set scanned page run state to running
             onDemandPageScanRunResult = {
-                state: 'running' as OnDemandPageScanRunState,
+                state: 'running',
                 timestamp: new Date()
                     .toJSON()
                     .valueOf()
@@ -62,7 +64,7 @@ export class Runner {
             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanRunResult);
 
             // start new web driver process
-            await this.webDriverTask.launch();
+            browser = await this.webDriverTask.launch();
 
             // scan page for accessibility issues
             const axeScanResults: AxeScanResults = await this.scannerTask.scan(scanMetadata.url);

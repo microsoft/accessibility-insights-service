@@ -44,3 +44,4 @@ fi
 createQueue "scanrequest"
 createQueue "scanrequest-dead"
 createQueue "webapiscanrequest"
+createQueue "webapiscanrequest-dead"
