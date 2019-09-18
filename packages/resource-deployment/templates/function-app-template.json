@@ -102,14 +102,6 @@
                         {
                             "name": "COSMOS_CONNECTION_STRING",
                             "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
-                        },
-                        {
-                            "name": "COSMOS_DB_URL",
-                            "value": "[concat('https://', parameters('cosmosAccountName'), '.documents.azure.com:443/')]"
-                        },
-                        {
-                            "name": "COSMOS_DB_KEY",
-                            "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').primaryMasterKey]"
                         }
                     ]
                 },
