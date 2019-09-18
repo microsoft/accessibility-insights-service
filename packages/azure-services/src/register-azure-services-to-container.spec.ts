@@ -16,6 +16,7 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
+import { CredentialType } from './credentials/msi-credential-provider';
 import {
     AzureKeyVaultClientProvider,
     BlobServiceClientProvider,
@@ -38,7 +39,7 @@ describe(registerAzureServicesToContainer, () => {
     });
 
     it('verify singleton resolution', async () => {
-        registerAzureServicesToContainer(container);
+        registerAzureServicesToContainer(container, CredentialType.AppService);
 
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
@@ -47,6 +48,8 @@ describe(registerAzureServicesToContainer, () => {
         verifySingletonDependencyResolutionWithValue(iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
+
+        expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
 
     it('verify non-singleton resolution', () => {
