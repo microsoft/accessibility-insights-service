@@ -11,8 +11,6 @@ export resourceName
 export clientId
 export environment
 export keyVault
-# export packageName
-# export functionAppNamePrefix
 
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
@@ -107,19 +105,17 @@ publishFunctionAppScripts() {
 templateFilePath="${0%/*}/../templates/function-app-template.json"
 
 # Read script arguments
-previousFlag=""
-for arg in "$@"; do
-    case $previousFlag in
-    -r) resourceGroupName=$arg ;;
-    -c) clientId=$arg ;;
-    -e) environment=$arg ;;
-    -k) keyVault=$arg ;;
-    -d) dropFolder=$arg ;;
-    -x) functionAppNamePrefix=$arg ;;
-    -g) packageName=$arg ;;
-    -?) exitWithUsageInfo ;;
+while getopts "r:c:e:k:d:x:g:" option; do
+    case $option in
+    r) resourceGroupName=${OPTARG} ;;
+    c) clientId=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
+    d) dropFolder=${OPTARG} ;;
+    x) functionAppNamePrefix=${OPTARG} ;;
+    g) packageName=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
     esac
-    previousFlag=$arg
 done
 
 if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $packageName ]; then
