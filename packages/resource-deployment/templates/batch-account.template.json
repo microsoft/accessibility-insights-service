@@ -215,6 +215,60 @@
                     "waitForSuccess": true
                 }
             }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts/pools",
+            "apiVersion": "2018-12-01",
+            "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "properties": {
+                "vmSize": "STANDARD_A1",
+                "interNodeCommunication": "Disabled",
+                "maxTasksPerNode": 1,
+                "taskSchedulingPolicy": {
+                    "nodeFillType": "Spread"
+                },
+                "deploymentConfiguration": {
+                    "virtualMachineConfiguration": {
+                        "imageReference": {
+                            "publisher": "microsoft-azure-batch",
+                            "offer": "ubuntu-server-container",
+                            "sku": "16-04-lts",
+                            "version": "latest"
+                        },
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                    }
+                },
+                "scaleSettings": {
+                    "fixedScale": {
+                        "targetDedicatedNodes": 2,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
+                    }
+                },
+                "startTask": {
+                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "environmentSettings": [
+                        {
+                            "name": "KEY_VAULT_NAME",
+                            "value": "[parameters('keyVault')]"
+                        }
+                    ],
+                    "resourceFiles": [
+                        {
+                            "autoStorageContainerName": "batch-pool-startup-script"
+                        }
+                    ],
+                    "userIdentity": {
+                        "autoUser": {
+                            "scope": "Pool",
+                            "elevationLevel": "Admin"
+                        }
+                    },
+                    "maxTaskRetryCount": 0,
+                    "waitForSuccess": true
+                }
+            }
         }
     ]
 }

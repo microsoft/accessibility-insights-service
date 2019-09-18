@@ -75,6 +75,13 @@
                 "description": "The name of the blob container for scan request sender script."
             }
         },
+        "onDemandScanRequestContainerName": {
+            "type": "string",
+            "defaultValue": "batch-on-demand-scan-request-sender-script",
+            "metadata": {
+                "description": "The name of the blob container for the on demand scan request sender script."
+            }
+        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
@@ -142,6 +149,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('scanRequestContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('onDemandScanRequestContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
