@@ -41,7 +41,7 @@
             },
             {
                 "name": "AZURE_STORAGE_SCAN_QUEUE",
-                "value": "webapiscanrequest"
+                "value": "ondemand-scanrequest"
             },
             {
                 "name": "KEY_VAULT_URL",

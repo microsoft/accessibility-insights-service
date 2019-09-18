@@ -1,0 +1,15 @@
+{
+    "bindings": [
+        {
+            "type": "cosmosDBTrigger",
+            "name": "documents",
+            "direction": "in",
+            "leaseCollectionName": "leases",
+            "connectionStringSetting": "COSMOS_CONNECTION_STRING",
+            "databaseName": "onDemandScanner",
+            "collectionName": "scanBatchRequests",
+            "createLeaseCollectionIfNotExists": true
+        }
+    ],
+    "scriptFile": "../scan-batch-requests-feed-func/index.js"
+}

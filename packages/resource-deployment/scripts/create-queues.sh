@@ -43,5 +43,5 @@ fi
 
 createQueue "scanrequest"
 createQueue "scanrequest-dead"
-createQueue "webapiscanrequest"
-createQueue "webapiscanrequest-dead"
+createQueue "ondemand-scanrequest"
+createQueue "ondemand-scanrequest-dead"

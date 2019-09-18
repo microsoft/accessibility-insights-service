@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
@@ -9,6 +8,7 @@ import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { Mock } from 'typemoq';
+import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
 
@@ -39,7 +39,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 loggerMock.object,
             );
 
-            testSubject = new OnDemandPageScanRunResultProvider(new HashGenerator(), new GuidGenerator(), cosmosContainerClient);
+            testSubject = new OnDemandPageScanRunResultProvider(
+                cosmosContainerClient,
+                new PartitionKeyFactory(new HashGenerator(), new GuidGenerator()),
+            );
         });
 
         afterEach(async () => {
