@@ -2,16 +2,25 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { cosmosContainerClientTypes } from 'azure-services';
+import { cosmosContainerClientTypes, AzureServicesIocTypes, CredentialType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
+import * as inversify from 'inversify';
 import { Logger } from 'logger';
 import { setupIoContainer } from './setup-ioc-container';
 
 describe(setupIoContainer, () => {
-    it('verify dependencies resolution', () => {
-        const container = setupIoContainer();
-        expect(container.get(ServiceConfiguration)).toBeDefined();
-        expect(container.get(Logger)).toBeDefined();
-        expect(container.get(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)).toBeDefined();
+    let testSubject: inversify.Container;
+    beforeEach(() => {
+        testSubject = setupIoContainer();
+    });
+
+    it('verifies dependencies resolution', () => {
+        expect(testSubject.get(ServiceConfiguration)).toBeDefined();
+        expect(testSubject.get(Logger)).toBeDefined();
+        expect(testSubject.get(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)).toBeDefined();
+    });
+
+    it('verifies credential type to be app service', () => {
+        expect(testSubject.get(AzureServicesIocTypes.CredentialType)).toBe(CredentialType.AppService);
     });
 });
