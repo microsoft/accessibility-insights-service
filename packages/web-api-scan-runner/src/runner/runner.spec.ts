@@ -35,7 +35,7 @@ const onDemandPageScanResult: OnDemandPageScanResult = {
     url: 'url',
     scanResult: {
         state: 'pass' as ScanState,
-        issueCount: 0,
+        issueCount: undefined,
     },
     reports: [
         {
@@ -111,7 +111,12 @@ describe('runner', () => {
         onDemandPageScanRunResultProviderMock
             .setup(async o => o.readScanRuns([onDemandPageScanResult.id]))
             .returns(async () => Promise.resolve([onDemandPageScanResult]))
-            .verifiable(Times.once());
+            .verifiable(Times.call(2));
+
+        onDemandPageScanRunResultProviderMock
+            .setup(async o => o.updateScanRun(onDemandPageScanResult))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.call(2));
 
         scannerTaskMock
             .setup(async o => o.scan(scanMetadata.url))

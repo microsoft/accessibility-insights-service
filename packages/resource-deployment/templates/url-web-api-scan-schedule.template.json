@@ -1,5 +1,5 @@
 {
-    "id": "url-web-api-scan-scan-schedule",
+    "id": "url-web-api-scan-schedule",
     "schedule": {
         "recurrenceInterval": "PT10M"
     },

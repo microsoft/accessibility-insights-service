@@ -34,13 +34,15 @@ export class Runner {
         let onDemandScanResult: OnDemandScanResult;
         let onDemandPageScanReport: OnDemandPageScanReport;
         let onDemandPageScanRunResult: OnDemandPageScanRunResult;
+        let pageScanRunResult: OnDemandPageScanResult;
+        let axeScanResults: AxeScanResults;
 
         try {
-            const pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([scanMetadata.id]))[0];
+            pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([scanMetadata.id]))[0];
 
             onDemandScanResult = {
                 state: 'unknown',
-                issueCount: 0,
+                issueCount: undefined,
             };
 
             onDemandPageScanReport = {
@@ -62,21 +64,33 @@ export class Runner {
             pageScanRunResult.run = onDemandPageScanRunResult;
 
             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanRunResult);
+            pageScanRunResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([scanMetadata.id]))[0];
 
             // start new web driver process
             browser = await this.webDriverTask.launch();
 
             // scan page for accessibility issues
-            const axeScanResults: AxeScanResults = await this.scannerTask.scan(scanMetadata.url);
+            try {
+                axeScanResults = await this.scannerTask.scan(scanMetadata.url);
+            } catch (error) {
+                onDemandPageScanRunResult.error = (error as Error).message;
+            }
 
-            onDemandPageScanRunResult.state = 'completed' as OnDemandPageScanRunState;
+            onDemandPageScanRunResult.state = 'completed';
             onDemandPageScanRunResult.timestamp = new Date()
                 .toJSON()
                 .valueOf()
                 .toString();
 
-            onDemandScanResult.issueCount = axeScanResults.results.violations.length;
-            onDemandScanResult.state = (onDemandScanResult.issueCount > 0 ? 'fail' : 'pass') as ScanState;
+            if (axeScanResults !== undefined) {
+                if (axeScanResults.results !== undefined) {
+                    onDemandScanResult.state = 'pass';
+                    if (axeScanResults.results.violations !== undefined && axeScanResults.results.violations.length > 0) {
+                        onDemandScanResult.issueCount = axeScanResults.results.violations.length;
+                        onDemandScanResult.state = 'fail';
+                    }
+                }
+            }
 
             pageScanRunResult.run = onDemandPageScanRunResult;
             pageScanRunResult.reports = [onDemandPageScanReport];
