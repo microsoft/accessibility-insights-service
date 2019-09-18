@@ -5,6 +5,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "compilerOptions": {
-        "outDir": "dist"
+        "outDir": "dist",
+        "experimentalDecorators": true
     }
 }
