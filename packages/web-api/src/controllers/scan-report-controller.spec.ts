@@ -3,15 +3,14 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
+import { BlobContentDownloadResponse } from 'azure-services';
+import { GuidGenerator, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { PageScanRunReportService } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { Readable } from 'stream';
 import { IMock, It, Mock, Times } from 'typemoq';
 
-import { BlobContentDownloadResponse } from 'azure-services';
-import { Stream } from 'stream';
-import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
+import { BodyParser } from './../utils/body-parser';
 import { ScanReportController } from './scan-report-controller';
 
 describe(ScanReportController, () => {
@@ -26,7 +25,8 @@ describe(ScanReportController, () => {
     const invalidId = 'invalid-id';
     let contentMock: IMock<NodeJS.ReadableStream>;
     let downloadResponse: BlobContentDownloadResponse;
-
+    let bodyParserMock: IMock<BodyParser>;
+    let buffer: Buffer;
     const notFoundDownloadResponse: BlobContentDownloadResponse = {
         notFound: true,
         content: undefined,
@@ -42,10 +42,13 @@ describe(ScanReportController, () => {
             },
             bindingData: {},
         });
-        contentMock = Mock.ofType(Stream.Readable);
-        contentMock
-            // tslint:disable-next-line: no-unsafe-any
-            .setup(cm => cm.pipe(It.isAny()))
+        buffer = new Buffer('A chunk of data');
+        contentMock = Mock.ofType(Readable);
+
+        bodyParserMock = Mock.ofType(BodyParser);
+        bodyParserMock
+            .setup(async bpm => bpm.getRawBody(contentMock.object as Readable))
+            .returns(async () => buffer)
             .verifiable(Times.once());
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
@@ -77,6 +80,7 @@ describe(ScanReportController, () => {
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
+            bodyParserMock.object,
         );
         controller.context = contextReq;
 
@@ -111,7 +115,7 @@ describe(ScanReportController, () => {
 
             contentMock.verifyAll();
             expect(context.res.status).toEqual(200);
-            expect(context.res.body).toBeDefined();
+            expect(context.res.body).toEqual(buffer);
         });
     });
 });

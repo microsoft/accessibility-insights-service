@@ -3,9 +3,10 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import * as getRawBody from 'raw-body';
 import { ApiController, PageScanRunReportService } from 'service-library';
 import { Readable } from 'stream';
+
+import { BodyParser } from './../utils/body-parser';
 
 @injectable()
 export class ScanReportController extends ApiController {
@@ -17,6 +18,7 @@ export class ScanReportController extends ApiController {
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
+        private readonly bodyParser: BodyParser = new BodyParser(),
     ) {
         super();
     }
@@ -42,7 +44,7 @@ export class ScanReportController extends ApiController {
             return;
         }
 
-        const content = await getRawBody(blobContentDownloadResponse.content as Readable);
+        const content = await this.bodyParser.getRawBody(blobContentDownloadResponse.content as Readable);
 
         this.context.res = {
             status: 200,
