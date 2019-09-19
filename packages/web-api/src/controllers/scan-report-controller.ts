@@ -3,8 +3,9 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
+import * as getRawBody from 'raw-body';
 import { ApiController, PageScanRunReportService } from 'service-library';
-import { Stream } from 'stream';
+import { Readable } from 'stream';
 
 @injectable()
 export class ScanReportController extends ApiController {
@@ -41,12 +42,11 @@ export class ScanReportController extends ApiController {
             return;
         }
 
-        const stream = new Stream.PassThrough();
-        blobContentDownloadResponse.content.pipe(stream);
+        const content = await getRawBody(blobContentDownloadResponse.content as Readable);
 
         this.context.res = {
             status: 200,
-            body: stream,
+            body: content,
         };
 
         this.logger.logInfo('Report fetched', { reportId });
