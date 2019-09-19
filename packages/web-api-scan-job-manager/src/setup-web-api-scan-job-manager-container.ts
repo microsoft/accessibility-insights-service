@@ -8,7 +8,7 @@ import { registerLoggerToContainer } from 'logger';
 import { Batch } from './batch/batch';
 import { BatchConfig } from './batch/batch-config';
 import { RunnerTaskConfig } from './batch/runner-task-config';
-import { webAPIJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
+import { webApiJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
 
 export function setupWebApiScanJobManagerContainer(): Container {
     const container = new Container({ autoBindInjectable: true });
@@ -37,7 +37,7 @@ export function setupWebApiScanJobManagerContainer(): Container {
 }
 
 function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
-    IoC.setupSingletonProvider(webAPIJobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
+    IoC.setupSingletonProvider(webApiJobManagerIocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
         const batchConfig = context.container.get(BatchConfig);
         const credentialProvider = context.container.get(CredentialsProvider);
 

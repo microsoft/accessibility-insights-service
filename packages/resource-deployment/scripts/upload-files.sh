@@ -6,9 +6,9 @@
 set -eo pipefail
 
 export jobManagerContainerName="batch-job-manager-script"
-export webAPIScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
+export webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
 export runnerContainerName="batch-runner-script"
-export webAPIScanrunnerContainerName="batch-web-api-scan-runner-script"
+export webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
 export scanRequestSenderContainerName="batch-scan-request-sender-script"
 export onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
 export poolStartupContainerName="batch-pool-startup-script"
@@ -57,9 +57,9 @@ fi
 echo "Uploading files to blobs"
 
 uploadFolderContents $jobManagerContainerName "$dropFolder/job-manager/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webAPIScanJobManagerContainerName "$dropFolder/web-api-scan-job-manager/dist" "$storageAccountName" "$includePattern"
+uploadFolderContents $webApiScanJobManagerContainerName "$dropFolder/web-api-scan-job-manager/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webAPIScanrunnerContainerName "$dropFolder/web-api-scan-runner/dist" "$storageAccountName" "$includePattern"
+uploadFolderContents $webApiScanrunnerContainerName "$dropFolder/web-api-scan-runner/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $onDemandScanRequestSenderContainerName "$dropFolder/web-api-scan-request-sender/dist" "$storageAccountName" "$includePattern"
 uploadFolderContents $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"

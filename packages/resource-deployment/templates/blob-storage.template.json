@@ -40,7 +40,7 @@
                 "description": "The name of the blob container for job manager script."
             }
         },
-        "webAPIScanJobManagerContainerName": {
+        "webApiScanJobManagerContainerName": {
             "type": "string",
             "defaultValue": "batch-web-api-scan-job-manager-script",
             "metadata": {
@@ -75,7 +75,7 @@
                 "description": "The name of the blob container for web api scan runner script."
             }
         },
-        "webAPIScanRunnerContainerName": {
+        "webApiScanRunnerContainerName": {
             "type": "string",
             "defaultValue": "batch-web-api-scan-runner-script",
             "metadata": {
@@ -144,7 +144,7 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
-                    "name": "[concat('default/', parameters('webAPIScanJobManagerContainerName'))]",
+                    "name": "[concat('default/', parameters('webApiScanJobManagerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
@@ -168,7 +168,7 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
-                    "name": "[concat('default/', parameters('webAPIScanRunnerContainerName'))]",
+                    "name": "[concat('default/', parameters('webApiScanRunnerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
