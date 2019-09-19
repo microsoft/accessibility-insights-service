@@ -7,27 +7,14 @@ import { BatchConfig } from './batch-config';
 describe(BatchConfig, () => {
     let batchConfig: BatchConfig;
 
-    it('return value of AZ_BATCH_ACCOUNT_NAME environment variable', () => {
-        const value: string = `value-${new Date().valueOf()}`;
-        process.env.AZ_BATCH_ACCOUNT_NAME = value;
+    it('returns config set in environment variables', () => {
+        process.env.AZ_BATCH_ACCOUNT_NAME = 'test account name';
+        process.env.AZ_BATCH_ACCOUNT_URL = 'test account url';
+        process.env.AZ_BATCH_POOL_ID = 'pool id';
         batchConfig = new BatchConfig();
 
-        expect(batchConfig.accountName).toEqual(value);
-    });
-
-    it('return value of AZ_BATCH_ACCOUNT_URL environment variable', () => {
-        const value: string = `value-${new Date().valueOf()}`;
-        process.env.AZ_BATCH_ACCOUNT_URL = value;
-        batchConfig = new BatchConfig();
-
-        expect(batchConfig.accountUrl).toEqual(value);
-    });
-
-    it('return value of AZ_BATCH_POOL_ID environment variable', () => {
-        const value: string = `value-${new Date().valueOf()}`;
-        process.env.AZ_BATCH_POOL_ID = value;
-        batchConfig = new BatchConfig();
-
-        expect(batchConfig.poolId).toEqual(value);
+        expect(batchConfig.accountName).toEqual(process.env.AZ_BATCH_ACCOUNT_NAME);
+        expect(batchConfig.accountUrl).toEqual(process.env.AZ_BATCH_ACCOUNT_URL);
+        expect(batchConfig.poolId).toEqual(process.env.AZ_BATCH_POOL_ID);
     });
 });
