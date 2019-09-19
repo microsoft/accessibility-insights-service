@@ -1,7 +1,7 @@
 {
     "id": "url-web-api-scan-schedule",
     "schedule": {
-        "recurrenceInterval": "PT10M"
+        "recurrenceInterval": "PT1M"
     },
     "jobSpecification": {
         "priority": 0,
@@ -12,8 +12,7 @@
         "jobManagerTask": {
             "id": "url-web-api-scan-job-manager-task",
             "commandLine": "/bin/bash -c run-web-api-scan-job-manager.sh",
-            "resourceFiles": [
-                {
+            "resourceFiles": [{
                     "autoStorageContainerName": "batch-web-api-scan-job-manager-script"
                 },
                 {
@@ -34,8 +33,7 @@
             },
             "runExclusive": false
         },
-        "commonEnvironmentSettings": [
-            {
+        "commonEnvironmentSettings": [{
                 "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                 "value": "%APP_INSIGHTS_TOKEN%"
             },
