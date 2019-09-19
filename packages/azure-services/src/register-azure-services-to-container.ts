@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { CosmosClient } from '@azure/cosmos';
-import { DefaultAzureCredential } from '@azure/identity';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { BlobServiceClient } from '@azure/storage-blob';
+import { BlobServiceClient, SharedKeyCredential as SharedKeyCredentialBlob } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
+
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -81,8 +81,11 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async context => {
         const secretProvider = context.container.get(SecretProvider);
         const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
+        const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
 
-        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, new DefaultAzureCredential());
+        const sharedKeyCredential = new SharedKeyCredentialBlob(accountName, accountKey);
+
+        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, sharedKeyCredential);
     });
 }
 
@@ -111,6 +114,7 @@ function setupSingletonQueueServiceURLProvider(container: interfaces.Container):
         const secretProvider = context.container.get(SecretProvider);
         const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
         const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+
         const sharedKeyCredential = new SharedKeyCredential(accountName, accountKey);
         const pipeline = StorageURL.newPipeline(sharedKeyCredential);
 

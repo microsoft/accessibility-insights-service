@@ -38,6 +38,7 @@
         "jest-circus": "^24.9.0",
         "jest-junit": "^8.0.0",
         "npm-run-all": "^4.1.5",
+        "raw-body": "^2.4.1",
         "rimraf": "^2.6.3",
         "ts-jest": "^24.0.0",
         "ts-loader": "^5.3.3",
@@ -52,10 +53,10 @@
         "azure-services": "1.0.0",
         "common": "1.0.0",
         "inversify": "^5.0.1",
+        "lodash": "^4.17.14",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
-        "storage-documents": "1.0.0",
-        "lodash": "^4.17.14"
+        "storage-documents": "1.0.0"
     }
 }
