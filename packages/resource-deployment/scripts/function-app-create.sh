@@ -20,24 +20,19 @@ exitWithUsageInfo() {
     echo "
 Usage: $0 \
 -r <resource group> \
--c <Azure AD application client id> \
+-c <Azure AD application client ID> \
 -e <environment> \
--x <function app name prefix> \
--g <function app package name> \
 -k <Key Vault to grant Azure Function App an access to> \
 -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
 
-addReplyUrlIfNotExists() {
-    clientId=$1
-    functionAppName=$2
-
+addReplyUrlToAadApp() {
     # Get existing reply urls of the AAD app registration
     echo "Fetching existing reply URls of the Azure Function AAD application..."
     replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv) || true
-    replyUrl="https://${functionAppName}.azurewebsites.net/.auth/login/aad/callback"
+    replyUrl="https://${functionAppServiceName}.azurewebsites.net/.auth/login/aad/callback"
 
     for url in $replyUrls; do
         if [[ $url == $replyUrl ]]; then
@@ -52,16 +47,34 @@ addReplyUrlIfNotExists() {
 }
 
 createAppRegistration() {
-    resourceGroupName=$1
-    environment=$2
+    packageName=$1
 
-    appRegistrationName="allyappregistration-$resourceGroupName-$environment"
+    appRegistrationName="$packageName-func-app-$resourceGroupName-$environment"
     echo "Creating a new AAD application with display name $appRegistrationName..."
     clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
     echo "  Successfully created '$appRegistrationName' AAD application with client ID '$clientId'"
 }
 
+createAppRegistrationIfNotExists() {
+    packageName=$1
+
+    if [ -z $clientId ]; then
+        echo "Create AAD application..."
+        functionAppServiceName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv 2>/dev/null) || true
+        clientId=$(az webapp auth show -n "$functionAppServiceName" -g "$resourceGroupName" --query "clientId" -o tsv 2>/dev/null) || true
+        appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv 2>/dev/null) || true
+
+        if [[ ! -n $appRegistrationName ]]; then
+            createAppRegistration $packageName
+        else
+            echo "AAD application with display name '$appRegistrationName' already exists."
+        fi
+    fi
+}
+
 copyConfigFileToScriptFolder() {
+    packageName=$1
+
     echo "Copying config file to '$packageName' script folder..."
     for folderName in $dropFolder/$packageName/dist/*-func; do
         if [[ -d $folderName ]]; then
@@ -72,8 +85,9 @@ copyConfigFileToScriptFolder() {
 }
 
 installAzureFunctionsCoreToolsOnLinux() {
-    # Install the Azure Functions Core Tools. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
+    # Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2
 
+    echo "Installing Azure Functions Core Tools..."
     # Install the Microsoft package repository GPG key, to validate package integrity
     curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
     sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
@@ -84,9 +98,28 @@ installAzureFunctionsCoreToolsOnLinux() {
 
     # Install the Core Tools package
     sudo apt-get install azure-functions-core-tools
+    echo "Azure Functions Core Tools installed successfully"
+}
+
+installAzureFunctionsCoreTools() {
+    osVersion=$(uname -s 2>/dev/null) || true
+    case "${unameOut}" in
+    Linux*) installAzureFunctionsCoreToolsOnLinux ;;
+    *) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
+    esac
+}
+
+grantFuncAppAccessToKeyVault() {
+    echo "Fetching principal ID of the Azure Function App..."
+    principalId=$(az functionapp identity show --name $functionAppServiceName --resource-group $resourceGroupName --query "principalId" -o tsv)
+    echo "  Successfully fetched principal ID $principalId."
+
+    . "${0%/*}/key-vault-enable-msi.sh"
 }
 
 publishFunctionAppScripts() {
+    packageName=$1
+
     currentDir=$(pwd)
     # Copy config file to function app deployment folder
     copyConfigFileToScriptFolder $packageName
@@ -95,35 +128,106 @@ publishFunctionAppScripts() {
     cd "${0%/*}/../../../$packageName/dist"
 
     # Publish the function scripts to the function app
-    echo "Publishing '$packageName' scripts..."
-    func azure functionapp publish $functionAppName --node
+    echo "Publishing '$packageName' scripts to '$functionAppServiceName' Function App..."
+    func azure functionapp publish $functionAppServiceName --node
+    echo "Successfully published API functions to '$functionAppServiceName' Function App."
 
     cd "$currentDir"
 }
 
-# Set default ARM Azure Function App template files
-templateFilePath="${0%/*}/../templates/function-app-template.json"
+waitForFunctionAppServiceDeploymentCompletion() {
+    end=$((SECONDS + 300))
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        sleep 5
+        printf "."
+        functionAppState=$(az functionapp list -g $resourceGroupName --query "[?name=='$functionAppServiceName'].state" -o tsv)
+        if [[ $functionAppState == "Running" ]]; then
+            break
+        fi
+    done
+    echo "."
+}
+
+deployWebApiArmTemplate() {
+    packageName=$1
+
+    functionAppNamePrefix="$packageName-allyfuncapp"
+    templateFilePath="${0%/*}/../templates/function-web-api-app-template.json"
+
+    echo "Deploying Azure Function App using ARM template..."
+    resources=$(az group deployment create \
+        --resource-group "$resourceGroupName" \
+        --template-file "$templateFilePath" \
+        --parameters clientId="$clientId" namePrefix="$functionAppNamePrefix" \
+        --query "properties.outputResources[].id" \
+        -o tsv)
+
+    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
+    functionAppServiceName=$resourceName
+
+    waitForFunctionAppServiceDeploymentCompletion
+    echo "Successfully deployed Azure Function App '$functionAppServiceName'"
+}
+
+deployWebWorkersArmTemplate() {
+    packageName=$1
+
+    functionAppNamePrefix="$packageName-allyfuncapp"
+    templateFilePath="${0%/*}/../templates/function-web-workers-app-template.json"
+
+    echo "Deploying Azure Function App using ARM template..."
+    resources=$(az group deployment create \
+        --resource-group "$resourceGroupName" \
+        --template-file "$templateFilePath" \
+        --parameters namePrefix="$functionAppNamePrefix" \
+        --query "properties.outputResources[].id" \
+        -o tsv)
+
+    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
+    functionAppServiceName=$resourceName
+
+    waitForFunctionAppServiceDeploymentCompletion
+    echo "Successfully deployed Azure Function App '$functionAppServiceName'"
+}
+
+deployWebApiFunctionApp() {
+    packageName=$1
+
+    createAppRegistrationIfNotExists $packageName
+    deployWebApiArmTemplate $packageName
+
+    # Add reply url to function app registration
+    if [ $environment = "dev" ]; then
+        addReplyUrlToAadApp
+    fi
+
+    grantFuncAppAccessToKeyVault
+    publishFunctionAppScripts $packageName
+}
+
+deployWebWorkersFunctionApp() {
+    packageName=$1
+
+    deployWebWorkersArmTemplate $packageName
+    grantFuncAppAccessToKeyVault
+    publishFunctionAppScripts $packageName
+}
 
 # Read script arguments
-while getopts "r:c:e:k:d:x:g:" option; do
+while getopts "r:c:e:k:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) clientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
-    x) functionAppNamePrefix=${OPTARG} ;;
-    g) packageName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $packageName ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
-fi
-
-if [ -z $functionAppNamePrefix ]; then
-    functionAppNamePrefix="$packageName-allyfuncapp"
 fi
 
 if [ -z $clientId ] && [ ! $environment = "dev" ]; then
@@ -131,56 +235,8 @@ if [ -z $clientId ] && [ ! $environment = "dev" ]; then
     exitWithUsageInfo
 fi
 
-# Create AAD function application for dev deployment only if not exists
-if [ -z $clientId ]; then
-    echo "Create AAD application for the development environment if not exists..."
-    functionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv 2>/dev/null) || true
-    clientId=$(az webapp auth show -n "$functionAppName" -g "$resourceGroupName" --query "clientId" -o tsv 2>/dev/null) || true
-    appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv 2>/dev/null) || true
+installAzureFunctionsCoreTools
 
-    if [[ ! -n $appRegistrationName ]]; then
-        createAppRegistration $resourceGroupName $environment
-    else
-        echo "AAD application with display name '$appRegistrationName' already exists."
-    fi
-fi
-
-# Start function app deployment
-echo "Deploying Azure Function App using ARM template..."
-resources=$(az group deployment create \
-    --resource-group "$resourceGroupName" \
-    --template-file "$templateFilePath" \
-    --parameters clientId="$clientId" namePrefix="$functionAppNamePrefix" \
-    --query "properties.outputResources[].id" \
-    -o tsv)
-
-. "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-functionAppName=$resourceName
-echo "Successfully deployed Azure Function App '$functionAppName'"
-
-# Add reply url to function app registration
-if [ $environment = "dev" ]; then
-    addReplyUrlIfNotExists $clientId $functionAppName
-fi
-
-# Grant key vault access to function app
-echo "Fetching principal ID of the Azure Function App..."
-principalId=$(az functionapp identity show --name $functionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
-echo "  Successfully fetched principal ID $principalId"
-
-. "${0%/*}/key-vault-enable-msi.sh"
-
-# Start publishing function scripts
-echo "Publishing API functions to '$functionAppName' Function App"
-
-# Install Azure Functions Core Tools for non-dev environment
-osVersion="$(uname -s)"
-case "${unameOut}" in
-Linux*) installAzureFunctionsCoreToolsOnLinux ;;
-*) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
-esac
-
-# Publish the function scripts to the function app
-publishFunctionAppScripts
-
-echo "Successfully published API functions to '$functionAppName' Function App."
+deployWebWorkersFunctionApp "web-workers"
+deployWebApiFunctionApp "web-api"
+functionAppName=$functionAppServiceName

@@ -111,8 +111,7 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
-"${0%/*}/function-app-create.sh" -g "web-api"
-"${0%/*}/function-app-create.sh" -g "web-workers"
+. "${0%/*}/function-app-create.sh"
 
 . "${0%/*}/job-schedule-create.sh"
 
