@@ -12,3 +12,4 @@ export { WebController } from './web-api/web-controller';
 export { ApiController } from './web-api/api-controller';
 export { WebControllerDispatcher } from './web-api/web-controller-dispatcher';
 export { PartitionKeyFactory } from './factories/partition-key-factory';
+export { PageScanRunReportService } from './data-service/page-scan-run-report-service';

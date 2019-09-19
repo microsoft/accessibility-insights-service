@@ -70,6 +70,7 @@ describe(registerAzureServicesToContainer, () => {
 
     describe('BlobServiceClientProvider', () => {
         const storageAccountName = 'test-storage-account-name';
+        const storageAccountKey = 'test-storage-account-key';
 
         it('creates singleton blob service client', async () => {
             const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
@@ -77,6 +78,11 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock
                 .setup(async s => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
+                .verifiable(Times.once());
+
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
             registerAzureServicesToContainer(container);

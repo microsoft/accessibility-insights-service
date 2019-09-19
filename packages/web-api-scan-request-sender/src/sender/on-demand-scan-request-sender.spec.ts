@@ -43,6 +43,7 @@ describe('Scan request sender', () => {
     });
 
     afterEach(() => {
+        MockDate.reset();
         queueMock.verifyAll();
         pageScanRequestProvider.verifyAll();
         onDemandPageScanRunResultProvider.verifyAll();
