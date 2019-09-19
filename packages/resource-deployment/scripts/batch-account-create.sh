@@ -28,7 +28,7 @@ Usage: $0 -r <resource group> [-t <batch template file (optional)>]
 }
 
 # Read script arguments
-while getopts "r:t:" option; do
+while getopts ":r:t:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
@@ -66,7 +66,7 @@ batchAccountName="$resourceName"
 
 if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
     echo \
-"Unable to get required resource information from Batch account deployment:
+        "Unable to get required resource information from Batch account deployment:
     batchAccountName - $batchAccountName
     keyVault - $keyVault"
 

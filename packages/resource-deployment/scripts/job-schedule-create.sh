@@ -52,7 +52,7 @@ exitWithUsageInfo() {
 }
 
 # Read script arguments
-while getopts "b:r:a:k:t:" option; do
+while getopts ":b:r:a:k:t:" option; do
     case $option in
     b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;

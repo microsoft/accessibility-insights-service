@@ -18,7 +18,7 @@ Usage: $0 -r <resource group> -s <subscription name or id>
 }
 
 # Read script arguments
-while getopts "r:s:" option; do
+while getopts ":r:s:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;

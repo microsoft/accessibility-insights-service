@@ -24,12 +24,12 @@ Usage: $0 -o <organisation name> -p <publisher email> -r <resource group>
 templateFilePath="${0%/*}/../templates/api-management.template.json"
 
 # Read script arguments
-while getopts "o:p:r:"  option; do
+while getopts ":o:p:r:" option; do
     case $option in
-        o) orgName=${OPTARG} ;;
-        p) publisherEmail=${OPTARG} ;;
-        r) resourceGroupName=${OPTARG} ;;
-        *) exitWithUsageInfo ;;
+    o) orgName=${OPTARG} ;;
+    p) publisherEmail=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
     esac
 done
 
@@ -43,10 +43,9 @@ echo "Deploying API management instance. This might take up to 45 mins"
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
-    --parameters adminEmail="$publisherEmail" orgName="$orgName"\
+    --parameters adminEmail="$publisherEmail" orgName="$orgName" \
     --query "properties.outputResources[].id" \
     -o tsv)
-
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.ApiManagement/service" -r "$resources"
 apiManagementName=$resourceName
