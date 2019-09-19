@@ -1,5 +1,5 @@
 {
-    "id": "url-web-api-scan-schedule",
+    "id": "on-demand-scan-schedule",
     "schedule": {
         "recurrenceInterval": "PT1M"
     },
@@ -10,8 +10,8 @@
             "maxTaskRetryCount": 0
         },
         "jobManagerTask": {
-            "id": "url-web-api-scan-job-manager-task",
-            "commandLine": "/bin/bash -c run-web-api-scan-job-manager.sh",
+            "id": "on-demand-url-scan-job-manager-task",
+            "commandLine": "/bin/bash -c run-on-demand-scan-job-manager.sh",
             "resourceFiles": [
                 {
                     "autoStorageContainerName": "batch-web-api-scan-job-manager-script"
