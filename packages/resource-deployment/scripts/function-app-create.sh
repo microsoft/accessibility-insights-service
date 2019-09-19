@@ -11,6 +11,7 @@ export resourceName
 export clientId
 export environment
 export keyVault
+export principalId
 
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
@@ -110,14 +111,6 @@ installAzureFunctionsCoreTools() {
     esac
 }
 
-grantFuncAppAccessToKeyVault() {
-    echo "Fetching principal ID of the Azure Function App..."
-    principalId=$(az functionapp identity show --name $currentFunctionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
-    echo "  Successfully fetched principal ID $principalId."
-
-    . "${0%/*}/key-vault-enable-msi.sh"
-}
-
 publishFunctionAppScripts() {
     packageName=$1
 
@@ -148,6 +141,12 @@ waitForFunctionAppServiceDeploymentCompletion() {
         fi
     done
     echo "."
+}
+
+getFunctionAppPrincipalId() {
+    echo "Fetching principal ID of the Azure Function App..."
+    principalId=$(az functionapp identity show --name $currentFunctionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
+    echo "  Successfully fetched principal ID $principalId."
 }
 
 deployWebApiArmTemplate() {
@@ -203,7 +202,10 @@ deployWebApiFunctionApp() {
         addReplyUrlToAadApp
     fi
 
-    grantFuncAppAccessToKeyVault
+    # Keep child script call only one function level deep to preserve exports
+    getFunctionAppPrincipalId
+    . "${0%/*}/key-vault-enable-msi.sh"
+
     publishFunctionAppScripts $packageName
 }
 
@@ -211,7 +213,11 @@ deployWebWorkersFunctionApp() {
     packageName=$1
 
     deployWebWorkersArmTemplate $packageName
-    grantFuncAppAccessToKeyVault
+
+    # Keep child script call only one level deep to preserve exports
+    getFunctionAppPrincipalId
+    . "${0%/*}/key-vault-enable-msi.sh"
+
     publishFunctionAppScripts $packageName
 }
 
