@@ -17,7 +17,7 @@ Usage: $0 -r <resource group> -p <service principal id> -o <role name or id (opt
 }
 
 # Read script arguments
-while getopts "r:p:o:" option; do
+while getopts ":r:p:o:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     p) principalId=${OPTARG} ;;
@@ -39,12 +39,12 @@ printf " - Running .."
 while [ $SECONDS -le $end ]; do
     response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" --query "roleDefinitionId") || true
 
-    if [[ -n $response ]]; then	
-        break	
-    else	
+    if [[ -n $response ]]; then
+        break
+    else
         printf "."
-    fi	
-    
+    fi
+
     sleep 5
 done
 echo "  ended"

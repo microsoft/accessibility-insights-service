@@ -21,8 +21,8 @@ parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.tem
 
 urlScanScheduleJobName="url-scan-schedule"
 parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
-urlWebAPIScanScheduleJobName="url-web-api-scan-schedule"
-parsedUrlWebAPIScanScheduleFileName="url-web-api-scan-schedule.generated.template.json"
+urlWebApiScanScheduleJobName="url-web-api-scan-schedule"
+parsedUrlWebApiScanScheduleFileName="url-web-api-scan-schedule.generated.template.json"
 
 adjustJob() {
     local jobName=$1
@@ -54,7 +54,7 @@ exitWithUsageInfo() {
 }
 
 # Read script arguments
-while getopts "b:r:a:k:t:" option; do
+while getopts ":b:r:a:k:t:" option; do
     case $option in
     b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
@@ -78,7 +78,7 @@ fi
 
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-web-api-scan-schedule.template.json" >"$parsedUrlWebAPIScanScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-web-api-scan-schedule.template.json" >"$parsedUrlWebApiScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
@@ -89,7 +89,7 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
-adjustJob "$urlWebAPIScanScheduleJobName" "$parsedUrlWebAPIScanScheduleFileName" "$allJobsScheduleList"
+adjustJob "$urlWebApiScanScheduleJobName" "$parsedUrlWebApiScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."

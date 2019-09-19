@@ -69,7 +69,7 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 }
 
 # Read script arguments
-while getopts "r:s:l:e:o:p:c:" option; do
+while getopts ":r:s:l:e:o:p:c:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;

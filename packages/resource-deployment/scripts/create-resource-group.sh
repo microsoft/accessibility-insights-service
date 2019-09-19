@@ -48,7 +48,7 @@ uaenorth
 }
 
 # Read script arguments
-while getopts "r:l:" option; do
+while getopts ":r:l:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     l) location=${OPTARG} ;;

@@ -25,7 +25,6 @@ done
 
 if [[ -z $providerPath ]] || [[ -z $resourcePaths ]]; then
     exitWithUsageInfo
-    exit 1
 fi
 
 shopt -s nocasematch
@@ -39,4 +38,4 @@ for resourcePath in $resourcePaths; do
     fi
 done
 
-echo "unable to find $providerPath in resource paths - $resourcePaths"
+echo "Unable to find $providerPath in resource paths '$resourcePaths'"
