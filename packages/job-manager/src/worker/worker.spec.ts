@@ -192,7 +192,7 @@ describe(Worker, () => {
 
         await worker.run();
     });
-    it('Continue waiting until all active tasks are completed', async () => {
+    it('Continue waiting until all active and running tasks are completed', async () => {
         const poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 4,
@@ -224,7 +224,7 @@ describe(Worker, () => {
             .returns(async () => {
                 if (poolMetricsInfoCallbackCount > 1) {
                     poolMetricsInfo.load.activeTasks = 0;
-                    poolMetricsInfo.load.runningTasks = 0;
+                    poolMetricsInfo.load.runningTasks = 1;
 
                     return Promise.resolve(poolMetricsInfo);
                 } else {
@@ -239,6 +239,95 @@ describe(Worker, () => {
             .verifiable(Times.exactly(2));
         // let it exit by itself
         worker.runOnce = false;
+        await worker.run();
+    });
+    it('terminate only if there are no active task and only manager task is running', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 0,
+                runningTasks: 1,
+            },
+        };
+        poolLoadGeneratorMock
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(8))
+            .verifiable(Times.once());
+        poolLoadGeneratorMock.setup(async o => o.setLastTasksIncrementCount(It.isAny())).verifiable(Times.never());
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
+        await worker.run();
+    });
+
+    it('continue executing if there are active tasks', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 1,
+                runningTasks: 1,
+            },
+        };
+        poolLoadGeneratorMock
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(8))
+            .verifiable(Times.once());
+        poolLoadGeneratorMock.setup(async o => o.setLastTasksIncrementCount(It.isAny())).verifiable(Times.once());
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
+        await worker.run();
+    });
+
+    it('continue executing if there are running tasks', async () => {
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 0,
+                runningTasks: 2,
+            },
+        };
+        poolLoadGeneratorMock
+            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
+            .returns(async () => Promise.resolve(8))
+            .verifiable(Times.once());
+        poolLoadGeneratorMock.setup(async o => o.setLastTasksIncrementCount(It.isAny())).verifiable(Times.once());
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
         await worker.run();
     });
 });
