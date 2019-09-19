@@ -68,6 +68,7 @@ steps:
               web-api-scan-job-manager/dist/**/*
               resource-deployment/dist/**/*
               web-api/dist/**/*
+              web-workers/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
