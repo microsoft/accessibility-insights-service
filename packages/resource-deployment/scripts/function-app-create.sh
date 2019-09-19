@@ -103,6 +103,7 @@ installAzureFunctionsCoreToolsOnLinux() {
 
 installAzureFunctionsCoreTools() {
     kernelName=$(uname -s 2>/dev/null) || true
+    echo "OS kernel name: $kernelName"
     case "${kernelName}" in
     Linux*) installAzureFunctionsCoreToolsOnLinux ;;
     *) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
