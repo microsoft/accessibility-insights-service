@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { GuidGenerator } from 'common';
 import { Logger } from 'logger';
+import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
@@ -16,7 +17,6 @@ import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
-
 let runner: Runner;
 let browser: Browser;
 let webDriverTaskMock: IMock<WebDriverTask>;
@@ -89,6 +89,8 @@ const axeScanResults: AxeScanResults = {
     } as AxeResults,
 };
 
+let dateNow: Date;
+
 beforeEach(() => {
     browser = <Browser>{};
     webDriverTaskMock = Mock.ofType<WebDriverTask>();
@@ -100,6 +102,15 @@ beforeEach(() => {
     pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService);
     guidGeneratorMock = Mock.ofType(GuidGenerator);
     guidGeneratorMock.setup(g => g.createGuid()).returns(() => 'guid');
+    dateNow = new Date();
+    MockDate.set(dateNow);
+});
+
+afterEach(() => {
+    MockDate.reset();
+    scannerTaskMock.verifyAll();
+    webDriverTaskMock.verifyAll();
+    onDemandPageScanRunResultProviderMock.verifyAll();
 });
 
 describe('runner', () => {
@@ -140,9 +151,5 @@ describe('runner', () => {
         );
 
         await runner.run();
-
-        scannerTaskMock.verifyAll();
-        webDriverTaskMock.verifyAll();
-        onDemandPageScanRunResultProviderMock.verifyAll();
     });
 });
