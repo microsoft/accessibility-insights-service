@@ -15,6 +15,7 @@ export const iocTypeNames = {
     msRestAzure: 'msRestAzure',
     QueueServiceURLProvider: 'QueueServiceURLProvider',
     AuthenticationMethod: 'AuthenticationMethod',
+    CredentialType: 'CredentialType',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<KeyVaultClient>;

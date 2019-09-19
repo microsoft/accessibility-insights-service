@@ -12,13 +12,14 @@ import { Logger } from 'logger';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
-import { AuthenticationMethod, CredentialsProvider } from './credentials/credentials-provider';
+import { CredentialsProvider } from './credentials/credentials-provider';
+import { AuthenticationMethod, CredentialType, MSICredentialsProvider } from './credentials/msi-credential-provider';
 import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 
-export function registerAzureServicesToContainer(container: Container): void {
+export function registerAzureServicesToContainer(container: Container, credentialType: CredentialType = CredentialType.VM): void {
     setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
@@ -42,6 +43,10 @@ export function registerAzureServicesToContainer(container: Container): void {
     setupSingletonCosmosClientProvider(container);
 
     container.bind(CosmosClientWrapper).toSelf();
+    container
+        .bind(MSICredentialsProvider)
+        .toSelf()
+        .inSingletonScope();
 
     container.bind(iocTypeNames.QueueURLProvider).toConstantValue(QueueURL.fromServiceURL);
     container.bind(iocTypeNames.MessagesURLProvider).toConstantValue(MessagesURL.fromQueueURL);
@@ -64,6 +69,8 @@ export function registerAzureServicesToContainer(container: Container): void {
     container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue(context => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
+
+    container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
 
