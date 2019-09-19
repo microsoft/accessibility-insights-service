@@ -29,7 +29,7 @@ Usage: $0 -s <storage account name>
 }
 
 # Read script arguments
-while getopts "s:" option; do
+while getopts ":s:" option; do
     case $option in
     s) storageAccountName=${OPTARG} ;;
     *) exitWithUsageInfo ;;

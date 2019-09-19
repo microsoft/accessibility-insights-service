@@ -15,7 +15,7 @@ Usage: $0 -k <key vault> -p <service principal id>
 }
 
 # Read script arguments
-while getopts "k:p:" option; do
+while getopts ":k:p:" option; do
     case $option in
     k) keyVault=${OPTARG} ;;
     p) principalId=${OPTARG} ;;
@@ -30,4 +30,4 @@ fi
 # Grant permissions to the managed identity
 echo "Granting '$principalId' service principal permissions to '$keyVault' key vault"
 az keyvault set-policy --name "$keyVault" --object-id "$principalId" --secret-permissions get list 1>/dev/null
-echo "  Permission successfully granted"
+echo "  Permission successfully granted."

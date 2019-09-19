@@ -14,7 +14,7 @@ Usage: $0 -r <resource group>
     exit 1
 }
 
-while getopts "r:" option; do
+while getopts ":r:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;

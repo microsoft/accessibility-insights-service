@@ -38,7 +38,7 @@ Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFold
 }
 
 # Read script arguments
-while getopts "s:d:e:" option; do
+while getopts ":s:d:e:" option; do
     case $option in
     s) storageAccountName=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;

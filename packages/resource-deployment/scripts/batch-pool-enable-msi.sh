@@ -41,7 +41,7 @@ getVmssInfo() {
     end=$((SECONDS + 600))
     while [ $SECONDS -le $end ]; do
         vmssResourceGroupsStr=$(az vmss list --query "$vmssResourceGroupsQuery" -o tsv | tr "\n" ",")
-        IFS=$',' read -ra vmssResourceGroups <<< "$vmssResourceGroupsStr"
+        IFS=$',' read -ra vmssResourceGroups <<<"$vmssResourceGroupsStr"
         currentVmssCount=$((${#vmssResourceGroups[@]}))
 
         if [ $currentVmssCount -ge $vmssCount ]; then
@@ -66,7 +66,7 @@ getVmssInfo() {
     fi
 
     echo \
-"VMSS resource groups:"
+        "VMSS resource groups:"
 
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "  $vmssResourceGroup"
@@ -84,7 +84,7 @@ assignSystemIdentity() {
         systemAssignedIdentities+=($systemAssignedIdentity)
 
         echo \
-"VMSS Resource configuration:
+            "VMSS Resource configuration:
   Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
@@ -94,7 +94,7 @@ assignSystemIdentity() {
 }
 
 # Read script arguments
-while getopts "r:a:p:" option; do
+while getopts ":r:a:p:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;

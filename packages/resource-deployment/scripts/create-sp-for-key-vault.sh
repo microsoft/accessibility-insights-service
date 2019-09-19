@@ -20,7 +20,7 @@ Usage: $0 -r <resource group> -s <subscription name or id> -k <key vault>
 }
 
 # Read script arguments
-while getopts "s:r:k:" option; do
+while getopts ":s:r:k:" option; do
     case $option in
     s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
@@ -38,7 +38,7 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-# Set default subscription scope 
+# Set default subscription scope
 az account set --subscription "$subscription"
 
 # Generate service principal name
@@ -53,7 +53,7 @@ password=$(az ad sp create-for-rbac --role contributor --scopes "/subscriptions/
 
 # Set key vault access policy
 echo "Granting service principal permissions to the '$keyVault' key vault"
-az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret-permissions get list 1> /dev/null
+az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret-permissions get list 1>/dev/null
 
 # Retrieve service principal object properties
 tenant=$(az ad sp show --id "$servicePrincipalName" --query "appOwnerTenantId" -o tsv)

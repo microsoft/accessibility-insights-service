@@ -11,6 +11,7 @@ export resourceName
 export clientId
 export environment
 export keyVault
+export principalId
 
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
@@ -32,7 +33,7 @@ addReplyUrlToAadApp() {
     # Get existing reply urls of the AAD app registration
     echo "Fetching existing reply URls of the Azure Function AAD application..."
     replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv) || true
-    replyUrl="https://${functionAppServiceName}.azurewebsites.net/.auth/login/aad/callback"
+    replyUrl="https://${currentFunctionAppName}.azurewebsites.net/.auth/login/aad/callback"
 
     for url in $replyUrls; do
         if [[ $url == $replyUrl ]]; then
@@ -60,8 +61,8 @@ createAppRegistrationIfNotExists() {
 
     if [ -z $clientId ]; then
         echo "Create AAD application..."
-        functionAppServiceName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv 2>/dev/null) || true
-        clientId=$(az webapp auth show -n "$functionAppServiceName" -g "$resourceGroupName" --query "clientId" -o tsv 2>/dev/null) || true
+        currentFunctionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv 2>/dev/null) || true
+        clientId=$(az webapp auth show -n "$currentFunctionAppName" -g "$resourceGroupName" --query "clientId" -o tsv 2>/dev/null) || true
         appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv 2>/dev/null) || true
 
         if [[ ! -n $appRegistrationName ]]; then
@@ -102,19 +103,12 @@ installAzureFunctionsCoreToolsOnLinux() {
 }
 
 installAzureFunctionsCoreTools() {
-    osVersion=$(uname -s 2>/dev/null) || true
-    case "${unameOut}" in
+    kernelName=$(uname -s 2>/dev/null) || true
+    echo "OS kernel name: $kernelName"
+    case "${kernelName}" in
     Linux*) installAzureFunctionsCoreToolsOnLinux ;;
     *) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
     esac
-}
-
-grantFuncAppAccessToKeyVault() {
-    echo "Fetching principal ID of the Azure Function App..."
-    principalId=$(az functionapp identity show --name $functionAppServiceName --resource-group $resourceGroupName --query "principalId" -o tsv)
-    echo "  Successfully fetched principal ID $principalId."
-
-    . "${0%/*}/key-vault-enable-msi.sh"
 }
 
 publishFunctionAppScripts() {
@@ -128,9 +122,9 @@ publishFunctionAppScripts() {
     cd "${0%/*}/../../../$packageName/dist"
 
     # Publish the function scripts to the function app
-    echo "Publishing '$packageName' scripts to '$functionAppServiceName' Function App..."
-    func azure functionapp publish $functionAppServiceName --node
-    echo "Successfully published API functions to '$functionAppServiceName' Function App."
+    echo "Publishing '$packageName' scripts to '$currentFunctionAppName' Function App..."
+    func azure functionapp publish $currentFunctionAppName --node
+    echo "Successfully published API functions to '$currentFunctionAppName' Function App."
 
     cd "$currentDir"
 }
@@ -141,12 +135,18 @@ waitForFunctionAppServiceDeploymentCompletion() {
     while [ $SECONDS -le $end ]; do
         sleep 5
         printf "."
-        functionAppState=$(az functionapp list -g $resourceGroupName --query "[?name=='$functionAppServiceName'].state" -o tsv)
+        functionAppState=$(az functionapp list -g $resourceGroupName --query "[?name=='$currentFunctionAppName'].state" -o tsv)
         if [[ $functionAppState == "Running" ]]; then
             break
         fi
     done
     echo "."
+}
+
+getFunctionAppPrincipalId() {
+    echo "Fetching principal ID of the Azure Function App..."
+    principalId=$(az functionapp identity show --name $currentFunctionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
+    echo "  Successfully fetched principal ID $principalId."
 }
 
 deployWebApiArmTemplate() {
@@ -164,10 +164,10 @@ deployWebApiArmTemplate() {
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    functionAppServiceName=$resourceName
+    currentFunctionAppName="$resourceName"
 
     waitForFunctionAppServiceDeploymentCompletion
-    echo "Successfully deployed Azure Function App '$functionAppServiceName'"
+    echo "Successfully deployed Azure Function App '$currentFunctionAppName'"
 }
 
 deployWebWorkersArmTemplate() {
@@ -185,10 +185,10 @@ deployWebWorkersArmTemplate() {
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    functionAppServiceName=$resourceName
+    currentFunctionAppName="$resourceName"
 
     waitForFunctionAppServiceDeploymentCompletion
-    echo "Successfully deployed Azure Function App '$functionAppServiceName'"
+    echo "Successfully deployed Azure Function App '$currentFunctionAppName'"
 }
 
 deployWebApiFunctionApp() {
@@ -202,7 +202,10 @@ deployWebApiFunctionApp() {
         addReplyUrlToAadApp
     fi
 
-    grantFuncAppAccessToKeyVault
+    # Keep child script call only one function level deep to preserve exports
+    getFunctionAppPrincipalId
+    . "${0%/*}/key-vault-enable-msi.sh"
+
     publishFunctionAppScripts $packageName
 }
 
@@ -210,12 +213,16 @@ deployWebWorkersFunctionApp() {
     packageName=$1
 
     deployWebWorkersArmTemplate $packageName
-    grantFuncAppAccessToKeyVault
+
+    # Keep child script call only one level deep to preserve exports
+    getFunctionAppPrincipalId
+    . "${0%/*}/key-vault-enable-msi.sh"
+
     publishFunctionAppScripts $packageName
 }
 
 # Read script arguments
-while getopts "r:c:e:k:d:" option; do
+while getopts ":r:c:e:k:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) clientId=${OPTARG} ;;
@@ -239,4 +246,6 @@ installAzureFunctionsCoreTools
 
 deployWebWorkersFunctionApp "web-workers"
 deployWebApiFunctionApp "web-api"
-functionAppName=$functionAppServiceName
+
+# Export the last created web-api function app service name to be used by the API Management install script
+functionAppName="$currentFunctionAppName"

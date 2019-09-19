@@ -44,7 +44,7 @@ restartBatchPools() {
 }
 
 # Read script arguments
-while getopts "r:s:l:" option; do
+while getopts ":r:s:l:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;

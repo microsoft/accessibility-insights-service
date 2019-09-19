@@ -56,6 +56,13 @@
             "metadata": {
                 "description": "Name of the cosmos account that have the scan related data"
             }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "defaultValue": "[concat('allyvault',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "Name of the key vault service"
+            }
         }
     },
     "resources": [
@@ -98,6 +105,10 @@
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                             "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
+                        },
+                        {
+                            "name": "KEY_VAULT_URL",
+                            "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
                         }
                     ]
                 }

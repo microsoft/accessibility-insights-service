@@ -33,13 +33,13 @@ Usage: $0 -a <API management name> -t <Template Location> -r <resource group> -f
 }
 
 # Read script arguments
-while getopts "a:f:r:t:" option; do
+while getopts ":a:f:r:t:" option; do
     case $option in
-        a) apiManagementName=${OPTARG} ;;
-        f) functionAppName=${OPTARG} ;;
-        r) resourceGroupName=${OPTARG} ;;
-        t) apiTemplates=${OPTARG} ;;
-        *) exitWithUsageInfo ;;
+    a) apiManagementName=${OPTARG} ;;
+    f) functionAppName=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
+    t) apiTemplates=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
     esac
 done
 
