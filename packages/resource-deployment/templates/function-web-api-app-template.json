@@ -2,9 +2,15 @@
     "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "namePrefix": {
+            "type": "string",
+            "metadata": {
+                "description": "The Function App name prefix"
+            }
+        },
         "name": {
             "type": "string",
-            "defaultValue": "[concat('allyfunction',toLower(uniqueString(resourceGroup().id)))]",
+            "defaultValue": "[toLower(concat(parameters('namePrefix'),uniqueString(resourceGroup().id)))]",
             "metadata": {
                 "description": "The Function App name"
             }
@@ -92,16 +98,9 @@
                         {
                             "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
                             "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
-                        },
-                        {
-                            "name": "COSMOS_CONNECTION_STRING",
-                            "value": "[first(listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmosAccountName')), '2015-11-06').connectionStrings).connectionString]"
                         }
                     ]
-                },
-                "name": "[parameters('name')]",
-                "clientAffinityEnabled": false,
-                "reserved": false
+                }
             },
             "resources": [
                 {

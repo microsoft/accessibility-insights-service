@@ -63,6 +63,12 @@ while getopts "b:r:a:k:t:" option; do
     esac
 done
 
+if [[ -z $keyVaultUrl ]]; then
+    echo "Resolving Key Vault URL for Key Vault $keyVault..."
+    keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
+    echo "  Key Vault URL $keyVaultUrl"
+fi
+
 # Print script usage help
 if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsightsKey ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
     exitWithUsageInfo
@@ -70,7 +76,6 @@ fi
 
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
-
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
@@ -81,7 +86,6 @@ allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
 adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
-
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."
