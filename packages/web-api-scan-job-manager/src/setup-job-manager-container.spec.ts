@@ -10,7 +10,7 @@ import { Batch } from './batch/batch';
 
 import { ServiceConfiguration } from 'common';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
-import { BatchServiceClientProvider, webAPIJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
+import { BatchServiceClientProvider, webApiJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
 
 // tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
 
@@ -47,7 +47,7 @@ describe(setupWebApiScanJobManagerContainer, () => {
 
         it('resolves BatchServiceClient', async () => {
             const batchServiceClientProvider: BatchServiceClientProvider = container.get(
-                webAPIJobManagerIocTypeNames.BatchServiceClientProvider,
+                webApiJobManagerIocTypeNames.BatchServiceClientProvider,
             );
 
             const batchServiceClient = await batchServiceClientProvider();
@@ -58,10 +58,10 @@ describe(setupWebApiScanJobManagerContainer, () => {
 
         it('resolves BatchServiceClient top singleton value', async () => {
             const batchServiceClientProvider1: BatchServiceClientProvider = container.get(
-                webAPIJobManagerIocTypeNames.BatchServiceClientProvider,
+                webApiJobManagerIocTypeNames.BatchServiceClientProvider,
             );
             const batchServiceClientProvider2: BatchServiceClientProvider = container.get(
-                webAPIJobManagerIocTypeNames.BatchServiceClientProvider,
+                webApiJobManagerIocTypeNames.BatchServiceClientProvider,
             );
 
             expect(await batchServiceClientProvider1()).toBe(await batchServiceClientProvider2());

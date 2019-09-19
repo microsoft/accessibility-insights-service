@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 
-export const webAPIJobManagerIocTypeNames = {
+export const webApiJobManagerIocTypeNames = {
     BatchServiceClientProvider: 'BatchServiceClientProvider',
 };
 

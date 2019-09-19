@@ -1,7 +1,7 @@
 {
     "id": "url-web-api-scan-schedule",
     "schedule": {
-        "recurrenceInterval": "PT10M"
+        "recurrenceInterval": "PT1M"
     },
     "jobSpecification": {
         "priority": 0,

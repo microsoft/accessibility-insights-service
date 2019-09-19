@@ -9,7 +9,7 @@ import * as _ from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { VError } from 'verror';
-import { BatchServiceClientProvider, webAPIJobManagerIocTypeNames } from '../web-api-job-manager-ioc-types';
+import { BatchServiceClientProvider, webApiJobManagerIocTypeNames } from '../web-api-job-manager-ioc-types';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
@@ -21,7 +21,7 @@ export class Batch {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
-        @inject(webAPIJobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
+        @inject(webApiJobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
