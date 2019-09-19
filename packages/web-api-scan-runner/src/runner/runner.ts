@@ -65,6 +65,7 @@ export class Runner {
             // scan page for accessibility issues
             try {
                 axeScanResults = await this.scannerTask.scan(scanMetadata.url);
+                onDemandPageScanRunResult.error = '';
             } catch (error) {
                 onDemandPageScanRunResult.error = (error as Error).message;
                 this.logger.logInfo(`Scan failed ${error}`);
@@ -77,6 +78,7 @@ export class Runner {
             if (axeScanResults !== undefined) {
                 if (axeScanResults.results !== undefined) {
                     onDemandScanResult.state = 'pass';
+                    onDemandScanResult.issueCount = 0;
                     if (axeScanResults.results.violations !== undefined && axeScanResults.results.violations.length > 0) {
                         onDemandScanResult.issueCount = axeScanResults.results.violations.length;
                         onDemandScanResult.state = 'fail';
