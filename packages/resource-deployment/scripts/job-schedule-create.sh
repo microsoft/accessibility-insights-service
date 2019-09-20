@@ -21,8 +21,8 @@ parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.tem
 
 urlScanScheduleJobName="url-scan-schedule"
 parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
-onDemandScanScheduleJobName="on-demand-scan-schedule"
-parsedOnDemandScanScheduleFileName="on-demand-scan-schedule.generated.template.json"
+onDemandScanScheduleJobName="on-demand-url-scan-schedule"
+parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
 
 adjustJob() {
     local jobName=$1
@@ -78,7 +78,7 @@ fi
 
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."

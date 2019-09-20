@@ -1,5 +1,5 @@
 {
-    "id": "on-demand-scan-schedule",
+    "id": "on-demand-url-scan-schedule",
     "schedule": {
         "recurrenceInterval": "PT1M"
     },
