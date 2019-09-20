@@ -30,7 +30,7 @@ export class Runner {
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
-        private readonly convertAxeToSarifFn = convertAxeToSarif,
+        private readonly convertAxeToSarifFunc = convertAxeToSarif,
     ) {}
 
     public async run(): Promise<void> {
@@ -120,7 +120,7 @@ export class Runner {
         const format = 'sarif';
 
         this.logger.logInfo(`Converting to Sarif...`);
-        const sarifResults: SarifLog = this.convertAxeToSarifFn(axeResults.results);
+        const sarifResults: SarifLog = this.convertAxeToSarifFunc(axeResults.results);
 
         this.logger.logInfo(`Saving sarif results to Blobs...`);
         await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
