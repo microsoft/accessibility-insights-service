@@ -123,9 +123,18 @@ publishFunctionAppScripts() {
 
     # Publish the function scripts to the function app
     echo "Publishing '$packageName' scripts to '$currentFunctionAppName' Function App..."
-    func azure functionapp publish $currentFunctionAppName --node
-    echo "Successfully published API functions to '$currentFunctionAppName' Function App."
 
+    # Run function tool with retries due to app service warm up time delay
+    end=$((SECONDS + 120))
+    while [ $SECONDS -le $end ]; do
+        func azure functionapp publish $currentFunctionAppName --node || true
+        if [ $? -eq 0 ]; then
+            break
+        fi
+        sleep 5
+    done
+
+    echo "Successfully published API functions to '$currentFunctionAppName' Function App."
     cd "$currentDir"
 }
 
