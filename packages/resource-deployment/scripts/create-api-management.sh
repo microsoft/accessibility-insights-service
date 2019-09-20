@@ -48,5 +48,5 @@ resources=$(az group deployment create \
     -o tsv)
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.ApiManagement/service" -r "$resources"
-apiManagementName=$resourceName
+apiManagementName="$resourceName"
 echo "[create-api-management] Successfully deployed API Managment instance - $resourceName"
