@@ -42,7 +42,7 @@ export class Runner {
         pageScanResult = (await this.onDemandPageScanRunResultProvider.readScanRuns([scanMetadata.id]))[0];
 
         // set scanned page run state to running
-        pageScanResult.run = this.getRunResult('running');
+        pageScanResult.run = this.createRunResult('running');
 
         this.logger.logInfo(`Updating page scan to running`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -55,7 +55,7 @@ export class Runner {
             await this.scan(pageScanResult);
         } catch (error) {
             this.logger.logInfo(`Scan failed ${error}`);
-            pageScanResult.run = this.getRunResult('failed', error instanceof Error ? error.message : `${error}`);
+            pageScanResult.run = this.createRunResult('failed', error instanceof Error ? error.message : `${error}`);
             pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
             pageScanResult.reports = [];
         } finally {
@@ -77,18 +77,18 @@ export class Runner {
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Changing page status to failed`);
-            pageScanResult.run = this.getRunResult('failed', axeScanResults.error);
+            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
             pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
             pageScanResult.reports = [];
         } else {
             this.logger.logInfo(`Changing page status to completed`);
-            pageScanResult.run = this.getRunResult('completed');
+            pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = [await this.saveScanReport(axeScanResults)];
         }
     }
 
-    private getRunResult(state: OnDemandPageScanRunState, error?: string): OnDemandPageScanRunResult {
+    private createRunResult(state: OnDemandPageScanRunState, error?: string): OnDemandPageScanRunResult {
         return {
             state: state,
             timestamp: new Date().toJSON(),
