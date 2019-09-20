@@ -53,7 +53,7 @@
             }
         ],
         "poolInfo": {
-            "poolId": "url-web-api-scan-pool"
+            "poolId": "on-demand-url-scan-pool"
         }
     }
 }
