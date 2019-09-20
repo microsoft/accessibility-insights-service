@@ -42,7 +42,13 @@ describe(Runner, () => {
     const onDemandPageScanResult: OnDemandPageScanResult = {
         url: 'url',
         scanResult: undefined,
-        reports: [],
+        reports: [
+            {
+                reportId: '',
+                href: '',
+                format: 'sarif',
+            },
+        ],
         run: {
             state: 'queued' as OnDemandPageScanRunState,
             timestamp: 'timestamp',

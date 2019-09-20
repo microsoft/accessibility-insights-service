@@ -57,7 +57,13 @@ export class Runner {
             this.logger.logInfo(`Scan failed ${error}`);
             pageScanResult.run = this.getRunResult('failed', error instanceof Error ? error.message : `${error}`);
             pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
-            pageScanResult.reports = [];
+            pageScanResult.reports = [
+                {
+                    reportId: '',
+                    href: '',
+                    format: 'sarif',
+                },
+            ];
         } finally {
             try {
                 await this.webDriverTask.close();
@@ -79,7 +85,13 @@ export class Runner {
             this.logger.logInfo(`Changing page status to failed`);
             pageScanResult.run = this.getRunResult('failed', axeScanResults.error);
             pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
-            pageScanResult.reports = [];
+            pageScanResult.reports = [
+                {
+                    reportId: '',
+                    href: '',
+                    format: 'sarif',
+                },
+            ];
         } else {
             this.logger.logInfo(`Changing page status to completed`);
             pageScanResult.run = this.getRunResult('completed');
@@ -125,9 +137,9 @@ export class Runner {
         this.logger.logInfo(`Saving sarif results to Blobs...`);
         await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
 
-        this.logger.logInfo(`File saved at ${href}`);
-
         href = this.pageScanRunReportService.getBlobFilePath(reportId, format);
+
+        this.logger.logInfo(`File saved at ${href}`);
 
         return {
             format,
