@@ -12,9 +12,9 @@ module.exports = env => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['yargs', 'applicationinsights'],
+        externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer', 'applicationinsights'],
         entry: {
-            ['index']: path.resolve('./src/index.ts'),
+            ['web-api-scan-runner']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
@@ -34,7 +34,7 @@ module.exports = env => {
                 },
             ],
         },
-        name: 'web-api-scan-request-sender',
+        name: 'web-api-scan-runner',
         node: {
             __dirname: false,
         },

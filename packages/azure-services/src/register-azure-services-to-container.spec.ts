@@ -87,6 +87,11 @@ describe(registerAzureServicesToContainer, () => {
                 .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
+                .verifiable(Times.once());
+
             registerAzureServicesToContainer(container);
             stubBinding(SecretProvider, secretProviderMock.object);
 
