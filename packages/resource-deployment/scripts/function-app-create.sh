@@ -134,7 +134,12 @@ publishFunctionAppScripts() {
         sleep 5
     done
 
-    echo "Successfully published API functions to '$currentFunctionAppName' Function App."
+    if [ $? -ne 0 ]; then
+        echo "Publishing '$packageName' scripts to '$currentFunctionAppName' Function App was unsuccessful."
+        exit 1
+    fi
+
+    echo "Successfully published '$packageName' scripts to '$currentFunctionAppName' Function App."
     cd "$currentDir"
 }
 
