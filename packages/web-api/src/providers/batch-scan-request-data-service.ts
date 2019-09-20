@@ -6,9 +6,9 @@ import { ItemType, OnDemandPageScanBatchRequest, PartitionKey } from 'storage-do
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 
 @injectable()
-export class ScanDataProvider {
+export class BatchScanRequestDataService {
     public constructor(
-        @inject(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient)
+        @inject(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 

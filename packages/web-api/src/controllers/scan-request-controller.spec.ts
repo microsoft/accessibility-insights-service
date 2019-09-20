@@ -6,7 +6,7 @@ import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ScanDataProvider } from '../providers/scan-data-provider';
+import { BatchScanRequestDataService } from '../providers/batch-scan-request-data-service';
 import { ScanRequestController } from './scan-request-controller';
 
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion
@@ -14,7 +14,7 @@ import { ScanRequestController } from './scan-request-controller';
 describe(ScanRequestController, () => {
     let scanRequestController: ScanRequestController;
     let context: Context;
-    let scanDataProviderMock: IMock<ScanDataProvider>;
+    let scanDataProviderMock: IMock<BatchScanRequestDataService>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
@@ -31,7 +31,7 @@ describe(ScanRequestController, () => {
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
 
-        scanDataProviderMock = Mock.ofType<ScanDataProvider>();
+        scanDataProviderMock = Mock.ofType<BatchScanRequestDataService>();
         scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);

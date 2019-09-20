@@ -6,7 +6,7 @@ import { Logger } from 'logger';
 import { ApiController } from 'service-library';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
-import { ScanDataProvider } from '../providers/scan-data-provider';
+import { BatchScanRequestDataService } from '../providers/batch-scan-request-data-service';
 
 @injectable()
 export class ScanRequestController extends ApiController {
@@ -14,7 +14,7 @@ export class ScanRequestController extends ApiController {
     public readonly apiName = 'web-api-post-scans';
 
     public constructor(
-        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
+        @inject(BatchScanRequestDataService) private readonly scanDataProvider: BatchScanRequestDataService,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,

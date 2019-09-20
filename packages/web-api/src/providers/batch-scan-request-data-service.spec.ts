@@ -5,19 +5,19 @@ import 'reflect-metadata';
 import { CosmosContainerClient } from 'azure-services';
 import { ItemType, OnDemandPageScanBatchRequest, PartitionKey } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ScanDataProvider } from './scan-data-provider';
+import { BatchScanRequestDataService } from './batch-scan-request-data-service';
 
 // tslint:disable: no-unsafe-any
 
-let scanDataProvider: ScanDataProvider;
+let scanDataProvider: BatchScanRequestDataService;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 
 beforeEach(() => {
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
-    scanDataProvider = new ScanDataProvider(cosmosContainerClientMock.object);
+    scanDataProvider = new BatchScanRequestDataService(cosmosContainerClientMock.object);
 });
 
-describe(ScanDataProvider, () => {
+describe(BatchScanRequestDataService, () => {
     it('write scan run batch request to a Cosmos DB', async () => {
         const scanRunBatchResponse = [
             {
