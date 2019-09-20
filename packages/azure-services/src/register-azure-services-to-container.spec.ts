@@ -68,6 +68,17 @@ describe(registerAzureServicesToContainer, () => {
             'onDemandScanner',
             'scanRequests',
         );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanBatchRequests',
+        );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+
         verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
     });
 
