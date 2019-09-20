@@ -14,7 +14,7 @@ export class ScanRequestController extends ApiController {
     public readonly apiName = 'web-api-post-scans';
 
     public constructor(
-        @inject(BatchScanRequestDataService) private readonly batchScanRequestDataService: BatchScanRequestDataService,
+        @inject(BatchScanRequestDataService) private readonly scanDataProvider: BatchScanRequestDataService,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
@@ -41,7 +41,7 @@ export class ScanRequestController extends ApiController {
         const batchId = this.guidGenerator.createGuid();
         const response = this.createScanRunBatchResponse(batchId, payload);
 
-        await this.batchScanRequestDataService.writeScanRunBatchRequest(batchId, response);
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
 
         this.context.res = {
             status: 202, // Accepted
