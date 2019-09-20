@@ -38,7 +38,7 @@ if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]];
 fi
 
 # Start deployment
-echo "Deploying API management instance. This might take up to 45 mins"
+echo "[create-api-management] Deploying API management instance. This might take up to 45 mins"
 
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
@@ -49,4 +49,4 @@ resources=$(az group deployment create \
 
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.ApiManagement/service" -r "$resources"
 apiManagementName=$resourceName
-echo "Successfully deployed API Managment instance - $resourceName"
+echo "[create-api-management] Successfully deployed API Managment instance - $resourceName"

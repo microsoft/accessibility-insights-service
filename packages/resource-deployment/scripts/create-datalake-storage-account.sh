@@ -28,7 +28,7 @@ fi
 templateFile="${0%/*}/../templates/datalake-storage.template.json"
 parameters="${0%/*}/../templates/datalake-storage.parameters.json"
 
-echo "Creating Data Lake enabled storage account under resource group '$resourceGroupName' using ARM template $templateFile"
+echo "[create-datalake-storage-account] Creating Data Lake enabled storage account under resource group '$resourceGroupName' using ARM template $templateFile"
 resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "$templateFile" --parameters "$parameters" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName
@@ -36,7 +36,7 @@ export resourceName
 datalakeStorageAccountName="$resourceName"
 
 if [[ -z $datalakeStorageAccountName ]]; then
-    echo "Unable to get storage account name from storage account creation response"
+    echo "[create-datalake-storage-account] Unable to get storage account name from storage account creation response"
     exit 1
 fi
 
