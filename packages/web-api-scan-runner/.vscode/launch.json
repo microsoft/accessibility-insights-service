@@ -4,16 +4,18 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
 
     "version": "0.2.0",
-    "configurations": [{
-        "name": "Start debugging web-api-scan-runner",
-        "type": "node",
-        "request": "launch",
-        "outFiles": ["${workspaceFolder}/dist/**/*.js"],
-        "cwd": "${workspaceFolder}",
-        "program": "${workspaceFolder}/src/index.ts",
-        "preLaunchTask": "tsc",
-        "console": "integratedTerminal",
-        "internalConsoleOptions": "neverOpen",
-        "args": []
-    }]
+    "configurations": [
+        {
+            "name": "Start debugging web-api-scan-runner",
+            "type": "node",
+            "request": "launch",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "tsc",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "args": []
+        }
+    ]
 }
