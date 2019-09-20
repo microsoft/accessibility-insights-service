@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { convertAxeToSarif } from 'axe-sarif-converter/dist';
+import { convertAxeToSarif } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
@@ -12,7 +12,7 @@ import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
-import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState, ReportFormat, ScanState } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
