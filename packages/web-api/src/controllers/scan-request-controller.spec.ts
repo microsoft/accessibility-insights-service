@@ -14,7 +14,7 @@ import { ScanRequestController } from './scan-request-controller';
 describe(ScanRequestController, () => {
     let scanRequestController: ScanRequestController;
     let context: Context;
-    let scanDataProviderMock: IMock<BatchScanRequestDataService>;
+    let batchScanRequestDataServiceMock: IMock<BatchScanRequestDataService>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
@@ -31,8 +31,8 @@ describe(ScanRequestController, () => {
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
 
-        scanDataProviderMock = Mock.ofType<BatchScanRequestDataService>();
-        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
+        batchScanRequestDataServiceMock = Mock.ofType<BatchScanRequestDataService>();
+        batchScanRequestDataServiceMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
@@ -50,7 +50,7 @@ describe(ScanRequestController, () => {
 
     function createScanRequestController(contextReq: Context): ScanRequestController {
         const controller = new ScanRequestController(
-            scanDataProviderMock.object,
+            batchScanRequestDataServiceMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -89,7 +89,7 @@ describe(ScanRequestController, () => {
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
             const response = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, response)).verifiable(Times.once());
+            batchScanRequestDataServiceMock.setup(async o => o.writeScanRunBatchRequest(guid1, response)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -97,7 +97,7 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(202);
             expect(context.res.body).toEqual(response);
-            scanDataProviderMock.verifyAll();
+            batchScanRequestDataServiceMock.verifyAll();
             guidGeneratorMock.verifyAll();
         });
     });
