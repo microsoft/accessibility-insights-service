@@ -65,7 +65,7 @@ describe(Runner, () => {
         results: {
             url: 'url',
             timestamp: 'timestamp',
-            passes: [{}],
+            passes: [],
             violations: [],
             incomplete: [],
             inapplicable: [],
@@ -85,7 +85,7 @@ describe(Runner, () => {
         results: {
             url: 'url',
             timestamp: 'timestamp',
-            passes: [{}],
+            passes: [],
             violations: [{}],
             incomplete: [],
             inapplicable: [],

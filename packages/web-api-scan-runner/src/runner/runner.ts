@@ -132,6 +132,9 @@ export class Runner {
         const format = 'sarif';
 
         this.logger.logInfo(`Converting to Sarif...`);
+        axeResults.results.inapplicable = [];
+        axeResults.results.incomplete = [];
+        axeResults.results.passes = [];
         const sarifResults: SarifLog = this.convertAxeToSarifFunc(axeResults.results);
 
         this.logger.logInfo(`Saving sarif results to Blobs...`);
