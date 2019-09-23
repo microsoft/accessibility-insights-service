@@ -140,7 +140,7 @@ export class Runner {
         this.logger.logInfo(`Saving sarif results to Blobs...`);
         await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
 
-        href = this.pageScanRunReportService.getBlobFilePath(reportId, format);
+        href = this.pageScanRunReportService.getBlobFilePath(reportId, `${reportId}.${format}`);
 
         this.logger.logInfo(`File saved at ${href}`);
 
