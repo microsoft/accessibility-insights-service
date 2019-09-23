@@ -39,6 +39,13 @@ describe(BatchScanResultController, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
+        reports: [
+            {
+                reportId: 'report-id',
+                format: 'sarif',
+                href: 'href',
+            },
+        ],
     };
 
     beforeEach(() => {

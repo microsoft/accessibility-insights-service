@@ -288,12 +288,7 @@ describe(Runner, () => {
     function setupSaveSarifReportCall(): void {
         pageScanRunReportServiceMock
             .setup(async s => s.saveSarifReport(reportGuid, JSON.stringify(parsedSarifContent)))
-            .returns(async () => Promise.resolve())
-            .verifiable();
-
-        pageScanRunReportServiceMock
-            .setup(s => s.getBlobFilePath(reportGuid, 'sarif'))
-            .returns(() => blobFilePath)
+            .returns(async () => Promise.resolve(blobFilePath))
             .verifiable();
     }
 

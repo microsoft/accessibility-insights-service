@@ -14,12 +14,11 @@ export class PageScanRunReportService {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async saveSarifReport(fileId: string, content: string): Promise<void> {
-        await this.blobStorageClient.uploadBlobContent(
-            PageScanRunReportService.blobContainerName,
-            this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId)),
-            content,
-        );
+    public async saveSarifReport(fileId: string, content: string): Promise<string> {
+        const filePath = this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId));
+        await this.blobStorageClient.uploadBlobContent(PageScanRunReportService.blobContainerName, filePath, content);
+
+        return filePath;
     }
 
     public async readSarifReport(fileId: string): Promise<BlobContentDownloadResponse> {

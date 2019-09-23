@@ -138,9 +138,7 @@ export class Runner {
         const sarifResults: SarifLog = this.convertAxeToSarifFunc(axeResults.results);
 
         this.logger.logInfo(`Saving sarif results to Blobs...`);
-        await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
-
-        href = this.pageScanRunReportService.getBlobFilePath(reportId, format);
+        href = await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
 
         this.logger.logInfo(`File saved at ${href}`);
 

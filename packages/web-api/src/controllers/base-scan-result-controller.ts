@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
-import { Dictionary, keyBy } from 'lodash';
+import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
-import { ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
+import { OnDemandPageScanResult } from 'storage-documents';
+
+import { ScanReport, ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
@@ -64,11 +65,21 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     protected getResponseFromDbDocument(dbDocument: OnDemandPageScanResult): ScanResultResponse {
+        let reports: ScanReport[] = [];
+        if (!isEmpty(dbDocument.reports)) {
+            reports = dbDocument.reports.map(report => {
+                return {
+                    reportId: report.reportId,
+                    format: report.format,
+                };
+            });
+        }
+
         return {
             scanId: dbDocument.id,
             url: dbDocument.url,
             scanResult: dbDocument.scanResult,
-            reports: dbDocument.reports,
+            reports: reports,
             run: dbDocument.run,
         };
     }
