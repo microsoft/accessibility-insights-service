@@ -38,7 +38,7 @@ describe(PageScanRunReportService, () => {
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
-        await testSubject.saveSarifReport(guid, blobContent);
+        expect(await testSubject.saveSarifReport(guid, blobContent)).toEqual('2019/3/1/18/some guid.sarif');
         verifyAll();
     });
 
