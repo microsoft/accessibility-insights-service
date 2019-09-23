@@ -292,7 +292,7 @@ describe(Runner, () => {
             .verifiable();
 
         pageScanRunReportServiceMock
-            .setup(s => s.getBlobFilePath(reportGuid, 'sarif'))
+            .setup(s => s.getBlobFilePath(reportGuid, `${reportGuid}.sarif`))
             .returns(() => blobFilePath)
             .verifiable();
     }
