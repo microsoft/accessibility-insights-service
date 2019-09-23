@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
-import { isEmpty } from 'lodash';
-import { Dictionary, keyBy } from 'lodash';
+import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { OnDemandPageScanResult } from 'storage-documents';
+
 import { ScanReport, ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
