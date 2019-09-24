@@ -46,7 +46,7 @@ export abstract class BaseScanResultController extends ApiController {
             scanId,
             url: undefined,
             run: {
-                state: 'unknown',
+                state: 'not found',
             },
         };
     }

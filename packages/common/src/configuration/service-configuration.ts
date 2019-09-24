@@ -167,7 +167,7 @@ export class ServiceConfiguration {
                 },
                 minimumWaitTimeforScanResultQueryInSeconds: {
                     format: 'int',
-                    default: 120,
+                    default: 300,
                     doc: 'Minimum time interval in seconds before a scan result query can be processed after requested.',
                 },
             },

@@ -45,7 +45,7 @@ Object {
       "format": "int",
     },
     "minimumWaitTimeforScanResultQueryInSeconds": Object {
-      "default": 120,
+      "default": 300,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
     },
@@ -132,7 +132,7 @@ Object {
       "format": "int",
     },
     "minimumWaitTimeforScanResultQueryInSeconds": Object {
-      "default": 120,
+      "default": 300,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
     },
