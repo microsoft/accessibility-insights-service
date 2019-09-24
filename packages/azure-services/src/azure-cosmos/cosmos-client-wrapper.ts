@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as cosmos from '@azure/cosmos';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
@@ -17,11 +18,15 @@ export class CosmosClientWrapper {
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
 
-        await Promise.all(
-            items.map(async item => {
-                await container.items.upsert(item, this.getOptions(item, partitionKey));
-            }),
-        );
+        const chunks = System.chunkArray(items, 10);
+
+        for (const chunk of chunks) {
+            await Promise.all(
+                chunk.map(async item => {
+                    await container.items.upsert(item, this.getOptions(item, partitionKey));
+                }),
+            );
+        }
     }
 
     public async upsertItem<T extends CosmosDocument>(
