@@ -37,11 +37,15 @@ apt-get install -y nodejs
 echo "Install node_modules on shared location $AZ_BATCH_NODE_SHARED_DIR"
 JOB_MANAGER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-job-manager
 RUNNER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-runner
+WEB_API_SCAN_JOB_MANAGER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-web-api-scan-job-manager
+WEB_API_SCAN_RUNNER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-web-api-scan-runner
 SCAN_REQUEST_SENDER_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-scan-request-sender
 SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION=$AZ_BATCH_NODE_SHARED_DIR/batch-on-demand-scan-request-sender
 
 mkdir -p "$JOB_MANAGER_SHARED_LOCATION"
+mkdir -p "$WEB_API_SCAN_JOB_MANAGER_SHARED_LOCATION"
 mkdir -p "$RUNNER_SHARED_LOCATION"
+mkdir -p "$WEB_API_SCAN_RUNNER_SHARED_LOCATION"
 mkdir -p "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 mkdir -p "$SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION"
 
@@ -51,6 +55,14 @@ npm install yargs@13.2.4 applicationinsights@1.4.0
 
 cd "$RUNNER_SHARED_LOCATION"
 echo "Installing runner dependencies"
+npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.2.2 axe-puppeteer@1.0.0 applicationinsights@1.4.0
+
+cd "$WEB_API_SCAN_JOB_MANAGER_SHARED_LOCATION"
+echo "Installing web api scan job manager dependencies"
+npm install yargs@13.2.4 applicationinsights@1.4.0
+
+cd "$WEB_API_SCAN_RUNNER_SHARED_LOCATION"
+echo "Installing web api scan runner dependencies"
 npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.2.2 axe-puppeteer@1.0.0 applicationinsights@1.4.0
 
 cd "$SCAN_REQUEST_SENDER_SHARED_LOCATION"

@@ -40,6 +40,13 @@
                 "description": "The name of the blob container for job manager script."
             }
         },
+        "webApiScanJobManagerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-scan-job-manager-script",
+            "metadata": {
+                "description": "The name of the blob container for web api scan job manager script."
+            }
+        },
         "poolScriptContainerName": {
             "type": "string",
             "defaultValue": "batch-pool-startup-script",
@@ -64,6 +71,13 @@
         "runnerContainerName": {
             "type": "string",
             "defaultValue": "batch-runner-script",
+            "metadata": {
+                "description": "The name of the blob container for web api scan runner script."
+            }
+        },
+        "webApiScanRunnerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-scan-runner-script",
             "metadata": {
                 "description": "The name of the blob container for runner script."
             }
@@ -130,6 +144,12 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
+                    "name": "[concat('default/', parameters('webApiScanJobManagerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
                     "name": "[concat('default/', parameters('poolScriptContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
@@ -143,6 +163,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('runnerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('webApiScanRunnerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

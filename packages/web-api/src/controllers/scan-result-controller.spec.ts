@@ -43,6 +43,13 @@ describe(ScanResultController, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
+        reports: [
+            {
+                reportId: 'report-id',
+                format: 'sarif',
+                href: 'href',
+            },
+        ],
     };
     const scanResponse: ScanResultResponse = {
         scanId,
@@ -50,6 +57,12 @@ describe(ScanResultController, () => {
         run: {
             state: 'running',
         },
+        reports: [
+            {
+                format: 'sarif',
+                reportId: 'report-id',
+            },
+        ],
     };
 
     beforeEach(() => {

@@ -68,6 +68,17 @@ describe(registerAzureServicesToContainer, () => {
             'onDemandScanner',
             'scanRequests',
         );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanBatchRequests',
+        );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+
         verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
     });
 
@@ -82,6 +93,11 @@ describe(registerAzureServicesToContainer, () => {
                 .setup(async s => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
                 .verifiable(Times.once());
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
+                .verifiable(Times.once());
+
             secretProviderMock
                 .setup(async s => s.getSecret(secretNames.storageAccountKey))
                 .returns(async () => storageAccountKey)

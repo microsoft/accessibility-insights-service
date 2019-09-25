@@ -25,6 +25,7 @@ createCosmosCollection() {
     local collectionName=$1
     local dbName=$2
     local ttl=$3
+    local throughput=$4
 
     if [[ -z $ttl ]]; then
         ttl=-1
@@ -37,8 +38,8 @@ createCosmosCollection() {
         echo "[setup-cosmos-db] Collection '$collectionName' already exists"
     else
         echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
-        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput 100000 --default-ttl "$ttl" 1>/dev/null
-        echo "[setup-cosmos-db] Successfully created DB collection '$collectionName'"
+        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --default-ttl "$ttl" 1>/dev/null
+        echo "Successfully created DB collection '$collectionName'"
     fi
 }
 
@@ -59,21 +60,24 @@ createCosmosDatabase() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 \
+-r <resource group> \
+-e <environment>
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [ -z $resourceGroupName ] || [ -z $environment ]; then
     exitWithUsageInfo
 fi
 
@@ -85,8 +89,17 @@ onDemandScannerDbName="onDemandScanner"
 createCosmosDatabase "$scannerDbName"
 createCosmosDatabase "$onDemandScannerDbName"
 
-createCosmosCollection "a11yIssues" "$scannerDbName"
+# Increase throughput for below collection only in case of prod
 # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
-createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000"         # 30 days
-createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" # 7 days
-createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800"      # 7 days
+if [ $environment = "prod" ]; then
+    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "25000"
+    createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "100000"        # 30 days
+    createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "25000" # 7 days
+    createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "25000"      # 7 days
+
+else
+    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "10000"
+    createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "10000"         # 30 days
+    createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "10000" # 7 days
+    createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "10000"      # 7 days
+fi
