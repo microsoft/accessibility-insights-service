@@ -44,13 +44,8 @@ Object {
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minimumWaitTimeforCosmosTriggerInSeconds": Object {
-      "default": 300,
-      "doc": "Minimum time interval expected in seconds before a page document is created in cosmos db for each scanId.",
-      "format": "int",
-    },
     "minimumWaitTimeforScanResultQueryInSeconds": Object {
-      "default": 120,
+      "default": 300,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
     },
@@ -170,13 +165,8 @@ Object {
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minimumWaitTimeforCosmosTriggerInSeconds": Object {
-      "default": 300,
-      "doc": "Minimum time interval expected in seconds before a page document is created in cosmos db for each scanId.",
-      "format": "int",
-    },
     "minimumWaitTimeforScanResultQueryInSeconds": Object {
-      "default": 120,
+      "default": 300,
       "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
       "format": "int",
     },

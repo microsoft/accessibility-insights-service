@@ -8,7 +8,7 @@ Array [
   },
   Object {
     "run": Object {
-      "state": "accepted",
+      "state": "pending",
     },
     "scanId": "requested-too-soon-scan-id",
     "url": undefined,

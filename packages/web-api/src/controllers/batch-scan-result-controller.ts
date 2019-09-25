@@ -52,18 +52,14 @@ export class BatchScanResultController extends BaseScanResultController {
         }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQuery);
-        for (const scanId of scanIdsToQuery) {
+
+        scanIdsToQuery.forEach(scanId => {
             if (isEmpty(scanResultItemMap[scanId])) {
-                const isCosmosTriggerNotDone = await this.isCosmosTriggerNotDone(scanId);
-                if (isCosmosTriggerNotDone) {
-                    responseBody.push(this.getCosmosTriggerNotDoneResponse(scanId));
-                } else {
-                    responseBody.push(this.get404Response(scanId));
-                }
+                responseBody.push(this.get404Response(scanId));
             } else {
                 responseBody.push(this.getResponseFromDbDocument(scanResultItemMap[scanId]));
             }
-        }
+        });
 
         this.context.res = {
             status: 200,

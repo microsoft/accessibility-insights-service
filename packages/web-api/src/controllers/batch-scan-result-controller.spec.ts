@@ -79,8 +79,7 @@ describe(BatchScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 120,
-                    minimumWaitTimeforCosmosTriggerInSeconds: 300,
+                    minimumWaitTimeforScanResultQueryInSeconds: 300,
                 } as RestApiConfig;
             });
 
@@ -99,11 +98,11 @@ describe(BatchScanResultController, () => {
         return controller;
     }
 
-    function setupGetGuidTimestamp(scanId: string, time: Date, times: number): void {
+    function setupGetGuidTimestamp(scanId: string, time: Date): void {
         guidGeneratorMock
             .setup(gm => gm.getGuidTimestamp(scanId))
             .returns(() => time)
-            .verifiable(Times.exactly(times));
+            .verifiable(Times.once());
     }
 
     describe('handleRequest', () => {
@@ -123,9 +122,9 @@ describe(BatchScanResultController, () => {
             requestTooSoonTimeStamp.setFullYear(requestTooSoonTimeStamp.getFullYear() + 1);
             const validTimeStamp = new Date(0);
 
-            setupGetGuidTimestamp(validScanId, validTimeStamp, 1);
-            setupGetGuidTimestamp(requestedTooSoonScanId, requestTooSoonTimeStamp, 1);
-            setupGetGuidTimestamp(notFoundScanId, validTimeStamp, 2);
+            setupGetGuidTimestamp(validScanId, validTimeStamp);
+            setupGetGuidTimestamp(requestedTooSoonScanId, requestTooSoonTimeStamp);
+            setupGetGuidTimestamp(notFoundScanId, validTimeStamp);
 
             await batchScanResultController.handleRequest();
 

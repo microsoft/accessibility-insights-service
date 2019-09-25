@@ -21,14 +21,6 @@ export abstract class BaseScanResultController extends ApiController {
         return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforScanResultQueryInSeconds * 1000;
     }
 
-    protected async isCosmosTriggerNotDone(scanId: string): Promise<boolean> {
-        const timeRequested = this.getScanRequestedTime(scanId);
-        const timeCurrent = new Date();
-        const minimumWaitTimeforCosmosTriggerInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforCosmosTriggerInSeconds;
-
-        return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforCosmosTriggerInSeconds * 1000;
-    }
-
     protected async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
         const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
 
@@ -39,24 +31,22 @@ export abstract class BaseScanResultController extends ApiController {
         return this.guidGenerator.getGuidTimestamp(scanId);
     }
 
-    protected getCosmosTriggerNotDoneResponse(scanId: string): ScanResultResponse {
-        return this.getScanResultResponse(scanId, 'accepted');
-    }
-
     protected getTooSoonRequestResponse(scanId: string): ScanResultResponse {
-        return this.getScanResultResponse(scanId, 'accepted');
-    }
-
-    protected get404Response(scanId: string): ScanResultResponse {
-        return this.getScanResultResponse(scanId, 'not found');
-    }
-
-    protected getScanResultResponse(scanId: string, state: RunState): ScanResultResponse {
         return {
             scanId,
             url: undefined,
             run: {
-                state,
+                state: 'pending',
+            },
+        };
+    }
+
+    protected get404Response(scanId: string): ScanResultResponse {
+        return {
+            scanId,
+            url: undefined,
+            run: {
+                state: 'not found',
             },
         };
     }
