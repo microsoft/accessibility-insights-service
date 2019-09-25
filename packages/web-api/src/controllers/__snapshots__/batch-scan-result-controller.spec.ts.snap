@@ -14,7 +14,12 @@ Array [
     "url": undefined,
   },
   Object {
-    "reports": undefined,
+    "reports": Array [
+      Object {
+        "format": "sarif",
+        "reportId": "report-id",
+      },
+    ],
     "run": Object {
       "state": "running",
     },
