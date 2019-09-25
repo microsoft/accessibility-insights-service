@@ -68,13 +68,10 @@ Azure region - Azure region where the instances will be deployed. Available Azur
     exit 1
 }
 
-
-function waitForProcesses(){
+function waitForProcesses() {
     processesToWaitFor=$1
     for pid in ${processesToWaitFor[@]}; do
         wait $pid
-        returnCode=$?
-        echo "Value of pid is $pid, Return code is $returnCode"
     done
 }
 
@@ -107,11 +104,11 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/create-storage-account.sh"
 
-echo "Finished creating storage account"
-
 resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
+
+echo "Starting parallel processes.."
 
 . "${0%/*}/create-api-management.sh" &
 apiManagmentProcess="$!"
@@ -130,6 +127,8 @@ parallelizableProcesses+=" $!"
 
 waitForProcesses "${parallelizableProcesses[@]}"
 
+# The following scripts all depend on the result from the above scripts.
+# Additionally, these should run sequentially because of interdependence.
 . "${0%/*}/app-insights-create.sh"
 
 . "${0%/*}/batch-account-create.sh"
