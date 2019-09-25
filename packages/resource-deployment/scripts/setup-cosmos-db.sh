@@ -11,14 +11,14 @@ export cosmosAccountName
 export resourceGroupName
 
 createCosmosAccount() {
-    echo "Creating Cosmos DB account..."
+    echo "[setup-cosmos-db] Creating Cosmos DB account..."
     resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
     cosmosAccountName="$resourceName"
 
-    echo "Successfully created Cosmos DB account '$cosmosAccountName'"
+    echo "[setup-cosmos-db] Successfully created Cosmos DB account '$cosmosAccountName'"
 }
 
 createCosmosCollection() {
@@ -31,13 +31,13 @@ createCosmosCollection() {
         ttl=-1
     fi
 
-    echo "Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
+    echo "[setup-cosmos-db] Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
     collectionExists=$(az cosmosdb collection exists --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
     if [ "$collectionExists" = true ]; then
-        echo "Collection '$collectionName' already exists"
+        echo "[setup-cosmos-db] Collection '$collectionName' already exists"
     else
-        echo "Creating DB collection '$collectionName'"
+        echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
         az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --default-ttl "$ttl" 1>/dev/null
         echo "Successfully created DB collection '$collectionName'"
     fi
@@ -46,15 +46,15 @@ createCosmosCollection() {
 createCosmosDatabase() {
     local dbName=$1
 
-    echo "Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
+    echo "[setup-cosmos-db] Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
     databaseExists=$(az cosmosdb database exists --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
     if [ "$databaseExists" = true ]; then
-        echo "Database '$dbName' already exists"
+        echo "[setup-cosmos-db] Database '$dbName' already exists"
     else
-        echo "Creating Cosmos DB '$dbName'"
+        echo "[setup-cosmos-db] Creating Cosmos DB '$dbName'"
         az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" 1>/dev/null
-        echo "Successfully created Cosmos DB '$dbName'"
+        echo "[setup-cosmos-db] Successfully created Cosmos DB '$dbName'"
     fi
 }
 

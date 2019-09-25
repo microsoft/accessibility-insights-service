@@ -10,14 +10,14 @@ export storageAccountName
 createQueue() {
     local queue=$1
 
-    echo "Checking if queue '$queue' exists in storage account '$storageAccountName'"
+    echo "[create-queues] Checking if queue '$queue' exists in storage account '$storageAccountName'"
     queueExists=$(az storage queue exists --name "$queue" --account-name "$storageAccountName" --query "exists")
 
     if [ "$queueExists" = true ]; then
-        echo "Queue '$queue' already exists"
+        echo "[create-queues] Queue '$queue' already exists"
     else
         az storage queue create --name "$queue" --account-name "$storageAccountName" 1>/dev/null
-        echo "Successfully created queue '$queue'"
+        echo "[create-queues] Successfully created queue '$queue'"
     fi
 }
 
