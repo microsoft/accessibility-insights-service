@@ -35,6 +35,7 @@ export interface ScanRunTimeConfig {
 export interface RestApiConfig {
     maxScanRequestBatchCount: number;
     minimumWaitTimeforScanResultQueryInSeconds: number;
+    minimumWaitTimeforCosmosTriggerInSeconds: number;
 }
 
 export interface RuntimeConfig {
@@ -167,8 +168,13 @@ export class ServiceConfiguration {
                 },
                 minimumWaitTimeforScanResultQueryInSeconds: {
                     format: 'int',
-                    default: 300,
+                    default: 120,
                     doc: 'Minimum time interval in seconds before a scan result query can be processed after requested.',
+                },
+                minimumWaitTimeforCosmosTriggerInSeconds: {
+                    format: 'int',
+                    default: 300,
+                    doc: 'Minimum time interval expected in seconds before a page document is created in cosmos db for each scanId.',
                 },
             },
         };

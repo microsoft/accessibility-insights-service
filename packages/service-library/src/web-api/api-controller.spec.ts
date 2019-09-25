@@ -312,6 +312,7 @@ describe('getRestApiConfig()', () => {
         const configStub = {
             maxScanRequestBatchCount: 1,
             minimumWaitTimeforScanResultQueryInSeconds: 2,
+            minimumWaitTimeforCosmosTriggerInSeconds: 5,
         };
 
         const serviceConfigMock = Mock.ofType(ServiceConfiguration);

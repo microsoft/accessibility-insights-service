@@ -47,12 +47,22 @@ export class ScanResultController extends BaseScanResultController {
         const scanResult = scanResultItemMap[scanId];
 
         if (isEmpty(scanResult)) {
-            // scan result not found
-            this.context.res = {
-                status: 404,
-                body: this.get404Response(scanId),
-            };
-            this.logger.logInfo('scan result not found', { scanId });
+            const isCosmosTriggerNotDone = await this.isCosmosTriggerNotDone(scanId);
+            if (isCosmosTriggerNotDone) {
+                this.context.res = {
+                    status: 200,
+                    body: this.getCosmosTriggerNotDoneResponse(scanId),
+                };
+
+                this.logger.logInfo('scan result fetched', { scanId });
+            } else {
+                this.context.res = {
+                    status: 404,
+                    body: this.get404Response(scanId),
+                };
+
+                this.logger.logInfo('scan result not found', { scanId });
+            }
         } else {
             this.context.res = {
                 status: 200,

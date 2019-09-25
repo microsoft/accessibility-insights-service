@@ -82,7 +82,8 @@ describe(ScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 300,
+                    minimumWaitTimeforScanResultQueryInSeconds: 120,
+                    minimumWaitTimeforCosmosTriggerInSeconds: 300,
                 } as RestApiConfig;
             });
 
@@ -101,11 +102,11 @@ describe(ScanResultController, () => {
         return controller;
     }
 
-    function setupGetGuidTimestamp(time: Date): void {
+    function setupGetGuidTimestamp(time: Date, times: number): void {
         guidGeneratorMock
             .setup(gm => gm.getGuidTimestamp(scanId))
             .returns(() => time)
-            .verifiable(Times.once());
+            .verifiable(Times.exactly(times));
     }
 
     describe('handleRequest', () => {
@@ -132,7 +133,7 @@ describe(ScanResultController, () => {
             scanResultController = createScanResultController(context);
             const timeStamp = new Date();
             timeStamp.setFullYear(timeStamp.getFullYear() + 1);
-            setupGetGuidTimestamp(timeStamp);
+            setupGetGuidTimestamp(timeStamp, 1);
 
             await scanResultController.handleRequest();
 
@@ -143,7 +144,7 @@ describe(ScanResultController, () => {
 
         it('should return 404 if the scan cannot be found', async () => {
             scanResultController = createScanResultController(context);
-            setupGetGuidTimestamp(new Date(0));
+            setupGetGuidTimestamp(new Date(0), 2);
             onDemandPageScanRunResultProviderMock
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
@@ -161,7 +162,7 @@ describe(ScanResultController, () => {
 
         it('should return 200 if successfully fetched result', async () => {
             scanResultController = createScanResultController(context);
-            setupGetGuidTimestamp(new Date(0));
+            setupGetGuidTimestamp(new Date(0), 1);
             onDemandPageScanRunResultProviderMock.reset();
 
             onDemandPageScanRunResultProviderMock
