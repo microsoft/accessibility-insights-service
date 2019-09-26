@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
-import { ItemType, OnDemandPageScanBatchRequest, PartitionKey } from 'storage-documents';
+import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from './scan-data-provider';
 
@@ -19,14 +19,11 @@ beforeEach(() => {
 
 describe(ScanDataProvider, () => {
     it('write scan run batch request to a Cosmos DB', async () => {
-        const scanRunBatchResponse = [
+        const scanRunBatchResponse: ScanRunBatchRequest[] = [
             {
                 scanId: 'scanId-1',
                 url: 'url-1',
-            },
-            {
-                url: 'url-2',
-                error: 'error-2',
+                priority: 5,
             },
         ];
 

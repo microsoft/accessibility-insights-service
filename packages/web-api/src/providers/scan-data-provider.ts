@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, OnDemandPageScanBatchRequest, PartitionKey } from 'storage-documents';
-import { ScanRunResponse } from '../api-contracts/scan-run-response';
+import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 
 @injectable()
 export class ScanDataProvider {
@@ -12,7 +11,7 @@ export class ScanDataProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async writeScanRunBatchRequest(batchId: string, scanRunBatchResponse: ScanRunResponse[]): Promise<void> {
+    public async writeScanRunBatchRequest(batchId: string, scanRunBatchResponse: ScanRunBatchRequest[]): Promise<void> {
         const scanRunBatchRequest: OnDemandPageScanBatchRequest = {
             id: batchId,
             itemType: ItemType.scanRunBatchRequest,
