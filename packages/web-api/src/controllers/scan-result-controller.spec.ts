@@ -24,7 +24,7 @@ describe(ScanResultController, () => {
         scanId,
         url: undefined,
         run: {
-            state: 'pending',
+            state: 'accepted',
         },
     };
     const scanNotFoundResponse: ScanResultResponse = {
