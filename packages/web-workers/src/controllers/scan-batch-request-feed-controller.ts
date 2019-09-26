@@ -62,7 +62,7 @@ export class ScanBatchRequestFeedController extends WebController {
             return {
                 id: request.scanId,
                 url: request.url,
-                priority: 0,
+                priority: request.priority,
                 itemType: ItemType.onDemandPageScanRunResult,
                 partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
                 run: {
@@ -80,7 +80,7 @@ export class ScanBatchRequestFeedController extends WebController {
             return {
                 id: request.scanId,
                 url: request.url,
-                priority: 0,
+                priority: request.priority,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };

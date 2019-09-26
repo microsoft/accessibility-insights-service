@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
+import { isNil } from 'lodash';
 import { Logger } from 'logger';
 import { ApiController } from 'service-library';
+import { ScanRunBatchRequest } from 'storage-documents';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
@@ -39,36 +41,56 @@ export class ScanRequestController extends ApiController {
         }
 
         const batchId = this.guidGenerator.createGuid();
-        const response = this.createScanRunBatchResponse(batchId, payload);
+        const processedData = this.getProcessedRequestData(batchId, payload);
 
-        await this.scanDataProvider.writeScanRunBatchRequest(batchId, response);
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.requestToBeSaved);
 
         this.context.res = {
             status: 202, // Accepted
-            body: response,
+            body: processedData.responseToBeSent,
         };
 
         this.logger.logInfo('Accepted scan run batch request', {
             batchId: batchId,
-            totalUrls: response.length.toString(),
-            invalidUrls: response.filter(i => i.error !== undefined).length.toString(),
+            totalUrls: processedData.responseToBeSent.length.toString(),
+            invalidUrls: processedData.responseToBeSent.filter(i => i.error !== undefined).length.toString(),
         });
     }
 
-    private createScanRunBatchResponse(batchId: string, scanRunRequests: ScanRunRequest[]): ScanRunResponse[] {
-        return scanRunRequests.map(scanRunRequest => {
+    private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
+        const requestToBeSaved: ScanRunBatchRequest[] = [];
+        const responseToBeSent: ScanRunResponse[] = [];
+
+        scanRunRequests.forEach(scanRunRequest => {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
-                return {
-                    // preserve guid origin for a single batch scope
-                    scanId: this.guidGenerator.createGuidFromBaseGuid(batchId),
+                // preserve guid origin for a single batch scope
+                const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
+                requestToBeSaved.push({
+                    scanId: scanId,
+                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
-                };
+                });
+
+                responseToBeSent.push({
+                    scanId: scanId,
+                    url: scanRunRequest.url,
+                });
             } else {
-                return {
+                responseToBeSent.push({
                     url: scanRunRequest.url,
                     error: 'Invalid URL',
-                };
+                });
             }
         });
+
+        return {
+            requestToBeSaved,
+            responseToBeSent,
+        };
     }
+}
+
+interface ProcessedBatchRequestData {
+    requestToBeSaved: ScanRunBatchRequest[];
+    responseToBeSent: ScanRunResponse[];
 }

@@ -11,7 +11,7 @@ export interface OnDemandPageScanBatchRequest extends StorageDocument {
 }
 
 export interface ScanRunBatchRequest {
-    scanId?: string;
+    scanId: string;
+    priority: number;
     url: string;
-    error?: string;
 }
