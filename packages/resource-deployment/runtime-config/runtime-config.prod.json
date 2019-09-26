@@ -49,5 +49,9 @@
             "label-content-name-mismatch",
             "landmark-complementary-is-top-level"
         ]
+    },
+    "restApiConfig": {
+        "maxScanRequestBatchCount": 1000,
+        "minimumWaitTimeforScanResultQueryInSeconds": 300
     }
 }
