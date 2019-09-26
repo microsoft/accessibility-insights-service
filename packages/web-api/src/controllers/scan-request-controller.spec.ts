@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from '../providers/scan-data-provider';
 import { ScanRequestController } from './scan-request-controller';
@@ -61,7 +62,7 @@ describe(ScanRequestController, () => {
     }
 
     describe(ScanRequestController, () => {
-        it('reject request with invalid payload', async () => {
+        it('rejects request with invalid payload', async () => {
             context.req.rawBody = '{ url: ';
             scanRequestController = createScanRequestController(context);
 
@@ -71,7 +72,7 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toMatch(/Malformed request body\.+/);
         });
 
-        it('reject request with large payload', async () => {
+        it('rejects request with large payload', async () => {
             context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }]);
             scanRequestController = createScanRequestController(context);
 
@@ -81,22 +82,45 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toEqual('Request size is too large');
         });
 
-        it('accept valid request', async () => {
+        it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
             guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
-            const response = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, response)).verifiable(Times.once());
+            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
+            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 0 }];
+            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
 
             expect(context.res.status).toEqual(202);
-            expect(context.res.body).toEqual(response);
+            expect(context.res.body).toEqual(expectedResponse);
+            scanDataProviderMock.verifyAll();
+            guidGeneratorMock.verifyAll();
+        });
+
+        it('accepts request with priority', async () => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
+            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
+            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
+            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
             scanDataProviderMock.verifyAll();
             guidGeneratorMock.verifyAll();
         });

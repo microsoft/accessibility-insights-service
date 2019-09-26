@@ -8,7 +8,14 @@ import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory } from 'service-library';
-import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
+import {
+    ItemType,
+    OnDemandPageScanBatchRequest,
+    OnDemandPageScanRequest,
+    OnDemandPageScanResult,
+    PartitionKey,
+    ScanRunBatchRequest,
+} from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
@@ -87,14 +94,18 @@ describe(ScanBatchRequestFeedController, () => {
                     {
                         scanId: 'scan-1',
                         url: 'url-1',
+                        priority: 1,
                     },
                     {
                         scanId: 'scan-2',
                         url: 'url-2',
+                        // tslint:disable-next-line: no-null-keyword
+                        priority: 0,
                     },
                     {
                         url: 'url-3',
                         error: 'error-3',
+                        priority: -3,
                     },
                 ],
             },
@@ -106,10 +117,12 @@ describe(ScanBatchRequestFeedController, () => {
                     {
                         scanId: 'scan-4',
                         url: 'url-4',
+                        priority: 0,
                     },
                     {
                         scanId: 'scan-5',
                         url: 'url-5',
+                        priority: 2,
                     },
                 ],
             },
@@ -130,7 +143,7 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                 return {
                     id: request.scanId,
                     url: request.url,
-                    priority: 0,
+                    priority: request.priority,
                     itemType: ItemType.onDemandPageScanRunResult,
                     partitionKey: `pk-${request.scanId}`,
                     run: {
@@ -151,7 +164,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 return {
                     id: request.scanId,
                     url: request.url,
-                    priority: 0,
+                    priority: request.priority,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
