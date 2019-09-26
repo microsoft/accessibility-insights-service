@@ -88,6 +88,11 @@ describe(Runner, () => {
             passes: [],
             violations: [
                 {
+                    description: 'rule with 2 violations',
+                    nodes: [{}, {}],
+                },
+                {
+                    description: 'rule with one violation',
                     nodes: [{}],
                 },
             ],
@@ -351,7 +356,7 @@ describe(Runner, () => {
             error: undefined,
         };
         result.scanResult = {
-            issueCount: axeScanResultsWithViolations.results.violations.length,
+            issueCount: 3,
             state: 'fail',
         };
 
