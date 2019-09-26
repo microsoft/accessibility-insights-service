@@ -86,7 +86,16 @@ describe(Runner, () => {
             url: 'url',
             timestamp: 'timestamp',
             passes: [],
-            violations: [{}],
+            violations: [
+                {
+                    description: 'rule with 2 violations',
+                    nodes: [{}, {}],
+                },
+                {
+                    description: 'rule with one violation',
+                    nodes: [{}],
+                },
+            ],
             incomplete: [],
             inapplicable: [],
         } as AxeResults,
@@ -347,7 +356,7 @@ describe(Runner, () => {
             error: undefined,
         };
         result.scanResult = {
-            issueCount: axeScanResultsWithViolations.results.violations.length,
+            issueCount: 3,
             state: 'fail',
         };
 

@@ -113,7 +113,7 @@ export class Runner {
         let state: ScanState = 'fail';
 
         if (axeResults.results.violations !== undefined && axeResults.results.violations.length > 0) {
-            issueCount = axeResults.results.violations.length;
+            issueCount = axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0);
             state = 'fail';
         } else {
             state = 'pass';
