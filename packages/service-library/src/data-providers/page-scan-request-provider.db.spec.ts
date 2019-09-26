@@ -45,14 +45,14 @@ describe('PageScanRequestProvider.Db', () => {
             const request1: OnDemandPageScanRequest = {
                 id: 'id1',
                 url: 'url1',
-                priority: 10,
+                priority: 0,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
             const request2: OnDemandPageScanRequest = {
                 id: 'id2',
                 url: 'url2',
-                priority: 0,
+                priority: 10,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
