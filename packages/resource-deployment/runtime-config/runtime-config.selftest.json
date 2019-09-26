@@ -13,5 +13,9 @@
         "pageRescanIntervalInDays": 3,
         "failedPageRescanIntervalInHours": 3,
         "maxScanRetryCount": 3
+    },
+    "restApiConfig": {
+        "maxScanRequestBatchCount": 1000,
+        "minimumWaitTimeforScanResultQueryInSeconds": 300
     }
 }

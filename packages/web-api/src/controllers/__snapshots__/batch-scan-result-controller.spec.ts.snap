@@ -29,7 +29,7 @@ Array [
   },
   Object {
     "run": Object {
-      "state": "unknown",
+      "state": "not found",
     },
     "scanId": "not-found-scan-id",
     "url": undefined,

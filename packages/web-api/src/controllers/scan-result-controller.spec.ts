@@ -31,7 +31,7 @@ describe(ScanResultController, () => {
         scanId,
         url: undefined,
         run: {
-            state: 'unknown',
+            state: 'not found',
         },
     };
     const dbResponse: OnDemandPageScanResult = {
@@ -95,7 +95,7 @@ describe(ScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 120,
+                    minimumWaitTimeforScanResultQueryInSeconds: 300,
                 } as RestApiConfig;
             });
 

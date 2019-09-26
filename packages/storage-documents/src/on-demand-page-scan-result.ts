@@ -5,7 +5,7 @@ import { ItemType } from './item-type';
 
 export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'unknown' | 'pass' | 'fail';
-export declare type OnDemandPageScanRunState = 'unknown' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type OnDemandPageScanRunState = 'not found' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
 /**
  * The web page scan run result document.

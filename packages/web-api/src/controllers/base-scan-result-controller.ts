@@ -3,9 +3,8 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, isEmpty, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { OnDemandPageScanResult } from 'storage-documents';
-
-import { ScanReport, ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { RunState, ScanReport, ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
@@ -47,7 +46,7 @@ export abstract class BaseScanResultController extends ApiController {
             scanId,
             url: undefined,
             run: {
-                state: 'unknown',
+                state: 'not found',
             },
         };
     }
