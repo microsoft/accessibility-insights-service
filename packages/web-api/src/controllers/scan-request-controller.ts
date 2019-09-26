@@ -43,17 +43,17 @@ export class ScanRequestController extends ApiController {
         const batchId = this.guidGenerator.createGuid();
         const processedData = this.getProcessedRequestData(batchId, payload);
 
-        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.requestToBeSaved);
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
 
         this.context.res = {
             status: 202, // Accepted
-            body: processedData.responseToBeSent,
+            body: processedData.scanResponses,
         };
 
         this.logger.logInfo('Accepted scan run batch request', {
             batchId: batchId,
-            totalUrls: processedData.responseToBeSent.length.toString(),
-            invalidUrls: processedData.responseToBeSent.filter(i => i.error !== undefined).length.toString(),
+            totalUrls: processedData.scanResponses.length.toString(),
+            invalidUrls: processedData.scanResponses.filter(i => i.error !== undefined).length.toString(),
         });
     }
 
@@ -84,13 +84,13 @@ export class ScanRequestController extends ApiController {
         });
 
         return {
-            requestToBeSaved,
-            responseToBeSent,
+            scanRequestsToBeStoredInDb: requestToBeSaved,
+            scanResponses: responseToBeSent,
         };
     }
 }
 
 interface ProcessedBatchRequestData {
-    requestToBeSaved: ScanRunBatchRequest[];
-    responseToBeSent: ScanRunResponse[];
+    scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
+    scanResponses: ScanRunResponse[];
 }
