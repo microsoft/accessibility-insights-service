@@ -86,7 +86,11 @@ describe(Runner, () => {
             url: 'url',
             timestamp: 'timestamp',
             passes: [],
-            violations: [{}],
+            violations: [
+                {
+                    nodes: [{}],
+                },
+            ],
             incomplete: [],
             inapplicable: [],
         } as AxeResults,
