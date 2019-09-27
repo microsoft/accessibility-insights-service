@@ -69,7 +69,6 @@ describe(ScanRequestController, () => {
             await scanRequestController.handleRequest();
 
             expect(context.res.status).toEqual(400);
-            expect(context.res.body).toMatch(/Malformed request body\.+/);
         });
 
         it('rejects request with large payload', async () => {

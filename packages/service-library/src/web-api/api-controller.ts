@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
+import { HttpResponse } from './http-response';
+import { WebApiErrorCodes } from './web-api-error-codes';
 import { WebController } from './web-controller';
 
 // tslint:disable: no-any
@@ -19,10 +21,7 @@ export abstract class ApiController extends WebController {
             // tslint:disable-next-line: no-unsafe-any
             return JSON.parse(this.context.req.rawBody);
         } catch (error) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: `Malformed request body. ${error}`,
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument);
         }
 
         return undefined;
@@ -50,19 +49,13 @@ export abstract class ApiController extends WebController {
         }
 
         if (this.context.req.headers === undefined || this.context.req.headers['content-type'] === undefined) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: 'Content type was not specified',
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader);
 
             return false;
         }
 
         if (this.context.req.headers['content-type'] !== 'application/json') {
-            this.context.res = {
-                status: 415, // Unsupported Media Type
-                body: 'Content type is not supported',
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType);
 
             return false;
         }
@@ -72,19 +65,13 @@ export abstract class ApiController extends WebController {
 
     protected validateApiVersion(): boolean {
         if (this.context.req.query === undefined || this.context.req.query['api-version'] === undefined) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: 'Client API version was not specified',
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter);
 
             return false;
         }
 
         if (this.context.req.query['api-version'] !== this.apiVersion) {
-            this.context.res = {
-                status: 400, // Bad Request
-                body: 'Client API version is not supported',
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion);
 
             return false;
         }
