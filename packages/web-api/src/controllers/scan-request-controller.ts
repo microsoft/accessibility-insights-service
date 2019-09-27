@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController } from 'service-library';
+import { ApiController, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
@@ -30,21 +30,24 @@ export class ScanRequestController extends ApiController {
             return;
         }
 
+        if (isEmpty(payload)) {
+            this.context.res = {
+                status: 204, // No Content
+            };
+
+            return;
+        }
+
         const maxLength = (await this.getRestApiConfig()).maxScanRequestBatchCount;
         if (payload.length > maxLength) {
-            this.context.res = {
-                status: 413, // Payload Too Large
-                body: 'Request size is too large',
-            };
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
 
             return;
         }
 
         const batchId = this.guidGenerator.createGuid();
         const processedData = this.getProcessedRequestData(batchId, payload);
-
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
-
         this.context.res = {
             status: 202, // Accepted
             body: processedData.scanResponses,
@@ -58,34 +61,34 @@ export class ScanRequestController extends ApiController {
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
-        const requestToBeSaved: ScanRunBatchRequest[] = [];
-        const responseToBeSent: ScanRunResponse[] = [];
+        const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
+        const scanResponses: ScanRunResponse[] = [];
 
         scanRunRequests.forEach(scanRunRequest => {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
                 // preserve guid origin for a single batch scope
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-                requestToBeSaved.push({
+                scanRequestsToBeStoredInDb.push({
                     scanId: scanId,
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
                 });
 
-                responseToBeSent.push({
+                scanResponses.push({
                     scanId: scanId,
                     url: scanRunRequest.url,
                 });
             } else {
-                responseToBeSent.push({
+                scanResponses.push({
                     url: scanRunRequest.url,
-                    error: 'Invalid URL',
+                    ...WebApiErrorCodes.invalidURL.response,
                 });
             }
         });
 
         return {
-            scanRequestsToBeStoredInDb: requestToBeSaved,
-            scanResponses: responseToBeSent,
+            scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,
+            scanResponses: scanResponses,
         };
     }
 }

@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import { HttpResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from '../providers/scan-data-provider';
@@ -68,7 +69,16 @@ describe(ScanRequestController, () => {
 
             await scanRequestController.handleRequest();
 
-            expect(context.res.status).toEqual(400);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
+        });
+
+        it('accepts request with an empty payload', async () => {
+            context.req.rawBody = '[]';
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(204);
         });
 
         it('rejects request with large payload', async () => {
@@ -77,8 +87,7 @@ describe(ScanRequestController, () => {
 
             await scanRequestController.handleRequest();
 
-            expect(context.res.status).toEqual(413);
-            expect(context.res.body).toEqual('Request size is too large');
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
         });
 
         it('accepts valid request only', async () => {
@@ -88,7 +97,10 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
-            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }, { error: 'Invalid URL', url: '/invalid/url' }];
+            const expectedResponse = [
+                { scanId: guid2, url: 'https://abs/path/' },
+                { url: '/invalid/url', ...WebApiErrorCodes.invalidURL.response },
+            ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 0 }];
             scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
