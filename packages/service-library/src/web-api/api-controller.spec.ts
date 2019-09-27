@@ -6,6 +6,8 @@ import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { Mock, Times } from 'typemoq';
 import { ApiController } from './api-controller';
+import { HttpResponse } from './http-response';
+import { WebApiErrorCodes } from './web-api-error-codes';
 
 // tslint:disable: no-any no-unnecessary-override no-null-keyword no-unsafe-any
 
@@ -88,11 +90,8 @@ describe('validateContentType()', () => {
         });
         const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
-        expect(context.res).toEqual({ status: 400, body: 'Content type was not specified' });
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
         expect(valid).toEqual(false);
-
-        context.req.headers = {}; //.host = 'localhost';
-        context.req.headers.host = 'localhost';
     });
 
     it('should fail when missing content-type HTTP header', () => {
@@ -105,7 +104,7 @@ describe('validateContentType()', () => {
         });
         const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
-        expect(context.res).toEqual({ status: 400, body: 'Content type was not specified' });
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingContentTypeHeader));
         expect(valid).toEqual(false);
     });
 
@@ -120,7 +119,7 @@ describe('validateContentType()', () => {
         context.req.headers['content-type'] = 'text/plain';
         const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateContentType();
-        expect(context.res).toEqual({ status: 415, body: 'Content type is not supported' });
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedContentType));
         expect(valid).toEqual(false);
     });
 
@@ -147,7 +146,7 @@ describe('validateApiVersion()', () => {
         });
         const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateApiVersion();
-        expect(context.res).toEqual({ status: 400, body: 'Client API version was not specified' });
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingApiVersionQueryParameter));
         expect(valid).toEqual(false);
     });
 
@@ -160,7 +159,7 @@ describe('validateApiVersion()', () => {
         context.req.query['api-version'] = '2.0';
         const apiControllerMock = new TestableApiController(context);
         const valid = apiControllerMock.validateApiVersion();
-        expect(context.res).toEqual({ status: 400, body: 'Client API version is not supported' });
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
         expect(valid).toEqual(false);
     });
 
@@ -291,7 +290,7 @@ describe('tryGetPayload()', () => {
         const apiControllerMock = new TestableApiController(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
         expect(payload).toEqual(undefined);
-        expect(context.res.status).toEqual(400);
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
     });
 
     it('should parse valid content', () => {
