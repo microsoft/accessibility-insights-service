@@ -8,7 +8,6 @@ import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, S
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
-
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -79,9 +78,16 @@ export function registerAzureServicesToContainer(container: Container, credentia
 
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async context => {
-        const secretProvider = context.container.get(SecretProvider);
-        const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
-        const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        let accountName: string;
+        let accountKey: string;
+        if (process.env.AZURE_STORAGE_NAME !== undefined && process.env.AZURE_STORAGE_KEY !== undefined) {
+            accountName = process.env.AZURE_STORAGE_NAME;
+            accountKey = process.env.AZURE_STORAGE_KEY;
+        } else {
+            const secretProvider = context.container.get(SecretProvider);
+            accountName = await secretProvider.getSecret(secretNames.storageAccountName);
+            accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        }
 
         const sharedKeyCredential = new SharedKeyCredentialBlob(accountName, accountKey);
 
@@ -111,9 +117,16 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 
 function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
-        const secretProvider = context.container.get(SecretProvider);
-        const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
-        const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        let accountName: string;
+        let accountKey: string;
+        if (process.env.AZURE_STORAGE_NAME !== undefined && process.env.AZURE_STORAGE_KEY !== undefined) {
+            accountName = process.env.AZURE_STORAGE_NAME;
+            accountKey = process.env.AZURE_STORAGE_KEY;
+        } else {
+            const secretProvider = context.container.get(SecretProvider);
+            accountName = await secretProvider.getSecret(secretNames.storageAccountName);
+            accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        }
 
         const sharedKeyCredential = new SharedKeyCredential(accountName, accountKey);
         const pipeline = StorageURL.newPipeline(sharedKeyCredential);
