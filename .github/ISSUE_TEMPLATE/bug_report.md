@@ -7,29 +7,37 @@ assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## Describe the bug
 
-**Area**
+<!-- A clear and concise description of what the bug is. -->
+
+## Area
+
 - [ ] Install script
 - [ ] Update script
 - [ ] Service
 
-**To Reproduce**
+## To Reproduce
+
 Steps to reproduce the behavior:
+
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'
 4. See error
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Expected behavior
 
-**Log files**
-If applicable, any log files / console output that might help explain what the issue might be.
+<!-- A clear and concise description of what you expected to happen. -->
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+## Log files
 
-**Additional context**
-Add any other context about the problem here.
+<!-- If applicable, any log files / console output that might help explain what the issue might be. -->
+
+## Screenshots
+
+<!-- If applicable, add screenshots to help explain your problem. -->
+
+## Additional context
+
+<!-- Add any other context about the problem here. -->
