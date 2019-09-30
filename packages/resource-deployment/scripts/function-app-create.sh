@@ -212,7 +212,7 @@ deployWebApiFunctionApp() {
     deployWebApiArmTemplate $packageName
 
     # Add reply url to function app registration
-    if [ $environment = "dev" ]; then
+    if [ ! $clientIdPassed ]; then
         addReplyUrlToAadApp
     fi
 
@@ -254,6 +254,10 @@ fi
 if [ -z $clientId ] && [ ! $environment = "dev" ]; then
     echo "AAD application client ID option is required for the non-dev environment."
     exitWithUsageInfo
+fi
+
+if [ -z $clientId ]; then
+    clientIdPassed=false
 fi
 
 installAzureFunctionsCoreTools
