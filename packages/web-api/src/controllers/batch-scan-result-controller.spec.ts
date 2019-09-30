@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResultResponse } from '../api-contracts/scan-result-response';
@@ -116,24 +116,6 @@ describe(BatchScanResultController, () => {
     }
 
     describe('handleRequest', () => {
-        it('rejects request with invalid payload', async () => {
-            context.req.rawBody = undefined;
-            batchScanResultController = createScanResultController(context);
-
-            await batchScanResultController.handleRequest();
-
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
-        });
-
-        it('accepts request with an empty payload', async () => {
-            context.req.rawBody = '[]';
-            batchScanResultController = createScanResultController(context);
-
-            await batchScanResultController.handleRequest();
-
-            expect(context.res.status).toEqual(204);
-        });
-
         it('should return different response for different kind of scanIds', async () => {
             context.req.rawBody = JSON.stringify(batchRequestBody);
             batchScanResultController = createScanResultController(context);

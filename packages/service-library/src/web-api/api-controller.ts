@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 import { WebController } from './web-controller';
@@ -13,7 +14,7 @@ export abstract class ApiController extends WebController {
     protected abstract readonly serviceConfig: ServiceConfiguration;
 
     public hasPayload(): boolean {
-        return this.context.req.rawBody !== undefined;
+        return this.context.req.rawBody !== undefined && !isEmpty(this.tryGetPayload<any>());
     }
 
     /**

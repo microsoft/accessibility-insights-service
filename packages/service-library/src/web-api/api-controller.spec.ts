@@ -85,7 +85,7 @@ describe('validateContentType()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
             },
         });
         const apiControllerMock = new TestableApiController(context);
@@ -98,7 +98,7 @@ describe('validateContentType()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: { host: 'localhost' },
             },
         });
@@ -112,7 +112,7 @@ describe('validateContentType()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: {},
             },
         });
@@ -127,7 +127,7 @@ describe('validateContentType()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: {},
             },
         });
@@ -187,10 +187,22 @@ describe('hasPayload()', () => {
         expect(valid).toEqual(false);
     });
 
+    it('should detect empty payload in request', () => {
+        const context = <Context>(<unknown>{
+            req: {
+                rawBody: `[]`,
+            },
+        });
+        const apiControllerMock = new TestableApiController(context);
+        const valid = apiControllerMock.hasPayload();
+
+        expect(valid).toEqual(false);
+    });
+
     it('should detect payload in request', () => {
         const context = <Context>(<unknown>{
             req: {
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
             },
         });
         const apiControllerMock = new TestableApiController(context);
@@ -198,6 +210,10 @@ describe('hasPayload()', () => {
         expect(valid).toEqual(true);
     });
 });
+
+export interface Data {
+    id: number;
+}
 
 describe('validateRequest()', () => {
     it('should reject invalid request', () => {
@@ -215,7 +231,7 @@ describe('validateRequest()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: {},
                 query: {},
             },
@@ -245,7 +261,7 @@ describe('invoke()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: {},
                 query: {},
             },
@@ -262,7 +278,7 @@ describe('invoke()', () => {
         const context = <Context>(<unknown>{
             req: {
                 method: 'POST',
-                rawBody: `{ id: '1' }`,
+                rawBody: `{ "id": "1" }`,
                 headers: {},
                 query: {},
             },
@@ -284,7 +300,7 @@ describe('tryGetPayload()', () => {
     it('should detect invalid content', () => {
         const context = <Context>(<unknown>{
             req: {
-                rawBody: `{ id: 1`,
+                rawBody: `{ "id": "1"`,
             },
         });
         const apiControllerMock = new TestableApiController(context);
@@ -296,12 +312,12 @@ describe('tryGetPayload()', () => {
     it('should parse valid content', () => {
         const context = <Context>(<unknown>{
             req: {
-                rawBody: `{ "id": 1 }`,
+                rawBody: `{ "id": "1" }`,
             },
         });
         const apiControllerMock = new TestableApiController(context);
         const payload = apiControllerMock.tryGetPayload<PayloadType>();
-        expect(payload).toEqual({ id: 1 });
+        expect(payload).toEqual({ id: '1' });
     });
 });
 

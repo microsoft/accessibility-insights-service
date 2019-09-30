@@ -63,24 +63,6 @@ describe(ScanRequestController, () => {
     }
 
     describe(ScanRequestController, () => {
-        it('rejects request with invalid payload', async () => {
-            context.req.rawBody = '{ url: ';
-            scanRequestController = createScanRequestController(context);
-
-            await scanRequestController.handleRequest();
-
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument));
-        });
-
-        it('accepts request with an empty payload', async () => {
-            context.req.rawBody = '[]';
-            scanRequestController = createScanRequestController(context);
-
-            await scanRequestController.handleRequest();
-
-            expect(context.res.status).toEqual(204);
-        });
-
         it('rejects request with large payload', async () => {
             context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }]);
             scanRequestController = createScanRequestController(context);

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty, isNil } from 'lodash';
+import { isNil } from 'lodash';
 import { Logger } from 'logger';
 import { ApiController, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
@@ -26,18 +26,6 @@ export class ScanRequestController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanRunRequest[]>();
-        if (payload === undefined) {
-            return;
-        }
-
-        if (isEmpty(payload)) {
-            this.context.res = {
-                status: 204, // No Content
-            };
-
-            return;
-        }
-
         const maxLength = (await this.getRestApiConfig()).maxScanRequestBatchCount;
         if (payload.length > maxLength) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
@@ -66,7 +54,7 @@ export class ScanRequestController extends ApiController {
 
         scanRunRequests.forEach(scanRunRequest => {
             if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
-                // preserve guid origin for a single batch scope
+                // preserve GUID origin for a single batch scope
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
                 scanRequestsToBeStoredInDb.push({
                     scanId: scanId,

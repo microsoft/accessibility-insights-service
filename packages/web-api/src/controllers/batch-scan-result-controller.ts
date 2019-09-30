@@ -27,18 +27,6 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
-        if (payload === undefined) {
-            return;
-        }
-
-        if (isEmpty(payload)) {
-            this.context.res = {
-                status: 204, // No Content
-            };
-
-            return;
-        }
-
         const scanIds = payload.map(request => request.scanId);
         const responseBody: ScanResultResponse[] = [];
         const scanIdsToQuery: string[] = [];
