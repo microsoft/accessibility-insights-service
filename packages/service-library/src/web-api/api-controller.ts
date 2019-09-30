@@ -2,23 +2,27 @@
 // Licensed under the MIT License.
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import { injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 import { WebController } from './web-controller';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-unsafe-any
 
 @injectable()
 export abstract class ApiController extends WebController {
     protected abstract readonly serviceConfig: ServiceConfiguration;
 
     public hasPayload(): boolean {
-        return this.context.req.rawBody !== undefined;
+        return this.context.req.rawBody !== undefined && !isEmpty(this.tryGetPayload<any>());
     }
 
+    /**
+     * Try parse a JSON string from the HTTP request body.
+     * Will return undefined if parsing was unsuccessful; otherwise object representation of a JSON string.
+     */
     public tryGetPayload<T>(): T {
         try {
-            // tslint:disable-next-line: no-unsafe-any
             return JSON.parse(this.context.req.rawBody);
         } catch (error) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidJsonDocument);

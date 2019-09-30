@@ -6,7 +6,7 @@ import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { PageScanRunReportService } from 'service-library';
+import { HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
 import { Readable } from 'stream';
 import { IMock, It, Mock, Times } from 'typemoq';
 
@@ -88,14 +88,13 @@ describe(ScanReportController, () => {
     }
 
     describe('handleRequest', () => {
-        it('should return 422 if request body is empty array', async () => {
+        it('should return 400 if request id is invalid', async () => {
             context.bindingData.reportId = invalidId;
             scanReportController = createScanResultController(context);
 
             await scanReportController.handleRequest();
 
-            expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(`Invalid report id: ${invalidId}.`);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
         it('should return 404 if report not found', async () => {

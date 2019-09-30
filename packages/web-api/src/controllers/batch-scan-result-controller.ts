@@ -4,10 +4,10 @@ import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
-
+import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
@@ -17,6 +17,7 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
@@ -26,23 +27,19 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
-        if (isEmpty(payload)) {
-            this.context.res = {
-                status: 422, // Unprocessable Entity,
-            };
-
-            return;
-        }
-
         const scanIds = payload.map(request => request.scanId);
         const responseBody: ScanResultResponse[] = [];
         const scanIdsToQuery: string[] = [];
 
         for (const scanId of scanIds) {
             if (!this.isScanIdValid(scanId)) {
-                responseBody.push(this.getInvalidRequestResponse(scanId));
+                responseBody.push({
+                    scanId: scanId,
+                    ...WebApiErrorCodes.invalidResourceId.response,
+                });
                 continue;
             }
+
             const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
             if (isRequestMadeTooSoon === true) {
                 responseBody.push(this.getTooSoonRequestResponse(scanId));
@@ -52,12 +49,14 @@ export class BatchScanResultController extends BaseScanResultController {
         }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQuery);
-
         scanIdsToQuery.forEach(scanId => {
             if (isEmpty(scanResultItemMap[scanId])) {
-                responseBody.push(this.get404Response(scanId));
+                responseBody.push({
+                    scanId: scanId,
+                    ...WebApiErrorCodes.resourceNotFound.response,
+                });
             } else {
-                responseBody.push(this.getResponseFromDbDocument(scanResultItemMap[scanId]));
+                responseBody.push(this.getScanResultResponse(scanResultItemMap[scanId]));
             }
         });
 
@@ -66,9 +65,6 @@ export class BatchScanResultController extends BaseScanResultController {
             body: responseBody,
         };
 
-        this.logger.logInfo('batch scan result fetched');
+        this.logger.logInfo('Batch scan result fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
     }
-
-    // tslint:disable-next-line: no-empty
-    protected handleInvalidRequest(): void {}
 }

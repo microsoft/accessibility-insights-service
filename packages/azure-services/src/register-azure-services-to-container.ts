@@ -8,7 +8,6 @@ import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, S
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
-
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -18,6 +17,11 @@ import { cosmosContainerClientTypes, iocTypeNames } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+
+export interface StorageKey {
+    accountName: string;
+    accountKey: string;
+}
 
 export function registerAzureServicesToContainer(container: Container, credentialType: CredentialType = CredentialType.VM): void {
     setupAuthenticationMethod(container);
@@ -77,15 +81,28 @@ export function registerAzureServicesToContainer(container: Container, credentia
     container.bind(Queue).toSelf();
 }
 
+async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
+    if (process.env.AZURE_STORAGE_NAME !== undefined && process.env.AZURE_STORAGE_KEY !== undefined) {
+        return {
+            accountName: process.env.AZURE_STORAGE_NAME,
+            accountKey: process.env.AZURE_STORAGE_KEY,
+        };
+    } else {
+        const secretProvider = context.container.get(SecretProvider);
+
+        return {
+            accountName: await secretProvider.getSecret(secretNames.storageAccountName),
+            accountKey: await secretProvider.getSecret(secretNames.storageAccountKey),
+        };
+    }
+}
+
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async context => {
-        const secretProvider = context.container.get(SecretProvider);
-        const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
-        const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
+        const storageKey = await getStorageKey(context);
+        const sharedKeyCredential = new SharedKeyCredentialBlob(storageKey.accountName, storageKey.accountKey);
 
-        const sharedKeyCredential = new SharedKeyCredentialBlob(accountName, accountKey);
-
-        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, sharedKeyCredential);
+        return new BlobServiceClient(`https://${storageKey.accountName}.blob.core.windows.net`, sharedKeyCredential);
     });
 }
 
@@ -111,14 +128,11 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 
 function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
-        const secretProvider = context.container.get(SecretProvider);
-        const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
-        const accountKey = await secretProvider.getSecret(secretNames.storageAccountKey);
-
-        const sharedKeyCredential = new SharedKeyCredential(accountName, accountKey);
+        const storageKey = await getStorageKey(context);
+        const sharedKeyCredential = new SharedKeyCredential(storageKey.accountName, storageKey.accountKey);
         const pipeline = StorageURL.newPipeline(sharedKeyCredential);
 
-        return new ServiceURL(`https://${accountName}.queue.core.windows.net`, pipeline);
+        return new ServiceURL(`https://${storageKey.accountName}.queue.core.windows.net`, pipeline);
     });
 }
 
