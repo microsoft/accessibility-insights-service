@@ -37,7 +37,7 @@ addReplyUrlToAadApp() {
 
     for url in $replyUrls; do
         if [[ $url == $replyUrl ]]; then
-            echo "Reply Url '${replyUrl}' already exsits. Skipping adding reply URL to Azure Function AAD app application."
+            echo "Reply Url '${replyUrl}' already exists. Skipping adding reply URL to Azure Function AAD app application."
             return
         fi
     done
@@ -212,7 +212,7 @@ deployWebApiFunctionApp() {
     deployWebApiArmTemplate $packageName
 
     # Add reply url to function app registration
-    if [ ! $clientIdPassed ]; then
+    if [ "$clientIdPassed" = false]; then
         addReplyUrlToAadApp
     fi
 
@@ -251,13 +251,11 @@ if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
     exitWithUsageInfo
 fi
 
-if [ -z $clientId ] && [ ! $environment = "dev" ]; then
-    echo "AAD application client ID option is required for the non-dev environment."
-    exitWithUsageInfo
-fi
-
 if [ -z $clientId ]; then
     clientIdPassed=false
+    if [ ! $environment = "dev" ]; then
+    echo "AAD application client ID option is required for the non-dev environment."
+    exitWithUsageInfo
 fi
 
 installAzureFunctionsCoreTools
