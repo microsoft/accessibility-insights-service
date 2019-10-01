@@ -3,7 +3,7 @@
 
 // tslint:disable: no-unnecessary-class variable-name
 
-export declare type ScanRunErrorCodeName = 'InternalError';
+export declare type ScanRunErrorCodeName = 'InternalError' | 'UrlNavigationTimeout';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -16,5 +16,10 @@ export class ScanRunErrorCodes {
     public static internalError: ScanRunErrorCode = {
         code: 'InternalError',
         message: 'The scan engine encountered an internal error.',
+    };
+
+    public static urlNavigationTimeout: ScanRunErrorCode = {
+        code: 'UrlNavigationTimeout',
+        message: 'The URL navigation timeout exceeded.',
     };
 }

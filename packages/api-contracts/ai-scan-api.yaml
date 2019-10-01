@@ -278,6 +278,7 @@ components:
                     type: string
                     enum:
                         - InternalError
+                        - UrlNavigationTimeout
                 message:
                     type: string
         ScanRunErrorResponse:

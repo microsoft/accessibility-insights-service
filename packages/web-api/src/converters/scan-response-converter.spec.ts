@@ -4,14 +4,28 @@ import 'reflect-metadata';
 
 import { ScanRunErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb } from 'storage-documents';
+import { IMock, Mock, Times } from 'typemoq';
 import { RunState as RunStateRestApi, ScanResultResponse } from '../api-contracts/scan-result-response';
 import { ScanResponseConverter } from './scan-response-converter';
+import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 // tslint:disable: no-unsafe-any no-any
 
 const apiVersion = '1.0';
 const baseUrl = 'https://localhost/api/';
+const scanRunError = 'internal-error';
 let scanResponseConverter: ScanResponseConverter;
+let scanRunErrorConverterMock: IMock<ScanRunErrorConverter>;
+
+beforeEach(() => {
+    scanRunErrorConverterMock = Mock.ofType(ScanRunErrorConverter);
+    scanRunErrorConverterMock
+        .setup(o => o.getScanRunErrorCode(scanRunError))
+        .returns(() => ScanRunErrorCodes.internalError)
+        .verifiable(Times.once());
+
+    scanResponseConverter = new ScanResponseConverter(scanRunErrorConverterMock.object);
+});
 
 function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
     return {
@@ -77,7 +91,6 @@ function validateConverterShortResult(dbState: RunStateDb, clientState: RunState
     const pageScanDbResult = getPageScanResult(dbState);
     const responseExpected = getScanResultClientResponseShort(clientState);
 
-    scanResponseConverter = new ScanResponseConverter();
     const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
 
     expect(response).toEqual(responseExpected);
@@ -90,19 +103,18 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('queued', 'queued');
         validateConverterShortResult('running', 'running');
         validateConverterShortResult('failed', 'failed');
+        scanRunErrorConverterMock.verifyAll();
     });
 
     it('return scan run full form of client result', () => {
         const pageScanDbResult = getPageScanResult('completed');
         const responseExpected = getScanResultClientResponseFull('completed');
-        scanResponseConverter = new ScanResponseConverter();
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect(response).toEqual(responseExpected);
     });
 
     it('create full canonical REST Get Report URL', () => {
         const pageScanDbResult = getPageScanResult('completed');
-        scanResponseConverter = new ScanResponseConverter();
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportId?api-version=1.0');
     });
