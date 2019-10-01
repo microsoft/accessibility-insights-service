@@ -81,7 +81,7 @@ describe(ScanRequestController, () => {
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/' }, { url: '/invalid/url' }]);
             const expectedResponse = [
                 { scanId: guid2, url: 'https://abs/path/' },
-                { url: '/invalid/url', ...WebApiErrorCodes.invalidURL.response },
+                { url: '/invalid/url', error: WebApiErrorCodes.invalidURL.error },
             ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 0 }];
             scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());

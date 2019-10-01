@@ -1,13 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { WebApiErrorCodes } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { ScanReport, ScanResultResponse } from '../api-contracts/scan-result-response';
+import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 @injectable()
 export class ScanResponseConverter {
+    constructor(@inject(ScanRunErrorConverter) private readonly scanRunErrorConverter: ScanRunErrorConverter) {}
+
     public getScanResultResponse(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
         const runState: OnDemandPageScanRunState = pageScanResultDocument.run.state;
         switch (runState) {
@@ -29,7 +31,8 @@ export class ScanResponseConverter {
                     url: pageScanResultDocument.url,
                     run: {
                         state: pageScanResultDocument.run.state,
-                        error: WebApiErrorCodes.internalError.response.error,
+                        timestamp: pageScanResultDocument.run.timestamp,
+                        error: this.scanRunErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
                     },
                 };
             case 'completed':
@@ -43,6 +46,7 @@ export class ScanResponseConverter {
                     reports: this.getScanReports(baseUrl, apiVersion, pageScanResultDocument),
                     run: {
                         state: pageScanResultDocument.run.state,
+                        timestamp: pageScanResultDocument.run.timestamp,
                     },
                 };
         }

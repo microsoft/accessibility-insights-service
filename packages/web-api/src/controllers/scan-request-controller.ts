@@ -69,7 +69,7 @@ export class ScanRequestController extends ApiController {
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,
-                    ...WebApiErrorCodes.invalidURL.response,
+                    error: WebApiErrorCodes.invalidURL.error,
                 });
             }
         });
