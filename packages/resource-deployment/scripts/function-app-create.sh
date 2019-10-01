@@ -254,8 +254,9 @@ fi
 if [ -z $clientId ]; then
     clientIdPassed=false
     if [ ! $environment = "dev" ]; then
-    echo "AAD application client ID option is required for the non-dev environment."
-    exitWithUsageInfo
+        echo "AAD application client ID option is required for the non-dev environment."
+        exitWithUsageInfo
+    fi
 fi
 
 installAzureFunctionsCoreTools
