@@ -92,7 +92,7 @@ createCosmosDatabase "$onDemandScannerDbName"
 # Increase throughput for below collection only in case of prod
 # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
 if [ $environment = "prod" ]; then
-    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "10000"
+    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "25000"
     createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "2000"         # 30 days
     createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "2000" # 7 days
     createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "10000"     # 7 days
