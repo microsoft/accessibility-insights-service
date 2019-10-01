@@ -24,14 +24,17 @@ export interface WebApiError {
     // This type is part of the REST API client response.
     // Ensure compatibility when changing this type.
     code: WebApiErrorCodeName;
+    codeId: number;
     message: string;
 }
 
+// Code ID range 4001 - 5999
 export class WebApiErrorCodes {
     public static resourceNotFound: WebApiErrorCode = {
         statusCode: 404,
         error: {
             code: 'ResourceNotFound',
+            codeId: 4001,
             message: 'The specified resource does not exist.',
         },
     };
@@ -40,6 +43,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'InvalidResourceId',
+            codeId: 4002,
             message: 'The resource ID is not valid.',
         },
     };
@@ -48,6 +52,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'InvalidURL',
+            codeId: 4003,
             message: 'The URL is not valid.',
         },
     };
@@ -56,6 +61,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'InvalidJsonDocument',
+            codeId: 4004,
             message: 'The specified JSON is not syntactically valid.',
         },
     };
@@ -64,6 +70,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'MissingApiVersionQueryParameter',
+            codeId: 4005,
             message: `A required 'api-version' query parameter was not specified for this request.`,
         },
     };
@@ -72,6 +79,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'UnsupportedApiVersion',
+            codeId: 4006,
             message: `The specified API version is not supported.`,
         },
     };
@@ -80,6 +88,7 @@ export class WebApiErrorCodes {
         statusCode: 400,
         error: {
             code: 'MissingContentTypeHeader',
+            codeId: 4007,
             message: `The 'Content-Type' header was not specified.`,
         },
     };
@@ -88,6 +97,7 @@ export class WebApiErrorCodes {
         statusCode: 415,
         error: {
             code: 'UnsupportedContentType',
+            codeId: 4008,
             message: 'The specified request content type is not supported.',
         },
     };
@@ -96,6 +106,7 @@ export class WebApiErrorCodes {
         statusCode: 413,
         error: {
             code: 'RequestBodyTooLarge',
+            codeId: 4009,
             message: 'The size of the request body exceeds the maximum size permitted.',
         },
     };
@@ -104,6 +115,7 @@ export class WebApiErrorCodes {
         statusCode: 500,
         error: {
             code: 'InternalError',
+            codeId: 5001,
             message: 'The server encountered an internal error. Please retry the request.',
         },
     };

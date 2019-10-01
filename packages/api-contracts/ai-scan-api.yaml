@@ -251,6 +251,7 @@ components:
             type: object
             required:
                 - code
+                - codeId
                 - message
             properties:
                 code:
@@ -266,12 +267,18 @@ components:
                         - MissingContentTypeHeader
                         - UnsupportedContentType
                         - UnsupportedApiVersion
+                codeId:
+                    type: integer
+                    format: int32
+                    minimum: 4001
+                    maximum: 5999
                 message:
                     type: string
         ScanRunError:
             type: object
             required:
                 - code
+                - codeId
                 - message
             properties:
                 code:
@@ -279,6 +286,11 @@ components:
                     enum:
                         - InternalError
                         - UrlNavigationTimeout
+                codeId:
+                    type: integer
+                    format: int32
+                    minimum: 9001
+                    maximum: 9999
                 message:
                     type: string
         ScanRunErrorResponse:
