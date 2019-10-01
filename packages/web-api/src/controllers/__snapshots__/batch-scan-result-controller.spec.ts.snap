@@ -3,8 +3,10 @@
 exports[`BatchScanResultController handleRequest should return different response for different kind of scanIds 1`] = `
 Array [
   Object {
-    "code": "InvalidResourceId",
-    "error": "The resource ID is not valid.",
+    "error": Object {
+      "code": "InvalidResourceId",
+      "message": "The resource ID is not valid.",
+    },
     "scanId": "invalid-scan-id",
   },
   Object {
@@ -22,8 +24,10 @@ Array [
     "url": "url",
   },
   Object {
-    "code": "ResourceNotFound",
-    "error": "The specified resource does not exist.",
+    "error": Object {
+      "code": "ResourceNotFound",
+      "message": "The specified resource does not exist.",
+    },
     "scanId": "not-found-scan-id",
   },
 ]

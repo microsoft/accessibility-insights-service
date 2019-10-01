@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { WebApiErrorCodes } from 'service-library';
+import { ScanRunErrorCodes } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { ScanReport, ScanResultResponse } from '../api-contracts/scan-result-response';
 
@@ -29,7 +29,8 @@ export class ScanResponseConverter {
                     url: pageScanResultDocument.url,
                     run: {
                         state: pageScanResultDocument.run.state,
-                        error: WebApiErrorCodes.internalError.response.error,
+                        timestamp: pageScanResultDocument.run.timestamp,
+                        error: ScanRunErrorCodes.internalError,
                     },
                 };
             case 'completed':
@@ -43,6 +44,7 @@ export class ScanResponseConverter {
                     reports: this.getScanReports(baseUrl, apiVersion, pageScanResultDocument),
                     run: {
                         state: pageScanResultDocument.run.state,
+                        timestamp: pageScanResultDocument.run.timestamp,
                     },
                 };
         }

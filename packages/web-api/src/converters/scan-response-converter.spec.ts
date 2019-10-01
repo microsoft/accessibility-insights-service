@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { WebApiErrorCodes } from 'service-library';
+import { ScanRunErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb } from 'storage-documents';
 import { RunState as RunStateRestApi, ScanResultResponse } from '../api-contracts/scan-result-response';
 import { ScanResponseConverter } from './scan-response-converter';
@@ -68,7 +68,7 @@ function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultRes
         url: 'url',
         run: {
             state: state,
-            error: state === 'failed' ? WebApiErrorCodes.internalError.response.error : undefined,
+            error: state === 'failed' ? ScanRunErrorCodes.internalError : undefined,
         },
     };
 }

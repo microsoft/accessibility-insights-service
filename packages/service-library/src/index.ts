@@ -14,4 +14,5 @@ export { PageScanRequestProvider } from './data-providers/page-scan-request-prov
 export { PageScanRunReportService } from './data-service/page-scan-run-report-service';
 export { PartitionKeyFactory } from './factories/partition-key-factory';
 export * from './web-api/web-api-error-codes';
+export * from './web-api/scan-run-error-codes';
 export { HttpResponse } from './web-api/http-response';

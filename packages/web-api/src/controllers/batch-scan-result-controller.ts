@@ -35,7 +35,7 @@ export class BatchScanResultController extends BaseScanResultController {
             if (!this.isScanIdValid(scanId)) {
                 responseBody.push({
                     scanId: scanId,
-                    ...WebApiErrorCodes.invalidResourceId.response,
+                    error: WebApiErrorCodes.invalidResourceId.error,
                 });
                 continue;
             }
@@ -53,7 +53,7 @@ export class BatchScanResultController extends BaseScanResultController {
             if (isEmpty(scanResultItemMap[scanId])) {
                 responseBody.push({
                     scanId: scanId,
-                    ...WebApiErrorCodes.resourceNotFound.response,
+                    error: WebApiErrorCodes.resourceNotFound.error,
                 });
             } else {
                 responseBody.push(this.getScanResultResponse(scanResultItemMap[scanId]));

@@ -17,90 +17,94 @@ export declare type WebApiErrorCodeName =
 
 export interface WebApiErrorCode {
     statusCode: number;
-    response: {
-        code: WebApiErrorCodeName;
-        error: string;
-    };
+    error: WebApiError;
+}
+
+export interface WebApiError {
+    // This type is part of the REST API client response.
+    // Ensure compatibility when changing this type.
+    code: WebApiErrorCodeName;
+    message: string;
 }
 
 export class WebApiErrorCodes {
     public static resourceNotFound: WebApiErrorCode = {
         statusCode: 404,
-        response: {
+        error: {
             code: 'ResourceNotFound',
-            error: 'The specified resource does not exist.',
+            message: 'The specified resource does not exist.',
         },
     };
 
     public static invalidResourceId: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'InvalidResourceId',
-            error: 'The resource ID is not valid.',
+            message: 'The resource ID is not valid.',
         },
     };
 
     public static invalidURL: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'InvalidURL',
-            error: 'The URL is not valid.',
+            message: 'The URL is not valid.',
         },
     };
 
     public static invalidJsonDocument: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'InvalidJsonDocument',
-            error: 'The specified JSON is not syntactically valid.',
+            message: 'The specified JSON is not syntactically valid.',
         },
     };
 
     public static missingApiVersionQueryParameter: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'MissingApiVersionQueryParameter',
-            error: `A required 'api-version' query parameter was not specified for this request.`,
+            message: `A required 'api-version' query parameter was not specified for this request.`,
         },
     };
 
     public static unsupportedApiVersion: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'UnsupportedApiVersion',
-            error: `The specified API version is not supported.`,
+            message: `The specified API version is not supported.`,
         },
     };
 
     public static missingContentTypeHeader: WebApiErrorCode = {
         statusCode: 400,
-        response: {
+        error: {
             code: 'MissingContentTypeHeader',
-            error: `The 'Content-Type' header was not specified.`,
+            message: `The 'Content-Type' header was not specified.`,
         },
     };
 
     public static unsupportedContentType: WebApiErrorCode = {
         statusCode: 415,
-        response: {
+        error: {
             code: 'UnsupportedContentType',
-            error: 'The specified request content type is not supported.',
+            message: 'The specified request content type is not supported.',
         },
     };
 
     public static requestBodyTooLarge: WebApiErrorCode = {
         statusCode: 413,
-        response: {
+        error: {
             code: 'RequestBodyTooLarge',
-            error: 'The size of the request body exceeds the maximum size permitted.',
+            message: 'The size of the request body exceeds the maximum size permitted.',
         },
     };
 
     public static internalError: WebApiErrorCode = {
         statusCode: 500,
-        response: {
+        error: {
             code: 'InternalError',
-            error: 'The server encountered an internal error. Please retry the request.',
+            message: 'The server encountered an internal error. Please retry the request.',
         },
     };
 }
