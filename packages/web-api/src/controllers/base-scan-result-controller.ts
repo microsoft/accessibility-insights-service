@@ -1,20 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
-import { Dictionary, isEmpty, keyBy } from 'lodash';
+import { Dictionary, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
-import { RunState, ScanReport, ScanResultErrorResponse, ScanResultResponse } from './../api-contracts/scan-result-response';
+import { OnDemandPageScanResult } from 'storage-documents';
+import { ScanResponseConverter } from '../converters/scan-response-converter';
+import { ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
     protected abstract readonly guidGenerator: GuidGenerator;
-
-    // tslint:disable-next-line: no-any
-    protected abstract handleInvalidRequest(scanId: string): void;
+    protected abstract readonly scanResponseConverter: ScanResponseConverter;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.getScanRequestedTime(scanId);
+        const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
         const timeCurrent = new Date();
         const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
 
@@ -27,26 +26,12 @@ export abstract class BaseScanResultController extends ApiController {
         return keyBy(scanResultItems, item => item.id);
     }
 
-    protected getScanRequestedTime(scanId: string): Date {
-        return this.guidGenerator.getGuidTimestamp(scanId);
-    }
-
     protected getTooSoonRequestResponse(scanId: string): ScanResultResponse {
         return {
             scanId,
             url: undefined,
             run: {
-                state: 'accepted',
-            },
-        };
-    }
-
-    protected get404Response(scanId: string): ScanResultResponse {
-        return {
-            scanId,
-            url: undefined,
-            run: {
-                state: 'not found',
+                state: 'pending',
             },
         };
     }
@@ -55,31 +40,10 @@ export abstract class BaseScanResultController extends ApiController {
         return this.guidGenerator.isValidV6Guid(scanId);
     }
 
-    // tslint:disable-next-line: no-any
-    protected getInvalidRequestResponse(scanId: string): ScanResultErrorResponse {
-        return {
-            scanId: scanId,
-            error: `Unprocessable Entity: ${scanId}.`,
-        };
-    }
+    protected getScanResultResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
+        const segment = '/api/';
+        const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
 
-    protected getResponseFromDbDocument(dbDocument: OnDemandPageScanResult): ScanResultResponse {
-        let reports: ScanReport[] = [];
-        if (!isEmpty(dbDocument.reports)) {
-            reports = dbDocument.reports.map(report => {
-                return {
-                    reportId: report.reportId,
-                    format: report.format,
-                };
-            });
-        }
-
-        return {
-            scanId: dbDocument.id,
-            url: dbDocument.url,
-            scanResult: dbDocument.scanResult,
-            reports: reports,
-            run: dbDocument.run,
-        };
+        return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResultDocument);
     }
 }

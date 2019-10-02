@@ -19,6 +19,7 @@ import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
+
 // tslint:disable: no-any
 
 describe(Runner, () => {
@@ -310,7 +311,7 @@ describe(Runner, () => {
         };
         result.scanResult = {
             issueCount: 0,
-            state: 'unknown',
+            state: 'pending',
         };
 
         return result;

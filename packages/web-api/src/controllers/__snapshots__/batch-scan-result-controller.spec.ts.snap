@@ -3,36 +3,34 @@
 exports[`BatchScanResultController handleRequest should return different response for different kind of scanIds 1`] = `
 Array [
   Object {
-    "error": "Unprocessable Entity: invalid-scan-id.",
+    "error": Object {
+      "code": "InvalidResourceId",
+      "codeId": 4002,
+      "message": "The resource ID is not valid.",
+    },
     "scanId": "invalid-scan-id",
   },
   Object {
     "run": Object {
-      "state": "accepted",
+      "state": "pending",
     },
     "scanId": "requested-too-soon-scan-id",
     "url": undefined,
   },
   Object {
-    "reports": Array [
-      Object {
-        "format": "sarif",
-        "reportId": "report-id",
-      },
-    ],
     "run": Object {
       "state": "running",
     },
     "scanId": "valid-scan-id",
-    "scanResult": undefined,
     "url": "url",
   },
   Object {
-    "run": Object {
-      "state": "not found",
+    "error": Object {
+      "code": "ResourceNotFound",
+      "codeId": 4001,
+      "message": "The specified resource does not exist.",
     },
     "scanId": "not-found-scan-id",
-    "url": undefined,
   },
 ]
 `;

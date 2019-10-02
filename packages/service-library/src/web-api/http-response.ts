@@ -16,8 +16,7 @@ export class HttpResponse {
         return {
             status: webApiErrorCode.statusCode,
             body: {
-                code: webApiErrorCode.response.code,
-                error: webApiErrorCode.response.error,
+                error: webApiErrorCode.error,
             },
         };
     }
