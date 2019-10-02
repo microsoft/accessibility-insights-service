@@ -39,7 +39,7 @@ restartBatchPools() {
 
         for nodeId in $poolNodeIds; do
             echo "Restarting node with nodeId $nodeId under poolId $poolId"
-            az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --subscription $subscription --node-reboot-option requeue 1>/dev/null
+            az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --subscription $subscription --node-reboot-option taskcompletion 1>/dev/null
         done
     done
 }
