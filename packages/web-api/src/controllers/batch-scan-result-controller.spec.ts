@@ -8,9 +8,9 @@ import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-
+import { ScanResultResponse } from '../api-contracts/scan-result-response';
+import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
 describe(BatchScanResultController, () => {
@@ -20,6 +20,9 @@ describe(BatchScanResultController, () => {
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
+    let scanResponseConverterMock: IMock<ScanResponseConverter>;
+    const apiVersion = '1.0';
+    const baseUrl = 'https://localhost/api/';
     const validScanId = 'valid-scan-id';
     const notFoundScanId = 'not-found-scan-id';
     const invalidScanId = 'invalid-scan-id';
@@ -32,32 +35,33 @@ describe(BatchScanResultController, () => {
     ];
     const scanFetchedResponse: OnDemandPageScanResult = {
         id: validScanId,
-        partitionKey: 'pk',
+        partitionKey: 'partition-key',
         url: 'url',
         run: {
             state: 'running',
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
-        reports: [
-            {
-                reportId: 'report-id',
-                format: 'sarif',
-                href: 'href',
-            },
-        ],
+    };
+    const scanClientResponseForFetchedResponse: ScanResultResponse = {
+        scanId: validScanId,
+        url: 'url',
+        run: {
+            state: 'running',
+        },
     };
 
     beforeEach(() => {
         context = <Context>(<unknown>{
             req: {
+                url: `${baseUrl}scans/$batch/`,
                 method: 'POST',
                 headers: {},
                 rawBody: `[]`,
                 query: {},
             },
         });
-        context.req.query['api-version'] = '1.0';
+        context.req.query['api-version'] = apiVersion;
         context.req.headers['content-type'] = 'application/json';
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         onDemandPageScanRunResultProviderMock
@@ -79,16 +83,22 @@ describe(BatchScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 300,
+                    minimumWaitTimeforScanResultQueryInSeconds: 120,
                 } as RestApiConfig;
             });
 
         loggerMock = Mock.ofType<Logger>();
+
+        scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
+        scanResponseConverterMock
+            .setup(o => o.getScanResultResponse(baseUrl, apiVersion, scanFetchedResponse))
+            .returns(() => scanClientResponseForFetchedResponse);
     });
 
     function createScanResultController(contextReq: Context): BatchScanResultController {
         const controller = new BatchScanResultController(
             onDemandPageScanRunResultProviderMock.object,
+            scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -106,15 +116,6 @@ describe(BatchScanResultController, () => {
     }
 
     describe('handleRequest', () => {
-        it('should return 422 if request body is empty array', async () => {
-            context.req.rawBody = undefined;
-            batchScanResultController = createScanResultController(context);
-
-            await batchScanResultController.handleRequest();
-
-            expect(context.res.status).toEqual(422);
-        });
-
         it('should return different response for different kind of scanIds', async () => {
             context.req.rawBody = JSON.stringify(batchRequestBody);
             batchScanResultController = createScanResultController(context);

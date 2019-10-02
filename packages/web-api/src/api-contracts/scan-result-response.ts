@@ -1,24 +1,26 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ScanRunErrorCodeName, WebApiError } from 'service-library';
+
 export declare type LinkType = 'self';
 export declare type ReportFormat = 'sarif';
-export declare type ScanState = 'unknown' | 'pass' | 'fail';
-export declare type RunState = 'not found' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type ScanState = 'pending' | 'pass' | 'fail';
+export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
-export interface ScanResultErrorResponse {
+export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
+
+export interface ScanRunResultResponse {
     scanId: string;
-    error: string;
+    url: string;
+    scanResult?: ScanResult;
+    reports?: ScanReport[];
+    run: ScanRun;
 }
 
-export type ScanResultResponse =
-    | {
-          scanId: string;
-          url: string;
-          scanResult?: ScanResult;
-          reports?: ScanReport[];
-          run: ScanRun;
-      }
-    | ScanResultErrorResponse;
+export interface ScanRunErrorResponse {
+    scanId: string;
+    error: WebApiError;
+}
 
 export interface ScanResult {
     state: ScanState;
@@ -28,16 +30,21 @@ export interface ScanResult {
 export interface ScanReport {
     reportId: string;
     format: ReportFormat;
-    links?: Links;
-}
-
-export interface ScanRun {
-    state: RunState;
-    timestamp?: string;
-    error?: string;
+    links: Links;
 }
 
 export interface Links {
     rel: LinkType;
     href: string;
+}
+
+export interface ScanRun {
+    state: RunState;
+    timestamp?: string;
+    error?: ScanRunError;
+}
+
+export interface ScanRunError {
+    code: ScanRunErrorCodeName;
+    message: string;
 }

@@ -56,7 +56,7 @@ export class Runner {
         } catch (error) {
             this.logger.logInfo(`Scan failed ${error}`);
             pageScanResult.run = this.createRunResult('failed', error instanceof Error ? error.message : `${error}`);
-            pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
+            pageScanResult.scanResult = { state: 'pending', issueCount: 0 };
             pageScanResult.reports = [
                 {
                     reportId: '',
@@ -84,7 +84,7 @@ export class Runner {
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Changing page status to failed`);
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
-            pageScanResult.scanResult = { state: 'unknown', issueCount: 0 };
+            pageScanResult.scanResult = { state: 'pending', issueCount: 0 };
             pageScanResult.reports = [
                 {
                     reportId: '',

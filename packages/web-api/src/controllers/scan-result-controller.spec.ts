@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ScanResultErrorResponse } from '../api-contracts/scan-result-response';
+import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { ScanResultController } from './scan-result-controller';
+
+// tslint:disable: no-unsafe-any
 
 describe(ScanResultController, () => {
     let scanResultController: ScanResultController;
@@ -19,37 +21,33 @@ describe(ScanResultController, () => {
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<Logger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
+    let scanResponseConverterMock: IMock<ScanResponseConverter>;
+    const apiVersion = '1.0';
+    const baseUrl = 'https://localhost/api/';
     const scanId = 'scan-id-1';
     const tooSoonRequestResponse: ScanResultResponse = {
         scanId,
         url: undefined,
         run: {
-            state: 'accepted',
-        },
-    };
-    const scanNotFoundResponse: ScanResultResponse = {
-        scanId,
-        url: undefined,
-        run: {
-            state: 'not found',
+            state: 'pending',
         },
     };
     const dbResponse: OnDemandPageScanResult = {
         id: scanId,
-        partitionKey: 'pk',
+        partitionKey: 'partition-key',
         url: 'url',
         run: {
             state: 'running',
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
-        reports: [
-            {
-                reportId: 'report-id',
-                format: 'sarif',
-                href: 'href',
-            },
-        ],
+    };
+    const scanClientResponseForDbResponse: ScanResultResponse = {
+        scanId: scanId,
+        url: 'url',
+        run: {
+            state: 'running',
+        },
     };
     const scanResponse: ScanResultResponse = {
         scanId,
@@ -57,17 +55,12 @@ describe(ScanResultController, () => {
         run: {
             state: 'running',
         },
-        reports: [
-            {
-                format: 'sarif',
-                reportId: 'report-id',
-            },
-        ],
     };
 
     beforeEach(() => {
         context = <Context>(<unknown>{
             req: {
+                url: `${baseUrl}scans/$batch/`,
                 method: 'GET',
                 headers: {},
                 query: {},
@@ -76,11 +69,10 @@ describe(ScanResultController, () => {
                 scanId,
             },
         });
-        context.req.query['api-version'] = '1.0';
+        context.req.query['api-version'] = apiVersion;
         context.req.headers['content-type'] = 'application/json';
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        // tslint:disable-next-line: no-unsafe-any
         onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -95,16 +87,19 @@ describe(ScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 300,
+                    minimumWaitTimeforScanResultQueryInSeconds: 120,
                 } as RestApiConfig;
             });
 
         loggerMock = Mock.ofType<Logger>();
+
+        scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
     });
 
     function createScanResultController(contextReq: Context): ScanResultController {
         const controller = new ScanResultController(
             onDemandPageScanRunResultProviderMock.object,
+            scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -122,11 +117,7 @@ describe(ScanResultController, () => {
     }
 
     describe('handleRequest', () => {
-        it('should return 422 for invalid scanId', async () => {
-            const invalidRequestResponse: ScanResultErrorResponse = {
-                scanId: scanId,
-                error: `Unprocessable Entity: ${scanId}.`,
-            };
+        it('should return 400 for invalid scan Id', async () => {
             scanResultController = createScanResultController(context);
             guidGeneratorMock.reset();
             guidGeneratorMock
@@ -137,8 +128,7 @@ describe(ScanResultController, () => {
             await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(422);
-            expect(context.res.body).toEqual(invalidRequestResponse);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
         it('should return a default response for requests made too early', async () => {
@@ -150,7 +140,7 @@ describe(ScanResultController, () => {
             await scanResultController.handleRequest();
 
             guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(202);
+            expect(context.res.status).toEqual(200);
             expect(context.res.body).toEqual(tooSoonRequestResponse);
         });
 
@@ -168,8 +158,7 @@ describe(ScanResultController, () => {
 
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
-            expect(context.res.status).toEqual(404);
-            expect(context.res.body).toEqual(scanNotFoundResponse);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
         });
 
         it('should return 200 if successfully fetched result', async () => {
@@ -178,12 +167,15 @@ describe(ScanResultController, () => {
             onDemandPageScanRunResultProviderMock.reset();
 
             onDemandPageScanRunResultProviderMock
-                // tslint:disable-next-line: no-unsafe-any
                 .setup(async om => om.readScanRuns([scanId]))
                 .returns(async () => {
                     return Promise.resolve([dbResponse]);
                 })
                 .verifiable(Times.once());
+
+            scanResponseConverterMock
+                .setup(o => o.getScanResultResponse(baseUrl, apiVersion, dbResponse))
+                .returns(() => scanClientResponseForDbResponse);
 
             await scanResultController.handleRequest();
 
