@@ -8,11 +8,11 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -a <address prefix> -s <subnet address prefix> -r <resource group>"
+Usage: $0 -r <resource group> [-a <address prefix (optional)> -s <subnet address prefix (optional)>]"
     exit 1
 }
 
-# Set default Api gateway template file
+# Set default vnet template file
 templateFilePath="${0%/*}/../templates/vnet.template.json"
 
 # Read script arguments
@@ -25,9 +25,14 @@ while getopts ":a:s:r:" option; do
     esac
 done
 
-if [[ -z $addressPrefix ]] || [[ -z $subnetAddressPrefix ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
+
+addressPrefix=${addressPrefix:-"10.2.0.0/16"}
+subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
+
+echo "[create-vnet] Starting vnet creation"
 
 vnetResource=$(az group deployment create \
     --resource-group "$resourceGroupName" \
@@ -36,4 +41,4 @@ vnetResource=$(az group deployment create \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-echo $vnetResource
+echo "[create-vnet] VNET created = $vnetResource"

@@ -39,8 +39,8 @@
                 "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
         },
-        "virtualNetworks_ak_vnet_francecentral_azurebatch_externalid": {
-            "defaultValue": "/subscriptions/76eb140e-abd4-4a17-ad98-534d0f8d2759/resourceGroups/vnet-francecentral-azurebatch/providers/Microsoft.Network/virtualNetworks/ak-vnet-francecentral-azurebatch",
+        "vnetResource": {
+            "defaultValue": "",
             "type": "string"
         }
     },
@@ -136,7 +136,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('virtualNetworks_ak_vnet_francecentral_azurebatch_externalid'), '/subnets/default')]"
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -193,7 +193,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('virtualNetworks_ak_vnet_francecentral_azurebatch_externalid'), '/subnets/default')]"
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -250,7 +250,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('virtualNetworks_ak_vnet_francecentral_azurebatch_externalid'), '/subnets/default')]"
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -307,7 +307,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('virtualNetworks_ak_vnet_francecentral_azurebatch_externalid'), '/subnets/default')]"
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {

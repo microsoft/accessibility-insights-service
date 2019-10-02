@@ -23,6 +23,7 @@ export storageAccountName
 export clientId
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
+export vnetResource
 
 exitWithUsageInfo() {
     echo "
@@ -123,6 +124,9 @@ parallelizableProcesses+=" $!"
 parallelizableProcesses+=" $!"
 
 . "${0%/*}/setup-cosmos-db.sh" &
+parallelizableProcesses+=" $!"
+
+. "${0%/*}/create-vnet.sh"
 parallelizableProcesses+=" $!"
 
 waitForProcesses "${parallelizableProcesses[@]}"
