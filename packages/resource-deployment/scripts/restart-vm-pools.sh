@@ -28,6 +28,10 @@ restartBatchPools() {
     local batchAccountName
     getBatchAccountName batchAccountName
 
+    # Login into Azure Batch account
+    echo "Logging into '$batchAccountName' Azure Batch account"
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+
     echo "Querying pools for $batchAccountName"
     batchPoolIds=$(az batch pool list --account-name "$batchAccountName" --subscription "$subscription" --query "[*].id" -o tsv)
 
