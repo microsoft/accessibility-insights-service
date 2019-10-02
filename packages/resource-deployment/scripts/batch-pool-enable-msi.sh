@@ -81,17 +81,17 @@ assignSystemIdentity() {
         # Wait until we are certain the resource group exists
         waiting=false
         end=$((SECONDS + 600))
-        resourceGroupExists=$(az group exists --name '$vmssResourceGroup')
+        resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
         while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
             if [ "$waiting" != true ]; then
                 waiting=true
-                echo "Waiting for resource group '$vmssResourceGroup'"
+                echo "Waiting for resource group $vmssResourceGroup"
                 printf " - Running .."
             fi
 
             sleep 5
             printf "."
-            resourceGroupExists=$(az group exists --name '$vmssResourceGroup')
+            resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
         done
 
         # Exit if timed out
