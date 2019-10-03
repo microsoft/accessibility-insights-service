@@ -97,7 +97,7 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/create-storage-account.sh"
 
-. "${0%/*}/create-datalake-storage-account.sh"
+# . "${0%/*}/create-datalake-storage-account.sh"
 
 . "${0%/*}/upload-files.sh"
 
