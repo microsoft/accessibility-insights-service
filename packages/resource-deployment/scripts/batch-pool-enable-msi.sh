@@ -80,7 +80,8 @@ assignSystemIdentity() {
 
         # Wait until we are certain the resource group exists
         waiting=false
-        end=$((SECONDS + 600))
+        timeout=7200
+        end=$((SECONDS + $timeout))
         resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
         while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
             if [ "$waiting" != true ]; then
@@ -99,6 +100,8 @@ assignSystemIdentity() {
             echo "Resource group $vmssResourceGroup does not exist"
             exit 1
         fi
+
+        echo "Resource group found after $((SECONDS - (end - timeout)))"
 
         vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
         vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
