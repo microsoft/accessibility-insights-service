@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { WebController } from './web-controller';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-unsafe-any
 
 export class TestableWebController extends WebController {
     public readonly apiVersion = '1.0';
@@ -33,7 +33,7 @@ export class TestableWebController extends WebController {
 let context: Context;
 
 beforeEach(() => {
-    context = <Context>(<unknown>{ bindingDefinitions: {} });
+    context = <Context>(<unknown>{ bindingDefinitions: {}, res: {} });
 });
 
 describe(WebController, () => {
@@ -49,5 +49,29 @@ describe(WebController, () => {
         await controller.invoke(context, 'invalid');
         expect(controller.validateRequestInvoked).toEqual(true);
         expect(controller.handleRequestInvoked).toEqual(false);
+    });
+
+    it('should add content-type response header if no any', async () => {
+        const controller = new TestableWebController();
+        await controller.invoke(context, 'valid');
+        expect(controller.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    });
+
+    it('should add content-type response header if if other', async () => {
+        const controller = new TestableWebController();
+        context.res.headers = {
+            'content-length': 100,
+        };
+        await controller.invoke(context, 'valid');
+        expect(controller.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+    });
+
+    it('should skip adding content-type response header if any', async () => {
+        const controller = new TestableWebController();
+        context.res.headers = {
+            'content-type': 'text/plain',
+        };
+        await controller.invoke(context, 'valid');
+        expect(controller.context.res.headers['content-type']).toEqual('text/plain');
     });
 });
