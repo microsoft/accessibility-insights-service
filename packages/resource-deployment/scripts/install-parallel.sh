@@ -114,11 +114,11 @@ echo "Starting parallel processes.."
 . "${0%/*}/create-api-management.sh" &
 apiManagmentProcess="$!"
 
-. "${0%/*}/create-datalake-storage-account.sh" &
-parallelizableProcesses="$!"
+# . "${0%/*}/create-datalake-storage-account.sh" &
+# parallelizableProcesses="$!"
 
 . "${0%/*}/upload-files.sh" &
-parallelizableProcesses+=" $!"
+parallelizableProcesses+="$!"
 
 . "${0%/*}/create-queues.sh" &
 parallelizableProcesses+=" $!"

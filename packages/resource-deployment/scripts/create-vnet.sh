@@ -32,7 +32,7 @@ fi
 addressPrefix=${addressPrefix:-"10.2.0.0/16"}
 subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
 
-echo "[create-vnet] Starting vnet creation"
+echo "[create-vnet] Starting Virtual Network creation"
 
 vnetResource=$(az group deployment create \
     --resource-group "$resourceGroupName" \
@@ -41,4 +41,4 @@ vnetResource=$(az group deployment create \
     --query "properties.outputResources[].id" \
     -o tsv)
 
-echo "[create-vnet] VNET created = $vnetResource"
+echo "[create-vnet] Virtual Network created = $vnetResource"
