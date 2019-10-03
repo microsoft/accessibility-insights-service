@@ -23,6 +23,7 @@ export storageAccountName
 export clientId
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
+export vnetResource
 
 exitWithUsageInfo() {
     echo "
@@ -106,6 +107,8 @@ az account set --subscription "$subscription"
 . "${0%/*}/setup-cosmos-db.sh"
 
 . "${0%/*}/app-insights-create.sh"
+
+. "${0%/*}/create-vnet.sh"
 
 . "${0%/*}/batch-account-create.sh"
 

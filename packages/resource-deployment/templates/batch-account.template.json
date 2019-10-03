@@ -38,6 +38,10 @@
             "metadata": {
                 "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
+        },
+        "vnetResource": {
+            "defaultValue": "",
+            "type": "string"
         }
     },
     "variables": {
@@ -131,6 +135,9 @@
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
                 },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                },
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": 2,
@@ -184,6 +191,9 @@
                         },
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
+                },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -239,6 +249,9 @@
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
                 },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                },
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": 3,
@@ -292,6 +305,9 @@
                         },
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
+                },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {

@@ -23,6 +23,7 @@ export storageAccountName
 export clientId
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
+export vnetResource
 
 exitWithUsageInfo() {
     echo "
@@ -113,16 +114,19 @@ echo "Starting parallel processes.."
 . "${0%/*}/create-api-management.sh" &
 apiManagmentProcess="$!"
 
-. "${0%/*}/create-datalake-storage-account.sh" &
-parallelizableProcesses="$!"
+# . "${0%/*}/create-datalake-storage-account.sh" &
+# parallelizableProcesses="$!"
 
 . "${0%/*}/upload-files.sh" &
-parallelizableProcesses+=" $!"
+parallelizableProcesses+="$!"
 
 . "${0%/*}/create-queues.sh" &
 parallelizableProcesses+=" $!"
 
 . "${0%/*}/setup-cosmos-db.sh" &
+parallelizableProcesses+=" $!"
+
+. "${0%/*}/create-vnet.sh"
 parallelizableProcesses+=" $!"
 
 waitForProcesses "${parallelizableProcesses[@]}"
