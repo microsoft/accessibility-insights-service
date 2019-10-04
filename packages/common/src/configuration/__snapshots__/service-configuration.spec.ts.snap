@@ -39,14 +39,24 @@ Object {
     },
   },
   "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
     "maxScanRequestBatchCount": Object {
       "default": 1000,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minimumWaitTimeforScanResultQueryInSeconds": Object {
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "scanRequestProcessingDelayInSeconds": Object {
       "default": 15,
-      "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
+      "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
   },
@@ -160,14 +170,24 @@ Object {
     },
   },
   "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
     "maxScanRequestBatchCount": Object {
       "default": 1000,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
-    "minimumWaitTimeforScanResultQueryInSeconds": Object {
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "scanRequestProcessingDelayInSeconds": Object {
       "default": 15,
-      "doc": "Minimum time interval in seconds before a scan result query can be processed after requested.",
+      "doc": "The scan request processing delay interval in seconds for a new submitted request.",
       "format": "int",
     },
   },

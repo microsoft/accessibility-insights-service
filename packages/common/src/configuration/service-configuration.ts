@@ -34,7 +34,9 @@ export interface ScanRunTimeConfig {
 
 export interface RestApiConfig {
     maxScanRequestBatchCount: number;
-    minimumWaitTimeforScanResultQueryInSeconds: number;
+    scanRequestProcessingDelayInSeconds: number;
+    minScanPriorityValue: number;
+    maxScanPriorityValue: number;
 }
 
 export interface RuntimeConfig {
@@ -200,10 +202,24 @@ export class ServiceConfiguration {
                     default: 1000,
                     doc: 'Maximum number of scan requests in a single HTTP client request.',
                 },
-                minimumWaitTimeforScanResultQueryInSeconds: {
+                scanRequestProcessingDelayInSeconds: {
                     format: 'int',
                     default: 15,
-                    doc: 'Minimum time interval in seconds before a scan result query can be processed after requested.',
+                    doc: 'The scan request processing delay interval in seconds for a new submitted request.',
+                },
+                minScanPriorityValue: {
+                    format: 'int',
+                    default: -1000,
+                    doc:
+                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
+                },
+                maxScanPriorityValue: {
+                    format: 'int',
+                    default: 1000,
+                    doc:
+                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
                 },
             },
         };

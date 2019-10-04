@@ -51,7 +51,6 @@
         ]
     },
     "restApiConfig": {
-        "maxScanRequestBatchCount": 1000,
-        "minimumWaitTimeforScanResultQueryInSeconds": 300
+        "scanRequestProcessingDelayInSeconds": 300
     }
 }
