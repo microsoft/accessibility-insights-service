@@ -49,5 +49,8 @@
             "label-content-name-mismatch",
             "landmark-complementary-is-top-level"
         ]
+    },
+    "restApiConfig": {
+        "scanRequestProcessingDelayInSeconds": 300
     }
 }
