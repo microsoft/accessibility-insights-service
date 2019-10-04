@@ -48,7 +48,7 @@ export class ScanRequestController extends ApiController {
         }
 
         const batchId = this.guidGenerator.createGuid();
-        const processedData = await this.getProcessedRequestData(batchId, payload);
+        const processedData = this.getProcessedRequestData(batchId, payload);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
         this.context.res = {
             status: 202, // Accepted
@@ -62,34 +62,32 @@ export class ScanRequestController extends ApiController {
         });
     }
 
-    private async getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): Promise<ProcessedBatchRequestData> {
+    private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
 
-        await Promise.all(
-            scanRunRequests.map(async scanRunRequest => {
-                const runRequestValidationResult = await this.validateRunRequest(scanRunRequest);
-                if (runRequestValidationResult.valid) {
-                    // preserve GUID origin for a single batch scope
-                    const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-                    scanRequestsToBeStoredInDb.push({
-                        scanId: scanId,
-                        priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
-                        url: scanRunRequest.url,
-                    });
+        scanRunRequests.forEach(scanRunRequest => {
+            const runRequestValidationResult = this.validateRunRequest(scanRunRequest);
+            if (runRequestValidationResult.valid) {
+                // preserve GUID origin for a single batch scope
+                const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
+                scanRequestsToBeStoredInDb.push({
+                    scanId: scanId,
+                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
+                    url: scanRunRequest.url,
+                });
 
-                    scanResponses.push({
-                        scanId: scanId,
-                        url: scanRunRequest.url,
-                    });
-                } else {
-                    scanResponses.push({
-                        url: scanRunRequest.url,
-                        error: runRequestValidationResult.error,
-                    });
-                }
-            }),
-        );
+                scanResponses.push({
+                    scanId: scanId,
+                    url: scanRunRequest.url,
+                });
+            } else {
+                scanResponses.push({
+                    url: scanRunRequest.url,
+                    error: runRequestValidationResult.error,
+                });
+            }
+        });
 
         return {
             scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,
@@ -97,7 +95,7 @@ export class ScanRequestController extends ApiController {
         };
     }
 
-    private async validateRunRequest(scanRunRequest: ScanRunRequest): Promise<RunRequestValidationResult> {
+    private validateRunRequest(scanRunRequest: ScanRunRequest): RunRequestValidationResult {
         if (Url.tryParseUrlString(scanRunRequest.url) === undefined) {
             return { valid: false, error: WebApiErrorCodes.invalidURL.error };
         }
