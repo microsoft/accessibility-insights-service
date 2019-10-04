@@ -1,19 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { GuidGenerator, ServiceConfiguration, Url } from 'common';
+import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController, HttpResponse, WebApiErrorCodes } from 'service-library';
+import { ApiController, HttpResponse, WebApiError, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 import { ScanDataProvider } from '../providers/scan-data-provider';
 
+// tslint:disable: no-any
+
+interface ProcessedBatchRequestData {
+    scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
+    scanResponses: ScanRunResponse[];
+}
+
+interface RunRequestValidationResult {
+    valid: boolean;
+    error?: WebApiError;
+}
+
 @injectable()
 export class ScanRequestController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-post-scans';
+    private config: RestApiConfig;
 
     public constructor(
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
@@ -25,16 +38,17 @@ export class ScanRequestController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
+        await this.init();
+
         const payload = this.tryGetPayload<ScanRunRequest[]>();
-        const maxLength = (await this.getRestApiConfig()).maxScanRequestBatchCount;
-        if (payload.length > maxLength) {
+        if (payload.length > this.config.maxScanRequestBatchCount) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
 
             return;
         }
 
         const batchId = this.guidGenerator.createGuid();
-        const processedData = this.getProcessedRequestData(batchId, payload);
+        const processedData = await this.getProcessedRequestData(batchId, payload);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
         this.context.res = {
             status: 202, // Accepted
@@ -48,40 +62,54 @@ export class ScanRequestController extends ApiController {
         });
     }
 
-    private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
+    private async getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): Promise<ProcessedBatchRequestData> {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
 
-        scanRunRequests.forEach(scanRunRequest => {
-            if (Url.tryParseUrlString(scanRunRequest.url) !== undefined) {
-                // preserve GUID origin for a single batch scope
-                const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-                scanRequestsToBeStoredInDb.push({
-                    scanId: scanId,
-                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
-                    url: scanRunRequest.url,
-                });
+        await Promise.all(
+            scanRunRequests.map(async scanRunRequest => {
+                const runRequestValidationResult = await this.validateRunRequest(scanRunRequest);
+                if (runRequestValidationResult.valid) {
+                    // preserve GUID origin for a single batch scope
+                    const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
+                    scanRequestsToBeStoredInDb.push({
+                        scanId: scanId,
+                        priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
+                        url: scanRunRequest.url,
+                    });
 
-                scanResponses.push({
-                    scanId: scanId,
-                    url: scanRunRequest.url,
-                });
-            } else {
-                scanResponses.push({
-                    url: scanRunRequest.url,
-                    error: WebApiErrorCodes.invalidURL.error,
-                });
-            }
-        });
+                    scanResponses.push({
+                        scanId: scanId,
+                        url: scanRunRequest.url,
+                    });
+                } else {
+                    scanResponses.push({
+                        url: scanRunRequest.url,
+                        error: runRequestValidationResult.error,
+                    });
+                }
+            }),
+        );
 
         return {
             scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,
             scanResponses: scanResponses,
         };
     }
-}
 
-interface ProcessedBatchRequestData {
-    scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
-    scanResponses: ScanRunResponse[];
+    private async validateRunRequest(scanRunRequest: ScanRunRequest): Promise<RunRequestValidationResult> {
+        if (Url.tryParseUrlString(scanRunRequest.url) === undefined) {
+            return { valid: false, error: WebApiErrorCodes.invalidURL.error };
+        }
+
+        if (scanRunRequest.priority < this.config.minScanPriorityValue || scanRunRequest.priority > this.config.maxScanPriorityValue) {
+            return { valid: false, error: WebApiErrorCodes.outOfRangePriority.error };
+        }
+
+        return { valid: true };
+    }
+
+    private async init(): Promise<void> {
+        this.config = await this.getRestApiConfig();
+    }
 }

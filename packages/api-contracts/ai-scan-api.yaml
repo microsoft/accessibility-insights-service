@@ -267,6 +267,7 @@ components:
                         - MissingContentTypeHeader
                         - UnsupportedContentType
                         - UnsupportedApiVersion
+                        - OutOfRangePriority
                 codeId:
                     type: integer
                     format: int32

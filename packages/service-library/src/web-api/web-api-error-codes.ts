@@ -13,7 +13,8 @@ export declare type WebApiErrorCodeName =
     | 'MissingApiVersionQueryParameter'
     | 'MissingContentTypeHeader'
     | 'UnsupportedContentType'
-    | 'UnsupportedApiVersion';
+    | 'UnsupportedApiVersion'
+    | 'OutOfRangePriority';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -108,6 +109,15 @@ export class WebApiErrorCodes {
             code: 'RequestBodyTooLarge',
             codeId: 4009,
             message: 'The size of the request body exceeds the maximum size permitted.',
+        },
+    };
+
+    public static outOfRangePriority: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'OutOfRangePriority',
+            codeId: 4010,
+            message: 'A priority specified in the request is outside the permissible range.',
         },
     };
 
