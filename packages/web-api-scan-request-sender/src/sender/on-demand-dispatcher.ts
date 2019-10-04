@@ -40,6 +40,7 @@ export class OnDemandDispatcher {
                 itemCount = response.item.length;
                 if (itemCount > 0) {
                     await this.sender.sendRequestToScan(response.item);
+                    this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
                 }
             } while (continuationToken !== undefined);
             currentQueueSize = await this.sender.getCurrentQueueSize();
