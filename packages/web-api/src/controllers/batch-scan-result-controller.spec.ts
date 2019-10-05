@@ -83,7 +83,7 @@ describe(BatchScanResultController, () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
                     maxScanRequestBatchCount: 2,
-                    minimumWaitTimeforScanResultQueryInSeconds: 120,
+                    scanRequestProcessingDelayInSeconds: 120,
                 } as RestApiConfig;
             });
 

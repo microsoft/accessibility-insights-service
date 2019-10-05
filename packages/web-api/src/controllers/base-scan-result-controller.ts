@@ -15,9 +15,9 @@ export abstract class BaseScanResultController extends ApiController {
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
         const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
         const timeCurrent = new Date();
-        const minimumWaitTimeforScanResultQueryInSeconds = (await this.getRestApiConfig()).minimumWaitTimeforScanResultQueryInSeconds;
+        const scanRequestProcessingDelayInSeconds = (await this.getRestApiConfig()).scanRequestProcessingDelayInSeconds;
 
-        return timeCurrent.getTime() - timeRequested.getTime() <= minimumWaitTimeforScanResultQueryInSeconds * 1000;
+        return timeCurrent.getTime() - timeRequested.getTime() <= scanRequestProcessingDelayInSeconds * 1000;
     }
 
     protected async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {

@@ -118,7 +118,7 @@
             "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d1_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
                 "taskSchedulingPolicy": {
@@ -175,7 +175,7 @@
             "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d11_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 2,
                 "taskSchedulingPolicy": {
@@ -232,7 +232,7 @@
             "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d11_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 2,
                 "taskSchedulingPolicy": {
@@ -289,7 +289,7 @@
             "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d1_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
                 "taskSchedulingPolicy": {
