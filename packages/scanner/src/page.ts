@@ -35,6 +35,10 @@ export class Page {
             return { unscannable: true, error: `Cannot scan ${url} because it is not a html page.` };
         }
 
+        if (!response.ok()) {
+            return { error: `Error accessing ${url}. Status code: ${response.status()}` };
+        }
+
         try {
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
