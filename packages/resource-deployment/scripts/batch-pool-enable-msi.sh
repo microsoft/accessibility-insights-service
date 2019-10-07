@@ -77,6 +77,32 @@ getVmssInfo() {
 assignSystemIdentity() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
+
+        # Wait until we are certain the resource group exists
+        waiting=false
+        timeout=1800 # timeout after half an hour
+        end=$((SECONDS + $timeout))
+        resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
+        while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
+            if [ "$waiting" != true ]; then
+                waiting=true
+                echo "Waiting for resource group $vmssResourceGroup"
+                printf " - Running .."
+            fi
+
+            sleep 5
+            printf "."
+            resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
+        done
+
+        # Exit if timed out
+        if [ "$resourceGroupExists" = false ]; then
+            echo "Could not find resource group $vmssResourceGroup after $timeout seconds"
+            exit 1
+        fi
+
+        echo "Resource group $vmssResourceGroup found after $((SECONDS - (end - timeout))) seconds"
+
         vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
         vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
 
