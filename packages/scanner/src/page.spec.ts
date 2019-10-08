@@ -8,6 +8,7 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 
+import { ok } from 'assert';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { WebDriver } from 'service-library';
@@ -181,7 +182,7 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: `Error accessing ${scanUrl}. Status code: 500`,
+            error: `Error accessing ${scanUrl}: 500 status code text`,
         };
         const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
 
@@ -246,6 +247,9 @@ function makeResponse(options: ResponseOptions): Puppeteer.Response {
         },
         ok: () => {
             return statusCode >= 200 && statusCode < 300;
+        },
+        statusText: () => {
+            return 'status code text';
         },
         // tslint:disable-next-line: no-any
     } as any;

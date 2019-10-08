@@ -42,7 +42,7 @@ export class Page {
         }
 
         if (!response.ok()) {
-            return { error: `Error accessing ${url}. Status code: ${response.status()}` };
+            return { error: `Error accessing ${url}: ${response.status()} ${response.statusText()}` };
         }
 
         try {
