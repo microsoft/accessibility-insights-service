@@ -192,6 +192,8 @@ export class ServiceConfiguration {
                         'form-field-multiple-labels',
                         'label-content-name-mismatch',
                         'landmark-complementary-is-top-level',
+                        'scrollable-region-focusable',
+                        'label-content-name-mismatch',
                     ],
                     doc: 'Axe core rule exclusion list',
                 },

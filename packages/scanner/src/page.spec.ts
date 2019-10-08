@@ -8,11 +8,22 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 
+import { ServiceConfiguration } from 'common';
+import { Logger } from 'logger';
+import { WebDriver } from 'service-library';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
 
 class PuppeteerPageMock {
+    private readonly expectedViewPortSetting: Puppeteer.Viewport = {
+        width: 1920,
+        height: 1080,
+        deviceScaleFactor: 1,
+    };
+
+    private viewPortSettingInvoked = false;
+
     constructor(
         private readonly gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
         private readonly waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
@@ -20,6 +31,10 @@ class PuppeteerPageMock {
     ) {}
 
     public async goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
+        if (this.viewPortSettingInvoked !== true) {
+            throw new Error('viewport should be set before navigation');
+        }
+
         return this.gotoMock(url, options);
     }
 
@@ -29,6 +44,11 @@ class PuppeteerPageMock {
 
     public async setBypassCSP(enabled: boolean): Promise<void> {
         return this.setBypassCSPMock(enabled);
+    }
+
+    public async setViewport(viewport: Puppeteer.Viewport): Promise<void> {
+        expect(viewport).toEqual(this.expectedViewPortSetting);
+        this.viewPortSettingInvoked = true;
     }
 }
 
@@ -183,6 +203,29 @@ describe('Page', () => {
 
         expect(result).toEqual(errorResult);
     });
+
+    it.skip('validates scanning in dev box', async () => {
+        const webDriver = new WebDriver(Mock.ofType(Logger).object);
+        const browser = await webDriver.launch();
+        const getBrowser = () => {
+            return browser;
+        };
+        page = new Page(getBrowser, new AxePuppeteerFactory(new ServiceConfiguration()));
+
+        await page.create();
+
+        await page.enableBypassCSP();
+
+        const results = await page.scanForA11yIssues('https://www.bing.com');
+
+        let violationCount = 0;
+        results.results.violations.map(v => {
+            violationCount += v.nodes.length;
+        });
+
+        console.log('violations count >>>', violationCount);
+        console.log(results);
+    }, 50000);
 });
 
 interface ResponseOptions {
