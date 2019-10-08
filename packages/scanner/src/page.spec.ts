@@ -136,9 +136,9 @@ describe('Page', () => {
     });
 
     it('should analyze accessibility issues, even if error thrown when waitForNavigation', async () => {
-        const axeResults: AxeResults = <AxeResults>(<unknown>{ type: 'AxeResults' });
-        const scanResults: AxeScanResults = { results: axeResults };
         const scanUrl = 'https://www.example.com';
+        const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
+        const scanResults: AxeScanResults = { results: axeResults };
         const response: Puppeteer.Response = {
             headers: () => {
                 return { 'content-type': 'text/html' };
@@ -200,7 +200,7 @@ describe('Page', () => {
 
         await page.enableBypassCSP();
 
-        const results = await page.scanForA11yIssues('https://www.bing.com');
+        const results = await page.scanForA11yIssues('https://tinyurl.com/mrhd5x');
 
         let violationCount = 0;
         results.results.violations.map(v => {
@@ -210,4 +210,46 @@ describe('Page', () => {
         console.log('violations count >>>', violationCount);
         console.log(results);
     }, 50000);
+
+    it('should add the redirected url to results', async () => {
+        // tslint:disable-next-line: no-object-literal-type-assertion
+        const axeResults = createEmptyAxeResults('https://www.redirect-to.com');
+        const scanUrl = 'https://www.redirect-from.com';
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            redirectedFromUrl: scanUrl,
+        };
+        const response: Puppeteer.Response = {
+            headers: () => {
+                return { 'content-type': 'text/html' };
+            },
+            // tslint:disable-next-line: no-any
+        } as any;
+        gotoMock
+            .setup(async goto => goto(scanUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerFactoryMock
+            // tslint:disable-next-line: no-unsafe-any
+            .setup(async o => o.createAxePuppeteer(It.isAny()))
+            // tslint:disable-next-line: no-any
+            .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+
+        expect(result).toEqual(scanResults);
+    });
 });
+
+function createEmptyAxeResults(url: string): AxeResults {
+    // tslint:disable-next-line: no-object-literal-type-assertion
+    return { url: url } as AxeResults;
+}

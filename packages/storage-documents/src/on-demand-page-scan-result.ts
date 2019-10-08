@@ -12,6 +12,7 @@ export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued'
  */
 export interface OnDemandPageScanResult extends StorageDocument {
     url: string;
+    redirectedFromUrl?: string;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;

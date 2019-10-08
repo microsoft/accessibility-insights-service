@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
+import { loggerTypes } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -50,7 +51,14 @@ export class Page {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
-        return { results: scanResults };
+        if (scanResults.url !== url) {
+            return {
+                results: scanResults,
+                redirectedFromUrl: url,
+            };
+        } else {
+            return { results: scanResults };
+        }
     }
 
     public async close(): Promise<void> {
