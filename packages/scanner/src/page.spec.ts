@@ -8,7 +8,6 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 
-import { ok } from 'assert';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { WebDriver } from 'service-library';
