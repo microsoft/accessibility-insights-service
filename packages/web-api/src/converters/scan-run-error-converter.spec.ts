@@ -15,7 +15,7 @@ describe(ScanRunErrorConverter, () => {
         let errorCode = scanRunErrorConverter.getScanRunErrorCode(undefined);
         expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
 
-        errorCode = scanRunErrorConverter.getScanRunErrorCode('unknown error');
+        errorCode = scanRunErrorConverter.getScanRunErrorCode('');
         expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
     });
 
@@ -25,5 +25,12 @@ describe(ScanRunErrorConverter, () => {
             '{ TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
         );
         expect(errorCode).toEqual(ScanRunErrorCodes.urlNavigationTimeout);
+    });
+
+    it('return full error message on internal server error', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode('unknown error');
+        expect(errorCode.code).toEqual(ScanRunErrorCodes.internalError.code);
+        expect(errorCode.message).toEqual(`${ScanRunErrorCodes.internalError.message} unknown error`);
     });
 });

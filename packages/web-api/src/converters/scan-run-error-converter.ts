@@ -10,6 +10,16 @@ export class ScanRunErrorConverter {
             return ScanRunErrorCodes.urlNavigationTimeout;
         }
 
-        return ScanRunErrorCodes.internalError;
+        return this.createInternalErrorWithMessage(scanError);
+    }
+
+    private createInternalErrorWithMessage(appendMessage: string): ScanRunErrorCode {
+        if (appendMessage === undefined || appendMessage.length === 0) {
+            return ScanRunErrorCodes.internalError;
+        }
+        const errorCode: ScanRunErrorCode = { ...ScanRunErrorCodes.internalError };
+        errorCode.message += ` ${appendMessage}`;
+
+        return errorCode;
     }
 }
