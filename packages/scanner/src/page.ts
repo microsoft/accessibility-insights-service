@@ -26,6 +26,12 @@ export class Page {
     }
 
     public async scanForA11yIssues(url: string): Promise<AxeScanResults> {
+        await this.puppeteerPage.setViewport({
+            width: 1920,
+            height: 1080,
+            deviceScaleFactor: 1,
+        });
+
         const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
