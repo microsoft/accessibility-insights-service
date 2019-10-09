@@ -181,7 +181,7 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: `Error accessing ${scanUrl}: 500 status code text`,
+            error: `The URL ${scanUrl} returned unsuccessful response: 500 status code text`,
         };
         const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
 

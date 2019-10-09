@@ -29,7 +29,7 @@ export class ScanRunErrorConverter {
         if (/TimeoutError: Navigation Timeout Exceeded:/i.test(scanError)) {
             return ScanRunErrorCodes.urlNavigationTimeout;
         }
-        if (/Error accessing .+?: [0-9]+ .+/.test(scanError)) {
+        if (/The URL .+? returned unsuccessful response: [0-9]+ .+/.test(scanError)) {
             return this.createHTTPResponseError(scanError);
         }
 

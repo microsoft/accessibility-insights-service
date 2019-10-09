@@ -48,7 +48,7 @@ export class Page {
         }
 
         if (!response.ok()) {
-            return { error: `Error accessing ${url}: ${response.status()} ${response.statusText()}` };
+            return { error: `The URL ${url} returned unsuccessful response: ${response.status()} ${response.statusText()}` };
         }
 
         try {

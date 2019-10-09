@@ -67,7 +67,9 @@ describe(ScanRunErrorConverter, () => {
 
     it('convert to http error code', () => {
         scanRunErrorConverter = new ScanRunErrorConverter();
-        const errorCode = scanRunErrorConverter.getScanRunErrorCode('Error accessing http://bing.com: 404 page not found');
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode(
+            'The URL http://bing.com returned unsuccessful response: 404 page not found',
+        );
         expect(errorCode.codeId).toEqual(ScanRunErrorCodes.httpErrorCode.codeId);
         expect(errorCode.message).toEqual(`${ScanRunErrorCodes.httpErrorCode.message}: 404 page not found`);
     });
