@@ -98,7 +98,10 @@ export class Runner {
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = [await this.saveScanReport(axeScanResults)];
             if (axeScanResults.redirectedFromUrl !== undefined) {
+                this.logger.logInfo(`URL was redirected, adding redirected URL to document`);
                 pageScanResult.redirectedFromUrl = axeScanResults.redirectedFromUrl;
+            } else {
+                this.logger.logInfo(`URL was not redirected.`);
             }
         }
     }
