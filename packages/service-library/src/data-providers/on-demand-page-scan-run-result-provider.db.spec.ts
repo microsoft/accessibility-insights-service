@@ -124,11 +124,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
             resultUpdate.scanResult = { state: 'pass', issueCount: 3 };
 
             await testSubject.writeScanRuns([result]);
-            await testSubject.updateScanRun(result);
-            const itemsInDb = await testSubject.readScanRuns([result.id]);
+            const itemsInDb = await testSubject.updateScanRun(result);
 
-            maskSystemProperties(itemsInDb);
-            expect(itemsInDb).toEqual([expectedSavedResult]);
+            maskSystemProperties([itemsInDb]);
+            expect(itemsInDb).toEqual(expectedSavedResult);
         });
 
         function maskSystemProperties(results: OnDemandPageScanResult[]): void {

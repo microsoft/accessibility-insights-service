@@ -12,7 +12,7 @@ import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-respon
 import { client } from './client';
 import { RetryOptions } from './retry-options';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-unsafe-any
 
 export class CosmosContainerClient {
     constructor(
@@ -60,12 +60,13 @@ export class CosmosContainerClient {
     }
 
     /**
-     * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
+     * Writes document to a storage if document does not exist; otherwise, merges the provided document with the storage document.
      *
-     * Source document properties that resolve to undefined are skipped on merge if a current storage document value exists.
+     * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
+     * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
      * Array and plain object properties are merged recursively. Other objects and value types are overridden.
      *
-     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
+     * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
@@ -84,8 +85,8 @@ export class CosmosContainerClient {
         }
 
         const mergedDocument = response.item;
-        // preserve storage document _etag value
         _.mergeWith(mergedDocument, document, (target: T, source: T, key) => {
+            // preserve the storage document _etag value
             if (key === '_etag') {
                 return target;
             }
@@ -93,7 +94,10 @@ export class CosmosContainerClient {
             return undefined;
         });
 
-        return this.cosmosClientWrapper.upsertItem<T>(mergedDocument, this.dbName, this.collectionName, effectivePartitionKey);
+        // normalize document properties by converting from null to undefined
+        const normalizedDocument = <T>this.getNormalizeMergedDocument(mergedDocument);
+
+        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName, effectivePartitionKey);
     }
 
     /**
@@ -185,6 +189,16 @@ export class CosmosContainerClient {
         } while (token !== undefined);
 
         return result;
+    }
+
+    private getNormalizeMergedDocument(document: any): any {
+        return _.mapValues(document, value => {
+            if (_.isPlainObject(value)) {
+                return this.getNormalizeMergedDocument(value);
+            }
+
+            return value === null ? undefined : value;
+        });
     }
 
     private getEffectivePartitionKey<T extends CosmosDocument>(document: T, partitionKey: string): string {

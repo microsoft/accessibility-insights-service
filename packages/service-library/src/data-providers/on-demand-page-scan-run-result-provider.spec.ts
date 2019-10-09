@@ -58,15 +58,17 @@ describe(OnDemandPageScanRunResultProvider, () => {
             id: 'partition1id1',
         } as OnDemandPageScanResult;
         const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        partition1Result1Saved._etag = 'etag-1';
 
         setupVerifiableGetNodeCall('bucket1', 'partition1id1');
         cosmosContainerClientMock
             .setup(c => c.mergeOrWriteDocument(partition1Result1ToBeSaved))
-            .returns(() => Promise.resolve(undefined))
+            .returns(() => Promise.resolve({ item: partition1Result1Saved } as CosmosOperationResponse<OnDemandPageScanResult>))
             .verifiable();
 
-        await testSubject.updateScanRun(partition1Result1);
-
+        const savedDocument = await testSubject.updateScanRun(partition1Result1);
+        expect(savedDocument).toEqual(partition1Result1Saved);
         verifyAll();
     });
 
@@ -85,7 +87,6 @@ describe(OnDemandPageScanRunResultProvider, () => {
         it('throws if one of the query call fails', async () => {
             const scanIdsToFetch = ['partition1id1', 'partition2id1', 'partition1id2'];
             const call1Result: any[] = [{ id: 'result 1' }, { id: 'result 2' }];
-            const call2Result: any[] = [{ id: 'result 3' }];
 
             setupVerifiableGetNodeCall('bucket1', 'partition1id1', 'partition1id2');
             setupVerifiableGetNodeCall('bucket2', 'partition2id1');
@@ -147,6 +148,18 @@ describe(OnDemandPageScanRunResultProvider, () => {
             expect(results).toEqual(call1Result.concat(call2Result));
 
             verifyAll();
+        });
+
+        it('read scan result', async () => {
+            const scanRunDocument = getDocumentWithSysProps('id1', 'bucket1');
+            setupVerifiableGetNodeCall('bucket1', 'id1');
+            cosmosContainerClientMock
+                .setup(o => o.readDocument('id1', 'bucket1'))
+                .returns(() => Promise.resolve({ item: scanRunDocument } as CosmosOperationResponse<OnDemandPageScanResult>))
+                .verifiable();
+
+            const scanRun = await testSubject.readScanRun('id1');
+            expect(scanRun).toEqual(scanRunDocument);
         });
     });
 

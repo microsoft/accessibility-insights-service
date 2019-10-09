@@ -15,18 +15,8 @@ export class OnDemandPageScanRunResultProvider {
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
     ) {}
 
-    public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
-        const scanRunsByPartition = groupBy(scanRuns, scanRun => {
-            this.setSystemProperties(scanRun);
-
-            return scanRun.partitionKey;
-        });
-
-        await Promise.all(
-            Object.keys(scanRunsByPartition).map(async pKey => {
-                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
-            }),
-        );
+    public async readScanRun(scanId: string): Promise<OnDemandPageScanResult> {
+        return (await this.cosmosContainerClient.readDocument<OnDemandPageScanResult>(scanId, this.getPartitionKey(scanId))).item;
     }
 
     public async readScanRuns(scanIds: string[]): Promise<OnDemandPageScanResult[]> {
@@ -56,10 +46,24 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: OnDemandPageScanResult): Promise<void> {
+    public async updateScanRun(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanResult> {
         this.setSystemProperties(pageScanResult);
 
-        await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult);
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult)).item;
+    }
+
+    public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
+        const scanRunsByPartition = groupBy(scanRuns, scanRun => {
+            this.setSystemProperties(scanRun);
+
+            return scanRun.partitionKey;
+        });
+
+        await Promise.all(
+            Object.keys(scanRunsByPartition).map(async pKey => {
+                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
+            }),
+        );
     }
 
     private getReadScanQueryForScanIds(scanIds: string[]): string {

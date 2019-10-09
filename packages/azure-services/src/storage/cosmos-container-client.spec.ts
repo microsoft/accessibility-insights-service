@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any
 import 'reflect-metadata';
 
 import { Logger } from 'logger';
@@ -9,6 +8,8 @@ import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 import { CosmosContainerClient } from './cosmos-container-client';
+
+// tslint:disable: no-import-side-effect no-any no-unsafe-any no-null-keyword
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 
@@ -117,7 +118,12 @@ describe('mergeOrWriteDocument()', () => {
             valueA: 'document-valueA',
             valueB: <string>undefined,
             valueC: 'document-valueC',
-            valueD: ['document-valueD-item1'],
+            valueD: ['document-valueD-item1', 'storage-valueD-item4'],
+            valueE: <string>null,
+            valueH: {
+                id: 'id-1',
+                prop: <string>null,
+            },
             _etag: 'document-etag',
         };
 
@@ -126,16 +132,26 @@ describe('mergeOrWriteDocument()', () => {
             valueA: 'storage-valueA',
             valueB: 'storage-valueB',
             valueD: ['storage-valueD-item3', 'storage-valueD-item4'],
+            valueE: 'storage-valueE',
+            valueH: {
+                id: 'id-1',
+                prop: 'prop-1',
+            },
             _etag: 'storage-etag',
         };
 
-        const expectedItem = {
+        const expectedMergedItem = {
             id: 'id',
-            valueA: 'document-valueA',
-            valueB: 'storage-valueB',
-            valueC: 'document-valueC',
-            valueD: ['document-valueD-item1', 'storage-valueD-item4'],
-            _etag: 'storage-etag',
+            valueA: 'document-valueA', // replaced from a source
+            valueB: 'storage-valueB', // keep a target value when the source property is undefined
+            valueC: 'document-valueC', // assigned from a source to new property
+            valueD: ['document-valueD-item1', 'storage-valueD-item4'], // position based array merge
+            valueE: <string>undefined, // reset a target to undefined when the source property is null
+            valueH: {
+                id: 'id-1',
+                prop: <string>undefined, // reset a child object's target property to undefined when the source property is null
+            },
+            _etag: 'storage-etag', // keep target value based on a property name
         };
 
         let mergedItem = {};
@@ -153,7 +169,7 @@ describe('mergeOrWriteDocument()', () => {
 
         const response = await cosmosContainerClient.mergeOrWriteDocument(documentItem, partitionKey);
 
-        expect(response.item).toEqual(expectedItem);
+        expect(response.item).toEqual(expectedMergedItem);
         cosmosClientWrapperMock.verifyAll();
     });
 });
