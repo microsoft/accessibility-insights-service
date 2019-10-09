@@ -226,6 +226,33 @@ describe('Page', () => {
         console.log('violations count >>>', violationCount);
         console.log(results);
     }, 50000);
+
+    it('should identify errors thrown by goto', async () => {
+        const scanUrl = 'https://www.problem-url.com';
+        const errorResult: AxeScanResults = {
+            error: `Puppeteer navigation to ${scanUrl} failed: unknown error`,
+        };
+
+        gotoMock
+            .setup(async goto => goto(scanUrl, gotoOptions))
+            .returns(async () => {
+                throw new Error('unknown error');
+            })
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+        axePuppeteerFactoryMock
+            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        expect(result).toEqual(errorResult);
+    });
 });
 
 interface ResponseOptions {

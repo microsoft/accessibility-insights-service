@@ -15,7 +15,7 @@ describe(ScanRunErrorConverter, () => {
         let errorCode = scanRunErrorConverter.getScanRunErrorCode(undefined);
         expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
 
-        errorCode = scanRunErrorConverter.getScanRunErrorCode('');
+        errorCode = scanRunErrorConverter.getScanRunErrorCode('unknown error');
         expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
     });
 
@@ -27,10 +27,48 @@ describe(ScanRunErrorConverter, () => {
         expect(errorCode).toEqual(ScanRunErrorCodes.urlNavigationTimeout);
     });
 
-    it('return full error message on internal server error', () => {
+    it('convert to ssl error code', () => {
         scanRunErrorConverter = new ScanRunErrorConverter();
-        const errorCode = scanRunErrorConverter.getScanRunErrorCode('unknown error');
-        expect(errorCode.code).toEqual(ScanRunErrorCodes.internalError.code);
-        expect(errorCode.message).toEqual(`${ScanRunErrorCodes.internalError.message} unknown error`);
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode(
+            'Puppeteer navigation to http://www.bing.com failed: net::ERR_CERT_AUTHORITY_INVALID',
+        );
+        expect(errorCode).toEqual(ScanRunErrorCodes.sslError);
+    });
+
+    it('convert to main resource load failure error code', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode(
+            'Puppeteer navigation to http://www.bing.com failed: net::ERR_CONNECTION_REFUSED',
+        );
+        expect(errorCode).toEqual(ScanRunErrorCodes.mainResourceLoadFailure);
+    });
+
+    it('convert to invalid url error code', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode(
+            'Puppeteer navigation to http://www.bing.com failed: Cannot navigate to invalid URL',
+        );
+        expect(errorCode).toEqual(ScanRunErrorCodes.invalidUrl);
+    });
+
+    it('convert to empty page error code', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode('Puppeteer navigation to http://www.bing.com failed: net::ERR_ABORTED');
+        expect(errorCode).toEqual(ScanRunErrorCodes.emptyPage);
+    });
+
+    it('convert to navigation error code', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode(
+            'Puppeteer navigation to http://www.bing.com failed: unknown error message',
+        );
+        expect(errorCode).toEqual(ScanRunErrorCodes.navigationError);
+    });
+
+    it('convert to http error code', () => {
+        scanRunErrorConverter = new ScanRunErrorConverter();
+        const errorCode = scanRunErrorConverter.getScanRunErrorCode('Error accessing http://bing.com: 404 page not found');
+        expect(errorCode.codeId).toEqual(ScanRunErrorCodes.httpErrorCode.codeId);
+        expect(errorCode.message).toEqual(`${ScanRunErrorCodes.httpErrorCode.message}: 404 page not found`);
     });
 });
