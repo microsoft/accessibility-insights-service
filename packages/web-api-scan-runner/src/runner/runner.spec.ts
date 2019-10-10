@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-object-literal-type-assertion no-unsafe-any
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
@@ -13,14 +12,14 @@ import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
-import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
-// tslint:disable: no-any
+// tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
 describe(Runner, () => {
     let runner: Runner;
@@ -39,21 +38,13 @@ describe(Runner, () => {
         priority: 1,
     };
 
-    // tslint:disable-next-line:mocha-no-side-effect-code
     const onDemandPageScanResult: OnDemandPageScanResult = {
         url: 'url',
-        scanResult: undefined,
-        reports: [
-            {
-                reportId: '',
-                href: '',
-                format: 'sarif',
-            },
-        ],
+        scanResult: null,
+        reports: null,
         run: {
             state: 'queued' as OnDemandPageScanRunState,
             timestamp: 'timestamp',
-            error: '',
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
@@ -61,7 +52,6 @@ describe(Runner, () => {
         partitionKey: 'item-partitionKey',
     };
 
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const passedAxeScanResults: AxeScanResults = {
         results: {
             url: 'url',
@@ -78,10 +68,9 @@ describe(Runner, () => {
         unscannable: true,
         error: 'test scan error - not a valid page',
     };
+
     const blobFilePath = 'test sarif blob path';
-    // tslint:disable-next-line:mocha-no-side-effect-code
     const parsedSarifContent = { testSarifContent: true } as any;
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const axeScanResultsWithViolations: AxeScanResults = {
         results: {
             url: 'url',
@@ -143,12 +132,12 @@ describe(Runner, () => {
         const failureMessage = 'failed to launch';
         webDriverTaskMock
             .setup(async o => o.launch())
-            .returns(async () => Promise.reject('failed to launch'))
+            .returns(async () => Promise.reject(failureMessage))
             .verifiable(Times.once());
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
-        setupSaveScanResultCall(getFailingJobStateScanResult(failureMessage));
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage)));
 
         await runner.run();
     });
@@ -165,7 +154,7 @@ describe(Runner, () => {
             .verifiable(Times.once());
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
@@ -175,7 +164,7 @@ describe(Runner, () => {
         setupConvertAxeToSarifCall(passedAxeScanResults);
 
         setupSaveSarifReportCall();
-        setupSaveScanResultCall(getScanResultWithNoViolations());
+        setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
     });
@@ -184,30 +173,31 @@ describe(Runner, () => {
         setupWebDriverCalls();
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(unscannableAxeScanResults))
             .verifiable();
 
-        setupSaveScanResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
 
         await runner.run();
     });
+
     it('sets job state to failed if scanner task throws', async () => {
         const failureMessage = 'scanner task failed message';
         setupWebDriverCalls();
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
             .returns(async () => Promise.reject(failureMessage))
             .verifiable();
 
-        setupSaveScanResultCall(getFailingJobStateScanResult(failureMessage));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage)));
 
         await runner.run();
     });
@@ -216,7 +206,7 @@ describe(Runner, () => {
         setupWebDriverCalls();
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
@@ -226,7 +216,7 @@ describe(Runner, () => {
         setupConvertAxeToSarifCall(passedAxeScanResults);
 
         setupSaveSarifReportCall();
-        setupSaveScanResultCall(getScanResultWithNoViolations());
+        setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
     });
@@ -235,7 +225,7 @@ describe(Runner, () => {
         setupWebDriverCalls();
 
         setupReadScanResultCall(onDemandPageScanResult);
-        setupSaveScanResultCall(getRunningJobStateScanResult());
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
@@ -245,7 +235,7 @@ describe(Runner, () => {
         setupConvertAxeToSarifCall(axeScanResultsWithViolations);
 
         setupSaveSarifReportCall();
-        setupSaveScanResultCall(getScanResultWithViolations());
+        setupUpdateScanRunResultCall(getScanResultWithViolations());
 
         await runner.run();
     });
@@ -256,32 +246,12 @@ describe(Runner, () => {
             .returns(() => parsedSarifContent)
             .verifiable();
     }
-    it('handles if cosmos read fails', async () => {
-        const failureMessage = 'test error - read failed';
 
+    function setupReadScanResultCall(scanResult: any): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async s => s.readScanRuns(It.isAny()))
-            .returns(async () => Promise.reject(failureMessage));
-
-        await expect(runner.run()).rejects.toBe(failureMessage);
-    });
-
-    it('handles if cosmos write fails', async () => {
-        const failureMessage = 'test error - write failed';
-
-        setupReadScanResultCall(onDemandPageScanResult, 1);
-        onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(It.isAny()))
-            .returns(async () => Promise.reject(failureMessage));
-
-        await expect(runner.run()).rejects.toBe(failureMessage);
-    });
-
-    function setupReadScanResultCall(scanResult: any, times: number = 2): void {
-        onDemandPageScanRunResultProviderMock
-            .setup(async d => d.readScanRuns([scanMetadata.id]))
-            .returns(async () => Promise.resolve([cloneDeep(scanResult)]))
-            .verifiable(Times.exactly(times));
+            .setup(async d => d.readScanRun(scanMetadata.id))
+            .returns(async () => Promise.resolve(cloneDeep(scanResult)))
+            .verifiable(Times.exactly(1));
     }
 
     function getRunningJobStateScanResult(): OnDemandPageScanResult {
@@ -289,7 +259,7 @@ describe(Runner, () => {
         result.run = {
             state: 'running',
             timestamp: dateNow.toJSON(),
-            error: undefined,
+            error: null,
         };
 
         return result;
@@ -307,22 +277,18 @@ describe(Runner, () => {
         result.run = {
             state: 'failed',
             timestamp: dateNow.toJSON(),
-            error: error,
-        };
-        result.scanResult = {
-            issueCount: 0,
-            state: 'pending',
+            error,
         };
 
         return result;
     }
 
-    function setupSaveScanResultCall(result: OnDemandPageScanResult): void {
+    function setupUpdateScanRunResultCall(result: OnDemandPageScanResult): void {
         const clonedResult = cloneDeep(result);
 
         onDemandPageScanRunResultProviderMock
             .setup(async d => d.updateScanRun(clonedResult))
-            .returns(async () => Promise.resolve())
+            .returns(async () => Promise.resolve(clonedResult))
             .verifiable();
     }
 
@@ -334,7 +300,6 @@ describe(Runner, () => {
             error: undefined,
         };
         result.scanResult = {
-            issueCount: 0,
             state: 'pass',
         };
 
