@@ -35,10 +35,20 @@ export class Page {
         const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
-        const response = await gotoUrlPromise;
+        let response;
+
+        try {
+            response = await gotoUrlPromise;
+        } catch (err) {
+            return { error: `Puppeteer navigation to ${url} failed: ${(<Error>err).message}` };
+        }
 
         if (!this.isHtmlPage(response)) {
             return { unscannable: true, error: `Cannot scan ${url} because it is not a html page.` };
+        }
+
+        if (!response.ok()) {
+            return { error: `The URL ${url} returned unsuccessful response: ${response.status()} ${response.statusText()}` };
         }
 
         try {
