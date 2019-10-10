@@ -216,7 +216,7 @@ describe('Page', () => {
 
         await page.enableBypassCSP();
 
-        const results = await page.scanForA11yIssues('https://tinyurl.com/mrhd5x');
+        const results = await page.scanForA11yIssues('https://www.bing.com');
 
         let violationCount = 0;
         results.results.violations.map(v => {
