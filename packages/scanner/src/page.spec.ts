@@ -109,12 +109,7 @@ describe('Page', () => {
             error: `Cannot scan ${scanUrl} because it is not a html page.`,
             unscannable: true,
         };
-        const response: Puppeteer.Response = {
-            headers: () => {
-                return { 'content-type': 'text/plain' };
-            },
-            // tslint:disable-next-line: no-any
-        } as any;
+        const response: Puppeteer.Response = makeResponse({ contentType: 'text/plain' });
 
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
@@ -139,12 +134,7 @@ describe('Page', () => {
         const scanUrl = 'https://www.example.com';
         const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
         const scanResults: AxeScanResults = { results: axeResults };
-        const response: Puppeteer.Response = {
-            headers: () => {
-                return { 'content-type': 'text/html' };
-            },
-            // tslint:disable-next-line: no-any
-        } as any;
+        const response: Puppeteer.Response = makeResponse({});
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
@@ -188,6 +178,32 @@ describe('Page', () => {
         setBypassCSPMock.verifyAll();
     });
 
+    it('should return error info for non-successful status code', async () => {
+        const scanUrl = 'https://www.error-url.com';
+        const errorResult: AxeScanResults = {
+            error: `The URL ${scanUrl} returned unsuccessful response: 500 status code text`,
+        };
+        const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
+
+        gotoMock
+            .setup(async goto => goto(scanUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+        axePuppeteerFactoryMock
+            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        expect(result).toEqual(errorResult);
+    });
+
     it.skip('validates scanning in dev box', async () => {
         const webDriver = new WebDriver(Mock.ofType(Logger).object);
         const browser = await webDriver.launch();
@@ -220,12 +236,7 @@ describe('Page', () => {
             results: axeResults,
             redirectedToUrl: redirectToUrl,
         };
-        const response: Puppeteer.Response = {
-            headers: () => {
-                return { 'content-type': 'text/html' };
-            },
-            // tslint:disable-next-line: no-any
-        } as any;
+        const response: Puppeteer.Response = makeResponse({ withRedirect: true });
         gotoMock
             .setup(async goto => goto(redirectFromUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
@@ -248,7 +259,74 @@ describe('Page', () => {
 
         expect(result).toEqual(scanResults);
     });
+
+    it('should identify errors thrown by goto', async () => {
+        const scanUrl = 'https://www.problem-url.com';
+        const errorResult: AxeScanResults = {
+            error: `Puppeteer navigation to ${scanUrl} failed: unknown error`,
+        };
+
+        gotoMock
+            .setup(async goto => goto(scanUrl, gotoOptions))
+            .returns(async () => {
+                throw new Error('unknown error');
+            })
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+        axePuppeteerFactoryMock
+            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        expect(result).toEqual(errorResult);
+    });
 });
+
+interface ResponseOptions {
+    contentType?: string;
+    statusCode?: number;
+    withRedirect?: boolean;
+}
+
+function makeResponse(options: ResponseOptions): Puppeteer.Response {
+    const statusCode: number = options.statusCode === undefined ? 200 : options.statusCode;
+    const contentType: string = options.contentType === undefined ? 'text/html' : options.contentType;
+
+    const redirectChain: string[] = [];
+
+    if (options.withRedirect) {
+        redirectChain.push('redirect');
+    }
+    const request = {
+        redirectChain: () => {
+            return redirectChain;
+        },
+    };
+
+    return {
+        headers: () => {
+            return { 'content-type': contentType };
+        },
+        status: () => {
+            return statusCode;
+        },
+        ok: () => {
+            return statusCode >= 200 && statusCode < 300;
+        },
+        statusText: () => {
+            return 'status code text';
+        },
+        request: () => {
+            return request;
+        },
+        // tslint:disable-next-line: no-any
+    } as any;
+}
 
 function createEmptyAxeResults(url: string): AxeResults {
     // tslint:disable-next-line: no-object-literal-type-assertion
