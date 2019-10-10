@@ -213,11 +213,12 @@ describe('Page', () => {
 
     it('should add the redirected url to results', async () => {
         // tslint:disable-next-line: no-object-literal-type-assertion
-        const axeResults = createEmptyAxeResults('https://www.redirect-to.com');
-        const scanUrl = 'https://www.redirect-from.com';
+        const redirectFromUrl = 'https://www.redirect-from.com';
+        const redirectToUrl = 'https://www.redirect-to.com';
+        const axeResults = createEmptyAxeResults(redirectToUrl);
         const scanResults: AxeScanResults = {
             results: axeResults,
-            redirectedToUrl: scanUrl,
+            redirectedToUrl: redirectToUrl,
         };
         const response: Puppeteer.Response = {
             headers: () => {
@@ -226,7 +227,7 @@ describe('Page', () => {
             // tslint:disable-next-line: no-any
         } as any;
         gotoMock
-            .setup(async goto => goto(scanUrl, gotoOptions))
+            .setup(async goto => goto(redirectFromUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -240,7 +241,7 @@ describe('Page', () => {
             .verifiable(Times.once());
 
         await page.create();
-        const result = await page.scanForA11yIssues(scanUrl);
+        const result = await page.scanForA11yIssues(redirectFromUrl);
 
         axePuppeteerFactoryMock.verifyAll();
         axePuppeteerMock.verifyAll();

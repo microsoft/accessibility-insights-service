@@ -50,10 +50,10 @@ export class Page {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
-        if (scanResults.url !== url) {
+        if (response.request().redirectChain().length > 0) {
             return {
                 results: scanResults,
-                redirectedToUrl: url,
+                redirectedToUrl: scanResults.url,
             };
         } else {
             return { results: scanResults };
