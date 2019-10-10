@@ -6,5 +6,5 @@ export interface AxeScanResults {
     results?: AxeResults;
     error?: string;
     unscannable?: boolean;
-    redirectedFromUrl?: string;
+    redirectedToUrl?: string;
 }

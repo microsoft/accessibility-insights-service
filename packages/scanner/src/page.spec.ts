@@ -217,7 +217,7 @@ describe('Page', () => {
         const scanUrl = 'https://www.redirect-from.com';
         const scanResults: AxeScanResults = {
             results: axeResults,
-            redirectedFromUrl: scanUrl,
+            redirectedToUrl: scanUrl,
         };
         const response: Puppeteer.Response = {
             headers: () => {

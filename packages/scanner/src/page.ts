@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
-import { loggerTypes } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -54,7 +53,7 @@ export class Page {
         if (scanResults.url !== url) {
             return {
                 results: scanResults,
-                redirectedFromUrl: url,
+                redirectedToUrl: url,
             };
         } else {
             return { results: scanResults };
