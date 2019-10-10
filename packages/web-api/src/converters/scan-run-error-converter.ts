@@ -15,7 +15,7 @@ export class ScanRunErrorConverter {
                 return ScanRunErrorCodes.sslError;
             }
             if (scanError.includes('net::ERR_CONNECTION_REFUSED') || scanError.includes('NS_ERROR_CONNECTION_REFUSED')) {
-                return ScanRunErrorCodes.mainResourceLoadFailure;
+                return ScanRunErrorCodes.resourceLoadFailure;
             }
             if (scanError.includes('Cannot navigate to invalid URL') || scanError.includes('Invalid url')) {
                 return ScanRunErrorCodes.invalidUrl;

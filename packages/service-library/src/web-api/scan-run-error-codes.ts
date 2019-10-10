@@ -8,7 +8,7 @@ export declare type ScanRunErrorCodeName =
     | 'UrlNavigationTimeout'
     | 'HttpErrorCode'
     | 'SslError'
-    | 'MainResourceLoadFailure'
+    | 'ResourceLoadFailure'
     | 'InvalidUrl'
     | 'EmptyPage'
     | 'NavigationError';
@@ -47,10 +47,10 @@ export class ScanRunErrorCodes {
         message: 'SSL Error when navigating to scan URL',
     };
 
-    public static mainResourceLoadFailure: ScanRunErrorCode = {
-        code: 'MainResourceLoadFailure',
+    public static resourceLoadFailure: ScanRunErrorCode = {
+        code: 'ResourceLoadFailure',
         codeId: 9005,
-        message: 'The main resource failed to load when navigating to scan URL',
+        message: 'The resource is not available at scan URL',
     };
 
     public static invalidUrl: ScanRunErrorCode = {
