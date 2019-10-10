@@ -40,7 +40,7 @@ describe(ScanRunErrorConverter, () => {
         const errorCode = scanRunErrorConverter.getScanRunErrorCode(
             'Puppeteer navigation to http://www.bing.com failed: net::ERR_CONNECTION_REFUSED',
         );
-        expect(errorCode).toEqual(ScanRunErrorCodes.mainResourceLoadFailure);
+        expect(errorCode).toEqual(ScanRunErrorCodes.resourceLoadFailure);
     });
 
     it('convert to invalid url error code', () => {
