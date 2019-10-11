@@ -63,7 +63,7 @@ export class Page {
         if (response.request().redirectChain().length > 0) {
             return {
                 results: scanResults,
-                redirectedToUrl: scanResults.url,
+                scannedUrl: scanResults.url,
             };
         } else {
             return { results: scanResults };

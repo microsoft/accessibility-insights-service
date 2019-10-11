@@ -49,8 +49,8 @@ export class ScanResponseConverter {
                         timestamp: pageScanResultDocument.run.timestamp,
                     },
                 };
-                if (pageScanResultDocument.redirectedToUrl !== undefined) {
-                    scanResultResponse.redirectedToUrl = pageScanResultDocument.redirectedToUrl;
+                if (pageScanResultDocument.scannedUrl !== undefined) {
+                    scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
                 }
 
                 return scanResultResponse;

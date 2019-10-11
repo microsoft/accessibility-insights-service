@@ -97,8 +97,8 @@ export class Runner {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = [await this.saveScanReport(axeScanResults)];
-            if (axeScanResults.redirectedToUrl !== undefined) {
-                pageScanResult.redirectedToUrl = axeScanResults.redirectedToUrl;
+            if (axeScanResults.scannedUrl !== undefined) {
+                pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
         }
     }

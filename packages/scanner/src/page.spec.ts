@@ -234,7 +234,7 @@ describe('Page', () => {
         const axeResults = createEmptyAxeResults(redirectToUrl);
         const scanResults: AxeScanResults = {
             results: axeResults,
-            redirectedToUrl: redirectToUrl,
+            scannedUrl: redirectToUrl,
         };
         const response: Puppeteer.Response = makeResponse({ withRedirect: true });
         gotoMock
