@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { CosmosContainerClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
@@ -22,7 +21,6 @@ import { ScanBatchRequestFeedController } from './scan-batch-request-feed-contro
 // tslint:disable: no-any no-unsafe-any
 
 let scanBatchRequestFeedController: ScanBatchRequestFeedController;
-let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
 let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
@@ -35,7 +33,6 @@ beforeEach(() => {
     dateNow = new Date();
     MockDate.set(dateNow);
 
-    cosmosContainerClientMock = Mock.ofType(CosmosContainerClient);
     onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
     pageScanRequestProviderMock = Mock.ofType(PageScanRequestProvider);
     partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
@@ -44,7 +41,6 @@ beforeEach(() => {
     context = <Context>(<unknown>{ bindingDefinitions: {} });
 
     scanBatchRequestFeedController = new ScanBatchRequestFeedController(
-        cosmosContainerClientMock.object,
         onDemandPageScanRunResultProviderMock.object,
         pageScanRequestProviderMock.object,
         partitionKeyFactoryMock.object,
@@ -55,7 +51,6 @@ beforeEach(() => {
 
 afterEach(() => {
     MockDate.reset();
-    cosmosContainerClientMock.verifyAll();
     onDemandPageScanRunResultProviderMock.verifyAll();
     pageScanRequestProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
@@ -127,7 +122,6 @@ describe(ScanBatchRequestFeedController, () => {
                 ],
             },
         ] as OnDemandPageScanBatchRequest[];
-        setupCosmosContainerClientMock(documents);
         setupOnDemandPageScanRunResultProviderMock(documents);
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
@@ -170,6 +164,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                 };
             });
         pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments)).verifiable(Times.once());
+        pageScanRequestProviderMock.setup(async o => o.deleteBatchRequest(document)).verifiable(Times.once());
     });
 }
 
@@ -186,15 +181,9 @@ function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[])
     });
 }
 
-function setupCosmosContainerClientMock(documents: OnDemandPageScanBatchRequest[]): void {
-    documents.map(d => {
-        cosmosContainerClientMock.setup(async o => o.deleteDocument(d.id, d.partitionKey)).verifiable(Times.once());
-    });
-}
-
 function setupMocksWithTimesNever(): void {
-    cosmosContainerClientMock.setup(async o => o.deleteDocument(It.isAny(), It.isAny())).verifiable(Times.never());
     onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(It.isAny())).verifiable(Times.never());
     pageScanRequestProviderMock.setup(async o => o.insertRequests(It.isAny())).verifiable(Times.never());
+    pageScanRequestProviderMock.setup(async o => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
     partitionKeyFactoryMock.setup(o => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
 }

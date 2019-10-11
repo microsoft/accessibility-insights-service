@@ -3,7 +3,7 @@
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
+import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 
 @injectable()
 export class PageScanRequestProvider {
@@ -35,5 +35,9 @@ export class PageScanRequestProvider {
                 await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);
             }),
         );
+    }
+
+    public async deleteBatchRequest(request: OnDemandPageScanBatchRequest): Promise<void> {
+        await this.cosmosContainerClient.deleteDocument(request.id, request.partitionKey);
     }
 }
