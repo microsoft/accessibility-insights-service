@@ -194,6 +194,7 @@ export class ServiceConfiguration {
                         'landmark-complementary-is-top-level',
                         'scrollable-region-focusable',
                         'label-content-name-mismatch',
+                        'landmark-unique',
                     ],
                     doc: 'Axe core rule exclusion list',
                 },
