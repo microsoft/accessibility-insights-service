@@ -131,9 +131,9 @@ describe('Page', () => {
     });
 
     it('should analyze accessibility issues, even if error thrown when waitForNavigation', async () => {
-        const axeResults: AxeResults = <AxeResults>(<unknown>{ type: 'AxeResults' });
-        const scanResults: AxeScanResults = { results: axeResults };
         const scanUrl = 'https://www.example.com';
+        const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
+        const scanResults: AxeScanResults = { results: axeResults };
         const response: Puppeteer.Response = makeResponse({});
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
@@ -227,6 +227,39 @@ describe('Page', () => {
         console.log(results);
     }, 50000);
 
+    it('should add the redirected url to results', async () => {
+        // tslint:disable-next-line: no-object-literal-type-assertion
+        const redirectFromUrl = 'https://www.redirect-from.com';
+        const redirectToUrl = 'https://www.redirect-to.com';
+        const axeResults = createEmptyAxeResults(redirectToUrl);
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            scannedUrl: redirectToUrl,
+        };
+        const response: Puppeteer.Response = makeResponse({ withRedirect: true });
+        gotoMock
+            .setup(async goto => goto(redirectFromUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerFactoryMock
+            // tslint:disable-next-line: no-unsafe-any
+            .setup(async o => o.createAxePuppeteer(It.isAny()))
+            // tslint:disable-next-line: no-any
+            .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(redirectFromUrl);
+
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+
+        expect(result).toEqual(scanResults);
+    });
+
     it('should identify errors thrown by goto', async () => {
         const scanUrl = 'https://www.problem-url.com';
         const errorResult: AxeScanResults = {
@@ -241,7 +274,6 @@ describe('Page', () => {
             .verifiable(Times.once());
 
         waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
-
         axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
             .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
@@ -258,11 +290,23 @@ describe('Page', () => {
 interface ResponseOptions {
     contentType?: string;
     statusCode?: number;
+    withRedirect?: boolean;
 }
 
 function makeResponse(options: ResponseOptions): Puppeteer.Response {
     const statusCode: number = options.statusCode === undefined ? 200 : options.statusCode;
     const contentType: string = options.contentType === undefined ? 'text/html' : options.contentType;
+
+    const redirectChain: string[] = [];
+
+    if (options.withRedirect) {
+        redirectChain.push('redirect');
+    }
+    const request = {
+        redirectChain: () => {
+            return redirectChain;
+        },
+    };
 
     return {
         headers: () => {
@@ -277,6 +321,14 @@ function makeResponse(options: ResponseOptions): Puppeteer.Response {
         statusText: () => {
             return 'status code text';
         },
+        request: () => {
+            return request;
+        },
         // tslint:disable-next-line: no-any
     } as any;
+}
+
+function createEmptyAxeResults(url: string): AxeResults {
+    // tslint:disable-next-line: no-object-literal-type-assertion
+    return { url: url } as AxeResults;
 }

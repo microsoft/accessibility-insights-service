@@ -60,7 +60,14 @@ export class Page {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
-        return { results: scanResults };
+        if (response.request().redirectChain().length > 0) {
+            return {
+                results: scanResults,
+                scannedUrl: scanResults.url,
+            };
+        } else {
+            return { results: scanResults };
+        }
     }
 
     public async close(): Promise<void> {

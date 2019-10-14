@@ -12,6 +12,7 @@ export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorRes
 export interface ScanRunResultResponse {
     scanId: string;
     url: string;
+    scannedUrl?: string;
     scanResult?: ScanResult;
     reports?: ScanReport[];
     run: ScanRun;

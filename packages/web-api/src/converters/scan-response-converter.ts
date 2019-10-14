@@ -36,7 +36,7 @@ export class ScanResponseConverter {
                     },
                 };
             case 'completed':
-                return {
+                const scanResultResponse: ScanResultResponse = {
                     scanId: pageScanResultDocument.id,
                     url: pageScanResultDocument.url,
                     scanResult: {
@@ -49,6 +49,11 @@ export class ScanResponseConverter {
                         timestamp: pageScanResultDocument.run.timestamp,
                     },
                 };
+                if (pageScanResultDocument.scannedUrl !== undefined) {
+                    scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
+                }
+
+                return scanResultResponse;
         }
     }
 
