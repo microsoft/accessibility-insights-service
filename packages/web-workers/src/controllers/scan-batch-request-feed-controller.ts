@@ -3,7 +3,13 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, WebController } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    PageScanRequestProvider,
+    PartitionKeyFactory,
+    ScanDataProvider,
+    WebController,
+} from 'service-library';
 import {
     ItemType,
     OnDemandPageScanBatchRequest,
@@ -23,6 +29,7 @@ export class ScanBatchRequestFeedController extends WebController {
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
@@ -50,7 +57,7 @@ export class ScanBatchRequestFeedController extends WebController {
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests);
             await this.writeRequestsToQueueContainer(requests);
-            await this.pageScanRequestProvider.deleteBatchRequest(batchDocument);
+            await this.scanDataProvider.deleteBatchRequest(batchDocument);
         }
     }
 

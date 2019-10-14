@@ -36,8 +36,4 @@ export class PageScanRequestProvider {
             }),
         );
     }
-
-    public async deleteBatchRequest(request: OnDemandPageScanBatchRequest): Promise<void> {
-        await this.cosmosContainerClient.deleteDocument(request.id, request.partitionKey);
-    }
 }
