@@ -4,11 +4,10 @@ import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common'
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController, HttpResponse, WebApiError, WebApiErrorCodes } from 'service-library';
+import { ApiController, HttpResponse, ScanDataProvider, WebApiError, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
-import { ScanDataProvider } from '../providers/scan-data-provider';
 
 // tslint:disable: no-any
 

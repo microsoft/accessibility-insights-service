@@ -1,10 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, WebController } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    PageScanRequestProvider,
+    PartitionKeyFactory,
+    ScanDataProvider,
+    WebController,
+} from 'service-library';
 import {
     ItemType,
     OnDemandPageScanBatchRequest,
@@ -22,10 +27,9 @@ export class ScanBatchRequestFeedController extends WebController {
     public readonly apiName = 'scan-batch-request-feed';
 
     public constructor(
-        @inject(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)
-        private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) protected readonly logger: Logger,
@@ -53,7 +57,7 @@ export class ScanBatchRequestFeedController extends WebController {
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests);
             await this.writeRequestsToQueueContainer(requests);
-            await this.cosmosContainerClient.deleteDocument(batchDocument.id, batchDocument.partitionKey);
+            await this.scanDataProvider.deleteBatchRequest(batchDocument);
         }
     }
 

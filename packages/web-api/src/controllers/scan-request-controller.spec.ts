@@ -5,11 +5,10 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { HttpResponse, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, ScanDataProvider, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
-import { ScanDataProvider } from '../providers/scan-data-provider';
 import { ScanRequestController } from './scan-request-controller';
 
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion
