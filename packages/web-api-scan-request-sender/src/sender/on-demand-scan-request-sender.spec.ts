@@ -143,6 +143,7 @@ describe('Scan request sender', () => {
                 timestamp: dateNow.toJSON(),
             },
             itemType: ItemType.onDemandPageScanRunResult,
+            batchRequestId: scanRequest.id,
         };
     }
 

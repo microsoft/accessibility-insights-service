@@ -41,6 +41,7 @@ describe(ScanResultController, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
+        batchRequestId: 'batch-id',
     };
     const scanClientResponseForDbResponse: ScanResultResponse = {
         scanId: scanId,

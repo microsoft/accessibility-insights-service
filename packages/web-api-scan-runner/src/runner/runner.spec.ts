@@ -50,6 +50,7 @@ describe(Runner, () => {
         itemType: ItemType.onDemandPageScanRunResult,
         id: 'id',
         partitionKey: 'item-partitionKey',
+        batchRequestId: 'batch-id',
     };
 
     const passedAxeScanResults: AxeScanResults = {
