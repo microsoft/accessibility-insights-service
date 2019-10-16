@@ -86,6 +86,10 @@ export class Logger {
         this.invokeLoggerClient(client => client.flush());
     }
 
+    public setCustomProperties(properties: { [key: string]: string }): void {
+        this.invokeLoggerClient(client => client.setCustomProperties(properties));
+    }
+
     private invokeLoggerClient(action: (loggerClient: LoggerClient) => void): void {
         this.loggerClients.forEach(client => {
             action(client);

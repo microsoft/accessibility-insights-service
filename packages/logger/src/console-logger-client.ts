@@ -53,6 +53,10 @@ export class ConsoleLoggerClient implements LoggerClient {
     // tslint:disable-next-line: no-empty
     public flush(): void {}
 
+    public setCustomProperties(properties: { [key: string]: string }): void {
+        this.baseProperties = { ...this.baseProperties, ...properties };
+    }
+
     private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
         // tslint:disable-next-line: no-null-keyword
         const allProperties = { ...this.baseProperties, ...properties };

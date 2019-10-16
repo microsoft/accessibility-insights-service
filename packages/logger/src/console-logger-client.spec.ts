@@ -65,6 +65,18 @@ describe(ConsoleLoggerClient, () => {
 
             consoleMock.verify(c => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === metric1 - 1`), Times.once());
         });
+
+        it('log data with custom runtime properties', async () => {
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            const customProps = { foo: 'baz', key: 'value' };
+            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            await testSubject.setup(baseProps);
+            testSubject.setCustomProperties(customProps);
+
+            testSubject.trackMetric('metric1', 1);
+
+            consoleMock.verify(c => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
+        });
     });
 
     describe('trackEvent', () => {
@@ -83,6 +95,18 @@ describe(ConsoleLoggerClient, () => {
             testSubject.trackEvent('event1');
 
             consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === event1`), Times.once());
+        });
+
+        it('log data with custom runtime properties', async () => {
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            const customProps = { foo: 'baz', key: 'value' };
+            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            await testSubject.setup(baseProps);
+            testSubject.setCustomProperties(customProps);
+
+            testSubject.trackEvent('event1');
+
+            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === event1`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -115,6 +139,18 @@ describe(ConsoleLoggerClient, () => {
             testSubject.log('trace1', LogLevel.warn);
 
             consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(baseProps)}] === trace1`), Times.once());
+        });
+
+        it('log data with custom runtime properties', async () => {
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            const customProps = { foo: 'baz', key: 'value' };
+            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            await testSubject.setup(baseProps);
+            testSubject.setCustomProperties(customProps);
+
+            testSubject.log('trace1', LogLevel.warn);
+
+            consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -150,6 +186,22 @@ describe(ConsoleLoggerClient, () => {
 
             consoleMock.verify(
                 c => c.log(`[Exception][properties - ${util.inspect(baseProps)}] === ${util.inspect(error, { depth: null })}`),
+                Times.once(),
+            );
+        });
+
+        it('log data with custom runtime properties', async () => {
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            const customProps = { foo: 'baz', key: 'value' };
+            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            await testSubject.setup(baseProps);
+            const error = new Error('error1');
+
+            testSubject.setCustomProperties(customProps);
+            testSubject.trackException(error);
+
+            consoleMock.verify(
+                c => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
                 Times.once(),
             );
         });
