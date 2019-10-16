@@ -30,6 +30,7 @@ export class Runner {
         let browser: Browser;
         const runTime = new Date();
         const scanMetadata = this.scanMetadataConfig.getConfig();
+        this.logger.setCustomProperties({ scanId: scanMetadata.scanUrl });
 
         try {
             // set scanned page run state to running

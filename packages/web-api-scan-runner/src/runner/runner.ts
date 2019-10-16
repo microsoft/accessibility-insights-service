@@ -38,6 +38,7 @@ export class Runner {
         let browser: Browser;
         let pageScanResult: OnDemandPageScanResult;
         const scanMetadata = this.scanMetadataConfig.getConfig();
+        this.logger.setCustomProperties({ scanId: scanMetadata.id });
 
         this.logger.logInfo(`Reading page scan run result.`);
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
