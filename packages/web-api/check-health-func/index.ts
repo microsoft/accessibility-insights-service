@@ -3,10 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { WebControllerDispatcher } from 'service-library';
+import { HealthCheckController } from '../src/controllers/health-check-controller';
+import { setupIoContainer } from '../src/setup-ioc-container';
 
 export async function run(context: Context): Promise<void> {
-    context.res = {
-        status: 200,
-    };
-    context.done();
+    const dispatcher = new WebControllerDispatcher(HealthCheckController, setupIoContainer());
+    await dispatcher.start(context);
 }
