@@ -15,6 +15,9 @@ module.exports = env => {
         externals: ['@azure/functions'],
         entry: {
             ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
+            ['health-monitor-timer-func']: path.resolve('./health-monitor-timer-func/index.ts'),
+            ['health-monitor-client-func']: path.resolve('./health-monitor-client-func/index.ts'),
+            ['health-monitor-orchestration-func']: path.resolve('./health-monitor-orchestration-func/index.ts'),
         },
         mode: 'development',
         module: {
