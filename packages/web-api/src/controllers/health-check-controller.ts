@@ -8,7 +8,7 @@ import { ApiController } from 'service-library';
 @injectable()
 export class HealthCheckController extends ApiController {
     public readonly apiVersion = '1.0';
-    public readonly apiName = 'web-api-get-report';
+    public readonly apiName = 'web-api-health-check';
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
