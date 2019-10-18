@@ -6,6 +6,7 @@ import * as appInsights from 'applicationinsights';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
+import { LoggerEvent } from './logger-event';
 import { loggerTypes } from './logger-types';
 
 @injectable()
@@ -40,7 +41,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         this.appInsightsObject.defaultClient.trackMetric({ name: name, value: value });
     }
 
-    public trackEvent(name: string, properties?: { [name: string]: string }): void {
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }): void {
         this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: properties });
     }
 

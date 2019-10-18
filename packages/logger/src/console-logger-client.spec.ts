@@ -39,7 +39,7 @@ describe(ConsoleLoggerClient, () => {
 
             await testSubject.setup();
             testSubject.trackMetric('metric1', 1);
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
             testSubject.log('trace1', LogLevel.info);
             testSubject.trackException(new Error('exception'));
 
@@ -71,18 +71,18 @@ describe(ConsoleLoggerClient, () => {
         it('log data without properties', async () => {
             await testSubject.setup(null);
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log('[Event] === event1'), Times.once());
+            consoleMock.verify(c => c.log('[Event] === HealthCheck'), Times.once());
         });
 
         it('log data with base properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             await testSubject.setup(baseProps);
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === event1`), Times.once());
+            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === HealthCheck`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -90,10 +90,10 @@ describe(ConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
 
-            testSubject.trackEvent('event1', eventProps);
+            testSubject.trackEvent('HealthCheck', eventProps);
 
             consoleMock.verify(
-                c => c.log(`[Event][properties - ${util.inspect({ ...baseProps, ...eventProps })}] === event1`),
+                c => c.log(`[Event][properties - ${util.inspect({ ...baseProps, ...eventProps })}] === HealthCheck`),
                 Times.once(),
             );
         });

@@ -93,9 +93,11 @@ describe(AppInsightsLoggerClient, () => {
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
-            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: undefined }))).verifiable();
+            appInsightsTelemetryClientMock
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: undefined })))
+                .verifiable();
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
             verifyMocks();
         });
@@ -106,10 +108,10 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: { foo: 'bar' } })))
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' } })))
                 .verifiable();
 
-            testSubject.trackEvent('event1', { foo: 'bar' });
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' });
 
             verifyMocks();
         });
