@@ -90,7 +90,7 @@ describe(Logger, () => {
     describe('trackEvent', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.trackEvent('event1', { foo: 'bar' });
+                testSubject.trackEvent('HealthCheck', { foo: 'bar' });
             }).toThrowError('Logger not setup');
         });
 
@@ -98,9 +98,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('event1', undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', undefined)).verifiable(Times.once()));
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
             verifyMocks();
         });
@@ -110,9 +110,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('event1', properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', properties)).verifiable(Times.once()));
 
-            testSubject.trackEvent('event1', properties);
+            testSubject.trackEvent('HealthCheck', properties);
 
             verifyMocks();
         });
@@ -248,9 +248,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.verbose, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
 
-            testSubject.logVerbose('event1');
+            testSubject.logVerbose('HealthCheck');
 
             verifyMocks();
         });
@@ -264,9 +264,9 @@ describe(Logger, () => {
             });
 
             it('when properties not passed', () => {
-                invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.verbose, undefined)).verifiable(Times.once()));
+                invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
 
-                testSubject.logVerbose('event1');
+                testSubject.logVerbose('HealthCheck');
 
                 verifyMocks();
             });
@@ -274,9 +274,9 @@ describe(Logger, () => {
             it('when properties passed', () => {
                 const properties = { foo: 'bar' };
 
-                invokeAllLoggerClientMocks(m => m.setup(c => c.log('event1', LogLevel.verbose, properties)).verifiable(Times.once()));
+                invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, properties)).verifiable(Times.once()));
 
-                testSubject.logVerbose('event1', properties);
+                testSubject.logVerbose('HealthCheck', properties);
 
                 verifyMocks();
             });
@@ -284,14 +284,14 @@ describe(Logger, () => {
 
         describe('in normal mode', () => {
             it('when properties not passed', () => {
-                testSubject.logVerbose('event1');
+                testSubject.logVerbose('HealthCheck');
 
                 verifyMocks();
             });
 
             it('when properties passed', () => {
                 const properties = { foo: 'bar' };
-                testSubject.logVerbose('event1', properties);
+                testSubject.logVerbose('HealthCheck', properties);
 
                 verifyMocks();
             });
