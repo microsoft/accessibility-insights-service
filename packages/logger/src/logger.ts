@@ -5,6 +5,7 @@ import { injectable } from 'inversify';
 import { VError } from 'verror';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
+import { LoggerEvent } from './logger-event';
 
 export enum LogLevel {
     info,
@@ -38,7 +39,7 @@ export class Logger {
         this.invokeLoggerClient(client => client.trackMetric(name, value));
     }
 
-    public trackEvent(name: string, properties?: { [name: string]: string }): void {
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
         this.invokeLoggerClient(client => client.trackEvent(name, properties));
