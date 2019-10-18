@@ -34,7 +34,7 @@ describe(HealthCheckController, () => {
     });
 
     it('Handle request', async () => {
-        loggerMock.setup(t => t.trackEvent('Health check success')).verifiable(Times.once());
+        loggerMock.setup(t => t.trackEvent('HealthCheck')).verifiable(Times.once());
         await healthCheckController.handleRequest();
         expect(context.res.status).toEqual(200);
         loggerMock.verifyAll();

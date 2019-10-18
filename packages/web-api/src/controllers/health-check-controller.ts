@@ -18,7 +18,7 @@ export class HealthCheckController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
-        this.logger.trackEvent('Health check success');
+        this.logger.trackEvent('HealthCheck');
         this.context.res = {
             status: 200, // OK
         };
