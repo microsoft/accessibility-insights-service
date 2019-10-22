@@ -1,0 +1,10 @@
+{
+    "bindings": [
+        {
+            "name": "action",
+            "type": "activityTrigger",
+            "direction": "in"
+        }
+    ],
+    "scriptFile": "../health-monitor-client-func/index.js"
+}
