@@ -131,7 +131,7 @@ export class ServiceConfiguration {
                 },
                 maxWallClockTimeInHours: {
                     format: 'int',
-                    default: 29,
+                    default: 5,
                     doc: 'The amount of time the job manager instance will run.',
                 },
             },
