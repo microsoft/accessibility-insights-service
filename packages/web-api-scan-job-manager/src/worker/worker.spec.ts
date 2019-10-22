@@ -5,8 +5,9 @@ import 'reflect-metadata';
 import { Message, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { BatchPoolMeasurements, Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
+
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
@@ -90,9 +91,17 @@ describe(Worker, () => {
                 runningTasks: 4,
             },
         };
+
+        const samplingIntervalInSeconds = 9999;
+
         poolLoadGeneratorMock
             .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
             .returns(async () => Promise.resolve(8))
+            .verifiable(Times.once());
+
+        poolLoadGeneratorMock
+            .setup(o => o.samplingIntervalInSeconds)
+            .returns(() => samplingIntervalInSeconds)
             .verifiable(Times.once());
 
         batchMock
@@ -123,10 +132,24 @@ describe(Worker, () => {
             })
             .verifiable(Times.exactly(taskCount));
 
+        const expectedMeasurements: BatchPoolMeasurements = {
+            runningTasks: poolMetricsInfo.load.runningTasks,
+            samplingIntervalInSeconds,
+            maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
+        };
+
+        loggerMock
+            .setup(lm =>
+                // tslint:disable-next-line: no-null-keyword
+                lm.trackEvent('ScanTasksQueued', null, expectedMeasurements),
+            )
+            .verifiable(Times.once());
+
         await worker.run();
 
         // should delete messages from the queue
         expect(queueMessages.length).toEqual(0);
+        loggerMock.verifyAll();
     });
 
     it('skip adding tasks when pool is overloaded', async () => {

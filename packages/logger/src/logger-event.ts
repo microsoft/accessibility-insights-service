@@ -5,7 +5,14 @@ export declare type LoggerEvent =
     | 'HealthCheck'
     | 'BatchScanRequestSubmitted'
     | 'ScanRequestSubmitted'
+    | 'ScanTasksQueued'
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'
     | 'ScanTaskFailed';
+
+[
+    {
+        url: 'https://www.bing.com',
+    },
+];

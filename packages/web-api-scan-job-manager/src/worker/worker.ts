@@ -3,8 +3,9 @@
 import { Message, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { BatchPoolMeasurements, Logger } from 'logger';
 import * as moment from 'moment';
+
 import { Batch } from '../batch/batch';
 import { JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
@@ -51,15 +52,28 @@ export class Worker {
 
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
+            const runningTasks = poolMetricsInfo.load.runningTasks;
+            const samplingIntervalInSeconds = this.poolLoadGenerator.samplingIntervalInSeconds;
+            const maxParallelTasks = poolMetricsInfo.maxTasksPerPool;
+
             this.logger.logInfo('Pool load statistics', {
                 activeTasks: poolMetricsInfo.load.activeTasks.toString(),
-                runningTasks: poolMetricsInfo.load.runningTasks.toString(),
+                runningTasks: runningTasks.toString(),
                 requestedTasksToAddPerInterval: tasksIncrementCount.toString(),
                 tasksAddedPerInterval: tasksQueuedCount.toString(),
-                samplingIntervalInSeconds: this.poolLoadGenerator.samplingIntervalInSeconds.toString(),
+                samplingIntervalInSeconds: samplingIntervalInSeconds.toString(),
                 processingSpeedTasksPerMinute: this.poolLoadGenerator.processingSpeedPerMinute.toString(),
                 activeToRunningTasksRatio: this.poolLoadGenerator.activeToRunningTasksRatio.toString(),
             });
+
+            const batchPoolMeasurements: BatchPoolMeasurements = {
+                runningTasks,
+                samplingIntervalInSeconds,
+                maxParallelTasks,
+            };
+
+            // tslint:disable-next-line: no-null-keyword
+            this.logger.trackEvent('ScanTasksQueued', null, batchPoolMeasurements);
 
             if (this.runOnce) {
                 break;
