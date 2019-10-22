@@ -1,27 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-export interface BatchScanRequestMeasurements {
+
+// tslint:disable-next-line: no-empty-interface
+export interface BaseTelemetryMeasurements {
+    [name: string]: number;
+}
+
+export interface BatchScanRequestMeasurements extends BaseTelemetryMeasurements {
     totalScanRequests: number;
     acceptedScanRequests: number;
     rejectedScanRequests: number;
 }
 
-export interface BatchPoolMeasurements {
+export interface BatchPoolMeasurements extends BaseTelemetryMeasurements {
     runningTasks: number;
     samplingIntervalInSeconds: number;
     maxParallelTasksPossible: number;
 }
 
-export interface BaseScanRequestMeasurements {
-    scanId: string;
-}
-
-export interface ScanTaskStartedMeasurements extends BaseScanRequestMeasurements {
+export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
     scanWaitTime: number;
     scanTaskStartTime: number;
 }
 
-export interface ScanTaskCompletedMeasurements extends BaseScanRequestMeasurements {
+export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
     scanCompleteTime: number;
     scanExecutionTime: number;
     endToEndRunTime: number;
