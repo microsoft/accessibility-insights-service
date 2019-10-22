@@ -88,13 +88,13 @@ describe(AppInsightsLoggerClient, () => {
         });
     });
     describe('trackEvent', () => {
-        it('when properties not passed', async () => {
+        it('when properties/measurements not passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: undefined })))
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: undefined, measurements: undefined })))
                 .verifiable();
 
             testSubject.trackEvent('HealthCheck');
@@ -102,16 +102,16 @@ describe(AppInsightsLoggerClient, () => {
             verifyMocks();
         });
 
-        it('when properties passed', async () => {
+        it('when properties/measurements passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' } })))
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { foo: 1 } })))
                 .verifiable();
 
-            testSubject.trackEvent('HealthCheck', { foo: 'bar' });
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { foo: 1 });
 
             verifyMocks();
         });
