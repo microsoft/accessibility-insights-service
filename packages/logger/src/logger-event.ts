@@ -10,9 +10,3 @@ export declare type LoggerEvent =
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'
     | 'ScanTaskFailed';
-
-[
-    {
-        url: 'https://www.bing.com',
-    },
-];
