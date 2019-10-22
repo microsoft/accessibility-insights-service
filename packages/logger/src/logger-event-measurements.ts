@@ -15,16 +15,14 @@ export interface BatchScanRequestMeasurements extends BaseTelemetryMeasurements 
 export interface BatchPoolMeasurements extends BaseTelemetryMeasurements {
     runningTasks: number;
     samplingIntervalInSeconds: number;
-    maxParallelTasksPossible: number;
+    maxParallelTasks: number;
 }
 
 export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
     scanWaitTime: number;
-    scanTaskStartTime: number;
 }
 
 export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
-    scanCompleteTime: number;
     scanExecutionTime: number;
-    endToEndRunTime: number;
+    scanWallClockTime: number;
 }
