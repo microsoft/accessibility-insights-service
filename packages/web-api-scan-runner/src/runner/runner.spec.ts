@@ -6,7 +6,7 @@ import { AxeResults } from 'axe-core';
 import { convertAxeToSarif } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger } from 'logger';
+import { Logger, loggerTypes, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
@@ -106,6 +106,7 @@ describe(Runner, () => {
         pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock.setup(g => g.getGuidTimestamp('id')).returns(() => new Date());
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
         convertAxeToSarifMock = Mock.ofInstance(convertAxeToSarif, MockBehavior.Strict);
@@ -240,6 +241,80 @@ describe(Runner, () => {
         await runner.run();
     });
 
+    it('sends telemetry event on successful scan', async () => {
+        const queueTime: number = 20;
+        const executionTime: number = 30;
+        const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
+
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
+            scanExecutionTime: executionTime * 1000,
+            scanWallClockTime: (executionTime + queueTime) * 1000,
+        };
+
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
+
+        setupWebDriverCalls();
+        setupReadScanResultCall(onDemandPageScanResult);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+        scannerTaskMock
+            .setup(async s => s.scan(scanMetadata.url))
+            .returns(async () => {
+                MockDate.set(timestamps.scanCompleteTime);
+
+                return passedAxeScanResults;
+            })
+            .verifiable();
+        setupConvertAxeToSarifCall(passedAxeScanResults);
+        setupSaveSarifReportCall();
+        const scanResult = getScanResultWithNoViolations();
+        scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
+        setupUpdateScanRunResultCall(scanResult);
+
+        await runner.run();
+        loggerMock.verifyAll();
+    });
+
+    it('sends telemetry event on scan error', async () => {
+        const queueTime: number = 20;
+        const executionTime: number = 30;
+        const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
+
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
+            scanExecutionTime: executionTime * 1000,
+            scanWallClockTime: (executionTime + queueTime) * 1000,
+        };
+
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
+
+        setupWebDriverCalls();
+        setupReadScanResultCall(onDemandPageScanResult);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+        scannerTaskMock
+            .setup(async s => s.scan(scanMetadata.url))
+            .returns(async () => {
+                MockDate.set(timestamps.scanCompleteTime);
+
+                return unscannableAxeScanResults;
+            })
+            .verifiable();
+        setupConvertAxeToSarifCall(unscannableAxeScanResults);
+        setupSaveSarifReportCall();
+        const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
+        scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
+        setupUpdateScanRunResultCall(scanResult);
+
+        await runner.run();
+        loggerMock.verifyAll();
+    });
+
     function setupConvertAxeToSarifCall(scanResults: AxeScanResults): void {
         convertAxeToSarifMock
             .setup(c => c(scanResults.results))
@@ -347,5 +422,33 @@ describe(Runner, () => {
             .setup(async o => o.close())
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
+    }
+
+    interface ScanRunTimestamps {
+        scanRequestTime: Date;
+        scanCompleteTime: Date;
+    }
+
+    function setupTimeMocks(queueTime: number, executionTime: number, scanResults: AxeScanResults): ScanRunTimestamps {
+        const scanRequestTime: Date = new Date();
+        const scanCompleteTime: Date = new Date();
+        scanRequestTime.setSeconds(scanRequestTime.getSeconds() - queueTime);
+
+        guidGeneratorMock.reset();
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock
+            .setup(g => g.getGuidTimestamp('id'))
+            .returns(() => scanRequestTime)
+            .verifiable();
+        scanCompleteTime.setSeconds(scanCompleteTime.getSeconds() + executionTime);
+
+        guidGeneratorMock.reset();
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock
+            .setup(g => g.getGuidTimestamp('id'))
+            .returns(() => scanRequestTime)
+            .verifiable();
+
+        return { scanRequestTime: scanRequestTime, scanCompleteTime: scanCompleteTime };
     }
 });
