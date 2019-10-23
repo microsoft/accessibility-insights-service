@@ -14,7 +14,7 @@ Object {
       "format": "int",
     },
     "maxWallClockTimeInHours": Object {
-      "default": 29,
+      "default": 5,
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
@@ -45,7 +45,7 @@ Object {
       "format": "int",
     },
     "maxScanRequestBatchCount": Object {
-      "default": 1000,
+      "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
@@ -148,7 +148,7 @@ Object {
       "format": "int",
     },
     "maxWallClockTimeInHours": Object {
-      "default": 29,
+      "default": 5,
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
@@ -179,7 +179,7 @@ Object {
       "format": "int",
     },
     "maxScanRequestBatchCount": Object {
-      "default": 1000,
+      "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },

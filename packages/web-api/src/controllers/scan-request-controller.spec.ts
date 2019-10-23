@@ -4,12 +4,12 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
-import { HttpResponse, WebApiErrorCodes } from 'service-library';
+import { BatchScanRequestMeasurements, Logger } from 'logger';
+import { HttpResponse, ScanDataProvider, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
-import { ScanDataProvider } from '../providers/scan-data-provider';
 import { ScanRequestController } from './scan-request-controller';
 
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion
@@ -136,6 +136,33 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toEqual(expectedResponse);
             scanDataProviderMock.verifyAll();
             guidGeneratorMock.verifyAll();
+        });
+
+        it('sends telemetry event', async () => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+
+            context.req.rawBody = JSON.stringify([
+                { url: 'https://abs/path/', priority: 1 }, // valid request
+                { url: '/invalid/url' }, // invalid URL
+                { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
+            ]);
+
+            const expectedMeasurements: BatchScanRequestMeasurements = {
+                totalScanRequests: 3,
+                acceptedScanRequests: 1,
+                rejectedScanRequests: 2,
+            };
+
+            // tslint:disable-next-line: no-null-keyword
+            loggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+
+            scanRequestController = createScanRequestController(context);
+            await scanRequestController.handleRequest();
+
+            loggerMock.verifyAll();
         });
     });
 });

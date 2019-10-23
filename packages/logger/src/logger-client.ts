@@ -2,11 +2,13 @@
 // Licensed under the MIT License.
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
+import { LoggerEvent } from './logger-event';
+import { TelemetryMeasurements } from './logger-event-measurements';
 
 export interface LoggerClient {
     setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
     trackMetric(name: string, value: number): void;
-    trackEvent(name: string, properties?: { [name: string]: string }): void;
+    trackEvent(name: LoggerEvent, properties?: { [key: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void;
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;
     flush(): void;

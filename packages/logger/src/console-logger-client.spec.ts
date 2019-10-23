@@ -3,12 +3,13 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
-import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
+
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { LogLevel } from './logger';
+import { ScanTaskStartedMeasurements } from './logger-event-measurements';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 
@@ -39,7 +40,7 @@ describe(ConsoleLoggerClient, () => {
 
             await testSubject.setup();
             testSubject.trackMetric('metric1', 1);
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
             testSubject.log('trace1', LogLevel.info);
             testSubject.trackException(new Error('exception'));
 
@@ -80,21 +81,21 @@ describe(ConsoleLoggerClient, () => {
     });
 
     describe('trackEvent', () => {
-        it('log data without properties', async () => {
+        it('log data without properties/measurements', async () => {
             await testSubject.setup(null);
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log('[Event] === event1'), Times.once());
+            consoleMock.verify(c => c.log('[Event] === HealthCheck'), Times.once());
         });
 
         it('log data with base properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             await testSubject.setup(baseProps);
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === event1`), Times.once());
+            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === HealthCheck`), Times.once());
         });
 
         it('log data with custom runtime properties', async () => {
@@ -104,22 +105,23 @@ describe(ConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             testSubject.setCustomProperties(customProps);
 
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === event1`), Times.once());
+            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
         });
 
-        it('log data with event properties', async () => {
+        it('log data with event properties and measurements', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             await testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
+            const eventMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: 1 };
 
-            testSubject.trackEvent('event1', eventProps);
+            testSubject.trackEvent('HealthCheck', eventProps, eventMeasurements);
+            const properties = `[properties - ${util.inspect({ ...baseProps, ...eventProps })}]`;
+            const measurements = `[measurements - ${util.inspect(eventMeasurements)}]`;
+            const expectedLogMessage = `[Event]${properties}${measurements} === HealthCheck`;
 
-            consoleMock.verify(
-                c => c.log(`[Event][properties - ${util.inspect({ ...baseProps, ...eventProps })}] === event1`),
-                Times.once(),
-            );
+            consoleMock.verify(c => c.log(expectedLogMessage), Times.once());
         });
     });
 

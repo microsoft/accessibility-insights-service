@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
-import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -92,28 +92,32 @@ describe(AppInsightsLoggerClient, () => {
         });
     });
     describe('trackEvent', () => {
-        it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
-            await testSubject.setup(null);
-            appInsightsTelemetryClientMock.reset();
-
-            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: {} }))).verifiable();
-
-            testSubject.trackEvent('event1');
-
-            verifyMocks();
-        });
-
-        it('when properties passed', async () => {
+        it('when properties/measurements not passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: { foo: 'bar' } })))
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: {}, measurements: undefined })))
                 .verifiable();
 
-            testSubject.trackEvent('event1', { foo: 'bar' });
+            testSubject.trackEvent('HealthCheck');
+
+            verifyMocks();
+        });
+
+        it('when properties/measurements passed', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { scanWaitTime: 1 } })),
+                )
+                .verifiable();
+
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
 
             verifyMocks();
         });
@@ -280,14 +284,15 @@ describe(AppInsightsLoggerClient, () => {
                 .setup(t =>
                     t.trackEvent(
                         It.isValue({
-                            name: 'event1',
+                            name: 'HealthCheck',
                             properties: customDimensionAssignments,
+                            measurements: undefined,
                         }),
                     ),
                 )
                 .verifiable();
             testSubject.setCustomProperties(customDimensionAssignments);
-            testSubject.trackEvent('event1');
+            testSubject.trackEvent('HealthCheck');
             verifyMocks();
         });
     });

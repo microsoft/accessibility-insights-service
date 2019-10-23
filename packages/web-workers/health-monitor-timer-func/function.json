@@ -1,0 +1,11 @@
+{
+    "bindings": [
+        {
+            "name": "monitorTimer",
+            "type": "timerTrigger",
+            "direction": "in",
+            "schedule": "0 */5 * * * *"
+        }
+    ],
+    "scriptFile": "../health-monitor-timer-func/index.js"
+}

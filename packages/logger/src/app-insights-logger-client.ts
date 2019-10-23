@@ -1,11 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 
-import * as appInsights from 'applicationinsights';
+import { get } from 'http';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
+import { LoggerEvent } from './logger-event';
+import { TelemetryMeasurements } from './logger-event-measurements';
 import { loggerTypes } from './logger-types';
 
 @injectable()
@@ -48,8 +51,8 @@ export class AppInsightsLoggerClient implements LoggerClient {
         });
     }
 
-    public trackEvent(name: string, properties?: { [name: string]: string }): void {
-        this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: this.getMergedProperties(properties) });
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
+        this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: this.getMergedProperties(properties), measurements });
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
