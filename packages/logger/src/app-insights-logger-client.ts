@@ -3,7 +3,6 @@
 import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 
-import { get } from 'http';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
