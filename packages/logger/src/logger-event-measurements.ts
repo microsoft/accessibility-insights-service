@@ -30,7 +30,7 @@ export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements
 export type TelemetryMeasurements = {
     HealthCheck: null;
     ScanRequestSubmitted: null;
-    ScanTasksQueued: BatchPoolMeasurements;
+    BatchPoolStats: BatchPoolMeasurements;
     BatchScanRequestSubmitted: BatchScanRequestMeasurements;
     ScanTaskStarted: ScanTaskStartedMeasurements;
     ScanTaskCompleted: ScanTaskCompletedMeasurements;

@@ -73,7 +73,7 @@ export class Worker {
             };
 
             // tslint:disable-next-line: no-null-keyword
-            this.logger.trackEvent('ScanTasksQueued', null, batchPoolMeasurements);
+            this.logger.trackEvent('BatchPoolStats', null, batchPoolMeasurements);
 
             if (this.runOnce) {
                 break;

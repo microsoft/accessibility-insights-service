@@ -141,7 +141,7 @@ describe(Worker, () => {
         loggerMock
             .setup(lm =>
                 // tslint:disable-next-line: no-null-keyword
-                lm.trackEvent('ScanTasksQueued', null, expectedMeasurements),
+                lm.trackEvent('BatchPoolStats', null, expectedMeasurements),
             )
             .verifiable(Times.once());
 
