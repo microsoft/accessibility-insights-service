@@ -9,7 +9,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
-import { BaseTelemetryMeasurements } from './logger-event-measurements';
+import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
 import { loggerTypes } from './logger-types';
 
 @injectable()
@@ -34,7 +34,7 @@ export class ConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: BaseTelemetryMeasurements): void {
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.executeInDebugMode(() => {
             this.logInConsole(
                 `[Event]${this.getPrintablePropertiesString(properties)}${this.getPrintableMeasurementsString(measurements)}`,

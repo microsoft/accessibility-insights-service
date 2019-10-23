@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
-import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -108,10 +108,12 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { foo: 1 } })))
+                .setup(t =>
+                    t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { scanWaitTime: 1 } })),
+                )
                 .verifiable();
 
-            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { foo: 1 });
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
 
             verifyMocks();
         });

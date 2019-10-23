@@ -10,4 +10,5 @@ export {
     BatchPoolMeasurements,
     ScanTaskStartedMeasurements,
     ScanTaskCompletedMeasurements,
+    TelemetryMeasurements,
 } from './logger-event-measurements';
