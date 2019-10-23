@@ -7,15 +7,9 @@ import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
-import {
-    ItemType,
-    OnDemandPageScanBatchRequest,
-    OnDemandPageScanRequest,
-    OnDemandPageScanResult,
-    PartitionKey,
-    ScanRunBatchRequest,
-} from 'storage-documents';
+import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
 // tslint:disable: no-any no-unsafe-any
@@ -58,6 +52,7 @@ afterEach(() => {
     pageScanRequestProviderMock.verifyAll();
     scanDataProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
+    loggerMock.verifyAll();
 });
 
 describe(ScanBatchRequestFeedController, () => {
@@ -98,7 +93,6 @@ describe(ScanBatchRequestFeedController, () => {
                     {
                         scanId: 'scan-2',
                         url: 'url-2',
-                        // tslint:disable-next-line: no-null-keyword
                         priority: 0,
                     },
                     {
@@ -129,6 +123,9 @@ describe(ScanBatchRequestFeedController, () => {
         setupOnDemandPageScanRunResultProviderMock(documents);
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
+        // tslint:disable-next-line: no-null-keyword
+        loggerMock.setup(lm => lm.trackEvent('ScanUrlsAddedForProcessing', null, { addedUrls: 2 })).verifiable(Times.exactly(2));
+
         await scanBatchRequestFeedController.invoke(context, documents);
     });
 });

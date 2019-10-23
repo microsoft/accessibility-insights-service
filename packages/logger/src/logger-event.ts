@@ -6,6 +6,7 @@ export declare type LoggerEvent =
     | 'BatchScanRequestSubmitted'
     | 'ScanRequestSubmitted'
     | 'BatchPoolStats'
+    | 'ScanUrlsAddedForProcessing'
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'

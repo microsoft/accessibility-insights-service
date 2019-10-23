@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { Logger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -41,7 +41,13 @@ export class ScanBatchRequestFeedController extends WebController {
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
             batchDocuments.map(async document => {
-                await this.processDocument(document);
+                const addedRequests = await this.processDocument(document);
+                const scanUrlsAddedMeasurements: ScanUrlsAddedMeasurements = {
+                    addedUrls: addedRequests,
+                };
+
+                // tslint:disable-next-line: no-null-keyword
+                this.logger.trackEvent('ScanUrlsAddedForProcessing', null, scanUrlsAddedMeasurements);
             }),
         );
     }
@@ -52,13 +58,15 @@ export class ScanBatchRequestFeedController extends WebController {
         return this.validateRequestData(batchDocuments);
     }
 
-    private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<void> {
+    private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<number> {
         const requests = batchDocument.scanRunBatchRequest.filter(request => request.scanId !== undefined);
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests);
             await this.writeRequestsToQueueContainer(requests);
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
         }
+
+        return requests.length;
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[]): Promise<void> {
