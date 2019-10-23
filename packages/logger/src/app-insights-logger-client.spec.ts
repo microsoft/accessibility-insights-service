@@ -40,8 +40,6 @@ describe(AppInsightsLoggerClient, () => {
             batchJobId: 'job 1',
             batchTaskId: 'task 1',
             batchNodeId: 'node 1',
-            scanId: 'None',
-            batchRequestId: 'None',
         };
 
         processStub = {} as typeof process;

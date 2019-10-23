@@ -10,12 +10,13 @@ import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
 export class ConsoleLoggerClient implements LoggerClient {
     private isConsoleLogEnabled: boolean;
-    private baseProperties?: { [key: string]: string };
+    private baseProperties?: BaseTelemetryProperties;
 
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -58,7 +59,7 @@ export class ConsoleLoggerClient implements LoggerClient {
     // tslint:disable-next-line: no-empty
     public flush(): void {}
 
-    public setCustomProperties(properties: { [key: string]: string }): void {
+    public setCustomProperties(properties: LoggerProperties): void {
         this.baseProperties = { ...this.baseProperties, ...properties };
     }
 

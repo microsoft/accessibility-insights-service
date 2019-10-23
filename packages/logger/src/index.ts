@@ -12,3 +12,4 @@ export {
     ScanTaskCompletedMeasurements,
     TelemetryMeasurements,
 } from './logger-event-measurements';
+export { LoggerProperties } from './logger-properties';

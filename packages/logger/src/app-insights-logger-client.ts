@@ -9,11 +9,12 @@ import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
 export class AppInsightsLoggerClient implements LoggerClient {
-    private customProperties: { [key: string]: string } = {};
+    private customProperties: LoggerProperties;
 
     constructor(
         @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
@@ -35,8 +36,6 @@ export class AppInsightsLoggerClient implements LoggerClient {
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
             batchTaskId: this.currentProcess.env.AZ_BATCH_TASK_ID,
             batchNodeId: this.currentProcess.env.AZ_BATCH_NODE_ID,
-            scanId: 'None',
-            batchRequestId: 'None',
             ...baseProperties,
         };
 
@@ -47,7 +46,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         this.appInsightsObject.defaultClient.trackMetric({
             name: name,
             value: value,
-            properties: this.customProperties,
+            properties: { ...this.customProperties },
         });
     }
 
@@ -66,7 +65,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
     }
 
     public trackException(error: Error): void {
-        this.appInsightsObject.defaultClient.trackException({ exception: error, properties: this.customProperties });
+        this.appInsightsObject.defaultClient.trackException({ exception: error, properties: { ...this.customProperties } });
     }
 
     public flush(): void {
@@ -79,7 +78,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
 
     private getMergedProperties(properties?: { [key: string]: string }): { [key: string]: string } {
         if (properties === undefined) {
-            return this.customProperties;
+            return { ...this.customProperties };
         }
 
         return { ...this.customProperties, ...properties };

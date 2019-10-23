@@ -4,6 +4,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 
 export interface LoggerClient {
     setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
@@ -12,5 +13,5 @@ export interface LoggerClient {
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;
     flush(): void;
-    setCustomProperties(properties: { [key: string]: string }): void;
+    setCustomProperties(properties: LoggerProperties): void;
 }

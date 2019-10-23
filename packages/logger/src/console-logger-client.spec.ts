@@ -10,6 +10,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { LogLevel } from './logger';
 import { ScanTaskStartedMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 
@@ -68,9 +69,9 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with custom runtime properties', async () => {
-            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            const customProps = { foo: 'baz', key: 'value' };
-            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            const baseProps: BaseTelemetryProperties = { source: 'test-source' };
+            const customProps = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
             testSubject.setCustomProperties(customProps);
 
@@ -99,9 +100,9 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with custom runtime properties', async () => {
-            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            const customProps = { foo: 'baz', key: 'value' };
-            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            const baseProps: BaseTelemetryProperties = { source: 'test-source' };
+            const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
             testSubject.setCustomProperties(customProps);
 
@@ -144,9 +145,9 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with custom runtime properties', async () => {
-            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            const customProps = { foo: 'baz', key: 'value' };
-            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            const baseProps: BaseTelemetryProperties = { source: 'test-source' };
+            const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
             testSubject.setCustomProperties(customProps);
 
@@ -193,9 +194,9 @@ describe(ConsoleLoggerClient, () => {
         });
 
         it('log data with custom runtime properties', async () => {
-            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-            const customProps = { foo: 'baz', key: 'value' };
-            const mergedProps = { foo: 'baz', source: 'test-source', key: 'value' };
+            const baseProps: BaseTelemetryProperties = { source: 'test-source' };
+            const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
             const error = new Error('error1');
 
