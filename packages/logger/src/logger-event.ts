@@ -5,6 +5,7 @@ export declare type LoggerEvent =
     | 'HealthCheck'
     | 'BatchScanRequestSubmitted'
     | 'ScanRequestSubmitted'
+    | 'BatchPoolStats'
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'
