@@ -6,7 +6,7 @@ import { AxeResults } from 'axe-core';
 import { convertAxeToSarif } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger, loggerTypes, ScanTaskCompletedMeasurements } from 'logger';
+import { Logger, loggerTypes, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
@@ -245,12 +245,15 @@ describe(Runner, () => {
         const queueTime: number = 20;
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
-        const expectedMeasurements: ScanTaskCompletedMeasurements = {
+
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
             scanExecutionTime: executionTime * 1000,
             scanWallClockTime: (executionTime + queueTime) * 1000,
         };
 
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, expectedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
 
@@ -279,12 +282,15 @@ describe(Runner, () => {
         const queueTime: number = 20;
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
-        const expectedMeasurements: ScanTaskCompletedMeasurements = {
+
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
             scanExecutionTime: executionTime * 1000,
             scanWallClockTime: (executionTime + queueTime) * 1000,
         };
 
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, expectedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
 

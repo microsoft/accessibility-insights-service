@@ -35,11 +35,13 @@ export class Runner {
     ) {}
 
     public async run(): Promise<void> {
-        const scanStartTimestamp: number = Date.now();
-
         let browser: Browser;
         let pageScanResult: OnDemandPageScanResult;
         const scanMetadata = this.scanMetadataConfig.getConfig();
+
+        const scanStartedTimestamp: number = Date.now();
+        const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
+        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp });
 
         this.logger.logInfo(`Reading page scan run result.`);
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
@@ -57,10 +59,9 @@ export class Runner {
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
             this.logger.trackEvent('ScanTaskFailed');
         } finally {
-            const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-                scanExecutionTime: scanCompletedTimestamp - scanStartTimestamp,
+                scanExecutionTime: scanCompletedTimestamp - scanStartedTimestamp,
                 scanWallClockTime: scanCompletedTimestamp - scanSubmittedTimestamp,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
