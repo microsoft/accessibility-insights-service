@@ -31,6 +31,10 @@ export interface ScanUrlsAddedMeasurements extends BaseTelemetryMeasurements {
     addedUrls: number;
 }
 
+export interface ScanRequestQueuedMeasurements extends BaseTelemetryMeasurements {
+    queuedRequests: number;
+}
+
 export type TelemetryMeasurements = {
     HealthCheck: null;
     ScanRequestSubmitted: null;
@@ -41,4 +45,5 @@ export type TelemetryMeasurements = {
     ScanTaskSucceeded: null;
     ScanTaskFailed: null;
     ScanUrlsAddedForProcessing: ScanUrlsAddedMeasurements;
+    ScanRequestQueued: ScanRequestQueuedMeasurements;
 };

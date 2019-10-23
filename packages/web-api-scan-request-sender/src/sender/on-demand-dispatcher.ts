@@ -6,6 +6,7 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
+
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 @injectable()
@@ -30,6 +31,7 @@ export class OnDemandDispatcher {
 
         let itemCount;
         let continuationToken;
+        let queuedItemCount = 0;
         do {
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
@@ -40,6 +42,7 @@ export class OnDemandDispatcher {
                 itemCount = response.item.length;
                 if (itemCount > 0) {
                     await this.sender.sendRequestToScan(response.item);
+                    queuedItemCount += itemCount;
                     this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
                 }
             } while (continuationToken !== undefined);
@@ -51,6 +54,9 @@ export class OnDemandDispatcher {
         } else {
             this.logger.logInfo(`[Sender] Queue reached its maximum capacity`);
         }
+
+        // tslint:disable-next-line: no-null-keyword
+        this.logger.trackEvent('ScanRequestQueued', null, { queuedRequests: queuedItemCount });
 
         this.logger.logInfo(`[Sender] Sending scan requests completed. Queue size ${currentQueueSize}`);
     }

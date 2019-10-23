@@ -12,4 +12,5 @@ export {
     ScanTaskCompletedMeasurements,
     TelemetryMeasurements,
     ScanUrlsAddedMeasurements,
+    ScanRequestQueuedMeasurements,
 } from './logger-event-measurements';
