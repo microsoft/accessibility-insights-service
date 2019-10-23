@@ -31,7 +31,7 @@ export class OnDemandDispatcher {
 
         let itemCount;
         let continuationToken;
-        let queuedItemCount = 0;
+
         do {
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
@@ -42,8 +42,9 @@ export class OnDemandDispatcher {
                 itemCount = response.item.length;
                 if (itemCount > 0) {
                     await this.sender.sendRequestToScan(response.item);
-                    queuedItemCount += itemCount;
                     this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
+                    // tslint:disable-next-line: no-null-keyword
+                    this.logger.trackEvent('ScanRequestQueued', null, { queuedRequests: itemCount });
                 }
             } while (continuationToken !== undefined);
             currentQueueSize = await this.sender.getCurrentQueueSize();
@@ -54,9 +55,6 @@ export class OnDemandDispatcher {
         } else {
             this.logger.logInfo(`[Sender] Queue reached its maximum capacity`);
         }
-
-        // tslint:disable-next-line: no-null-keyword
-        this.logger.trackEvent('ScanRequestQueued', null, { queuedRequests: queuedItemCount });
 
         this.logger.logInfo(`[Sender] Sending scan requests completed. Queue size ${currentQueueSize}`);
     }
