@@ -9,7 +9,7 @@ import * as util from 'util';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { LogLevel } from './logger';
-import { BaseTelemetryMeasurements } from './logger-event-measurements';
+import { ScanTaskStartedMeasurements } from './logger-event-measurements';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 
@@ -90,7 +90,7 @@ describe(ConsoleLoggerClient, () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             await testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
-            const eventMeasurements: BaseTelemetryMeasurements = { foo: 1 };
+            const eventMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: 1 };
 
             testSubject.trackEvent('HealthCheck', eventProps, eventMeasurements);
             const properties = `[properties - ${util.inspect({ ...baseProps, ...eventProps })}]`;

@@ -26,3 +26,14 @@ export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements
     scanExecutionTime: number;
     scanWallClockTime: number;
 }
+
+export type TelemetryMeasurements = {
+    HealthCheck: null;
+    ScanRequestSubmitted: null;
+    ScanTasksQueued: BatchPoolMeasurements;
+    BatchScanRequestSubmitted: BatchScanRequestMeasurements;
+    ScanTaskStarted: ScanTaskStartedMeasurements;
+    ScanTaskCompleted: ScanTaskCompletedMeasurements;
+    ScanTaskSucceeded: null;
+    ScanTaskFailed: null;
+};
