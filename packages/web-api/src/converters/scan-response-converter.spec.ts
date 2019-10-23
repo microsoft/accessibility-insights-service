@@ -49,6 +49,7 @@ function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
             state: state,
             error: 'internal-error',
         },
+        batchRequestId: 'batch-id',
     };
 }
 

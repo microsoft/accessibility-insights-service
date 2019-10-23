@@ -55,13 +55,13 @@ export class ScanBatchRequestFeedController extends WebController {
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<void> {
         const requests = batchDocument.scanRunBatchRequest.filter(request => request.scanId !== undefined);
         if (requests.length > 0) {
-            await this.writeRequestsToPermanentContainer(requests);
+            await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests);
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
         }
     }
 
-    private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[]): Promise<void> {
+    private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanResult>(request => {
             return {
                 id: request.scanId,
@@ -73,6 +73,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     state: 'accepted',
                     timestamp: new Date().toJSON(),
                 },
+                batchRequestId: batchRequestId,
             };
         });
 
