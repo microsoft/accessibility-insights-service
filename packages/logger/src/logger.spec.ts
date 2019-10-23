@@ -107,7 +107,7 @@ describe(Logger, () => {
 
         it('when properties/measurements passed', async () => {
             const properties = { foo: 'bar' };
-            const measurements = { foo: 1 };
+            const measurements = { scanWaitTime: 1 };
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
