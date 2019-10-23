@@ -293,6 +293,44 @@ describe(AppInsightsLoggerClient, () => {
             testSubject.trackEvent('HealthCheck');
             verifyMocks();
         });
+
+        it('override custom dimensions in a single log call', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const customDimensionAssignments = { scanId: 'scan-id-1', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(
+                        It.isValue({
+                            name: 'HealthCheck',
+                            properties: { scanId: 'scan-id-2', batchRequestId: 'batch-req-id' },
+                            measurements: undefined,
+                        }),
+                    ),
+                )
+                .verifiable();
+
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.trackEvent('HealthCheck', { scanId: 'scan-id-2' });
+            verifyMocks();
+
+            appInsightsTelemetryClientMock.reset();
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(
+                        It.isValue({
+                            name: 'HealthCheck',
+                            properties: customDimensionAssignments,
+                            measurements: undefined,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.trackEvent('HealthCheck');
+            verifyMocks();
+        });
     });
 
     function verifyMocks(): void {
