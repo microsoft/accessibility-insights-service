@@ -41,10 +41,12 @@ export class Runner {
 
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
-        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp });
 
         this.logger.logInfo(`Reading page scan run result.`);
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
+        this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: pageScanResult.batchRequestId });
+
+        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         pageScanResult = this.resetPageScanResultState(pageScanResult);

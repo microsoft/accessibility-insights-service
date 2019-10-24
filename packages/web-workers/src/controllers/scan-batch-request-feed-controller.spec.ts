@@ -145,6 +145,7 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                         state: 'accepted',
                         timestamp: dateNow.toJSON(),
                     },
+                    batchRequestId: document.id,
                 };
             });
         onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(dbDocuments)).verifiable(Times.once());

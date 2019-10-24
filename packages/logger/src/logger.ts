@@ -7,6 +7,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 
 export enum LogLevel {
     info,
@@ -86,6 +87,10 @@ export class Logger {
         this.ensureInitialized();
 
         this.invokeLoggerClient(client => client.flush());
+    }
+
+    public setCustomProperties(properties: LoggerProperties): void {
+        this.invokeLoggerClient(client => client.setCustomProperties(properties));
     }
 
     private invokeLoggerClient(action: (loggerClient: LoggerClient) => void): void {

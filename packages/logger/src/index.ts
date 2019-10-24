@@ -14,3 +14,4 @@ export {
     ScanUrlsAddedMeasurements,
     ScanRequestQueuedMeasurements,
 } from './logger-event-measurements';
+export { LoggerProperties } from './logger-properties';

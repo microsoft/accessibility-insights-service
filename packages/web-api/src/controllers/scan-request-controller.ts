@@ -58,6 +58,7 @@ export class ScanRequestController extends ApiController {
         const totalUrls: number = processedData.scanResponses.length;
         const invalidUrls: number = processedData.scanResponses.filter(i => i.error !== undefined).length;
 
+        this.logger.setCustomProperties({ batchRequestId: batchId });
         this.logger.logInfo('Accepted scan run batch request', {
             batchId: batchId,
             totalUrls: totalUrls.toString(),

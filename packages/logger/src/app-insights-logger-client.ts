@@ -8,10 +8,13 @@ import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
 export class AppInsightsLoggerClient implements LoggerClient {
+    private customProperties: LoggerProperties;
+
     constructor(
         @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
@@ -39,25 +42,45 @@ export class AppInsightsLoggerClient implements LoggerClient {
     }
 
     public trackMetric(name: string, value: number): void {
-        this.appInsightsObject.defaultClient.trackMetric({ name: name, value: value });
+        this.appInsightsObject.defaultClient.trackMetric({
+            name: name,
+            value: value,
+            properties: { ...this.customProperties },
+        });
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
-        this.appInsightsObject.defaultClient.trackEvent({ name: name, properties, measurements });
+        this.appInsightsObject.defaultClient.trackEvent({ name: name, properties: this.getMergedProperties(properties), measurements });
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         const severity = this.getAppInsightsSeverityLevel(logLevel);
 
-        this.appInsightsObject.defaultClient.trackTrace({ message: message, severity: severity, properties: properties });
+        this.appInsightsObject.defaultClient.trackTrace({
+            message: message,
+            severity: severity,
+            properties: this.getMergedProperties(properties),
+        });
     }
 
     public trackException(error: Error): void {
-        this.appInsightsObject.defaultClient.trackException({ exception: error });
+        this.appInsightsObject.defaultClient.trackException({ exception: error, properties: { ...this.customProperties } });
     }
 
     public flush(): void {
         this.appInsightsObject.defaultClient.flush();
+    }
+
+    public setCustomProperties(properties: { [key: string]: string }): void {
+        this.customProperties = this.getMergedProperties(properties);
+    }
+
+    private getMergedProperties(properties?: { [key: string]: string }): { [key: string]: string } {
+        if (properties === undefined) {
+            return { ...this.customProperties };
+        }
+
+        return { ...this.customProperties, ...properties };
     }
 
     private getAppInsightsSeverityLevel(logLevel: LogLevel): appInsights.Contracts.SeverityLevel {
