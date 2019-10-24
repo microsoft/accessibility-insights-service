@@ -46,8 +46,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     addedUrls: addedRequests,
                 };
 
-                // tslint:disable-next-line: no-null-keyword
-                this.logger.trackEvent('ScanUrlsAddedForProcessing', null, scanUrlsAddedMeasurements);
+                this.logger.trackEvent('ScanUrlsAddedForProcessing', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
             }),
         );
     }

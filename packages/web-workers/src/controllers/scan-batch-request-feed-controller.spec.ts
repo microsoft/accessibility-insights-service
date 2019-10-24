@@ -124,7 +124,12 @@ describe(ScanBatchRequestFeedController, () => {
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
         // tslint:disable-next-line: no-null-keyword
-        loggerMock.setup(lm => lm.trackEvent('ScanUrlsAddedForProcessing', null, { addedUrls: 2 })).verifiable(Times.exactly(2));
+        loggerMock
+            .setup(lm => lm.trackEvent('ScanUrlsAddedForProcessing', { batchRequestId: documents[0].id }, { addedUrls: 2 }))
+            .verifiable(Times.once());
+        loggerMock
+            .setup(lm => lm.trackEvent('ScanUrlsAddedForProcessing', { batchRequestId: documents[1].id }, { addedUrls: 2 }))
+            .verifiable(Times.once());
 
         await scanBatchRequestFeedController.invoke(context, documents);
     });
