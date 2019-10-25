@@ -73,6 +73,7 @@ export class ScanRequestController extends ApiController {
 
         // tslint:disable-next-line: no-null-keyword
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
+        this.logger.trackMetric('InProgressScanRequests', totalUrls - invalidUrls);
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
