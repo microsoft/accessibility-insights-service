@@ -242,7 +242,7 @@ describe(Runner, () => {
         await runner.run();
     });
 
-    it('sends telemetry event on successful scan', async () => {
+    it('sends telemetry event/metric on successful scan', async () => {
         const queueTime: number = 20;
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
@@ -257,6 +257,7 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
+        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1)).verifiable();
 
         setupWebDriverCalls();
         setupReadScanResultCall(onDemandPageScanResult);
@@ -279,7 +280,7 @@ describe(Runner, () => {
         loggerMock.verifyAll();
     });
 
-    it('sends telemetry event on scan error', async () => {
+    it('sends telemetry event/metric on scan error', async () => {
         const queueTime: number = 20;
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
@@ -294,6 +295,7 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
+        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1)).verifiable();
 
         setupWebDriverCalls();
         setupReadScanResultCall(onDemandPageScanResult);

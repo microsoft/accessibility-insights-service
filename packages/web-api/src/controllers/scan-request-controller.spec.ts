@@ -138,7 +138,7 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.verifyAll();
         });
 
-        it('sends telemetry event', async () => {
+        it('sends telemetry event/metric', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
@@ -158,6 +158,7 @@ describe(ScanRequestController, () => {
 
             // tslint:disable-next-line: no-null-keyword
             loggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+            loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', 1)).verifiable();
 
             scanRequestController = createScanRequestController(context);
             await scanRequestController.handleRequest();
