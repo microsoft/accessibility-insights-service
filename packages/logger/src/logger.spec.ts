@@ -60,7 +60,7 @@ describe(Logger, () => {
     describe('trackMetric', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.trackMetric('metric1', 1);
+                testSubject.trackMetric('InProgressScanRequests', 1);
             }).toThrowError('Logger not setup');
         });
 
@@ -68,9 +68,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('metric1', 1)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1)).verifiable(Times.once()));
 
-            testSubject.trackMetric('metric1');
+            testSubject.trackMetric('InProgressScanRequests');
 
             verifyMocks();
         });
@@ -79,9 +79,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('metric1', 10)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 10)).verifiable(Times.once()));
 
-            testSubject.trackMetric('metric1', 10);
+            testSubject.trackMetric('InProgressScanRequests', 10);
 
             verifyMocks();
         });

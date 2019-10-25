@@ -7,6 +7,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerMetric } from './logger-metric';
 import { LoggerProperties } from './logger-properties';
 
 export enum LogLevel {
@@ -35,7 +36,7 @@ export class Logger {
         this.initialized = true;
     }
 
-    public trackMetric(name: string, value: number = 1): void {
+    public trackMetric(name: LoggerMetric, value: number = 1): void {
         this.ensureInitialized();
 
         this.invokeLoggerClient(client => client.trackMetric(name, value));

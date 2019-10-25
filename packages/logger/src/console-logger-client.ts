@@ -10,6 +10,7 @@ import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerMetric } from './logger-metric';
 import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
@@ -29,7 +30,7 @@ export class ConsoleLoggerClient implements LoggerClient {
         this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
     }
 
-    public trackMetric(name: string, value: number): void {
+    public trackMetric(name: LoggerMetric, value: number): void {
         this.executeInDebugMode(() => {
             this.logInConsole(`[Metric]${this.getPrintablePropertiesString()}`, `${name} - ${value}`);
         });

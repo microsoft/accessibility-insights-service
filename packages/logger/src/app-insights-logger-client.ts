@@ -8,6 +8,7 @@ import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerMetric } from './logger-metric';
 import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
@@ -41,7 +42,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         this.appInsightsObject.start();
     }
 
-    public trackMetric(name: string, value: number): void {
+    public trackMetric(name: LoggerMetric, value: number): void {
         this.appInsightsObject.defaultClient.trackMetric({
             name: name,
             value: value,

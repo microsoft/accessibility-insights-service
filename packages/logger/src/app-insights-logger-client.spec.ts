@@ -81,10 +81,10 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackMetric(It.isValue({ name: 'metric1', value: 10, properties: {} })))
+                .setup(t => t.trackMetric(It.isValue({ name: 'InProgressScanRequests', value: 10, properties: {} })))
                 .verifiable();
 
-            testSubject.trackMetric('metric1', 10);
+            testSubject.trackMetric('InProgressScanRequests', 10);
 
             verifyMocks();
         });
@@ -238,7 +238,7 @@ describe(AppInsightsLoggerClient, () => {
                 .setup(t =>
                     t.trackMetric(
                         It.isValue({
-                            name: 'metric1',
+                            name: 'InProgressScanRequests',
                             value: 10,
                             properties: customDimensionAssignments,
                         }),
@@ -246,7 +246,7 @@ describe(AppInsightsLoggerClient, () => {
                 )
                 .verifiable();
             testSubject.setCustomProperties(customDimensionAssignments);
-            testSubject.trackMetric('metric1', 10);
+            testSubject.trackMetric('InProgressScanRequests', 10);
             verifyMocks();
         });
 
