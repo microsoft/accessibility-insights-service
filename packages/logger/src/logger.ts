@@ -36,10 +36,10 @@ export class Logger {
         this.initialized = true;
     }
 
-    public trackMetric(name: LoggerMetric, value: number = 1): void {
+    public trackMetric(name: LoggerMetric, value: number = 1, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.trackMetric(name, value));
+        this.invokeLoggerClient(client => client.trackMetric(name, value, properties));
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {

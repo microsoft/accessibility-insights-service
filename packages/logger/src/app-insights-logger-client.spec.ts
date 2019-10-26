@@ -75,7 +75,7 @@ describe(AppInsightsLoggerClient, () => {
     });
 
     describe('trackMetric', () => {
-        it('when value passed', async () => {
+        it('when properties not passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
@@ -85,6 +85,20 @@ describe(AppInsightsLoggerClient, () => {
                 .verifiable();
 
             testSubject.trackMetric('InProgressScanRequests', 10);
+
+            verifyMocks();
+        });
+
+        it('when properties passed', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            appInsightsTelemetryClientMock
+                .setup(t => t.trackMetric(It.isValue({ name: 'InProgressScanRequests', value: 1, properties: { foo: 'bar' } })))
+                .verifiable();
+
+            testSubject.trackMetric('InProgressScanRequests', 1, { foo: 'bar' });
 
             verifyMocks();
         });

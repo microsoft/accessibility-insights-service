@@ -67,7 +67,7 @@ export class Runner {
                 scanWallClockTime: scanCompletedTimestamp - scanSubmittedTimestamp,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
-            this.logger.trackMetric('InProgressScanRequests', -1);
+            this.logger.trackMetric('InProgressScanRequests', -1, { priority: scanMetadata.priority.toString() });
             try {
                 await this.webDriverTask.close();
             } catch (error) {

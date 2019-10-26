@@ -15,6 +15,7 @@ type DictionaryStringToNumber = { [name: string]: number };
 interface ProcessedBatchRequestData {
     scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
     scanResponses: ScanRunResponse[];
+    requestCountByPriority: { [priority: string]: number };
 }
 
 interface RunRequestValidationResult {
@@ -73,21 +74,26 @@ export class ScanRequestController extends ApiController {
 
         // tslint:disable-next-line: no-null-keyword
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
-        this.logger.trackMetric('InProgressScanRequests', totalUrls - invalidUrls);
+        let priority: string;
+        for (priority of Object.keys(processedData.requestCountByPriority)) {
+            this.logger.trackMetric('InProgressScanRequests', processedData.requestCountByPriority[priority], { priority: priority });
+        }
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
+        const requestCountByPriority: { [priority: string]: number } = {};
 
         scanRunRequests.forEach(scanRunRequest => {
             const runRequestValidationResult = this.validateRunRequest(scanRunRequest);
             if (runRequestValidationResult.valid) {
                 // preserve GUID origin for a single batch scope
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
+                const priority = isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority;
                 scanRequestsToBeStoredInDb.push({
                     scanId: scanId,
-                    priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
+                    priority: priority,
                     url: scanRunRequest.url,
                 });
 
@@ -95,6 +101,11 @@ export class ScanRequestController extends ApiController {
                     scanId: scanId,
                     url: scanRunRequest.url,
                 });
+
+                if (requestCountByPriority[priority.toString()] === undefined) {
+                    requestCountByPriority[priority.toString()] = 0;
+                }
+                requestCountByPriority[priority.toString()] += 1;
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,
@@ -106,6 +117,7 @@ export class ScanRequestController extends ApiController {
         return {
             scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,
             scanResponses: scanResponses,
+            requestCountByPriority: requestCountByPriority,
         };
     }
 

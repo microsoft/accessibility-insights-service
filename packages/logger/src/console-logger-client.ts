@@ -30,9 +30,9 @@ export class ConsoleLoggerClient implements LoggerClient {
         this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
     }
 
-    public trackMetric(name: LoggerMetric, value: number): void {
+    public trackMetric(name: LoggerMetric, value: number, properties?: { [name: string]: string }): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Metric]${this.getPrintablePropertiesString()}`, `${name} - ${value}`);
+            this.logInConsole(`[Metric]${this.getPrintablePropertiesString(properties)}`, `${name} - ${value}`);
         });
     }
 

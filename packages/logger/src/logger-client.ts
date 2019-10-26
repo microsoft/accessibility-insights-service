@@ -9,7 +9,7 @@ import { LoggerProperties } from './logger-properties';
 
 export interface LoggerClient {
     setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
-    trackMetric(name: LoggerMetric, value: number): void;
+    trackMetric(name: LoggerMetric, value: number, properties?: { [name: string]: string }): void;
     trackEvent(name: LoggerEvent, properties?: { [key: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void;
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;

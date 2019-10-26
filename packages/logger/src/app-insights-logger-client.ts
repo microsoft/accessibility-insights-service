@@ -42,11 +42,11 @@ export class AppInsightsLoggerClient implements LoggerClient {
         this.appInsightsObject.start();
     }
 
-    public trackMetric(name: LoggerMetric, value: number): void {
+    public trackMetric(name: LoggerMetric, value: number, properties?: { [name: string]: string }): void {
         this.appInsightsObject.defaultClient.trackMetric({
             name: name,
             value: value,
-            properties: { ...this.customProperties },
+            properties: this.getMergedProperties(properties),
         });
     }
 

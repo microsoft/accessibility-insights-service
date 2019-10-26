@@ -85,6 +85,18 @@ describe(ConsoleLoggerClient, () => {
                 Times.once(),
             );
         });
+
+        it('log data with metric properties', async () => {
+            const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            await testSubject.setup(baseProps);
+            const metricProps = { metricProp1: 'prop value' };
+
+            testSubject.trackMetric('InProgressScanRequests', 1, metricProps);
+            const properties = `[properties - ${util.inspect({ ...baseProps, ...metricProps })}]`;
+            const expectedLogMessage = `[Metric]${properties} === InProgressScanRequests - 1`;
+
+            consoleMock.verify(c => c.log(expectedLogMessage), Times.once());
+        });
     });
 
     describe('trackEvent', () => {

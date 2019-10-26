@@ -68,7 +68,7 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1, undefined)).verifiable(Times.once()));
 
             testSubject.trackMetric('InProgressScanRequests');
 
@@ -79,9 +79,21 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 10)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 10, undefined)).verifiable(Times.once()));
 
             testSubject.trackMetric('InProgressScanRequests', 10);
+
+            verifyMocks();
+        });
+
+        it('when properties passed', async () => {
+            const properties = { foo: 'bar' };
+            setupCallsForTelemetrySetup();
+            await testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1, properties)).verifiable(Times.once()));
+
+            testSubject.trackMetric('InProgressScanRequests', 1, properties);
 
             verifyMocks();
         });

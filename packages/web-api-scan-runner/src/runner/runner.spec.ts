@@ -257,7 +257,7 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
-        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1)).verifiable();
+        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1, { priority: '1' })).verifiable();
 
         setupWebDriverCalls();
         setupReadScanResultCall(onDemandPageScanResult);
@@ -295,7 +295,7 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable();
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
-        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1)).verifiable();
+        loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', -1, { priority: '1' })).verifiable();
 
         setupWebDriverCalls();
         setupReadScanResultCall(onDemandPageScanResult);
