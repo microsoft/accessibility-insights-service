@@ -40,7 +40,7 @@ describe(ConsoleLoggerClient, () => {
             testSubject = new ConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);
 
             await testSubject.setup();
-            testSubject.trackMetric('InProgressScanRequests', 1);
+            testSubject.trackMetric('QueuedScanRequests', 1);
             testSubject.trackEvent('HealthCheck');
             testSubject.log('trace1', LogLevel.info);
             testSubject.trackException(new Error('exception'));
@@ -53,9 +53,9 @@ describe(ConsoleLoggerClient, () => {
         it('log data', async () => {
             await testSubject.setup(null);
 
-            testSubject.trackMetric('InProgressScanRequests', 1);
+            testSubject.trackMetric('QueuedScanRequests', 1);
 
-            consoleMock.verify(c => c.log('[Metric] === InProgressScanRequests - 1'), Times.once());
+            consoleMock.verify(c => c.log('[Metric] === QueuedScanRequests - 1'), Times.once());
         });
 
         it('log data with base properties with circular reference', async () => {
@@ -63,10 +63,10 @@ describe(ConsoleLoggerClient, () => {
             (baseProps as any).y = baseProps;
             await testSubject.setup(baseProps);
 
-            testSubject.trackMetric('InProgressScanRequests', 1);
+            testSubject.trackMetric('QueuedScanRequests', 1);
 
             consoleMock.verify(
-                c => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === InProgressScanRequests - 1`),
+                c => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === QueuedScanRequests - 1`),
                 Times.once(),
             );
         });
@@ -78,10 +78,10 @@ describe(ConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             testSubject.setCustomProperties(customProps);
 
-            testSubject.trackMetric('InProgressScanRequests', 1);
+            testSubject.trackMetric('QueuedScanRequests', 1);
 
             consoleMock.verify(
-                c => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === InProgressScanRequests - 1`),
+                c => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === QueuedScanRequests - 1`),
                 Times.once(),
             );
         });
@@ -91,9 +91,9 @@ describe(ConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             const metricProps = { metricProp1: 'prop value' };
 
-            testSubject.trackMetric('InProgressScanRequests', 1, metricProps);
+            testSubject.trackMetric('QueuedScanRequests', 1, metricProps);
             const properties = `[properties - ${util.inspect({ ...baseProps, ...metricProps })}]`;
-            const expectedLogMessage = `[Metric]${properties} === InProgressScanRequests - 1`;
+            const expectedLogMessage = `[Metric]${properties} === QueuedScanRequests - 1`;
 
             consoleMock.verify(c => c.log(expectedLogMessage), Times.once());
         });

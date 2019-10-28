@@ -41,12 +41,17 @@ export class Runner {
 
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
+        const priority: number = scanMetadata.priority;
 
         this.logger.logInfo(`Reading page scan run result.`);
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
-        this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: pageScanResult.batchRequestId });
 
-        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp });
+        this.logger.setCustomProperties({
+            scanId: scanMetadata.id,
+            batchRequestId: pageScanResult.batchRequestId,
+            priority: priority.toString(),
+        });
+        this.logScanStart(scanStartedTimestamp, scanSubmittedTimestamp);
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         pageScanResult = this.resetPageScanResultState(pageScanResult);
@@ -61,13 +66,7 @@ export class Runner {
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
             this.logger.trackEvent('ScanTaskFailed');
         } finally {
-            const scanCompletedTimestamp: number = Date.now();
-            const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-                scanExecutionTime: scanCompletedTimestamp - scanStartedTimestamp,
-                scanWallClockTime: scanCompletedTimestamp - scanSubmittedTimestamp,
-            };
-            this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
-            this.logger.trackMetric('InProgressScanRequests', -1, { priority: scanMetadata.priority.toString() });
+            this.logScanComplete(scanStartedTimestamp, scanSubmittedTimestamp);
             try {
                 await this.webDriverTask.close();
             } catch (error) {
@@ -154,5 +153,23 @@ export class Runner {
 
     private getErrorMessage(error: any): string {
         return error instanceof Error ? error.message : JSON.stringify(error);
+    }
+
+    private logScanStart(scanStartedTimestamp: number, scanSubmittedTimestamp: number): void {
+        this.logger.trackMetric('QueuedScanRequests', -1);
+        this.logger.trackMetric('ActiveScanRequests', 1);
+        this.logger.trackEvent('ScanTaskStarted', undefined, {
+            scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp,
+        });
+    }
+
+    private logScanComplete(scanStartedTimestamp: number, scanSubmittedTimestamp: number): void {
+        const scanCompletedTimestamp: number = Date.now();
+        const telemetryMeasurements: ScanTaskCompletedMeasurements = {
+            scanExecutionTime: scanCompletedTimestamp - scanStartedTimestamp,
+            scanWallClockTime: scanCompletedTimestamp - scanSubmittedTimestamp,
+        };
+        this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
+        this.logger.trackMetric('ActiveScanRequests', -1);
     }
 }

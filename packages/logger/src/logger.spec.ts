@@ -60,7 +60,7 @@ describe(Logger, () => {
     describe('trackMetric', () => {
         it('throw if called before setup', () => {
             expect(() => {
-                testSubject.trackMetric('InProgressScanRequests', 1);
+                testSubject.trackMetric('QueuedScanRequests', 1);
             }).toThrowError('Logger not setup');
         });
 
@@ -68,9 +68,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('QueuedScanRequests', 1, undefined)).verifiable(Times.once()));
 
-            testSubject.trackMetric('InProgressScanRequests');
+            testSubject.trackMetric('QueuedScanRequests');
 
             verifyMocks();
         });
@@ -79,9 +79,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 10, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('QueuedScanRequests', 10, undefined)).verifiable(Times.once()));
 
-            testSubject.trackMetric('InProgressScanRequests', 10);
+            testSubject.trackMetric('QueuedScanRequests', 10);
 
             verifyMocks();
         });
@@ -91,9 +91,9 @@ describe(Logger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('InProgressScanRequests', 1, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('QueuedScanRequests', 1, properties)).verifiable(Times.once()));
 
-            testSubject.trackMetric('InProgressScanRequests', 1, properties);
+            testSubject.trackMetric('QueuedScanRequests', 1, properties);
 
             verifyMocks();
         });
@@ -119,7 +119,7 @@ describe(Logger, () => {
 
         it('when properties/measurements passed', async () => {
             const properties = { foo: 'bar' };
-            const measurements = { scanWaitTime: 1 };
+            const measurements = { scanWaitTime: 1, priority: 1 };
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 

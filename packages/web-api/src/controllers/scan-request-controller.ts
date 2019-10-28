@@ -76,7 +76,7 @@ export class ScanRequestController extends ApiController {
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
         let priority: string;
         for (priority of Object.keys(processedData.requestCountByPriority)) {
-            this.logger.trackMetric('InProgressScanRequests', processedData.requestCountByPriority[priority], { priority: priority });
+            this.logger.trackMetric('QueuedScanRequests', processedData.requestCountByPriority[priority], { priority: priority });
         }
     }
 

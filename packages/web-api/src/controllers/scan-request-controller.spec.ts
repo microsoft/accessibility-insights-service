@@ -158,7 +158,7 @@ describe(ScanRequestController, () => {
 
             // tslint:disable-next-line: no-null-keyword
             loggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
-            loggerMock.setup(lm => lm.trackMetric('InProgressScanRequests', 1, { priority: '1' })).verifiable();
+            loggerMock.setup(lm => lm.trackMetric('QueuedScanRequests', 1, { priority: '1' })).verifiable();
 
             scanRequestController = createScanRequestController(context);
             await scanRequestController.handleRequest();
