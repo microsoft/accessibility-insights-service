@@ -109,6 +109,10 @@ describe('Dispatcher', () => {
         const queryDataProviderStub2 = new QueryDataProviderStub<OnDemandPageScanRequest>([], 2);
 
         setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+        loggerMock
+            // tslint:disable-next-line: no-null-keyword
+            .setup(lm => lm.trackEvent('ScanRequestQueued', null, { queuedRequests: 2 }))
+            .verifiable(Times.exactly(4));
 
         await dispatcher.dispatchOnDemandScanRequests();
 

@@ -27,6 +27,14 @@ export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements
     scanWallClockTime: number;
 }
 
+export interface ScanUrlsAddedMeasurements extends BaseTelemetryMeasurements {
+    addedUrls: number;
+}
+
+export interface ScanRequestQueuedMeasurements extends BaseTelemetryMeasurements {
+    queuedRequests: number;
+}
+
 export type TelemetryMeasurements = {
     HealthCheck: null;
     ScanRequestSubmitted: null;
@@ -36,4 +44,6 @@ export type TelemetryMeasurements = {
     ScanTaskCompleted: ScanTaskCompletedMeasurements;
     ScanTaskSucceeded: null;
     ScanTaskFailed: null;
+    ScanRequestsAccepted: ScanUrlsAddedMeasurements;
+    ScanRequestQueued: ScanRequestQueuedMeasurements;
 };

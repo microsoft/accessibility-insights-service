@@ -11,5 +11,7 @@ export {
     ScanTaskStartedMeasurements,
     ScanTaskCompletedMeasurements,
     TelemetryMeasurements,
+    ScanUrlsAddedMeasurements,
+    ScanRequestQueuedMeasurements,
 } from './logger-event-measurements';
 export { LoggerProperties } from './logger-properties';
