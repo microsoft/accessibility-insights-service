@@ -8,6 +8,8 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
+import { LoggerEvent } from './logger-event';
+import { LoggerMetric } from './logger-metric';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
 
@@ -79,12 +81,15 @@ describe(AppInsightsLoggerClient, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
+            const metric = {
+                name: <LoggerMetric>'QueuedScanRequests',
+                value: 10,
+                properties: {},
+            };
 
-            appInsightsTelemetryClientMock
-                .setup(t => t.trackMetric(It.isValue({ name: 'QueuedScanRequests', value: 10, properties: {} })))
-                .verifiable();
+            appInsightsTelemetryClientMock.setup(t => t.trackMetric(It.isValue(metric))).verifiable();
 
-            testSubject.trackMetric('QueuedScanRequests', 10);
+            testSubject.trackMetric(metric.name, metric.value);
 
             verifyMocks();
         });
@@ -93,12 +98,15 @@ describe(AppInsightsLoggerClient, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
+            const metric = {
+                name: <LoggerMetric>'QueuedScanRequests',
+                value: 10,
+                properties: { foo: 'bar' },
+            };
 
-            appInsightsTelemetryClientMock
-                .setup(t => t.trackMetric(It.isValue({ name: 'QueuedScanRequests', value: 1, properties: { foo: 'bar' } })))
-                .verifiable();
+            appInsightsTelemetryClientMock.setup(t => t.trackMetric(It.isValue(metric))).verifiable();
 
-            testSubject.trackMetric('QueuedScanRequests', 1, { foo: 'bar' });
+            testSubject.trackMetric(metric.name, metric.value, metric.properties);
 
             verifyMocks();
         });
@@ -108,12 +116,15 @@ describe(AppInsightsLoggerClient, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
+            const event = {
+                name: <LoggerEvent>'HealthCheck',
+                properties: {},
+                measurements: <any>undefined,
+            };
 
-            appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: {}, measurements: undefined })))
-                .verifiable();
+            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue(event))).verifiable();
 
-            testSubject.trackEvent('HealthCheck');
+            testSubject.trackEvent(event.name);
 
             verifyMocks();
         });
@@ -122,14 +133,15 @@ describe(AppInsightsLoggerClient, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
+            const event = {
+                name: <LoggerEvent>'HealthCheck',
+                properties: { foo: 'bar' },
+                measurements: { scanWaitTime: 1 },
+            };
 
-            appInsightsTelemetryClientMock
-                .setup(t =>
-                    t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { scanWaitTime: 1 } })),
-                )
-                .verifiable();
+            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue(event))).verifiable();
 
-            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
+            testSubject.trackEvent(event.name, event.properties, event.measurements);
 
             verifyMocks();
         });
@@ -248,19 +260,15 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
-            appInsightsTelemetryClientMock
-                .setup(t =>
-                    t.trackMetric(
-                        It.isValue({
-                            name: 'QueuedScanRequests',
-                            value: 10,
-                            properties: customDimensionAssignments,
-                        }),
-                    ),
-                )
-                .verifiable();
+            const metric = {
+                name: <LoggerMetric>'QueuedScanRequests',
+                value: 10,
+                properties: customDimensionAssignments,
+            };
+            appInsightsTelemetryClientMock.setup(t => t.trackMetric(It.isValue(metric))).verifiable();
+
             testSubject.setCustomProperties(customDimensionAssignments);
-            testSubject.trackMetric('QueuedScanRequests', 10);
+            testSubject.trackMetric(metric.name, metric.value);
             verifyMocks();
         });
 
@@ -292,19 +300,14 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
-            appInsightsTelemetryClientMock
-                .setup(t =>
-                    t.trackEvent(
-                        It.isValue({
-                            name: 'HealthCheck',
-                            properties: customDimensionAssignments,
-                            measurements: undefined,
-                        }),
-                    ),
-                )
-                .verifiable();
+            const event = {
+                name: <LoggerEvent>'HealthCheck',
+                properties: customDimensionAssignments,
+                measurements: <any>undefined,
+            };
+            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue(event))).verifiable();
             testSubject.setCustomProperties(customDimensionAssignments);
-            testSubject.trackEvent('HealthCheck');
+            testSubject.trackEvent(event.name);
             verifyMocks();
         });
 
@@ -314,35 +317,25 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.reset();
 
             const customDimensionAssignments = { scanId: 'scan-id-1', batchRequestId: 'batch-req-id' };
-            appInsightsTelemetryClientMock
-                .setup(t =>
-                    t.trackEvent(
-                        It.isValue({
-                            name: 'HealthCheck',
-                            properties: { scanId: 'scan-id-2', batchRequestId: 'batch-req-id' },
-                            measurements: undefined,
-                        }),
-                    ),
-                )
-                .verifiable();
+            const eventWithProperties = {
+                name: <LoggerEvent>'HealthCheck',
+                properties: { scanId: 'scan-id-2', batchRequestId: 'batch-req-id' },
+                measurements: <any>undefined,
+            };
+            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue(eventWithProperties))).verifiable();
 
             testSubject.setCustomProperties(customDimensionAssignments);
-            testSubject.trackEvent('HealthCheck', { scanId: 'scan-id-2' });
+            testSubject.trackEvent(eventWithProperties.name, { scanId: 'scan-id-2' });
             verifyMocks();
 
+            const eventWithoutProperties = {
+                name: <LoggerEvent>'HealthCheck',
+                properties: customDimensionAssignments,
+                measurements: <any>undefined,
+            };
             appInsightsTelemetryClientMock.reset();
-            appInsightsTelemetryClientMock
-                .setup(t =>
-                    t.trackEvent(
-                        It.isValue({
-                            name: 'HealthCheck',
-                            properties: customDimensionAssignments,
-                            measurements: undefined,
-                        }),
-                    ),
-                )
-                .verifiable();
-            testSubject.trackEvent('HealthCheck');
+            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue(eventWithoutProperties))).verifiable();
+            testSubject.trackEvent(eventWithoutProperties.name);
             verifyMocks();
         });
     });
