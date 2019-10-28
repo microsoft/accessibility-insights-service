@@ -25,6 +25,7 @@ interface RunRequestValidationResult {
 
 @injectable()
 export class ScanRequestController extends ApiController {
+    private static readonly defaultPriority = 0;
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-post-scans';
     private config: RestApiConfig;
@@ -90,7 +91,7 @@ export class ScanRequestController extends ApiController {
             if (runRequestValidationResult.valid) {
                 // preserve GUID origin for a single batch scope
                 const scanId = this.guidGenerator.createGuidFromBaseGuid(batchId);
-                const priority = isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority;
+                const priority = isNil(scanRunRequest.priority) ? ScanRequestController.defaultPriority : scanRunRequest.priority;
                 scanRequestsToBeStoredInDb.push({
                     scanId: scanId,
                     priority: priority,
@@ -103,9 +104,10 @@ export class ScanRequestController extends ApiController {
                 });
 
                 if (requestCountByPriority[priority.toString()] === undefined) {
-                    requestCountByPriority[priority.toString()] = 0;
+                    requestCountByPriority[priority.toString()] = 1;
+                } else {
+                    requestCountByPriority[priority.toString()] += 1;
                 }
-                requestCountByPriority[priority.toString()] += 1;
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,
