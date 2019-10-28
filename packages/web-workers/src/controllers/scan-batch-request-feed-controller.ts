@@ -46,7 +46,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     addedUrls: addedRequests,
                 };
 
-                this.logger.trackEvent('ScanUrlsAddedForProcessing', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
             }),
         );
     }

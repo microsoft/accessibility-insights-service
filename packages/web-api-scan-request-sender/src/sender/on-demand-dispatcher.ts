@@ -6,7 +6,6 @@ import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
-
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 @injectable()

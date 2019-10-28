@@ -44,6 +44,6 @@ export type TelemetryMeasurements = {
     ScanTaskCompleted: ScanTaskCompletedMeasurements;
     ScanTaskSucceeded: null;
     ScanTaskFailed: null;
-    ScanUrlsAddedForProcessing: ScanUrlsAddedMeasurements;
+    ScanRequestsAccepted: ScanUrlsAddedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;
 };
