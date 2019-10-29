@@ -5,6 +5,7 @@ import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as utils from 'util';
 
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
@@ -43,6 +44,9 @@ export class ConsoleLoggerClient implements LoggerClient {
             );
         });
     }
+
+    // tslint:disable-next-line: no-empty
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {}
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.executeInDebugMode(() => {
