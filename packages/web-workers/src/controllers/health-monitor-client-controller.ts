@@ -20,7 +20,7 @@ export class HealthMonitorClientController extends WebController {
     }
 
     public async handleRequest(...args: any[]): Promise<void> {
-        return;
+        this.logger.logInfo(`Executing ${args[0]} activity action.`);
     }
 
     protected validateRequest(...args: any[]): boolean {
