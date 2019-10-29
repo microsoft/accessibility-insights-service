@@ -1,20 +1,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { inject, injectable } from 'inversify';
-
 import { ServiceConfiguration } from 'common';
+import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as utils from 'util';
+
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
+import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
 export class ConsoleLoggerClient implements LoggerClient {
     private isConsoleLogEnabled: boolean;
-    private baseProperties?: { [key: string]: string };
+    private baseProperties?: BaseTelemetryProperties;
 
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -33,9 +35,12 @@ export class ConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }): void {
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Event]${this.getPrintablePropertiesString(properties)}`, name);
+            this.logInConsole(
+                `[Event]${this.getPrintablePropertiesString(properties)}${this.getPrintableMeasurementsString(measurements)}`,
+                name,
+            );
         });
     }
 
@@ -54,11 +59,18 @@ export class ConsoleLoggerClient implements LoggerClient {
     // tslint:disable-next-line: no-empty
     public flush(): void {}
 
+    public setCustomProperties(properties: LoggerProperties): void {
+        this.baseProperties = { ...this.baseProperties, ...properties };
+    }
+
     private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
-        // tslint:disable-next-line: no-null-keyword
         const allProperties = { ...this.baseProperties, ...properties };
 
         return _.isEmpty(allProperties) ? '' : `[properties - ${this.getPrintableString(allProperties)}]`;
+    }
+
+    private getPrintableMeasurementsString(measurements?: BaseTelemetryMeasurements): string {
+        return _.isEmpty(measurements) ? '' : `[measurements - ${this.getPrintableString(measurements)}]`;
     }
 
     private executeInDebugMode(action: () => void): void {

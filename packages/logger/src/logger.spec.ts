@@ -94,25 +94,26 @@ describe(Logger, () => {
             }).toThrowError('Logger not setup');
         });
 
-        it('when properties not passed', async () => {
+        it('when properties/measurements not passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', undefined, undefined)).verifiable(Times.once()));
 
             testSubject.trackEvent('HealthCheck');
 
             verifyMocks();
         });
 
-        it('when properties passed', async () => {
+        it('when properties/measurements passed', async () => {
             const properties = { foo: 'bar' };
+            const measurements = { scanWaitTime: 1 };
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', properties, measurements)).verifiable(Times.once()));
 
-            testSubject.trackEvent('HealthCheck', properties);
+            testSubject.trackEvent('HealthCheck', properties, measurements);
 
             verifyMocks();
         });

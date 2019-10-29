@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
-
 import { VError } from 'verror';
+
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
+import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 
 export enum LogLevel {
     info,
@@ -39,10 +41,10 @@ export class Logger {
         this.invokeLoggerClient(client => client.trackMetric(name, value));
     }
 
-    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }): void {
+    public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.trackEvent(name, properties));
+        this.invokeLoggerClient(client => client.trackEvent(name, properties, measurements));
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
@@ -85,6 +87,10 @@ export class Logger {
         this.ensureInitialized();
 
         this.invokeLoggerClient(client => client.flush());
+    }
+
+    public setCustomProperties(properties: LoggerProperties): void {
+        this.invokeLoggerClient(client => client.setCustomProperties(properties));
     }
 
     private invokeLoggerClient(action: (loggerClient: LoggerClient) => void): void {

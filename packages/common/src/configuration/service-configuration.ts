@@ -131,7 +131,7 @@ export class ServiceConfiguration {
                 },
                 maxWallClockTimeInHours: {
                     format: 'int',
-                    default: 29,
+                    default: 5,
                     doc: 'The amount of time the job manager instance will run.',
                 },
             },
@@ -202,7 +202,7 @@ export class ServiceConfiguration {
             restApiConfig: {
                 maxScanRequestBatchCount: {
                     format: 'int',
-                    default: 1000,
+                    default: 250,
                     doc: 'Maximum number of scan requests in a single HTTP client request.',
                 },
                 scanRequestProcessingDelayInSeconds: {

@@ -30,6 +30,7 @@ export class OnDemandDispatcher {
 
         let itemCount;
         let continuationToken;
+
         do {
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
@@ -41,6 +42,8 @@ export class OnDemandDispatcher {
                 if (itemCount > 0) {
                     await this.sender.sendRequestToScan(response.item);
                     this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
+                    // tslint:disable-next-line: no-null-keyword
+                    this.logger.trackEvent('ScanRequestQueued', null, { queuedRequests: itemCount });
                 }
             } while (continuationToken !== undefined);
             currentQueueSize = await this.sender.getCurrentQueueSize();

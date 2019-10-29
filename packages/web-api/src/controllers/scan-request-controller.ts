@@ -3,13 +3,14 @@
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
-import { Logger } from 'logger';
+import { BatchScanRequestMeasurements, Logger } from 'logger';
 import { ApiController, HttpResponse, ScanDataProvider, WebApiError, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { ScanRunRequest } from '../api-contracts/scan-run-request';
 import { ScanRunResponse } from '../api-contracts/scan-run-response';
 
 // tslint:disable: no-any
+type DictionaryStringToNumber = { [name: string]: number };
 
 interface ProcessedBatchRequestData {
     scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
@@ -54,11 +55,24 @@ export class ScanRequestController extends ApiController {
             body: processedData.scanResponses,
         };
 
+        const totalUrls: number = processedData.scanResponses.length;
+        const invalidUrls: number = processedData.scanResponses.filter(i => i.error !== undefined).length;
+
+        this.logger.setCustomProperties({ batchRequestId: batchId });
         this.logger.logInfo('Accepted scan run batch request', {
             batchId: batchId,
-            totalUrls: processedData.scanResponses.length.toString(),
-            invalidUrls: processedData.scanResponses.filter(i => i.error !== undefined).length.toString(),
+            totalUrls: totalUrls.toString(),
+            invalidUrls: invalidUrls.toString(),
         });
+
+        const measurements: BatchScanRequestMeasurements = {
+            totalScanRequests: totalUrls,
+            acceptedScanRequests: totalUrls - invalidUrls,
+            rejectedScanRequests: invalidUrls,
+        };
+
+        // tslint:disable-next-line: no-null-keyword
+        this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {

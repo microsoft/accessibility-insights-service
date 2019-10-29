@@ -62,6 +62,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 run: { state: 'failed' },
                 priority: 1,
                 itemType: ItemType.onDemandPageScanRunResult,
+                batchRequestId: 'batch-id1',
             };
             const expectedSavedResult1 = {
                 ...result1,
@@ -76,6 +77,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 run: { state: 'completed' },
                 priority: 2,
                 itemType: ItemType.onDemandPageScanRunResult,
+                batchRequestId: 'batch-id2',
             };
             const expectedSavedResult2 = {
                 ...result2,
@@ -90,6 +92,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 run: { state: 'running' },
                 priority: 2,
                 itemType: ItemType.onDemandPageScanRunResult,
+                batchRequestId: 'batch-id2',
             };
             const expectedSavedResult3 = {
                 ...result3,
@@ -114,6 +117,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 run: { state: 'failed' },
                 priority: 1,
                 itemType: ItemType.onDemandPageScanRunResult,
+                batchRequestId: 'batch-id',
             };
             const expectedSavedResult = {
                 ...result,
