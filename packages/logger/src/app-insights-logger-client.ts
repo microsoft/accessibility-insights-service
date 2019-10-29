@@ -59,7 +59,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         availabilityTelemetry.runLocation = telemetry.runLocation;
         availabilityTelemetry.message = telemetry.message;
         availabilityTelemetry.measurements = telemetry.measurements;
-        availabilityTelemetry.properties = telemetry.properties;
+        availabilityTelemetry.properties = this.getMergedProperties(telemetry.properties);
 
         const availabilityData = new appInsights.Contracts.Data();
         availabilityData.baseData = availabilityTelemetry;

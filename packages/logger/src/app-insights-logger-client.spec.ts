@@ -125,7 +125,7 @@ describe(AppInsightsLoggerClient, () => {
         });
     });
 
-    describe('trackEvent', () => {
+    describe('trackAvailability', () => {
         it('sends availability telemetry', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
