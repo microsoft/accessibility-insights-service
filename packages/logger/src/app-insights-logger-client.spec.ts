@@ -138,11 +138,9 @@ describe(AppInsightsLoggerClient, () => {
             const telemetryName = 'test';
             const availabilityData: AvailabilityTelemetry = {
                 id: '1',
+                success: false,
             };
-            appInsightsMock
-                .setup(a => a.Contracts)
-                .returns(() => appInsightsContractMock.object)
-                .verifiable();
+
             appInsightsTelemetryClientMock
                 .setup(t => t.channel)
                 .returns(() => channelStub as any)

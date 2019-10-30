@@ -55,6 +55,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
 
         availabilityTelemetry.id = telemetry.id;
         availabilityTelemetry.name = name;
+        availabilityTelemetry.success = telemetry.success;
         availabilityTelemetry.duration = telemetry.duration;
         availabilityTelemetry.runLocation = telemetry.runLocation;
         availabilityTelemetry.message = telemetry.message;
@@ -64,7 +65,7 @@ export class AppInsightsLoggerClient implements LoggerClient {
         const availabilityData = new appInsights.Contracts.Data();
         availabilityData.baseData = availabilityTelemetry;
         // tslint:disable-next-line: no-any
-        availabilityData.baseType = this.appInsightsObject.Contracts.telemetryTypeToBaseType('AvailabilityData' as any);
+        availabilityData.baseType = 'AvailabilityData';
 
         const availabilityEnvelope = new appInsights.Contracts.Envelope();
         availabilityEnvelope.data = availabilityData;

@@ -4,7 +4,7 @@
 export type AvailabilityTelemetry = {
     id: string;
     duration?: string;
-    success?: boolean;
+    success: boolean;
     runLocation?: string;
     message?: string;
     // tslint:disable-next-line: no-any
