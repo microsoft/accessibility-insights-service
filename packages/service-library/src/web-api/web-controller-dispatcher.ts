@@ -31,7 +31,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
 
         return {
             source: 'azure-function',
-            instanceId: currentProcess.env.WEBSITE_INSTANCE_ID,
+            serverInstanceId: currentProcess.env.WEBSITE_INSTANCE_ID,
         };
     }
 }

@@ -72,7 +72,7 @@ describe(WebControllerDispatcher, () => {
 
         expect((webControllerDispatcher as any).getTelemetryBaseProperties()).toEqual({
             source: 'azure-function',
-            instanceId: 'server_id',
+            serverInstanceId: 'server_id',
         });
     });
 
