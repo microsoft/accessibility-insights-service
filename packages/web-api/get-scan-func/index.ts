@@ -3,11 +3,9 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { WebControllerDispatcher } from 'service-library';
 import { ScanResultController } from '../src/controllers/scan-result-controller';
-import { setupIoContainer } from '../src/setup-ioc-container';
+import { processWebRequest } from '../src/process-request';
 
 export async function run(context: Context): Promise<void> {
-    const dispatcher = new WebControllerDispatcher(ScanResultController, setupIoContainer());
-    await dispatcher.start(context);
+    await processWebRequest(context, ScanResultController);
 }

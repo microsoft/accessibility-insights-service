@@ -11,6 +11,7 @@ export { WebController } from './web-api/web-controller';
 export { ApiController } from './web-api/api-controller';
 export { WebControllerDispatcher } from './web-api/web-controller-dispatcher';
 export { PageScanRequestProvider } from './data-providers/page-scan-request-provider';
+export { getGlobalWebControllerDispatcher } from './web-api/get-global-web-controller-dispatcher';
 export { PageScanRunReportService } from './data-service/page-scan-run-report-service';
 export { ScanDataProvider } from './data-providers/scan-data-provider';
 export { PartitionKeyFactory } from './factories/partition-key-factory';
