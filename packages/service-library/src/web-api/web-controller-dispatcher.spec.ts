@@ -35,18 +35,11 @@ export class TestableWebController extends WebController {
 describe(WebControllerDispatcher, () => {
     let webControllerDispatcher: WebControllerDispatcher;
     let containerMock: IMock<Container>;
-    let baseTelemetryProperties: BaseTelemetryProperties;
     let context: Context;
     let testableWebController: TestableWebController;
     let processLifeCycleContainerMock: IMock<Container>;
 
     beforeEach(() => {
-        baseTelemetryProperties = {
-            source: 'azure-function',
-            api: 'controller-mock-api',
-            version: '1.0',
-            controller: 'TestableWebController',
-        };
         context = <Context>(<unknown>{ bindingDefinitions: {} });
         testableWebController = new TestableWebController();
 
