@@ -518,16 +518,6 @@
                           "ScanTaskSucceeded"
                         ]
                       }
-                    },
-                    "MsPortalFx_TimeRange": {
-                      "model": {
-                        "format": "utc",
-                        "granularity": "auto",
-                        "absolute": {
-                          "fromDate": "2019-10-29T10:28:50.995Z",
-                          "toDate": "2019-10-30T10:28:50.995Z"
-                        }
-                      }
                     }
                   }
                 }
@@ -721,18 +711,6 @@
                           }
                         },
                         "version": 2
-                      }
-                    }
-                  },
-                  "filters": {
-                    "MsPortalFx_TimeRange": {
-                      "model": {
-                        "format": "utc",
-                        "granularity": "auto",
-                        "absolute": {
-                          "fromDate": "2019-10-29T10:28:50.995Z",
-                          "toDate": "2019-10-30T10:28:50.995Z"
-                        }
                       }
                     }
                   }
