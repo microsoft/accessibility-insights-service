@@ -1,0 +1,1172 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+      "storageAccountName": {
+        "type": "string",
+        "defaultValue": "allystorage5d4fa3x2bewh6"
+      },
+      "cosmosName": {
+        "type": "string",
+        "defaultValue": "allycosmos5d4fa3x2bewh6"
+      },
+      "appInsightsName": {
+        "type": "string",
+        "defaultValue": "allyinsights5d4fa3x2bewh6"
+      },
+      "batchAccountName": {
+        "type": "string",
+        "defaultValue": "allybatch5d4fa3x2bewh6"
+      },
+      "dashboardName": {
+          "type": "string",
+          "defaultValue": "Test Dashboard"
+      },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]"
+      }
+  },
+  "variables": {},
+  "resources": [
+    {
+      "properties": {
+        "lenses": {
+          "0": {
+            "order": 0,
+            "parts": {
+              "0": {
+                "position": {
+                  "x": 0,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 3
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                              },
+                              "name": "Availability",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.storage/storageaccounts",
+                              "metricVisualization": {
+                                "displayName": "Availability"
+                              }
+                            }
+                          ],
+                          "title": "Avg Availability for allystorage5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                              },
+                              "name": "Availability",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.storage/storageaccounts",
+                              "metricVisualization": {
+                                "displayName": "Availability"
+                              }
+                            }
+                          ],
+                          "title": "Storage Account Availability",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "1": {
+                "position": {
+                  "x": 4,
+                  "y": 0,
+                  "colSpan": 4,
+                  "rowSpan": 3
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosName'))]"
+                              },
+                              "name": "Service Availability",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.documentdb/databaseaccounts/classic",
+                              "metricVisualization": {
+                                "displayName": "Service Availability"
+                              }
+                            }
+                          ],
+                          "title": "Avg Service Availability for allycosmos5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosName'))]"
+                              },
+                              "name": "Service Availability",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.documentdb/databaseaccounts/classic",
+                              "metricVisualization": {
+                                "displayName": "Service Availability"
+                              }
+                            }
+                          ],
+                          "title": "Cosmos Availability",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "2": {
+                "position": {
+                  "x": 8,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/totalScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "totalScanRequests"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/acceptedScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "acceptedScanRequests",
+                                "color": "#2dc004"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/rejectedScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "rejectedScanRequests",
+                                "color": "#f71a21"
+                              }
+                            }
+                          ],
+                          "title": "Sum totalScanRequests, Sum acceptedScanRequests, and Sum rejectedScanRequests for allyinsights5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/totalScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "totalScanRequests"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/acceptedScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "acceptedScanRequests",
+                                "color": "#2dc004"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/rejectedScanRequests",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "rejectedScanRequests",
+                                "color": "#f71a21"
+                              }
+                            }
+                          ],
+                          "title": "Scan Requests",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "3": {
+                "position": {
+                  "x": 14,
+                  "y": 0,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/count",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "Events"
+                              }
+                            }
+                          ],
+                          "title": "Sum Events for allyinsights5d4fa3x2bewh6 by Event name where Event name = 'ScanTaskFailed', 'ScanTaskCompleted', 'ScanTaskSucceeded'",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          },
+                          "filterCollection": {
+                            "filters": [
+                              {
+                                "key": "customEvent/name",
+                                "operator": 0,
+                                "values": [
+                                  "ScanTaskFailed",
+                                  "ScanTaskCompleted",
+                                  "ScanTaskSucceeded"
+                                ]
+                              }
+                            ]
+                          },
+                          "grouping": {
+                            "dimension": "customEvent/name",
+                            "sort": 2,
+                            "top": 3
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/count",
+                              "aggregationType": 1,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "Events"
+                              }
+                            }
+                          ],
+                          "title": "Scans Completed",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          },
+                          "grouping": {
+                            "dimension": "customEvent/name",
+                            "sort": 2,
+                            "top": 3
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  },
+                  "filters": {
+                    "customEvent/name": {
+                      "model": {
+                        "operator": "equals",
+                        "values": [
+                          "ScanTaskFailed",
+                          "ScanTaskCompleted",
+                          "ScanTaskSucceeded"
+                        ]
+                      }
+                    },
+                    "MsPortalFx_TimeRange": {
+                      "model": {
+                        "format": "utc",
+                        "granularity": "auto",
+                        "absolute": {
+                          "fromDate": "2019-10-29T10:28:50.995Z",
+                          "toDate": "2019-10-30T10:28:50.995Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "4": {
+                "position": {
+                  "x": 0,
+                  "y": 3,
+                  "colSpan": 8,
+                  "rowSpan": 5
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "StartingNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Starting Node Count"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "IdleNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Idle Node Count"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "RunningNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Running Node Count"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "StartTaskFailedNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Start Task Failed Node Count"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "RebootingNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Rebooting Node Count"
+                              }
+                            }
+                          ],
+                          "title": "Avg Starting Node Count, Avg Idle Node Count, and 3 other metrics for allybatch5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "StartingNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Starting Node Count",
+                                "color": "#00188f"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "IdleNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Idle Node Count",
+                                "color": "#a0a5a8"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "RunningNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Running Node Count",
+                                "color": "#009e49"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "StartTaskFailedNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Start Task Failed Node Count",
+                                "color": "#ff8c00"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
+                              },
+                              "name": "RebootingNodeCount",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.batch/batchaccounts",
+                              "metricVisualization": {
+                                "displayName": "Rebooting Node Count",
+                                "color": "#ec008c"
+                              }
+                            }
+                          ],
+                          "title": "Pool Node Status",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  },
+                  "filters": {
+                    "MsPortalFx_TimeRange": {
+                      "model": {
+                        "format": "utc",
+                        "granularity": "auto",
+                        "absolute": {
+                          "fromDate": "2019-10-29T10:28:50.995Z",
+                          "toDate": "2019-10-30T10:28:50.995Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "5": {
+                "position": {
+                  "x": 8,
+                  "y": 4,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanExecutionTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanExecutionTime",
+                                "color": "#917edb"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanWaitTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanWaitTime",
+                                "color": "#e86e58"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanWallClockTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanWallClockTime",
+                                "color": "#0078d4"
+                              }
+                            }
+                          ],
+                          "title": "Avg scanExecutionTime, Avg scanWaitTime, and Avg scanWallClockTime for allyinsights5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanExecutionTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanExecutionTime",
+                                "color": "#917edb"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanWaitTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanWaitTime",
+                                "color": "#e86e58"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/scanWallClockTime",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "scanWallClockTime",
+                                "color": "#0078d4"
+                              }
+                            }
+                          ],
+                          "title": "Scan Duration (milliseconds)",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "6": {
+                "position": {
+                  "x": 14,
+                  "y": 4,
+                  "colSpan": 6,
+                  "rowSpan": 4
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/maxParallelTasks",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "maxParallelTasks"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/runningTasks",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "runningTasks"
+                              }
+                            }
+                          ],
+                          "title": "Avg maxParallelTasks and Avg runningTasks for allyinsights5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/maxParallelTasks",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "maxParallelTasks"
+                              }
+                            },
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/runningTasks",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "runningTasks"
+                              }
+                            }
+                          ],
+                          "title": "Maximum Parallel Tasks and Running Tasks",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              },
+              "7": {
+                "position": {
+                  "x": 10,
+                  "y": 8,
+                  "colSpan": 4,
+                  "rowSpan": 3
+                },
+                "metadata": {
+                  "inputs": [
+                    {
+                      "name": "options",
+                      "value": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/samplingIntervalInSeconds",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "samplingIntervalInSeconds"
+                              }
+                            }
+                          ],
+                          "title": "Avg samplingIntervalInSeconds for allyinsights5d4fa3x2bewh6",
+                          "titleKind": 1,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            }
+                          }
+                        },
+                        "version": 2
+                      }
+                    },
+                    {
+                      "name": "sharedTimeRange",
+                      "isOptional": true
+                    }
+                  ],
+                  "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                  "settings": {
+                    "content": {
+                      "options": {
+                        "chart": {
+                          "metrics": [
+                            {
+                              "resourceMetadata": {
+                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                              },
+                              "name": "customEvents/custom/samplingIntervalInSeconds",
+                              "aggregationType": 4,
+                              "namespace": "microsoft.insights/components/kusto",
+                              "metricVisualization": {
+                                "displayName": "samplingIntervalInSeconds"
+                              }
+                            }
+                          ],
+                          "title": "Pool Sampling Interval (seconds)",
+                          "titleKind": 2,
+                          "visualization": {
+                            "chartType": 2,
+                            "legendVisualization": {
+                              "isVisible": true,
+                              "position": 2,
+                              "hideSubtitle": false
+                            },
+                            "axisVisualization": {
+                              "x": {
+                                "isVisible": true,
+                                "axisType": 2
+                              },
+                              "y": {
+                                "isVisible": true,
+                                "axisType": 1
+                              }
+                            },
+                            "disablePinning": true
+                          }
+                        },
+                        "version": 2
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "metadata": {
+          "model": {
+            "timeRange": {
+              "value": {
+                "relative": {
+                  "duration": 24,
+                  "timeUnit": 1
+                }
+              },
+              "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
+            },
+            "filterLocale": {
+              "value": "en-us"
+            },
+            "filters": {
+              "value": {
+                "MsPortalFx_TimeRange": {
+                  "model": {
+                    "format": "utc",
+                    "granularity": "auto",
+                    "relative": "24h"
+                  },
+                  "displayCache": {
+                    "name": "UTC Time",
+                    "value": "Past 1440 minutes"
+                  },
+                  "filteredPartIds": [
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337b",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337d",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337f",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43381",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43383",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43385",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43387",
+                    "StartboardPart-AnalyticsPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43389",
+                    "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4338b"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "name": "[parameters('dashboardName')]",
+      "type": "Microsoft.Portal/dashboards",
+      "location": "[parameters('location')]",
+      "tags": {
+        "hidden-title": "[parameters('dashboardName')]"
+      },
+      "apiVersion": "2015-08-01-preview"
+    }
+  ]
+}
+
