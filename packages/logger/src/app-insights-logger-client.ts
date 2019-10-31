@@ -3,6 +3,7 @@
 import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
@@ -47,6 +48,33 @@ export class AppInsightsLoggerClient implements LoggerClient {
             value: value,
             properties: { ...this.customProperties },
         });
+    }
+
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
+        const availabilityTelemetry = new appInsights.Contracts.AvailabilityData();
+
+        availabilityTelemetry.id = telemetry.id;
+        availabilityTelemetry.name = name;
+        availabilityTelemetry.success = telemetry.success;
+        availabilityTelemetry.duration = telemetry.duration;
+        availabilityTelemetry.runLocation = telemetry.runLocation;
+        availabilityTelemetry.message = telemetry.message;
+        availabilityTelemetry.measurements = telemetry.measurements;
+        availabilityTelemetry.properties = this.getMergedProperties(telemetry.properties);
+
+        const availabilityData = new appInsights.Contracts.Data();
+        availabilityData.baseData = availabilityTelemetry;
+        // tslint:disable-next-line: no-any
+        availabilityData.baseType = 'AvailabilityData';
+
+        const availabilityEnvelope = new appInsights.Contracts.Envelope();
+        availabilityEnvelope.data = availabilityData;
+        availabilityEnvelope.time = new Date().toISOString();
+        availabilityEnvelope.ver = 1;
+        availabilityEnvelope.iKey = this.appInsightsObject.defaultClient.config.instrumentationKey;
+        availabilityEnvelope.name = 'Microsoft.ApplicationInsights.Availability';
+
+        this.appInsightsObject.defaultClient.channel.send(availabilityEnvelope);
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerEvent } from './logger-event';
@@ -10,6 +11,7 @@ export interface LoggerClient {
     setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
     trackMetric(name: string, value: number): void;
     trackEvent(name: LoggerEvent, properties?: { [key: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void;
+    trackAvailability(name: string, telemetry: AvailabilityTelemetry): void;
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;
     flush(): void;

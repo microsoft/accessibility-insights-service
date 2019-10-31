@@ -6,6 +6,7 @@ import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
@@ -14,6 +15,7 @@ import { LogLevel } from './logger';
 describe(AppInsightsLoggerClient, () => {
     let appInsightsMock: IMock<typeof appInsights>;
     let appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
+    let appInsightsContractMock: IMock<typeof appInsights.Contracts>;
     let testSubject: AppInsightsLoggerClient;
     let appInsightsTelemetryClientMock: IMock<appInsights.TelemetryClient>;
     let processStub: typeof process;
@@ -28,6 +30,7 @@ describe(AppInsightsLoggerClient, () => {
         appInsightsMock = Mock.ofType<typeof appInsights>(null, MockBehavior.Strict);
         appInsightsConfigMock = Mock.ofType<typeof appInsights.Configuration>(null, MockBehavior.Strict);
         appInsightsTelemetryClientMock = Mock.ofType<appInsights.TelemetryClient>(null);
+        appInsightsContractMock = Mock.ofType<typeof appInsights.Contracts>(null);
 
         envVariables = {
             AZ_BATCH_POOL_ID: 'pool 1',
@@ -89,6 +92,7 @@ describe(AppInsightsLoggerClient, () => {
             verifyMocks();
         });
     });
+
     describe('trackEvent', () => {
         it('when properties/measurements not passed', async () => {
             setupCallsForTelemetrySetup();
@@ -117,6 +121,47 @@ describe(AppInsightsLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
 
+            verifyMocks();
+        });
+    });
+
+    describe('trackAvailability', () => {
+        it('sends availability telemetry', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+            // tslint:disable-next-line: no-empty
+            const sendMock = Mock.ofInstance((data: any) => {});
+            const channelStub = {
+                send: sendMock.object,
+            };
+            const telemetryName = 'test';
+            const availabilityData: AvailabilityTelemetry = {
+                id: '1',
+                success: false,
+            };
+
+            appInsightsTelemetryClientMock
+                .setup(t => t.channel)
+                .returns(() => channelStub as any)
+                .verifiable(Times.atLeastOnce());
+            sendMock
+                .setup(send =>
+                    send(
+                        It.is(availabilityEnvelope => {
+                            // tslint:disable-next-line: no-unsafe-any
+                            const data = availabilityEnvelope.data.baseData;
+
+                            // tslint:disable-next-line: no-unsafe-any
+                            return data.id === availabilityData.id && data.name === telemetryName;
+                        }),
+                    ),
+                )
+                .verifiable();
+
+            testSubject.trackAvailability(telemetryName, availabilityData);
+
+            sendMock.verifyAll();
             verifyMocks();
         });
     });
