@@ -20,7 +20,7 @@
       },
       "dashboardName": {
           "type": "string",
-          "defaultValue": "[concat(resourceGroup(), 'Dashboard')]"
+          "defaultValue": "[concat('allydashboard',toLower(uniqueString(resourceGroup().id)))]"
       },
       "location": {
         "type": "string",
