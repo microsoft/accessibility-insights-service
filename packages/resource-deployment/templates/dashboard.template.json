@@ -4,23 +4,23 @@
   "parameters": {
       "storageAccountName": {
         "type": "string",
-        "defaultValue": "allystorage5d4fa3x2bewh6"
+        "defaultValue": "[concat('allystorage',toLower(uniqueString(resourceGroup().id)))]"
       },
-      "cosmosName": {
+      "cosmosAccountName": {
         "type": "string",
-        "defaultValue": "allycosmos5d4fa3x2bewh6"
+        "defaultValue": "[concat('allycosmos',toLower(uniqueString(resourceGroup().id)))]"
       },
       "appInsightsName": {
         "type": "string",
-        "defaultValue": "allyinsights5d4fa3x2bewh6"
+        "defaultValue": "[concat('allyinsights',toLower(uniqueString(resourceGroup().id)))]"
       },
       "batchAccountName": {
         "type": "string",
-        "defaultValue": "allybatch5d4fa3x2bewh6"
+        "defaultValue": "[concat('allybatch',toLower(uniqueString(resourceGroup().id)))]"
       },
       "dashboardName": {
           "type": "string",
-          "defaultValue": "Test Dashboard"
+          "defaultValue": "[concat(resourceGroup(), 'Dashboard')]"
       },
       "location": {
         "type": "string",
@@ -152,7 +152,7 @@
                           "metrics": [
                             {
                               "resourceMetadata": {
-                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosName'))]"
+                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosAccountName'))]"
                               },
                               "name": "Service Availability",
                               "aggregationType": 4,
@@ -199,7 +199,7 @@
                           "metrics": [
                             {
                               "resourceMetadata": {
-                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosName'))]"
+                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosAccountName'))]"
                               },
                               "name": "Service Availability",
                               "aggregationType": 4,
