@@ -5,7 +5,7 @@ import { A11yServiceClient } from './a11y-service-client';
 
 export function registerWebApiClientLibraryToContainer(container: inversify.Container): inversify.Container {
     container.bind(A11yServiceClient).toDynamicValue(context => {
-        return new A11yServiceClient(process.env.FunctionAppName);
+        return new A11yServiceClient(process.env.APIM_NAME);
     });
 
     return container;
