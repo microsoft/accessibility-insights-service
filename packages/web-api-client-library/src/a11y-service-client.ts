@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 import * as request from 'request-promise';
+import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 
 @injectable()
 export class A11yServiceClient {
@@ -19,9 +20,8 @@ export class A11yServiceClient {
         httpRequest.defaults(this.defaultOptions);
     }
 
-    // tslint:disable-next-line: no-any
-    public async postScanUrl(scanUrl: string, priority?: number): Promise<any> {
-        const requestBody = [
+    public async postScanUrl(scanUrl: string, priority?: number): Promise<ScanRunResponse> {
+        const requestBody: ScanRunRequest[] = [
             {
                 url: scanUrl,
                 priority: priority === undefined ? 0 : priority,
@@ -33,15 +33,13 @@ export class A11yServiceClient {
         return this.httpRequest.post(requestUrl, { json: requestBody });
     }
 
-    // tslint:disable-next-line: no-any
-    public async getScanStatus(scanId: string): Promise<any> {
+    public async getScanStatus(scanId: string): Promise<ScanResultResponse> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}`;
 
         return this.httpRequest.get(requestUrl);
     }
 
-    // tslint:disable-next-line: no-any
-    public async getScanReport(scanId: string, reportId: string): Promise<any> {
+    public async getScanReport(scanId: string, reportId: string): Promise<Buffer> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}/reports/${reportId}`;
 
         return this.httpRequest.get(requestUrl);
