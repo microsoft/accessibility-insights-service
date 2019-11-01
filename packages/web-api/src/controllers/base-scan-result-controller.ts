@@ -3,9 +3,9 @@
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
 import { ApiController, OnDemandPageScanRunResultProvider } from 'service-library';
+import { ScanResultResponse } from 'service-library/src/web-api/api-contracts/scan-result-response';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
 
 export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;

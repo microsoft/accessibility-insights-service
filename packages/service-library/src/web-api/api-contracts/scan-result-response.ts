@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ScanRunErrorCodeName, WebApiError } from 'service-library';
+import { ScanRunErrorCodeName } from '../scan-run-error-codes';
+import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
 export declare type ReportFormat = 'sarif';
