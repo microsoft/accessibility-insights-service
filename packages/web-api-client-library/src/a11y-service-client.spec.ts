@@ -23,16 +23,8 @@ describe(A11yServiceClient, () => {
         const priority = 3;
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
+        const options = getRequestOptions(requestBody);
 
-        const options = {
-            json: requestBody,
-            qs: {
-                'api-version': apiVersion,
-            },
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
         requestMock
             .setup(req => req.post(`${baseUrl}/scans`, options))
             // tslint:disable-next-line: no-any
@@ -44,4 +36,51 @@ describe(A11yServiceClient, () => {
 
         requestMock.verifyAll();
     });
+
+    it('getScanStatus', async () => {
+        const scanId = 'scanid';
+        const response = { statusCode: 200 };
+        const options = getRequestOptions();
+
+        requestMock
+            .setup(req => req.get(`${baseUrl}/scans/${scanId}`, options))
+            // tslint:disable-next-line: no-any
+            .returns(() => Promise.resolve(response) as any)
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.getScanStatus(scanId);
+        expect(actualResponse).toEqual(response);
+
+        requestMock.verifyAll();
+    });
+
+    it('getScanReport', async () => {
+        const scanId = 'scanid';
+        const reportId = 'reportid';
+        const response = { statusCode: 200 };
+        const options = getRequestOptions();
+
+        requestMock
+            .setup(req => req.get(`${baseUrl}/scans/${scanId}/reports/${reportId}`, options))
+            // tslint:disable-next-line: no-any
+            .returns(() => Promise.resolve(response) as any)
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.getScanReport(scanId, reportId);
+        expect(actualResponse).toEqual(response);
+
+        requestMock.verifyAll();
+    });
+
+    function getRequestOptions(requestBody?: Object): request.RequestPromiseOptions {
+        return {
+            json: requestBody,
+            qs: {
+                'api-version': apiVersion,
+            },
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        };
+    }
 });
