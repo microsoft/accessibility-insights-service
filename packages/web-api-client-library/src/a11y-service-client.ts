@@ -5,7 +5,19 @@ import * as request from 'request-promise';
 
 @injectable()
 export class A11yServiceClient {
-    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', private readonly httpRequest = request) {}
+    private readonly defaultOptions: request.RequestPromiseOptions = {
+        forever: true,
+        qs: {
+            'api-version': this.apiVersion,
+        },
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    };
+
+    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', private readonly httpRequest = request) {
+        httpRequest.defaults(this.defaultOptions);
+    }
 
     // tslint:disable-next-line: no-any
     public async postScanUrl(scanUrl: string, priority?: number): Promise<any> {
@@ -18,32 +30,20 @@ export class A11yServiceClient {
 
         const requestUrl: string = `${this.baseUrl}/scans`;
 
-        return this.httpRequest.post(requestUrl, this.getRequestOptions(requestBody));
+        return this.httpRequest.post(requestUrl, { json: requestBody });
     }
 
     // tslint:disable-next-line: no-any
     public async getScanStatus(scanId: string): Promise<any> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}`;
 
-        return this.httpRequest.get(requestUrl, this.getRequestOptions());
+        return this.httpRequest.get(requestUrl);
     }
 
     // tslint:disable-next-line: no-any
     public async getScanReport(scanId: string, reportId: string): Promise<any> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}/reports/${reportId}`;
 
-        return this.httpRequest.get(requestUrl, this.getRequestOptions());
-    }
-
-    private getRequestOptions(requestBody?: Object): request.RequestPromiseOptions {
-        return {
-            json: requestBody,
-            qs: {
-                'api-version': this.apiVersion,
-            },
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
+        return this.httpRequest.get(requestUrl);
     }
 }
