@@ -5,11 +5,7 @@ import * as request from 'request-promise';
 
 @injectable()
 export class A11yServiceClient {
-    public get baseUrl(): string {
-        return `https://${this.apimName}.azure-api.net`;
-    }
-
-    constructor(private readonly apimName: string, private readonly apiVersion = '1.0', private readonly httpRequest = request) {}
+    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', private readonly httpRequest = request) {}
 
     // tslint:disable-next-line: no-any
     public async postScanUrl(scanUrl: string, priority?: number): Promise<any> {

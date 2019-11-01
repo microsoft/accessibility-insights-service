@@ -8,18 +8,14 @@ import { A11yServiceClient } from './a11y-service-client';
 
 // tslint:disable: no-null-keyword
 describe(A11yServiceClient, () => {
-    const apimName = 'app-name';
+    const baseUrl = 'base-url';
     let testSubject: A11yServiceClient;
     let requestMock: IMock<typeof request>;
     const apiVersion = '1.0';
 
     beforeEach(() => {
         requestMock = Mock.ofType<typeof request>(null);
-        testSubject = new A11yServiceClient(apimName, apiVersion, requestMock.object);
-    });
-
-    it('baseUrl', () => {
-        expect(testSubject.baseUrl).toEqual(`https://${apimName}.azure-api.net`);
+        testSubject = new A11yServiceClient(baseUrl, apiVersion, requestMock.object);
     });
 
     it('postScanUrl', async () => {
@@ -38,7 +34,7 @@ describe(A11yServiceClient, () => {
             },
         };
         requestMock
-            .setup(req => req.post(`${testSubject.baseUrl}/scans`, options))
+            .setup(req => req.post(`${baseUrl}/scans`, options))
             // tslint:disable-next-line: no-any
             .returns(() => Promise.resolve(response) as any)
             .verifiable(Times.once());
