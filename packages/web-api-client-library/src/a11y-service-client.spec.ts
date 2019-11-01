@@ -25,6 +25,7 @@ describe(A11yServiceClient, () => {
     it('postScanUrl', async () => {
         const scanUrl = 'url';
         const priority = 3;
+        const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
 
         const options = {
@@ -36,8 +37,14 @@ describe(A11yServiceClient, () => {
                 'Content-Type': 'application/json',
             },
         };
-        requestMock.setup(req => req.post(`${testSubject.baseUrl}/scans`, options)).verifiable(Times.once());
-        await testSubject.postScanUrl(scanUrl, priority);
+        requestMock
+            .setup(req => req.post(`${testSubject.baseUrl}/scans`, options))
+            // tslint:disable-next-line: no-any
+            .returns(() => Promise.resolve(response) as any)
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.postScanUrl(scanUrl, priority);
+        expect(actualResponse).toEqual(response);
 
         requestMock.verifyAll();
     });
