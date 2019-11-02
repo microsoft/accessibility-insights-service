@@ -13,23 +13,29 @@ describe(A11yServiceClient, () => {
     let testSubject: A11yServiceClient;
     let requestMock: IMock<typeof request>;
     const apiVersion = '1.0';
+    const requestDefaults = {
+        forever: true,
+        qs: {
+            'api-version': apiVersion,
+        },
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    };
+
     beforeEach(() => {
         requestMock = Mock.ofType<typeof request>(null);
+        requestMock
+            .setup(req => req.defaults(requestDefaults))
+            .returns(() => requestMock.object)
+            .verifiable(Times.once());
         testSubject = new A11yServiceClient(baseUrl, apiVersion, requestMock.object);
-        const requestDefaults = {
-            forever: true,
-            qs: {
-                'api-version': apiVersion,
-            },
-            headers: {
-                'Content-Type': 'application/json',
-            },
-        };
-        requestMock.setup(req => req.defaults(requestDefaults)).verifiable(Times.once());
     });
+
     afterEach(() => {
         requestMock.verifyAll();
     });
+
     it('postScanUrl', async () => {
         const scanUrl = 'url';
         const priority = 3;
@@ -44,6 +50,7 @@ describe(A11yServiceClient, () => {
         const actualResponse = await testSubject.postScanUrl(scanUrl, priority);
         expect(actualResponse).toEqual(response);
     });
+
     it('getScanStatus', async () => {
         const scanId = 'scanid';
         const response = { statusCode: 200 };
@@ -55,6 +62,7 @@ describe(A11yServiceClient, () => {
         const actualResponse = await testSubject.getScanStatus(scanId);
         expect(actualResponse).toEqual(response);
     });
+
     it('getScanReport', async () => {
         const scanId = 'scanid';
         const reportId = 'reportid';

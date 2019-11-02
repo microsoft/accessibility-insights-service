@@ -6,6 +6,7 @@ import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-lib
 
 @injectable()
 export class A11yServiceClient {
+    private readonly defaultRequestObject: typeof request;
     private readonly defaultOptions: request.RequestPromiseOptions = {
         forever: true,
         qs: {
@@ -16,8 +17,8 @@ export class A11yServiceClient {
         },
     };
 
-    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', private readonly httpRequest = request) {
-        httpRequest.defaults(this.defaultOptions);
+    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', httpRequest = request) {
+        this.defaultRequestObject = httpRequest.defaults(this.defaultOptions);
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ScanRunResponse> {
@@ -30,18 +31,18 @@ export class A11yServiceClient {
 
         const requestUrl: string = `${this.baseUrl}/scans`;
 
-        return this.httpRequest.post(requestUrl, { json: requestBody });
+        return this.defaultRequestObject.post(requestUrl, { json: requestBody });
     }
 
     public async getScanStatus(scanId: string): Promise<ScanResultResponse> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}`;
 
-        return this.httpRequest.get(requestUrl);
+        return this.defaultRequestObject.get(requestUrl);
     }
 
     public async getScanReport(scanId: string, reportId: string): Promise<Buffer> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}/reports/${reportId}`;
 
-        return this.httpRequest.get(requestUrl);
+        return this.defaultRequestObject.get(requestUrl);
     }
 }
