@@ -98,7 +98,7 @@ getStorageAccessKey() {
 }
 
 # Read script arguments
-while getopts "c:r:s:k:" option; do
+while getopts ":c:r:s:k:" option; do
     case $option in
     c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;

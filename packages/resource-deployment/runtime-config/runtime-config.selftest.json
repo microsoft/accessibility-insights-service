@@ -1,0 +1,20 @@
+{
+    "logConfig": {
+        "logInConsole": true
+    },
+    "queueConfig": {
+        "maxQueueSize": 10
+    },
+    "taskConfig": {
+        "taskTimeoutInMinutes": 3
+    },
+    "scanConfig": {
+        "minLastReferenceSeenInDays": 3,
+        "pageRescanIntervalInDays": 3,
+        "failedPageRescanIntervalInHours": 3,
+        "maxScanRetryCount": 3
+    },
+    "restApiConfig": {
+        "scanRequestProcessingDelayInSeconds": 300
+    }
+}

@@ -33,7 +33,7 @@ deleteResourceGroup() {
 }
 
 # Read script arguments
-while getopts "r:" option; do
+while getopts ":r:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;

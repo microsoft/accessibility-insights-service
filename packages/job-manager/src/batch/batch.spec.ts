@@ -3,7 +3,8 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
 import 'reflect-metadata';
 
-import { BatchServiceClient, BatchServiceModels, Job, Task } from '@azure/batch';
+import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
+import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
 import { Message } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
@@ -12,8 +13,22 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { BatchServiceClientProvider } from '../job-manager-ioc-types';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
-import { JobTaskExecutionResult, JobTaskState } from './job-task';
+import { JobTaskState } from './job-task';
 import { RunnerTaskConfig } from './runner-task-config';
+
+export interface JobListItemStub {
+    id: string;
+}
+
+export class JobListStub {
+    public odatanextLink: string;
+
+    public constructor(public items: JobListItemStub[]) {}
+
+    public values(): JobListItemStub[] {
+        return this.items;
+    }
+}
 
 describe(Batch, () => {
     const jobId1 = 'job-1';
@@ -23,6 +38,7 @@ describe(Batch, () => {
     let runnerTaskConfigMock: IMock<RunnerTaskConfig>;
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
+    let poolMock: IMock<Pool>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<Logger>;
     let taskEnvSettings: BatchServiceModels.EnvironmentSetting[];
@@ -54,9 +70,11 @@ describe(Batch, () => {
 
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
+        poolMock = Mock.ofType();
         batchClientStub = ({
             job: jobMock.object,
             task: taskMock.object,
+            pool: poolMock.object,
         } as unknown) as BatchServiceClient;
 
         loggerMock = Mock.ofType(Logger);
@@ -65,183 +83,55 @@ describe(Batch, () => {
         batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);
     });
 
-    describe('waitJob()', () => {
-        it('stop wait on error', async () => {
-            taskMock
-                .setup(async o => o.list(jobId1, It.isAny()))
-                .returns(async () => Promise.reject('error'))
+    describe('getPoolMetricsInfo()', () => {
+        it('get pool metrics info', async () => {
+            const poolMetricsInfoExpected = {
+                id: 'poolId',
+                maxTasksPerPool: 32,
+                load: {
+                    activeTasks: 4,
+                    runningTasks: 7,
+                },
+            };
+            poolMock
+                .setup(async o => o.get(config.poolId))
+                .returns(async () =>
+                    Promise.resolve(<PoolGetResponse>(<unknown>{
+                        maxTasksPerNode: 8,
+                        currentDedicatedNodes: 3,
+                        currentLowPriorityNodes: 1,
+                    })),
+                )
                 .verifiable();
 
-            await expect(batch.waitJob(jobId1, 200)).rejects.toThrowError();
-            taskMock.verifyAll();
+            const options = {
+                jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${config.poolId}'` },
+            };
+            const items1 = new JobListStub([{ id: 'job-id-1' }]);
+            items1.odatanextLink = 'odatanextLink-1';
+            const items2 = new JobListStub([{ id: 'job-id-2' }]);
+            jobMock
+                .setup(async o => o.list(options))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items1)))
+                .verifiable();
+            jobMock
+                .setup(async o => o.listNext(items1.odatanextLink, options))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items2)))
+                .verifiable();
+            jobMock
+                .setup(async o => o.getTaskCounts(items1.items[0].id))
+                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 1, running: 2 })))
+                .verifiable();
+            jobMock
+                .setup(async o => o.getTaskCounts(items2.items[0].id))
+                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 3, running: 5 })))
+                .verifiable();
+
+            const poolMetricsInfo = await batch.getPoolMetricsInfo();
+
+            expect(poolMetricsInfo).toEqual(poolMetricsInfoExpected);
+            poolMock.verifyAll();
         });
-
-        it('wait for all tasks to complete', async () => {
-            const cloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
-            for (let k = 1; k < 5; k++) {
-                cloudTaskListResult.push({
-                    id: `job-${k}`,
-                    state: 'preparing',
-                    executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                        result: JobTaskExecutionResult.success,
-                    },
-                });
-            }
-            // the last task is a hosted task
-            process.env.AZ_BATCH_TASK_ID = 'taskManagerId';
-            cloudTaskListResult[cloudTaskListResult.length - 1].id = process.env.AZ_BATCH_TASK_ID;
-            let i = 0;
-            taskMock
-                .setup(async o => o.list(jobId1, It.isAny()))
-                .callback((id, taskListOptions) => {
-                    // the hosted task does not complete
-                    if (i < cloudTaskListResult.length - 1) {
-                        cloudTaskListResult[i++].state = 'completed';
-                    }
-                })
-                .returns(async () => Promise.resolve(cloudTaskListResult.filter(r => r.state !== JobTaskState.completed) as any))
-                .verifiable();
-
-            await batch.waitJob(jobId1, 200);
-
-            taskMock.verify(async t => t.list(jobId1, It.isAny()), Times.atLeast(3));
-        });
-    });
-
-    describe('getCreatedTasksState()', () => {
-        it('get created job tasks state with pagination', async () => {
-            const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultFirst.odatanextLink = 'nextPageLink';
-            cloudTaskListResultFirst.push({
-                id: 'job-1',
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-            const cloudTaskListResultNext: BatchServiceModels.CloudTaskListResult = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultNext.push({
-                id: 'job-2',
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-            const jobTasksExpected = [
-                {
-                    id: 'job-1',
-                    state: JobTaskState.completed,
-                    result: JobTaskExecutionResult.success,
-                    correlationId: 'messageId-1',
-                },
-                {
-                    id: 'job-2',
-                    state: JobTaskState.completed,
-                    result: JobTaskExecutionResult.success,
-                    correlationId: 'messageId-2',
-                },
-            ];
-            let i = 0;
-            const messages = [
-                {
-                    messageId: 'messageId-1',
-                    messageText: '{}',
-                },
-                {
-                    messageId: 'messageId-2',
-                    messageText: '{}',
-                },
-            ];
-
-            taskMock
-                .setup(async o => o.list(jobId1))
-                .returns(async () => {
-                    if (i++ === 0) {
-                        return Promise.resolve(cloudTaskListResultFirst as any);
-                    } else {
-                        return Promise.resolve(<BatchServiceModels.CloudTaskListResult>{});
-                    }
-                })
-                .verifiable();
-            taskMock
-                .setup(async o => o.listNext('nextPageLink'))
-                .returns(async () => Promise.resolve(cloudTaskListResultNext as BatchServiceModels.TaskListResponse))
-                .verifiable();
-            taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
-                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
-
-            const jobTask = await batch.createTasks(jobId1, messages);
-            cloudTaskListResultFirst[0].id = jobTask[0].id;
-            cloudTaskListResultNext[0].id = jobTask[1].id;
-            jobTasksExpected[0].id = jobTask[0].id;
-            jobTasksExpected[1].id = jobTask[1].id;
-
-            const tasksActual = await batch.getCreatedTasksState(jobId1);
-
-            expect(tasksActual).toEqual(jobTasksExpected);
-            taskMock.verifyAll();
-        });
-
-        it('verifies taskAddParameter data', async () => {
-            const cloudTaskListResultFirst = <BatchServiceModels.CloudTaskListResult>[];
-            cloudTaskListResultFirst.push({
-                id: jobId1,
-                state: JobTaskState.completed,
-                executionInfo: <BatchServiceModels.TaskExecutionInformation>{
-                    result: JobTaskExecutionResult.success,
-                },
-            });
-
-            const messages = [
-                {
-                    messageId: 'messageId-1',
-                    messageText: JSON.stringify({ msg: 'message 1 text' }),
-                },
-                {
-                    messageId: 'messageId-2',
-                    messageText: JSON.stringify({ msg: 'message 2 text' }),
-                },
-            ];
-            const message1CommandLine = 'message 1 command line';
-            const message2CommandLine = 'message 2 command line';
-
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[0].messageText)))
-                .returns(() => message1CommandLine)
-                .verifiable();
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[1].messageText)))
-                .returns(() => message2CommandLine)
-                .verifiable();
-
-            let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
-            taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
-                .callback((id, taskParameters) => {
-                    actualTaskAddParameters = taskParameters;
-                })
-                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
-
-            await batch.createTasks(jobId1, messages);
-
-            verifyTaskAddParameter(actualTaskAddParameters[0], message1CommandLine, messages[0].messageId);
-            verifyTaskAddParameter(actualTaskAddParameters[1], message2CommandLine, messages[1].messageId);
-
-            taskMock.verifyAll();
-            runnerTaskConfigMock.verifyAll();
-        });
-
-        function verifyTaskAddParameter(
-            actualTaskAddParameter: BatchServiceModels.TaskAddParameter,
-            expectedCommandLineMessage: string,
-            messageId: string,
-        ): void {
-            expect(actualTaskAddParameter.commandLine).toEqual(expectedCommandLineMessage);
-            expect(actualTaskAddParameter.environmentSettings).toEqual(taskEnvSettings);
-            expect(actualTaskAddParameter.resourceFiles).toEqual(taskResourceFiles);
-            expect(actualTaskAddParameter.id.startsWith(`task_${messageId}_`)).toBe(true);
-        }
     });
 
     describe('createTasks()', () => {
@@ -250,6 +140,40 @@ describe(Batch, () => {
             const tasksActual = await batch.createTasks(jobId1, messages);
 
             expect(tasksActual.length).toBe(0);
+        });
+
+        it('should add no more than 100 tasks in a single Batch API call', async () => {
+            const messagesCount = 103;
+            const messages = [];
+            let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
+            const tasksAddedBatchCount: number[] = [];
+
+            for (let i = 0; i < messagesCount; i += 1) {
+                messages.push({
+                    messageText: '{}',
+                    messageId: `message-id-${i}`,
+                });
+            }
+
+            taskMock
+                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .callback((id, taskAddParameters) => {
+                    tasksAddedBatchCount.push(taskAddParameters.length);
+                    taskAddCollectionResponse = <BatchServiceModels.TaskAddCollectionResponse>(<unknown>{ value: [] });
+                    taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
+                        taskAddCollectionResponse.value.push({ taskId: taskAddParameter.id, status: 'success' });
+                    });
+                })
+                .returns(async () => Promise.resolve(<BatchServiceModels.TaskAddCollectionResponse>(<unknown>taskAddCollectionResponse)))
+                .verifiable(Times.exactly(2));
+
+            const tasksActual = await batch.createTasks(jobId1, messages);
+
+            expect(tasksActual.length).toEqual(messagesCount);
+            expect(tasksAddedBatchCount.length).toEqual(2);
+            expect(tasksAddedBatchCount[0]).toEqual(100);
+            expect(tasksAddedBatchCount[1]).toEqual(3);
+            taskMock.verifyAll();
         });
 
         it('create new job tasks in batch request with success and failure ', async () => {
@@ -317,6 +241,57 @@ describe(Batch, () => {
             expect(expectedTaskConstraints).toEqual(actualTaskConstraints);
             taskMock.verifyAll();
         });
+
+        it('verifies tasks parameters on creation', async () => {
+            const messages = [
+                {
+                    messageId: 'messageId-1',
+                    messageText: JSON.stringify({ msg: 'message 1 text' }),
+                },
+                {
+                    messageId: 'messageId-2',
+                    messageText: JSON.stringify({ msg: 'message 2 text' }),
+                },
+            ];
+            const message1CommandLine = 'message 1 command line';
+            const message2CommandLine = 'message 2 command line';
+
+            runnerTaskConfigMock
+                .setup(t => t.getCommandLine(JSON.parse(messages[0].messageText)))
+                .returns(() => message1CommandLine)
+                .verifiable();
+            runnerTaskConfigMock
+                .setup(t => t.getCommandLine(JSON.parse(messages[1].messageText)))
+                .returns(() => message2CommandLine)
+                .verifiable();
+
+            let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
+            taskMock
+                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .callback((id, taskParameters) => {
+                    actualTaskAddParameters = taskParameters;
+                })
+                .returns(async () => Promise.resolve({ value: [] } as BatchServiceModels.TaskAddCollectionResponse));
+
+            await batch.createTasks(jobId1, messages);
+
+            verifyTaskAddParameter(actualTaskAddParameters[0], message1CommandLine, messages[0].messageId);
+            verifyTaskAddParameter(actualTaskAddParameters[1], message2CommandLine, messages[1].messageId);
+
+            taskMock.verifyAll();
+            runnerTaskConfigMock.verifyAll();
+        });
+
+        function verifyTaskAddParameter(
+            actualTaskAddParameter: BatchServiceModels.TaskAddParameter,
+            expectedCommandLineMessage: string,
+            messageId: string,
+        ): void {
+            expect(actualTaskAddParameter.commandLine).toEqual(expectedCommandLineMessage);
+            expect(actualTaskAddParameter.environmentSettings).toEqual(taskEnvSettings);
+            expect(actualTaskAddParameter.resourceFiles).toEqual(taskResourceFiles);
+            expect(actualTaskAddParameter.id.startsWith(`task_${messageId}_`)).toBe(true);
+        }
     });
 
     describe('createJobIfNotExists()', () => {

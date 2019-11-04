@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as cosmos from '@azure/cosmos';
-import { Activator } from 'common';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
@@ -18,11 +18,15 @@ export class CosmosClientWrapper {
     public async upsertItems<T>(items: T[], dbName: string, collectionName: string, partitionKey?: string): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
 
-        await Promise.all(
-            items.map(async item => {
-                await container.items.upsert(item, this.getOptions(item, partitionKey));
-            }),
-        );
+        const chunks = System.chunkArray(items, 10);
+
+        for (const chunk of chunks) {
+            await Promise.all(
+                chunk.map(async item => {
+                    await container.items.upsert(item, this.getOptions(item, partitionKey));
+                }),
+            );
+        }
     }
 
     public async upsertItem<T extends CosmosDocument>(
@@ -34,7 +38,7 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
         try {
             const response = await container.items.upsert(item, this.getOptions(item, partitionKey));
-            const itemT = this.convert<T>(response.body);
+            const itemT = <T>(<unknown>response.body);
 
             return {
                 item: itemT,
@@ -52,7 +56,7 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async readAllItem<T>(dbName: string, collectionName: string): Promise<CosmosOperationResponse<T[]>> {
+    public async readAllItem<T extends CosmosDocument>(dbName: string, collectionName: string): Promise<CosmosOperationResponse<T[]>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
@@ -60,7 +64,7 @@ export class CosmosClientWrapper {
             const itemsT: T[] = [];
 
             response.result.forEach(document => {
-                itemsT.push(this.convert<T>(document));
+                itemsT.push(<T>(<unknown>document));
             });
 
             return {
@@ -125,7 +129,7 @@ export class CosmosClientWrapper {
                 partitionQueryResult.headers !== undefined ? partitionQueryResult.headers['x-ms-continuation'] : undefined;
 
             partitionQueryResult.result.forEach(item => {
-                itemsT.push(this.convert<T>(item));
+                itemsT.push(<T>(<unknown>item));
             });
 
             return {
@@ -157,7 +161,7 @@ export class CosmosClientWrapper {
         try {
             const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
             const response = await container.item(id).read(options);
-            const itemT = this.convert<T>(response.body);
+            const itemT = <T>(<unknown>response.body);
 
             return {
                 item: itemT,
@@ -175,6 +179,13 @@ export class CosmosClientWrapper {
         }
     }
 
+    public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
+        const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
+        const container = await this.getContainer(dbName, collectionName);
+
+        await container.item(id).delete(options);
+    }
+
     public async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {
         const db = await this.getDatabase(dbName);
 
@@ -189,13 +200,6 @@ export class CosmosClientWrapper {
         const client = await this.cosmosClientProvider();
 
         return client.database(databaseId);
-    }
-
-    // tslint:disable-next-line: no-any
-    private convert<T>(source: any): T {
-        const activator = new Activator();
-
-        return activator.convert<T>(source);
     }
 
     private getOptions<T extends CosmosDocument>(item: T, partitionKey: string): cosmos.RequestOptions {

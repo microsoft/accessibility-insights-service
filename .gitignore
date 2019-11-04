@@ -4,7 +4,6 @@ test-results/
 out/
 
 **/.secrets
-**/local.settings.json
 **/dev.DockerFile
 **/.env
 **/.prod
@@ -12,3 +11,7 @@ out/
 **/*.generated.template.json
 
 yarn-error.log
+**/*.DS_Store
+
+**/bin
+**/obj

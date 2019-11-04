@@ -18,13 +18,18 @@ Usage: $0 -r <resource group> -s <subscription name or id>
 }
 
 # Read script arguments
-while getopts "r:s:" option; do
+while getopts ":r:s:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
+
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+    exitWithUsageInfo
+    exit 1
+fi
 
 echo "Installing microsoft.insights extension for azure-cli"
 az extension add -n application-insights

@@ -1,0 +1,62 @@
+{
+    "name": "web-workers",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "webpack --config ./webpack.config.js --config-name web-workers --colors",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors",
+        "watch": "tsc --w",
+        "start:host": "func start",
+        "start": "npm-run-all --parallel start:host watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {
+        "@azure/functions": "^1.0.3",
+        "@types/dotenv": "^6.1.0",
+        "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.136",
+        "@types/node": "^11.9.4",
+        "@types/sha.js": "^2.4.0",
+        "@types/verror": "^1.10.3",
+        "@types/yargs": "^12.0.9",
+        "copy-webpack-plugin": "^4.6.0",
+        "fork-ts-checker-webpack-plugin": "^0.5.2",
+        "jest": "^24.9.0",
+        "jest-circus": "^24.9.0",
+        "jest-junit": "^8.0.0",
+        "mockdate": "^2.0.5",
+        "npm-run-all": "^4.1.5",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^24.0.0",
+        "ts-loader": "^5.3.3",
+        "tslint": "5.12.1",
+        "tslint-microsoft-contrib": "6.0.0",
+        "typemoq": "^2.1.0",
+        "typescript": "^3.6.2",
+        "webpack": "^4.29.4",
+        "webpack-cli": "^3.2.3"
+    },
+    "dependencies": {
+        "azure-services": "1.0.0",
+        "common": "1.0.0",
+        "inversify": "^5.0.1",
+        "logger": "1.0.0",
+        "reflect-metadata": "^0.1.13",
+        "service-library": "1.0.0",
+        "storage-documents": "1.0.0",
+        "lodash": "^4.17.14"
+    }
+}

@@ -1,0 +1,312 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+openapi: 3.0.0
+info:
+    version: 1.0.0
+    title: Accessibility Insight Service – Scan API
+paths:
+    /scans:
+        post:
+            summary: Create accessibility scan requests
+            operationId: createScans
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/ScanRunRequest'
+            responses:
+                '202':
+                    description: Accepted
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/ScanRunResponse'
+    '/scans/{scanid}':
+        get:
+            summary: Get accessibility scan result
+            operationId: getScan
+            parameters:
+                - name: scanid
+                  in: path
+                  required: true
+                  description: The scan request ID
+                  schema:
+                      type: string
+                - name: api-version
+                  in: query
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScanRunResultResponse'
+                '400':
+                    description: Bad Request
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ScanRunErrorResponse'
+    /scans/$batch:
+        post:
+            summary: Get accessibility scan results
+            operationId: getScanBatch
+            parameters:
+                - name: api-version
+                  in: query
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: array
+                            items:
+                                $ref: '#/components/schemas/ScanBatchRequest'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    oneOf:
+                                        - $ref: '#/components/schemas/ScanRunResultResponse'
+                                        - $ref: '#/components/schemas/ScanRunErrorResponse'
+    '/scans/{scanid}/reports/{reportid}':
+        get:
+            summary: Get accessibility scan report
+            operationId: getReport
+            parameters:
+                - name: scanid
+                  in: path
+                  required: true
+                  description: The scan request ID
+                  schema:
+                      type: string
+                - name: reportid
+                  in: path
+                  required: true
+                  description: The report ID
+                  schema:
+                      type: string
+                - name: api-version
+                  in: query
+                  required: true
+                  description: The client API version
+                  schema:
+                      type: string
+                  example: '1.0'
+            responses:
+                '200':
+                    description: OK
+                    content:
+                        application/json:
+                            example:
+                                href: >-
+                                    SARIF document per following specification
+                                    https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html
+components:
+    schemas:
+        ScanRunRequest:
+            type: object
+            required:
+                - url
+            properties:
+                url:
+                    type: string
+                priority:
+                    description: >-
+                        Priority values can range from -1000 to 1000, with -1000 being the
+                        lowest priority and 1000 being the highest priority. The default
+                        value is 0.
+                    default: 0
+                    type: integer
+        ScanRunResponse:
+            type: object
+            required:
+                - url
+            properties:
+                scanId:
+                    type: string
+                url:
+                    type: string
+                error:
+                    $ref: '#/components/schemas/WebApiError'
+        ScanResult:
+            type: object
+            required:
+                - state
+            properties:
+                state:
+                    type: string
+                    default: pending
+                    enum:
+                        - pending
+                        - pass
+                        - fail
+                issueCount:
+                    type: integer
+                    format: int32
+                    minimum: 0
+        Links:
+            type: object
+            required:
+                - rel
+                - href
+            properties:
+                rel:
+                    type: string
+                    default: self
+                    enum:
+                        - self
+                href:
+                    type: string
+        ScanRun:
+            type: object
+            required:
+                - state
+            properties:
+                timestamp:
+                    description: Full date and time string format as defined by ISO 8601
+                    type: string
+                error:
+                    $ref: '#/components/schemas/ScanRunError'
+                state:
+                    type: string
+                    default: pending
+                    enum:
+                        - pending
+                        - accepted
+                        - queued
+                        - running
+                        - completed
+                        - failed
+        ScanReport:
+            type: object
+            required:
+                - reportId
+                - format
+                - links
+            properties:
+                reportId:
+                    type: string
+                format:
+                    type: string
+                    description: >-
+                        SARIF format specification
+                        https://www.oasis-open.org/committees/sarif/charter.php
+                    enum:
+                        - sarif
+                links:
+                    $ref: '#/components/schemas/Links'
+        ScanBatchRequest:
+            type: object
+            required:
+                - scanId
+            properties:
+                scanId:
+                    type: string
+        ScanRunResultResponse:
+            type: object
+            required:
+                - scanId
+                - url
+                - run
+            properties:
+                scanId:
+                    type: string
+                url:
+                    type: string
+                scanResult:
+                    $ref: '#/components/schemas/ScanResult'
+                reports:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ScanReport'
+                run:
+                    $ref: '#/components/schemas/ScanRun'
+        WebApiError:
+            type: object
+            required:
+                - code
+                - codeId
+                - message
+            properties:
+                code:
+                    type: string
+                    enum:
+                        - ResourceNotFound
+                        - InvalidResourceId
+                        - InvalidJsonDocument
+                        - RequestBodyTooLarge
+                        - InvalidURL
+                        - InternalError
+                        - MissingApiVersionQueryParameter
+                        - MissingContentTypeHeader
+                        - UnsupportedContentType
+                        - UnsupportedApiVersion
+                        - OutOfRangePriority
+                codeId:
+                    type: integer
+                    format: int32
+                    minimum: 4001
+                    maximum: 5999
+                message:
+                    type: string
+        ScanRunError:
+            type: object
+            required:
+                - code
+                - codeId
+                - message
+            properties:
+                code:
+                    type: string
+                    enum:
+                        - InternalError
+                        - UrlNavigationTimeout
+                        - HttpErrorCode
+                        - SslError
+                        - MainResourceLoadFailure
+                        - InvalidUrl
+                        - EmptyPage
+                        - NavigationError
+                codeId:
+                    type: integer
+                    format: int32
+                    minimum: 9001
+                    maximum: 9999
+                message:
+                    type: string
+        ScanRunErrorResponse:
+            type: object
+            required:
+                - scanId
+                - error
+            properties:
+                scanId:
+                    type: string
+                error:
+                    $ref: '#/components/schemas/WebApiError'

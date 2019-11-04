@@ -38,6 +38,10 @@
             "metadata": {
                 "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
+        },
+        "vnetResource": {
+            "defaultValue": "",
+            "type": "string"
         }
     },
     "variables": {
@@ -114,7 +118,7 @@
             "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d1_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
                 "taskSchedulingPolicy": {
@@ -130,6 +134,9 @@
                         },
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
+                },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -168,7 +175,7 @@
             "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "STANDARD_A1",
+                "vmSize": "standard_d11_v2",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 2,
                 "taskSchedulingPolicy": {
@@ -185,9 +192,126 @@
                         "nodeAgentSkuId": "batch.node.ubuntu 16.04"
                     }
                 },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                },
                 "scaleSettings": {
                     "fixedScale": {
                         "targetDedicatedNodes": 3,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
+                    }
+                },
+                "startTask": {
+                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "environmentSettings": [
+                        {
+                            "name": "KEY_VAULT_NAME",
+                            "value": "[parameters('keyVault')]"
+                        }
+                    ],
+                    "resourceFiles": [
+                        {
+                            "autoStorageContainerName": "batch-pool-startup-script"
+                        }
+                    ],
+                    "userIdentity": {
+                        "autoUser": {
+                            "scope": "Pool",
+                            "elevationLevel": "Admin"
+                        }
+                    },
+                    "maxTaskRetryCount": 0,
+                    "waitForSuccess": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts/pools",
+            "apiVersion": "2018-12-01",
+            "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "properties": {
+                "vmSize": "standard_d11_v2",
+                "interNodeCommunication": "Disabled",
+                "maxTasksPerNode": 2,
+                "taskSchedulingPolicy": {
+                    "nodeFillType": "Spread"
+                },
+                "deploymentConfiguration": {
+                    "virtualMachineConfiguration": {
+                        "imageReference": {
+                            "publisher": "microsoft-azure-batch",
+                            "offer": "ubuntu-server-container",
+                            "sku": "16-04-lts",
+                            "version": "latest"
+                        },
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                    }
+                },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                },
+                "scaleSettings": {
+                    "fixedScale": {
+                        "targetDedicatedNodes": 3,
+                        "targetLowPriorityNodes": 0,
+                        "resizeTimeout": "PT15M"
+                    }
+                },
+                "startTask": {
+                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "environmentSettings": [
+                        {
+                            "name": "KEY_VAULT_NAME",
+                            "value": "[parameters('keyVault')]"
+                        }
+                    ],
+                    "resourceFiles": [
+                        {
+                            "autoStorageContainerName": "batch-pool-startup-script"
+                        }
+                    ],
+                    "userIdentity": {
+                        "autoUser": {
+                            "scope": "Pool",
+                            "elevationLevel": "Admin"
+                        }
+                    },
+                    "maxTaskRetryCount": 0,
+                    "waitForSuccess": true
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Batch/batchAccounts/pools",
+            "apiVersion": "2018-12-01",
+            "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
+            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "properties": {
+                "vmSize": "standard_d1_v2",
+                "interNodeCommunication": "Disabled",
+                "maxTasksPerNode": 1,
+                "taskSchedulingPolicy": {
+                    "nodeFillType": "Spread"
+                },
+                "deploymentConfiguration": {
+                    "virtualMachineConfiguration": {
+                        "imageReference": {
+                            "publisher": "microsoft-azure-batch",
+                            "offer": "ubuntu-server-container",
+                            "sku": "16-04-lts",
+                            "version": "latest"
+                        },
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                    }
+                },
+                "networkConfiguration": {
+                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                },
+                "scaleSettings": {
+                    "fixedScale": {
+                        "targetDedicatedNodes": 2,
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }

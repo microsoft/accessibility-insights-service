@@ -1,0 +1,18 @@
+{
+    "bindings": [
+        {
+            "authLevel": "anonymous",
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "scans/{scanId:guid}",
+            "methods": ["get"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../get-scan-func/index.js"
+}

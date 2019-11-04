@@ -6,8 +6,8 @@ import 'reflect-metadata';
 import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
-import { Activator } from 'common';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { registerLoggerToContainer } from 'logger';
@@ -16,10 +16,19 @@ import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
 import { CredentialsProvider } from './credentials/credentials-provider';
-import { AzureKeyVaultClientProvider, CosmosClientProvider, iocTypeNames, QueueServiceURLProvider } from './ioc-types';
+import { CredentialType } from './credentials/msi-credential-provider';
+import {
+    AzureKeyVaultClientProvider,
+    BlobServiceClientProvider,
+    CosmosClientProvider,
+    cosmosContainerClientTypes,
+    iocTypeNames,
+    QueueServiceURLProvider,
+} from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
+import { CosmosContainerClient } from './storage/cosmos-container-client';
 
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
@@ -30,9 +39,8 @@ describe(registerAzureServicesToContainer, () => {
     });
 
     it('verify singleton resolution', async () => {
-        registerAzureServicesToContainer(container);
+        registerAzureServicesToContainer(container, CredentialType.AppService);
 
-        verifySingletonDependencyResolution(Activator);
         verifySingletonDependencyResolution(StorageConfig);
         verifySingletonDependencyResolution(SecretProvider);
         verifySingletonDependencyResolution(CredentialsProvider);
@@ -40,6 +48,8 @@ describe(registerAzureServicesToContainer, () => {
         verifySingletonDependencyResolutionWithValue(iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
         verifySingletonDependencyResolutionWithValue(iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
+
+        expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
 
     it('verify non-singleton resolution', () => {
@@ -47,6 +57,65 @@ describe(registerAzureServicesToContainer, () => {
 
         verifyNonSingletonDependencyResolution(Queue);
         verifyNonSingletonDependencyResolution(CosmosClientWrapper);
+    });
+
+    it('resolves CosmosContainerClient', () => {
+        registerAzureServicesToContainer(container);
+
+        verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanBatchRequests',
+        );
+        verifyCosmosContainerClient(
+            cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRequests',
+        );
+
+        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
+    });
+
+    describe('BlobServiceClientProvider', () => {
+        const storageAccountName = 'test-storage-account-name';
+        const storageAccountKey = 'test-storage-account-key';
+
+        it('creates singleton blob service client', async () => {
+            const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
+
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountName))
+                .returns(async () => storageAccountName)
+                .verifiable(Times.once());
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
+                .verifiable(Times.once());
+
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .returns(async () => storageAccountKey)
+                .verifiable(Times.once());
+
+            registerAzureServicesToContainer(container);
+            stubBinding(SecretProvider, secretProviderMock.object);
+
+            const blobServiceClientProvider = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
+
+            const blobServiceClient1 = await blobServiceClientProvider();
+            const blobServiceClient2 = await blobServiceClientProvider();
+            const blobServiceClient3 = await container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider)();
+
+            expect(blobServiceClient1).toBeInstanceOf(BlobServiceClient);
+            expect(blobServiceClient2).toBe(blobServiceClient1);
+            expect(blobServiceClient3).toBe(blobServiceClient1);
+        });
     });
 
     describe('QueueServiceURLProvider', () => {
@@ -181,5 +250,11 @@ describe(registerAzureServicesToContainer, () => {
     function verifyNonSingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).not.toBe(container.get(key));
+    }
+
+    function verifyCosmosContainerClient(cosmosContainerType: string, dbName: string, collectionName: string): void {
+        const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
+        expect((cosmosContainerClient as any).dbName).toBe(dbName);
+        expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
     }
 });

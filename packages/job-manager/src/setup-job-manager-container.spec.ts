@@ -8,8 +8,10 @@ import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 import { Batch } from './batch/batch';
 
+import { ServiceConfiguration } from 'common';
 import { BatchServiceClientProvider, jobManagerIocTypeNames } from './job-manager-ioc-types';
 import { setupJobManagerContainer } from './setup-job-manager-container';
+
 // tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
 
 describe(setupJobManagerContainer, () => {
@@ -61,6 +63,13 @@ describe(setupJobManagerContainer, () => {
             );
 
             expect(await batchServiceClientProvider1()).toBe(await batchServiceClientProvider2());
+        });
+
+        it('resolves service config to singleton value', () => {
+            const serviceConfig = container.get(ServiceConfiguration);
+
+            expect(serviceConfig).toBeInstanceOf(ServiceConfiguration);
+            expect(serviceConfig).toBe(container.get(ServiceConfiguration));
         });
     });
 

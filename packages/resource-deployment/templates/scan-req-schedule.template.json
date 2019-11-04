@@ -1,7 +1,7 @@
 {
     "id": "scan-req-schedule",
     "schedule": {
-        "recurrenceInterval": "PT2H"
+        "recurrenceInterval": "PT2M"
     },
     "jobSpecification": {
         "priority": 0,

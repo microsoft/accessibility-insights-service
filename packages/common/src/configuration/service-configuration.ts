@@ -11,10 +11,17 @@ export interface TaskRuntimeConfig {
 
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
+    messageVisibilityTimeoutInSeconds: number;
 }
 
 export interface LogRuntimeConfig {
     logInConsole: boolean;
+}
+
+export interface JobManagerConfig {
+    activeToRunningTasksRatio: number;
+    addTasksIntervalInSeconds: number;
+    maxWallClockTimeInHours: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -22,6 +29,14 @@ export interface ScanRunTimeConfig {
     pageRescanIntervalInDays: number;
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
+    accessibilityRuleExclusionList: string[];
+}
+
+export interface RestApiConfig {
+    maxScanRequestBatchCount: number;
+    scanRequestProcessingDelayInSeconds: number;
+    minScanPriorityValue: number;
+    maxScanPriorityValue: number;
 }
 
 export interface RuntimeConfig {
@@ -29,6 +44,8 @@ export interface RuntimeConfig {
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
     scanConfig: ScanRunTimeConfig;
+    jobManagerConfig: JobManagerConfig;
+    restApiConfig: RestApiConfig;
 }
 
 @injectable()
@@ -71,6 +88,7 @@ export class ServiceConfiguration {
         return this.loadConfigPromise;
     }
 
+    // tslint:disable-next-line: max-func-body-length
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
             logConfig: {
@@ -86,6 +104,11 @@ export class ServiceConfiguration {
                     default: 10,
                     doc: 'Maximum message the queue can have',
                 },
+                messageVisibilityTimeoutInSeconds: {
+                    format: 'int',
+                    default: 180,
+                    doc: 'Message visibility timeout in seconds',
+                },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
@@ -94,7 +117,24 @@ export class ServiceConfiguration {
                     doc: 'Timeout value after which the task has to be terminated',
                 },
             },
-
+            jobManagerConfig: {
+                activeToRunningTasksRatio: {
+                    format: Number,
+                    default: 3,
+                    // tslint:disable-next-line: max-line-length
+                    doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
+                },
+                addTasksIntervalInSeconds: {
+                    format: 'int',
+                    default: 15,
+                    doc: 'The time interval at which a job manager adds tasks to the job.',
+                },
+                maxWallClockTimeInHours: {
+                    format: 'int',
+                    default: 5,
+                    doc: 'The amount of time the job manager instance will run.',
+                },
+            },
             scanConfig: {
                 minLastReferenceSeenInDays: {
                     format: 'int',
@@ -115,6 +155,74 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'Maximum number of retries allowed for a page scan',
+                },
+                accessibilityRuleExclusionList: {
+                    format: Array,
+                    default: [
+                        'image-redundant-alt',
+                        'checkboxgroup',
+                        'empty-heading',
+                        'p-as-heading',
+                        'radiogroup',
+                        'table-duplicate-name',
+                        'table-fake-caption',
+                        'td-has-header',
+                        'link-in-text-block',
+                        'meta-viewport-large',
+                        'tabindex',
+                        'scope-attr-valid',
+                        'frame-title-unique',
+                        'heading-order',
+                        'hidden-content',
+                        'label-title-only',
+                        'region',
+                        'skip-link',
+                        'landmark-main-is-top-level',
+                        'landmark-one-main',
+                        'aria-dpub-role-fallback',
+                        'focus-order-semantics',
+                        'frame-tested',
+                        'landmark-banner-is-top-level',
+                        'landmark-contentinfo-is-top-level',
+                        'landmark-no-duplicate-banner',
+                        'landmark-no-duplicate-contentinfo',
+                        'page-has-heading-one',
+                        'aria-allowed-role',
+                        'css-orientation-lock',
+                        'form-field-multiple-labels',
+                        'label-content-name-mismatch',
+                        'landmark-complementary-is-top-level',
+                        'scrollable-region-focusable',
+                        'label-content-name-mismatch',
+                        'landmark-unique',
+                    ],
+                    doc: 'Axe core rule exclusion list',
+                },
+            },
+            restApiConfig: {
+                maxScanRequestBatchCount: {
+                    format: 'int',
+                    default: 250,
+                    doc: 'Maximum number of scan requests in a single HTTP client request.',
+                },
+                scanRequestProcessingDelayInSeconds: {
+                    format: 'int',
+                    default: 15,
+                    doc: 'The scan request processing delay interval in seconds for a new submitted request.',
+                },
+                minScanPriorityValue: {
+                    format: 'int',
+                    default: -1000,
+                    doc:
+                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
+                },
+                maxScanPriorityValue: {
+                    format: 'int',
+                    default: 1000,
+                    doc:
+                        'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
+                        This range correlates with Azure Batch pool task priority range.',
                 },
             },
         };

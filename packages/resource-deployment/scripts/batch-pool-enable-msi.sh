@@ -41,7 +41,7 @@ getVmssInfo() {
     end=$((SECONDS + 600))
     while [ $SECONDS -le $end ]; do
         vmssResourceGroupsStr=$(az vmss list --query "$vmssResourceGroupsQuery" -o tsv | tr "\n" ",")
-        IFS=$',' read -ra vmssResourceGroups <<< "$vmssResourceGroupsStr"
+        IFS=$',' read -ra vmssResourceGroups <<<"$vmssResourceGroupsStr"
         currentVmssCount=$((${#vmssResourceGroups[@]}))
 
         if [ $currentVmssCount -ge $vmssCount ]; then
@@ -66,7 +66,7 @@ getVmssInfo() {
     fi
 
     echo \
-"VMSS resource groups:"
+        "VMSS resource groups:"
 
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "  $vmssResourceGroup"
@@ -77,6 +77,32 @@ getVmssInfo() {
 assignSystemIdentity() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
+
+        # Wait until we are certain the resource group exists
+        waiting=false
+        timeout=1800 # timeout after half an hour
+        end=$((SECONDS + $timeout))
+        resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
+        while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
+            if [ "$waiting" != true ]; then
+                waiting=true
+                echo "Waiting for resource group $vmssResourceGroup"
+                printf " - Running .."
+            fi
+
+            sleep 5
+            printf "."
+            resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
+        done
+
+        # Exit if timed out
+        if [ "$resourceGroupExists" = false ]; then
+            echo "Could not find resource group $vmssResourceGroup after $timeout seconds"
+            exit 1
+        fi
+
+        echo "Resource group $vmssResourceGroup found after $((SECONDS - (end - timeout))) seconds"
+
         vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
         vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
 
@@ -84,7 +110,7 @@ assignSystemIdentity() {
         systemAssignedIdentities+=($systemAssignedIdentity)
 
         echo \
-"VMSS Resource configuration:
+            "VMSS Resource configuration:
   Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
@@ -94,7 +120,7 @@ assignSystemIdentity() {
 }
 
 # Read script arguments
-while getopts "r:a:p:" option; do
+while getopts ":r:a:p:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;

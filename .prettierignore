@@ -17,7 +17,10 @@ test-results/
 dist/
 **/*.code-workspace
 **/*.env
-out/
 **/.env.*
 **/yarn-*.log
+**/*.ts.snap
 copyright-header.txt
+**/.DS_Store
+**/.funcignore
+**/extensions.csproj

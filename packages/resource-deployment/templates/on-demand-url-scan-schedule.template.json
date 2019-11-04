@@ -1,0 +1,59 @@
+{
+    "id": "on-demand-url-scan-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT1M"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "constraints": {
+            "maxWallClockTime": "P2D",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "on-demand-url-scan-job-manager-task",
+            "commandLine": "/bin/bash -c run-on-demand-scan-job-manager.sh",
+            "resourceFiles": [
+                {
+                    "autoStorageContainerName": "batch-web-api-scan-job-manager-script"
+                },
+                {
+                    "autoStorageContainerName": "runtime-configuration"
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": "P1D",
+                "retentionTime": "P7D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": false
+        },
+        "commonEnvironmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "%APP_INSIGHTS_TOKEN%"
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "ondemand-scanrequest"
+            },
+            {
+                "name": "KEY_VAULT_URL",
+                "value": "%KEY_VAULT_TOKEN%"
+            },
+            {
+                "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
+                "value": "batch-web-api-scan-runner-script"
+            }
+        ],
+        "poolInfo": {
+            "poolId": "on-demand-url-scan-pool"
+        }
+    }
+}

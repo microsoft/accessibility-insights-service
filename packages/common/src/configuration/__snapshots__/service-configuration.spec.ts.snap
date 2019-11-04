@@ -2,6 +2,23 @@
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
+  "jobManagerConfig": Object {
+    "activeToRunningTasksRatio": Object {
+      "default": 3,
+      "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
+      "format": [Function],
+    },
+    "addTasksIntervalInSeconds": Object {
+      "default": 15,
+      "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
+    },
+    "maxWallClockTimeInHours": Object {
+      "default": 5,
+      "doc": "The amount of time the job manager instance will run.",
+      "format": "int",
+    },
+  },
   "logConfig": Object {
     "logInConsole": Object {
       "default": true,
@@ -15,8 +32,77 @@ Object {
       "doc": "Maximum message the queue can have",
       "format": "int",
     },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 180,
+      "doc": "Message visibility timeout in seconds",
+      "format": "int",
+    },
+  },
+  "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "maxScanRequestBatchCount": Object {
+      "default": 250,
+      "doc": "Maximum number of scan requests in a single HTTP client request.",
+      "format": "int",
+    },
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "scanRequestProcessingDelayInSeconds": Object {
+      "default": 15,
+      "doc": "The scan request processing delay interval in seconds for a new submitted request.",
+      "format": "int",
+    },
   },
   "scanConfig": Object {
+    "accessibilityRuleExclusionList": Object {
+      "default": Array [
+        "image-redundant-alt",
+        "checkboxgroup",
+        "empty-heading",
+        "p-as-heading",
+        "radiogroup",
+        "table-duplicate-name",
+        "table-fake-caption",
+        "td-has-header",
+        "link-in-text-block",
+        "meta-viewport-large",
+        "tabindex",
+        "scope-attr-valid",
+        "frame-title-unique",
+        "heading-order",
+        "hidden-content",
+        "label-title-only",
+        "region",
+        "skip-link",
+        "landmark-main-is-top-level",
+        "landmark-one-main",
+        "aria-dpub-role-fallback",
+        "focus-order-semantics",
+        "frame-tested",
+        "landmark-banner-is-top-level",
+        "landmark-contentinfo-is-top-level",
+        "landmark-no-duplicate-banner",
+        "landmark-no-duplicate-contentinfo",
+        "page-has-heading-one",
+        "aria-allowed-role",
+        "css-orientation-lock",
+        "form-field-multiple-labels",
+        "label-content-name-mismatch",
+        "landmark-complementary-is-top-level",
+        "scrollable-region-focusable",
+        "label-content-name-mismatch",
+        "landmark-unique",
+      ],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
+    },
     "failedPageRescanIntervalInHours": Object {
       "default": 3,
       "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",
@@ -50,6 +136,23 @@ Object {
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
+  "jobManagerConfig": Object {
+    "activeToRunningTasksRatio": Object {
+      "default": 3,
+      "doc": "The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.",
+      "format": [Function],
+    },
+    "addTasksIntervalInSeconds": Object {
+      "default": 15,
+      "doc": "The time interval at which a job manager adds tasks to the job.",
+      "format": "int",
+    },
+    "maxWallClockTimeInHours": Object {
+      "default": 5,
+      "doc": "The amount of time the job manager instance will run.",
+      "format": "int",
+    },
+  },
   "logConfig": Object {
     "logInConsole": Object {
       "default": true,
@@ -63,8 +166,77 @@ Object {
       "doc": "Maximum message the queue can have",
       "format": "int",
     },
+    "messageVisibilityTimeoutInSeconds": Object {
+      "default": 180,
+      "doc": "Message visibility timeout in seconds",
+      "format": "int",
+    },
+  },
+  "restApiConfig": Object {
+    "maxScanPriorityValue": Object {
+      "default": 1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "maxScanRequestBatchCount": Object {
+      "default": 250,
+      "doc": "Maximum number of scan requests in a single HTTP client request.",
+      "format": "int",
+    },
+    "minScanPriorityValue": Object {
+      "default": -1000,
+      "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
+      "format": "int",
+    },
+    "scanRequestProcessingDelayInSeconds": Object {
+      "default": 15,
+      "doc": "The scan request processing delay interval in seconds for a new submitted request.",
+      "format": "int",
+    },
   },
   "scanConfig": Object {
+    "accessibilityRuleExclusionList": Object {
+      "default": Array [
+        "image-redundant-alt",
+        "checkboxgroup",
+        "empty-heading",
+        "p-as-heading",
+        "radiogroup",
+        "table-duplicate-name",
+        "table-fake-caption",
+        "td-has-header",
+        "link-in-text-block",
+        "meta-viewport-large",
+        "tabindex",
+        "scope-attr-valid",
+        "frame-title-unique",
+        "heading-order",
+        "hidden-content",
+        "label-title-only",
+        "region",
+        "skip-link",
+        "landmark-main-is-top-level",
+        "landmark-one-main",
+        "aria-dpub-role-fallback",
+        "focus-order-semantics",
+        "frame-tested",
+        "landmark-banner-is-top-level",
+        "landmark-contentinfo-is-top-level",
+        "landmark-no-duplicate-banner",
+        "landmark-no-duplicate-contentinfo",
+        "page-has-heading-one",
+        "aria-allowed-role",
+        "css-orientation-lock",
+        "form-field-multiple-labels",
+        "label-content-name-mismatch",
+        "landmark-complementary-is-top-level",
+        "scrollable-region-focusable",
+        "label-content-name-mismatch",
+        "landmark-unique",
+      ],
+      "doc": "Axe core rule exclusion list",
+      "format": [Function],
+    },
     "failedPageRescanIntervalInHours": Object {
       "default": 3,
       "doc": "Minimum hours since the last scan failed. Pages newer than this time will not be scanned.",

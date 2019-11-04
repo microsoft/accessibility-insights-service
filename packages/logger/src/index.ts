@@ -4,3 +4,14 @@ export { Logger, LogLevel } from './logger';
 export { loggerTypes } from './logger-types';
 export { registerLoggerToContainer } from './register-logger-to-container';
 export { BaseTelemetryProperties } from './base-telemetry-properties';
+export {
+    BaseTelemetryMeasurements,
+    BatchScanRequestMeasurements,
+    BatchPoolMeasurements,
+    ScanTaskStartedMeasurements,
+    ScanTaskCompletedMeasurements,
+    TelemetryMeasurements,
+    ScanUrlsAddedMeasurements,
+    ScanRequestQueuedMeasurements,
+} from './logger-event-measurements';
+export { LoggerProperties } from './logger-properties';

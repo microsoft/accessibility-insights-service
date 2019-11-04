@@ -3,9 +3,10 @@
 import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
-import * as _ from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
@@ -14,6 +15,7 @@ import { LogLevel } from './logger';
 describe(AppInsightsLoggerClient, () => {
     let appInsightsMock: IMock<typeof appInsights>;
     let appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
+    let appInsightsContractMock: IMock<typeof appInsights.Contracts>;
     let testSubject: AppInsightsLoggerClient;
     let appInsightsTelemetryClientMock: IMock<appInsights.TelemetryClient>;
     let processStub: typeof process;
@@ -28,6 +30,7 @@ describe(AppInsightsLoggerClient, () => {
         appInsightsMock = Mock.ofType<typeof appInsights>(null, MockBehavior.Strict);
         appInsightsConfigMock = Mock.ofType<typeof appInsights.Configuration>(null, MockBehavior.Strict);
         appInsightsTelemetryClientMock = Mock.ofType<appInsights.TelemetryClient>(null);
+        appInsightsContractMock = Mock.ofType<typeof appInsights.Contracts>(null);
 
         envVariables = {
             AZ_BATCH_POOL_ID: 'pool 1',
@@ -80,37 +83,85 @@ describe(AppInsightsLoggerClient, () => {
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
-            appInsightsTelemetryClientMock.setup(t => t.trackMetric(It.isValue({ name: 'metric1', value: 10 }))).verifiable();
+            appInsightsTelemetryClientMock
+                .setup(t => t.trackMetric(It.isValue({ name: 'metric1', value: 10, properties: {} })))
+                .verifiable();
 
             testSubject.trackMetric('metric1', 10);
 
             verifyMocks();
         });
     });
+
     describe('trackEvent', () => {
-        it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
-            await testSubject.setup(null);
-            appInsightsTelemetryClientMock.reset();
-
-            appInsightsTelemetryClientMock.setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: undefined }))).verifiable();
-
-            testSubject.trackEvent('event1');
-
-            verifyMocks();
-        });
-
-        it('when properties passed', async () => {
+        it('when properties/measurements not passed', async () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup(null);
             appInsightsTelemetryClientMock.reset();
 
             appInsightsTelemetryClientMock
-                .setup(t => t.trackEvent(It.isValue({ name: 'event1', properties: { foo: 'bar' } })))
+                .setup(t => t.trackEvent(It.isValue({ name: 'HealthCheck', properties: {}, measurements: undefined })))
                 .verifiable();
 
-            testSubject.trackEvent('event1', { foo: 'bar' });
+            testSubject.trackEvent('HealthCheck');
 
+            verifyMocks();
+        });
+
+        it('when properties/measurements passed', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(It.isValue({ name: 'HealthCheck', properties: { foo: 'bar' }, measurements: { scanWaitTime: 1 } })),
+                )
+                .verifiable();
+
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
+
+            verifyMocks();
+        });
+    });
+
+    describe('trackAvailability', () => {
+        it('sends availability telemetry', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+            // tslint:disable-next-line: no-empty
+            const sendMock = Mock.ofInstance((data: any) => {});
+            const channelStub = {
+                send: sendMock.object,
+            };
+            const telemetryName = 'test';
+            const availabilityData: AvailabilityTelemetry = {
+                id: '1',
+                success: false,
+            };
+
+            appInsightsTelemetryClientMock
+                .setup(t => t.channel)
+                .returns(() => channelStub as any)
+                .verifiable(Times.atLeastOnce());
+            sendMock
+                .setup(send =>
+                    send(
+                        It.is(availabilityEnvelope => {
+                            // tslint:disable-next-line: no-unsafe-any
+                            const data = availabilityEnvelope.data.baseData;
+
+                            // tslint:disable-next-line: no-unsafe-any
+                            return data.id === availabilityData.id && data.name === telemetryName;
+                        }),
+                    ),
+                )
+                .verifiable();
+
+            testSubject.trackAvailability(telemetryName, availabilityData);
+
+            sendMock.verifyAll();
             verifyMocks();
         });
     });
@@ -124,7 +175,7 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock
                 .setup(t =>
                     t.trackTrace(
-                        It.isValue({ message: 'trace1', severity: appInsights.Contracts.SeverityLevel.Information, properties: undefined }),
+                        It.isValue({ message: 'trace1', severity: appInsights.Contracts.SeverityLevel.Information, properties: {} }),
                     ),
                 )
                 .verifiable();
@@ -183,7 +234,7 @@ describe(AppInsightsLoggerClient, () => {
         it('trackException', () => {
             const error = new Error('some error');
 
-            appInsightsTelemetryClientMock.setup(t => t.trackException({ exception: error })).verifiable();
+            appInsightsTelemetryClientMock.setup(t => t.trackException({ exception: error, properties: {} })).verifiable();
 
             testSubject.trackException(error);
             verifyMocks();
@@ -195,6 +246,135 @@ describe(AppInsightsLoggerClient, () => {
             appInsightsTelemetryClientMock.setup(t => t.flush()).verifiable();
 
             testSubject.flush();
+            verifyMocks();
+        });
+    });
+
+    describe('set custom dimensions at runtime', () => {
+        it('set custom dimensions for log', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackTrace(
+                        It.isValue({
+                            message: 'trace1',
+                            severity: appInsights.Contracts.SeverityLevel.Information,
+                            properties: customDimensionAssignments,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.log('trace1', LogLevel.info);
+            verifyMocks();
+        });
+
+        it('set custom dimensions for trackMetric', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackMetric(
+                        It.isValue({
+                            name: 'metric1',
+                            value: 10,
+                            properties: customDimensionAssignments,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.trackMetric('metric1', 10);
+            verifyMocks();
+        });
+
+        it('set custom dimensions for trackException', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const error = new Error('some error');
+            const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackException(
+                        It.isValue({
+                            exception: error,
+                            properties: customDimensionAssignments,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.trackException(error);
+            verifyMocks();
+        });
+
+        it('set custom dimensions for trackEvent', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const customDimensionAssignments = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(
+                        It.isValue({
+                            name: 'HealthCheck',
+                            properties: customDimensionAssignments,
+                            measurements: undefined,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.trackEvent('HealthCheck');
+            verifyMocks();
+        });
+
+        it('override custom dimensions in a single log call', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup(null);
+            appInsightsTelemetryClientMock.reset();
+
+            const customDimensionAssignments = { scanId: 'scan-id-1', batchRequestId: 'batch-req-id' };
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(
+                        It.isValue({
+                            name: 'HealthCheck',
+                            properties: { scanId: 'scan-id-2', batchRequestId: 'batch-req-id' },
+                            measurements: undefined,
+                        }),
+                    ),
+                )
+                .verifiable();
+
+            testSubject.setCustomProperties(customDimensionAssignments);
+            testSubject.trackEvent('HealthCheck', { scanId: 'scan-id-2' });
+            verifyMocks();
+
+            appInsightsTelemetryClientMock.reset();
+            appInsightsTelemetryClientMock
+                .setup(t =>
+                    t.trackEvent(
+                        It.isValue({
+                            name: 'HealthCheck',
+                            properties: customDimensionAssignments,
+                            measurements: undefined,
+                        }),
+                    ),
+                )
+                .verifiable();
+            testSubject.trackEvent('HealthCheck');
+            verifyMocks();
         });
     });
 

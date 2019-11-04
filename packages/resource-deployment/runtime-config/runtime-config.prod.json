@@ -3,7 +3,7 @@
         "logInConsole": true
     },
     "queueConfig": {
-        "maxQueueSize": 10
+        "maxQueueSize": 2000
     },
     "taskConfig": {
         "taskTimeoutInMinutes": 3
@@ -14,5 +14,8 @@
         "pageRescanIntervalInDays": 3,
         "failedPageRescanIntervalInHours": 3,
         "maxScanRetryCount": 3
+    },
+    "restApiConfig": {
+        "scanRequestProcessingDelayInSeconds": 300
     }
 }

@@ -28,23 +28,28 @@ restartBatchPools() {
     local batchAccountName
     getBatchAccountName batchAccountName
 
-    echo "Querying for vm scalesets resource groups of batch account $batchAccountName"
-    local query="[?tags.BatchAccountName=='$batchAccountName']"
-    vmssResourceGroupNames=$(az vmss list --subscription "$subscription" --query "$query.[resourceGroup]" -o tsv)
+    # Login into Azure Batch account
+    echo "Logging into '$batchAccountName' Azure Batch account"
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-    for vmssResourceGroupName in $vmssResourceGroupNames; do
-        local name
+    echo "Querying pools for $batchAccountName"
+    batchPoolIds=$(az batch pool list --account-name "$batchAccountName" --subscription "$subscription" --query "[*].id" -o tsv)
 
-        echo "Querying for vm scaleset name under resource group $vmssResourceGroupName"
-        name=$(az vmss list --subscription "$subscription" --resource-group "$vmssResourceGroupName" --query "$query.[name]" -o tsv)
+    for poolId in $batchPoolIds; do
+        local poolNodeIds
 
-        echo "Restarting vm scaleset $name under resource group $vmssResourceGroupName"
-        az vmss restart --name "$name" --resource-group "$vmssResourceGroupName" --subscription "$subscription" 1>/dev/null
+        echo "Querying node list for poolId $poolId"
+        poolNodeIds=$(az batch node list --account-name "$batchAccountName" --subscription "$subscription" --pool-id "$poolId" --query "[*].id" -o tsv)
+
+        for nodeId in $poolNodeIds; do
+            echo "Restarting node with nodeId $nodeId under poolId $poolId"
+            az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --subscription $subscription --node-reboot-option taskcompletion 1>/dev/null
+        done
     done
 }
 
 # Read script arguments
-while getopts "r:s:l:" option; do
+while getopts ":r:s:l:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;

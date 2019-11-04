@@ -22,21 +22,24 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
+        "@azure/functions": "^1.0.3",
         "@azure/cosmos": "^2.1.2",
         "@types/jest": "^24.0.11",
         "@types/node": "^11.13.4",
         "@types/sha.js": "^2.4.0",
-        "jest": "^24.7.1",
-        "jest-circus": "^24.7.1",
-        "jest-junit": "^6.3.0",
+        "@types/puppeteer": "^1.12.1",
+        "jest": "^24.9.0",
+        "jest-circus": "^24.9.0",
+        "jest-junit": "^8.0.0",
         "rimraf": "^2.6.3",
         "ts-jest": "^24.0.2",
         "tslint": "^5.12.1",
         "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
-        "typescript": "^3.4.3"
+        "typescript": "^3.6.2"
     },
     "dependencies": {
+        "puppeteer": "^1.12.2",
         "azure-services": "1.0.0",
         "common": "1.0.0",
         "dotenv": "^6.2.0",

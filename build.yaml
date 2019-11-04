@@ -38,6 +38,7 @@ steps:
       displayName: run linter
 
     - script: |
+          export NODE_OPTIONS=--max_old_space_size=4096
           yarn test --ci --coverage
       displayName: run unit tests
 
@@ -60,9 +61,14 @@ steps:
           SourceFolder: packages
           Contents: |
               job-manager/dist/**/*
+              web-api-scan-job-manager/dist/**/*
               runner/dist/**/*
+              web-api-scan-runner/dist/**/*
               scan-request-sender/dist/**/*
-              resource-deployment/**/*
+              web-api-scan-request-sender/dist/**/*
+              resource-deployment/dist/**/*
+              web-api/dist/**/*
+              web-workers/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
@@ -79,3 +85,4 @@ steps:
       displayName: 'Component Detection'
       inputs:
           failOnAlert: true
+      condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI')

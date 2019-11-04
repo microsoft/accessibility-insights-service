@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
+import { AxeScanResults } from 'scanner';
 import { IssueScanResults, PageScanResult, Website, WebsitePage } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { PageScanResultFactory } from '../factories/page-scan-result-factory';
 import { ScanResultFactory } from '../factories/scan-result-factory';
 import { WebsiteFactory } from '../factories/website-factory';
 import { WebsitePageFactory } from '../factories/website-page-factory';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanMetadata } from '../types/scan-metadata';
 
 @injectable()

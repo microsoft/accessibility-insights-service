@@ -1,0 +1,18 @@
+{
+    "bindings": [
+        {
+            "authLevel": "anonymous",
+            "name": "request",
+            "type": "httpTrigger",
+            "direction": "in",
+            "route": "scans/$batch",
+            "methods": ["post"]
+        },
+        {
+            "type": "http",
+            "direction": "out",
+            "name": "response"
+        }
+    ],
+    "scriptFile": "../get-scans-batch-func/index.js"
+}
