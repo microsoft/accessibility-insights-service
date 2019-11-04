@@ -5,11 +5,11 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, OnDemandPageScanRunResultProvider, ScanResultResponse, WebApiErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { ScanResultController } from './scan-result-controller';
 
 // tslint:disable: no-unsafe-any

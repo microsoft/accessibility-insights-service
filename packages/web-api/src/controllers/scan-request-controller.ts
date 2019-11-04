@@ -4,10 +4,16 @@ import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common'
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { BatchScanRequestMeasurements, Logger } from 'logger';
-import { ApiController, HttpResponse, ScanDataProvider, WebApiError, WebApiErrorCodes } from 'service-library';
+import {
+    ApiController,
+    HttpResponse,
+    ScanDataProvider,
+    ScanRunRequest,
+    ScanRunResponse,
+    WebApiError,
+    WebApiErrorCodes,
+} from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
-import { ScanRunRequest } from '../api-contracts/scan-run-request';
-import { ScanRunResponse } from '../api-contracts/scan-run-response';
 
 // tslint:disable: no-any
 type DictionaryStringToNumber = { [name: string]: number };

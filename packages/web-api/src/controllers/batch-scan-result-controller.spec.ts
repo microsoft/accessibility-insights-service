@@ -5,12 +5,11 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ScanResultResponse } from '../api-contracts/scan-result-response';
+
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
 describe(BatchScanResultController, () => {

@@ -4,10 +4,9 @@ import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse, WebApiErrorCodes } from 'service-library';
+
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
