@@ -6,7 +6,7 @@ import { Container } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 
 import { A11yServiceClient } from './a11y-service-client';
-import { registerWebApiClientLibraryToContainer } from './register-web-api-client-library-to-container';
+import { registerWebApiClientLibraryToContainer } from './register-web-api-client-to-container';
 
 // tslint:disable: no-unsafe-any no-any
 
