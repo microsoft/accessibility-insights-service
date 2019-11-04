@@ -70,25 +70,4 @@ else
     echo "Resource group $resourceGroupName already exists"
 fi
 
-resourceGroupExists=$($resourceGroupExistsQuery)
-# Wait until we are certain the resource group exists
-waiting=false
-timeout=600 # timeout after ten minutes
-end=$((SECONDS + $timeout))
-while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
-    if [ "$waiting" != true ]; then
-        waiting=true
-        echo "Waiting for resource group $resourceGroupName"
-        printf " - Running .."
-    fi
-
-    sleep 5
-    printf "."
-    resourceGroupExists=$($resourceGroupExistsQuery)
-done
-
-# Exit if timed out
-if [ "$resourceGroupExists" = false ]; then
-    echo "Could not find resource group $resourceGroupName after $timeout seconds"
-    exit 1
-fi
+./wait-for-deployment.sh -n $resourceGroupName -t 600 -q "$resourceGroupExistsQuery"

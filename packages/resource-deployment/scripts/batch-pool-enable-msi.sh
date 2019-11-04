@@ -79,31 +79,10 @@ assignSystemIdentity() {
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
         # Wait until we are certain the resource group exists
-        waiting=false
-        timeout=1800 # timeout after half an hour
-        end=$((SECONDS + $timeout))
-        resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
-        while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
-            if [ "$waiting" != true ]; then
-                waiting=true
-                echo "Waiting for resource group $vmssResourceGroup"
-                printf " - Running .."
-            fi
+        ./wait-for-deployment -n $vmssResourceGroup -t 1800 -q "az group exists --name $vmssResourceGroup"
 
-            sleep 5
-            printf "."
-            resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
-        done
-
-        # Exit if timed out
-        if [ "$resourceGroupExists" = false ]; then
-            echo "Could not find resource group $vmssResourceGroup after $timeout seconds"
-            exit 1
-        fi
-
-        echo "Resource group $vmssResourceGroup found after $((SECONDS - (end - timeout))) seconds"
-
-        vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
+        vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup' && provisioningState=='Succeeded'].name"
+        ./wait-for-deployment -n $vmssResourceGroup -t 1800 -q "az vmss list --query \"$vmssNameQuery\" -o tsv"
         vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
 
         systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
