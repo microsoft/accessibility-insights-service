@@ -16,14 +16,16 @@ Usage: $0 -n <resource name> -t <max wait time> [-r <resource group> | -q <exist
 }
 
 # Read script arguments
-while getopts ":n:r:t:q:" option; do
-    case $option in
-    n) resourceName=${OPTARG} ;;
-    t) timeout=${OPTARG} ;;
-    r) resourceGroupName=${OPTARG} ;;
-    q) existanceQuery=${OPTARG} ;;
-    *) exitWithUsageInfo ;;
+previousFlag=""
+for arg in "$@"; do
+    case $previousFlag in
+    -n) resourceName=$arg ;;
+    -t) timeout=$arg ;;
+    -r) resourceGroupName=$arg ;;
+    -q) existanceQuery=$arg ;;
+    -?) exitWithUsageInfo ;;
     esac
+    previousFlag=$arg
 done
 
 if [ -z $resourceName ] || [ -z $timeout ]; then
