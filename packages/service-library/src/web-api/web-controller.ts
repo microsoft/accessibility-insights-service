@@ -30,11 +30,11 @@ export abstract class WebController {
 
             this.setResponseContentTypeHeader();
 
-            this.contextAwareLogger.logInfo('[WebController] processed request');
+            this.contextAwareLogger.logInfo('[WebController] request completed');
 
             return result;
         } catch (error) {
-            this.contextAwareLogger.trackExceptionAny(error, 'Request failed');
+            this.contextAwareLogger.trackExceptionAny(error, '[WebController] Request failed');
             throw error;
         }
     }

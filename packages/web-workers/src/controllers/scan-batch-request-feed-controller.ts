@@ -19,7 +19,16 @@ import {
     ScanRunBatchRequest,
 } from 'storage-documents';
 
-// tslint:disable: no-any
+interface ScanRequestTelemetryProperties {
+    scanUrl: string;
+    scanId: string;
+}
+
+interface BatchRequestFeedProcessTelemetryProperties {
+    scanRequests: string;
+    batchRequestId: string;
+    [name: string]: string;
+}
 
 @injectable()
 export class ScanBatchRequestFeedController extends WebController {
@@ -37,7 +46,7 @@ export class ScanBatchRequestFeedController extends WebController {
         super(contextAwareLogger);
     }
 
-    public async handleRequest(...args: any[]): Promise<void> {
+    public async handleRequest(...args: unknown[]): Promise<void> {
         this.contextAwareLogger.logInfo('processing the documents');
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
@@ -49,12 +58,16 @@ export class ScanBatchRequestFeedController extends WebController {
                 };
 
                 this.contextAwareLogger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
-                this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] processed batch request document with id ${document.id}`);
+
+                this.contextAwareLogger.logInfo(
+                    `[ScanBatchRequestFeedController] processed batch request document`,
+                    this.getLogPropertiesForRequests(document.scanRunBatchRequest, document.id),
+                );
             }),
         );
     }
 
-    protected validateRequest(...args: any[]): boolean {
+    protected validateRequest(...args: unknown[]): boolean {
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
 
         return this.validateRequestData(batchDocuments);
@@ -64,9 +77,12 @@ export class ScanBatchRequestFeedController extends WebController {
         const requests = batchDocument.scanRunBatchRequest.filter(request => request.scanId !== undefined);
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
-            await this.writeRequestsToQueueContainer(requests);
+            await this.writeRequestsToQueueContainer(requests, batchDocument.id);
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`);
+            this.contextAwareLogger.logInfo(
+                `[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`,
+                this.getLogPropertiesForRequests(requests, batchDocument.id),
+            );
         }
 
         return requests.length;
@@ -89,10 +105,13 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] Added requests to permanent container`);
+        this.contextAwareLogger.logInfo(
+            `[ScanBatchRequestFeedController] Added requests to permanent container`,
+            this.getLogPropertiesForRequests(requests, batchRequestId),
+        );
     }
 
-    private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[]): Promise<void> {
+    private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>(request => {
             return {
                 id: request.scanId,
@@ -104,7 +123,28 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] Added requests to queue container`);
+        this.contextAwareLogger.logInfo(
+            `[ScanBatchRequestFeedController] Added requests to queue container`,
+            this.getLogPropertiesForRequests(requests, batchRequestId),
+        );
+    }
+
+    private getLogPropertiesForRequests(
+        requests: ScanRunBatchRequest[],
+        batchRequestId: string,
+    ): BatchRequestFeedProcessTelemetryProperties {
+        return {
+            scanRequests: JSON.stringify(
+                requests.map(r => {
+                    // tslint:disable-next-line: no-object-literal-type-assertion
+                    return {
+                        scanId: r.scanId,
+                        scanUrl: r.url,
+                    } as ScanRequestTelemetryProperties;
+                }),
+            ),
+            batchRequestId,
+        };
     }
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
