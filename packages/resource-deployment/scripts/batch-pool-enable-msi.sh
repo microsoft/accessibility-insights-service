@@ -79,10 +79,10 @@ assignSystemIdentity() {
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
         # Wait until we are certain the resource group exists
-        ./wait-for-deployment -n $vmssResourceGroup -t 1800 -q "az group exists --name $vmssResourceGroup"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
         vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup' && provisioningState=='Succeeded'].name"
-        ./wait-for-deployment -n $vmssResourceGroup -t 1800 -q "az vmss list --query \"$vmssNameQuery\" -o tsv"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssNameQuery\" -o tsv"
         vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
 
         systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)

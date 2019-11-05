@@ -70,4 +70,4 @@ else
     echo "Resource group $resourceGroupName already exists"
 fi
 
-./wait-for-deployment.sh -n $resourceGroupName -t 600 -q "$resourceGroupExistsQuery"
+. "${0%/*}/wait-for-deployment.sh" -n "$resourceGroupName" -t "600" -q "$resourceGroupExistsQuery"
