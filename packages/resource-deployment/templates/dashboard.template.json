@@ -750,16 +750,16 @@
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/custom/scanWallClockTime",
+                                                            "name": "customEvents/custom/scanTotalTime",
                                                             "aggregationType": 4,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "scanWallClockTime",
+                                                                "displayName": "scanTotalTime",
                                                                 "color": "#0078d4"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg scanExecutionTime, Avg scanWaitTime, and Avg scanWallClockTime for allyinsights5d4fa3x2bewh6",
+                                                    "title": "Avg scanExecutionTime, Avg scanWaitTime, and Avg scanTotalTime for allyinsights5d4fa3x2bewh6",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -822,11 +822,11 @@
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/custom/scanWallClockTime",
+                                                            "name": "customEvents/custom/scanTotalTime",
                                                             "aggregationType": 4,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "scanWallClockTime",
+                                                                "displayName": "scanTotalTime",
                                                                 "color": "#0078d4"
                                                             }
                                                         }
