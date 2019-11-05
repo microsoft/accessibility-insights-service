@@ -41,7 +41,7 @@ if [ -z "$existanceQuery" ]; then
     fi
 fi
 
-resourceExists=$($existanceQuery)
+resourceExists=$(eval "$existanceQuery")
 # Wait until we are certain the resource group exists
 waiting=false
 end=$((SECONDS + $timeout))
@@ -54,7 +54,7 @@ while ([ -z "$resourceExists" ] || [ "$resourceExists" = false ]) && [ $SECONDS 
 
     sleep 5
     printf "."
-    resourceExists=$($existanceQuery)
+    resourceExists=$(eval "$existanceQuery")
 done
 
 # Exit if timed out
