@@ -32,19 +32,19 @@ export class A11yServiceClient {
         const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
         const requestUrl: string = `${this.baseUrl}/scans`;
 
-        return this.postRequest(requestUrl, { json: requestBody });
+        return this.postRequest<ScanRunResponse>(requestUrl, { json: requestBody });
     }
 
     public async getScanStatus(scanId: string): Promise<ScanResultResponse> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}`;
 
-        return this.getRequest(requestUrl);
+        return this.getRequest<ScanResultResponse>(requestUrl);
     }
 
     public async getScanReport(scanId: string, reportId: string): Promise<Buffer> {
         const requestUrl: string = `${this.baseUrl}/scans/${scanId}/reports/${reportId}`;
 
-        return this.getRequest(requestUrl);
+        return this.getRequest<Buffer>(requestUrl);
     }
 
     private async postRequest<T>(url: string, options?: request.RequestPromiseOptions): Promise<T> {
