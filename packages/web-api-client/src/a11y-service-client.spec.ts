@@ -2,9 +2,11 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import * as Auth from '@azure/ms-rest-nodeauth';
 import * as request from 'request-promise';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 
+import { merge } from 'lodash';
 import { A11yServiceClient } from './a11y-service-client';
 
 // tslint:disable: no-null-keyword
@@ -12,8 +14,9 @@ describe(A11yServiceClient, () => {
     const baseUrl = 'base-url';
     let testSubject: A11yServiceClient;
     let requestMock: IMock<typeof request>;
+    let defaultRequestMock: IMock<typeof request>;
     const apiVersion = '1.0';
-    const requestDefaults = {
+    const requestDefaults: request.RequestPromiseOptions = {
         forever: true,
         qs: {
             'api-version': apiVersion,
@@ -22,18 +25,39 @@ describe(A11yServiceClient, () => {
             'Content-Type': 'application/json',
         },
     };
+    let credMock: IMock<Auth.ApplicationTokenCredentials>;
+    const accessToken = {
+        tokenType: 'type',
+        accessToken: 'token',
+    };
+    let authHeaderOptions: request.RequestPromiseOptions;
 
     beforeEach(() => {
+        authHeaderOptions = {
+            headers: {
+                authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
+            },
+        };
         requestMock = Mock.ofType<typeof request>(null);
+        defaultRequestMock = Mock.ofType<typeof request>(null);
+        credMock = Mock.ofType<Auth.ApplicationTokenCredentials>(null);
+
         requestMock
             .setup(req => req.defaults(requestDefaults))
-            .returns(() => requestMock.object)
+            .returns(() => defaultRequestMock.object)
             .verifiable(Times.once());
-        testSubject = new A11yServiceClient(baseUrl, apiVersion, requestMock.object);
+        credMock
+            .setup(cm => cm.getToken())
+            // tslint:disable-next-line: no-any
+            .returns(() => Promise.resolve(accessToken as any))
+            .verifiable(Times.once());
+
+        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestMock.object);
     });
 
     afterEach(() => {
         requestMock.verifyAll();
+        defaultRequestMock.verifyAll();
     });
 
     it('postScanUrl', async () => {
@@ -42,8 +66,8 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
         const options = { json: requestBody };
-        requestMock
-            .setup(req => req.post(`${baseUrl}/scans`, options))
+        defaultRequestMock
+            .setup(req => req.post(`${baseUrl}/scans`, merge(options, authHeaderOptions)))
             // tslint:disable-next-line: no-any
             .returns(() => Promise.resolve(response) as any)
             .verifiable(Times.once());
@@ -54,8 +78,8 @@ describe(A11yServiceClient, () => {
     it('getScanStatus', async () => {
         const scanId = 'scanid';
         const response = { statusCode: 200 };
-        requestMock
-            .setup(req => req.get(`${baseUrl}/scans/${scanId}`))
+        defaultRequestMock
+            .setup(req => req.get(`${baseUrl}/scans/${scanId}`, authHeaderOptions))
             // tslint:disable-next-line: no-any
             .returns(() => Promise.resolve(response) as any)
             .verifiable(Times.once());
@@ -67,8 +91,8 @@ describe(A11yServiceClient, () => {
         const scanId = 'scanid';
         const reportId = 'reportid';
         const response = { statusCode: 200 };
-        requestMock
-            .setup(req => req.get(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+        defaultRequestMock
+            .setup(req => req.get(`${baseUrl}/scans/${scanId}/reports/${reportId}`, authHeaderOptions))
             // tslint:disable-next-line: no-any
             .returns(() => Promise.resolve(response) as any)
             .verifiable(Times.once());
