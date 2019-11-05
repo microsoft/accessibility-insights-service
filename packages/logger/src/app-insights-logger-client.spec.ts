@@ -5,10 +5,10 @@ import 'reflect-metadata';
 import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
+import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
-import { RootAppInsightsLoggerClient } from './root-app-insights-logger-client';
 
-class TestableAppInsightsLoggerClient extends RootAppInsightsLoggerClient {
+class TestableAppInsightsLoggerClient extends AppInsightsLoggerClient {
     // tslint:disable-next-line: no-unnecessary-override
     public getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {
         return super.getAdditionalPropertiesToAddToEvent();
@@ -16,7 +16,7 @@ class TestableAppInsightsLoggerClient extends RootAppInsightsLoggerClient {
 }
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 
-describe(RootAppInsightsLoggerClient, () => {
+describe(AppInsightsLoggerClient, () => {
     let appInsightsMock: IMock<typeof appInsights>;
     let appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
     let testSubject: TestableAppInsightsLoggerClient;

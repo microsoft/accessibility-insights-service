@@ -6,15 +6,15 @@ import * as appInsights from 'applicationinsights';
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
 import * as argv from 'yargs';
-import { ContextAppInsightsContextLoggerClient } from './context-app-insights-logger-client';
-import { ContextConsoleLoggerClient } from './context-console-logger-client';
-import { ContextLogger } from './context-logger';
+import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { ConsoleLoggerClient } from './console-logger-client';
+import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
+import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
+import { ContextAwareLogger } from './context-aware-logger';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
 import { registerLoggerToContainer } from './register-logger-to-container';
-import { RootAppInsightsLoggerClient } from './root-app-insights-logger-client';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
 
 // tslint:disable: no-unsafe-any no-any
 
@@ -34,12 +34,12 @@ describe(registerLoggerToContainer, () => {
         expect(container.get(loggerTypes.Argv)).toBe(argv);
         expect(container.get(loggerTypes.DotEnvConfig)).toEqual(dotenv.config());
 
-        verifySingletonDependencyResolution(RootAppInsightsLoggerClient);
-        verifySingletonDependencyResolution(RootConsoleLoggerClient);
+        verifySingletonDependencyResolution(AppInsightsLoggerClient);
+        verifySingletonDependencyResolution(ConsoleLoggerClient);
         verifySingletonDependencyResolution(loggerTypes.DotEnvConfig);
 
-        verifyNonSingletonDependencyResolution(ContextAppInsightsContextLoggerClient);
-        verifyNonSingletonDependencyResolution(ContextConsoleLoggerClient);
+        verifyNonSingletonDependencyResolution(ContextAwareAppInsightsLoggerClient);
+        verifyNonSingletonDependencyResolution(ContextAwareConsoleLoggerClient);
     });
 
     it('verify logger resolution', () => {
@@ -50,20 +50,20 @@ describe(registerLoggerToContainer, () => {
         verifySingletonDependencyResolution(Logger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
-        expect(telemetryClients.filter(c => c instanceof RootAppInsightsLoggerClient)).toHaveLength(1);
-        expect(telemetryClients.filter(c => c instanceof RootConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter(c => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter(c => c instanceof ConsoleLoggerClient)).toHaveLength(1);
     });
 
     it('verify context logger resolution', () => {
         registerLoggerToContainer(container);
 
-        const logger = container.get(ContextLogger);
+        const logger = container.get(ContextAwareLogger);
 
         verifySingletonDependencyResolution(Logger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
-        expect(telemetryClients.filter(c => c instanceof ContextAppInsightsContextLoggerClient)).toHaveLength(1);
-        expect(telemetryClients.filter(c => c instanceof ContextConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter(c => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
     });
 
     function verifySingletonDependencyResolution(key: any): void {

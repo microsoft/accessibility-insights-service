@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-export { ContextLogger } from './context-logger';
+export { ContextAwareLogger as ContextLogger } from './context-aware-logger';
 export { Logger } from './logger';
 export { LogLevel } from './base-logger';
 export { loggerTypes } from './logger-types';

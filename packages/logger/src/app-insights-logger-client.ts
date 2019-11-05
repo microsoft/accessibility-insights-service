@@ -8,7 +8,7 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
-export class RootAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
+export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     constructor(
         @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,

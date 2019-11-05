@@ -5,10 +5,10 @@ import 'reflect-metadata';
 
 import { TelemetryClient } from 'applicationinsights';
 import { IMock, Mock } from 'typemoq';
-import { ContextAppInsightsContextLoggerClient } from './context-app-insights-logger-client';
-import { RootAppInsightsLoggerClient } from './root-app-insights-logger-client';
+import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
 
-export class TestableAppInsightsContextLoggerClient extends ContextAppInsightsContextLoggerClient {
+export class TestableContextAwareAppInsightsLoggerClient extends ContextAwareAppInsightsLoggerClient {
     public getTelemetryClient(): TelemetryClient {
         return this.telemetryClient;
     }
@@ -19,13 +19,13 @@ export class TestableAppInsightsContextLoggerClient extends ContextAppInsightsCo
     }
 }
 
-describe(ContextAppInsightsContextLoggerClient, () => {
-    let testSubject: TestableAppInsightsContextLoggerClient;
-    let rootLoggerClient: IMock<RootAppInsightsLoggerClient>;
+describe(ContextAwareAppInsightsLoggerClient, () => {
+    let testSubject: TestableContextAwareAppInsightsLoggerClient;
+    let rootLoggerClient: IMock<AppInsightsLoggerClient>;
 
     beforeEach(() => {
-        rootLoggerClient = Mock.ofType(RootAppInsightsLoggerClient);
-        testSubject = new TestableAppInsightsContextLoggerClient(rootLoggerClient.object);
+        rootLoggerClient = Mock.ofType(AppInsightsLoggerClient);
+        testSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
     });
 

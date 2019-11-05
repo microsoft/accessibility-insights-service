@@ -5,15 +5,15 @@ import * as _ from 'lodash';
 
 import { ServiceConfiguration } from 'common';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
+import { ConsoleLoggerClient } from './console-logger-client';
 import { loggerTypes } from './logger-types';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
 
 @injectable()
-export class ContextConsoleLoggerClient extends BaseConsoleLoggerClient {
+export class ContextAwareConsoleLoggerClient extends BaseConsoleLoggerClient {
     constructor(
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Console) consoleObject: typeof console,
-        @inject(RootConsoleLoggerClient) private readonly rootLoggerClient: RootConsoleLoggerClient,
+        @inject(ConsoleLoggerClient) private readonly rootLoggerClient: ConsoleLoggerClient,
     ) {
         super(serviceConfig, consoleObject);
     }

@@ -5,16 +5,16 @@ import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
 import { Mock } from 'typemoq';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
+import { ConsoleLoggerClient } from './console-logger-client';
 
-class TestableRootConsoleLoggerClient extends RootConsoleLoggerClient {
+class TestableRootConsoleLoggerClient extends ConsoleLoggerClient {
     // tslint:disable-next-line: no-unnecessary-override
     public getPropertiesToAddToEvent(): { [name: string]: string } {
         return super.getPropertiesToAddToEvent();
     }
 }
 
-describe(RootConsoleLoggerClient, () => {
+describe(ConsoleLoggerClient, () => {
     let testSubject: TestableRootConsoleLoggerClient;
 
     beforeEach(() => {

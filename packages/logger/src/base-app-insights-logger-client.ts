@@ -6,10 +6,11 @@ import { injectable } from 'inversify';
 import { BaseTelemetryProperties, TelemetryMeasurements } from '.';
 import { AvailabilityTelemetry } from './availablity-telemetry';
 import { LogLevel } from './base-logger';
+import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 
 @injectable()
-export abstract class BaseAppInsightsLoggerClient {
+export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     protected telemetryClient: TelemetryClient;
 
     public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;

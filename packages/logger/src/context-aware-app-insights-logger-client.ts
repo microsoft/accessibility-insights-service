@@ -3,13 +3,13 @@
 
 import { TelemetryClient } from 'applicationinsights';
 import { inject, injectable } from 'inversify';
-import { BaseTelemetryProperties, LoggerProperties } from '.';
+import { BaseTelemetryProperties } from '.';
+import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
-import { RootAppInsightsLoggerClient } from './root-app-insights-logger-client';
 
 @injectable()
-export class ContextAppInsightsContextLoggerClient extends BaseAppInsightsLoggerClient {
-    constructor(@inject(RootAppInsightsLoggerClient) private readonly rootLoggerClient: RootAppInsightsLoggerClient) {
+export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
+    constructor(@inject(AppInsightsLoggerClient) private readonly rootLoggerClient: AppInsightsLoggerClient) {
         super();
     }
 

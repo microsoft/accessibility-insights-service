@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 
 @injectable()
-export class RootConsoleLoggerClient extends BaseConsoleLoggerClient {
+export class ConsoleLoggerClient extends BaseConsoleLoggerClient {
     protected getPropertiesToAddToEvent(): { [name: string]: string } {
         return {};
     }

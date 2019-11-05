@@ -4,23 +4,23 @@ import * as appInsights from 'applicationinsights';
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
 import * as argv from 'yargs';
-import { ContextAppInsightsContextLoggerClient } from './context-app-insights-logger-client';
-import { ContextConsoleLoggerClient } from './context-console-logger-client';
-import { ContextLogger } from './context-logger';
+import { AppInsightsLoggerClient } from './app-insights-logger-client';
+import { ConsoleLoggerClient } from './console-logger-client';
+import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
+import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
+import { ContextAwareLogger } from './context-aware-logger';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
-import { RootAppInsightsLoggerClient } from './root-app-insights-logger-client';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
 
 export function registerLoggerToContainer(container: Container): void {
     container.bind(loggerTypes.AppInsights).toConstantValue(appInsights);
     container.bind(loggerTypes.Process).toConstantValue(process);
     container
-        .bind(RootAppInsightsLoggerClient)
+        .bind(AppInsightsLoggerClient)
         .toSelf()
         .inSingletonScope();
     container
-        .bind(RootConsoleLoggerClient)
+        .bind(ConsoleLoggerClient)
         .toSelf()
         .inSingletonScope();
 
@@ -31,17 +31,17 @@ export function registerLoggerToContainer(container: Container): void {
     container
         .bind(Logger)
         .toDynamicValue(context => {
-            const appInsightsLoggerClient = context.container.get(RootAppInsightsLoggerClient);
-            const consoleLoggerClient = context.container.get(RootConsoleLoggerClient);
+            const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
+            const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
 
             return new Logger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
         })
         .inSingletonScope();
 
-    container.bind(ContextLogger).toDynamicValue(context => {
-        const appInsightsLoggerClient = context.container.get(ContextAppInsightsContextLoggerClient);
-        const consoleLoggerClient = context.container.get(ContextConsoleLoggerClient);
+    container.bind(ContextAwareLogger).toDynamicValue(context => {
+        const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
+        const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
 
-        return new ContextLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+        return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
     });
 }

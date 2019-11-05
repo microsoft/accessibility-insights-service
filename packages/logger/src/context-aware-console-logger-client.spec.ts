@@ -5,24 +5,24 @@ import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
 import { IMock, Mock } from 'typemoq';
-import { ContextConsoleLoggerClient } from './context-console-logger-client';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
+import { ConsoleLoggerClient } from './console-logger-client';
+import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
 
-class TestableContextConsoleLoggerClient extends ContextConsoleLoggerClient {
+class TestableContextAwareConsoleLoggerClient extends ContextAwareConsoleLoggerClient {
     // tslint:disable-next-line: no-unnecessary-override
     public getPropertiesToAddToEvent(): { [name: string]: string } {
         return super.getPropertiesToAddToEvent();
     }
 }
 
-describe(ContextConsoleLoggerClient, () => {
-    let testSubject: TestableContextConsoleLoggerClient;
-    let rootLoggerClient: IMock<RootConsoleLoggerClient>;
+describe(ContextAwareConsoleLoggerClient, () => {
+    let testSubject: TestableContextAwareConsoleLoggerClient;
+    let rootLoggerClient: IMock<ConsoleLoggerClient>;
 
     beforeEach(() => {
-        rootLoggerClient = Mock.ofType(RootConsoleLoggerClient);
+        rootLoggerClient = Mock.ofType(ConsoleLoggerClient);
 
-        testSubject = new TestableContextConsoleLoggerClient(
+        testSubject = new TestableContextAwareConsoleLoggerClient(
             Mock.ofType(ServiceConfiguration).object,
             Mock.ofType<typeof console>().object,
             rootLoggerClient.object,

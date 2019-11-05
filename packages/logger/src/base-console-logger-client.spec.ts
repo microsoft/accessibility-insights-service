@@ -11,7 +11,6 @@ import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ScanTaskStartedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
-import { RootConsoleLoggerClient } from './root-console-logger-client';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 

@@ -6,7 +6,7 @@ import { BaseLogger } from './base-logger';
 import { LoggerClient } from './logger-client';
 
 @injectable()
-export class ContextLogger extends BaseLogger {
+export class ContextAwareLogger extends BaseLogger {
     constructor(loggerClients: LoggerClient[], currentProcess: typeof process) {
         super(loggerClients, currentProcess);
     }
