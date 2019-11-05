@@ -3,10 +3,10 @@
 import 'reflect-metadata';
 
 import * as Auth from '@azure/ms-rest-nodeauth';
-import * as request from 'request-promise';
-import { IMock, It, Mock, Times } from 'typemoq';
-
 import { merge } from 'lodash';
+import * as request from 'request-promise';
+import { IMock, Mock, Times } from 'typemoq';
+
 import { A11yServiceClient } from './a11y-service-client';
 
 // tslint:disable: no-null-keyword
