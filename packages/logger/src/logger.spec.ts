@@ -5,10 +5,11 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
+import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
-import { ConsoleLoggerClient } from './console-logger-client';
-import { Logger, LogLevel } from './logger';
+import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
+import { RootConsoleLoggerClient } from './root-console-logger-client';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
 
@@ -20,8 +21,8 @@ describe(Logger, () => {
 
     beforeEach(() => {
         processStub = { execArgv: ['--test'] } as typeof process;
-        loggerClient1Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
-        loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
+        loggerClient1Mock = Mock.ofType2(RootConsoleLoggerClient, null, MockBehavior.Strict);
+        loggerClient2Mock = Mock.ofType2(RootConsoleLoggerClient, null, MockBehavior.Strict);
 
         testSubject = new Logger([loggerClient1Mock.object, loggerClient2Mock.object], processStub);
     });

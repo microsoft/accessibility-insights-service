@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 import * as utils from 'util';
 
 import { AvailabilityTelemetry } from './availablity-telemetry';
+import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
-import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';
@@ -15,7 +15,7 @@ import { LoggerProperties } from './logger-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
-export class ConsoleLoggerClient implements LoggerClient {
+export abstract class BaseConsoleLoggerClient implements LoggerClient {
     private isConsoleLogEnabled: boolean;
     private baseProperties?: BaseTelemetryProperties;
 
@@ -67,8 +67,14 @@ export class ConsoleLoggerClient implements LoggerClient {
         this.baseProperties = { ...this.baseProperties, ...properties };
     }
 
+    public getDefaultProperties(): { [name: string]: string } {
+        return this.baseProperties;
+    }
+
+    protected abstract getPropertiesToAddToEvent(): { [name: string]: string };
+
     private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
-        const allProperties = { ...this.baseProperties, ...properties };
+        const allProperties = { ...this.baseProperties, ...this.getPropertiesToAddToEvent(), ...properties };
 
         return _.isEmpty(allProperties) ? '' : `[properties - ${this.getPrintableString(allProperties)}]`;
     }
