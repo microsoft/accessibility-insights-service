@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
+import { ContextAwareLogger, loggerTypes } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
@@ -38,10 +38,12 @@ describe(WebControllerDispatcher, () => {
     let context: Context;
     let testableWebController: TestableWebController;
     let processLifeCycleContainerMock: IMock<Container>;
+    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{ bindingDefinitions: {} });
-        testableWebController = new TestableWebController();
+        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        testableWebController = new TestableWebController(contextAwareLoggerMock.object);
 
         containerMock = Mock.ofType(Container);
         processLifeCycleContainerMock = Mock.ofType(Container);

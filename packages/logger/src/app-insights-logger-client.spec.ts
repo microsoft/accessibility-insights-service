@@ -6,7 +6,6 @@ import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 
 class TestableAppInsightsLoggerClient extends AppInsightsLoggerClient {
     // tslint:disable-next-line: no-unnecessary-override
@@ -77,7 +76,7 @@ describe(AppInsightsLoggerClient, () => {
         });
 
         it('initializes with additional common properties', async () => {
-            const additionalCommonProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
+            const additionalCommonProps = { foo: 'bar', source: 'test-source' };
 
             await testSubject.setup(additionalCommonProps);
 

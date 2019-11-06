@@ -3,7 +3,6 @@
 
 import { TelemetryClient } from 'applicationinsights';
 import { inject, injectable } from 'inversify';
-import { BaseTelemetryProperties } from '.';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 
@@ -13,7 +12,7 @@ export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerCl
         super();
     }
 
-    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
+    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         this.telemetryClient = new TelemetryClient();
 
         this.telemetryClient.commonProperties = {
