@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { HttpResponse, OnDemandPageScanRunResultProvider, ScanResultResponse, WebApiErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -19,7 +19,7 @@ describe(ScanResultController, () => {
     let context: Context;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let loggerMock: IMock<Logger>;
+    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let scanResponseConverterMock: IMock<ScanResponseConverter>;
     const apiVersion = '1.0';
@@ -92,7 +92,7 @@ describe(ScanResultController, () => {
                 } as RestApiConfig;
             });
 
-        loggerMock = Mock.ofType<Logger>();
+        contextAwareLoggerMock = Mock.ofType<ContextAwareLogger>();
 
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
     });
@@ -103,7 +103,7 @@ describe(ScanResultController, () => {
             scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
-            loggerMock.object,
+            contextAwareLoggerMock.object,
         );
         controller.context = contextReq;
 

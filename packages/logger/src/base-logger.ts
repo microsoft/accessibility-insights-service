@@ -20,7 +20,7 @@ export abstract class BaseLogger {
 
     constructor(protected readonly loggerClients: LoggerClient[], protected readonly currentProcess: typeof process) {}
 
-    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
+    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         if (this.initialized === true) {
             return;
         }

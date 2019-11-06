@@ -3,7 +3,7 @@
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
-import { BatchScanRequestMeasurements, Logger } from 'logger';
+import { BatchScanRequestMeasurements, ContextAwareLogger, Logger } from 'logger';
 import {
     ApiController,
     HttpResponse,
@@ -38,9 +38,9 @@ export class ScanRequestController extends ApiController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(): Promise<void> {
@@ -64,8 +64,8 @@ export class ScanRequestController extends ApiController {
         const totalUrls: number = processedData.scanResponses.length;
         const invalidUrls: number = processedData.scanResponses.filter(i => i.error !== undefined).length;
 
-        this.logger.setCustomProperties({ batchRequestId: batchId });
-        this.logger.logInfo('Accepted scan run batch request', {
+        this.contextAwareLogger.setCustomProperties({ batchRequestId: batchId });
+        this.contextAwareLogger.logInfo('Accepted scan run batch request', {
             batchId: batchId,
             totalUrls: totalUrls.toString(),
             invalidUrls: invalidUrls.toString(),
@@ -78,7 +78,7 @@ export class ScanRequestController extends ApiController {
         };
 
         // tslint:disable-next-line: no-null-keyword
-        this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
+        this.contextAwareLogger.trackEvent('BatchScanRequestSubmitted', null, measurements);
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {

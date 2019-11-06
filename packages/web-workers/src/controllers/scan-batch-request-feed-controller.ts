@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger, ScanUrlsAddedMeasurements } from 'logger';
+import { ContextAwareLogger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -32,9 +32,9 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(...args: any[]): Promise<void> {
@@ -46,7 +46,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     addedUrls: addedRequests,
                 };
 
-                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.contextAwareLogger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
             }),
         );
     }

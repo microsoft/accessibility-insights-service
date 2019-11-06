@@ -4,7 +4,6 @@ import * as appInsights from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
-import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { loggerTypes } from './logger-types';
 
 @injectable()
@@ -16,7 +15,7 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         super();
     }
 
-    public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
+    public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
         this.appInsightsObject
             .setup()
             .setAutoCollectConsole(true)

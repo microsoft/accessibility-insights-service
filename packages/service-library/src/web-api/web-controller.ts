@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+import { ContextAwareLogger } from 'logger';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -11,8 +12,14 @@ export abstract class WebController {
     public abstract readonly apiName: string;
     public context: Context;
 
+    constructor(@inject(ContextAwareLogger) protected readonly contextAwareLogger: ContextAwareLogger) {}
+
     public async invoke(requestContext: Context, ...args: any[]): Promise<void> {
         this.context = requestContext;
+
+        await this.contextAwareLogger.setup(this.getBaseTelemetryProperties());
+        this.contextAwareLogger.logInfo('request started');
+
         if (this.validateRequest(...args)) {
             await this.handleRequest(...args);
         }
@@ -23,6 +30,15 @@ export abstract class WebController {
     protected abstract validateRequest(...args: any[]): boolean;
 
     protected abstract async handleRequest(...args: any[]): Promise<void>;
+
+    protected getBaseTelemetryProperties(): { [name: string]: string } {
+        return {
+            apiName: this.apiName,
+            apiVersion: this.apiVersion,
+            controller: this.constructor.name,
+            invocationId: this.context.invocationId,
+        };
+    }
 
     private setResponseContentTypeHeader(): void {
         if (this.context !== undefined && this.context.res !== undefined) {

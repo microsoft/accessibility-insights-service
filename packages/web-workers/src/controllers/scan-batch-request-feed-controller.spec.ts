@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
 import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
@@ -20,7 +20,7 @@ let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
 let scanDataProviderMock: IMock<ScanDataProvider>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
-let loggerMock: IMock<Logger>;
+let contextAwareLoggerMock: IMock<ContextAwareLogger>;
 let context: Context;
 let dateNow: Date;
 
@@ -33,7 +33,7 @@ beforeEach(() => {
     scanDataProviderMock = Mock.ofType(ScanDataProvider);
     partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
     serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-    loggerMock = Mock.ofType(Logger);
+    contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
     context = <Context>(<unknown>{ bindingDefinitions: {} });
 
     scanBatchRequestFeedController = new ScanBatchRequestFeedController(
@@ -42,7 +42,7 @@ beforeEach(() => {
         scanDataProviderMock.object,
         partitionKeyFactoryMock.object,
         serviceConfigurationMock.object,
-        loggerMock.object,
+        contextAwareLoggerMock.object,
     );
 });
 
@@ -52,7 +52,7 @@ afterEach(() => {
     pageScanRequestProviderMock.verifyAll();
     scanDataProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
-    loggerMock.verifyAll();
+    contextAwareLoggerMock.verifyAll();
 });
 
 describe(ScanBatchRequestFeedController, () => {
@@ -124,10 +124,10 @@ describe(ScanBatchRequestFeedController, () => {
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
         // tslint:disable-next-line: no-null-keyword
-        loggerMock
+        contextAwareLoggerMock
             .setup(lm => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[0].id }, { addedUrls: 2 }))
             .verifiable(Times.once());
-        loggerMock
+        contextAwareLoggerMock
             .setup(lm => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[1].id }, { addedUrls: 2 }))
             .verifiable(Times.once());
 

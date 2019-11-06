@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 
 // tslint:disable: no-any
@@ -14,9 +14,9 @@ export class HealthMonitorTimerController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(...args: any[]): Promise<void> {
