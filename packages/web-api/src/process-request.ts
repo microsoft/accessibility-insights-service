@@ -13,5 +13,5 @@ export async function processWebRequest(context: Context, controllerType: Newabl
 
     const requestContainer = setupRequestContextIocContainer(processLifeCycleContainer);
 
-    await dispatcher.processRequest(requestContainer, controllerType, context, args);
+    await dispatcher.processRequest(requestContainer, controllerType, context, ...args);
 }
