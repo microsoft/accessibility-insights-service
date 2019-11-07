@@ -24,7 +24,7 @@ export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
 
 export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
     scanExecutionTime: number;
-    scanWallClockTime: number;
+    scanTotalTime: number;
 }
 
 export interface ScanUrlsAddedMeasurements extends BaseTelemetryMeasurements {

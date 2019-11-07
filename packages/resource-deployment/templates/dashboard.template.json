@@ -61,7 +61,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg Availability for allystorage5d4fa3x2bewh6",
+                                                    "title": "Storage account availability",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -162,7 +162,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg Service Availability for allycosmos5d4fa3x2bewh6",
+                                                    "title": "Cosmos availability",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -287,7 +287,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Sum totalScanRequests, Sum acceptedScanRequests, and Sum rejectedScanRequests for allyinsights5d4fa3x2bewh6",
+                                                    "title": "Scan requests count",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -412,7 +412,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Sum Events for allyinsights5d4fa3x2bewh6 by Event name where Event name = 'ScanTaskFailed', 'ScanTaskCompleted', 'ScanTaskSucceeded'",
+                                                    "title": "Scans completed",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -584,7 +584,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg Starting Node Count, Avg Idle Node Count, and 3 other metrics for allybatch5d4fa3x2bewh6",
+                                                    "title": "Node States",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -750,16 +750,16 @@
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/custom/scanWallClockTime",
+                                                            "name": "customEvents/custom/scanTotalTime",
                                                             "aggregationType": 4,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "scanWallClockTime",
+                                                                "displayName": "scanTotalTime",
                                                                 "color": "#0078d4"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg scanExecutionTime, Avg scanWaitTime, and Avg scanWallClockTime for allyinsights5d4fa3x2bewh6",
+                                                    "title": "Scan duration",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -822,11 +822,11 @@
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/custom/scanWallClockTime",
+                                                            "name": "customEvents/custom/scanTotalTime",
                                                             "aggregationType": 4,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "scanWallClockTime",
+                                                                "displayName": "scanTotalTime",
                                                                 "color": "#0078d4"
                                                             }
                                                         }
@@ -896,7 +896,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg maxParallelTasks and Avg runningTasks for allyinsights5d4fa3x2bewh6",
+                                                    "title": "Batch pool stats",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -1008,7 +1008,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Avg samplingIntervalInSeconds for allyinsights5d4fa3x2bewh6",
+                                                    "title": "Average pool sampling interval",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,

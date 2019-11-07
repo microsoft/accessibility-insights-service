@@ -46,7 +46,7 @@ export class Runner {
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
         this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: pageScanResult.batchRequestId });
 
-        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: scanStartedTimestamp - scanSubmittedTimestamp });
+        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         pageScanResult = this.resetPageScanResultState(pageScanResult);
@@ -63,8 +63,8 @@ export class Runner {
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-                scanExecutionTime: scanCompletedTimestamp - scanStartedTimestamp,
-                scanWallClockTime: scanCompletedTimestamp - scanSubmittedTimestamp,
+                scanExecutionTime: (scanCompletedTimestamp - scanStartedTimestamp) / 1000,
+                scanTotalTime: (scanCompletedTimestamp - scanSubmittedTimestamp) / 1000,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
             try {
