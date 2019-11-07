@@ -3,22 +3,13 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
+import { ContextAwareLogger, loggerTypes } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
 
-// tslint:disable: no-any
-
-let webControllerDispatcher: WebControllerDispatcher;
-let containerMock: IMock<Container>;
-let loggerMock: IMock<Logger>;
-let dotEnvConfigStub: DotenvConfigOutput;
-let baseTelemetryProperties: BaseTelemetryProperties;
-let context: Context;
-let testableWebController: TestableWebController;
+// tslint:disable: no-any no-unsafe-any
 
 export class TestableWebController extends WebController {
     public readonly apiVersion = '1.0';
@@ -41,56 +32,55 @@ export class TestableWebController extends WebController {
     }
 }
 
-beforeEach(() => {
-    dotEnvConfigStub = {};
-    baseTelemetryProperties = { source: 'azure-function', api: 'controller-mock-api', version: '1.0', controller: 'TestableWebController' };
-    context = <Context>(<unknown>{ bindingDefinitions: {} });
-    testableWebController = new TestableWebController();
-
-    containerMock = Mock.ofType(Container);
-    containerMock
-        .setup(c => c.get(loggerTypes.DotEnvConfig))
-        .returns(() => dotEnvConfigStub)
-        .verifiable();
-    containerMock
-        .setup(c => c.get(Logger))
-        .returns(() => loggerMock.object)
-        .verifiable();
-    containerMock
-        .setup(c => c.get(TestableWebController))
-        .returns(() => testableWebController)
-        .verifiable();
-
-    loggerMock = Mock.ofType(Logger);
-    loggerMock
-        .setup(async l => l.setup(baseTelemetryProperties))
-        .returns(async () => Promise.resolve())
-        .verifiable();
-});
-
-afterEach(() => {
-    loggerMock.verifyAll();
-    containerMock.verifyAll();
-});
-
 describe(WebControllerDispatcher, () => {
-    it('should invoke controller instance', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
-        await webControllerDispatcher.start(context);
-        expect(testableWebController.context).toEqual(context);
+    let webControllerDispatcher: WebControllerDispatcher;
+    let containerMock: IMock<Container>;
+    let context: Context;
+    let testableWebController: TestableWebController;
+    let processLifeCycleContainerMock: IMock<Container>;
+    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+
+    beforeEach(() => {
+        context = <Context>(<unknown>{ bindingDefinitions: {} });
+        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        testableWebController = new TestableWebController(contextAwareLoggerMock.object);
+
+        containerMock = Mock.ofType(Container);
+        processLifeCycleContainerMock = Mock.ofType(Container);
+
+        containerMock.setup(c => c.get(TestableWebController)).returns(() => testableWebController);
     });
 
     it('should invoke controller instance with args', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
-        await webControllerDispatcher.start(context, 1, 'a');
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
+
+        await webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context, 1, 'a');
+
         expect(testableWebController.context).toEqual(context);
         expect(testableWebController.requestArgs).toEqual([1, 'a']);
     });
 
-    it('should fail when no context provided', async () => {
-        webControllerDispatcher = new WebControllerDispatcher(TestableWebController, containerMock.object);
-        await expect(webControllerDispatcher.start({ prop: 'prop-a' })).rejects.toThrowError(
-            /The first argument should be type of Azure Functions Context./,
-        );
+    it('should set base telemetry properties', async () => {
+        let processStub: typeof process;
+        processStub = {
+            env: {
+                WEBSITE_INSTANCE_ID: 'server_id',
+            },
+        } as any;
+
+        processLifeCycleContainerMock.setup(c => c.get(loggerTypes.Process)).returns(() => processStub);
+
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
+
+        expect((webControllerDispatcher as any).getTelemetryBaseProperties()).toEqual({
+            source: 'azure-function',
+            serverInstanceId: 'server_id',
+        });
+    });
+
+    it('should do nothing on invoking custom action', async () => {
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
+
+        expect((webControllerDispatcher as any).runCustomAction()).toResolve();
     });
 });

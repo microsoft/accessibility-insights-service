@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ScanRunErrorCodes } from 'service-library';
+import { RunState as RunStateRestApi, ScanResultResponse, ScanRunErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { RunState as RunStateRestApi, ScanResultResponse } from '../api-contracts/scan-result-response';
+
 import { ScanResponseConverter } from './scan-response-converter';
 import { ScanRunErrorConverter } from './scan-run-error-converter';
 

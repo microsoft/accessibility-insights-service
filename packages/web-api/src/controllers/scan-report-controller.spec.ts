@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
 import { Readable } from 'stream';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -18,7 +18,7 @@ describe(ScanReportController, () => {
     let context: Context;
     let reportServiceMock: IMock<PageScanRunReportService>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let loggerMock: IMock<Logger>;
+    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const validId = 'valid-id';
     const notFoundId = 'not-found-id';
@@ -71,7 +71,7 @@ describe(ScanReportController, () => {
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
 
-        loggerMock = Mock.ofType<Logger>();
+        contextAwareLoggerMock = Mock.ofType<ContextAwareLogger>();
     });
 
     function createScanResultController(contextReq: Context): ScanReportController {
@@ -79,7 +79,7 @@ describe(ScanReportController, () => {
             reportServiceMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
-            loggerMock.object,
+            contextAwareLoggerMock.object,
             bodyParserMock.object,
         );
         controller.context = contextReq;

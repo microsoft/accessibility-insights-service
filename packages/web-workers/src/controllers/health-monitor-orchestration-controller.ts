@@ -5,7 +5,7 @@ import { ServiceConfiguration } from 'common';
 import * as df from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger, Logger } from 'logger';
 import * as moment from 'moment';
 import { WebController } from 'service-library';
 import { ActivityAction } from '../contracts/activity-actions';
@@ -18,13 +18,13 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(...args: any[]): Promise<void> {
-        this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
+        this.contextAwareLogger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,
         });
@@ -93,7 +93,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     private async setContextGenerator(): Promise<void> {
-        this.context.bindingData.logger = this.logger;
+        this.context.bindingData.logger = this.contextAwareLogger;
         this.context.bindingData.scanRequestProcessingDelayInSeconds = (await this.serviceConfig.getConfigValue(
             'restApiConfig',
         )).scanRequestProcessingDelayInSeconds;

@@ -7,14 +7,11 @@ import { Context } from '@azure/functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { WebControllerDispatcher } from 'service-library';
 import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
-import { setupIoContainer } from '../src/setup-ioc-container';
-
-const container = setupIoContainer();
+import { processWebRequest } from '../src/process-request';
 
 /**
  * The durable orchestration function to execute the health test workflow.
  */
 export async function run(context: Context): Promise<void> {
-    const dispatcher = new WebControllerDispatcher(HealthMonitorOrchestrationController, container);
-    await dispatcher.start(context, (<IOrchestrationFunctionContext>context).df);
+    await processWebRequest(context, HealthMonitorOrchestrationController, (<IOrchestrationFunctionContext>context).df);
 }

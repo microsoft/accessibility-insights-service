@@ -121,3 +121,5 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-api-management.sh"
 
 . "${0%/*}/deploy-rest-api.sh"
+
+. "${0%/*}/create-dashboard.sh"

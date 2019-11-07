@@ -3,11 +3,10 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { ContextAwareLogger } from 'logger';
+import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse, WebApiErrorCodes } from 'service-library';
+
 import { ScanResponseConverter } from '../converters/scan-response-converter';
-import { ScanBatchRequest } from './../api-contracts/scan-batch-request';
-import { ScanResultResponse } from './../api-contracts/scan-result-response';
 import { BaseScanResultController } from './base-scan-result-controller';
 
 @injectable()
@@ -20,9 +19,9 @@ export class BatchScanResultController extends BaseScanResultController {
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(): Promise<void> {
@@ -65,6 +64,6 @@ export class BatchScanResultController extends BaseScanResultController {
             body: responseBody,
         };
 
-        this.logger.logInfo('Batch scan result fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
+        this.contextAwareLogger.logInfo('Batch scan result fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
     }
 }

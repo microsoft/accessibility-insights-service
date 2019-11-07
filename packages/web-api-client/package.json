@@ -1,0 +1,43 @@
+{
+    "name": "web-api-client",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {
+        "build": "tsc && echo",
+        "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
+        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "test": "jest --coverage --colors"
+    },
+    "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {
+        "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.136",
+        "@types/node": "^11.13.4",
+        "@types/request-promise": "^4.1.44",
+        "jest": "^24.9.0",
+        "jest-circus": "^24.9.0",
+        "jest-junit": "^8.0.0",
+        "rimraf": "^2.6.3",
+        "ts-jest": "^24.0.2",
+        "tslint": "^5.12.1",
+        "tslint-microsoft-contrib": "^6.0.0",
+        "typemoq": "^2.1.0",
+        "typescript": "^3.6.2"
+    },
+    "dependencies": {
+        "common": "1.0.0",
+        "inversify": "^5.0.1",
+        "lodash": "^4.17.14",
+        "reflect-metadata": "^0.1.13",
+        "service-library": "1.0.0",
+        "request-promise": "^4.2.4"
+    }
+}

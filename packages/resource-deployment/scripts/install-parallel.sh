@@ -146,3 +146,5 @@ waitForProcesses "${parallelizableProcesses[@]}"
 waitForProcesses "$apiManagmentProcess"
 
 . "${0%/*}/deploy-rest-api.sh"
+
+. "${0%/*}/create-dashboard.sh"

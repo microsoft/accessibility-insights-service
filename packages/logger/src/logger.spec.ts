@@ -5,9 +5,10 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
+import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
-import { Logger, LogLevel } from './logger';
+import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { WebApiError } from 'service-library';
+import { WebApiError } from '../web-api-error-codes';
 
 export interface ScanRunResponse {
     scanId?: string;

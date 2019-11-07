@@ -6,6 +6,9 @@ import { Container } from 'inversify';
 import * as argv from 'yargs';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
+import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
+import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
+import { ContextAwareLogger } from './context-aware-logger';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 
@@ -34,4 +37,11 @@ export function registerLoggerToContainer(container: Container): void {
             return new Logger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
         })
         .inSingletonScope();
+
+    container.bind(ContextAwareLogger).toDynamicValue(context => {
+        const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
+        const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
+
+        return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+    });
 }

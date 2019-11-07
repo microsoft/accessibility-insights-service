@@ -3,13 +3,10 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { WebControllerDispatcher } from 'service-library';
 import { OnDemandPageScanBatchRequest } from 'storage-documents';
 import { ScanBatchRequestFeedController } from '../src/controllers/scan-batch-request-feed-controller';
-import { setupIoContainer } from '../src/setup-ioc-container';
-const container = setupIoContainer();
+import { processWebRequest } from '../src/process-request';
 
 export async function run(context: Context, documents: OnDemandPageScanBatchRequest[]): Promise<void> {
-    const dispatcher = new WebControllerDispatcher(ScanBatchRequestFeedController, container);
-    await dispatcher.start(context, documents);
+    await processWebRequest(context, ScanBatchRequestFeedController, documents);
 }

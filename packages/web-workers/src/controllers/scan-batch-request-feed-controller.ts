@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger, ScanUrlsAddedMeasurements } from 'logger';
+import { ContextAwareLogger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -32,12 +32,14 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(...args: any[]): Promise<void> {
+        this.contextAwareLogger.logInfo('processing the documents');
+
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
             batchDocuments.map(async document => {
@@ -46,7 +48,8 @@ export class ScanBatchRequestFeedController extends WebController {
                     addedUrls: addedRequests,
                 };
 
-                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.contextAwareLogger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] processed batch request document with id ${document.id}`);
             }),
         );
     }
@@ -63,6 +66,7 @@ export class ScanBatchRequestFeedController extends WebController {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests);
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
+            this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`);
         }
 
         return requests.length;
@@ -103,6 +107,10 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
         if (documents === undefined || documents.length === 0 || !documents.some(d => d.itemType === ItemType.scanRunBatchRequest)) {
+            this.contextAwareLogger.logInfo(
+                `[ScanBatchRequestFeedController] passed documents were not valid - ${JSON.stringify(documents)}`,
+            );
+
             return false;
         }
 

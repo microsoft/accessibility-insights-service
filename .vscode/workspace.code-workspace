@@ -65,6 +65,10 @@
             "path": "../packages/web-workers"
         },
         {
+            "name": "web-api-client",
+            "path": "../packages/web-api-client"
+        }，
+        {
             "name": "root",
             "path": "../"
         }
