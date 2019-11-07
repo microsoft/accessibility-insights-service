@@ -81,9 +81,16 @@ assignSystemIdentity() {
         # Wait until we are certain the resource group exists
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
-        vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup' && provisioningState=='Succeeded'].name"
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssNameQuery\" -o tsv"
-        vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
+        vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
+        vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+
+        vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
+        vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
+        if ["$vmssStatus" != "Succeeded"]; then
+            echo "Deployment of vmss $vmssName failed with status $vmssStatus"
+            exit 1
+        fi
 
         systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
         systemAssignedIdentities+=($systemAssignedIdentity)
