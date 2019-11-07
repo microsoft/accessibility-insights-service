@@ -6,15 +6,22 @@ import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 
-import { A11yServiceAuthenticationHandler } from './a11y-service-authentication-handler';
+import { A11yServiceAuthenticationHandler, A11yServiceCredential } from './a11y-service-authentication-handler';
 import { A11yServiceClient } from './a11y-service-client';
+
+class TestableA11yServiceClient extends A11yServiceClient {
+    public setAuthenticationHandler(authHandler: A11yServiceAuthenticationHandler): void {
+        this.authenticationHandler = authHandler;
+    }
+}
 
 // tslint:disable: no-null-keyword
 describe(A11yServiceClient, () => {
-    const baseUrl = 'base-url';
-    let testSubject: A11yServiceClient;
+    let testSubject: TestableA11yServiceClient;
     let requestMock: IMock<typeof request>;
     let defaultRequestMock: IMock<typeof request>;
+    let authHeaderOptions: request.RequestPromiseOptions;
+    const baseUrl = 'base-url';
     const apiVersion = '1.0';
     const requestDefaults: request.RequestPromiseOptions = {
         forever: true,
@@ -30,7 +37,12 @@ describe(A11yServiceClient, () => {
         tokenType: 'type',
         accessToken: 'token',
     };
-    let authHeaderOptions: request.RequestPromiseOptions;
+    const cred: A11yServiceCredential = {
+        clientId: 'client-id',
+        clientSecret: 'client-secret',
+        authorityUrl: 'https://login.foo.com/tenant',
+    };
+    const resourceId = 'resource-id';
 
     beforeEach(() => {
         authHeaderOptions = {
@@ -52,7 +64,8 @@ describe(A11yServiceClient, () => {
             .returns(() => Promise.resolve(authHeaderOptions))
             .verifiable(Times.once());
 
-        testSubject = new A11yServiceClient(authHandler.object, baseUrl, apiVersion, requestMock.object);
+        testSubject = new TestableA11yServiceClient(cred, resourceId, baseUrl, apiVersion, requestMock.object);
+        testSubject.setAuthenticationHandler(authHandler.object);
     });
 
     afterEach(() => {

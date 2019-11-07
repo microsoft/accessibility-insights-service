@@ -14,6 +14,7 @@ describe(A11yServiceAuthenticationHandler, () => {
     const credential: A11yServiceCredential = {
         clientId: 'client-id',
         clientSecret: 'client-sec',
+        authorityUrl: 'authorityUrl',
     };
     const resource = 'resource-id';
     // tslint:disable-next-line:

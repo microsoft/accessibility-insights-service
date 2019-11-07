@@ -7,6 +7,7 @@ import { isNullOrUndefined } from 'util';
 export interface A11yServiceCredential {
     clientId: string;
     clientSecret: string;
+    authorityUrl: string;
 }
 
 export class A11yServiceAuthenticationHandler {
