@@ -6,8 +6,8 @@ import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 
-import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceAuthenticationHandler } from './a11y-service-authentication-handler';
+import { A11yServiceClient } from './a11y-service-client';
 
 // tslint:disable: no-null-keyword
 describe(A11yServiceClient, () => {
