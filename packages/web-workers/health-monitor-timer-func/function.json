@@ -7,9 +7,9 @@
             "schedule": "0 */5 * * * *"
         },
         {
-            "name": "starter",
+            "name": "orchestrationFunc",
             "type": "orchestrationClient",
-            "direction": "in"
+            "direction": "out"
         }
     ],
     "scriptFile": "../health-monitor-timer-func/index.js"

@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { WebControllerDispatcher } from 'service-library';
 import { FunctionTimer } from '../src/contracts/function-timer';
 import { HealthMonitorTimerController } from '../src/controllers/health-monitor-timer-controller';
 import { processWebRequest } from '../src/process-request';

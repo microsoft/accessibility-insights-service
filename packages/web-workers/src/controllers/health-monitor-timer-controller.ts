@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
+import { GuidGenerator } from 'common';
 import * as df from 'durable-functions';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -18,6 +19,7 @@ export class HealthMonitorTimerController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {
         super(contextAwareLogger);
     }
@@ -30,13 +32,15 @@ export class HealthMonitorTimerController extends WebController {
             isPastDue: funcTimer.IsPastDue.toString(),
         });
 
-        const dfClient = df.getClient(this.context);
-        const instanceId = await dfClient.startNew(this.orchestrationFuncName);
-        this.contextAwareLogger.logInfo(`Started new '${this.orchestrationFuncName}' orchestration function instance.`, {
-            instanceId: instanceId,
-        });
+        const startArgs = [
+            {
+                FunctionName: this.orchestrationFuncName,
+                InstanceId: this.guidGenerator.createGuid(),
+            },
+        ];
+        this.context.bindings.orchestrationFunc = startArgs;
 
-        console.log(JSON.stringify(dfClient.createCheckStatusResponse(this.context.req, instanceId)));
+        this.contextAwareLogger.logInfo(`Started new '${this.orchestrationFuncName}' orchestration function instance.`);
     }
 
     protected validateRequest(...args: any[]): boolean {
