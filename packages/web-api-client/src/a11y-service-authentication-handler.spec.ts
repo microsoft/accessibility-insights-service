@@ -17,7 +17,6 @@ describe(A11yServiceAuthenticationHandler, () => {
         authorityUrl: 'authorityUrl',
     };
     const resource = 'resource-id';
-    // tslint:disable-next-line:
     const tokenResponse: TokenResponse = {
         tokenType: 'type',
         accessToken: 'at',
