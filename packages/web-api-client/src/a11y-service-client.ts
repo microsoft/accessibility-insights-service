@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Auth from '@azure/ms-rest-nodeauth';
 import { injectable } from 'inversify';
 import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
+import { A11yServiceAuthenticationHandler } from './a11y-service-authentication-handler';
 
 @injectable()
 export class A11yServiceClient {
@@ -20,7 +20,7 @@ export class A11yServiceClient {
     };
 
     constructor(
-        private readonly credential: Auth.ApplicationTokenCredentials,
+        private readonly authenticationHandler: A11yServiceAuthenticationHandler,
         private readonly baseUrl: string,
         private readonly apiVersion = '1.0',
         httpRequest = request,
@@ -48,24 +48,14 @@ export class A11yServiceClient {
     }
 
     private async postRequest<T>(url: string, options?: request.RequestPromiseOptions): Promise<T> {
-        const authOptions = await this.getAuthHeaders();
+        const authOptions = await this.authenticationHandler.getAuthHeaders();
 
         return this.defaultRequestObject.post(url, merge(options, authOptions));
     }
 
-    private async getRequest<T>(url: string): Promise<T> {
-        const authOptions = await this.getAuthHeaders();
+    private async getRequest<T>(url: string, options?: request.RequestPromiseOptions): Promise<T> {
+        const authOptions = await this.authenticationHandler.getAuthHeaders();
 
-        return this.defaultRequestObject.get(url, authOptions);
-    }
-
-    private async getAuthHeaders(): Promise<request.RequestPromiseOptions> {
-        const accessToken = await this.credential.getToken();
-
-        return {
-            headers: {
-                authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
-            },
-        };
+        return this.defaultRequestObject.get(url, merge(options, authOptions));
     }
 }

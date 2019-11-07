@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as Auth from '@azure/ms-rest-nodeauth';
 import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { A11yServiceClient } from './a11y-service-client';
+import { A11yServiceAuthenticationHandler } from './a11y-service-authentication-handler';
 
 // tslint:disable: no-null-keyword
 describe(A11yServiceClient, () => {
@@ -25,7 +25,7 @@ describe(A11yServiceClient, () => {
             'Content-Type': 'application/json',
         },
     };
-    let credMock: IMock<Auth.ApplicationTokenCredentials>;
+    let authHandler: IMock<A11yServiceAuthenticationHandler>;
     const accessToken = {
         tokenType: 'type',
         accessToken: 'token',
@@ -40,19 +40,19 @@ describe(A11yServiceClient, () => {
         };
         requestMock = Mock.ofType<typeof request>(null);
         defaultRequestMock = Mock.ofType<typeof request>(null);
-        credMock = Mock.ofType<Auth.ApplicationTokenCredentials>(null);
+        authHandler = Mock.ofType<A11yServiceAuthenticationHandler>(null);
 
         requestMock
             .setup(req => req.defaults(requestDefaults))
             .returns(() => defaultRequestMock.object)
             .verifiable(Times.once());
-        credMock
-            .setup(cm => cm.getToken())
+        authHandler
+            .setup(cm => cm.getAuthHeaders())
             // tslint:disable-next-line: no-any
-            .returns(() => Promise.resolve(accessToken as any))
+            .returns(() => Promise.resolve(authHeaderOptions))
             .verifiable(Times.once());
 
-        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestMock.object);
+        testSubject = new A11yServiceClient(authHandler.object, baseUrl, apiVersion, requestMock.object);
     });
 
     afterEach(() => {
