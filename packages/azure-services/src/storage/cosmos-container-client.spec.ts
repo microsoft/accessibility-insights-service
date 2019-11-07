@@ -422,7 +422,7 @@ describe('executeQueryWithContinuationToken', () => {
         executeMock.setup(async e => e(undefined)).returns(async () => Promise.resolve(response1));
 
         await expect(cosmosContainerClient.executeQueryWithContinuationToken(executeMock.object)).rejects.toThrowError(
-            'Invalid HTTP response.',
+            /Failed request response/,
         );
         executeMock.verifyAll();
     });
