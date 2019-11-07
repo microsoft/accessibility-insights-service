@@ -11,13 +11,10 @@ export namespace client {
     export function ensureSuccessStatusCode<T>(response: CosmosOperationResponse<T>): void {
         if (!isSuccessStatusCode(response)) {
             throw new VError(
-                {
-                    info: {
-                        statusCode: response.statusCode === undefined ? 'undefined' : response.statusCode,
-                        response: response.response === undefined ? 'undefined' : response.response,
-                    },
-                },
-                'Invalid HTTP response.',
+                `Request failed - ${JSON.stringify({
+                    statusCode: response.statusCode === undefined ? 'undefined' : response.statusCode,
+                    response: response.response === undefined ? 'undefined' : response.response,
+                })}`,
             );
         }
     }
