@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import { isEmpty } from 'lodash';
 import { RequestPromiseOptions } from 'request-promise';
+import { isNullOrUndefined } from 'util';
 
 export interface A11yServiceCredential {
     clientId: string;
@@ -23,7 +23,7 @@ export class A11yServiceAuthenticationHandler {
                 this.credential.clientId,
                 this.credential.clientSecret,
                 (err, tokenResponse) => {
-                    if (!isEmpty(err)) {
+                    if (!isNullOrUndefined(err)) {
                         reject(err);
                     } else {
                         resolve(tokenResponse as TokenResponse);
