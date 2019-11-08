@@ -16,7 +16,7 @@ export class HealthMonitorClientController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
-        //        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
+        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
     ) {
         super(contextAwareLogger);
     }
