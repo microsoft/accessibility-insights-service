@@ -1,10 +1,15 @@
 {
     "bindings": [
         {
-            "name": "monitorTimer",
+            "name": "funcTimer",
             "type": "timerTrigger",
             "direction": "in",
             "schedule": "0 */5 * * * *"
+        },
+        {
+            "name": "orchestrationFunc",
+            "type": "orchestrationClient",
+            "direction": "out"
         }
     ],
     "scriptFile": "../health-monitor-timer-func/index.js"

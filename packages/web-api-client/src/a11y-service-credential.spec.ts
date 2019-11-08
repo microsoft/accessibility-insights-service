@@ -14,7 +14,7 @@ describe(A11yServiceCredential, () => {
     let testSubject: A11yServiceCredential;
     let requestMock: IMock<typeof request>;
     const clientId = 'client-id';
-    const clientSecret = 'client-sec';
+    const clientMockSec = 'random-string';
     const authorityUrl = 'authorityUrl';
     const resource = 'resource-id';
     const tokenResponse: TokenResponse = {
@@ -29,10 +29,10 @@ describe(A11yServiceCredential, () => {
         requestMock = Mock.ofType<typeof request>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
 
-        testSubject = new A11yServiceCredential(clientId, clientSecret, resource, authorityUrl, authenticationContextMock.object);
+        testSubject = new A11yServiceCredential(clientId, clientMockSec, resource, authorityUrl, authenticationContextMock.object);
 
         authenticationContextMock
-            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientSecret, It.isAny()))
+            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
             .returns((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
             });

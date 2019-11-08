@@ -2,11 +2,16 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+// tslint:disable: no-submodule-imports
 import { Context } from '@azure/functions';
-import { OnDemandPageScanBatchRequest } from 'storage-documents';
+import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
+import { WebControllerDispatcher } from 'service-library';
 import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
 import { processWebRequest } from '../src/process-request';
 
-export async function run(context: Context, documents: OnDemandPageScanBatchRequest[]): Promise<void> {
-    await processWebRequest(context, HealthMonitorOrchestrationController, documents);
+/**
+ * The durable orchestration function to execute the health test workflow.
+ */
+export async function run(context: Context): Promise<void> {
+    await processWebRequest(context, HealthMonitorOrchestrationController, (<IOrchestrationFunctionContext>context).df);
 }
