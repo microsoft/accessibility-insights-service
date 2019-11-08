@@ -247,10 +247,10 @@ describe(Runner, () => {
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
 
-        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime };
         const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
-            scanExecutionTime: executionTime * 1000,
-            scanWallClockTime: (executionTime + queueTime) * 1000,
+            scanExecutionTime: executionTime,
+            scanTotalTime: executionTime + queueTime,
         };
 
         loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
@@ -284,10 +284,10 @@ describe(Runner, () => {
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
 
-        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime * 1000 };
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime };
         const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
-            scanExecutionTime: executionTime * 1000,
-            scanWallClockTime: (executionTime + queueTime) * 1000,
+            scanExecutionTime: executionTime,
+            scanTotalTime: executionTime + queueTime,
         };
 
         loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();

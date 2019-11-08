@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
+import { ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
-import { ScanReport, ScanResultResponse } from '../api-contracts/scan-result-response';
 import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 @injectable()

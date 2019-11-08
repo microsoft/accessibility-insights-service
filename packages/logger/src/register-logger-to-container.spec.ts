@@ -8,6 +8,9 @@ import { Container } from 'inversify';
 import * as argv from 'yargs';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
+import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
+import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
+import { ContextAwareLogger } from './context-aware-logger';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
@@ -34,6 +37,9 @@ describe(registerLoggerToContainer, () => {
         verifySingletonDependencyResolution(AppInsightsLoggerClient);
         verifySingletonDependencyResolution(ConsoleLoggerClient);
         verifySingletonDependencyResolution(loggerTypes.DotEnvConfig);
+
+        verifyNonSingletonDependencyResolution(ContextAwareAppInsightsLoggerClient);
+        verifyNonSingletonDependencyResolution(ContextAwareConsoleLoggerClient);
     });
 
     it('verify logger resolution', () => {
@@ -48,8 +54,25 @@ describe(registerLoggerToContainer, () => {
         expect(telemetryClients.filter(c => c instanceof ConsoleLoggerClient)).toHaveLength(1);
     });
 
+    it('verify context logger resolution', () => {
+        registerLoggerToContainer(container);
+
+        const logger = container.get(ContextAwareLogger);
+
+        verifySingletonDependencyResolution(Logger);
+
+        const telemetryClients = (logger as any).loggerClients as LoggerClient[];
+        expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter(c => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
+    });
+
     function verifySingletonDependencyResolution(key: any): void {
         expect(container.get(key)).toBeDefined();
         expect(container.get(key)).toBe(container.get(key));
+    }
+
+    function verifyNonSingletonDependencyResolution(key: any): void {
+        expect(container.get(key)).toBeDefined();
+        expect(container.get(key)).not.toBe(container.get(key));
     }
 });

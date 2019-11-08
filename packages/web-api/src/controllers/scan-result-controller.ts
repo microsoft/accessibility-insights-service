@@ -3,7 +3,7 @@
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
@@ -18,9 +18,9 @@ export class ScanResultController extends BaseScanResultController {
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
     ) {
-        super();
+        super(contextAwareLogger);
     }
 
     public async handleRequest(): Promise<void> {
@@ -38,7 +38,7 @@ export class ScanResultController extends BaseScanResultController {
                 status: 200, // OK
                 body: this.getTooSoonRequestResponse(scanId),
             };
-            this.logger.logInfo('The client requested scan result early than it was processed.', { scanId });
+            this.contextAwareLogger.logInfo('The client requested scan result early than it was processed.', { scanId });
 
             return;
         }
@@ -49,13 +49,13 @@ export class ScanResultController extends BaseScanResultController {
         if (isEmpty(scanResult)) {
             // scan result not found in result storage
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
-            this.logger.logInfo('Scan result not found in result storage.', { scanId });
+            this.contextAwareLogger.logInfo('Scan result not found in result storage.', { scanId });
         } else {
             this.context.res = {
                 status: 200,
                 body: this.getScanResultResponse(scanResult),
             };
-            this.logger.logInfo('Scan result fetched from result storage.', { scanId });
+            this.contextAwareLogger.logInfo('Scan result fetched from result storage.', { scanId });
         }
     }
 }

@@ -79,32 +79,18 @@ assignSystemIdentity() {
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
         # Wait until we are certain the resource group exists
-        waiting=false
-        timeout=1800 # timeout after half an hour
-        end=$((SECONDS + $timeout))
-        resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
-        while [ "$resourceGroupExists" = false ] && [ $SECONDS -le $end ]; do
-            if [ "$waiting" != true ]; then
-                waiting=true
-                echo "Waiting for resource group $vmssResourceGroup"
-                printf " - Running .."
-            fi
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
-            sleep 5
-            printf "."
-            resourceGroupExists=$(az group exists --name "$vmssResourceGroup")
-        done
+        vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
+        vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssDeployedQuery\" -o tsv"
 
-        # Exit if timed out
-        if [ "$resourceGroupExists" = false ]; then
-            echo "Could not find resource group $vmssResourceGroup after $timeout seconds"
+        vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
+        vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
+        if ["$vmssStatus" != "Succeeded"]; then
+            echo "Deployment of vmss $vmssName failed with status $vmssStatus"
             exit 1
         fi
-
-        echo "Resource group $vmssResourceGroup found after $((SECONDS - (end - timeout))) seconds"
-
-        vmssNameQuery="[?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'].name"
-        vmssName=$(az vmss list --query "$vmssNameQuery" -o tsv)
 
         systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
         systemAssignedIdentities+=($systemAssignedIdentity)

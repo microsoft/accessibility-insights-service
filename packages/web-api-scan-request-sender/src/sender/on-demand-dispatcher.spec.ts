@@ -168,7 +168,7 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
-        await expect(dispatcher.dispatchOnDemandScanRequests()).rejects.toThrowError(/Invalid HTTP response/);
+        await expect(dispatcher.dispatchOnDemandScanRequests()).rejects.toThrowError(/Failed request response/);
         pageScanRequestProvider.verifyAll();
     });
 
