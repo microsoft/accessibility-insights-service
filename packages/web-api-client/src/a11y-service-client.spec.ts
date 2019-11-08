@@ -6,21 +6,12 @@ import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 
-import { A11yServiceAuthenticationHandler, A11yServiceCredential } from './a11y-service-authentication-handler';
 import { A11yServiceClient } from './a11y-service-client';
+import { A11yServiceCredential } from './a11y-service-credential';
 
-class TestableA11yServiceClient extends A11yServiceClient {
-    public setAuthenticationHandler(authHandler: A11yServiceAuthenticationHandler): void {
-        this.authenticationHandler = authHandler;
-    }
-}
-
-// tslint:disable: no-null-keyword
+// tslint:disable: no-null-keyword no-unsafe-any no-any
 describe(A11yServiceClient, () => {
-    let testSubject: TestableA11yServiceClient;
-    let requestMock: IMock<typeof request>;
-    let defaultRequestMock: IMock<typeof request>;
-    let authHeaderOptions: request.RequestPromiseOptions;
+    let testSubject: A11yServiceClient;
     const baseUrl = 'base-url';
     const apiVersion = '1.0';
     const requestDefaults: request.RequestPromiseOptions = {
@@ -32,45 +23,37 @@ describe(A11yServiceClient, () => {
             'Content-Type': 'application/json',
         },
     };
-    let authHandler: IMock<A11yServiceAuthenticationHandler>;
+    let credMock: IMock<A11yServiceCredential>;
     const accessToken = {
         tokenType: 'type',
         accessToken: 'token',
     };
-    const cred: A11yServiceCredential = {
-        clientId: 'client-id',
-        clientSecret: 'client-secret',
-        authorityUrl: 'https://login.foo.com/tenant',
-    };
-    const resourceId = 'resource-id';
+    let requestStub: any;
+    let getMock: IMock<(url: string) => {}>;
+    let postMock: IMock<(url: string, options?: request.RequestPromiseOptions) => {}>;
 
     beforeEach(() => {
-        authHeaderOptions = {
-            headers: {
-                authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
-            },
+        getMock = Mock.ofInstance(() => {
+            return null;
+        });
+        postMock = Mock.ofInstance(() => {
+            return null;
+        });
+        requestStub = {
+            // tslint:disable-next-line:
+            defaults: (options: request.RequestPromiseOptions) => requestStub,
+            get: getMock.object,
+            post: postMock.object,
         };
-        requestMock = Mock.ofType<typeof request>(null);
-        defaultRequestMock = Mock.ofType<typeof request>(null);
-        authHandler = Mock.ofType<A11yServiceAuthenticationHandler>(null);
+        credMock = Mock.ofType<A11yServiceCredential>(null);
 
-        requestMock
-            .setup(req => req.defaults(requestDefaults))
-            .returns(() => defaultRequestMock.object)
-            .verifiable(Times.once());
-        authHandler
-            .setup(cm => cm.getAuthHeaders())
+        credMock
+            .setup(cm => cm.signRequest(requestStub))
             // tslint:disable-next-line: no-any
-            .returns(() => Promise.resolve(authHeaderOptions))
-            .verifiable(Times.once());
+            .returns(async () => Promise.resolve(requestStub))
+            .verifiable();
 
-        testSubject = new TestableA11yServiceClient(cred, resourceId, baseUrl, apiVersion, requestMock.object);
-        testSubject.setAuthenticationHandler(authHandler.object);
-    });
-
-    afterEach(() => {
-        requestMock.verifyAll();
-        defaultRequestMock.verifyAll();
+        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestStub);
     });
 
     it('postScanUrl', async () => {
@@ -79,35 +62,34 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
         const options = { json: requestBody };
-        defaultRequestMock
-            .setup(req => req.post(`${baseUrl}/scans`, merge(options, authHeaderOptions)))
-            // tslint:disable-next-line: no-any
-            .returns(() => Promise.resolve(response) as any)
+        postMock
+            .setup(req => req(`${baseUrl}/scans`, options))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
         const actualResponse = await testSubject.postScanUrl(scanUrl, priority);
         expect(actualResponse).toEqual(response);
     });
 
     it('getScanStatus', async () => {
-        const scanId = 'scanid';
+        const scanId = 'scanId';
         const response = { statusCode: 200 };
-        defaultRequestMock
-            .setup(req => req.get(`${baseUrl}/scans/${scanId}`, authHeaderOptions))
-            // tslint:disable-next-line: no-any
-            .returns(() => Promise.resolve(response) as any)
+
+        getMock
+            .setup(req => req(`${baseUrl}/scans/${scanId}`))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
         const actualResponse = await testSubject.getScanStatus(scanId);
+
         expect(actualResponse).toEqual(response);
     });
 
     it('getScanReport', async () => {
-        const scanId = 'scanid';
-        const reportId = 'reportid';
+        const scanId = 'scanId';
+        const reportId = 'reportId';
         const response = { statusCode: 200 };
-        defaultRequestMock
-            .setup(req => req.get(`${baseUrl}/scans/${scanId}/reports/${reportId}`, authHeaderOptions))
-            // tslint:disable-next-line: no-any
-            .returns(() => Promise.resolve(response) as any)
+        getMock
+            .setup(req => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
         const actualResponse = await testSubject.getScanReport(scanId, reportId);
         expect(actualResponse).toEqual(response);

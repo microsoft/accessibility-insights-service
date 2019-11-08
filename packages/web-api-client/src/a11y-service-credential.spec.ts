@@ -4,18 +4,18 @@
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 
-import { A11yServiceAuthenticationHandler, A11yServiceCredential } from './a11y-service-authentication-handler';
+import * as request from 'request-promise';
+import { A11yServiceCredential } from './a11y-service-credential';
 
-describe(A11yServiceAuthenticationHandler, () => {
+describe(A11yServiceCredential, () => {
     let authenticationContextMock: IMock<AuthenticationContext>;
-    let testSubject: A11yServiceAuthenticationHandler;
-    const credential: A11yServiceCredential = {
-        clientId: 'client-id',
-        clientSecret: 'client-sec',
-        authorityUrl: 'authorityUrl',
-    };
+    let testSubject: A11yServiceCredential;
+    let requestMock: IMock<typeof request>;
+    const clientId = 'client-id';
+    const clientSecret = 'client-sec';
+    const authorityUrl = 'authorityUrl';
     const resource = 'resource-id';
     const tokenResponse: TokenResponse = {
         tokenType: 'type',
@@ -26,14 +26,16 @@ describe(A11yServiceAuthenticationHandler, () => {
 
     beforeEach(() => {
         error = null;
+        requestMock = Mock.ofType<typeof request>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
+
+        testSubject = new A11yServiceCredential(clientId, clientSecret, resource, authorityUrl, authenticationContextMock.object);
+
         authenticationContextMock
-            .setup(am => am.acquireTokenWithClientCredentials(resource, credential.clientId, credential.clientSecret, It.isAny()))
-            .returns((resourceUrl, clientId, clientSecret, callback) => {
+            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientSecret, It.isAny()))
+            .returns((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
             });
-
-        testSubject = new A11yServiceAuthenticationHandler(credential, authenticationContextMock.object, resource);
     });
 
     afterEach(() => {
@@ -45,18 +47,20 @@ describe(A11yServiceAuthenticationHandler, () => {
         expect(token).toEqual(tokenResponse);
     });
 
-    it('getAuthHeaders', async () => {
+    it('signRequest', async () => {
         const expectedHeaders = {
             headers: {
                 authorization: `${tokenResponse.tokenType} ${tokenResponse.accessToken}`,
             },
         };
-        const headers = await testSubject.getAuthHeaders();
-        expect(headers).toEqual(expectedHeaders);
+
+        await testSubject.signRequest(requestMock.object);
+
+        requestMock.verify(rm => rm.defaults(It.isValue(expectedHeaders)), Times.once());
     });
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
-        const token = await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
+        await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
 });
