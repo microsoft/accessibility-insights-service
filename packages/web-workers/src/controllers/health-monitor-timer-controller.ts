@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { GuidGenerator } from 'common';
-import * as df from 'durable-functions';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
