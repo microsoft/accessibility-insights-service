@@ -39,7 +39,6 @@ describe(A11yServiceClient, () => {
             return null;
         });
         requestStub = {
-            // tslint:disable-next-line:
             defaults: (options: request.RequestPromiseOptions) => requestStub,
             get: getMock.object,
             post: postMock.object,
@@ -48,7 +47,6 @@ describe(A11yServiceClient, () => {
 
         credMock
             .setup(cm => cm.signRequest(requestStub))
-            // tslint:disable-next-line: no-any
             .returns(async () => Promise.resolve(requestStub))
             .verifiable();
 
