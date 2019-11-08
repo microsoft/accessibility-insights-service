@@ -202,9 +202,45 @@
                     "name": "[concat('default/', parameters('batchLogsContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
-                    "dependsOn": ["[parameters('storageAccountName')]"]
+                    "dependsOn": ["[parameters('storageAccountName')]"],
+                    "properties": {
+                        "deleteRetentionPolicy": {
+                            "enabled": true,
+                            "days": 60
+                        }
+                    }
                 }
             ]
+        },
+        {
+            "name": "[concat(parameters('storageAccountName'), '/default')]",
+            "type": "Microsoft.Storage/storageAccounts/managementPolicies",
+            "apiVersion": "2019-04-01",
+            "dependsOn": ["[parameters('storageAccountName')]"],
+            "properties": {
+                "policy": {
+                    "rules": [
+                        {
+                            "enabled": true,
+                            "name": "deleteoldbacthlogs",
+                            "type": "Lifecycle",
+                            "definition": {
+                                "actions": {
+                                    "baseBlob": {
+                                        "delete": {
+                                            "daysAfterModificationGreaterThan": 60
+                                        }
+                                    }
+                                },
+                                "filters": {
+                                    "blobTypes": ["blockBlob"],
+                                    "prefixMatch": ["batch-logs", "page-scan-run-reports"]
+                                }
+                            }
+                        }
+                    ]
+                }
+            }
         }
     ]
 }
