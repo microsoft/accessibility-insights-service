@@ -8,6 +8,7 @@ import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, S
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
+import { StorageContainerSASUrlProvider } from './azure-blob/container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -77,7 +78,10 @@ export function registerAzureServicesToContainer(container: Container, credentia
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
-
+    container
+        .bind(StorageContainerSASUrlProvider)
+        .toSelf()
+        .inSingletonScope();
     container.bind(Queue).toSelf();
 }
 

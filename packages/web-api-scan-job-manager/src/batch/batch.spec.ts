@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
 import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
-import { Message } from 'azure-services';
+import { Message, StorageContainerSASUrlProvider } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
@@ -39,13 +39,14 @@ describe(Batch, () => {
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
     let poolMock: IMock<Pool>;
+    let storageContainerSASUrlProviderMock: IMock<StorageContainerSASUrlProvider>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<Logger>;
     let taskEnvSettings: BatchServiceModels.EnvironmentSetting[];
     let taskResourceFiles: BatchServiceModels.ResourceFile[];
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let maxTaskDurationInMinutes: number;
-
+    const containerSASUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/?sv=blah$se=blah';
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
         config = {
@@ -79,8 +80,20 @@ describe(Batch, () => {
 
         loggerMock = Mock.ofType(Logger);
         batchServiceClientProviderStub = async () => batchClientStub;
-
-        batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);
+        storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);
+        storageContainerSASUrlProviderMock
+            .setup(async c => c.generateSASUrl(It.isAny()))
+            .returns(async () => {
+                return containerSASUrl;
+            });
+        batch = new Batch(
+            serviceConfigMock.object,
+            config,
+            runnerTaskConfigMock.object,
+            batchServiceClientProviderStub,
+            loggerMock.object,
+            storageContainerSASUrlProviderMock.object,
+        );
     });
 
     describe('getPoolMetricsInfo()', () => {

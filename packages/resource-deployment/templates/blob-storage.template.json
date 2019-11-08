@@ -96,6 +96,13 @@
                 "description": "The name of the blob container for the on demand scan request sender script."
             }
         },
+        "batchLogsContainerName": {
+            "type": "string",
+            "defaultValue": "batch-logs",
+            "metadata": {
+                "description": "The name of the blob container for the preserving batch logs."
+            }
+        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
@@ -187,6 +194,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('pageScanRunReportContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('batchLogsContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
