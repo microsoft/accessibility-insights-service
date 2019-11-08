@@ -13,20 +13,7 @@ describe(A11yServiceClient, () => {
     let testSubject: A11yServiceClient;
     const baseUrl = 'base-url';
     const apiVersion = '1.0';
-    const requestDefaults: request.RequestPromiseOptions = {
-        forever: true,
-        qs: {
-            'api-version': apiVersion,
-        },
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    };
     let credMock: IMock<A11yServiceCredential>;
-    const accessToken = {
-        tokenType: 'type',
-        accessToken: 'token',
-    };
     let requestStub: any;
     let getMock: IMock<(url: string) => {}>;
     let postMock: IMock<(url: string, options?: request.RequestPromiseOptions) => {}>;
