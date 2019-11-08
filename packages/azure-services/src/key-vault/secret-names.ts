@@ -5,4 +5,6 @@ export const secretNames = {
     cosmosDbKey: 'cosmosDbKey',
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
+    serverAppRegistrationSecret: 'A11yServiceServerAppRegistration',
+    clientAppRegistrationSecret: 'A11yServiceClientAppRegistration',
 };
