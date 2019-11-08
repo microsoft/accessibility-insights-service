@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { merge } from 'lodash';
 import * as request from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 

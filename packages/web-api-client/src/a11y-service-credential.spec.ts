@@ -4,9 +4,9 @@
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
+import * as request from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
 
-import * as request from 'request-promise';
 import { A11yServiceCredential } from './a11y-service-credential';
 
 describe(A11yServiceCredential, () => {
