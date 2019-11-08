@@ -4,6 +4,8 @@ import { injectable } from 'inversify';
 import * as request from 'request-promise';
 import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 
+import { A11yServiceCredential } from './a11y-service-credential';
+
 @injectable()
 export class A11yServiceClient {
     private readonly defaultRequestObject: typeof request;
@@ -17,32 +19,36 @@ export class A11yServiceClient {
         },
     };
 
-    constructor(private readonly baseUrl: string, private readonly apiVersion = '1.0', httpRequest = request) {
+    constructor(
+        private readonly credential: A11yServiceCredential,
+        private readonly requestBaseUrl: string,
+        private readonly apiVersion = '1.0',
+        httpRequest = request,
+    ) {
         this.defaultRequestObject = httpRequest.defaults(this.defaultOptions);
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ScanRunResponse> {
-        const requestBody: ScanRunRequest[] = [
-            {
-                url: scanUrl,
-                priority: priority === undefined ? 0 : priority,
-            },
-        ];
+        const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
+        const requestUrl: string = `${this.requestBaseUrl}/scans`;
+        const options: request.RequestPromiseOptions = { json: requestBody };
 
-        const requestUrl: string = `${this.baseUrl}/scans`;
-
-        return this.defaultRequestObject.post(requestUrl, { json: requestBody });
+        return (await this.signRequest()).post(requestUrl, options);
     }
 
     public async getScanStatus(scanId: string): Promise<ScanResultResponse> {
-        const requestUrl: string = `${this.baseUrl}/scans/${scanId}`;
+        const requestUrl: string = `${this.requestBaseUrl}/scans/${scanId}`;
 
-        return this.defaultRequestObject.get(requestUrl);
+        return (await this.signRequest()).get(requestUrl).catch(console.log);
     }
 
     public async getScanReport(scanId: string, reportId: string): Promise<Buffer> {
-        const requestUrl: string = `${this.baseUrl}/scans/${scanId}/reports/${reportId}`;
+        const requestUrl: string = `${this.requestBaseUrl}/scans/${scanId}/reports/${reportId}`;
 
-        return this.defaultRequestObject.get(requestUrl);
+        return (await this.signRequest()).get(requestUrl);
+    }
+
+    private async signRequest(): Promise<typeof request> {
+        return this.credential.signRequest(this.defaultRequestObject);
     }
 }
