@@ -16,39 +16,39 @@ export class HealthMonitorClientController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
-//        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
+        //        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
     ) {
         super(contextAwareLogger);
     }
 
-    public async handleRequest(...args: any[]): Promise<void> {
+    protected async handleRequest(...args: any[]): Promise<void> {
         const activityActionName = args[0];
         this.contextAwareLogger.logInfo(`Executing ${activityActionName} activity action.`);
-        switch (activityActionName) {
-            case 'createScanRequest': {
-                this.createScanRequest();
-                break;
-            }
-            case 'getScanResult': {
-                this.getScanResult();
-                break;
-            }
-            case 'getScanResultBatch': {
-                this.getScanResultBatch();
-                break;
-            }
-            case 'getScanReport': {
-                this.getScanReport();
-                break;
-            }
-            case 'getHealthStatus': {
-                this.getHealthStatus();
-                break;
-            }
-            default: {
-                this.contextAwareLogger.logInfo(`Unrecognized activity action ${activityActionName}.`);
-            }
-        }
+        // switch (activityActionName) {
+        //     case 'createScanRequest': {
+        //         this.createScanRequest();
+        //         break;
+        //     }
+        //     case 'getScanResult': {
+        //         this.getScanResult();
+        //         break;
+        //     }
+        //     case 'getScanResultBatch': {
+        //         this.getScanResultBatch();
+        //         break;
+        //     }
+        //     case 'getScanReport': {
+        //         this.getScanReport();
+        //         break;
+        //     }
+        //     case 'getHealthStatus': {
+        //         this.getHealthStatus();
+        //         break;
+        //     }
+        //     default: {
+        //         this.contextAwareLogger.logInfo(`Unrecognized activity action ${activityActionName}.`);
+        //     }
+        // }
     }
 
     protected validateRequest(...args: any[]): boolean {

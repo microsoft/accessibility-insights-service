@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports no-any
 import { ServiceConfiguration } from 'common';
-import * as df from 'durable-functions';
+import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger, Logger } from 'logger';
-import * as moment from 'moment';
 import { WebController } from 'service-library';
 import { ActivityAction } from '../contracts/activity-actions';
 
@@ -19,11 +18,12 @@ export class HealthMonitorOrchestrationController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        private readonly df = durableFunctions,
     ) {
         super(contextAwareLogger);
     }
 
-    public async handleRequest(...args: any[]): Promise<void> {
+    protected async handleRequest(...args: any[]): Promise<void> {
         this.contextAwareLogger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,
@@ -38,7 +38,13 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     private invokeOrchestration(): void {
-        df.orchestrator(function*(context: IOrchestrationFunctionContext): IterableIterator<unknown> {
+        const orchestrationExecutor = this.getOrchestrationExecutor();
+
+        orchestrationExecutor(<IOrchestrationFunctionContext>this.context);
+    }
+
+    private getOrchestrationExecutor(): (context: IOrchestrationFunctionContext) => void {
+        return this.df.orchestrator(function*(context: IOrchestrationFunctionContext): IterableIterator<unknown> {
             const logOrchestrationStep = (message: string) => {
                 const contextLogger = <Logger>context.bindingData.logger;
                 contextLogger.logInfo(message, {
@@ -58,38 +64,38 @@ export class HealthMonitorOrchestrationController extends WebController {
             logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'pending' response.`);
             yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
 
-            const scanRequestProcessingDelayInSeconds = <number>context.bindingData.scanRequestProcessingDelayInSeconds;
-            logOrchestrationStep(
-                `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'pending' to 'accepted'.`,
-            );
-            yield context.df.createTimer(
-                moment
-                    .utc(context.df.currentUtcDateTime)
-                    .add(scanRequestProcessingDelayInSeconds, 'seconds')
-                    .toDate(),
-            );
+            // const scanRequestProcessingDelayInSeconds = <number>context.bindingData.scanRequestProcessingDelayInSeconds;
+            // logOrchestrationStep(
+            //     `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'pending' to 'accepted'.`,
+            // );
+            // yield context.df.createTimer(
+            //     moment
+            //         .utc(context.df.currentUtcDateTime)
+            //         .add(scanRequestProcessingDelayInSeconds, 'seconds')
+            //         .toDate(),
+            // );
 
-            logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'accepted' response.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
+            // logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'accepted' response.`);
+            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
 
-            logOrchestrationStep(
-                `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'accepted' to 'completed'.`,
-            );
-            yield context.df.createTimer(
-                moment
-                    .utc(context.df.currentUtcDateTime)
-                    .add(scanRequestProcessingDelayInSeconds, 'seconds')
-                    .toDate(),
-            );
+            // logOrchestrationStep(
+            //     `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'accepted' to 'completed'.`,
+            // );
+            // yield context.df.createTimer(
+            //     moment
+            //         .utc(context.df.currentUtcDateTime)
+            //         .add(scanRequestProcessingDelayInSeconds, 'seconds')
+            //         .toDate(),
+            // );
 
-            logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'completed' response.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
+            // logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'completed' response.`);
+            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
 
-            logOrchestrationStep(`Executing '${ActivityAction.getScanReport}' orchestration step.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanReport);
+            // logOrchestrationStep(`Executing '${ActivityAction.getScanReport}' orchestration step.`);
+            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanReport);
 
             logOrchestrationStep(`Orchestration ended.`);
-        })(<IOrchestrationFunctionContext>this.context);
+        });
     }
 
     private async setContextGenerator(): Promise<void> {

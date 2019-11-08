@@ -23,7 +23,7 @@ export class HealthMonitorTimerController extends WebController {
         super(contextAwareLogger);
     }
 
-    public async handleRequest(...args: any[]): Promise<void> {
+    protected async handleRequest(...args: any[]): Promise<void> {
         const funcTimer = <FunctionTimer>args[0];
         this.contextAwareLogger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
