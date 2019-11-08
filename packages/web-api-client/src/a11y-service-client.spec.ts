@@ -32,13 +32,15 @@ describe(A11yServiceClient, () => {
         };
         credMock = Mock.ofType<A11yServiceCredential>(null);
 
+        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestStub);
+    });
+
+    function setupVerifiableSignRequestCall(): void {
         credMock
             .setup(cm => cm.signRequest(requestStub))
             .returns(async () => Promise.resolve(requestStub))
             .verifiable();
-
-        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestStub);
-    });
+    }
 
     it('postScanUrl', async () => {
         const scanUrl = 'url';
@@ -46,22 +48,42 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
         const options = { json: requestBody };
+        setupVerifiableSignRequestCall();
         postMock
             .setup(req => req(`${baseUrl}/scans`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
+
         const actualResponse = await testSubject.postScanUrl(scanUrl, priority);
+
+        expect(actualResponse).toEqual(response);
+    });
+
+    it('postScanUrl, priority not set', async () => {
+        const scanUrl = 'url';
+        const response = { statusCode: 200 };
+        const requestBody = [{ url: scanUrl, priority: 0 }];
+        const options = { json: requestBody };
+        setupVerifiableSignRequestCall();
+        postMock
+            .setup(req => req(`${baseUrl}/scans`, options))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.postScanUrl(scanUrl);
+
         expect(actualResponse).toEqual(response);
     });
 
     it('getScanStatus', async () => {
         const scanId = 'scanId';
         const response = { statusCode: 200 };
-
+        setupVerifiableSignRequestCall();
         getMock
             .setup(req => req(`${baseUrl}/scans/${scanId}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
+
         const actualResponse = await testSubject.getScanStatus(scanId);
 
         expect(actualResponse).toEqual(response);
@@ -71,11 +93,14 @@ describe(A11yServiceClient, () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
         const response = { statusCode: 200 };
+        setupVerifiableSignRequestCall();
         getMock
             .setup(req => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
+
         const actualResponse = await testSubject.getScanReport(scanId, reportId);
+
         expect(actualResponse).toEqual(response);
     });
 });
