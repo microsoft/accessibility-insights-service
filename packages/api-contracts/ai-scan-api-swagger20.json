@@ -1,0 +1,487 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Accessibility Insight Service – Scan API",
+    "contact": {}
+  },
+  "host": "www.example.com",
+  "basePath": "/",
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/scans": {
+      "post": {
+        "description": "Create accessibility scan requests",
+        "summary": "createScans",
+        "operationId": "ScansPost",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The client API version"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ScanRunRequest"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ScanRunResponse"
+              }
+            },
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/scans/{scanid}": {
+      "get": {
+        "description": "Get accessibility scan result",
+        "summary": "getScan",
+        "operationId": "ScansByScanidGet",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scanid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The scan request ID"
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The client API version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ScanRunResultResponse"
+            },
+            "headers": {}
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/ScanRunErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/scans/$batch": {
+      "post": {
+        "description": "Get accessibility scan results",
+        "summary": "getScanBatch",
+        "operationId": "ScansBatchPost",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The client API version"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "description": "",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ScanBatchRequest"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object"
+            },
+            "headers": {}
+          }
+        }
+      }
+    },
+    "/scans/{scanid}/reports/{reportid}": {
+      "get": {
+        "description": "Get accessibility scan report",
+        "summary": "getReport",
+        "operationId": "ScansReportsByScanidAndReportidGet",
+        "deprecated": false,
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scanid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The scan request ID"
+          },
+          {
+            "name": "reportid",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The report ID"
+          },
+          {
+            "name": "api-version",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "description": "The client API version"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/ScansReportsResponse"
+            },
+            "examples": {
+              "application/json": {
+                "href": "SARIF document per following specification https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html"
+              }
+            },
+            "headers": {}
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ScanRunRequest": {
+      "title": "ScanRunRequest",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "priority": {
+          "description": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority. The default value is 0.",
+          "example": 0,
+          "type": "integer",
+          "default": 0,
+          "format": "int32"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "ScanRunResponse": {
+      "title": "ScanRunResponse",
+      "type": "object",
+      "properties": {
+        "scanId": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/definitions/WebApiError"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "ScanResult": {
+      "title": "ScanResult",
+      "type": "object",
+      "properties": {
+        "state": {
+          "$ref": "#/definitions/State"
+        },
+        "issueCount": {
+          "type": "integer",
+          "minimum": 0.0,
+          "format": "int32"
+        }
+      },
+      "required": [
+        "state"
+      ]
+    },
+    "Links": {
+      "title": "Links",
+      "type": "object",
+      "properties": {
+        "rel": {
+          "example": "self",
+          "type": "string",
+          "default": "self"
+        },
+        "href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "rel",
+        "href"
+      ]
+    },
+    "ScanRun": {
+      "title": "ScanRun",
+      "type": "object",
+      "properties": {
+        "timestamp": {
+          "description": "Full date and time string format as defined by ISO 8601",
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/definitions/ScanRunError"
+        },
+        "state": {
+          "$ref": "#/definitions/State1"
+        }
+      },
+      "required": [
+        "state"
+      ]
+    },
+    "ScanReport": {
+      "title": "ScanReport",
+      "type": "object",
+      "properties": {
+        "reportId": {
+          "type": "string"
+        },
+        "format": {
+          "description": "SARIF format specification https://www.oasis-open.org/committees/sarif/charter.php",
+          "example": "sarif",
+          "type": "string",
+          "default": "sarif"
+        },
+        "links": {
+          "$ref": "#/definitions/Links"
+        }
+      },
+      "required": [
+        "reportId",
+        "format",
+        "links"
+      ]
+    },
+    "ScanBatchRequest": {
+      "title": "ScanBatchRequest",
+      "type": "object",
+      "properties": {
+        "scanId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scanId"
+      ]
+    },
+    "ScanRunResultResponse": {
+      "title": "ScanRunResultResponse",
+      "type": "object",
+      "properties": {
+        "scanId": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "scanResult": {
+          "$ref": "#/definitions/ScanResult"
+        },
+        "reports": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ScanReport"
+          }
+        },
+        "run": {
+          "$ref": "#/definitions/ScanRun"
+        }
+      },
+      "required": [
+        "scanId",
+        "url",
+        "run"
+      ]
+    },
+    "WebApiError": {
+      "title": "WebApiError",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/Code"
+        },
+        "codeId": {
+          "type": "integer",
+          "minimum": 4001.0,
+          "maximum": 5999.0,
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "codeId",
+        "message"
+      ]
+    },
+    "ScanRunError": {
+      "title": "ScanRunError",
+      "type": "object",
+      "properties": {
+        "code": {
+          "$ref": "#/definitions/Code1"
+        },
+        "codeId": {
+          "type": "integer",
+          "minimum": 9001.0,
+          "maximum": 9999.0,
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "codeId",
+        "message"
+      ]
+    },
+    "ScanRunErrorResponse": {
+      "title": "ScanRunErrorResponse",
+      "type": "object",
+      "properties": {
+        "scanId": {
+          "type": "string"
+        },
+        "error": {
+          "$ref": "#/definitions/WebApiError"
+        }
+      },
+      "required": [
+        "scanId",
+        "error"
+      ]
+    },
+    "Code": {
+      "title": "Code",
+      "example": "ResourceNotFound",
+      "type": "string",
+      "enum": [
+        "ResourceNotFound",
+        "InvalidResourceId",
+        "InvalidJsonDocument",
+        "RequestBodyTooLarge",
+        "InvalidURL",
+        "InternalError",
+        "MissingApiVersionQueryParameter",
+        "MissingContentTypeHeader",
+        "UnsupportedContentType",
+        "UnsupportedApiVersion",
+        "OutOfRangePriority"
+      ]
+    },
+    "Code1": {
+      "title": "Code1",
+      "example": "InternalError",
+      "type": "string",
+      "enum": [
+        "InternalError",
+        "UrlNavigationTimeout",
+        "HttpErrorCode",
+        "SslError",
+        "MainResourceLoadFailure",
+        "InvalidUrl",
+        "EmptyPage",
+        "NavigationError"
+      ]
+    },
+    "ScansReportsResponse": {
+      "title": "ScansReportsResponse",
+      "example": {
+        "href": "SARIF document per following specification https://docs.oasis-open.org/sarif/sarif/v2.1.0/cs01/sarif-v2.1.0-cs01.html"
+      },
+      "type": "object",
+      "properties": {
+        "href": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "href"
+      ]
+    },
+    "State": {
+      "title": "State",
+      "example": "pending",
+      "type": "string",
+      "enum": [
+        "pending",
+        "pass",
+        "fail"
+      ]
+    },
+    "State1": {
+      "title": "State1",
+      "example": "pending",
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "queued",
+        "running",
+        "completed",
+        "failed"
+      ]
+    }
+  },
+  "tags": []
+}

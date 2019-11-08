@@ -16,24 +16,24 @@ paths:
                   description: The client API version
                   schema:
                       type: string
-                  example: '1.0'
+                  example: "1.0"
             requestBody:
                 content:
                     application/json:
                         schema:
                             type: array
                             items:
-                                $ref: '#/components/schemas/ScanRunRequest'
+                                $ref: "#/components/schemas/ScanRunRequest"
             responses:
-                '202':
+                "202":
                     description: Accepted
                     content:
                         application/json:
                             schema:
                                 type: array
                                 items:
-                                    $ref: '#/components/schemas/ScanRunResponse'
-    '/scans/{scanid}':
+                                    $ref: "#/components/schemas/ScanRunResponse"
+    "/scans/{scanid}":
         get:
             summary: Get accessibility scan result
             operationId: getScan
@@ -50,20 +50,20 @@ paths:
                   description: The client API version
                   schema:
                       type: string
-                  example: '1.0'
+                  example: "1.0"
             responses:
-                '200':
+                "200":
                     description: OK
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ScanRunResultResponse'
-                '400':
+                                $ref: "#/components/schemas/ScanRunResultResponse"
+                "400":
                     description: Bad Request
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/ScanRunErrorResponse'
+                                $ref: "#/components/schemas/ScanRunErrorResponse"
     /scans/$batch:
         post:
             summary: Get accessibility scan results
@@ -75,16 +75,16 @@ paths:
                   description: The client API version
                   schema:
                       type: string
-                  example: '1.0'
+                  example: "1.0"
             requestBody:
                 content:
                     application/json:
                         schema:
                             type: array
                             items:
-                                $ref: '#/components/schemas/ScanBatchRequest'
+                                $ref: "#/components/schemas/ScanBatchRequest"
             responses:
-                '200':
+                "200":
                     description: OK
                     content:
                         application/json:
@@ -92,9 +92,9 @@ paths:
                                 type: array
                                 items:
                                     oneOf:
-                                        - $ref: '#/components/schemas/ScanRunResultResponse'
-                                        - $ref: '#/components/schemas/ScanRunErrorResponse'
-    '/scans/{scanid}/reports/{reportid}':
+                                        - $ref: "#/components/schemas/ScanRunResultResponse"
+                                        - $ref: "#/components/schemas/ScanRunErrorResponse"
+    "/scans/{scanid}/reports/{reportid}":
         get:
             summary: Get accessibility scan report
             operationId: getReport
@@ -117,9 +117,9 @@ paths:
                   description: The client API version
                   schema:
                       type: string
-                  example: '1.0'
+                  example: "1.0"
             responses:
-                '200':
+                "200":
                     description: OK
                     content:
                         application/json:
@@ -153,7 +153,7 @@ components:
                 url:
                     type: string
                 error:
-                    $ref: '#/components/schemas/WebApiError'
+                    $ref: "#/components/schemas/WebApiError"
         ScanResult:
             type: object
             required:
@@ -192,7 +192,7 @@ components:
                     description: Full date and time string format as defined by ISO 8601
                     type: string
                 error:
-                    $ref: '#/components/schemas/ScanRunError'
+                    $ref: "#/components/schemas/ScanRunError"
                 state:
                     type: string
                     default: pending
@@ -220,7 +220,7 @@ components:
                     enum:
                         - sarif
                 links:
-                    $ref: '#/components/schemas/Links'
+                    $ref: "#/components/schemas/Links"
         ScanBatchRequest:
             type: object
             required:
@@ -240,13 +240,13 @@ components:
                 url:
                     type: string
                 scanResult:
-                    $ref: '#/components/schemas/ScanResult'
+                    $ref: "#/components/schemas/ScanResult"
                 reports:
                     type: array
                     items:
-                        $ref: '#/components/schemas/ScanReport'
+                        $ref: "#/components/schemas/ScanReport"
                 run:
-                    $ref: '#/components/schemas/ScanRun'
+                    $ref: "#/components/schemas/ScanRun"
         WebApiError:
             type: object
             required:
@@ -309,4 +309,4 @@ components:
                 scanId:
                     type: string
                 error:
-                    $ref: '#/components/schemas/WebApiError'
+                    $ref: "#/components/schemas/WebApiError"
