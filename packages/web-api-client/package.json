@@ -11,6 +11,7 @@
         "test": "jest --coverage --colors"
     },
     "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
+    "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {

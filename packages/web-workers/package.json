@@ -59,6 +59,7 @@
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
         "moment": "^2.22.2",
-        "lodash": "^4.17.14"
+        "lodash": "^4.17.14",
+        "web-api-client": "1.0.0"
     }
 }
