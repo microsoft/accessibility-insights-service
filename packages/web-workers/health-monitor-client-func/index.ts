@@ -3,10 +3,14 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { OnDemandPageScanBatchRequest } from 'storage-documents';
+import { WebControllerDispatcher } from 'service-library';
+import { ActivityAction } from '../src/contracts/activity-actions';
 import { HealthMonitorClientController } from '../src/controllers/health-monitor-client-controller';
 import { processWebRequest } from '../src/process-request';
 
-export async function run(context: Context, documents: OnDemandPageScanBatchRequest[]): Promise<void> {
-    await processWebRequest(context, HealthMonitorClientController, documents);
+/**
+ * The orchestration activity function to execute workflow actions.
+ */
+export async function run(context: Context, action: ActivityAction): Promise<void> {
+    await processWebRequest(context, HealthMonitorClientController, action);
 }
