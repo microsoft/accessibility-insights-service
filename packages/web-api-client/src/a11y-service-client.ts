@@ -48,6 +48,12 @@ export class A11yServiceClient {
         return (await this.signRequest()).get(requestUrl);
     }
 
+    public async checkHealth(): Promise<void> {
+        const requestUrl: string = `${this.requestBaseUrl}/health`;
+
+        return (await this.signRequest()).get(requestUrl);
+    }
+
     private async signRequest(): Promise<typeof request> {
         return this.credential.signRequest(this.defaultRequestObject);
     }
