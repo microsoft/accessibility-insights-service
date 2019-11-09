@@ -119,4 +119,29 @@ describe(A11yServiceClient, () => {
 
         await testSubject.checkHealth();
     });
+
+    it('should handle failure scans', async () => {
+        const errBody = 'err';
+        const errCode = 123;
+        const errRes = {
+            statusCode: errCode,
+                    body: errBody,
+        };
+        setupVerifiableSignRequestCall();
+        getMock
+            .setup(req => req(`${baseUrl}/health`))
+            .returns(async () =>
+                Promise.reject(errRes),
+            )
+            .verifiable(Times.once());
+
+        let errResponse;
+
+        await testSubject.checkHealth().catch(err => {
+            errResponse = err;
+        });
+
+        expect(errResponse).toEqual(errRes);
+
+    });
 });
