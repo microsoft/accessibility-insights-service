@@ -7,4 +7,6 @@ export const secretNames = {
     storageAccountKey: 'storageAccountKey',
     serverAppRegistrationSecret: 'A11yServiceServerAppRegistration',
     clientAppRegistrationSecret: 'A11yServiceClientAppRegistration',
+    clientAppRegistrationId: 'A11yServiceClientAppRegistrationId',
+    serverAppRegistrationId: 'A11yServiceServerAppRegistrationId',
 };
