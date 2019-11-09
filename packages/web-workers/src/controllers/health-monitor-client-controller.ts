@@ -3,8 +3,10 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { WebController } from 'service-library';
+import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
 import { A11yServiceClient } from 'web-api-client';
+import { ActivityAction } from '../contracts/activity-actions';
+import { ActivityRequestData, CreateScanRequestData, GetScanReportData, GetScanResultData } from './activity-request-data';
 
 // tslint:disable: no-any
 
@@ -12,68 +14,50 @@ import { A11yServiceClient } from 'web-api-client';
 export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-client';
+    private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
-        //        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
+        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
     ) {
         super(contextAwareLogger);
+
+        this.activityCallbacks = {
+            [ActivityAction.createScanRequest]: this.createScanRequest,
+            [ActivityAction.getScanResult]: this.getScanResult,
+            [ActivityAction.getScanReport]: this.getScanReport,
+            [ActivityAction.getHealthStatus]: this.getHealthStatus,
+
+        };
     }
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
-        const activityActionName = args[0];
-        this.contextAwareLogger.logInfo(`Executing ${activityActionName} activity action.`);
+        const activityRequestData = args[0] as ActivityRequestData;
+        this.contextAwareLogger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
 
-        return 'hello';
-        // switch (activityActionName) {
-        //     case 'createScanRequest': {
-        //         this.createScanRequest();
-        //         break;
-        //     }
-        //     case 'getScanResult': {
-        //         this.getScanResult();
-        //         break;
-        //     }
-        //     case 'getScanResultBatch': {
-        //         this.getScanResultBatch();
-        //         break;
-        //     }
-        //     case 'getScanReport': {
-        //         this.getScanReport();
-        //         break;
-        //     }
-        //     case 'getHealthStatus': {
-        //         this.getHealthStatus();
-        //         break;
-        //     }
-        //     default: {
-        //         this.contextAwareLogger.logInfo(`Unrecognized activity action ${activityActionName}.`);
-        //     }
-        // }
+        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
+
+        return activityCallback(activityRequestData.data);
     }
 
     protected validateRequest(...args: any[]): boolean {
         return true;
     }
 
-    private createScanRequest(): void {
-        return;
+    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<ScanRunResponse> => {
+        return this.webApiClient.postScanUrl(data.scanUrl, data.priority);
     }
 
-    private getScanResult(): void {
-        return;
+    private readonly getScanResult = async (data: GetScanResultData): Promise<ScanResultResponse> => {
+        return this.webApiClient.getScanStatus(data.scanId);
     }
 
-    private getScanResultBatch(): void {
-        return;
+    private readonly getScanReport = async (data: GetScanReportData): Promise<Buffer> => {
+        return this.webApiClient.getScanReport(data.scanId, data.reportId);
     }
 
-    private getScanReport(): void {
-        return;
-    }
-
-    private getHealthStatus(): void {
+    private readonly getHealthStatus = async (): Promise<void> => {
         return;
     }
 }
