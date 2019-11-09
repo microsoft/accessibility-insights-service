@@ -147,7 +147,13 @@ export class Batch {
         const jobTasks: Map<string, JobTask> = new Map();
         const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
         const maxTaskDurationInMinutes = (await this.getTaskConfig()).taskTimeoutInMinutes;
-        const sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
+        let sasUrl: string;
+
+        try {
+            sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
+        } catch (error) {
+            this.logger.logError(`encounter error while generating sas url ${error}`);
+        }
 
         messages.forEach(message => {
             const jobTask = new JobTask(message.messageId);
