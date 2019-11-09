@@ -3,6 +3,7 @@
 import { Context } from '@azure/functions';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
+import { ResultLevel } from 'storage-documents';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -14,24 +15,27 @@ export abstract class WebController {
 
     constructor(@inject(ContextAwareLogger) protected readonly contextAwareLogger: ContextAwareLogger) {}
 
-    public async invoke(requestContext: Context, ...args: any[]): Promise<void> {
+    public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;
 
         await this.contextAwareLogger.setup(this.getBaseTelemetryProperties());
         this.contextAwareLogger.logInfo('[WebController] request started');
 
+        let result: unknown;
         if (this.validateRequest(...args)) {
-            await this.handleRequest(...args);
+            result = await this.handleRequest(...args);
         }
 
         this.setResponseContentTypeHeader();
 
         this.contextAwareLogger.logInfo('[WebController] processed request');
+
+        return result;
     }
 
     protected abstract validateRequest(...args: any[]): boolean;
 
-    protected abstract async handleRequest(...args: any[]): Promise<void>;
+    protected abstract async handleRequest(...args: any[]): Promise<unknown>;
 
     protected getBaseTelemetryProperties(): { [name: string]: string } {
         return {

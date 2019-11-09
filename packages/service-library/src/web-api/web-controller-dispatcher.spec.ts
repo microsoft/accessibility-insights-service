@@ -12,15 +12,16 @@ import { WebControllerDispatcher } from './web-controller-dispatcher';
 // tslint:disable: no-any no-unsafe-any
 
 export class TestableWebController extends WebController {
+    public static readonly handleRequestResult = 'handle-request-result';
     public readonly apiVersion = '1.0';
     public readonly apiName = 'controller-mock-api';
     public requestArgs: any[];
 
-    public async invoke(requestContext: Context, ...args: any[]): Promise<void> {
+    public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;
         this.requestArgs = args;
 
-        return;
+        return TestableWebController.handleRequestResult;
     }
 
     protected validateRequest(...args: any[]): boolean {
@@ -82,5 +83,12 @@ describe(WebControllerDispatcher, () => {
         webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
 
         expect((webControllerDispatcher as any).runCustomAction()).toResolve();
+    });
+
+    it('return result of invoke', async () => {
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
+        await expect(webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context)).resolves.toBe(
+            TestableWebController.handleRequestResult,
+        );
     });
 });
