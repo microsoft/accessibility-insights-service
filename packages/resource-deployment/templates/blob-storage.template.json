@@ -222,7 +222,7 @@
                     "rules": [
                         {
                             "enabled": true,
-                            "name": "deleteoldbatdhlogs",
+                            "name": "deleteoldbatchlogs",
                             "type": "Lifecycle",
                             "definition": {
                                 "actions": {
