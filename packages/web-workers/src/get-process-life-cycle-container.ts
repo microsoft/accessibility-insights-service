@@ -16,7 +16,9 @@ export function getProcessLifeCycleContainer(): inversify.Container {
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
-        processLifeCycleContainer.bind(A11yServiceClient).toDynamicValue(context => new A11yServiceClient(process.env.WEB_API_BASE_URL));
+        processLifeCycleContainer
+            .bind(A11yServiceClient)
+            .toDynamicValue(context => new A11yServiceClient(undefined, process.env.WEB_API_BASE_URL));
     }
 
     return processLifeCycleContainer;
