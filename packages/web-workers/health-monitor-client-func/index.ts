@@ -11,6 +11,6 @@ import { processWebRequest } from '../src/process-request';
 /**
  * The orchestration activity function to execute workflow actions.
  */
-export async function run(context: Context, action: ActivityAction): Promise<void> {
-    await processWebRequest(context, HealthMonitorClientController, action);
+export async function run(context: Context, action: ActivityAction): Promise<unknown> {
+    return processWebRequest(context, HealthMonitorClientController, action);
 }

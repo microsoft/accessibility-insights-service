@@ -10,6 +10,7 @@ import { WebController } from './web-controller';
 // tslint:disable: no-any no-unsafe-any
 
 export class TestableWebController extends WebController {
+    public static readonly handleRequestResponse = 'handle-request-response';
     public readonly apiVersion = '1.0';
     public readonly apiName = 'controller-mock-api';
     public validateRequestInvoked = false;
@@ -27,13 +28,13 @@ export class TestableWebController extends WebController {
         return args[0] === 'valid';
     }
 
-    protected async handleRequest(...args: any[]): Promise<void> {
+    protected async handleRequest(...args: any[]): Promise<unknown> {
         this.handleRequestInvoked = true;
         if (args[0] === undefined) {
             throw new Error('At least one parameter is expected');
         }
 
-        return;
+        return TestableWebController.handleRequestResponse;
     }
 }
 
@@ -116,5 +117,9 @@ describe(WebController, () => {
             controller: 'TestableWebController',
             invocationId,
         });
+    });
+
+    it('returns handleRequest result', async () => {
+        await expect(testSubject.invoke(context, 'valid')).resolves.toBe(TestableWebController.handleRequestResponse);
     });
 });

@@ -56,13 +56,25 @@ export class HealthMonitorOrchestrationController extends WebController {
             logOrchestrationStep(`Orchestration started.`);
 
             logOrchestrationStep(`Executing '${ActivityAction.getHealthStatus}' orchestration step.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getHealthStatus);
+            const healthStatus = yield context.df.callActivity(
+                HealthMonitorOrchestrationController.activityName,
+                ActivityAction.getHealthStatus,
+            );
+            logOrchestrationStep(`${ActivityAction.getHealthStatus} action completed with result ${healthStatus}`);
 
             logOrchestrationStep(`Executing '${ActivityAction.createScanRequest}' orchestration step.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.createScanRequest);
+            const scanRequestResult = yield context.df.callActivity(
+                HealthMonitorOrchestrationController.activityName,
+                ActivityAction.createScanRequest,
+            );
+            logOrchestrationStep(`${ActivityAction.createScanRequest} action completed with result ${scanRequestResult}`);
 
             logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'pending' response.`);
-            yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
+            const scanStatus = yield context.df.callActivity(
+                HealthMonitorOrchestrationController.activityName,
+                ActivityAction.getScanResult,
+            );
+            logOrchestrationStep(`${ActivityAction.getScanResult} action completed with result ${scanStatus}`);
 
             // const scanRequestProcessingDelayInSeconds = <number>context.bindingData.scanRequestProcessingDelayInSeconds;
             // logOrchestrationStep(

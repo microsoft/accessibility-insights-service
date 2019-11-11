@@ -17,10 +17,10 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
         controllerType: Newable<WebController>,
         context: Context,
         ...args: unknown[]
-    ): Promise<void> {
+    ): Promise<unknown> {
         const controller = container.get(controllerType) as WebController;
 
-        await controller.invoke(context, ...args);
+        return controller.invoke(context, ...args);
     }
 
     // tslint:disable-next-line: no-empty no-any

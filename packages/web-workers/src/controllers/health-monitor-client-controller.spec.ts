@@ -5,38 +5,39 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import { A11yServiceClient } from 'web-api-client';
-
 import { IMock, It, Mock, Times } from 'typemoq';
-
+import { A11yServiceClient } from 'web-api-client';
+import { ActivityAction } from '../contracts/activity-actions';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
-let testSubject: HealthMonitorClientController;
-let serviceConfigurationMock: IMock<ServiceConfiguration>;
-let contextAwareLoggerMock: IMock<ContextAwareLogger>;
-let context: Context;
-let webApiClientMock: IMock<A11yServiceClient>;
+describe(HealthMonitorClientController, () => {
+    let testSubject: HealthMonitorClientController;
+    let serviceConfigurationMock: IMock<ServiceConfiguration>;
+    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let context: Context;
+    let webApiClientMock: IMock<A11yServiceClient>;
 
-beforeEach(() => {
-    serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-    contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
-    webApiClientMock = Mock.ofType(A11yServiceClient);
-    context = <Context>(<unknown>{ bindingDefinitions: {} });
+    beforeEach(() => {
+        serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
+        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        webApiClientMock = Mock.ofType(A11yServiceClient);
+        context = <Context>(<unknown>{ bindingDefinitions: {} });
 
-    testSubject = new HealthMonitorClientController(
-        serviceConfigurationMock.object,
-        contextAwareLoggerMock.object,
-        webApiClientMock.object,
-    );
-});
+        testSubject = new HealthMonitorClientController(
+            serviceConfigurationMock.object,
+            contextAwareLoggerMock.object,
+            webApiClientMock.object,
+        );
+    });
 
-afterEach(() => {
-    webApiClientMock.verifyAll();
-    contextAwareLoggerMock.verifyAll();
-});
+    afterEach(() => {
+        webApiClientMock.verifyAll();
+        contextAwareLoggerMock.verifyAll();
+    });
 
-describe('createScanRequest', () => {
-    it('createScanRequest', async () => {
-        return;
+    describe('invoke', () => {
+        it('handles createScanRequest', async () => {
+            return;
+        });
     });
 });

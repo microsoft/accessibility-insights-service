@@ -21,9 +21,11 @@ export class HealthMonitorClientController extends WebController {
         super(contextAwareLogger);
     }
 
-    protected async handleRequest(...args: any[]): Promise<void> {
+    protected async handleRequest(...args: any[]): Promise<unknown> {
         const activityActionName = args[0];
         this.contextAwareLogger.logInfo(`Executing ${activityActionName} activity action.`);
+
+        return 'hello';
         // switch (activityActionName) {
         //     case 'createScanRequest': {
         //         this.createScanRequest();
