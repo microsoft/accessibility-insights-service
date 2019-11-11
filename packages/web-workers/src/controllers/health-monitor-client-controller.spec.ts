@@ -26,7 +26,7 @@ beforeEach(() => {
     testSubject = new HealthMonitorClientController(
         serviceConfigurationMock.object,
         contextAwareLoggerMock.object,
-        //webApiClientMock.object,
+        webApiClientMock.object,
     );
 });
 

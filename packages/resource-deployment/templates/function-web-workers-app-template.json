@@ -49,6 +49,13 @@
             "metadata": {
                 "description": "Name of the key vault service"
             }
+        },
+        "webApiBaseUrl": {
+            "type": "string",
+            "defaultValue": "[concat('https://apim-a11y',toLower(uniqueString(resourceGroup().id)),'.azure-api.net')]",
+            "metadata": {
+                "description": "Base url of the web api"
+            }
         }
     },
     "resources": [
@@ -99,6 +106,10 @@
                         {
                             "name": "KEY_VAULT_URL",
                             "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
+                        },
+                        {
+                            "name": "WEB_API_BASE_URL",
+                            "value": "[parameters('webApiBaseUrl')]"
                         }
                     ]
                 }
