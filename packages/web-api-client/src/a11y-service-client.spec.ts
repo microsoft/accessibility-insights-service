@@ -35,6 +35,12 @@ describe(A11yServiceClient, () => {
         testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestStub);
     });
 
+    afterEach(() => {
+        credMock.verifyAll();
+        getMock.verifyAll();
+        postMock.verifyAll();
+    });
+
     function setupVerifiableSignRequestCall(): void {
         credMock
             .setup(cm => cm.signRequest(requestStub))
@@ -102,5 +108,37 @@ describe(A11yServiceClient, () => {
         const actualResponse = await testSubject.getScanReport(scanId, reportId);
 
         expect(actualResponse).toEqual(response);
+    });
+
+    it('checkHealth', async () => {
+        setupVerifiableSignRequestCall();
+        getMock
+            .setup(req => req(`${baseUrl}/health`))
+            .returns(async () => Promise.resolve(null))
+            .verifiable(Times.once());
+
+        await testSubject.checkHealth();
+    });
+
+    it('should handle failure request', async () => {
+        const errBody = 'err';
+        const errCode = 123;
+        const errRes = {
+            statusCode: errCode,
+            body: errBody,
+        };
+        setupVerifiableSignRequestCall();
+        getMock
+            .setup(req => req(`${baseUrl}/health`))
+            .returns(async () => Promise.reject(errRes))
+            .verifiable(Times.once());
+
+        let errResponse;
+
+        await testSubject.checkHealth().catch(err => {
+            errResponse = err;
+        });
+
+        expect(errResponse).toEqual(errRes);
     });
 });

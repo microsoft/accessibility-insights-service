@@ -40,6 +40,7 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "request-promise": "^4.2.4",
-        "adal-node": "0.2.0"
+        "adal-node": "0.2.0",
+        "request": "^2.88.0"
     }
 }
