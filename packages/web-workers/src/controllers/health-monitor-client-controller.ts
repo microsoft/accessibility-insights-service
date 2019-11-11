@@ -4,7 +4,7 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
-import { A11yServiceClient } from 'web-api-client';
+import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData, CreateScanRequestData, GetScanReportData, GetScanResultData } from './activity-request-data';
 
@@ -28,7 +28,6 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.getScanResult]: this.getScanResult,
             [ActivityAction.getScanReport]: this.getScanReport,
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
-
         };
     }
 
@@ -45,19 +44,22 @@ export class HealthMonitorClientController extends WebController {
         return true;
     }
 
-    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<ScanRunResponse> => {
+    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<ResponseWithBodyType<ScanRunResponse>> => {
         return this.webApiClient.postScanUrl(data.scanUrl, data.priority);
-    }
+    };
 
-    private readonly getScanResult = async (data: GetScanResultData): Promise<ScanResultResponse> => {
+    private readonly getScanResult = async (data: GetScanResultData): Promise<ResponseWithBodyType<ScanResultResponse>> => {
         return this.webApiClient.getScanStatus(data.scanId);
-    }
+    };
 
-    private readonly getScanReport = async (data: GetScanReportData): Promise<Buffer> => {
-        return this.webApiClient.getScanReport(data.scanId, data.reportId);
-    }
+    private readonly getScanReport = async (data: GetScanReportData): Promise<ResponseWithBodyType<unknown>> => {
+        const result = await this.webApiClient.getScanReport(data.scanId, data.reportId);
+        result.body = undefined;
+
+        return result;
+    };
 
     private readonly getHealthStatus = async (): Promise<void> => {
         return;
-    }
+    };
 }

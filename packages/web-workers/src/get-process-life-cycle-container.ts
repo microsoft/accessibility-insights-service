@@ -6,6 +6,7 @@ import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
 import { registerLoggerToContainer } from 'logger';
+import { A11yServiceClient } from 'web-api-client';
 
 let processLifeCycleContainer: inversify.Container;
 
@@ -15,6 +16,9 @@ export function getProcessLifeCycleContainer(): inversify.Container {
         setupRuntimeConfigContainer(processLifeCycleContainer);
         registerLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
+        processLifeCycleContainer
+            .bind(A11yServiceClient)
+            .toDynamicValue(context => new A11yServiceClient(undefined, process.env.WEB_API_BASE_URL));
     }
 
     return processLifeCycleContainer;

@@ -54,12 +54,12 @@
         "common": "1.0.0",
         "durable-functions": "^1.3.0",
         "inversify": "^5.0.1",
+        "lodash": "^4.17.14",
         "logger": "1.0.0",
+        "moment": "^2.22.2",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "moment": "^2.22.2",
-        "lodash": "^4.17.14",
         "web-api-client": "1.0.0"
     }
 }

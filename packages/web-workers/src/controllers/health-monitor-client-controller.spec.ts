@@ -5,12 +5,14 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import { ScanResultResponse } from 'service-library';
+import { ScanResultResponse, ScanRun, ScanRunResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { A11yServiceClient } from 'web-api-client';
+import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { ActivityRequestData, CreateScanRequestData, GetScanReportData, GetScanResultData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
+
+// tslint:disable:no-object-literal-type-assertion
 
 describe(HealthMonitorClientController, () => {
     let testSubject: HealthMonitorClientController;
@@ -40,7 +42,9 @@ describe(HealthMonitorClientController, () => {
     describe('invoke', () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
-            const expectedResult = { scanId: 'scan-id', url: scanUrl };
+            const expectedResult = {
+                body: { scanId: 'scan-id', url: scanUrl },
+            } as ResponseWithBodyType<ScanRunResponse>;
             webApiClientMock
                 .setup(async w => w.postScanUrl(scanUrl, 1))
                 .returns(async () => Promise.resolve(expectedResult))
@@ -60,11 +64,13 @@ describe(HealthMonitorClientController, () => {
         it('handles getScanResult', async () => {
             const scanUrl = 'scan-url';
             const scanId = 'scan-id';
-            const expectedResult: ScanResultResponse = {
-                scanId: scanId,
-                url: scanUrl,
-                run: { state: 'pending' }
-            };
+            const expectedResult = {
+                body: {
+                    scanId: scanId,
+                    url: scanUrl,
+                    run: { state: 'pending' },
+                },
+            } as ResponseWithBodyType<ScanResultResponse>;
             webApiClientMock
                 .setup(async w => w.getScanStatus(scanId))
                 .returns(async () => Promise.resolve(expectedResult))
@@ -73,7 +79,7 @@ describe(HealthMonitorClientController, () => {
             const args: ActivityRequestData = {
                 activityName: ActivityAction.getScanResult,
                 data: {
-                    scanId: scanId
+                    scanId: scanId,
                 },
             };
             const result = await testSubject.invoke(context, args);
@@ -83,7 +89,9 @@ describe(HealthMonitorClientController, () => {
         it('handles getScanReport', async () => {
             const scanId = 'scan-id';
             const reportId = 'report-id';
-            const expectedResult: Buffer = new Buffer('Scan report');
+            const expectedResult = {
+                body: new Buffer('Scan report'),
+            } as ResponseWithBodyType<Buffer>;
             webApiClientMock
                 .setup(async w => w.getScanReport(scanId, reportId))
                 .returns(async () => Promise.resolve(expectedResult))
