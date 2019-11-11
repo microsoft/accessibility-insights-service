@@ -5,4 +5,9 @@ export const secretNames = {
     cosmosDbKey: 'cosmosDbKey',
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
+    restApiSpAppId: 'restApiSpAppId',
+    restApiSpSecret: 'restApiSpSecret',
+    restApiE2eSpAppId: 'restApiE2eSpAppId',
+    restApiE2eSpSecret: 'restApiE2eSpSecret',
+    authorityUrl: 'authorityUrl',
 };
