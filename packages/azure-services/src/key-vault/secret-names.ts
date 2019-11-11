@@ -9,4 +9,5 @@ export const secretNames = {
     restApiSpSecret: 'restApiSpSecret',
     restApiE2eSpAppId: 'restApiE2eSpAppId',
     restApiE2eSpSecret: 'restApiE2eSpSecret',
+    authorityUrl: 'authorityUrl',
 };
