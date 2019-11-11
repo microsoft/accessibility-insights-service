@@ -6,6 +6,7 @@ import { AzureServicesIocTypes, cosmosContainerClientTypes, CredentialType } fro
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { Logger } from 'logger';
+import { A11yServiceClient } from 'web-api-client';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
 
 describe(getProcessLifeCycleContainer, () => {
@@ -18,6 +19,7 @@ describe(getProcessLifeCycleContainer, () => {
         expect(testSubject.get(ServiceConfiguration)).toBeDefined();
         expect(testSubject.get(Logger)).toBeDefined();
         expect(testSubject.get(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)).toBeDefined();
+        expect(testSubject.get(A11yServiceClient)).toBeDefined();
     });
 
     it('should not create more than one instance of container', () => {

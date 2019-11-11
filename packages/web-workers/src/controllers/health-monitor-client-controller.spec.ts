@@ -21,12 +21,12 @@ describe(HealthMonitorClientController, () => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
         webApiClientMock = Mock.ofType(A11yServiceClient);
-        context = <Context>(<unknown>{ bindingDefinitions: {}, bindings: {} });
+        context = <Context>(<unknown>{ bindingDefinitions: {} });
 
         testSubject = new HealthMonitorClientController(
             serviceConfigurationMock.object,
             contextAwareLoggerMock.object,
-            //webApiClientMock.object,
+            webApiClientMock.object,
         );
     });
 
