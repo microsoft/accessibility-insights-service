@@ -6,12 +6,15 @@ import 'reflect-metadata';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
+import { isNil } from 'lodash';
 import { ContextAwareLogger } from 'logger';
+import { ScanRunResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ActivityAction } from '../contracts/activity-actions';
+import { ActivityRequestData, CreateScanRequestData, SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
-// tslint:disable: no-empty no-unsafe-any
+// tslint:disable: no-empty no-unsafe-any no-object-literal-type-assertion
 
 describe('HealthMonitorOrchestrationController', () => {
     let testSubject: HealthMonitorOrchestrationController;
@@ -74,7 +77,7 @@ describe('HealthMonitorOrchestrationController', () => {
 
         it('sets context required for orchestrator execution', async () => {
             await testSubject.invoke(context);
-            expect(context.bindingData.logger).toBe(contextAwareLoggerMock.object);
+            expect(context.bindingData.controller).toBe(testSubject);
             expect(context.bindingData.scanRequestProcessingDelayInSeconds).toEqual(restApiConfig.scanRequestProcessingDelayInSeconds);
         });
 
@@ -88,21 +91,40 @@ describe('HealthMonitorOrchestrationController', () => {
         it('executes activities in sequence', async () => {
             await testSubject.invoke(context);
 
-            verifyActivityExecution(ActivityAction.getHealthStatus);
-            verifyActivityExecution(ActivityAction.createScanRequest);
-            verifyActivityExecution(ActivityAction.getScanResult);
+            let prevCall: IteratorResult<any>;
 
-            expect(orchestratorExecutorSteps.next().done).toBe(true);
+            prevCall = verifyActivityExecution(ActivityAction.getHealthStatus, undefined, { statusCode: 200 } as SerializableResponse);
+
+            prevCall = verifyActivityExecution(
+                ActivityAction.createScanRequest,
+                {
+                    scanUrl: 'https://www.bing.com',
+                    priority: 0,
+                } as CreateScanRequestData,
+                { statusCode: 200, body: [{ scanId: 'scan id', url: 'https://www.bing.com' } as ScanRunResponse] } as SerializableResponse<
+                    ScanRunResponse[]
+                >,
+                prevCall,
+            );
+
+            //verifyActivityExecution(ActivityAction.getScanResult);
+
+            expect(orchestratorExecutorSteps.next(prevCall.value).done).toBe(true);
         });
     });
 
-    function verifyActivityExecution(activityName: string, activityResult?: any): IteratorResult<any> {
+    function verifyActivityExecution(
+        activityName: string,
+        inputData?: any,
+        activityResult?: any,
+        prevCall?: IteratorResult<any>,
+    ): IteratorResult<any> {
         orchestrationContext
-            .setup(oc => oc.callActivity(activityFuncName, activityName))
+            .setup(oc => oc.callActivity(activityFuncName, { activityName, data: inputData } as ActivityRequestData))
             .returns(() => activityResult)
             .verifiable(Times.once());
 
-        const nextCall = orchestratorExecutorSteps.next();
+        const nextCall = orchestratorExecutorSteps.next(isNil(prevCall) ? undefined : prevCall.value);
         orchestrationContext.verifyAll();
 
         expect(nextCall.done).toBe(false);

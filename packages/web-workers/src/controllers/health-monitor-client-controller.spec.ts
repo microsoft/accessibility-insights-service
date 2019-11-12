@@ -9,10 +9,10 @@ import { ScanResultResponse, ScanRun, ScanRunResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
-import { ActivityRequestData, CreateScanRequestData, GetScanReportData, GetScanResultData } from './activity-request-data';
+import { ActivityRequestData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
-// tslint:disable:no-object-literal-type-assertion
+// tslint:disable:no-object-literal-type-assertion no-any no-unsafe-any
 
 describe(HealthMonitorClientController, () => {
     let testSubject: HealthMonitorClientController;
@@ -20,6 +20,8 @@ describe(HealthMonitorClientController, () => {
     let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     let context: Context;
     let webApiClientMock: IMock<A11yServiceClient>;
+    let jsonResponse: any;
+    let expectedResponse: ResponseWithBodyType<any>;
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -27,10 +29,16 @@ describe(HealthMonitorClientController, () => {
         webApiClientMock = Mock.ofType(A11yServiceClient);
         context = <Context>(<unknown>{ bindingDefinitions: {}, bindings: {} });
 
-        testSubject = new HealthMonitorClientController(
-            serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
-            webApiClientMock.object,
+        jsonResponse = { testResponse: true } as any;
+        expectedResponse = {
+            body: 'some body content',
+            toJSON: () => {
+                return jsonResponse;
+            },
+        } as ResponseWithBodyType<any>;
+
+        testSubject = new HealthMonitorClientController(serviceConfigurationMock.object, contextAwareLoggerMock.object, async () =>
+            Promise.resolve(webApiClientMock.object),
         );
     });
 
@@ -42,12 +50,9 @@ describe(HealthMonitorClientController, () => {
     describe('invoke', () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
-            const expectedResult = {
-                body: { scanId: 'scan-id', url: scanUrl },
-            } as ResponseWithBodyType<ScanRunResponse>;
             webApiClientMock
                 .setup(async w => w.postScanUrl(scanUrl, 1))
-                .returns(async () => Promise.resolve(expectedResult))
+                .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
             const args: ActivityRequestData = {
@@ -58,22 +63,15 @@ describe(HealthMonitorClientController, () => {
                 },
             };
             const result = await testSubject.invoke(context, args);
-            expect(result).toEqual(expectedResult);
+            expect(result).toEqual(jsonResponse);
         });
 
         it('handles getScanResult', async () => {
             const scanUrl = 'scan-url';
             const scanId = 'scan-id';
-            const expectedResult = {
-                body: {
-                    scanId: scanId,
-                    url: scanUrl,
-                    run: { state: 'pending' },
-                },
-            } as ResponseWithBodyType<ScanResultResponse>;
             webApiClientMock
                 .setup(async w => w.getScanStatus(scanId))
-                .returns(async () => Promise.resolve(expectedResult))
+                .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
             const args: ActivityRequestData = {
@@ -83,18 +81,15 @@ describe(HealthMonitorClientController, () => {
                 },
             };
             const result = await testSubject.invoke(context, args);
-            expect(result).toEqual(expectedResult);
+            expect(result).toEqual(jsonResponse);
         });
 
         it('handles getScanReport', async () => {
             const scanId = 'scan-id';
             const reportId = 'report-id';
-            const expectedResult = {
-                body: new Buffer('Scan report'),
-            } as ResponseWithBodyType<Buffer>;
             webApiClientMock
                 .setup(async w => w.getScanReport(scanId, reportId))
-                .returns(async () => Promise.resolve(expectedResult))
+                .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
             const args: ActivityRequestData = {
@@ -105,7 +100,20 @@ describe(HealthMonitorClientController, () => {
                 },
             };
             const result = await testSubject.invoke(context, args);
-            expect(result).toEqual(expectedResult);
+            expect(result).toEqual(jsonResponse);
+            expect(expectedResponse.body).toBeUndefined();
+        });
+
+        it('handles getHealthStatus', async () => {
+            webApiClientMock
+                .setup(async w => w.checkHealth())
+                .returns(async () => Promise.resolve(expectedResponse))
+                .verifiable(Times.once());
+
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.getHealthStatus,
+            };
+            const result = await testSubject.invoke(context, args);
         });
     });
 });

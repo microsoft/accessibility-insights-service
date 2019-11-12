@@ -6,7 +6,14 @@ import { ContextAwareLogger } from 'logger';
 import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
-import { ActivityRequestData, CreateScanRequestData, GetScanReportData, GetScanResultData } from './activity-request-data';
+import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
+import {
+    ActivityRequestData,
+    CreateScanRequestData,
+    GetScanReportData,
+    GetScanResultData,
+    SerializableResponse,
+} from './activity-request-data';
 
 // tslint:disable: no-any
 
@@ -19,7 +26,7 @@ export class HealthMonitorClientController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
-        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
+        @inject(iocTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
     ) {
         super(contextAwareLogger);
 
@@ -44,22 +51,36 @@ export class HealthMonitorClientController extends WebController {
         return true;
     }
 
-    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<ResponseWithBodyType<ScanRunResponse>> => {
-        return this.webApiClient.postScanUrl(data.scanUrl, data.priority);
+    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse>> => {
+        const webApiClient = await this.webApiClientProvider();
+
+        const response = await webApiClient.postScanUrl(data.scanUrl, data.priority);
+
+        return response.toJSON();
     };
 
-    private readonly getScanResult = async (data: GetScanResultData): Promise<ResponseWithBodyType<ScanResultResponse>> => {
-        return this.webApiClient.getScanStatus(data.scanId);
+    private readonly getScanResult = async (data: GetScanResultData): Promise<SerializableResponse<ScanResultResponse>> => {
+        const webApiClient = await this.webApiClientProvider();
+
+        const response = await webApiClient.getScanStatus(data.scanId);
+
+        return response.toJSON();
     };
 
-    private readonly getScanReport = async (data: GetScanReportData): Promise<ResponseWithBodyType<unknown>> => {
-        const result = await this.webApiClient.getScanReport(data.scanId, data.reportId);
-        result.body = undefined;
+    private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse> => {
+        const webApiClient = await this.webApiClientProvider();
 
-        return result;
+        const response = await webApiClient.getScanReport(data.scanId, data.reportId);
+        response.body = undefined;
+
+        return response.toJSON();
     };
 
-    private readonly getHealthStatus = async (): Promise<void> => {
-        return;
+    private readonly getHealthStatus = async (): Promise<SerializableResponse> => {
+        const webApiClient = await this.webApiClientProvider();
+
+        const response = await webApiClient.checkHealth();
+
+        return response.toJSON();
     };
 }
