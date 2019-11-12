@@ -1,12 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports no-any
+import { logicalExpression } from '@babel/types';
 import { ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
-import { IOrchestrationFunctionContext, ResponseMessage, Task } from 'durable-functions/lib/src/classes';
+import { IOrchestrationFunctionContext, ResponseMessage, Task, TimerTask } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
+import { isNil } from 'lodash';
 import { ContextAwareLogger, Logger, LogLevel } from 'logger';
-import { ScanRunResponse, WebController } from 'service-library';
+import * as moment from 'moment';
+import { RunState, ScanResultResponse, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebController } from 'service-library';
 import { ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
@@ -63,78 +66,33 @@ export class HealthMonitorOrchestrationController extends WebController {
             const scanId = thisObj.getScanIdFromResponse(context, submitScanRequestResponse);
             thisObj.logOrchestrationStep(context, `Orchestrator submitted scan with scan Id: ${scanId}`);
 
-            // yield thisObj.verifyScanSubmitted(scanId);
+            // tslint:disable-next-line: no-unsafe-any
+            let scanStatusResponse: SerializableResponse = yield thisObj.callGetScanStatusActivity(context, scanId);
+            thisObj.ensureSuccessStatusCode(context, scanStatusResponse, ActivityAction.getScanResult);
+            thisObj.verifyScanSubmitted(context, scanStatusResponse);
 
-            // yield thisObj.waitForScanCompletion(scanId);
+            let scanStatus: RunState = 'pending';
+            const waitStartTime = moment.utc(context.df.currentUtcDateTime);
+            const waitEndTime = waitStartTime.add(context.bindingData.maxScanRequestWaitTimeInSeconds as number, 'seconds');
+            while (
+                scanStatus !== 'completed' &&
+                scanStatus !== 'failed' &&
+                moment.utc(context.df.currentUtcDateTime).isBefore(waitEndTime)
+            ) {
+                yield thisObj.callWaitTimer(context);
+                thisObj.logOrchestrationStep(context, 'Timer completed');
+                // tslint:disable-next-line: no-unsafe-any
+                scanStatusResponse = yield thisObj.callGetScanStatusActivity(context, scanId);
+                thisObj.ensureSuccessStatusCode(context, scanStatusResponse, ActivityAction.getScanResult);
+                scanStatus = thisObj.getScanStatus(context, scanStatusResponse);
+            }
 
-            // yield thisObj.getScanReport(scanId);
+            const reportId = thisObj.getReportId(context, scanStatusResponse);
 
-            // const ensureSuccessStatusCode = (response: SerializableResponse<unknown>, activityName: string) => {
-            //     if (response.statusCode < 200 || response.statusCode >= 300) {
-            //         logOrchestrationStep(`Request failed - status code: ${response.statusCode}`, LogLevel.error, {
-            //             requestResponse: JSON.stringify(response),
-            //         });
-            //         throw new Error(`Request failed ${JSON.stringify(response)}`);
-            //     } else {
-            //         logOrchestrationStep(`${activityName} action completed with result ${JSON.stringify(response)}`);
-            //     }
-            // };
+            const scanReportResponse = yield thisObj.callGetScanReportActivity(context, scanId, reportId);
+            thisObj.ensureSuccessStatusCode(context, scanReportResponse, ActivityAction.getScanReport);
 
-            // logOrchestrationStep(`Orchestration started.`);
-
-            // logOrchestrationStep(`Executing '${ActivityAction.getHealthStatus}' orchestration step.`);
-            // const healthStatusResponse = (yield callActivity(ActivityAction.getHealthStatus)) as ResponseWithBodyType;
-            // ensureSuccessStatusCode(healthStatusResponse, ActivityAction.getHealthStatus);
-
-            // const testUrl = 'https://bing.com';
-            // logOrchestrationStep(`Executing '${ActivityAction.createScanRequest}' orchestration step.`);
-            // const scanRequestResult = (yield callActivity(ActivityAction.createScanRequest, { scanUrl: testUrl })) as SerializableResponse<
-            //     ScanRunResponse
-            // >;
-            // ensureSuccessStatusCode(scanRequestResult, ActivityAction.createScanRequest);
-            // const scanRunResponse = scanRequestResult.body;
-            // if (scanRunResponse.error !== undefined) {
-            //     logOrchestrationStep('Scan request failed', LogLevel.error, {
-            //         requestResponse: JSON.stringify(scanRequestResult);
-            //     });
-            //     throw new Error(`Request failed ${JSON.stringify(response.toJSON())}`);
-            // }
-
-            // logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'pending' response.`);
-            // const scanStatus = yield callActivity(ActivityAction.getScanResult);
-            // logOrchestrationStep(`${ActivityAction.getScanResult} action completed with result ${scanStatus}`);
-
-            // const scanRequestProcessingDelayInSeconds = <number>context.bindingData.scanRequestProcessingDelayInSeconds;
-            // logOrchestrationStep(
-            //     `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'pending' to 'accepted'.`,
-            // );
-            // yield context.df.createTimer(
-            //     moment
-            //         .utc(context.df.currentUtcDateTime)
-            //         .add(scanRequestProcessingDelayInSeconds, 'seconds')
-            //         .toDate(),
-            // );
-
-            // logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'accepted' response.`);
-            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
-
-            // logOrchestrationStep(
-            //     `Wait ${scanRequestProcessingDelayInSeconds} seconds for scan request state transition from 'accepted' to 'completed'.`,
-            // );
-            // yield context.df.createTimer(
-            //     moment
-            //         .utc(context.df.currentUtcDateTime)
-            //         .add(scanRequestProcessingDelayInSeconds, 'seconds')
-            //         .toDate(),
-            // );
-
-            // logOrchestrationStep(`Executing '${ActivityAction.getScanResult}' orchestration step with expected 'completed' response.`);
-            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanResult);
-
-            // logOrchestrationStep(`Executing '${ActivityAction.getScanReport}' orchestration step.`);
-            // yield context.df.callActivity(HealthMonitorOrchestrationController.activityName, ActivityAction.getScanReport);
-
-            //  logOrchestrationStep(`Orchestration ended.`);
+            thisObj.logOrchestrationStep(context, 'Orchestration ended.');
         });
     }
 
@@ -155,6 +113,36 @@ export class HealthMonitorOrchestrationController extends WebController {
         return this.callActivity(context, ActivityAction.createScanRequest, requestData);
     }
 
+    private callGetScanStatusActivity(context: IOrchestrationFunctionContext, scanId: string): Task {
+        this.logOrchestrationStep(context, `Executing '${ActivityAction.getScanResult}' orchestration step.`);
+
+        const requestData: GetScanResultData = { scanId: scanId };
+
+        return this.callActivity(context, ActivityAction.getScanResult, requestData);
+    }
+
+    private callGetScanReportActivity(context: IOrchestrationFunctionContext, scanId: string, reportId: string): Task {
+        this.logOrchestrationStep(context, `Executing '${ActivityAction.getScanReport}' orchestration step.`);
+
+        const requestData: GetScanReportData = {
+            scanId: scanId,
+            reportId: reportId,
+        };
+
+        return this.callActivity(context, ActivityAction.getScanReport, requestData);
+    }
+
+    private verifyScanSubmitted(context: IOrchestrationFunctionContext, response: SerializableResponse): void {
+        const scanStatus = this.getScanStatus(context, response);
+        if (scanStatus === 'pending' || scanStatus === 'accepted') {
+            this.logOrchestrationStep(context, 'verified scan submitted successfully');
+        } else {
+            this.logOrchestrationStep(context, 'scan submission failed', LogLevel.error, {
+                scanStatus: scanStatus,
+            });
+        }
+    }
+
     private getScanIdFromResponse(context: IOrchestrationFunctionContext, response: SerializableResponse): string {
         const body = response.body as ScanRunResponse[];
         const scanRunResponse = body[0];
@@ -166,6 +154,48 @@ export class HealthMonitorOrchestrationController extends WebController {
         }
 
         return scanRunResponse.scanId;
+    }
+
+    private getScanStatus(context: IOrchestrationFunctionContext, response: SerializableResponse): RunState {
+        const scanErrorResultResponse = response.body as ScanRunErrorResponse;
+        if (isNil(scanErrorResultResponse.error)) {
+            const scanRunResultResponse = response.body as ScanRunResultResponse;
+
+            return scanRunResultResponse.run.state;
+        } else {
+            this.logOrchestrationStep(context, 'Scan request failed', LogLevel.error, {
+                requestResponse: JSON.stringify(response),
+            });
+            throw new Error(`Request failed ${JSON.stringify(response)}`);
+        }
+    }
+
+    private getReportId(context: IOrchestrationFunctionContext, response: SerializableResponse): string {
+        const scanStatus = this.getScanStatus(context, response);
+        if (scanStatus !== 'completed') {
+            this.logOrchestrationStep(context, 'Scan failed', LogLevel.error, {
+                requestResponse: JSON.stringify(response),
+                scanStatus: scanStatus,
+            });
+            throw new Error(`Scan failed ${JSON.stringify(response)}`);
+        }
+
+        const scanRunResultResponse = response.body as ScanRunResultResponse;
+        const scanReport = scanRunResultResponse.reports[0];
+
+        return scanReport.reportId;
+    }
+
+    private callWaitTimer(context: IOrchestrationFunctionContext): TimerTask {
+        const scanRequestProcessingDelayInSeconds = <number>context.bindingData.scanRequestProcessingDelayInSeconds;
+        this.logOrchestrationStep(context, `scanRequestProcessingDelayInSeconds = ${scanRequestProcessingDelayInSeconds}`);
+
+        return context.df.createTimer(
+            moment
+                .utc(context.df.currentUtcDateTime)
+                .add(60, 'seconds')
+                .toDate(),
+        );
     }
 
     private callActivity(context: IOrchestrationFunctionContext, activityName: string, data?: unknown): Task {
@@ -203,8 +233,8 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     private async setContextGenerator(): Promise<void> {
         this.context.bindingData.controller = this;
-        this.context.bindingData.scanRequestProcessingDelayInSeconds = (await this.serviceConfig.getConfigValue(
-            'restApiConfig',
-        )).scanRequestProcessingDelayInSeconds;
+        const restApiConfig = await this.serviceConfig.getConfigValue('restApiConfig');
+        this.context.bindingData.scanRequestProcessingDelayInSeconds = restApiConfig.scanRequestProcessingDelayInSeconds;
+        this.context.bindingData.maxScanRequestWaitTimeInSeconds = restApiConfig.maxScanRequestWaitTimeInSeconds;
     }
 }

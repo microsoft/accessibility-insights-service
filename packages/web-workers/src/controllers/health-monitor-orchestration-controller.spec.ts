@@ -26,8 +26,9 @@ describe('HealthMonitorOrchestrationController', () => {
     const restApiConfig: RestApiConfig = {
         maxScanRequestBatchCount: 10,
         scanRequestProcessingDelayInSeconds: 20,
-        minScanPriorityValue: 30,
-        maxScanPriorityValue: 40,
+        maxScanRequestWaitTimeInSeconds: 30,
+        minScanPriorityValue: 40,
+        maxScanPriorityValue: 50,
     };
     const activityFuncName = 'health-monitor-client-func';
     let orchestratorGeneratorMock: IMock<(ctxt: IOrchestrationFunctionContext) => void>;

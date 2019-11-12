@@ -331,11 +331,12 @@ describe(ApiController, () => {
     describe('getRestApiConfig()', () => {
         it('should get config value', async () => {
             const context = <Context>(<unknown>{});
-            const configStub = {
+            const configStub: RestApiConfig = {
                 maxScanRequestBatchCount: 1,
                 scanRequestProcessingDelayInSeconds: 2,
                 minScanPriorityValue: -1,
                 maxScanPriorityValue: 1,
+                maxScanRequestWaitTimeInSeconds: 3,
             };
 
             const serviceConfigMock = Mock.ofType(ServiceConfiguration);

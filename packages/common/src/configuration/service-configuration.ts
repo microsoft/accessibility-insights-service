@@ -35,6 +35,7 @@ export interface ScanRunTimeConfig {
 export interface RestApiConfig {
     maxScanRequestBatchCount: number;
     scanRequestProcessingDelayInSeconds: number;
+    maxScanRequestWaitTimeInSeconds: number;
     minScanPriorityValue: number;
     maxScanPriorityValue: number;
 }
@@ -209,6 +210,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 15,
                     doc: 'The scan request processing delay interval in seconds for a new submitted request.',
+                },
+                maxScanRequestWaitTimeInSeconds: {
+                    format: 'int',
+                    default: 600,
+                    doc: 'Maximum wait time for fetching scan status of the submitted request',
                 },
                 minScanPriorityValue: {
                     format: 'int',
