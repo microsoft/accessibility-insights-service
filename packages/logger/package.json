@@ -38,7 +38,7 @@
         "typescript": "^3.6.2"
     },
     "dependencies": {
-        "applicationinsights": "^1.4.0",
+        "applicationinsights": "^1.6.0",
         "common": "1.0.0",
         "dotenv": "^6.2.0",
         "inversify": "^5.0.1",

@@ -38,30 +38,16 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     }
 
     public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
-        const availabilityTelemetry = new Contracts.AvailabilityData();
-
-        availabilityTelemetry.id = telemetry.id;
-        availabilityTelemetry.name = name;
-        availabilityTelemetry.success = telemetry.success;
-        availabilityTelemetry.duration = telemetry.duration;
-        availabilityTelemetry.runLocation = telemetry.runLocation;
-        availabilityTelemetry.message = telemetry.message;
-        availabilityTelemetry.measurements = telemetry.measurements;
-        availabilityTelemetry.properties = this.getMergedProperties(telemetry.properties);
-
-        const availabilityData = new Contracts.Data();
-        availabilityData.baseData = availabilityTelemetry;
-        // tslint:disable-next-line: no-any
-        availabilityData.baseType = 'AvailabilityData';
-
-        const availabilityEnvelope = new Contracts.Envelope();
-        availabilityEnvelope.data = availabilityData;
-        availabilityEnvelope.time = new Date().toISOString();
-        availabilityEnvelope.ver = 1;
-        availabilityEnvelope.iKey = this.telemetryClient.config.instrumentationKey;
-        availabilityEnvelope.name = 'Microsoft.ApplicationInsights.Availability';
-
-        this.telemetryClient.channel.send(availabilityEnvelope);
+        this.telemetryClient.trackAvailability({
+            name: name,
+            success: telemetry.success,
+            message: telemetry.message,
+            duration: telemetry.duration,
+            runLocation: telemetry.runLocation,
+            id: telemetry.id,
+            measurements: telemetry.measurements,
+            properties: telemetry.properties,
+        });
     }
 
     public trackException(error: Error): void {

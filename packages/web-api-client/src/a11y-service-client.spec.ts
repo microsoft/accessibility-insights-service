@@ -32,7 +32,7 @@ describe(A11yServiceClient, () => {
         };
         credMock = Mock.ofType<A11yServiceCredential>(null);
 
-        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, requestStub);
+        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, false, requestStub);
     });
 
     afterEach(() => {
@@ -48,12 +48,41 @@ describe(A11yServiceClient, () => {
             .verifiable();
     }
 
+    describe('verify default options', () => {
+        test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
+            const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
+            requestStub.defaults = defaultsMock.object;
+
+            defaultsMock
+                .setup(d =>
+                    d({
+                        forever: true,
+                        qs: {
+                            'api-version': '1.0',
+                        },
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        resolveWithFullResponse: true,
+                        json: true,
+                        simple: throwOnFailure,
+                    }),
+                )
+                .returns(() => 'some object' as any)
+                .verifiable(Times.once());
+
+            testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, throwOnFailure, requestStub);
+
+            defaultsMock.verifyAll();
+        });
+    });
+
     it('postScanUrl', async () => {
         const scanUrl = 'url';
         const priority = 3;
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority }];
-        const options = { json: requestBody };
+        const options = { body: requestBody };
         setupVerifiableSignRequestCall();
         postMock
             .setup(req => req(`${baseUrl}/scans`, options))
@@ -69,7 +98,7 @@ describe(A11yServiceClient, () => {
         const scanUrl = 'url';
         const response = { statusCode: 200 };
         const requestBody = [{ url: scanUrl, priority: 0 }];
-        const options = { json: requestBody };
+        const options = { body: requestBody };
         setupVerifiableSignRequestCall();
         postMock
             .setup(req => req(`${baseUrl}/scans`, options))
