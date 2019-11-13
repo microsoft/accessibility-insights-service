@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
@@ -115,6 +116,29 @@ describe(Logger, () => {
             invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', properties, measurements)).verifiable(Times.once()));
 
             testSubject.trackEvent('HealthCheck', properties, measurements);
+
+            verifyMocks();
+        });
+    });
+
+    describe('trackAvailability', () => {
+        // tslint:disable-next-line: mocha-no-side-effect-code
+        const availabilityTelemetryData: AvailabilityTelemetry = 'test data' as any;
+        const name = 'test availability name';
+
+        it('throw if called before setup', () => {
+            expect(() => {
+                testSubject.trackAvailability(name, availabilityTelemetryData);
+            }).toThrowError('Logger not setup');
+        });
+
+        it('invokes logger clients', async () => {
+            setupCallsForTelemetrySetup();
+            await testSubject.setup();
+
+            invokeAllLoggerClientMocks(m => m.setup(c => c.trackAvailability(name, availabilityTelemetryData)).verifiable(Times.once()));
+
+            testSubject.trackAvailability(name, availabilityTelemetryData);
 
             verifyMocks();
         });

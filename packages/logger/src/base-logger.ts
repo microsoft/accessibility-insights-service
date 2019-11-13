@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { VError } from 'verror';
+import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
@@ -52,6 +53,11 @@ export abstract class BaseLogger {
 
     public logInfo(message: string, properties?: { [name: string]: string }): void {
         this.log(message, LogLevel.info, properties);
+    }
+
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
+        this.ensureInitialized();
+        this.invokeLoggerClient(client => client.trackAvailability(name, telemetry));
     }
 
     public logVerbose(message: string, properties?: { [name: string]: string }): void {

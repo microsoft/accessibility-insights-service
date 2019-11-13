@@ -44,7 +44,12 @@ export class HealthMonitorClientController extends WebController {
 
         const activityCallback = this.activityCallbacks[activityRequestData.activityName];
 
-        return activityCallback(activityRequestData.data);
+        const result = activityCallback(activityRequestData.data);
+        this.contextAwareLogger.logInfo(
+            `${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`,
+        );
+
+        return result;
     }
 
     protected validateRequest(...args: any[]): boolean {
