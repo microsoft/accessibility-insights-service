@@ -50,7 +50,11 @@ describe(A11yServiceClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
+            const defaultsMock = Mock.ofInstance(
+                (options: request.RequestPromiseOptions): any => {
+                    return {};
+                },
+            );
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock
