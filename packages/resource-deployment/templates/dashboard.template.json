@@ -986,7 +986,7 @@
                                 "position": {
                                     "x": 0,
                                     "y": 8,
-                                    "colSpan": 4,
+                                    "colSpan": 7,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
@@ -1080,6 +1080,158 @@
                                                 "version": 2
                                             }
                                         }
+                                    }
+                                }
+                            },
+                            "8": {
+                                "position": {
+                                    "x": 7,
+                                    "y": 8,
+                                    "colSpan": 6,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().id]",
+                                                "Name": "[parameters('appInsightsName')]",
+                                                "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                                            }
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "let startTime = startofmonth(now());\nlet timeRangeInSeconds = (now() - startTime) / 1s;\nlet failureOrRecoverEvents = availabilityResults \n| serialize \n| extend prevSuccess = prev(success)\n| where timestamp > startTime and name == 'foo' and (success != prevSuccess)\n| sort by timestamp asc  \n| project timestamp , name, success, prevSuccess;\nlet availableIntervals = failureOrRecoverEvents\n| serialize \n| where success == \"1\" and prevSuccess == \"0\" \n| extend prevTimeStamp = prev(timestamp), status=\"available\"\n| extend intervalInSeconds = todouble((timestamp - prevTimeStamp)/1s) \n| extend totoalAvailableTime = row_cumsum(intervalInSeconds);\navailableIntervals\n| sort by timestamp desc\n| take 1\n| extend  availability = strcat(tostring(round(totoalAvailableTime/timeRangeInSeconds * 100, 2)), \"%\"), AST=timeRangeInSeconds\n| project name, availability, totoalAvailableTime, AST\n"
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "1.0"
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "bd2db51a-a977-49d8-b2b6-ce76143aae91"
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "Reliability"
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "service reliability in current month"
+                                        },
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "value": "components"
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid"
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "settings": {
+                                        "content": {
+                                            "PartTitle": "Availability",
+                                            "PartSubTitle": "Service availability in current month"
+                                        }
+                                    },
+                                    "asset": {
+                                        "idInputName": "ComponentId",
+                                        "type": "ApplicationInsights"
+                                    }
+                                }
+                            },
+                            "9": {
+                                "position": {
+                                    "x": 13,
+                                    "y": 8,
+                                    "colSpan": 7,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().id]",
+                                                "Name": "[parameters('appInsightsName')]",
+                                                "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                                            }
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "let startTime = startofmonth(now());\nlet timeRangeInHours = (now() - startTime) / 1h;\navailabilityResults \n| serialize \n| extend prevSuccess = prev(success)\n| where timestamp > startTime and name == 'foo' and success == \"0\" and prevSuccess != \"0\"\n| project timestamp , name, success, prevSuccess\n| summarize reliability = strcat(tostring(round((1 - todecimal(count())/timeRangeInHours) * 100, 2)), \"%\"), NumberOfFailures=count() by name \n| extend AST_in_hour = timeRangeInHours\n"
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "1.0"
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "962e0e73-b670-4d51-b1fc-ddda5bd7ccb2"
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "Analytics"
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "allyinsights5d4fa3x2bewh6"
+                                        },
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "value": "components"
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid"
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "settings": {
+                                        "content": {
+                                            "PartTitle": "Reliability",
+                                            "PartSubTitle": "Service reliability in current month"
+                                        }
+                                    },
+                                    "asset": {
+                                        "idInputName": "ComponentId",
+                                        "type": "ApplicationInsights"
                                     }
                                 }
                             }
