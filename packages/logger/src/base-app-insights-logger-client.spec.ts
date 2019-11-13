@@ -29,6 +29,7 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
                 trackException: (() => {}) as any,
                 flush: (() => {}) as any,
                 trackEvent: (() => {}) as any,
+                trackAvailability: (() => {}) as any,
             } as appInsights.TelemetryClient,
             MockBehavior.Loose,
             false,
@@ -216,37 +217,35 @@ describe(BaseAppInsightsLoggerClient, () => {
             await testSubject.setup();
 
             // tslint:disable-next-line: no-empty
-            const sendMock = Mock.ofInstance((data: any) => {});
-            const channelStub = {
-                send: sendMock.object,
-            };
+
             const telemetryName = 'test';
             const availabilityData: AvailabilityTelemetry = {
                 id: '1',
                 success: false,
+                duration: 1,
+                properties: 'test properties' as any,
+                measurements: 'test measurements' as any,
+                message: 'message 1',
+                runLocation: 'westus',
             };
 
             testSubject.telemetryClientMock
-                .setup(t => t.channel)
-                .returns(() => channelStub as any)
-                .verifiable(Times.atLeastOnce());
-            sendMock
-                .setup(send =>
-                    send(
-                        It.is(availabilityEnvelope => {
-                            // tslint:disable-next-line: no-unsafe-any
-                            const data = availabilityEnvelope.data.baseData;
-
-                            // tslint:disable-next-line: no-unsafe-any
-                            return data.id === availabilityData.id && data.name === telemetryName;
-                        }),
-                    ),
+                .setup(t =>
+                    t.trackAvailability({
+                        name: telemetryName,
+                        success: availabilityData.success,
+                        message: availabilityData.message,
+                        duration: availabilityData.duration,
+                        runLocation: availabilityData.runLocation,
+                        measurements: availabilityData.measurements,
+                        properties: availabilityData.properties,
+                        id: availabilityData.id,
+                    }),
                 )
-                .verifiable();
+                .verifiable(Times.once());
 
             testSubject.trackAvailability(telemetryName, availabilityData);
 
-            sendMock.verifyAll();
             verifyMocks();
         });
     });

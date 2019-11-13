@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 export type AvailabilityTelemetry = {
-    id: string;
-    duration?: string;
+    id?: string;
+    duration?: number;
     success: boolean;
     runLocation?: string;
     message?: string;
