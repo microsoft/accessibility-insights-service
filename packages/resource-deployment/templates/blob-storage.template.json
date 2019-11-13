@@ -234,7 +234,7 @@
                                 },
                                 "filters": {
                                     "blobTypes": ["blockBlob"],
-                                    "prefixMatch": ["batch-logs", "page-scan-run-reports"]
+                                    "prefixMatch": ["batch-logs"]
                                 }
                             }
                         }
