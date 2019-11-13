@@ -7,7 +7,7 @@ import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
-import { OrchestrationSteps } from '../orchestration-steps';
+import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 
 @injectable()
 export class HealthMonitorOrchestrationController extends WebController {
@@ -38,7 +38,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     protected createOrchestrationSteps(context: IOrchestrationFunctionContext, restApiConfig: RestApiConfig): OrchestrationSteps {
-        return new OrchestrationSteps(context, restApiConfig, this.contextAwareLogger);
+        return new OrchestrationStepsImpl(context, restApiConfig, this.contextAwareLogger);
     }
 
     private invokeOrchestration(): void {

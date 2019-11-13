@@ -9,7 +9,7 @@ import { ScanResultResponse, ScanRun, ScanRunResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
-import { ActivityRequestData } from './activity-request-data';
+import { ActivityRequestData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
 // tslint:disable:no-object-literal-type-assertion no-any no-unsafe-any
@@ -113,7 +113,21 @@ describe(HealthMonitorClientController, () => {
             const args: ActivityRequestData = {
                 activityName: ActivityAction.getHealthStatus,
             };
-            const result = await testSubject.invoke(context, args);
+            await testSubject.invoke(context, args);
+        });
+
+        it('handles trackAvailability', async () => {
+            const data: TrackAvailabilityData = {
+                name: 'track availability data name',
+                telemetry: 'availability telemetry' as any,
+            };
+            contextAwareLoggerMock.setup(async l => l.trackAvailability(data.name, data.telemetry)).verifiable(Times.once());
+
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.trackAvailability,
+                data: data,
+            };
+            await testSubject.invoke(context, args);
         });
     });
 });

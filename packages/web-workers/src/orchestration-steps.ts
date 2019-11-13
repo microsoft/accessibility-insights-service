@@ -30,15 +30,23 @@ interface OrchestrationTelemetryProperties {
     waitEndTime?: string;
     waitStartTime?: string;
 }
-export class OrchestrationSteps {
+
+export interface OrchestrationSteps {
+    callHealthCheckActivity(): Generator<Task, void, SerializableResponse>;
+    getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
+    waitForScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void>;
+    callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse>;
+}
+export class OrchestrationStepsImpl implements OrchestrationSteps {
     constructor(
         private readonly context: IOrchestrationFunctionContext,
         private readonly restApiConfig: RestApiConfig,
         private readonly logger: ContextAwareLogger,
     ) {}
 
-    public *callHealthCheckActivity(): Generator<Task, SerializableResponse, SerializableResponse> {
-        return yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
+    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse> {
+        yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
     }
 
     public *getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
