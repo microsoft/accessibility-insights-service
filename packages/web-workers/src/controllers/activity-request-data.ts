@@ -1,3 +1,4 @@
+import { AvailabilityTelemetry } from 'logger/dist/availablity-telemetry';
 import { Url } from 'url';
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -20,6 +21,11 @@ export interface GetScanResultData {
 export interface GetScanReportData {
     scanId: string;
     reportId: string;
+}
+
+export interface TrackAvailabilityData {
+    name: string;
+    telemetry: AvailabilityTelemetry;
 }
 
 interface SerializableRequest {

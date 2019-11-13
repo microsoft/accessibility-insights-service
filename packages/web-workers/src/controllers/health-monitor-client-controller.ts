@@ -13,6 +13,7 @@ import {
     GetScanReportData,
     GetScanResultData,
     SerializableResponse,
+    TrackAvailabilityData,
 } from './activity-request-data';
 
 // tslint:disable: no-any
@@ -35,6 +36,7 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.getScanResult]: this.getScanResult,
             [ActivityAction.getScanReport]: this.getScanReport,
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
+            [ActivityAction.trackAvailability]: this.trackAvailability,
         };
     }
 
@@ -44,7 +46,7 @@ export class HealthMonitorClientController extends WebController {
 
         const activityCallback = this.activityCallbacks[activityRequestData.activityName];
 
-        const result = activityCallback(activityRequestData.data);
+        const result = await activityCallback(activityRequestData.data);
         this.contextAwareLogger.logInfo(
             `${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`,
         );
@@ -87,5 +89,9 @@ export class HealthMonitorClientController extends WebController {
         const response = await webApiClient.checkHealth();
 
         return response.toJSON();
+    };
+
+    private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {
+        this.contextAwareLogger.trackAvailability(data.name, data.telemetry);
     };
 }
