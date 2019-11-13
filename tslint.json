@@ -7,6 +7,7 @@
         "completed-docs": false,
         "export-name": false,
         "newline-per-chained-call": false,
+        "semicolon": [true, "always", "ignore-bound-class-methods"],
         "no-implicit-dependencies": [true, "dev"],
         "no-import-side-effect": [true, { "ignore-module": "reflect-metadata" }],
         "no-parameter-properties": false,

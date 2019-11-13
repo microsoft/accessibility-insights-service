@@ -1,4 +1,4 @@
-import { AvailabilityTelemetry } from 'logger/dist/availablity-telemetry';
+import { AvailabilityTelemetry } from 'logger';
 import { Url } from 'url';
 
 // Copyright (c) Microsoft Corporation. All rights reserved.

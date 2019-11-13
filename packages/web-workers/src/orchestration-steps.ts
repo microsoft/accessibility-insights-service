@@ -106,7 +106,7 @@ export class OrchestrationSteps {
         } else {
             const scanResultString = JSON.stringify(scanStatus);
 
-            this.trackAvailability(false, {
+            yield* this.trackAvailability(false, {
                 activityName: 'waitForScanCompletion',
                 failureMessage: `Unable to get completed response `,
                 requestResponse: scanResultString,
