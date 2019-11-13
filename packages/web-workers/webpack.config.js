@@ -75,6 +75,10 @@ module.exports = env => {
                     to: '',
                 },
                 {
+                    from: '*.csproj',
+                    to: '',
+                },
+                {
                     from: '../../yarn.lock',
                     to: '',
                 },
