@@ -1096,7 +1096,7 @@
                                             "name": "ComponentId",
                                             "value": {
                                                 "SubscriptionId": "[subscription().subscriptionId]",
-                                                "ResourceGroup": "[resourceGroup().id]",
+                                                "ResourceGroup": "[resourceGroup().name]",
                                                 "Name": "[parameters('appInsightsName')]",
                                                 "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                             }
@@ -1115,11 +1115,11 @@
                                         },
                                         {
                                             "name": "PartTitle",
-                                            "value": "Reliability"
+                                            "value": "Analytics"
                                         },
                                         {
                                             "name": "PartSubTitle",
-                                            "value": "service reliability in current month"
+                                            "value": "allyinsights5d4fa3x2bewh6"
                                         },
                                         {
                                             "name": "resourceTypeMode",
@@ -1172,7 +1172,7 @@
                                             "name": "ComponentId",
                                             "value": {
                                                 "SubscriptionId": "[subscription().subscriptionId]",
-                                                "ResourceGroup": "[resourceGroup().id]",
+                                                "ResourceGroup": "[resourceGroup().name]",
                                                 "Name": "[parameters('appInsightsName')]",
                                                 "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                             }
@@ -1273,7 +1273,9 @@
                                         "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43385",
                                         "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43387",
                                         "StartboardPart-AnalyticsPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43389",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4338b"
+                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4338b",
+                                        "StartboardPart-AnalyticsPart-84369902-2b4c-4cf7-873b-af6a81b2a015",
+                                        "StartboardPart-AnalyticsPart-84369902-2b4c-4cf7-873b-af6a81b2a017"
                                     ]
                                 }
                             }
