@@ -23,21 +23,26 @@ export class A11yServiceClient {
             'Content-Type': 'application/json',
         },
         resolveWithFullResponse: true,
+        json: true,
     };
 
     constructor(
         private readonly credential: A11yServiceCredential,
         private readonly requestBaseUrl: string,
         private readonly apiVersion = '1.0',
+        private readonly throwOnRequestFailure: boolean = true,
         httpRequest = request,
     ) {
-        this.defaultRequestObject = httpRequest.defaults(this.defaultOptions);
+        this.defaultRequestObject = httpRequest.defaults({
+            ...this.defaultOptions,
+            simple: throwOnRequestFailure,
+        });
     }
 
-    public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse>> {
+    public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: request.RequestPromiseOptions = { json: requestBody };
+        const options: request.RequestPromiseOptions = { body: requestBody };
 
         return (await this.signRequest()).post(requestUrl, options);
     }
