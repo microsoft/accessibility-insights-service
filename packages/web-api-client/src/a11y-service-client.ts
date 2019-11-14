@@ -30,12 +30,12 @@ export class A11yServiceClient {
         private readonly credential: A11yServiceCredential,
         private readonly requestBaseUrl: string,
         private readonly apiVersion = '1.0',
-        private readonly throwOnRequestFailure: boolean = true,
+        private readonly throwOnRequestFailure: boolean = false,
         httpRequest = request,
     ) {
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
-            simple: throwOnRequestFailure,
+            simple: this.throwOnRequestFailure,
         });
     }
 
