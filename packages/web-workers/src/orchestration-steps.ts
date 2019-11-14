@@ -19,7 +19,7 @@ import {
 } from './controllers/activity-request-data';
 import { HealthMonitorOrchestrationController } from './controllers/health-monitor-orchestration-controller';
 
-interface OrchestrationTelemetryProperties {
+export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
     instanceId?: string;
     isReplaying?: string;
@@ -39,13 +39,15 @@ export interface OrchestrationSteps {
     callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse>;
 }
 export class OrchestrationStepsImpl implements OrchestrationSteps {
+    public static readonly activityTriggerFuncName = 'health-monitor-client-func';
+
     constructor(
         private readonly context: IOrchestrationFunctionContext,
         private readonly restApiConfig: RestApiConfig,
         private readonly logger: ContextAwareLogger,
     ) {}
 
-    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse> {
+    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse & void> {
         yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
     }
 
@@ -72,6 +74,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
         const waitEndTime = waitStartTime.clone().add(this.restApiConfig.maxScanRequestWaitTimeInSeconds, 'seconds');
         const scanRequestProcessingDelayInSeconds = this.restApiConfig.scanRequestProcessingDelayInSeconds;
+        let scanStatusResponse: SerializableResponse;
 
         this.logOrchestrationStep('Starting waitForScanCompletion');
 
@@ -97,9 +100,12 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
             });
-            const scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
+
+            // tslint:disable-next-line: no-unsafe-any
+            scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
             // tslint:disable-next-line: no-unsafe-any
             scanStatus = yield* this.getScanStatus(scanStatusResponse);
+
             scanRunState = scanStatus.run.state;
         }
 
@@ -112,19 +118,15 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
                 waitEndTime: waitEndTime.toJSON(),
             });
         } else {
-            const scanResultString = JSON.stringify(scanStatus);
+            const scanStatusResponseString = JSON.stringify(scanStatusResponse);
 
             yield* this.trackAvailability(false, {
                 activityName: 'waitForScanCompletion',
-                failureMessage: `Unable to get completed response `,
-                requestResponse: scanResultString,
-                totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
-                waitStartTime: waitStartTime.toJSON(),
-                waitEndTime: waitEndTime.toJSON(),
+                requestResponse: scanStatusResponseString,
             });
 
             this.logOrchestrationStep('waitForScanCompletion failed', LogLevel.error, {
-                requestResponse: scanResultString,
+                requestResponse: scanStatusResponseString,
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
@@ -139,37 +141,34 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     public *verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void> {
         const response = yield* this.callGetScanStatusActivity(scanId);
 
-        const scanStatus = yield* this.getScanStatus(response);
-        if (scanStatus.run.state === 'pending' || scanStatus.run.state === 'accepted') {
-            this.logOrchestrationStep('verified scan submitted successfully');
-        } else {
-            this.logOrchestrationStep('scan submission failed', LogLevel.error, {
-                requestResponse: JSON.stringify(scanStatus),
-            });
-        }
+        yield* this.getScanStatus(response);
+        this.logOrchestrationStep('verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
     }
 
-    public *callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse> {
+    public *callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateScanRequestData = {
             scanUrl: url,
-            priority: 0,
+            priority: 1000,
         };
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
 
-        const scanId = this.getScanIdFromResponse(response);
+        const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createScanRequest);
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId}`);
 
         return scanId;
     }
 
-    private *callGetScanStatusActivity(scanId: string): Generator<Task, SerializableResponse, SerializableResponse> {
+    private *callGetScanStatusActivity(scanId: string): Generator<Task, SerializableResponse, SerializableResponse & void> {
         const requestData: GetScanResultData = { scanId: scanId };
 
         return yield* this.callWebRequestActivity(ActivityAction.getScanResult, requestData);
     }
 
-    private *trackAvailability(success: boolean, properties: OrchestrationTelemetryProperties): Generator<Task, void, void> {
+    private *trackAvailability(
+        success: boolean,
+        properties: OrchestrationTelemetryProperties,
+    ): Generator<Task, void, SerializableResponse & void> {
         const data: TrackAvailabilityData = {
             name: 'workerAvailabilityTest',
             telemetry: {
@@ -184,7 +183,10 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         yield* this.callActivity(ActivityAction.trackAvailability, false, data);
     }
 
-    private *ensureSuccessStatusCode(response: SerializableResponse, activityName: string): Generator<Task, void, void> {
+    private *ensureSuccessStatusCode(
+        response: SerializableResponse,
+        activityName: string,
+    ): Generator<Task, void, SerializableResponse & void> {
         if (response.statusCode < 200 || response.statusCode >= 300) {
             this.logOrchestrationStep(`${activityName} activity failed`, LogLevel.error, {
                 requestResponse: JSON.stringify(response),
@@ -192,7 +194,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             });
 
             yield* this.trackAvailability(false, {
-                failureMessage: JSON.stringify(response),
+                requestResponse: JSON.stringify(response),
                 activityName: activityName,
             });
 
@@ -205,12 +207,11 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         }
     }
 
-    private getDefaultLogProperties(): { [name: string]: string } {
+    private getDefaultLogProperties(): OrchestrationTelemetryProperties {
         return {
             instanceId: this.context.df.instanceId,
             isReplaying: this.context.df.isReplaying.toString(),
             currentUtcDateTime: this.context.df.currentUtcDateTime.toUTCString(),
-            testing: '6',
         };
     }
 
@@ -221,25 +222,31 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         });
     }
 
-    private *callWebRequestActivity(activityName: string, data?: unknown): Generator<Task, SerializableResponse, SerializableResponse> {
-        return (yield* this.callActivity(activityName, true, data)) as SerializableResponse;
+    private *callWebRequestActivity(
+        activityName: ActivityAction,
+        data?: unknown,
+    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
+        return yield* this.callActivity(activityName, true, data);
     }
 
     private *callActivity(
-        activityName: string,
+        activityName: ActivityAction,
         isWebResponse: boolean,
         data?: unknown,
-    ): Generator<Task, SerializableResponse | void, SerializableResponse | void> {
+    ): Generator<Task, SerializableResponse, SerializableResponse & void> {
         const activityRequestData: ActivityRequestData = {
             activityName: activityName,
             data: data,
         };
 
         this.logOrchestrationStep(`Executing '${activityName}' orchestration step.`);
-        const response = yield this.context.df.callActivity(HealthMonitorOrchestrationController.activityName, activityRequestData);
+        const response = (yield this.context.df.callActivity(
+            OrchestrationStepsImpl.activityTriggerFuncName,
+            activityRequestData,
+        )) as SerializableResponse;
 
         if (isWebResponse) {
-            this.ensureSuccessStatusCode(response as SerializableResponse, activityName);
+            yield* this.ensureSuccessStatusCode(response, activityName);
         } else {
             this.logOrchestrationStep(`${activityName} activity completed}`);
         }
@@ -247,7 +254,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return response;
     }
 
-    private *getScanStatus(response: SerializableResponse): Generator<Task, ScanRunResultResponse, void> {
+    private *getScanStatus(response: SerializableResponse): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
         const scanErrorResultResponse = response.body as ScanRunErrorResponse;
         if (isNil(scanErrorResultResponse.error)) {
             return response.body as ScanRunResultResponse;
@@ -257,20 +264,28 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             });
             yield* this.trackAvailability(false, {
                 activityName: ActivityAction.getScanResult,
-                failureMessage: 'getScanStatus returned error object',
                 requestResponse: JSON.stringify(response),
             });
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         }
     }
 
-    private getScanIdFromResponse(response: SerializableResponse): string {
+    private *getScanIdFromResponse(
+        response: SerializableResponse,
+        activityName: string,
+    ): Generator<Task, string, SerializableResponse & void> {
         const body = response.body as ScanRunResponse[];
         const scanRunResponse = body[0];
         if (scanRunResponse.error !== undefined) {
             this.logOrchestrationStep('Scan request failed', LogLevel.error, {
                 requestResponse: JSON.stringify(response),
             });
+
+            yield* this.trackAvailability(false, {
+                activityName: activityName,
+                requestResponse: JSON.stringify(response),
+            });
+
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         }
 

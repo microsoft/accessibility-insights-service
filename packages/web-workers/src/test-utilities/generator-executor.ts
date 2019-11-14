@@ -3,7 +3,7 @@
 
 import { isNil } from 'lodash';
 
-export class GeneratorExecutor {
+export class GeneratorExecutor<T = {}> {
     private prevCall: IteratorResult<unknown, unknown>;
 
     constructor(private readonly generatorFunc: IterableIterator<unknown>) {}
@@ -15,5 +15,14 @@ export class GeneratorExecutor {
         this.prevCall = currentCall;
 
         return currentCall;
+    }
+
+    public runTillEnd(): T {
+        let done: Boolean = false;
+        while (done !== true) {
+            done = this.next().done;
+        }
+
+        return this.prevCall.value as T;
     }
 }

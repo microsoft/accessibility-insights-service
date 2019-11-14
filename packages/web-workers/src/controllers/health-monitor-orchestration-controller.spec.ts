@@ -6,15 +6,13 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
-import { DurableOrchestrationContext, IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
-import { isNil } from 'lodash';
+import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
 import { ContextAwareLogger } from 'logger';
-import { ScanRunResponse, ScanRunResultResponse } from 'service-library';
+import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ActivityAction } from '../contracts/activity-actions';
-import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
+import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
-import { ActivityRequestData, CreateScanRequestData, SerializableResponse } from './activity-request-data';
+import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
 // tslint:disable: no-empty no-unsafe-any no-object-literal-type-assertion
@@ -135,7 +133,6 @@ describe('HealthMonitorOrchestrationController', () => {
         minScanPriorityValue: 40,
         maxScanPriorityValue: 50,
     };
-    const activityFuncName = 'health-monitor-client-func';
     let orchestratorGeneratorMock: IMock<(ctxt: IOrchestrationFunctionContext) => void>;
     let orchestratorStepsStub: OrchestrationStepsStub;
     let orchestratorIterator: GeneratorExecutor;

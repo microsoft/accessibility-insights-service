@@ -11,7 +11,6 @@ import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-ste
 
 @injectable()
 export class HealthMonitorOrchestrationController extends WebController {
-    public static readonly activityName = 'health-monitor-client-func';
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-orchestration';
 
