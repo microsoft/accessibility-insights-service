@@ -1150,7 +1150,7 @@
                                     "settings": {
                                         "content": {
                                             "PartTitle": "Availability",
-                                            "PartSubTitle": "Service availability in current month"
+                                            "PartSubTitle": "Service availability in past 30 days"
                                         }
                                     },
                                     "asset": {
@@ -1226,7 +1226,7 @@
                                     "settings": {
                                         "content": {
                                             "PartTitle": "Reliability",
-                                            "PartSubTitle": "Service reliability in current month"
+                                            "PartSubTitle": "Service reliability in past 30 days"
                                         }
                                     },
                                     "asset": {
