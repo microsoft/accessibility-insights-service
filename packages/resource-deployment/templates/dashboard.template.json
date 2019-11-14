@@ -704,7 +704,7 @@
                                     "x": 0,
                                     "y": 7,
                                     "colSpan": 6,
-                                    "rowSpan": 3
+                                    "rowSpan": 4
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -794,9 +794,79 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "18": {
+                            "10": {
                                 "position": {
-                                    "x": 8,
+                                    "x": 18,
+                                    "y": 7,
+                                    "colSpan": 5,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().name]",
+                                                "Name": "[parameters('appInsightsName')]",
+                                                "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                                            }
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "requests\r\n| summarize Average_Response_Time=(avg(duration) / 1000) by name\n"
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "value": "P1D"
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "1.0"
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "45aa3e16-a894-4891-9148-a3d8561fb63a"
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "API response time"
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "Average response time per API endpoint"
+                                        },
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "value": "components"
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid"
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "asset": {
+                                        "idInputName": "ComponentId",
+                                        "type": "ApplicationInsights"
+                                    }
+                                }
+                            },
+                            "11": {
+                                "position": {
+                                    "x": 6,
                                     "y": 8,
                                     "colSpan": 6,
                                     "rowSpan": 3
@@ -871,9 +941,9 @@
                                     }
                                 }
                             },
-                            "19": {
+                            "12": {
                                 "position": {
-                                    "x": 14,
+                                    "x": 12,
                                     "y": 8,
                                     "colSpan": 6,
                                     "rowSpan": 3
