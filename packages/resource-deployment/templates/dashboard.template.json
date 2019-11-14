@@ -1226,7 +1226,7 @@
                                     "settings": {
                                         "content": {
                                             "PartTitle": "Reliability",
-                                            "PartSubTitle": "Service reliability in past 30 days"
+                                            "PartSubTitle": "Service reliability"
                                         }
                                     },
                                     "asset": {
