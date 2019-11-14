@@ -22,6 +22,10 @@
             "type": "string",
             "defaultValue": "[concat('allydashboard',toLower(uniqueString(resourceGroup().id)))]"
         },
+        "webApiFunctionAppName": {
+            "type": "string",
+            "defaultValue": "[concat('web-api-allyfuncapp',toLower(uniqueString(resourceGroup().id)))]"
+        },
         "location": {
             "type": "string",
             "defaultValue": "[resourceGroup().location]"
@@ -39,7 +43,7 @@
                                 "position": {
                                     "x": 0,
                                     "y": 0,
-                                    "colSpan": 4,
+                                    "colSpan": 3,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
@@ -61,7 +65,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Storage account availability",
+                                                    "title": "Availability for storage account",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -90,57 +94,14 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
-                                                            },
-                                                            "name": "Availability",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.storage/storageaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Availability"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Storage Account Availability",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
                             "1": {
                                 "position": {
-                                    "x": 4,
+                                    "x": 3,
                                     "y": 0,
-                                    "colSpan": 4,
+                                    "colSpan": 3,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
@@ -162,7 +123,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Cosmos availability",
+                                                    "title": "Availability for cosmos",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -191,55 +152,12 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.DocumentDB/databaseAccounts/', parameters('cosmosAccountName'))]"
-                                                            },
-                                                            "name": "Service Availability",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.documentdb/databaseaccounts/classic",
-                                                            "metricVisualization": {
-                                                                "displayName": "Service Availability"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Cosmos Availability",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
                             "2": {
                                 "position": {
-                                    "x": 8,
+                                    "x": 6,
                                     "y": 0,
                                     "colSpan": 6,
                                     "rowSpan": 4
@@ -259,7 +177,7 @@
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "totalScanRequests"
+                                                                "displayName": "totalScanRequests(Sum)"
                                                             }
                                                         },
                                                         {
@@ -270,7 +188,7 @@
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "acceptedScanRequests",
+                                                                "displayName": "acceptedScanRequests(Sum)",
                                                                 "color": "#2dc004"
                                                             }
                                                         },
@@ -282,12 +200,12 @@
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "rejectedScanRequests",
+                                                                "displayName": "rejectedScanRequests(Sum)",
                                                                 "color": "#f71a21"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Scan requests count",
+                                                    "title": "Count of scan requests submitted",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -316,79 +234,12 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/totalScanRequests",
-                                                            "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "totalScanRequests"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/acceptedScanRequests",
-                                                            "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "acceptedScanRequests",
-                                                                "color": "#2dc004"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/rejectedScanRequests",
-                                                            "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "rejectedScanRequests",
-                                                                "color": "#f71a21"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Scan Requests",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
                             "3": {
                                 "position": {
-                                    "x": 14,
+                                    "x": 12,
                                     "y": 0,
                                     "colSpan": 6,
                                     "rowSpan": 4
@@ -412,7 +263,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Scans completed",
+                                                    "title": "Count of scans completed",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -456,25 +307,44 @@
                                         }
                                     ],
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
+                                    "filters": {
+                                        "customEvent/name": {
+                                            "model": {
+                                                "operator": "equals",
+                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "4": {
+                                "position": {
+                                    "x": 18,
+                                    "y": 0,
+                                    "colSpan": 5,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
                                                 "chart": {
                                                     "metrics": [
                                                         {
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/count",
-                                                            "aggregationType": 1,
+                                                            "name": "customEvents/custom/samplingIntervalInSeconds",
+                                                            "aggregationType": 4,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "Events"
+                                                                "displayName": "samplingIntervalInSeconds"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Scans Completed",
-                                                    "titleKind": 2,
+                                                    "title": "Average pool sampling interval (seconds)",
+                                                    "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
                                                         "legendVisualization": {
@@ -491,35 +361,26 @@
                                                                 "isVisible": true,
                                                                 "axisType": 1
                                                             }
-                                                        },
-                                                        "disablePinning": true
-                                                    },
-                                                    "grouping": {
-                                                        "dimension": "customEvent/name",
-                                                        "sort": 2,
-                                                        "top": 3
+                                                        }
                                                     }
                                                 },
                                                 "version": 2
                                             }
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
                                         }
-                                    },
-                                    "filters": {
-                                        "customEvent/name": {
-                                            "model": {
-                                                "operator": "equals",
-                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
-                                            }
-                                        }
-                                    }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "4": {
+                            "5": {
                                 "position": {
                                     "x": 0,
                                     "y": 3,
-                                    "colSpan": 8,
-                                    "rowSpan": 5
+                                    "colSpan": 6,
+                                    "rowSpan": 4
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -613,104 +474,82 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
-                                                            },
-                                                            "name": "StartingNodeCount",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.batch/batchaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Starting Node Count",
-                                                                "color": "#00188f"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
-                                                            },
-                                                            "name": "IdleNodeCount",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.batch/batchaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Idle Node Count",
-                                                                "color": "#a0a5a8"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
-                                                            },
-                                                            "name": "RunningNodeCount",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.batch/batchaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Running Node Count",
-                                                                "color": "#009e49"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
-                                                            },
-                                                            "name": "StartTaskFailedNodeCount",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.batch/batchaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Start Task Failed Node Count",
-                                                                "color": "#ff8c00"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccountName'))]"
-                                                            },
-                                                            "name": "RebootingNodeCount",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.batch/batchaccounts",
-                                                            "metricVisualization": {
-                                                                "displayName": "Rebooting Node Count",
-                                                                "color": "#ec008c"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Pool Node Status",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+                                }
+                            },
+                            "6": {
+                                "position": {
+                                    "x": 18,
+                                    "y": 3,
+                                    "colSpan": 5,
+                                    "rowSpan": 4
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().name]",
+                                                "Name": "[parameters('appInsightsName')]",
+                                                "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                             }
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "requests\n| summarize No_of_Requests = dcount(id) by name\n"
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "value": "P1D"
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "1.0"
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "02da057d-376e-44a5-8d92-33b3c6476bba"
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "API request count"
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "Number of requests per API endpoint"
+                                        },
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "value": "components"
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid"
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
                                         }
+                                    ],
+                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "asset": {
+                                        "idInputName": "ComponentId",
+                                        "type": "ApplicationInsights"
                                     }
                                 }
                             },
-                            "5": {
+                            "7": {
                                 "position": {
-                                    "x": 8,
+                                    "x": 6,
                                     "y": 4,
                                     "colSpan": 6,
                                     "rowSpan": 4
@@ -788,80 +627,12 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/scanExecutionTime",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanExecutionTime",
-                                                                "color": "#917edb"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/scanWaitTime",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanWaitTime",
-                                                                "color": "#e86e58"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/scanTotalTime",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "scanTotalTime",
-                                                                "color": "#0078d4"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Scan Duration (milliseconds)",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "6": {
+                            "8": {
                                 "position": {
-                                    "x": 14,
+                                    "x": 12,
                                     "y": 4,
                                     "colSpan": 6,
                                     "rowSpan": 4
@@ -896,7 +667,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Batch pool stats",
+                                                    "title": "Running batch pool tasks",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -925,68 +696,14 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
-                                                "chart": {
-                                                    "metrics": [
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/maxParallelTasks",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "maxParallelTasks"
-                                                            }
-                                                        },
-                                                        {
-                                                            "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                                            },
-                                                            "name": "customEvents/custom/runningTasks",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
-                                                            "metricVisualization": {
-                                                                "displayName": "runningTasks"
-                                                            }
-                                                        }
-                                                    ],
-                                                    "title": "Maximum Parallel Tasks and Running Tasks",
-                                                    "titleKind": 2,
-                                                    "visualization": {
-                                                        "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
-                                                        "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
-                                                            "y": {
-                                                                "isVisible": true,
-                                                                "axisType": 1
-                                                            }
-                                                        },
-                                                        "disablePinning": true
-                                                    }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "7": {
+                            "9": {
                                 "position": {
                                     "x": 0,
-                                    "y": 8,
-                                    "colSpan": 7,
+                                    "y": 7,
+                                    "colSpan": 6,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
@@ -998,20 +715,57 @@
                                                     "metrics": [
                                                         {
                                                             "resourceMetadata": {
-                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
+                                                                "id": "[resourceId('Microsoft.Web/sites/', parameters('webApiFunctionAppName'))]"
                                                             },
-                                                            "name": "customEvents/custom/samplingIntervalInSeconds",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "Http2xx",
+                                                            "aggregationType": 7,
+                                                            "namespace": "microsoft.web/sites",
                                                             "metricVisualization": {
-                                                                "displayName": "samplingIntervalInSeconds"
+                                                                "displayName": "Http 2xx",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[resourceId('Microsoft.Web/sites/', parameters('webApiFunctionAppName'))]"
+                                                            },
+                                                            "name": "Http401",
+                                                            "aggregationType": 7,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http 401",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[resourceId('Microsoft.Web/sites/', parameters('webApiFunctionAppName'))]"
+                                                            },
+                                                            "name": "Http403",
+                                                            "aggregationType": 7,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http 403",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[resourceId('Microsoft.Web/sites/', parameters('webApiFunctionAppName'))]"
+                                                            },
+                                                            "name": "Http5xx",
+                                                            "aggregationType": 7,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http Server Errors",
+                                                                "resourceDisplayName": "web-api-azure-function"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Average pool sampling interval",
+                                                    "title": "API response code counts",
                                                     "titleKind": 1,
                                                     "visualization": {
-                                                        "chartType": 2,
+                                                        "chartType": 5,
                                                         "legendVisualization": {
                                                             "isVisible": true,
                                                             "position": 2,
@@ -1037,123 +791,87 @@
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
-                                    "settings": {
-                                        "content": {
-                                            "options": {
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart"
+                                }
+                            },
+                            "18": {
+                                "position": {
+                                    "x": 8,
+                                    "y": 8,
+                                    "colSpan": 6,
+                                    "rowSpan": 3
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "options",
+                                            "value": {
                                                 "chart": {
                                                     "metrics": [
                                                         {
                                                             "resourceMetadata": {
                                                                 "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
                                                             },
-                                                            "name": "customEvents/custom/samplingIntervalInSeconds",
+                                                            "name": "availabilityResults/availabilityPercentage",
                                                             "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "namespace": "microsoft.insights/components",
                                                             "metricVisualization": {
-                                                                "displayName": "samplingIntervalInSeconds"
+                                                                "resourceDisplayName": "[parameters('appInsightsName')]",
+                                                                "color": "#7FBA00"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Pool Sampling Interval (seconds)",
+                                                    "title": "Availability",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,
-                                                        "legendVisualization": {
-                                                            "isVisible": true,
-                                                            "position": 2,
-                                                            "hideSubtitle": false
-                                                        },
                                                         "axisVisualization": {
-                                                            "x": {
-                                                                "isVisible": true,
-                                                                "axisType": 2
-                                                            },
                                                             "y": {
                                                                 "isVisible": true,
-                                                                "axisType": 1
+                                                                "min": 0,
+                                                                "max": 100
+                                                            },
+                                                            "x": {
+                                                                "isVisible": true
                                                             }
                                                         },
                                                         "disablePinning": true
+                                                    },
+                                                    "openBladeOnClick": {
+                                                        "openBlade": true,
+                                                        "destinationBlade": {
+                                                            "bladeName": "ResourceMenuBlade",
+                                                            "parameters": {
+                                                                "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]",
+                                                                "menuid": "availability"
+                                                            },
+                                                            "extensionName": "HubsExtension",
+                                                            "metadata": {},
+                                                            "options": {
+                                                                "parameters": {
+                                                                    "id": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]",
+                                                                    "menuid": "availability"
+                                                                }
+                                                            }
+                                                        }
                                                     }
-                                                },
-                                                "version": 2
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "8": {
-                                "position": {
-                                    "x": 7,
-                                    "y": 8,
-                                    "colSpan": 7,
-                                    "rowSpan": 3
-                                },
-                                "metadata": {
-                                    "inputs": [
-                                        {
-                                            "name": "ComponentId",
-                                            "value": {
-                                                "SubscriptionId": "[subscription().subscriptionId]",
-                                                "ResourceGroup": "[resourceGroup().name]",
-                                                "Name": "[parameters('appInsightsName')]",
-                                                "ResourceId": "[resourceId('microsoft.insights/components/', parameters('appInsightsName'))]"
-                                            }
-                                        },
-                                        {
-                                            "name": "Query",
-                                            "value": "let startTime = ago(30d);\nlet timeRangeInMinutes = (now() - startTime) / 1min;\nlet failureOrRecoverEvents = availabilityResults\n| serialize \n| sort by timestamp asc  \n| where timestamp > startTime\n| extend prevSuccess = prev(success, 1, \"0\"), nextSuccess=next(success, 1, \"0\") \n| where name == 'workerAvailabilityTest' and (success != prevSuccess or success != nextSuccess)\n| project timestamp , name, success, prevSuccess, nextSuccess;\nlet availableIntervals = failureOrRecoverEvents\n| serialize \n| sort by timestamp asc \n| extend start = timestamp, end=next(timestamp, 1, now())\n| where success == \"1\"\n| extend interval_in_minutes = todouble((end - start)/1min)\n| extend totoalAvailableTime_in_minutes = row_cumsum(interval_in_minutes);\navailableIntervals\n| sort by timestamp desc\n| take 1\n| extend  availability = strcat(tostring(round(totoalAvailableTime_in_minutes/timeRangeInMinutes * 100, 2)), \"%\"), AST_in_minutes=timeRangeInMinutes\n| project availability, totoalAvailableTime_in_minutes, AST_in_minutes\n"
-                                        },
-                                        {
-                                            "name": "Version",
-                                            "value": "1.0"
-                                        },
-                                        {
-                                            "name": "PartId",
-                                            "value": "bd2db51a-a977-49d8-b2b6-ce76143aae91"
-                                        },
-                                        {
-                                            "name": "PartTitle",
-                                            "value": "Availability"
-                                        },
-                                        {
-                                            "name": "PartSubTitle",
-                                            "value": "Service availability"
-                                        },
-                                        {
-                                            "name": "resourceTypeMode",
-                                            "value": "components"
-                                        },
-                                        {
-                                            "name": "ControlType",
-                                            "value": "AnalyticsGrid"
-                                        },
-                                        {
-                                            "name": "Dimensions",
-                                            "isOptional": true
-                                        },
-                                        {
-                                            "name": "TimeRange",
-                                            "isOptional": true
-                                        },
-                                        {
-                                            "name": "DashboardId",
-                                            "isOptional": true
-                                        },
-                                        {
-                                            "name": "SpecificChart",
+                                                }
+                                            },
                                             "isOptional": true
                                         }
                                     ],
-                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
                                     "asset": {
                                         "idInputName": "ComponentId",
                                         "type": "ApplicationInsights"
                                     }
                                 }
                             },
-                            "9": {
+                            "19": {
                                 "position": {
                                     "x": 14,
                                     "y": 8,
