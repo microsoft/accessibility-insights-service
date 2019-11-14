@@ -49,6 +49,11 @@ Object {
       "doc": "Maximum number of scan requests in a single HTTP client request.",
       "format": "int",
     },
+    "maxScanRequestWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for fetching scan status of the submitted request",
+      "format": "int",
+    },
     "minScanPriorityValue": Object {
       "default": -1000,
       "doc": "Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.                        This range correlates with Azure Batch pool task priority range.",
@@ -181,6 +186,11 @@ Object {
     "maxScanRequestBatchCount": Object {
       "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
+      "format": "int",
+    },
+    "maxScanRequestWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for fetching scan status of the submitted request",
       "format": "int",
     },
     "minScanPriorityValue": Object {

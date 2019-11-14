@@ -7,7 +7,7 @@ import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-lib
 
 import { A11yServiceCredential } from './a11y-service-credential';
 
-interface ResponseWithBodyType<T = {}> extends Response {
+export interface ResponseWithBodyType<T = {}> extends Response {
     body: T;
 }
 
@@ -30,12 +30,12 @@ export class A11yServiceClient {
         private readonly credential: A11yServiceCredential,
         private readonly requestBaseUrl: string,
         private readonly apiVersion = '1.0',
-        private readonly throwOnRequestFailure: boolean = true,
+        private readonly throwOnRequestFailure: boolean = false,
         httpRequest = request,
     ) {
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
-            simple: throwOnRequestFailure,
+            simple: this.throwOnRequestFailure,
         });
     }
 

@@ -6,4 +6,5 @@ export enum ActivityAction {
     getScanResultBatch = 'getScanResultBatch',
     getScanReport = 'getScanReport',
     getHealthStatus = 'getHealthStatus',
+    trackAvailability = 'trackAvailability',
 }

@@ -16,4 +16,5 @@ export {
     ScanUrlsAddedMeasurements,
     ScanRequestQueuedMeasurements,
 } from './logger-event-measurements';
+export { AvailabilityTelemetry } from './availablity-telemetry';
 export { LoggerProperties } from './logger-properties';

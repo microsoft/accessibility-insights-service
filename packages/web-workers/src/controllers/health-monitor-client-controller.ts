@@ -3,8 +3,18 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { WebController } from 'service-library';
-import { A11yServiceClient } from 'web-api-client';
+import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
+import { ActivityAction } from '../contracts/activity-actions';
+import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
+import {
+    ActivityRequestData,
+    CreateScanRequestData,
+    GetScanReportData,
+    GetScanResultData,
+    SerializableResponse,
+    TrackAvailabilityData,
+} from './activity-request-data';
 
 // tslint:disable: no-any
 
@@ -12,68 +22,76 @@ import { A11yServiceClient } from 'web-api-client';
 export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-client';
+    private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
-        @inject(A11yServiceClient) protected webApiClient: A11yServiceClient,
+        @inject(iocTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
     ) {
         super(contextAwareLogger);
+
+        this.activityCallbacks = {
+            [ActivityAction.createScanRequest]: this.createScanRequest,
+            [ActivityAction.getScanResult]: this.getScanResult,
+            [ActivityAction.getScanReport]: this.getScanReport,
+            [ActivityAction.getHealthStatus]: this.getHealthStatus,
+            [ActivityAction.trackAvailability]: this.trackAvailability,
+        };
     }
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
-        const activityActionName = args[0];
-        this.contextAwareLogger.logInfo(`Executing ${activityActionName} activity action.`);
+        const activityRequestData = args[0] as ActivityRequestData;
+        this.contextAwareLogger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
 
-        return 'hello';
-        // switch (activityActionName) {
-        //     case 'createScanRequest': {
-        //         this.createScanRequest();
-        //         break;
-        //     }
-        //     case 'getScanResult': {
-        //         this.getScanResult();
-        //         break;
-        //     }
-        //     case 'getScanResultBatch': {
-        //         this.getScanResultBatch();
-        //         break;
-        //     }
-        //     case 'getScanReport': {
-        //         this.getScanReport();
-        //         break;
-        //     }
-        //     case 'getHealthStatus': {
-        //         this.getHealthStatus();
-        //         break;
-        //     }
-        //     default: {
-        //         this.contextAwareLogger.logInfo(`Unrecognized activity action ${activityActionName}.`);
-        //     }
-        // }
+        const activityCallback = this.activityCallbacks[activityRequestData.activityName];
+
+        const result = await activityCallback(activityRequestData.data);
+        this.contextAwareLogger.logInfo(
+            `${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`,
+        );
+
+        return result;
     }
 
     protected validateRequest(...args: any[]): boolean {
         return true;
     }
 
-    private createScanRequest(): void {
-        return;
-    }
+    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse>> => {
+        const webApiClient = await this.webApiClientProvider();
 
-    private getScanResult(): void {
-        return;
-    }
+        const response = await webApiClient.postScanUrl(data.scanUrl, data.priority);
 
-    private getScanResultBatch(): void {
-        return;
-    }
+        return response.toJSON();
+    };
 
-    private getScanReport(): void {
-        return;
-    }
+    private readonly getScanResult = async (data: GetScanResultData): Promise<SerializableResponse<ScanResultResponse>> => {
+        const webApiClient = await this.webApiClientProvider();
 
-    private getHealthStatus(): void {
-        return;
-    }
+        const response = await webApiClient.getScanStatus(data.scanId);
+
+        return response.toJSON();
+    };
+
+    private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse> => {
+        const webApiClient = await this.webApiClientProvider();
+
+        const response = await webApiClient.getScanReport(data.scanId, data.reportId);
+        response.body = undefined;
+
+        return response.toJSON();
+    };
+
+    private readonly getHealthStatus = async (): Promise<SerializableResponse> => {
+        const webApiClient = await this.webApiClientProvider();
+
+        const response = await webApiClient.checkHealth();
+
+        return response.toJSON();
+    };
+
+    private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {
+        this.contextAwareLogger.trackAvailability(data.name, data.telemetry);
+    };
 }

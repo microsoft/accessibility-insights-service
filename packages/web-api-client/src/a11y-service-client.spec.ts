@@ -8,7 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any
+// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(A11yServiceClient, () => {
     let testSubject: A11yServiceClient;
     const baseUrl = 'base-url';
@@ -50,11 +50,7 @@ describe(A11yServiceClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            const defaultsMock = Mock.ofInstance(
-                (options: request.RequestPromiseOptions): any => {
-                    return {};
-                },
-            );
+            const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock
