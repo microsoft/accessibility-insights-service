@@ -1115,11 +1115,11 @@
                                         },
                                         {
                                             "name": "PartTitle",
-                                            "value": "Analytics"
+                                            "value": "Availability"
                                         },
                                         {
                                             "name": "PartSubTitle",
-                                            "value": "allyinsights5d4fa3x2bewh6"
+                                            "value": "Service availability"
                                         },
                                         {
                                             "name": "resourceTypeMode",
@@ -1147,12 +1147,6 @@
                                         }
                                     ],
                                     "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
-                                    "settings": {
-                                        "content": {
-                                            "PartTitle": "Availability",
-                                            "PartSubTitle": "Service availability in past 30 days"
-                                        }
-                                    },
                                     "asset": {
                                         "idInputName": "ComponentId",
                                         "type": "ApplicationInsights"
@@ -1191,11 +1185,11 @@
                                         },
                                         {
                                             "name": "PartTitle",
-                                            "value": "Analytics"
+                                            "value": "Reliability"
                                         },
                                         {
                                             "name": "PartSubTitle",
-                                            "value": "allyinsights5d4fa3x2bewh6"
+                                            "value": "Service reliability"
                                         },
                                         {
                                             "name": "resourceTypeMode",
@@ -1223,12 +1217,6 @@
                                         }
                                     ],
                                     "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
-                                    "settings": {
-                                        "content": {
-                                            "PartTitle": "Reliability",
-                                            "PartSubTitle": "Service reliability"
-                                        }
-                                    },
                                     "asset": {
                                         "idInputName": "ComponentId",
                                         "type": "ApplicationInsights"
