@@ -1087,7 +1087,7 @@
                                 "position": {
                                     "x": 7,
                                     "y": 8,
-                                    "colSpan": 6,
+                                    "colSpan": 7,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
@@ -1163,7 +1163,7 @@
                                 "position": {
                                     "x": 13,
                                     "y": 8,
-                                    "colSpan": 7,
+                                    "colSpan": 6,
                                     "rowSpan": 3
                                 },
                                 "metadata": {
