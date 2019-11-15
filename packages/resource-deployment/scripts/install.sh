@@ -105,6 +105,7 @@ resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
 webApiFuncAppName="web-api-allyfuncapp$resourceGroupSuffix"
+vnetResource="vnet-a11y$resourceGroupSuffix"
 
 # . "${0%/*}/create-datalake-storage-account.sh"
 
