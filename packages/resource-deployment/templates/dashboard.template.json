@@ -1015,48 +1015,7 @@
                     }
                 },
                 "metadata": {
-                    "model": {
-                        "timeRange": {
-                            "value": {
-                                "relative": {
-                                    "duration": 24,
-                                    "timeUnit": 1
-                                }
-                            },
-                            "type": "MsPortalFx.Composition.Configuration.ValueTypes.TimeRange"
-                        },
-                        "filterLocale": {
-                            "value": "en-us"
-                        },
-                        "filters": {
-                            "value": {
-                                "MsPortalFx_TimeRange": {
-                                    "model": {
-                                        "format": "utc",
-                                        "granularity": "auto",
-                                        "relative": "24h"
-                                    },
-                                    "displayCache": {
-                                        "name": "UTC Time",
-                                        "value": "Past 1440 minutes"
-                                    },
-                                    "filteredPartIds": [
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337b",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337d",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4337f",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43381",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43383",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43385",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43387",
-                                        "StartboardPart-AnalyticsPart-6f2dabe9-fe7b-437e-9b0d-bc096eb43389",
-                                        "StartboardPart-MonitorChartPart-6f2dabe9-fe7b-437e-9b0d-bc096eb4338b",
-                                        "StartboardPart-AnalyticsPart-84369902-2b4c-4cf7-873b-af6a81b2a015",
-                                        "StartboardPart-AnalyticsPart-84369902-2b4c-4cf7-873b-af6a81b2a017"
-                                    ]
-                                }
-                            }
-                        }
-                    }
+                    "model": {}
                 }
             },
             "name": "[parameters('dashboardName')]",
@@ -1065,7 +1024,7 @@
             "tags": {
                 "hidden-title": "[parameters('dashboardName')]"
             },
-            "apiVersion": "2015-08-01-preview"
+            "apiVersion": "2019-01-01-preview"
         }
     ]
 }
