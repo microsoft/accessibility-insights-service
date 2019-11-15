@@ -13,21 +13,22 @@ export cosmosAccountName
 export datalakeStorageAccountName
 export dropFolder="${0%/*}/../../../"
 export environment
-export functionAppName
+export webApiFuncAppName
 export keyVault
 export keyVaultUrl
 export location
 export resourceGroupName
 export subscription
 export storageAccountName
-export clientId
+export webApiAdClientId
+export webApiAdClientSecret
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export vnetResource
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id>
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
@@ -35,6 +36,7 @@ Environment - The environment in which the set up is running.
 Publisher email - The email for notifications.
 Resource group - The resource group that this API instance needs to be added to.
 Client ID - the app registration client id used for function app authentication/ authorization.
+Client Secret - the secret used to authenticate with the AD application
 Azure region - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
@@ -70,14 +72,26 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 }
 
 function waitForProcesses() {
-    processesToWaitFor=$1
+    local -n processesToWaitFor=$1
     for pid in ${processesToWaitFor[@]}; do
         wait $pid
     done
 }
 
+function runInParallel() {
+    local -n processPaths=$1
+    local -a parallelizableProcesses
+
+    for processPath in ${processPaths[@]}; do
+        . "${processPath}" &
+        parallelizableProcesses+=("$!")
+    done
+
+    waitForProcesses parallelizableProcesses
+}
+
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:" option; do
+while getopts ":r:s:l:e:o:p:c:t:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -85,12 +99,13 @@ while getopts ":r:s:l:e:o:p:c:" option; do
     e) environment=${OPTARG} ;;
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
+    t) webApiAdClientSecret=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
     exitWithUsageInfo
 fi
 
@@ -108,43 +123,39 @@ az account set --subscription "$subscription"
 resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
+webApiFuncName="web-api-allyfuncapp$resourceGroupSuffix"
 
 echo "Starting parallel processes.."
 
 . "${0%/*}/create-api-management.sh" &
 apiManagmentProcess="$!"
 
-# . "${0%/*}/create-datalake-storage-account.sh" &
-# parallelizableProcesses="$!"
-
-. "${0%/*}/upload-files.sh" &
-parallelizableProcesses+="$!"
-
-. "${0%/*}/create-queues.sh" &
-parallelizableProcesses+=" $!"
-
-. "${0%/*}/setup-cosmos-db.sh" &
-parallelizableProcesses+=" $!"
-
-. "${0%/*}/create-vnet.sh"
-parallelizableProcesses+=" $!"
-
-waitForProcesses "${parallelizableProcesses[@]}"
+parallelProcesses=(
+    # "${0%/*}/create-datalake-storage-account.sh"
+    "${0%/*}/upload-files.sh"
+    "${0%/*}/create-queues.sh"
+    "${0%/*}/setup-cosmos-db.sh"
+    "${0%/*}/create-vnet.sh"
+    "${0%/*}/app-insights-create.sh"
+)
+runInParallel parallelProcesses
 
 # The following scripts all depend on the result from the above scripts.
 # Additionally, these should run sequentially because of interdependence.
-. "${0%/*}/app-insights-create.sh"
 
 . "${0%/*}/batch-account-create.sh"
-
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
-. "${0%/*}/function-app-create.sh"
-
-. "${0%/*}/job-schedule-create.sh"
+parallelProcesses=(
+    "${0%/*}/function-app-create.sh"
+    "${0%/*}/job-schedule-create.sh"
+)
+runInParallel parallelProcesses
 
 waitForProcesses "$apiManagmentProcess"
 
-. "${0%/*}/deploy-rest-api.sh"
-
-. "${0%/*}/create-dashboard.sh"
+parallelProcesses=(
+    "${0%/*}/deploy-rest-api.sh"
+    "${0%/*}/create-dashboard.sh"
+)
+runInParallel parallelProcesses

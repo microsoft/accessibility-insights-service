@@ -16,7 +16,7 @@ deployResource() {
 deployResourceWithFunctionName() {
     local templateName=$1
     echo "Deploying with resource parameters: Resource = $resourceGroupName, Template = $templateName, API Instance = $apiManagementName"
-    az group deployment create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$functionAppName" apimServiceName="$apiManagementName" 1>/dev/null
+    az group deployment create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
     echo "  Completed"
 }
 
@@ -36,14 +36,14 @@ Usage: $0 -a <API management name> -t <Template Location> -r <resource group> -f
 while getopts ":a:f:r:t:" option; do
     case $option in
     a) apiManagementName=${OPTARG} ;;
-    f) functionAppName=${OPTARG} ;;
+    f) webApiFuncAppName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     t) apiTemplates=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $apiManagementName ]] || [[ -z $apiTemplates ]] || [[ -z $resourceGroupName ]] || [[ -z $functionAppName ]]; then
+if [[ -z $apiManagementName ]] || [[ -z $apiTemplates ]] || [[ -z $resourceGroupName ]] || [[ -z $webApiFuncAppName ]]; then
     exitWithUsageInfo
 fi
 
