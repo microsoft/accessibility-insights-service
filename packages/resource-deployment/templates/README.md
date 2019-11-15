@@ -48,3 +48,8 @@ Time settings, including the overall time range and granularity of aggregations,
     -   Total number of requests for each azure function (including web-workers) during the time range
 -   **API response time**
     -   Average response time for each azure function (including web-workers) during the time range
+-   **Failure requests by function name**
+    -   Sum of failures by all azure functions (including web-workers) during the time range
+    -   Failure counts are aggregated over the set time granularity
+-   **Performance**
+    -   Scan performance as a percentage of cases where the scanExecutionTime (see notes on Scan duration graph) did not exceed the target
