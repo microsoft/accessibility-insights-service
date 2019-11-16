@@ -6,7 +6,6 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export appInsightsKey
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
@@ -123,6 +122,7 @@ resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
 webApiFuncName="web-api-allyfuncapp$resourceGroupSuffix"
+appInsightsName="allyinsights$resourceGroupSuffix"
 
 echo "Starting parallel processes.."
 

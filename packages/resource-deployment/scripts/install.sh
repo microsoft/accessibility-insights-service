@@ -6,7 +6,6 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export appInsightsKey
 export apiManagementName
 export batchAccountName
 export cosmosAccountName
