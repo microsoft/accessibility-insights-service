@@ -72,7 +72,9 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 function waitForProcesses() {
     local -n processesToWaitFor=$1
     for pid in ${processesToWaitFor[@]}; do
+        echo "Waiting for process with pid $pid"
         wait $pid
+        echo "Process with pid $pid exited"
     done
 }
 
@@ -82,6 +84,7 @@ function runInParallel() {
 
     for processPath in ${processPaths[@]}; do
         . "${processPath}" &
+        echo "Created process with pid $! for process path - $processPath"
         parallelizableProcesses+=("$!")
     done
 
@@ -151,7 +154,7 @@ parallelProcesses=(
 )
 runInParallel parallelProcesses
 
-waitForProcesses "$apiManagmentProcess"
+waitForProcesses apiManagmentProcess
 
 parallelProcesses=(
     "${0%/*}/deploy-rest-api.sh"
