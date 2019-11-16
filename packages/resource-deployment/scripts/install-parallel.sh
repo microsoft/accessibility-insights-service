@@ -24,7 +24,6 @@ export webApiAdClientId
 export webApiAdClientSecret
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
-export vnetResource
 
 exitWithUsageInfo() {
     echo "
@@ -124,7 +123,6 @@ resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
 webApiFuncName="web-api-allyfuncapp$resourceGroupSuffix"
-vnetResource="vnet-a11y$resourceGroupSuffix"
 
 echo "Starting parallel processes.."
 

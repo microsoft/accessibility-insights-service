@@ -39,13 +39,17 @@
                 "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
             }
         },
-        "vnetResource": {
-            "defaultValue": "",
-            "type": "string"
+        "vnetName": {
+            "defaultValue": "[concat('vnet-a11y',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the virtual network to be used for the batch pool nodes"
+            }
         }
     },
     "variables": {
-        "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]"
+        "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
+        "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
     },
     "resources": [
         {
@@ -136,7 +140,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -193,7 +197,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -250,7 +254,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {
@@ -307,7 +311,7 @@
                     }
                 },
                 "networkConfiguration": {
-                    "subnetId": "[concat(parameters('vnetResource'), '/subnets/default')]"
+                    "subnetId": "[concat(variables('vnetResource'), '/subnets/default')]"
                 },
                 "scaleSettings": {
                     "fixedScale": {

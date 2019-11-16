@@ -32,13 +32,12 @@ while getopts ":r:t:v:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
-    v) vnetResource=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $vnetResource ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
@@ -56,7 +55,6 @@ resources=$(
     az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$batchTemplateFile" \
-        --parameters vnetResource="$vnetResource" \
         --query "properties.outputResources[].id" \
         -o tsv
 )
