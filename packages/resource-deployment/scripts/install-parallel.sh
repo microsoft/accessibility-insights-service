@@ -124,7 +124,7 @@ az account set --subscription "$subscription"
 resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
-webApiFuncName="web-api-allyfuncapp$resourceGroupSuffix"
+webApiFuncAppName="web-api-allyfuncapp$resourceGroupSuffix"
 appInsightsName="allyinsights$resourceGroupSuffix"
 
 echo "Starting parallel processes.."
