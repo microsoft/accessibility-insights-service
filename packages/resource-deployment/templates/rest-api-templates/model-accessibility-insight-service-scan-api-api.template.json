@@ -342,7 +342,7 @@
             "type": "Microsoft.ApiManagement/service/apis/operations/policies",
             "apiVersion": "2019-01-01",
             "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getReport')]"
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','health')]"
             ]
         }
     ]
