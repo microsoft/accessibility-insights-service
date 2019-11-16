@@ -119,8 +119,6 @@ az account set --subscription "$subscription"
 
 . "${0%/*}/create-resource-group.sh"
 
-. "${0%/*}/create-storage-account.sh"
-
 resourceGroupSuffix=${storageAccountName:11}
 cosmosAccountName="allycosmos$resourceGroupSuffix"
 apiManagementName="apim-a11y$resourceGroupSuffix"
@@ -131,6 +129,10 @@ echo "Starting parallel processes.."
 
 . "${0%/*}/create-api-management.sh" &
 apiManagmentProcess="$!"
+
+# Other steps are dependant on storage account.
+# So, we need to wait till storage account creation.
+. "${0%/*}/create-storage-account.sh"
 
 parallelProcesses=(
     # "${0%/*}/create-datalake-storage-account.sh"
