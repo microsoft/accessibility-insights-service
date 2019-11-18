@@ -17,6 +17,7 @@ Time settings, including the overall time range and granularity of aggregations,
         3. Get the status of the submitted scan request
         4. Get the scan report once the scan completes
     -   If any of these steps fails (either an http error code or an internal scan failure), an availability failure is sent. Otherwise, once all steps complete, an availability success is sent.
+    - If an availability test exceeds the amount of time between tests, the next availability test will start running in parallel when the timer trigger is fired.
 -   **Azure Services Availability**
     -   Availability of Cosmos and Storage account, using metrics provided by Azure.
 -   **Reliability**
