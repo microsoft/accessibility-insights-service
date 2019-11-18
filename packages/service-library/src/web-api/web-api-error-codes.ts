@@ -127,7 +127,7 @@ export class WebApiErrorCodes {
         error: {
             code: 'MalformedBody',
             codeId: 4011,
-            message: 'Please validate the request body against the schema for this version and endpoint.',
+            message: 'The request body does not match the API schema for the given API version.',
         },
     };
 
