@@ -101,6 +101,13 @@ To debug packages locally follow the generic steps below.
 4.  Run the TypeScript compiler `tsc` for the selected package.
 5.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
 
+## Telemetry and Monitoring
+
+During deployment, an azure dashboard will be created to track service metrics and telemetry data.
+
+-   Documentation for all telemetry events sent can be found [here](packages/logger/README.md)
+-   Documentation for the azure dashboard created upon deployment can be found [here](packages/resource-deployment/templates/README.md)
+
 ## Contributing
 
 All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/accessibility-insights-service/blob/master/Contributing.md) page.

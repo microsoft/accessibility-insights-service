@@ -48,3 +48,11 @@ http://localhost:7071/runtime/webhooks/durabletask/orchestrators/<function name>
 The corresponding HTTP response will contains URLs to manage the durable function instance that was triggered.
 
 Monitor the durable function execution state and history by checking Azure Storage tables **DurableFunctionsHubInstances** and **DurableFunctionsHubHistory** correspondingly.
+
+## Availability test workflow
+
+Several web-worker functions are used for automated availability testing. These functions are:
+
+1. **health-monitor-timer-func:** Triggered every five minutes. Starts a new instance of the health-monitor-orchestration-func and then exits.
+2. **health-monitor-orchestration-func:** Orchestrates the availability test flow (pinging the health endpoint, submitting a scan request, polling until completion and then getting the report). This will end and throw an exception if the test fails at any point. This function calls health-monitor-client-func to perform individual activities.
+3. **health-monitor-client-func:** Responsible for calling the web api. The action performed is determined by the arguments passed to the function.
