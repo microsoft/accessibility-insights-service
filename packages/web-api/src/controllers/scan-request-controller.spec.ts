@@ -163,5 +163,78 @@ describe(ScanRequestController, () => {
 
             contextAwareLoggerMock.verifyAll();
         });
+
+        it('v1.0 accepts an array', async () => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const guid3 = '1e9cefa6-538a-6df0-dddd-ffffffffffff';
+
+            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid3);
+
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([
+                { url: 'https://abs/path/', priority: priority },
+                { url: 'https://bing.com/path/', priority: priority },
+            ]);
+            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }, { scanId: guid3, url: 'https://bing.com/path/' }];
+
+            const expectedSaveRequest: ScanRunBatchRequest[] = [
+                { scanId: guid2, url: 'https://abs/path/', priority: priority },
+                { scanId: guid3, url: 'https://bing.com/path/', priority: priority },
+            ];
+            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
+            scanDataProviderMock.verifyAll();
+            guidGeneratorMock.verifyAll();
+        });
+
+        it('v2.0 accepts a single url', async () => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+
+            context.req.query['api-version'] = '2.0';
+
+            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify({ url: 'https://abs/path/', priority: priority });
+            const expectedResponse = { scanId: guid2, url: 'https://abs/path/' };
+
+            const expectedSaveRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
+            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
+            scanDataProviderMock.verifyAll();
+            guidGeneratorMock.verifyAll();
+        });
+
+        it('v2.0 accepts does not accept an array', async () => {
+            context.req.query['api-version'] = '2.0';
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(400);
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
+        });
     });
 });

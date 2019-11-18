@@ -74,7 +74,7 @@ export abstract class ApiController extends WebController {
             return false;
         }
 
-        if (this.context.req.query['api-version'] !== this.apiVersion) {
+        if (this.context.req.query['api-version'] !== this.apiVersion && this.context.req.query['api-version'] !== '2.0') {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion);
 
             return false;

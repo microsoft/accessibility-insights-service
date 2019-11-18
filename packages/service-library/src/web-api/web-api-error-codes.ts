@@ -14,7 +14,8 @@ export declare type WebApiErrorCodeName =
     | 'MissingContentTypeHeader'
     | 'UnsupportedContentType'
     | 'UnsupportedApiVersion'
-    | 'OutOfRangePriority';
+    | 'OutOfRangePriority'
+    | 'MalformedBody';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -118,6 +119,15 @@ export class WebApiErrorCodes {
             code: 'OutOfRangePriority',
             codeId: 4010,
             message: 'A priority specified in the request is outside the permissible range.',
+        },
+    };
+
+    public static malformedRequest: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'MalformedBody',
+            codeId: 4011,
+            message: 'Please validate the request body against the schema for this version and endpoint.',
         },
     };
 

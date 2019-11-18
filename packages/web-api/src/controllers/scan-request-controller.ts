@@ -45,20 +45,26 @@ export class ScanRequestController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         await this.init();
+        let payload: ScanRunRequest[];
+        try {
+            payload = this.extractPayload();
+        } catch (e) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest);
 
-        const payload = this.tryGetPayload<ScanRunRequest[]>();
+            return;
+        }
+
         if (payload.length > this.config.maxScanRequestBatchCount) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
 
             return;
         }
-
         const batchId = this.guidGenerator.createGuid();
         const processedData = this.getProcessedRequestData(batchId, payload);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
         this.context.res = {
             status: 202, // Accepted
-            body: processedData.scanResponses,
+            body: this.getResponse(processedData),
         };
 
         const totalUrls: number = processedData.scanResponses.length;
@@ -79,6 +85,34 @@ export class ScanRequestController extends ApiController {
 
         // tslint:disable-next-line: no-null-keyword
         this.contextAwareLogger.trackEvent('BatchScanRequestSubmitted', null, measurements);
+    }
+
+    private getResponse(processedData: ProcessedBatchRequestData): any {
+        const isV2 = this.context.req.query['api-version'] === '2.0' ? true : false;
+        let response;
+        if (isV2) {
+            response = processedData.scanResponses.find(x => x !== undefined);
+        } else {
+            response = processedData.scanResponses;
+        }
+
+        return response;
+    }
+
+    private extractPayload(): ScanRunRequest[] {
+        const isV2 = this.context.req.query['api-version'] === '2.0';
+        let payload: ScanRunRequest[];
+        if (isV2) {
+            const singularReq: ScanRunRequest = this.tryGetPayload<ScanRunRequest>();
+            if (Array.isArray(singularReq)) {
+                throw new Error('Malformed request body');
+            }
+            payload = [singularReq];
+        } else {
+            payload = this.tryGetPayload<ScanRunRequest[]>();
+        }
+
+        return payload;
     }
 
     private getProcessedRequestData(batchId: string, scanRunRequests: ScanRunRequest[]): ProcessedBatchRequestData {
