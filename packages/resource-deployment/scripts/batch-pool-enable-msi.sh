@@ -87,7 +87,7 @@ assignSystemIdentity() {
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
-        if ["$vmssStatus" != "Succeeded"]; then
+        if [ "$vmssStatus" != "Succeeded" ]; then
             echo "Deployment of vmss $vmssName failed with status $vmssStatus"
             exit 1
         fi
