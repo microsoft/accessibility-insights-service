@@ -167,7 +167,7 @@ describe(ApiController, () => {
                     query: {},
                 },
             });
-            context.req.query['api-version'] = '2.0';
+            context.req.query['api-version'] = '3.0';
             const apiControllerMock = new TestableApiController(contextAwareLoggerMock.object, context);
             const valid = apiControllerMock.validateApiVersion();
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.unsupportedApiVersion));
