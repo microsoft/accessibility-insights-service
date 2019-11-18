@@ -14,6 +14,7 @@ export cosmosAccessKey
 
 export loggedInUserType
 export loggedInServicePrincipalName
+export tenantId
 
 exitWithUsageInfo() {
     echo "
@@ -33,6 +34,10 @@ getLoggedInUserDetails() {
         echo "Unable to get logged in user service principal id"
         exit 1
     fi
+}
+
+getTenantId() {
+    tenantId=$(az account show --query "tenantId" -o tsv)
 }
 
 grantWritePermissionToKeyVault() {
@@ -98,18 +103,20 @@ getStorageAccessKey() {
 }
 
 # Read script arguments
-while getopts ":c:r:s:k:" option; do
+while getopts ":c:r:s:k:a:p:" option; do
     case $option in
     c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     s) storageAccountName=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
+    a) webApiAdClientId=${OPTARG} ;;
+    p) webApiAdClientSecret=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]]; then
+if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
     echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault"
 
     exitWithUsageInfo
@@ -132,3 +139,8 @@ pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
 getStorageAccessKey
 pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"
+
+pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
+pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
+getTenantId
+pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"

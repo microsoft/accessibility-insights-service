@@ -8,7 +8,7 @@ set -eo pipefail
 
 export resourceGroupName
 export resourceName
-export clientId
+export webApiAdClientId
 export environment
 export keyVault
 export principalId
@@ -27,50 +27,6 @@ Usage: $0 \
 -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
-}
-
-addReplyUrlToAadApp() {
-    # Get existing reply urls of the AAD app registration
-    echo "Fetching existing reply URls of the Azure Function AAD application..."
-    replyUrls=$(az ad app show --id $clientId --query "replyUrls" -o tsv) || true
-    replyUrl="https://${currentFunctionAppName}.azurewebsites.net/.auth/login/aad/callback"
-
-    for url in $replyUrls; do
-        if [[ $url == $replyUrl ]]; then
-            echo "Reply Url '${replyUrl}' already exists. Skipping adding reply URL to Azure Function AAD app application."
-            return
-        fi
-    done
-
-    echo "Adding reply URL '$replyUrl' to Azure Function AAD application..."
-    az ad app update --id $clientId --add replyUrls $replyUrl
-    echo "  Successfully added reply URL."
-}
-
-createAppRegistration() {
-    packageName=$1
-
-    appRegistrationName="$packageName-func-app-$resourceGroupName-$environment"
-    echo "Creating a new AAD application with display name $appRegistrationName..."
-    clientId=$(az ad app create --display-name "$appRegistrationName" --query "appId" -o tsv)
-    echo "  Successfully created '$appRegistrationName' AAD application with client ID '$clientId'"
-}
-
-createAppRegistrationIfNotExists() {
-    packageName=$1
-
-    if [ -z $clientId ]; then
-        echo "Create AAD application..."
-        currentFunctionAppName=$(az group deployment show -g "$resourceGroupName" -n "function-app-template" --query "properties.parameters.name.value" -o tsv 2>/dev/null) || true
-        clientId=$(az webapp auth show -n "$currentFunctionAppName" -g "$resourceGroupName" --query "clientId" -o tsv 2>/dev/null) || true
-        appRegistrationName=$(az ad app show --id "$clientId" --query "displayName" -o tsv 2>/dev/null) || true
-
-        if [[ ! -n $appRegistrationName ]]; then
-            createAppRegistration $packageName
-        else
-            echo "AAD application with display name '$appRegistrationName' already exists."
-        fi
-    fi
 }
 
 copyConfigFileToScriptFolder() {
@@ -166,14 +122,14 @@ getFunctionAppPrincipalId() {
 deployWebApiArmTemplate() {
     packageName=$1
 
-    functionAppNamePrefix="$packageName-allyfuncapp"
+    functionAppNamePrefix="web-api-allyfuncapp"
     templateFilePath="${0%/*}/../templates/function-web-api-app-template.json"
 
     echo "Deploying Azure Function App using ARM template..."
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
-        --parameters clientId="$clientId" namePrefix="$functionAppNamePrefix" \
+        --parameters clientId="$webApiAdClientId" namePrefix="$functionAppNamePrefix" \
         --query "properties.outputResources[].id" \
         -o tsv)
 
@@ -187,7 +143,7 @@ deployWebApiArmTemplate() {
 deployWebWorkersArmTemplate() {
     packageName=$1
 
-    functionAppNamePrefix="$packageName-allyfuncapp"
+    functionAppNamePrefix="web-workers-allyfuncapp"
     templateFilePath="${0%/*}/../templates/function-web-workers-app-template.json"
 
     echo "Deploying Azure Function App using ARM template..."
@@ -208,13 +164,7 @@ deployWebWorkersArmTemplate() {
 deployWebApiFunctionApp() {
     packageName=$1
 
-    createAppRegistrationIfNotExists $packageName
     deployWebApiArmTemplate $packageName
-
-    # Add reply url to function app registration
-    if [ "$clientIdPassed" = false]; then
-        addReplyUrlToAadApp
-    fi
 
     # Keep child script call only one function level deep to preserve exports
     getFunctionAppPrincipalId
@@ -239,7 +189,7 @@ deployWebWorkersFunctionApp() {
 while getopts ":r:c:e:k:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    c) clientId=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
@@ -247,22 +197,11 @@ while getopts ":r:c:e:k:d:" option; do
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $webApiAdClientId ]; then
     exitWithUsageInfo
-fi
-
-if [ -z $clientId ]; then
-    clientIdPassed=false
-    if [ ! $environment = "dev" ]; then
-        echo "AAD application client ID option is required for the non-dev environment."
-        exitWithUsageInfo
-    fi
 fi
 
 installAzureFunctionsCoreTools
 
 deployWebWorkersFunctionApp "web-workers"
 deployWebApiFunctionApp "web-api"
-
-# Export the last created web-api function app service name to be used by the API Management install script
-functionAppName="$currentFunctionAppName"

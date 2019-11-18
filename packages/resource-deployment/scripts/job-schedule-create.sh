@@ -7,9 +7,9 @@ set -eo pipefail
 
 export batchAccountName
 export resourceGroupName
-export appInsightsKey
 export keyVaultUrl
 export templatesFolder
+export appInsightsName
 
 templatesFolder="${0%/*}/../templates/"
 
@@ -48,18 +48,18 @@ adjustJob() {
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights instrumentation key> -k <key vault url> -t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>
+        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights name> -k <key vault url> -t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>
     "
     exit 1
 }
 
 # Read script arguments
-while getopts ":b:r:a:k:t:" option; do
+while getopts ":b:r:k:a:t:" option; do
     case $option in
     b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
-    a) appInsightsKey=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
+    a) appInsightsName=${OPTARG} ;;
     t) templatesFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
@@ -72,9 +72,11 @@ if [[ -z $keyVaultUrl ]]; then
 fi
 
 # Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsightsKey ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
+if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsightsName ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
     exitWithUsageInfo
 fi
+
+appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
