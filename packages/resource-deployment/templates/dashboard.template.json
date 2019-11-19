@@ -214,7 +214,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "let scanExecutionTargetTime = 30;\ncustomEvents\n| where name == \"ScanTaskCompleted\"\n| extend scanExecutionTime = todouble(customMeasurements.scanExecutionTime)\n| summarize meet_target=countif(scanExecutionTime <= scanExecutionTargetTime) , total=count()\n| extend performance=strcat(round(meet_target/todecimal(total) * 100, 2), \"%\") \n"
+                                            "value": "let scanExecutionTargetTime = 30;\ncustomEvents\n| where name == \"ScanTaskCompleted\"\n| extend scanExecutionTime = todouble(customMeasurements.scanExecutionTime)\n| summarize RequestsMetTarget=countif(scanExecutionTime <= scanExecutionTargetTime) , TotalRequests=count()\n| extend Performance=strcat(round(RequestsMetTarget/todecimal(TotalRequests) * 100, 2), \"%\") \n"
                                         },
                                         {
                                             "name": "TimeRange",
