@@ -76,6 +76,7 @@ describe('Page', () => {
     beforeEach(() => {
         gotoOptions = {
             waitUntil: ['load' as Puppeteer.LoadEvent],
+            timeout: 60000,
         };
         waitOptions = {
             waitUntil: ['networkidle0' as Puppeteer.LoadEvent],
