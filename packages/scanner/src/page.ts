@@ -32,7 +32,7 @@ export class Page {
             deviceScaleFactor: 1,
         });
 
-        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'] });
+        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'], timeout: 60000 });
         const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
 
         let response;
