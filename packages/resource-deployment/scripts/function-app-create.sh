@@ -103,17 +103,8 @@ publishFunctionAppScripts() {
 waitForFunctionAppServiceDeploymentCompletion() {
     functionAppName=$1
 
-    end=$((SECONDS + 300))
-    printf " - Running .."
-    while [ $SECONDS -le $end ]; do
-        sleep 5
-        printf "."
-        functionAppState=$(az functionapp list -g $resourceGroupName --query "[?name=='$functionAppName'].state" -o tsv)
-        if [[ $functionAppState == "Running" ]]; then
-            break
-        fi
-    done
-    echo "."
+    functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
+    . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
 
 getFunctionAppPrincipalId() {
