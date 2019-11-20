@@ -139,17 +139,13 @@ export class Page {
 
         if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {
             scanError.errorType = 'UrlNavigationTimeout';
-        }
-        if (errorMessage.includes('net::ERR_CERT_AUTHORITY_INVALID') || errorMessage.includes('SSL_ERROR_UNKNOWN')) {
+        } else if (errorMessage.includes('net::ERR_CERT_AUTHORITY_INVALID') || errorMessage.includes('SSL_ERROR_UNKNOWN')) {
             scanError.errorType = 'SslError';
-        }
-        if (errorMessage.includes('net::ERR_CONNECTION_REFUSED') || errorMessage.includes('NS_ERROR_CONNECTION_REFUSED')) {
+        } else if (errorMessage.includes('net::ERR_CONNECTION_REFUSED') || errorMessage.includes('NS_ERROR_CONNECTION_REFUSED')) {
             scanError.errorType = 'ResourceLoadFailure';
-        }
-        if (errorMessage.includes('Cannot navigate to invalid URL') || errorMessage.includes('Invalid url')) {
+        } else if (errorMessage.includes('Cannot navigate to invalid URL') || errorMessage.includes('Invalid url')) {
             scanError.errorType = 'InvalidUrl';
-        }
-        if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
+        } else if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
             scanError.errorType = 'EmptyPage';
         }
 
