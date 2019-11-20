@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { Logger, LogLevel } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -35,23 +35,26 @@ export class Page {
         });
 
         const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'], timeout: 60000 });
-        const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({ waitUntil: ['networkidle0'], timeout: 15000 });
+        const networkLoadTimeoutInMilleSec = 15000;
+        const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({
+            waitUntil: ['networkidle0'],
+            timeout: networkLoadTimeoutInMilleSec,
+        });
 
         let response;
 
         try {
             response = await gotoUrlPromise;
         } catch (err) {
-            this.logger.logError('url navigation failed', { scanError: JSON.stringify(err) });
+            this.log(LogLevel.error, url, 'The URL navigation failed', { scanError: JSON.stringify(err) });
 
-            //  `Puppeteer navigation to ${url} failed: ${(<Error>err).message}`
             return { error: this.getScanErrorFromNavigationFailure((err as Error).message) };
         }
 
         if (!this.isHtmlPage(response)) {
             const contentType = this.getContentType(response.headers());
 
-            this.logger.logError('url is not a html page', { contentType: contentType });
+            this.log(LogLevel.error, url, 'The URL returned non-HTML content', { contentType: contentType });
 
             return {
                 unscannable: true,
@@ -64,7 +67,7 @@ export class Page {
         }
 
         if (!response.ok()) {
-            this.logger.logError('url navigation returned failed response', { statusCode: response.status().toString() });
+            this.log(LogLevel.error, url, 'url navigation returned failed response', { statusCode: response.status().toString() });
 
             return {
                 error: {
@@ -80,14 +83,14 @@ export class Page {
             await waitForNetworkLoadPromise;
             // tslint:disable-next-line:no-empty
         } catch {
-            this.logger.logWarn('Page still has network activity after the timeout');
+            this.log(LogLevel.warn, url, `Page still has network activity after the timeout ${networkLoadTimeoutInMilleSec} milliseconds`);
         }
 
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
         if (response.request().redirectChain().length > 0) {
-            this.logger.logInfo(`Scanning performed on redirected page - ${scanResults.url}`);
+            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${scanResults.url}`);
 
             return {
                 results: scanResults,
@@ -102,6 +105,30 @@ export class Page {
         if (this.puppeteerPage !== undefined) {
             await this.puppeteerPage.close();
         }
+    }
+
+    private log(
+        logLevel: LogLevel,
+        url: string,
+        message: string,
+        properties?: {
+            [name: string]: string;
+        },
+    ): void {
+        this.logger.log(message, logLevel, {
+            ...this.getBaseTelemetryProps(url),
+            ...properties,
+        });
+    }
+
+    private getBaseTelemetryProps(
+        url: string,
+    ): {
+        [name: string]: string;
+    } {
+        return {
+            scanUrl: url,
+        };
     }
 
     private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {
