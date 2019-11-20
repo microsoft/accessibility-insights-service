@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ScanError } from './on-demand-page-scan-result';
 import { ResultLevel } from './states';
 import { StorageDocument } from './storage-document';
-import { ScanError } from './on-demand-page-scan-result';
 
 export interface PhysicalLocation {
     fileLocation: {

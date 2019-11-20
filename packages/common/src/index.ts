@@ -13,5 +13,7 @@ export {
     ServiceConfiguration,
     JobManagerConfig,
     RestApiConfig,
+    AvailabilityTestConfig,
+    LogRuntimeConfig,
 } from './configuration/service-configuration';
 export { setupRuntimeConfigContainer } from './setup-runtime-config-container';

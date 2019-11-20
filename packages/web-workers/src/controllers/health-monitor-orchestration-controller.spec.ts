@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { RestApiConfig, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
 import { ContextAwareLogger } from 'logger';
@@ -23,7 +24,7 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
     constructor(
         public orchestrationStepsStub: OrchestrationStepsStub,
         public context: Context,
-        public restApiConfig: RestApiConfig,
+        public availabilityTestConfig: AvailabilityTestConfig,
         serviceConfig: ServiceConfiguration,
         contextAwareLogger: ContextAwareLogger,
         df: typeof durableFunctions,
@@ -31,9 +32,12 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         super(serviceConfig, contextAwareLogger, df);
     }
 
-    protected createOrchestrationSteps(context: IOrchestrationFunctionContext, restApiConfig: RestApiConfig): OrchestrationSteps {
+    protected createOrchestrationSteps(
+        context: IOrchestrationFunctionContext,
+        availabilityTestConfig: AvailabilityTestConfig,
+    ): OrchestrationSteps {
         expect(context).toBe(this.context);
-        expect(restApiConfig).toBe(this.restApiConfig);
+        expect(availabilityTestConfig).toBe(this.availabilityTestConfig);
         this.orchestrationStepsCreated = true;
 
         return this.orchestrationStepsStub;
@@ -126,13 +130,12 @@ describe('HealthMonitorOrchestrationController', () => {
     let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     let contextStub: IOrchestrationFunctionContext;
     let df: IMock<typeof durableFunctions>;
-    const restApiConfig: RestApiConfig = {
-        maxScanRequestBatchCount: 10,
-        scanRequestProcessingDelayInSeconds: 20,
-        maxScanRequestWaitTimeInSeconds: 30,
-        minScanPriorityValue: 40,
-        maxScanPriorityValue: 50,
+    const availabilityTestConfig: AvailabilityTestConfig = {
+        urlToScan: 'https://www.bing.com',
+        scanWaitIntervalInSeconds: 10,
+        maxScanWaitTimeInSeconds: 20,
     };
+
     let orchestratorGeneratorMock: IMock<(ctxt: IOrchestrationFunctionContext) => void>;
     let orchestratorStepsStub: OrchestrationStepsStub;
     let orchestratorIterator: GeneratorExecutor;
@@ -163,7 +166,7 @@ describe('HealthMonitorOrchestrationController', () => {
         testSubject = new TestableHealthMonitorOrchestrationController(
             orchestratorStepsStub,
             contextStub,
-            restApiConfig,
+            availabilityTestConfig,
             serviceConfigurationMock.object,
             contextAwareLoggerMock.object,
             df.object,
@@ -180,13 +183,13 @@ describe('HealthMonitorOrchestrationController', () => {
         });
 
         it('should use context passed by orchestrator', async () => {
-            const newRestApiConfig = { ...restApiConfig };
-            newRestApiConfig.maxScanPriorityValue += 1;
+            const newAvailabilityTestConfig = { ...availabilityTestConfig };
+            newAvailabilityTestConfig.maxScanWaitTimeInSeconds += 1;
 
             const orchestrationFuncContext = ({
                 bindingData: {
                     controller: testSubject,
-                    restApiConfig: newRestApiConfig,
+                    availabilityTestConfig: newAvailabilityTestConfig,
                 },
             } as unknown) as IOrchestrationFunctionContext;
 
@@ -200,7 +203,7 @@ describe('HealthMonitorOrchestrationController', () => {
             await testSubject.invoke(contextStub);
 
             testSubject.context = orchestrationFuncContext;
-            testSubject.restApiConfig = newRestApiConfig;
+            testSubject.availabilityTestConfig = newAvailabilityTestConfig;
 
             orchestratorIterator.next();
 
@@ -210,7 +213,7 @@ describe('HealthMonitorOrchestrationController', () => {
         it('sets context required for orchestrator execution', async () => {
             await testSubject.invoke(contextStub);
             expect(contextStub.bindingData.controller).toBe(testSubject);
-            expect(contextStub.bindingData.restApiConfig).toEqual(restApiConfig);
+            expect(contextStub.bindingData.availabilityTestConfig).toEqual(availabilityTestConfig);
         });
 
         it('executes orchestrator', async () => {
@@ -275,6 +278,6 @@ describe('HealthMonitorOrchestrationController', () => {
     });
 
     function setupServiceConfig(): void {
-        serviceConfigurationMock.setup(async sc => sc.getConfigValue('restApiConfig')).returns(async () => restApiConfig);
+        serviceConfigurationMock.setup(async sc => sc.getConfigValue('availabilityTestConfig')).returns(async () => availabilityTestConfig);
     }
 });

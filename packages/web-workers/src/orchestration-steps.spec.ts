@@ -6,7 +6,7 @@ import 'reflect-metadata';
 // tslint:disable-next-line:no-submodule-imports
 import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 
-import { RestApiConfig } from 'common';
+import { AvailabilityTestConfig, RestApiConfig } from 'common';
 import { isNil } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import * as moment from 'moment';
@@ -35,12 +35,10 @@ describe(OrchestrationStepsImpl, () => {
     let context: IOrchestrationFunctionContext;
     let orchestrationContext: IMock<DurableOrchestrationContext>;
     let testSubject: OrchestrationStepsImpl;
-    const restApiConfig: RestApiConfig = {
-        maxScanRequestBatchCount: 10,
-        scanRequestProcessingDelayInSeconds: 20,
-        maxScanRequestWaitTimeInSeconds: 30,
-        minScanPriorityValue: 40,
-        maxScanPriorityValue: 50,
+    const availabilityTestConfig: AvailabilityTestConfig = {
+        scanWaitIntervalInSeconds: 10,
+        maxScanWaitTimeInSeconds: 20,
+        urlToScan: 'https://www.bing.com',
     };
     let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     const scanUrl = 'https://www.bing.com';
@@ -68,7 +66,7 @@ describe(OrchestrationStepsImpl, () => {
             df: orchestrationContext.object,
         });
 
-        testSubject = new OrchestrationStepsImpl(context, restApiConfig, contextAwareLoggerMock.object);
+        testSubject = new OrchestrationStepsImpl(context, availabilityTestConfig, contextAwareLoggerMock.object);
     });
 
     afterEach(() => {
@@ -325,11 +323,11 @@ describe(OrchestrationStepsImpl, () => {
         beforeEach(() => {
             generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletion(scanId));
 
-            restApiConfig.scanRequestProcessingDelayInSeconds = 10;
-            restApiConfig.maxScanRequestWaitTimeInSeconds = 10 * 2 + 1;
-            nextTime1 = moment.utc(currentUtcDateTime).add(restApiConfig.scanRequestProcessingDelayInSeconds, 'seconds');
-            nextTime2 = nextTime1.clone().add(restApiConfig.scanRequestProcessingDelayInSeconds, 'seconds');
-            nextTime3 = nextTime2.clone().add(restApiConfig.scanRequestProcessingDelayInSeconds, 'seconds');
+            availabilityTestConfig.scanWaitIntervalInSeconds = 10;
+            availabilityTestConfig.maxScanWaitTimeInSeconds = 10 * 2 + 1;
+            nextTime1 = moment.utc(currentUtcDateTime).add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+            nextTime2 = nextTime1.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
+            nextTime3 = nextTime2.clone().add(availabilityTestConfig.scanWaitIntervalInSeconds, 'seconds');
 
             activityRequestData = {
                 activityName: ActivityAction.getScanResult,
