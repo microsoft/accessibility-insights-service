@@ -7,6 +7,22 @@ export declare type ReportFormat = 'sarif';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
+export type ScanErrorTypes =
+    | 'UrlNavigationTimeout'
+    | 'SslError'
+    | 'ResourceLoadFailure'
+    | 'InvalidUrl'
+    | 'EmptyPage'
+    | 'HttpErrorCode'
+    | 'NavigationError'
+    | 'InvalidContentType';
+
+export interface ScanError {
+    errorType: ScanErrorTypes;
+    responseStatusCode?: number;
+    message: string;
+}
+
 /**
  * The web page scan run result document.
  */
@@ -35,5 +51,5 @@ export interface OnDemandPageScanReport {
 export interface OnDemandPageScanRunResult {
     state: OnDemandPageScanRunState;
     timestamp?: string;
-    error?: string;
+    error?: string | ScanError;
 }

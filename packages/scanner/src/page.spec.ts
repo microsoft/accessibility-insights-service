@@ -11,7 +11,8 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { WebDriver } from 'service-library';
-import { AxeScanResults } from './axe-scan-results';
+import { log } from 'util';
+import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
 
@@ -72,8 +73,11 @@ describe('Page', () => {
     let page: Page;
     let gotoOptions: Puppeteer.DirectNavigationOptions;
     let waitOptions: Puppeteer.DirectNavigationOptions;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
+        loggerMock = Mock.ofType(Logger);
+
         gotoOptions = {
             waitUntil: ['load' as Puppeteer.LoadEvent],
             timeout: 60000,
@@ -101,16 +105,22 @@ describe('Page', () => {
             .setup(o => o())
             .returns(() => <Puppeteer.Browser>(<unknown>puppeteerBrowserMock))
             .verifiable(Times.once());
-        page = new Page(puppeteerBrowserFactory.object, axePuppeteerFactoryMock.object);
+        page = new Page(puppeteerBrowserFactory.object, axePuppeteerFactoryMock.object, loggerMock.object);
     });
 
     it('should return error info when page is not html', async () => {
         const scanUrl = 'https://www.non-html-url.com';
+        const contentType = 'text/plain';
+
         const errorResult: AxeScanResults = {
-            error: `Cannot scan ${scanUrl} because it is not a html page.`,
+            error: {
+                errorType: 'InvalidContentType',
+                message: `Content type - ${contentType}`,
+                responseStatusCode: 200,
+            },
             unscannable: true,
         };
-        const response: Puppeteer.Response = makeResponse({ contentType: 'text/plain' });
+        const response: Puppeteer.Response = makeResponse({ contentType: contentType });
 
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
@@ -182,7 +192,7 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: `The URL ${scanUrl} returned unsuccessful response: 500 status code text`,
+            error: { errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code', responseStatusCode: 500 },
         };
         const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
 
@@ -211,7 +221,7 @@ describe('Page', () => {
         const getBrowser = () => {
             return browser;
         };
-        page = new Page(getBrowser, new AxePuppeteerFactory(new ServiceConfiguration()));
+        page = new Page(getBrowser, new AxePuppeteerFactory(new ServiceConfiguration()), loggerMock.object);
 
         await page.create();
 
@@ -261,30 +271,68 @@ describe('Page', () => {
         expect(result).toEqual(scanResults);
     });
 
-    it('should identify errors thrown by goto', async () => {
-        const scanUrl = 'https://www.problem-url.com';
-        const errorResult: AxeScanResults = {
-            error: `Puppeteer navigation to ${scanUrl} failed: unknown error`,
-        };
+    describe('handles navigation errors', () => {
+        interface NavigationErrorTestCase {
+            errorMessage: string;
+            expectedScanErrorType: ScanErrorTypes;
+        }
 
-        gotoMock
-            .setup(async goto => goto(scanUrl, gotoOptions))
-            .returns(async () => {
-                throw new Error('unknown error');
-            })
-            .verifiable(Times.once());
+        const testCaseMappings: NavigationErrorTestCase[] = [
+            {
+                errorMessage: 'TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
+                expectedScanErrorType: 'UrlNavigationTimeout',
+            },
+            {
+                errorMessage: 'Puppeteer navigation failed: net::ERR_CERT_AUTHORITY_INVALID',
+                expectedScanErrorType: 'SslError',
+            },
+            {
+                errorMessage: 'Puppeteer navigation failed: net::ERR_CONNECTION_REFUSED',
+                expectedScanErrorType: 'ResourceLoadFailure',
+            },
+            {
+                errorMessage: 'Puppeteer navigation  failed: Cannot navigate to invalid URL',
+                expectedScanErrorType: 'InvalidUrl',
+            },
+            {
+                errorMessage: 'Puppeteer navigation  failed: Cannot navigate to Invalid url',
+                expectedScanErrorType: 'InvalidUrl',
+            },
+            {
+                errorMessage: 'Puppeteer navigation  failed: net::ERR_ABORTED',
+                expectedScanErrorType: 'EmptyPage',
+            },
+        ];
 
-        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
-        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
-        axePuppeteerFactoryMock
-            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
-            .returns(async () => Promise.resolve(axePuppeteerMock.object))
-            .verifiable(Times.once());
+        test.each(testCaseMappings)('should identify errors thrown by goto - %o', async (testCase: NavigationErrorTestCase) => {
+            const scanUrl = 'https://www.problem-url.com';
 
-        await page.create();
-        const result = await page.scanForA11yIssues(scanUrl);
+            const errorResult: AxeScanResults = {
+                error: {
+                    errorType: testCase.expectedScanErrorType,
+                    message: testCase.errorMessage,
+                },
+            };
 
-        expect(result).toEqual(errorResult);
+            gotoMock
+                .setup(async goto => goto(scanUrl, gotoOptions))
+                .returns(async () => {
+                    throw new Error(testCase.errorMessage);
+                })
+                .verifiable(Times.once());
+
+            waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+            axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+            axePuppeteerFactoryMock
+                .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+                .returns(async () => Promise.resolve(axePuppeteerMock.object))
+                .verifiable(Times.once());
+
+            await page.create();
+            const result = await page.scanForA11yIssues(scanUrl);
+
+            expect(result).toEqual(errorResult);
+        });
     });
 });
 

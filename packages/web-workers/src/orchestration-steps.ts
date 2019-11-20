@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { RestApiConfig } from 'common';
 // tslint:disable-next-line: no-submodule-imports
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
+
+import { AvailabilityTestConfig } from 'common';
 import { isNil } from 'lodash';
 import { ContextAwareLogger, LogLevel } from 'logger';
 import * as moment from 'moment';
-import { RunState, ScanResultResponse, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
+import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
@@ -17,7 +18,6 @@ import {
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
-import { HealthMonitorOrchestrationController } from './controllers/health-monitor-orchestration-controller';
 
 export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
@@ -43,7 +43,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
     constructor(
         private readonly context: IOrchestrationFunctionContext,
-        private readonly restApiConfig: RestApiConfig,
+        private readonly availabilityTestConfig: AvailabilityTestConfig,
         private readonly logger: ContextAwareLogger,
     ) {}
 
@@ -72,8 +72,8 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         let scanRunState: RunState = 'pending';
         let scanStatus: ScanRunResultResponse;
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
-        const waitEndTime = waitStartTime.clone().add(this.restApiConfig.maxScanRequestWaitTimeInSeconds, 'seconds');
-        const scanRequestProcessingDelayInSeconds = this.restApiConfig.scanRequestProcessingDelayInSeconds;
+        const waitEndTime = waitStartTime.clone().add(this.availabilityTestConfig.maxScanWaitTimeInSeconds, 'seconds');
+        const scanWaitIntervalInSeconds = this.availabilityTestConfig.scanWaitIntervalInSeconds;
         let scanStatusResponse: SerializableResponse;
 
         this.logOrchestrationStep('Starting waitForScanCompletion');
@@ -83,7 +83,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             scanRunState !== 'failed' &&
             moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)
         ) {
-            this.logOrchestrationStep(`Starting timer with wait time ${scanRequestProcessingDelayInSeconds}`, LogLevel.info, {
+            this.logOrchestrationStep(`Starting timer with wait time ${scanWaitIntervalInSeconds}`, LogLevel.info, {
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
             });
@@ -91,7 +91,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             const timerOutput = yield this.context.df.createTimer(
                 moment
                     .utc(this.context.df.currentUtcDateTime)
-                    .add(scanRequestProcessingDelayInSeconds, 'seconds')
+                    .add(scanWaitIntervalInSeconds, 'seconds')
                     .toDate(),
             );
 

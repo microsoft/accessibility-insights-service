@@ -336,7 +336,6 @@ describe(ApiController, () => {
                 scanRequestProcessingDelayInSeconds: 2,
                 minScanPriorityValue: -1,
                 maxScanPriorityValue: 1,
-                maxScanRequestWaitTimeInSeconds: 3,
             };
 
             const serviceConfigMock = Mock.ofType(ServiceConfiguration);

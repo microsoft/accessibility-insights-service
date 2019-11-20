@@ -2,6 +2,23 @@
 
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
+  "availabilityTestConfig": Object {
+    "maxScanWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for fetching scan status of the submitted request",
+      "format": "int",
+    },
+    "scanWaitIntervalInSeconds": Object {
+      "default": 60,
+      "doc": "Time to wait before checking the url scan status again",
+      "format": "int",
+    },
+    "urlToScan": Object {
+      "default": "https://www.bing.com",
+      "doc": "Url to scan for availability testing",
+      "format": "url",
+    },
+  },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
@@ -47,11 +64,6 @@ Object {
     "maxScanRequestBatchCount": Object {
       "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
-      "format": "int",
-    },
-    "maxScanRequestWaitTimeInSeconds": Object {
-      "default": 600,
-      "doc": "Maximum wait time for fetching scan status of the submitted request",
       "format": "int",
     },
     "minScanPriorityValue": Object {
@@ -141,6 +153,23 @@ Object {
 
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
+  "availabilityTestConfig": Object {
+    "maxScanWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for fetching scan status of the submitted request",
+      "format": "int",
+    },
+    "scanWaitIntervalInSeconds": Object {
+      "default": 60,
+      "doc": "Time to wait before checking the url scan status again",
+      "format": "int",
+    },
+    "urlToScan": Object {
+      "default": "https://www.bing.com",
+      "doc": "Url to scan for availability testing",
+      "format": "url",
+    },
+  },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
@@ -186,11 +215,6 @@ Object {
     "maxScanRequestBatchCount": Object {
       "default": 250,
       "doc": "Maximum number of scan requests in a single HTTP client request.",
-      "format": "int",
-    },
-    "maxScanRequestWaitTimeInSeconds": Object {
-      "default": 600,
-      "doc": "Maximum wait time for fetching scan status of the submitted request",
       "format": "int",
     },
     "minScanPriorityValue": Object {

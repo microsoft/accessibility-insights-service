@@ -35,7 +35,6 @@ export interface ScanRunTimeConfig {
 export interface RestApiConfig {
     maxScanRequestBatchCount: number;
     scanRequestProcessingDelayInSeconds: number;
-    maxScanRequestWaitTimeInSeconds: number;
     minScanPriorityValue: number;
     maxScanPriorityValue: number;
 }
@@ -47,6 +46,13 @@ export interface RuntimeConfig {
     scanConfig: ScanRunTimeConfig;
     jobManagerConfig: JobManagerConfig;
     restApiConfig: RestApiConfig;
+    availabilityTestConfig: AvailabilityTestConfig;
+}
+
+export interface AvailabilityTestConfig {
+    urlToScan: string;
+    scanWaitIntervalInSeconds: number;
+    maxScanWaitTimeInSeconds: number;
 }
 
 @injectable()
@@ -211,11 +217,6 @@ export class ServiceConfiguration {
                     default: 15,
                     doc: 'The scan request processing delay interval in seconds for a new submitted request.',
                 },
-                maxScanRequestWaitTimeInSeconds: {
-                    format: 'int',
-                    default: 600,
-                    doc: 'Maximum wait time for fetching scan status of the submitted request',
-                },
                 minScanPriorityValue: {
                     format: 'int',
                     default: -1000,
@@ -229,6 +230,23 @@ export class ServiceConfiguration {
                     doc:
                         'Priority values can range from -1000 to 1000, with -1000 being the lowest priority and 1000 being the highest priority.\
                         This range correlates with Azure Batch pool task priority range.',
+                },
+            },
+            availabilityTestConfig: {
+                urlToScan: {
+                    format: 'url',
+                    default: 'https://www.bing.com',
+                    doc: 'Url to scan for availability testing',
+                },
+                maxScanWaitTimeInSeconds: {
+                    format: 'int',
+                    default: 600,
+                    doc: 'Maximum wait time for fetching scan status of the submitted request',
+                },
+                scanWaitIntervalInSeconds: {
+                    format: 'int',
+                    default: 60,
+                    doc: 'Time to wait before checking the url scan status again',
                 },
             },
         };

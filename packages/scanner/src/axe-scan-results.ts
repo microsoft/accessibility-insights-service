@@ -2,9 +2,25 @@
 // Licensed under the MIT License.
 import { AxeResults } from 'axe-core';
 
+export type ScanErrorTypes =
+    | 'UrlNavigationTimeout'
+    | 'SslError'
+    | 'ResourceLoadFailure'
+    | 'InvalidUrl'
+    | 'EmptyPage'
+    | 'HttpErrorCode'
+    | 'NavigationError'
+    | 'InvalidContentType';
+
+export interface ScanError {
+    errorType: ScanErrorTypes;
+    responseStatusCode?: number;
+    message: string;
+}
+
 export interface AxeScanResults {
     results?: AxeResults;
-    error?: string;
+    error?: string | ScanError;
     unscannable?: boolean;
     scannedUrl?: string;
 }

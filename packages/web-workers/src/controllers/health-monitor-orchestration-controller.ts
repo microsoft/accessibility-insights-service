@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports no-any
 import { RestApiConfig, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
@@ -36,8 +37,11 @@ export class HealthMonitorOrchestrationController extends WebController {
         return true;
     }
 
-    protected createOrchestrationSteps(context: IOrchestrationFunctionContext, restApiConfig: RestApiConfig): OrchestrationSteps {
-        return new OrchestrationStepsImpl(context, restApiConfig, this.contextAwareLogger);
+    protected createOrchestrationSteps(
+        context: IOrchestrationFunctionContext,
+        availabilityTestConfig: AvailabilityTestConfig,
+    ): OrchestrationSteps {
+        return new OrchestrationStepsImpl(context, availabilityTestConfig, this.contextAwareLogger);
     }
 
     private invokeOrchestration(): void {
@@ -49,8 +53,8 @@ export class HealthMonitorOrchestrationController extends WebController {
     private getOrchestrationExecutor(): (context: IOrchestrationFunctionContext) => void {
         return this.df.orchestrator(function*(context: IOrchestrationFunctionContext): IterableIterator<unknown> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
-            const restApiConfig = context.bindingData.restApiConfig as RestApiConfig;
-            const orcSteps = thisObj.createOrchestrationSteps(context, restApiConfig);
+            const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
+            const orcSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
 
             yield* orcSteps.callHealthCheckActivity();
             const scanId = yield* orcSteps.callSubmitScanRequestActivity('https://www.bing.com');
@@ -62,6 +66,6 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     private async setContextGenerator(): Promise<void> {
         this.context.bindingData.controller = this;
-        this.context.bindingData.restApiConfig = await this.serviceConfig.getConfigValue('restApiConfig');
+        this.context.bindingData.availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
     }
 }

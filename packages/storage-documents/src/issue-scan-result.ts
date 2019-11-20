@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ScanError } from './on-demand-page-scan-result';
 import { ResultLevel } from './states';
 import { StorageDocument } from './storage-document';
 
@@ -42,6 +43,6 @@ export interface IssueScanResult extends StorageDocument {
 
 export interface IssueScanResults {
     results?: IssueScanResult[];
-    error?: string;
+    error?: string | ScanError;
     unscannable?: boolean;
 }
