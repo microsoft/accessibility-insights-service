@@ -18,19 +18,25 @@ export abstract class WebController {
     public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;
 
-        await this.contextAwareLogger.setup(this.getBaseTelemetryProperties());
-        this.contextAwareLogger.logInfo('[WebController] request started');
+        try {
+            await this.contextAwareLogger.setup(this.getBaseTelemetryProperties());
 
-        let result: unknown;
-        if (this.validateRequest(...args)) {
-            result = await this.handleRequest(...args);
+            this.contextAwareLogger.logInfo('[WebController] request started');
+
+            let result: unknown;
+            if (this.validateRequest(...args)) {
+                result = await this.handleRequest(...args);
+            }
+
+            this.setResponseContentTypeHeader();
+
+            this.contextAwareLogger.logInfo('[WebController] processed request');
+
+            return result;
+        } catch (error) {
+            this.contextAwareLogger.trackExceptionAny(error, 'Request failed');
+            throw error;
         }
-
-        this.setResponseContentTypeHeader();
-
-        this.contextAwareLogger.logInfo('[WebController] processed request');
-
-        return result;
     }
 
     protected abstract validateRequest(...args: any[]): boolean;

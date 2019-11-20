@@ -89,6 +89,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
+        this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] Added requests to permanent container`);
     }
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[]): Promise<void> {
@@ -103,6 +104,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
+        this.contextAwareLogger.logInfo(`[ScanBatchRequestFeedController] Added requests to queue container`);
     }
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {

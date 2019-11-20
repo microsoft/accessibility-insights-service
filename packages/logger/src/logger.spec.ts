@@ -368,14 +368,16 @@ describe(Logger, () => {
         });
 
         it('handles when passed non-error object', async () => {
-            const underlyingError = 'internal error';
+            const underlyingError = { err: 'internal error' };
             const errorMessage = 'error message';
 
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
             invokeAllLoggerClientMocks(m =>
-                m.setup(c => c.trackException(new VError({ info: { error: underlyingError } }, errorMessage))).verifiable(Times.once()),
+                m
+                    .setup(c => c.trackException(new VError(new Error(JSON.stringify(underlyingError)), errorMessage)))
+                    .verifiable(Times.once()),
             );
 
             testSubject.trackExceptionAny(underlyingError, errorMessage);
