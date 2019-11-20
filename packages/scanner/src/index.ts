@@ -2,4 +2,4 @@
 // Licensed under the MIT License.
 export { registerScannerToContainer } from './register-scanner-to-container';
 export { Scanner } from './scanner';
-export { AxeScanResults } from './axe-scan-results';
+export { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { ResultLevel } from './states';
 import { StorageDocument } from './storage-document';
+import { ScanError } from './on-demand-page-scan-result';
 
 export interface PhysicalLocation {
     fileLocation: {
@@ -42,6 +43,6 @@ export interface IssueScanResult extends StorageDocument {
 
 export interface IssueScanResults {
     results?: IssueScanResult[];
-    error?: string;
+    error?: string | ScanError;
     unscannable?: boolean;
 }

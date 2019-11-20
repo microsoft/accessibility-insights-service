@@ -11,7 +11,8 @@ export declare type ScanRunErrorCodeName =
     | 'ResourceLoadFailure'
     | 'InvalidUrl'
     | 'EmptyPage'
-    | 'NavigationError';
+    | 'NavigationError'
+    | 'InvalidContentType';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -38,7 +39,7 @@ export class ScanRunErrorCodes {
     public static httpErrorCode: ScanRunErrorCode = {
         code: 'HttpErrorCode',
         codeId: 9003,
-        message: 'Accessing the scan URL resulted in an error.',
+        message: 'Page returned an unsuccessful response code',
     };
 
     public static sslError: ScanRunErrorCode = {
@@ -70,4 +71,22 @@ export class ScanRunErrorCodes {
         codeId: 9008,
         message: 'Unknown error navigating to scan URL',
     };
+
+    public static invalidContentType: ScanRunErrorCode = {
+        code: 'InvalidContentType',
+        codeId: 9009,
+        message: 'Only html content type pages are supported for scanning',
+    };
 }
+
+export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
+    InternalError: ScanRunErrorCodes.internalError,
+    UrlNavigationTimeout: ScanRunErrorCodes.urlNavigationTimeout,
+    SslError: ScanRunErrorCodes.sslError,
+    HttpErrorCode: ScanRunErrorCodes.httpErrorCode,
+    ResourceLoadFailure: ScanRunErrorCodes.resourceLoadFailure,
+    InvalidUrl: ScanRunErrorCodes.invalidUrl,
+    EmptyPage: ScanRunErrorCodes.emptyPage,
+    NavigationError: ScanRunErrorCodes.navigationError,
+    InvalidContentType: ScanRunErrorCodes.invalidContentType,
+};

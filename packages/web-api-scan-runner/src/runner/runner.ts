@@ -14,6 +14,7 @@ import {
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
+    ScanError,
 } from 'storage-documents';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
@@ -111,7 +112,7 @@ export class Runner {
         return originPageScanResult;
     }
 
-    private createRunResult(state: OnDemandPageScanRunState, error?: string): OnDemandPageScanRunResult {
+    private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
         return {
             state,
             timestamp: new Date().toJSON(),

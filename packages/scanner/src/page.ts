@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
+import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import { AxeScanResults } from './axe-scan-results';
+import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 
 export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
@@ -15,6 +16,7 @@ export class Page {
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async create(): Promise<void> {
@@ -40,27 +42,53 @@ export class Page {
         try {
             response = await gotoUrlPromise;
         } catch (err) {
-            return { error: `Puppeteer navigation to ${url} failed: ${(<Error>err).message}` };
+            this.logger.logError('url navigation failed', { scanError: JSON.stringify(err) });
+
+            //  `Puppeteer navigation to ${url} failed: ${(<Error>err).message}`
+            return { error: this.getScanErrorFromNavigationFailure((err as Error).message) };
         }
 
         if (!this.isHtmlPage(response)) {
-            return { unscannable: true, error: `Cannot scan ${url} because it is not a html page.` };
+            const contentType = this.getContentType(response.headers());
+
+            this.logger.logError('url is not a html page', { contentType: contentType });
+
+            return {
+                unscannable: true,
+                error: {
+                    errorType: 'InvalidContentType',
+                    responseStatusCode: response.status(),
+                    message: `Content type - ${contentType}`,
+                },
+            };
         }
 
         if (!response.ok()) {
-            return { error: `The URL ${url} returned unsuccessful response: ${response.status()} ${response.statusText()}` };
+            this.logger.logError('url navigation returned failed response', { statusCode: response.status().toString() });
+
+            return {
+                error: {
+                    errorType: 'HttpErrorCode',
+                    responseStatusCode: response.status(),
+                    message: 'Page returned an unsuccessful response code',
+                },
+            };
         }
 
         try {
             // We ignore error if the page still has network activity after 15 sec
             await waitForNetworkLoadPromise;
             // tslint:disable-next-line:no-empty
-        } catch {}
+        } catch {
+            this.logger.logWarn('Page still has network activity after the timeout');
+        }
 
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const scanResults = await axePuppeteer.analyze();
 
         if (response.request().redirectChain().length > 0) {
+            this.logger.logInfo(`Scanning performed on redirected page - ${scanResults.url}`);
+
             return {
                 results: scanResults,
                 scannedUrl: scanResults.url,
@@ -74,6 +102,31 @@ export class Page {
         if (this.puppeteerPage !== undefined) {
             await this.puppeteerPage.close();
         }
+    }
+
+    private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {
+        const scanError: ScanError = {
+            errorType: 'NavigationError',
+            message: errorMessage,
+        };
+
+        if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {
+            scanError.errorType = 'UrlNavigationTimeout';
+        }
+        if (errorMessage.includes('net::ERR_CERT_AUTHORITY_INVALID') || errorMessage.includes('SSL_ERROR_UNKNOWN')) {
+            scanError.errorType = 'SslError';
+        }
+        if (errorMessage.includes('net::ERR_CONNECTION_REFUSED') || errorMessage.includes('NS_ERROR_CONNECTION_REFUSED')) {
+            scanError.errorType = 'ResourceLoadFailure';
+        }
+        if (errorMessage.includes('Cannot navigate to invalid URL') || errorMessage.includes('Invalid url')) {
+            scanError.errorType = 'InvalidUrl';
+        }
+        if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
+            scanError.errorType = 'EmptyPage';
+        }
+
+        return scanError;
     }
 
     private isHtmlPage(response: Puppeteer.Response): boolean {

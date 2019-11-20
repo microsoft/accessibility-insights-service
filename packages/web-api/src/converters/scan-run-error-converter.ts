@@ -1,11 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
-import { ScanRunErrorCode, ScanRunErrorCodes } from 'service-library';
+import { isNil, isString } from 'lodash';
+import { scanErrorNameToErrorMap, ScanRunErrorCode, ScanRunErrorCodes } from 'service-library';
+import { ScanError } from 'storage-documents';
 
 @injectable()
 export class ScanRunErrorConverter {
-    public getScanRunErrorCode(scanError: string): ScanRunErrorCode {
+    public getScanRunErrorCode(scanError: string | ScanError): ScanRunErrorCode {
+        if (isNil(scanError)) {
+            return ScanRunErrorCodes.internalError;
+        }
+
+        if (isString(scanError)) {
+            return this.resolveLegacyErrorType(scanError);
+        }
+
+        return scanErrorNameToErrorMap[scanError.errorType];
+    }
+
+    private resolveLegacyErrorType(scanError: string): ScanRunErrorCode {
         if (/Puppeteer navigation to .+ failed/.test(scanError)) {
             // Errors thrown by puppeteer goto
             if (/TimeoutError: Navigation Timeout Exceeded:/i.test(scanError)) {
@@ -29,7 +43,7 @@ export class ScanRunErrorConverter {
         if (/TimeoutError: Navigation Timeout Exceeded:/i.test(scanError)) {
             return ScanRunErrorCodes.urlNavigationTimeout;
         }
-        if (/The URL .+? returned unsuccessful response: [0-9]+ .+/.test(scanError)) {
+        if (/unsuccessful response/.test(scanError)) {
             return this.createHTTPResponseError(scanError);
         }
 
