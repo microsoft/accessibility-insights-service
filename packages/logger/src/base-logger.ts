@@ -81,7 +81,8 @@ export abstract class BaseLogger {
 
     // tslint:disable-next-line: no-any
     public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
-        const parsedErrorObject = underlyingErrorData instanceof Error ? underlyingErrorData : { info: { error: underlyingErrorData } };
+        const parsedErrorObject =
+            underlyingErrorData instanceof Error ? underlyingErrorData : new Error(JSON.stringify(underlyingErrorData));
 
         this.trackException(new VError(parsedErrorObject, message));
     }

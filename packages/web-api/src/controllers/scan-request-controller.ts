@@ -75,6 +75,7 @@ export class ScanRequestController extends ApiController {
             batchId: batchId,
             totalUrls: totalUrls.toString(),
             invalidUrls: invalidUrls.toString(),
+            scanRequestResponse: JSON.stringify(processedData.scanResponses),
         });
 
         const measurements: BatchScanRequestMeasurements = {

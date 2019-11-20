@@ -85,8 +85,10 @@ describe(ProcessEntryPointBase, () => {
             it('verifies logging for valid data', async () => {
                 dotEnvConfigStub = { parsed: { foo: 'bar' } };
 
-                loggerMock.setup(l => l.logInfo('Config based environment variables:')).verifiable();
-                loggerMock.setup(l => l.logInfo(JSON.stringify(dotEnvConfigStub.parsed, undefined, 2))).verifiable();
+                loggerMock.setup(l => l.logInfo('[ProcessEntryPointBase] Config based environment variables:')).verifiable();
+                loggerMock
+                    .setup(l => l.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfigStub.parsed, undefined, 2)}`))
+                    .verifiable();
 
                 await expect(testSubject.start()).resolves.toBeUndefined();
 
@@ -97,7 +99,9 @@ describe(ProcessEntryPointBase, () => {
             it('verifies logging for invalid data', async () => {
                 dotEnvConfigStub = { error: new Error('error1') };
 
-                loggerMock.setup(l => l.logWarn(`Unable to load env config file. ${dotEnvConfigStub.error}`)).verifiable();
+                loggerMock
+                    .setup(l => l.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfigStub.error}`))
+                    .verifiable();
 
                 await expect(testSubject.start()).resolves.toBeUndefined();
 
@@ -138,7 +142,9 @@ describe(ProcessEntryPointBase, () => {
                 testSubject.customActionToBeInvoked = () => {
                     throw error;
                 };
-                loggerMock.setup(l => l.trackExceptionAny(error, 'Error occurred while executing action.')).verifiable();
+                loggerMock
+                    .setup(l => l.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.'))
+                    .verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
 

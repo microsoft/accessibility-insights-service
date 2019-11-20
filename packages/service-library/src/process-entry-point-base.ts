@@ -25,6 +25,8 @@ export abstract class ProcessEntryPointBase {
         } catch (error) {
             if (loggerInitialized === false) {
                 console.log('Unable to setup logger.', error);
+            } else {
+                logger.trackExceptionAny(error, '[ProcessEntryPointBase] Unhandled exception');
             }
 
             throw error;
@@ -43,19 +45,19 @@ export abstract class ProcessEntryPointBase {
         try {
             await this.runCustomAction(container, ...args);
         } catch (error) {
-            logger.trackExceptionAny(error, 'Error occurred while executing action.');
+            logger.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.');
             throw error;
         }
     }
 
     private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: Logger): void {
         if (dotEnvConfig.parsed !== undefined) {
-            logger.logInfo('Config based environment variables:');
-            logger.logInfo(JSON.stringify(dotEnvConfig.parsed, undefined, 2));
+            logger.logInfo('[ProcessEntryPointBase] Config based environment variables:');
+            logger.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfig.parsed, undefined, 2)}`);
         }
 
         if (dotEnvConfig.error !== undefined) {
-            logger.logWarn(`Unable to load env config file. ${dotEnvConfig.error}`);
+            logger.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfig.error}`);
         }
     }
 }
