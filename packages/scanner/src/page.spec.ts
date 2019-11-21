@@ -302,6 +302,10 @@ describe('Page', () => {
                 errorMessage: 'Puppeteer navigation  failed: net::ERR_ABORTED',
                 expectedScanErrorType: 'EmptyPage',
             },
+            {
+                errorMessage: 'Puppeteer navigation  failed: net::ERR_NAME_NOT_RESOLVED',
+                expectedScanErrorType: 'UrlNotResolved',
+            },
         ];
 
         test.each(testCaseMappings)('should identify errors thrown by goto - %o', async (testCase: NavigationErrorTestCase) => {
