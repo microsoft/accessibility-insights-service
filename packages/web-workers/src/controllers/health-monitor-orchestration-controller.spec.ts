@@ -65,6 +65,8 @@ class OrchestrationStepsStub implements OrchestrationSteps {
     public reportId = 'report-id';
     public shouldThrowException = false;
 
+    constructor(private readonly availabilityTestConfig: AvailabilityTestConfig) {}
+
     public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse> {
         this.orchestratorStepsCallCount.callHealthCheckCount += 1;
         this.throwExceptionIfExpected();
@@ -112,7 +114,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
     public *callSubmitScanRequestActivity(url: string): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
-        expect(url).toBe('https://www.bing.com');
+        expect(url).toBe(this.availabilityTestConfig.urlToScan);
 
         return yield this.scanId;
     }
@@ -130,20 +132,22 @@ describe('HealthMonitorOrchestrationController', () => {
     let contextAwareLoggerMock: IMock<ContextAwareLogger>;
     let contextStub: IOrchestrationFunctionContext;
     let df: IMock<typeof durableFunctions>;
-    const availabilityTestConfig: AvailabilityTestConfig = {
-        urlToScan: 'https://www.bing.com',
-        scanWaitIntervalInSeconds: 10,
-        maxScanWaitTimeInSeconds: 20,
-    };
+    let availabilityTestConfig: AvailabilityTestConfig;
 
     let orchestratorGeneratorMock: IMock<(ctxt: IOrchestrationFunctionContext) => void>;
     let orchestratorStepsStub: OrchestrationStepsStub;
     let orchestratorIterator: GeneratorExecutor;
 
     beforeEach(() => {
+        availabilityTestConfig = {
+            urlToScan: 'some-url',
+            scanWaitIntervalInSeconds: 10,
+            maxScanWaitTimeInSeconds: 20,
+        };
+
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
-        orchestratorStepsStub = new OrchestrationStepsStub();
+        orchestratorStepsStub = new OrchestrationStepsStub(availabilityTestConfig);
 
         contextStub = ({
             bindingData: {},

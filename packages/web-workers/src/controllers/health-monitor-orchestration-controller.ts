@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports no-any
-import { RestApiConfig, ServiceConfiguration } from 'common';
-import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
+import { AvailabilityTestConfig, RestApiConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { inject, injectable } from 'inversify';
@@ -57,7 +56,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             const orcSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
 
             yield* orcSteps.callHealthCheckActivity();
-            const scanId = yield* orcSteps.callSubmitScanRequestActivity('https://www.bing.com');
+            const scanId = yield* orcSteps.callSubmitScanRequestActivity(availabilityTestConfig.urlToScan);
             yield* orcSteps.verifyScanSubmitted(scanId);
             const scanRunStatus = yield* orcSteps.waitForScanCompletion(scanId);
             yield* orcSteps.getScanReport(scanId, scanRunStatus.reports[0].reportId);
