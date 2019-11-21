@@ -293,6 +293,8 @@ components:
                         - InvalidUrl
                         - EmptyPage
                         - NavigationError
+                        - InvalidContentType
+                        - UrlNotResolved
                 codeId:
                     type: integer
                     format: int32
