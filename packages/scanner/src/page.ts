@@ -147,6 +147,8 @@ export class Page {
             scanError.errorType = 'InvalidUrl';
         } else if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
             scanError.errorType = 'EmptyPage';
+        } else if (errorMessage.includes('net::ERR_NAME_NOT_RESOLVED')) {
+            scanError.errorType = 'UrlNotResolved';
         }
 
         return scanError;

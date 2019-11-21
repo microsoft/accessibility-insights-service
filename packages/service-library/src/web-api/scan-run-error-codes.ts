@@ -12,7 +12,8 @@ export declare type ScanRunErrorCodeName =
     | 'InvalidUrl'
     | 'EmptyPage'
     | 'NavigationError'
-    | 'InvalidContentType';
+    | 'InvalidContentType'
+    | 'UrlNotResolved';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -77,6 +78,12 @@ export class ScanRunErrorCodes {
         codeId: 9009,
         message: 'Only html content type pages are supported for scanning',
     };
+
+    public static urlNotResolved: ScanRunErrorCode = {
+        code: 'UrlNotResolved',
+        codeId: 9010,
+        message: 'URL cannot be reached',
+    };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
@@ -89,4 +96,5 @@ export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunEr
     EmptyPage: ScanRunErrorCodes.emptyPage,
     NavigationError: ScanRunErrorCodes.navigationError,
     InvalidContentType: ScanRunErrorCodes.invalidContentType,
+    UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
 };
