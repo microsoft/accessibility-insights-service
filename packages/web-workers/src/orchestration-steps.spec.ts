@@ -10,7 +10,7 @@ import { AvailabilityTestConfig, RestApiConfig } from 'common';
 import { isNil } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import * as moment from 'moment';
-import { RunState, ScanRun, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
+import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ActivityAction } from './contracts/activity-actions';
 import {
@@ -19,7 +19,6 @@ import {
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
-import { HealthMonitorOrchestrationController } from './controllers/health-monitor-orchestration-controller';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
 import { GeneratorExecutor } from './test-utilities/generator-executor';
 

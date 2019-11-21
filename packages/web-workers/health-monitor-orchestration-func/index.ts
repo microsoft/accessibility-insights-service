@@ -5,7 +5,6 @@ import 'reflect-metadata';
 // tslint:disable: no-submodule-imports
 import { Context } from '@azure/functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { WebControllerDispatcher } from 'service-library';
 import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';
 import { processWebRequest } from '../src/process-request';
 

@@ -4,7 +4,6 @@ import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
-import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
 import {

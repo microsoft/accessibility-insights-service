@@ -5,7 +5,6 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
 import { ContextAwareLogger } from 'logger';
-import { ScanResultResponse, ScanRun, ScanRunResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
