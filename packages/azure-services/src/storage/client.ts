@@ -3,6 +3,8 @@
 import { VError } from 'verror';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
 
+// tslint:disable: no-any no-unsafe-any
+
 export namespace client {
     export function isSuccessStatusCode<T>(response: CosmosOperationResponse<T>): boolean {
         return response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode <= 299;
@@ -16,6 +18,17 @@ export namespace client {
                     response: response.response === undefined ? 'undefined' : response.response,
                 })}`,
             );
+        }
+    }
+
+    export function getErrorResponse<T>(error: any): CosmosOperationResponse<T> {
+        if (error.code !== undefined) {
+            return {
+                response: error.body,
+                statusCode: error.code,
+            };
+        } else {
+            return undefined;
         }
     }
 }

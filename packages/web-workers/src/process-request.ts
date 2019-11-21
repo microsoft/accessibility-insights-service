@@ -8,9 +8,7 @@ import { setupRequestContextIocContainer } from './setup-request-context-ioc-con
 
 export async function processWebRequest(context: Context, controllerType: Newable<WebController>, ...args: unknown[]): Promise<unknown> {
     const processLifeCycleContainer = getProcessLifeCycleContainer();
-
     const dispatcher = await getGlobalWebControllerDispatcher(processLifeCycleContainer);
-
     const requestContainer = setupRequestContextIocContainer(processLifeCycleContainer);
 
     return dispatcher.processRequest(requestContainer, controllerType, context, ...args);

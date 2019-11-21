@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
+import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import { CosmosClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
@@ -19,15 +20,18 @@ describe('CosmosClientWrapper', () => {
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
     let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
+    let loggerMock: IMock<Logger>;
     const partitionKey = 'partitionKey';
     const dbName = 'stub db';
     const collectionName = 'stub collection';
+    const errorResponse = { code: 500, body: 'Unable to store the item.' };
 
     beforeEach(() => {
         setupCosmosMocks();
         setupVerifiableGetDbCall();
         setupVerifiableGetCollectionCall();
-        testSubject = new CosmosClientWrapper(cosmosClientProviderStub);
+        loggerMock = Mock.ofType(Logger);
+        testSubject = new CosmosClientWrapper(cosmosClientProviderStub, loggerMock.object);
     });
 
     describe('readItem()', () => {
@@ -302,7 +306,23 @@ describe('CosmosClientWrapper', () => {
         });
 
         it('should upsert list of items with partition key', async () => {
-            const items = [1, 2, 3];
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propB',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-3',
+                    propA: 'propC',
+                    _etag: '1',
+                },
+            ];
             const options: cosmos.RequestOptions = { partitionKey: partitionKey };
             items.map(item => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
@@ -314,7 +334,23 @@ describe('CosmosClientWrapper', () => {
         });
 
         it('should upsert list of items with partition key', async () => {
-            const items = [1, 2, 3];
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propB',
+                    _etag: '1',
+                },
+                {
+                    id: 'id-3',
+                    propA: 'propC',
+                    _etag: '1',
+                },
+            ];
             const options: cosmos.RequestOptions = { partitionKey: partitionKey };
             items.map(item => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
@@ -326,11 +362,22 @@ describe('CosmosClientWrapper', () => {
         });
 
         it('should fail if one of the items failed to upsert', async () => {
-            const items = [1, 2];
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propB',
+                },
+            ];
             setupVerifiableUpsertItemCall(items[0]);
             setupVerifiableRejectedUpsertItemCall(items[1]);
 
-            await expect(testSubject.upsertItems(items, dbName, collectionName)).rejects.toEqual('unable to store item');
+            loggerMock.setup(o => o.logError(`The Cosmos DB 'upsertItem' operation failed.`, It.isAny())).verifiable();
+
+            await expect(testSubject.upsertItems(items, dbName, collectionName)).rejects.toEqual(errorResponse);
 
             verifyMocks();
         });
@@ -355,6 +402,7 @@ describe('CosmosClientWrapper', () => {
         dbMock.verifyAll();
         collectionMock.verifyAll();
         cosmosClientMock.verifyAll();
+        loggerMock.verifyAll();
     }
 
     function setupVerifiableGetDbCall(): void {
@@ -382,7 +430,7 @@ describe('CosmosClientWrapper', () => {
     }
 
     function setupVerifiableRejectedUpsertItemCall(item: any): void {
-        itemsMock.setup(async i => i.upsert(item, undefined)).returns(async () => Promise.reject('unable to store item'));
+        itemsMock.setup(async i => i.upsert(item, undefined)).returns(async () => Promise.reject(errorResponse));
     }
 });
 

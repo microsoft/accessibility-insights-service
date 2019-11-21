@@ -260,9 +260,11 @@ describe('CosmosContainerClient', () => {
     it('writeDocuments()', async () => {
         const items = [
             {
+                id: 'id1',
                 value: 'value1',
             },
             {
+                id: 'id2',
                 value: 'value2',
             },
         ];

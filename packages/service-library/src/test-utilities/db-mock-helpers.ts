@@ -7,7 +7,9 @@ import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
 import * as crypto from 'crypto';
 import * as _ from 'lodash';
+import { Logger } from 'logger';
 import { ItemType, StorageDocument, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
+import { Mock } from 'typemoq';
 import { PageObjectFactory } from '../factories/page-object-factory';
 
 export interface DbContainer {
@@ -43,7 +45,7 @@ export class DbMockHelper {
         };
 
         this.azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
-        this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient));
+        this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient), Mock.ofType<Logger>().object);
 
         await this.deleteDbContainer(this.dbContainer);
         await this.createDbContainer(this.dbContainer);

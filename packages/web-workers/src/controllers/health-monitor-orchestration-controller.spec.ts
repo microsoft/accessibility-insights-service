@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { RestApiConfig, ServiceConfiguration } from 'common';
+import { ServiceConfiguration } from 'common';
 import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
