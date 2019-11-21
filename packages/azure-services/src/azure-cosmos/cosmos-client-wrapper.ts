@@ -269,7 +269,7 @@ export class CosmosClientWrapper {
     ): void {
         const errorResponse = client.getErrorResponse(error);
         if (errorResponse !== undefined) {
-            this.logger.logError(`The Cosmos DB '${operation}' operation failed.`, {
+            this.logger.logError(`[storage-client] The Cosmos DB '${operation}' operation failed.`, {
                 statusCode: errorResponse.statusCode.toString(),
                 response: errorResponse.response === undefined ? 'undefined' : errorResponse.response.toString(),
                 ...properties,
