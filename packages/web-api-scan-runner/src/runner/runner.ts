@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { AxeResults } from 'axe-core';
 import { convertAxeToSarif, SarifLog } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
@@ -14,6 +15,7 @@ import {
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
+    ReportFormat,
     ScanError,
 } from 'storage-documents';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -22,8 +24,14 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 
 // tslint:disable: no-null-keyword no-any
 
+function convertAxeToHtml(results: AxeResults): string {
+    return 'html report';
+}
+
 @injectable()
 export class Runner {
+    private readonly reportGenerationFunctions: { [formatName: string]: (axeResults: AxeResults) => string };
+
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
@@ -33,7 +41,13 @@ export class Runner {
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         private readonly convertAxeToSarifFunc = convertAxeToSarif,
-    ) {}
+        private readonly convertAxeToHtmlFunc = convertAxeToHtml,
+    ) {
+        this.reportGenerationFunctions = {
+            sarif: ar => JSON.stringify(this.convertAxeToSarifFunc(ar)),
+            html: this.convertAxeToHtmlFunc,
+        };
+    }
 
     public async run(): Promise<void> {
         let browser: Browser;
@@ -93,7 +107,10 @@ export class Runner {
             this.logger.trackEvent('ScanTaskSucceeded');
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = [await this.saveScanReport(axeScanResults)];
+            pageScanResult.reports = [
+                await this.saveScanReport(axeScanResults, 'sarif'),
+                await this.saveScanReport(axeScanResults, 'html'),
+            ];
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
@@ -133,20 +150,21 @@ export class Runner {
         }
     }
 
-    private async saveScanReport(axeResults: AxeScanResults): Promise<OnDemandPageScanReport> {
-        this.logger.logInfo(`Converting scan run result to Sarif.`);
+    private async saveScanReport(axeResults: AxeScanResults, format: ReportFormat): Promise<OnDemandPageScanReport> {
+        this.logger.logInfo(`Converting scan run result to ${format}.`);
         axeResults.results.inapplicable = [];
         axeResults.results.incomplete = [];
         axeResults.results.passes = [];
-        const sarifResults: SarifLog = this.convertAxeToSarifFunc(axeResults.results);
 
-        this.logger.logInfo(`Saving Sarif report to a blob storage.`);
+        const report = this.reportGenerationFunctions[format](axeResults.results);
+
+        this.logger.logInfo(`Saving ${format} report to a blob storage.`);
         const reportId = this.guidGenerator.createGuid();
-        const href = await this.pageScanRunReportService.saveSarifReport(reportId, JSON.stringify(sarifResults));
-        this.logger.logInfo(`Sarif report saved to a blob ${href}`);
+        const href = await this.pageScanRunReportService.saveReport(reportId, report, format);
+        this.logger.logInfo(`${format} report saved to a blob ${href}`);
 
         return {
-            format: 'sarif',
+            format,
             href,
             reportId,
         };

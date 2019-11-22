@@ -4,7 +4,7 @@ import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
 
 export declare type LinkType = 'self';
-export declare type ReportFormat = 'sarif';
+export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 

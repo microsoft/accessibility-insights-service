@@ -343,7 +343,7 @@ describe(Runner, () => {
 
     function setupSaveSarifReportCall(): void {
         pageScanRunReportServiceMock
-            .setup(async s => s.saveSarifReport(reportGuid, JSON.stringify(parsedSarifContent)))
+            .setup(async s => s.saveReport(reportGuid, JSON.stringify(parsedSarifContent), 'sarif'))
             .returns(async () => Promise.resolve(blobFilePath))
             .verifiable();
     }

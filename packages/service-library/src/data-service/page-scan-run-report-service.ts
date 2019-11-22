@@ -4,6 +4,7 @@
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
+import { ReportFormat } from 'storage-documents';
 
 @injectable()
 export class PageScanRunReportService {
@@ -14,17 +15,17 @@ export class PageScanRunReportService {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async saveSarifReport(fileId: string, content: string): Promise<string> {
-        const filePath = this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId));
+    public async saveReport(fileId: string, content: string, format: ReportFormat): Promise<string> {
+        const filePath = this.getBlobFilePath(fileId, this.getBlobFileName(fileId, format));
         await this.blobStorageClient.uploadBlobContent(PageScanRunReportService.blobContainerName, filePath, content);
 
         return filePath;
     }
 
-    public async readSarifReport(fileId: string): Promise<BlobContentDownloadResponse> {
+    public async readReport(fileId: string, format: ReportFormat): Promise<BlobContentDownloadResponse> {
         return this.blobStorageClient.getBlobContent(
             PageScanRunReportService.blobContainerName,
-            this.getBlobFilePath(fileId, this.getBlobSarifFileName(fileId)),
+            this.getBlobFilePath(fileId, this.getBlobFileName(fileId, format)),
         );
     }
 
@@ -35,7 +36,7 @@ export class PageScanRunReportService {
             1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileName}`;
     }
 
-    private getBlobSarifFileName(fileId: string): string {
-        return `${fileId}.sarif`;
+    private getBlobFileName(fileId: string, format: ReportFormat): string {
+        return `${fileId}.${format}`;
     }
 }

@@ -58,7 +58,7 @@ describe(ScanReportController, () => {
             content: contentMock.object,
         };
         reportServiceMock
-            .setup(async rm => rm.readSarifReport(It.isAnyString()))
+            .setup(async rm => rm.readReport(It.isAnyString(), 'sarif'))
             .returns(async id => {
                 return id === validId ? downloadResponse : notFoundDownloadResponse;
             });
