@@ -60,14 +60,21 @@ if [[ -z $resourceGroupName ]] || [[ -z $location ]]; then
     exitWithUsageInfo
 fi
 
-resourceGroupExistsQuery="az group exists -n $resourceGroupName"
-resourceGroupExists=$($resourceGroupExistsQuery)
+queryConditions="[?name=='$resourceGroupName' && properties.provisioningState!='Creating' && properties.provisioningState!='Updating']"
+resourceGroupExists=$(az group list --query "$queryConditions.name" -o tsv)
 
-if [ "$resourceGroupExists" = false ]; then
+if [ -z "$resourceGroupExists" ]; then
     echo "Creating resource group $resourceGroupName under $location"
     az group create --name "$resourceGroupName" --location "$location" 1>/dev/null
 else
     echo "Resource group $resourceGroupName already exists"
 fi
 
-. "${0%/*}/wait-for-deployment.sh" -n "$resourceGroupName" -t "600" -q "$resourceGroupExistsQuery"
+. "${0%/*}/wait-for-deployment.sh" -n "$resourceGroupName" -t "600" -q "az group list --query \"$queryConditions.name\" -o tsv"
+
+resourceGroupStatus=$(az group list --query "$queryConditions.properties.provisioningState" -o tsv)
+
+if [ "$resourceGroupStatus" != "Succeeded" ]; then
+    echo "Deployment of resourceGroup $resourceGroupame failed with status $resourceGroupStatus"
+    exit 1
+fi
