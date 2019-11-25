@@ -4,7 +4,6 @@
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { ReportFormat } from 'storage-documents';
 
 @injectable()
 export class PageScanRunReportService {
@@ -23,7 +22,18 @@ export class PageScanRunReportService {
     }
 
     public async readReport(fileId: string): Promise<BlobContentDownloadResponse> {
-        return this.blobStorageClient.getBlobContent(PageScanRunReportService.blobContainerName, this.getBlobFilePath(fileId));
+        let downloadResponse = this.blobStorageClient.getBlobContent(
+            PageScanRunReportService.blobContainerName,
+            this.getBlobFilePath(fileId),
+        );
+        if ((await downloadResponse).notFound) {
+            downloadResponse = this.blobStorageClient.getBlobContent(
+                PageScanRunReportService.blobContainerName,
+                `${this.getBlobFilePath(fileId)}.sarif`,
+            );
+        }
+
+        return downloadResponse;
     }
 
     public getBlobFilePath(fileId: string): string {
