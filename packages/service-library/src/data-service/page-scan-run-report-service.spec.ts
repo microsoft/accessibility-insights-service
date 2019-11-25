@@ -17,7 +17,7 @@ describe(PageScanRunReportService, () => {
     const guid = 'some guid';
     // tslint:disable-next-line: mocha-no-side-effect-code
     const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() +
-        1}/${time.getUTCDate()}/${time.getUTCHours()}/${guid}.sarif`;
+        1}/${time.getUTCDate()}/${time.getUTCHours()}/${guid}`;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
@@ -25,7 +25,7 @@ describe(PageScanRunReportService, () => {
         testSubject = new PageScanRunReportService(blobStorageClientMock.object, guidGeneratorMock.object);
     });
 
-    it('saves sarif report', async () => {
+    it('saves report', async () => {
         const blobContent = 'blob content1';
 
         guidGeneratorMock
@@ -38,11 +38,11 @@ describe(PageScanRunReportService, () => {
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
-        expect(await testSubject.saveReport(guid, blobContent, 'sarif')).toEqual(expectedSarifBlobFilePath);
+        expect(await testSubject.saveReport(guid, blobContent)).toEqual(expectedSarifBlobFilePath);
         verifyAll();
     });
 
-    it('reads sarif report', async () => {
+    it('reads report', async () => {
         const expectedResponse: BlobContentDownloadResponse = { content: 'blob content1' as any, notFound: false };
 
         guidGeneratorMock
@@ -55,7 +55,7 @@ describe(PageScanRunReportService, () => {
             .returns(async () => Promise.resolve(expectedResponse))
             .verifiable();
 
-        await expect(testSubject.readReport(guid, 'sarif')).resolves.toBe(expectedResponse);
+        await expect(testSubject.readReport(guid)).resolves.toBe(expectedResponse);
         verifyAll();
     });
 

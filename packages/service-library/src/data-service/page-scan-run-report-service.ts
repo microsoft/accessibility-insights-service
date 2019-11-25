@@ -15,28 +15,21 @@ export class PageScanRunReportService {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async saveReport(fileId: string, content: string, format: ReportFormat): Promise<string> {
-        const filePath = this.getBlobFilePath(fileId, this.getBlobFileName(fileId, format));
+    public async saveReport(fileId: string, content: string): Promise<string> {
+        const filePath = this.getBlobFilePath(fileId);
         await this.blobStorageClient.uploadBlobContent(PageScanRunReportService.blobContainerName, filePath, content);
 
         return filePath;
     }
 
-    public async readReport(fileId: string, format: ReportFormat): Promise<BlobContentDownloadResponse> {
-        return this.blobStorageClient.getBlobContent(
-            PageScanRunReportService.blobContainerName,
-            this.getBlobFilePath(fileId, this.getBlobFileName(fileId, format)),
-        );
+    public async readReport(fileId: string): Promise<BlobContentDownloadResponse> {
+        return this.blobStorageClient.getBlobContent(PageScanRunReportService.blobContainerName, this.getBlobFilePath(fileId));
     }
 
-    public getBlobFilePath(fileId: string, fileName: string): string {
+    public getBlobFilePath(fileId: string): string {
         const fileCreatedTime = this.guidGenerator.getGuidTimestamp(fileId);
 
         return `${fileCreatedTime.getUTCFullYear()}/${fileCreatedTime.getUTCMonth() +
-            1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileName}`;
-    }
-
-    private getBlobFileName(fileId: string, format: ReportFormat): string {
-        return `${fileId}.${format}`;
+            1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileId}`;
     }
 }

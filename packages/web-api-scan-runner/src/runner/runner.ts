@@ -160,7 +160,7 @@ export class Runner {
 
         this.logger.logInfo(`Saving ${format} report to a blob storage.`);
         const reportId = this.guidGenerator.createGuid();
-        const href = await this.pageScanRunReportService.saveReport(reportId, report, format);
+        const href = await this.pageScanRunReportService.saveReport(reportId, report);
         this.logger.logInfo(`${format} report saved to a blob ${href}`);
 
         return {

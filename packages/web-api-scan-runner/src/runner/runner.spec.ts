@@ -32,6 +32,7 @@ describe(Runner, () => {
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let convertAxeToSarifMock: IMock<typeof convertAxeToSarif>;
+    let convertAxeToHtmlMock: IMock<(ar: AxeResults) => string>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -70,8 +71,10 @@ describe(Runner, () => {
         error: 'test scan error - not a valid page',
     };
 
-    const blobFilePath = 'test sarif blob path';
+    const sarifBlobFilePath = 'test sarif blob path';
+    const htmlBlobFilePath = 'test html blob path';
     const parsedSarifContent = { testSarifContent: true } as any;
+    const htmlContent = 'test html content';
     const axeScanResultsWithViolations: AxeScanResults = {
         results: {
             url: 'url',
@@ -94,7 +97,8 @@ describe(Runner, () => {
     };
 
     let dateNow: Date;
-    const reportGuid = 'report guid1';
+    const sarifReportGuid = 'sarif report guid';
+    const htmlReportGuid = 'html report guid';
 
     beforeEach(() => {
         browser = <Browser>{};
@@ -106,11 +110,13 @@ describe(Runner, () => {
         scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
         guidGeneratorMock.setup(g => g.getGuidTimestamp('id')).returns(() => new Date());
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
         convertAxeToSarifMock = Mock.ofInstance(convertAxeToSarif, MockBehavior.Strict);
+        convertAxeToHtmlMock = Mock.ofInstance((results: AxeResults) => htmlContent);
         runner = new Runner(
             guidGeneratorMock.object,
             scanMetadataConfig.object,
@@ -120,6 +126,7 @@ describe(Runner, () => {
             loggerMock.object,
             pageScanRunReportServiceMock.object,
             convertAxeToSarifMock.object,
+            convertAxeToHtmlMock.object,
         );
     });
 
@@ -164,8 +171,10 @@ describe(Runner, () => {
             .verifiable();
 
         setupConvertAxeToSarifCall(passedAxeScanResults);
+        setupConvertAxeToHtmlCall(passedAxeScanResults);
 
         setupSaveSarifReportCall();
+        setupSaveHtmlReportCall();
         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
@@ -216,8 +225,10 @@ describe(Runner, () => {
             .verifiable();
 
         setupConvertAxeToSarifCall(passedAxeScanResults);
+        setupConvertAxeToHtmlCall(passedAxeScanResults);
 
         setupSaveSarifReportCall();
+        setupSaveHtmlReportCall();
         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
@@ -235,8 +246,10 @@ describe(Runner, () => {
             .verifiable();
 
         setupConvertAxeToSarifCall(axeScanResultsWithViolations);
+        setupConvertAxeToHtmlCall(axeScanResultsWithViolations);
 
         setupSaveSarifReportCall();
+        setupSaveHtmlReportCall();
         setupUpdateScanRunResultCall(getScanResultWithViolations());
 
         await runner.run();
@@ -270,7 +283,9 @@ describe(Runner, () => {
             })
             .verifiable();
         setupConvertAxeToSarifCall(passedAxeScanResults);
+        setupConvertAxeToHtmlCall(passedAxeScanResults);
         setupSaveSarifReportCall();
+        setupSaveHtmlReportCall();
         const scanResult = getScanResultWithNoViolations();
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
@@ -307,7 +322,9 @@ describe(Runner, () => {
             })
             .verifiable();
         setupConvertAxeToSarifCall(unscannableAxeScanResults);
+        setupConvertAxeToHtmlCall(passedAxeScanResults);
         setupSaveSarifReportCall();
+        setupSaveHtmlReportCall();
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
@@ -320,6 +337,13 @@ describe(Runner, () => {
         convertAxeToSarifMock
             .setup(c => c(scanResults.results))
             .returns(() => parsedSarifContent)
+            .verifiable();
+    }
+
+    function setupConvertAxeToHtmlCall(scanResults: AxeScanResults): void {
+        convertAxeToHtmlMock
+            .setup(c => c(scanResults.results))
+            .returns(() => htmlContent)
             .verifiable();
     }
 
@@ -343,8 +367,15 @@ describe(Runner, () => {
 
     function setupSaveSarifReportCall(): void {
         pageScanRunReportServiceMock
-            .setup(async s => s.saveReport(reportGuid, JSON.stringify(parsedSarifContent), 'sarif'))
-            .returns(async () => Promise.resolve(blobFilePath))
+            .setup(async s => s.saveReport(sarifReportGuid, JSON.stringify(parsedSarifContent)))
+            .returns(async () => Promise.resolve(sarifBlobFilePath))
+            .verifiable();
+    }
+
+    function setupSaveHtmlReportCall(): void {
+        pageScanRunReportServiceMock
+            .setup(async s => s.saveReport(htmlReportGuid, htmlContent))
+            .returns(async () => Promise.resolve(htmlBlobFilePath))
             .verifiable();
     }
 
@@ -382,8 +413,13 @@ describe(Runner, () => {
         result.reports = [
             {
                 format: 'sarif',
-                href: blobFilePath,
-                reportId: reportGuid,
+                href: sarifBlobFilePath,
+                reportId: sarifReportGuid,
+            },
+            {
+                format: 'html',
+                href: htmlBlobFilePath,
+                reportId: htmlReportGuid,
             },
         ];
 
@@ -405,8 +441,13 @@ describe(Runner, () => {
         result.reports = [
             {
                 format: 'sarif',
-                href: blobFilePath,
-                reportId: reportGuid,
+                href: sarifBlobFilePath,
+                reportId: sarifReportGuid,
+            },
+            {
+                format: 'html',
+                href: htmlBlobFilePath,
+                reportId: htmlReportGuid,
             },
         ];
 
@@ -436,7 +477,8 @@ describe(Runner, () => {
         scanRequestTime.setSeconds(scanRequestTime.getSeconds() - queueTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
         guidGeneratorMock
             .setup(g => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)
@@ -444,7 +486,8 @@ describe(Runner, () => {
         scanCompleteTime.setSeconds(scanCompleteTime.getSeconds() + executionTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
         guidGeneratorMock
             .setup(g => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)
