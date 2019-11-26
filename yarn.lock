@@ -5956,10 +5956,10 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-markreay-accessibility-insights-report@0.0.1, markreay-accessibility-insights-report@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/markreay-accessibility-insights-report/-/markreay-accessibility-insights-report-0.0.1.tgz#d732dda13af93e1b87918903bdc3421b7e6aa95d"
-  integrity sha512-OtwjVmquga9v7Hic6bSrDztYwCheWMTHdWbp9zj4PT9ERqA+d5xPJ79xuCPh0GCy2X+mx7CQLMJbdmAIHYe7ZA==
+markreay-accessibility-insights-report@0.0.3, markreay-accessibility-insights-report@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/markreay-accessibility-insights-report/-/markreay-accessibility-insights-report-0.0.3.tgz#e71c141601ebc0957b63cf9b4e6fe50ba592ebd3"
+  integrity sha512-ng4Bs/pThfZKRzJ8Y+Reoe/1oIYYnRVMYiQU1aaX6wsjP8LKscl0iMN7cdDycepeJ6Fi9pIbqfEPyX9WCCubSA==
   dependencies:
     axe-core "3.3.2"
     classnames "^2.2.6"

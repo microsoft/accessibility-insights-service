@@ -146,6 +146,6 @@
         "https-proxy-agent": "^3.0.1"
     },
     "dependencies": {
-        "markreay-accessibility-insights-report": "0.0.1"
+        "markreay-accessibility-insights-report": "0.0.3"
     }
 }

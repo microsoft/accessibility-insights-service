@@ -27,14 +27,17 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 
 function convertAxeToHtml(results: AxeResults, pageTitle: string): string {
     const reporter = reporterFactory();
-    const options = {
-        browserSpec: 'BROWSER_SPEC',
-        browserVersion: 'BROWSER_VERSION',
-        pageTitle: pageTitle,
+    const params = {
+        results: results,
         description: 'Automated report',
+        scanContext: {
+            browserSpec: 'BROWSER_SPEC',
+            browserVersion: 'BROWSER_VERSION',
+            pageTitle: pageTitle,
+        },
     };
 
-    return reporter.fromAxeResult(results, options).asHTML();
+    return reporter.fromAxeResult(params).asHTML();
 }
 
 @injectable()
