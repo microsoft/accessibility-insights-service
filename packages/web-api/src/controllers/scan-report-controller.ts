@@ -30,7 +30,7 @@ export class ScanReportController extends ApiController {
             return;
         }
 
-        const blobContentDownloadResponse = await this.pageScanRunReportService.readSarifReport(reportId);
+        const blobContentDownloadResponse = await this.pageScanRunReportService.readReport(reportId);
         if (blobContentDownloadResponse.notFound === true) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
 

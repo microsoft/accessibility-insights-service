@@ -3,7 +3,7 @@
 import { StorageDocument } from '.';
 import { ItemType } from './item-type';
 
-export declare type ReportFormat = 'sarif';
+export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 
