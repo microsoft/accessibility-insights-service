@@ -32,7 +32,7 @@ describe(Runner, () => {
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let convertAxeToSarifMock: IMock<typeof convertAxeToSarif>;
-    let convertAxeToHtmlMock: IMock<(ar: AxeResults) => string>;
+    let convertAxeToHtmlMock: IMock<(ar: AxeResults, pt: string) => string>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -54,6 +54,8 @@ describe(Runner, () => {
         batchRequestId: 'batch-id',
     };
 
+    const pageTitle = 'page title';
+
     const passedAxeScanResults: AxeScanResults = {
         results: {
             url: 'url',
@@ -64,6 +66,7 @@ describe(Runner, () => {
             inapplicable: [],
         } as AxeResults,
         unscannable: false,
+        pageTitle: pageTitle,
     };
 
     const unscannableAxeScanResults: AxeScanResults = {
@@ -94,6 +97,7 @@ describe(Runner, () => {
             inapplicable: [],
         } as AxeResults,
         unscannable: false,
+        pageTitle: pageTitle,
     };
 
     let dateNow: Date;
@@ -116,7 +120,7 @@ describe(Runner, () => {
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
         convertAxeToSarifMock = Mock.ofInstance(convertAxeToSarif, MockBehavior.Strict);
-        convertAxeToHtmlMock = Mock.ofInstance((results: AxeResults) => htmlContent);
+        convertAxeToHtmlMock = Mock.ofInstance((results: AxeResults, title: string) => htmlContent);
         runner = new Runner(
             guidGeneratorMock.object,
             scanMetadataConfig.object,
@@ -342,7 +346,7 @@ describe(Runner, () => {
 
     function setupConvertAxeToHtmlCall(scanResults: AxeScanResults): void {
         convertAxeToHtmlMock
-            .setup(c => c(scanResults.results))
+            .setup(c => c(scanResults.results, pageTitle))
             .returns(() => htmlContent)
             .verifiable();
     }

@@ -87,18 +87,19 @@ export class Page {
         }
 
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
-        const scanResults = await axePuppeteer.analyze();
+        const axeResults = await axePuppeteer.analyze();
+
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            pageTitle: await this.puppeteerPage.title(),
+        };
 
         if (response.request().redirectChain().length > 0) {
-            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${scanResults.url}`);
-
-            return {
-                results: scanResults,
-                scannedUrl: scanResults.url,
-            };
-        } else {
-            return { results: scanResults };
+            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${axeResults.url}`);
+            scanResults.scannedUrl = axeResults.url;
         }
+
+        return scanResults;
     }
 
     public async close(): Promise<void> {

@@ -25,12 +25,12 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 
 // tslint:disable: no-null-keyword no-any
 
-function convertAxeToHtml(results: AxeResults): string {
+function convertAxeToHtml(results: AxeResults, pageTitle: string): string {
     const reporter = reporterFactory();
     const options = {
         browserSpec: 'BROWSER_SPEC',
         browserVersion: 'BROWSER_VERSION',
-        pageTitle: 'Accessibility Insights',
+        pageTitle: pageTitle,
         description: 'Automated report',
     };
 
@@ -39,7 +39,7 @@ function convertAxeToHtml(results: AxeResults): string {
 
 @injectable()
 export class Runner {
-    private readonly reportGenerationFunctions: { [formatName: string]: (axeResults: AxeResults) => string };
+    private readonly reportGenerationFunctions: { [formatName: string]: (axeResults: AxeResults, pageTitle: string) => string };
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
@@ -53,7 +53,7 @@ export class Runner {
         private readonly convertAxeToHtmlFunc = convertAxeToHtml,
     ) {
         this.reportGenerationFunctions = {
-            sarif: ar => JSON.stringify(this.convertAxeToSarifFunc(ar)),
+            sarif: (ar, p) => JSON.stringify(this.convertAxeToSarifFunc(ar)),
             html: this.convertAxeToHtmlFunc,
         };
     }
@@ -165,7 +165,7 @@ export class Runner {
         axeResults.results.incomplete = [];
         axeResults.results.passes = [];
 
-        const report = this.reportGenerationFunctions[format](axeResults.results);
+        const report = this.reportGenerationFunctions[format](axeResults.results, axeResults.pageTitle);
 
         this.logger.logInfo(`Saving ${format} report to a blob storage.`);
         const reportId = this.guidGenerator.createGuid();
