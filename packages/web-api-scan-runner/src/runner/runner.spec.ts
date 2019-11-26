@@ -6,7 +6,7 @@ import { AxeResults } from 'axe-core';
 import { convertAxeToSarif } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger, loggerTypes, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
+import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';

@@ -6,6 +6,7 @@ import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements } from 'logger';
+import { reporterFactory } from 'markreay-accessibility-insights-report';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
@@ -25,7 +26,15 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 // tslint:disable: no-null-keyword no-any
 
 function convertAxeToHtml(results: AxeResults): string {
-    return 'html report';
+    const reporter = reporterFactory();
+    const options = {
+        browserSpec: 'BROWSER_SPEC',
+        browserVersion: 'BROWSER_VERSION',
+        pageTitle: 'Accessibility Insights',
+        description: 'Automated report',
+    };
+
+    return reporter.fromAxeResult(results, options).asHTML();
 }
 
 @injectable()
