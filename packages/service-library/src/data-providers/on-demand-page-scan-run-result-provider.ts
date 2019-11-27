@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
+import { BaseLogger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 
@@ -15,11 +16,11 @@ export class OnDemandPageScanRunResultProvider {
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
     ) {}
 
-    public async readScanRun(scanId: string): Promise<OnDemandPageScanResult> {
-        return (await this.cosmosContainerClient.readDocument<OnDemandPageScanResult>(scanId, this.getPartitionKey(scanId))).item;
+    public async readScanRun(scanId: string, logger: BaseLogger): Promise<OnDemandPageScanResult> {
+        return (await this.cosmosContainerClient.readDocument<OnDemandPageScanResult>(scanId, logger, this.getPartitionKey(scanId))).item;
     }
 
-    public async readScanRuns(scanIds: string[]): Promise<OnDemandPageScanResult[]> {
+    public async readScanRuns(scanIds: string[], logger: BaseLogger): Promise<OnDemandPageScanResult[]> {
         const maxItemsPerQuery = 1000;
         // We need this check for query limits - https://docs.microsoft.com/en-us/azure/cosmos-db/concepts-limits#sql-query-limits
         // even though 'IN' condition supports 6000, we are defaulting to a maximum of 1000.
@@ -36,6 +37,7 @@ export class OnDemandPageScanRunResultProvider {
                 return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async token => {
                     return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
                         this.getReadScanQueryForScanIds(scanIdsByPartition[pKey]),
+                        logger,
                         token,
                         pKey,
                     );
@@ -46,13 +48,13 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanResult> {
+    public async updateScanRun(pageScanResult: OnDemandPageScanResult, logger: BaseLogger): Promise<OnDemandPageScanResult> {
         this.setSystemProperties(pageScanResult);
 
-        return (await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult)).item;
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult, logger)).item;
     }
 
-    public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
+    public async writeScanRuns(scanRuns: OnDemandPageScanResult[], logger: BaseLogger): Promise<void> {
         const scanRunsByPartition = groupBy(scanRuns, scanRun => {
             this.setSystemProperties(scanRun);
 
@@ -61,7 +63,7 @@ export class OnDemandPageScanRunResultProvider {
 
         await Promise.all(
             Object.keys(scanRunsByPartition).map(async pKey => {
-                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
+                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], logger, pKey);
             }),
         );
     }

@@ -349,7 +349,7 @@ describe(Runner, () => {
 
     function setupReadScanResultCall(scanResult: any): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.readScanRun(scanMetadata.id))
+            .setup(async d => d.readScanRun(scanMetadata.id, loggerMock.object))
             .returns(async () => Promise.resolve(cloneDeep(scanResult)))
             .verifiable(Times.exactly(1));
     }
@@ -394,7 +394,7 @@ describe(Runner, () => {
         const clonedResult = cloneDeep(result);
 
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(clonedResult))
+            .setup(async d => d.updateScanRun(clonedResult, loggerMock.object))
             .returns(async () => Promise.resolve(clonedResult))
             .verifiable();
     }

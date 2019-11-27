@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
+import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider } from 'service-library';
 import {
@@ -22,6 +23,7 @@ describe('Scan request sender', () => {
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let onDemandPageScanRunResultProvider: IMock<OnDemandPageScanRunResultProvider>;
     let dateNow: Date;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         dateNow = new Date();
@@ -31,6 +33,7 @@ describe('Scan request sender', () => {
             scanQueue: 'test-scan-queue',
         };
 
+        loggerMock = Mock.ofType(Logger);
         queueMock = Mock.ofType<Queue>();
         pageScanRequestProvider = Mock.ofType<PageScanRequestProvider>();
         onDemandPageScanRunResultProvider = Mock.ofType<OnDemandPageScanRunResultProvider>();
@@ -39,6 +42,7 @@ describe('Scan request sender', () => {
             onDemandPageScanRunResultProvider.object,
             queueMock.object,
             storageConfigStub,
+            loggerMock.object,
         );
     });
 
@@ -56,12 +60,12 @@ describe('Scan request sender', () => {
             const acceptedPageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .setup(async resultProvider => resultProvider.readScanRuns([request.id], loggerMock.object))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc]))
+                .setup(async resultProvider => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc], loggerMock.object))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
@@ -73,7 +77,7 @@ describe('Scan request sender', () => {
                 .verifiable(Times.once());
 
             pageScanRequestProvider
-                .setup(async doc => doc.deleteRequests([request.id]))
+                .setup(async doc => doc.deleteRequests([request.id], loggerMock.object))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         });
@@ -87,12 +91,12 @@ describe('Scan request sender', () => {
             const pageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .setup(async resultProvider => resultProvider.readScanRuns([request.id], loggerMock.object))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([pageScanRunResultDoc]))
+                .setup(async resultProvider => resultProvider.writeScanRuns([pageScanRunResultDoc], loggerMock.object))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.never());
 
@@ -104,7 +108,7 @@ describe('Scan request sender', () => {
                 .verifiable(Times.never());
 
             pageScanRequestProvider
-                .setup(async doc => doc.deleteRequests([request.id]))
+                .setup(async doc => doc.deleteRequests([request.id], loggerMock.object))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         });

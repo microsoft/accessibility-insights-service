@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 export { Logger } from './logger';
 export { ContextAwareLogger } from './context-aware-logger';
-export { LogLevel } from './base-logger';
+export { BaseLogger, LogLevel } from './base-logger';
 export { loggerTypes } from './logger-types';
 export { registerLoggerToContainer } from './register-logger-to-container';
 export { BaseTelemetryProperties } from './base-telemetry-properties';

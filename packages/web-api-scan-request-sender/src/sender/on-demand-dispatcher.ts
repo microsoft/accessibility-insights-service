@@ -34,6 +34,7 @@ export class OnDemandDispatcher {
         do {
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
+                    this.logger,
                     continuationToken,
                 );
                 client.ensureSuccessStatusCode(response);

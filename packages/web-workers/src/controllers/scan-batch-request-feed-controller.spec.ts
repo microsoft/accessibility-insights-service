@@ -153,7 +153,9 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                     batchRequestId: document.id,
                 };
             });
-        onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
+        onDemandPageScanRunResultProviderMock
+            .setup(async o => o.writeScanRuns(dbDocuments, contextAwareLoggerMock.object))
+            .verifiable(Times.once());
     });
 }
 
@@ -170,8 +172,8 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
             });
-        pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments)).verifiable(Times.once());
-        scanDataProviderMock.setup(async o => o.deleteBatchRequest(document)).verifiable(Times.once());
+        pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments, contextAwareLoggerMock.object)).verifiable(Times.once());
+        scanDataProviderMock.setup(async o => o.deleteBatchRequest(document, contextAwareLoggerMock.object)).verifiable(Times.once());
     });
 }
 
@@ -189,8 +191,10 @@ function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[])
 }
 
 function setupMocksWithTimesNever(): void {
-    onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(It.isAny())).verifiable(Times.never());
-    pageScanRequestProviderMock.setup(async o => o.insertRequests(It.isAny())).verifiable(Times.never());
-    scanDataProviderMock.setup(async o => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
+    onDemandPageScanRunResultProviderMock
+        .setup(async o => o.writeScanRuns(It.isAny(), contextAwareLoggerMock.object))
+        .verifiable(Times.never());
+    pageScanRequestProviderMock.setup(async o => o.insertRequests(It.isAny(), contextAwareLoggerMock.object)).verifiable(Times.never());
+    scanDataProviderMock.setup(async o => o.deleteBatchRequest(It.isAny(), contextAwareLoggerMock.object)).verifiable(Times.never());
     partitionKeyFactoryMock.setup(o => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
 }

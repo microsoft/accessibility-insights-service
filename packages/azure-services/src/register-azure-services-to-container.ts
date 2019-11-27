@@ -107,7 +107,7 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
 }
 
 function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
-    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(Logger));
+    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName);
 }
 
 function setupAuthenticationMethod(container: interfaces.Container): void {

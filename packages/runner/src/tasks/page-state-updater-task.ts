@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import { Logger } from 'logger';
 import { PageObjectFactory } from 'service-library';
 import { PageScanResult, RunState, WebsitePage } from 'storage-documents';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
@@ -12,6 +13,7 @@ export class PageStateUpdaterTask {
     constructor(
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(PageObjectFactory) private readonly pageObjectFactory: PageObjectFactory,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async setRunningState(scanMetadata: ScanMetadata, runTime: Date): Promise<void> {
@@ -21,7 +23,7 @@ export class PageStateUpdaterTask {
             runTime: runTime.toJSON(),
         };
 
-        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage, this.logger);
     }
 
     public async setPageLinks(crawlerScanResults: CrawlerScanResults, scanMetadata: ScanMetadata): Promise<void> {
@@ -32,7 +34,7 @@ export class PageStateUpdaterTask {
             const scanResult = crawlerScanResults.results.find(result => result.scanUrl === scanMetadata.scanUrl);
             websitePage.links = scanResult !== undefined ? scanResult.links : [];
 
-            await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
+            await this.cosmosContainerClient.mergeOrWriteDocument(websitePage, this.logger);
         }
     }
 
@@ -50,7 +52,7 @@ export class PageStateUpdaterTask {
             unscannable,
         };
 
-        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage);
+        await this.cosmosContainerClient.mergeOrWriteDocument(websitePage, this.logger);
     }
 
     private createWebsitePageInstance(scanMetadata: ScanMetadata): WebsitePage {

@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
+import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
@@ -14,10 +15,12 @@ describe(OnDemandPageScanRunResultProvider, () => {
     let testSubject: OnDemandPageScanRunResultProvider;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
     let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         cosmosContainerClientMock = Mock.ofType(CosmosContainerClient, MockBehavior.Strict);
         partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
+        loggerMock = Mock.ofType(Logger);
         testSubject = new OnDemandPageScanRunResultProvider(cosmosContainerClientMock.object, partitionKeyFactoryMock.object);
     });
 
@@ -40,16 +43,16 @@ describe(OnDemandPageScanRunResultProvider, () => {
         setupVerifiableGetNodeCall('bucket2', 'partition2id1');
 
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments([partition1Result1ToBeSaved, partition1Result2ToBeSaved], 'bucket1'))
+            .setup(c => c.writeDocuments([partition1Result1ToBeSaved, partition1Result2ToBeSaved], loggerMock.object, 'bucket1'))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments([partition2Result1ToBeSaved], 'bucket2'))
+            .setup(c => c.writeDocuments([partition2Result1ToBeSaved], loggerMock.object, 'bucket2'))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
-        await testSubject.writeScanRuns([partition1Result1, partition2Result1, partition1Result2]);
+        await testSubject.writeScanRuns([partition1Result1, partition2Result1, partition1Result2], loggerMock.object);
         verifyAll();
     });
 
@@ -63,11 +66,11 @@ describe(OnDemandPageScanRunResultProvider, () => {
 
         setupVerifiableGetNodeCall('bucket1', 'partition1id1');
         cosmosContainerClientMock
-            .setup(c => c.mergeOrWriteDocument(partition1Result1ToBeSaved))
+            .setup(c => c.mergeOrWriteDocument(partition1Result1ToBeSaved, loggerMock.object))
             .returns(() => Promise.resolve({ item: partition1Result1Saved } as CosmosOperationResponse<OnDemandPageScanResult>))
             .verifiable();
 
-        const savedDocument = await testSubject.updateScanRun(partition1Result1);
+        const savedDocument = await testSubject.updateScanRun(partition1Result1, loggerMock.object);
         expect(savedDocument).toEqual(partition1Result1Saved);
         verifyAll();
     });
@@ -79,7 +82,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 scanIdsToFetch.push(`scanId-${i}`);
             }
 
-            await expect(testSubject.readScanRuns(scanIdsToFetch)).rejects.toEqual(
+            await expect(testSubject.readScanRuns(scanIdsToFetch, loggerMock.object)).rejects.toEqual(
                 new Error("Can't read more than 1000 scan documents per query."),
             );
         });
@@ -101,16 +104,23 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition1id1", "partition1id2")', 'token1', 'bucket1'))
+                .setup(c =>
+                    c.queryDocuments(
+                        'select * from c where c.id in ("partition1id1", "partition1id2")',
+                        loggerMock.object,
+                        'token1',
+                        'bucket1',
+                    ),
+                )
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', 'token1', 'bucket2'))
+                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', loggerMock.object, 'token1', 'bucket2'))
                 .returns(() => Promise.reject('sample test error'))
                 .verifiable();
 
-            await expect(testSubject.readScanRuns(scanIdsToFetch)).rejects.toEqual('sample test error');
+            await expect(testSubject.readScanRuns(scanIdsToFetch, loggerMock.object)).rejects.toEqual('sample test error');
 
             verifyAll();
         });
@@ -133,16 +143,23 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition1id1", "partition1id2")', 'token1', 'bucket1'))
+                .setup(c =>
+                    c.queryDocuments(
+                        'select * from c where c.id in ("partition1id1", "partition1id2")',
+                        loggerMock.object,
+                        'token1',
+                        'bucket1',
+                    ),
+                )
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', 'token1', 'bucket2'))
+                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', loggerMock.object, 'token1', 'bucket2'))
                 .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
-            const results = await testSubject.readScanRuns(scanIdsToFetch);
+            const results = await testSubject.readScanRuns(scanIdsToFetch, loggerMock.object);
 
             expect(results.length).toBe(3);
             expect(results).toEqual(call1Result.concat(call2Result));
@@ -154,11 +171,11 @@ describe(OnDemandPageScanRunResultProvider, () => {
             const scanRunDocument = getDocumentWithSysProps('id1', 'bucket1');
             setupVerifiableGetNodeCall('bucket1', 'id1');
             cosmosContainerClientMock
-                .setup(o => o.readDocument('id1', 'bucket1'))
+                .setup(o => o.readDocument('id1', loggerMock.object, 'bucket1'))
                 .returns(() => Promise.resolve({ item: scanRunDocument } as CosmosOperationResponse<OnDemandPageScanResult>))
                 .verifiable();
 
-            const scanRun = await testSubject.readScanRun('id1');
+            const scanRun = await testSubject.readScanRun('id1', loggerMock.object);
             expect(scanRun).toEqual(scanRunDocument);
         });
     });

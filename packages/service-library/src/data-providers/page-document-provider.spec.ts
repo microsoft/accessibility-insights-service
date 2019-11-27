@@ -9,6 +9,7 @@ import { ItemType, RunState, Website, WebsitePage, WebsitePageExtra } from 'stor
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
+import { Logger } from 'logger';
 import { PageDocumentProvider } from './page-document-provider';
 
 // tslint:disable: mocha-no-side-effect-code
@@ -29,6 +30,7 @@ describe('PageDocumentProvider', () => {
     let pageDocumentProvider: PageDocumentProvider;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let scanConfig: ScanRunTimeConfig;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         scanConfig = {
@@ -39,6 +41,7 @@ describe('PageDocumentProvider', () => {
             accessibilityRuleExclusionList: [],
         };
 
+        loggerMock = Mock.ofType<Logger>();
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
@@ -53,18 +56,18 @@ describe('PageDocumentProvider', () => {
             const response: any = { item: ['web site id'], statusCode: 200 };
 
             cosmosContainerClientMock
-                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
+                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), loggerMock.object, token, 'website'))
                 .returns(() => Promise.resolve(response));
-            await expect(pageDocumentProvider.getWebsites(token)).resolves.toBe(response);
+            await expect(pageDocumentProvider.getWebsites(loggerMock.object, token)).resolves.toBe(response);
         });
 
         it('throws on response with invalid status code', async () => {
             const response: any = { item: ['web site id'], statusCode: 401 };
 
             cosmosContainerClientMock
-                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
+                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), loggerMock.object, token, 'website'))
                 .returns(() => Promise.resolve(response));
-            await expect(pageDocumentProvider.getWebsites(token)).rejects.not.toBeNull();
+            await expect(pageDocumentProvider.getWebsites(loggerMock.object, token)).rejects.not.toBeNull();
         });
     });
 
@@ -80,7 +83,9 @@ describe('PageDocumentProvider', () => {
                 const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
+                    .setup(s =>
+                        s.queryDocuments(It.is((q: string) => compareQuery(q, query)), loggerMock.object, 'token1', website.websiteId),
+                    )
                     .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
@@ -91,7 +96,9 @@ describe('PageDocumentProvider', () => {
                     .returns(() => Promise.resolve(expectedResponse))
                     .verifiable();
 
-                await expect(pageDocumentProvider.getPagesNeverScanned(website, itemCount)).resolves.toBe(expectedResponse);
+                await expect(pageDocumentProvider.getPagesNeverScanned(website, itemCount, loggerMock.object)).resolves.toBe(
+                    expectedResponse,
+                );
                 await expect(executeWithTokenCallback('token1')).resolves.toBe(queryResponse);
 
                 cosmosContainerClientMock.verifyAll();
@@ -111,7 +118,9 @@ describe('PageDocumentProvider', () => {
                 const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
+                    .setup(s =>
+                        s.queryDocuments(It.is((q: string) => compareQuery(q, query)), loggerMock.object, 'token1', website.websiteId),
+                    )
                     .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
@@ -122,7 +131,7 @@ describe('PageDocumentProvider', () => {
                     .returns(() => Promise.resolve(expectedResponse))
                     .verifiable();
 
-                await expect(pageDocumentProvider.getPagesScanned(website, itemCount)).resolves.toBe(expectedResponse);
+                await expect(pageDocumentProvider.getPagesScanned(website, itemCount, loggerMock.object)).resolves.toBe(expectedResponse);
                 await expect(executeWithTokenCallback('token1')).resolves.toBe(queryResponse);
 
                 cosmosContainerClientMock.verifyAll();
@@ -154,9 +163,11 @@ describe('PageDocumentProvider', () => {
         it('returns only pages not scanned before', async () => {
             webPagesNotScannedBefore = createWebsitePages(itemCount, 'un-scanned-page-id');
 
-            getPagesNotScannedBeforeMock.setup(g => g(website, itemCount)).returns(() => Promise.resolve(webPagesNotScannedBefore));
+            getPagesNotScannedBeforeMock
+                .setup(g => g(website, itemCount, loggerMock.object))
+                .returns(() => Promise.resolve(webPagesNotScannedBefore));
 
-            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, itemCount);
+            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, loggerMock.object, itemCount);
 
             expect(result).toEqual(webPagesNotScannedBefore);
         });
@@ -165,10 +176,14 @@ describe('PageDocumentProvider', () => {
             webPagesNotScannedBefore = [];
             webPagesScannedAtLeastOnce = createWebsitePages(itemCount, 'scanned-page-id');
 
-            getPagesNotScannedBeforeMock.setup(g => g(website, itemCount)).returns(() => Promise.resolve(webPagesNotScannedBefore));
-            getPagesScannedAtLeastOnceMock.setup(g => g(website, itemCount)).returns(() => Promise.resolve(webPagesScannedAtLeastOnce));
+            getPagesNotScannedBeforeMock
+                .setup(g => g(website, itemCount, loggerMock.object))
+                .returns(() => Promise.resolve(webPagesNotScannedBefore));
+            getPagesScannedAtLeastOnceMock
+                .setup(g => g(website, itemCount, loggerMock.object))
+                .returns(() => Promise.resolve(webPagesScannedAtLeastOnce));
 
-            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, itemCount);
+            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, loggerMock.object, itemCount);
 
             expect(result).toEqual(webPagesScannedAtLeastOnce);
         });
@@ -178,12 +193,14 @@ describe('PageDocumentProvider', () => {
             webPagesNotScannedBefore = createWebsitePages(webPagesNotScannedCount, 'un-scanned-page-id');
             webPagesScannedAtLeastOnce = createWebsitePages(itemCount - webPagesNotScannedCount, 'scanned-page-id');
 
-            getPagesNotScannedBeforeMock.setup(g => g(website, itemCount)).returns(() => Promise.resolve(webPagesNotScannedBefore));
+            getPagesNotScannedBeforeMock
+                .setup(g => g(website, itemCount, loggerMock.object))
+                .returns(() => Promise.resolve(webPagesNotScannedBefore));
             getPagesScannedAtLeastOnceMock
-                .setup(g => g(website, itemCount - webPagesNotScannedCount))
+                .setup(g => g(website, itemCount - webPagesNotScannedCount, loggerMock.object))
                 .returns(() => Promise.resolve(webPagesScannedAtLeastOnce));
 
-            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, itemCount);
+            const result = await pageDocumentProvider.getReadyToScanPagesForWebsite(website, loggerMock.object, itemCount);
 
             expect(result).toEqual(webPagesNotScannedBefore.concat(webPagesScannedAtLeastOnce));
         });
@@ -207,14 +224,16 @@ describe('PageDocumentProvider', () => {
                 [createWebsiteDocument('website1'), createWebsiteDocument('website2')],
                 continuationToken,
             );
-            getWebsitesMock.setup(s => s(continuationToken)).returns(() => Promise.resolve(websitesResponse));
+            getWebsitesMock.setup(s => s(loggerMock.object, continuationToken)).returns(() => Promise.resolve(websitesResponse));
 
             allPages = [];
             websitesResponse.item.forEach(item => {
                 const pagesForWebsite = createWebsitePages(pageBatchSize, item.websiteId);
                 allPages.push(...pagesForWebsite);
 
-                getReadyToScanPagesForWebsiteMock.setup(g => g(item, pageBatchSize)).returns(() => Promise.resolve(pagesForWebsite));
+                getReadyToScanPagesForWebsiteMock
+                    .setup(g => g(item, loggerMock.object, pageBatchSize))
+                    .returns(() => Promise.resolve(pagesForWebsite));
             });
         });
 
@@ -224,7 +243,7 @@ describe('PageDocumentProvider', () => {
         });
 
         it('returns pages with website response token', async () => {
-            const result = await pageDocumentProvider.getReadyToScanPages(continuationToken, pageBatchSize);
+            const result = await pageDocumentProvider.getReadyToScanPages(loggerMock.object, continuationToken, pageBatchSize);
 
             expect(result.item).toEqual(allPages);
             expect(result.continuationToken).toBe(continuationToken);
@@ -264,11 +283,11 @@ describe('PageDocumentProvider', () => {
         };
 
         cosmosContainerClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePageToWrite))
+            .setup(async o => o.mergeOrWriteDocument(websitePageToWrite, loggerMock.object))
             .returns(async () => Promise.resolve({ item: websitePageToWrite, statusCode: 200 }))
             .verifiable(Times.once());
 
-        const result = await pageDocumentProvider.updatePageProperties(websitePageBase, propertiesToUpdate);
+        const result = await pageDocumentProvider.updatePageProperties(websitePageBase, propertiesToUpdate, loggerMock.object);
 
         expect(result.item).toEqual(websitePageToWrite);
     });

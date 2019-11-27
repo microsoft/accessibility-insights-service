@@ -74,7 +74,7 @@ describe(ScanResultController, () => {
         context.req.headers['content-type'] = 'application/json';
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
+        onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny(), contextAwareLoggerMock.object));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock
@@ -149,7 +149,7 @@ describe(ScanResultController, () => {
             scanResultController = createScanResultController(context);
             setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock
-                .setup(async om => om.readScanRuns([scanId]))
+                .setup(async om => om.readScanRuns([scanId], contextAwareLoggerMock.object))
                 .returns(async () => {
                     return Promise.resolve([]);
                 })
@@ -168,7 +168,7 @@ describe(ScanResultController, () => {
             onDemandPageScanRunResultProviderMock.reset();
 
             onDemandPageScanRunResultProviderMock
-                .setup(async om => om.readScanRuns([scanId]))
+                .setup(async om => om.readScanRuns([scanId], contextAwareLoggerMock.object))
                 .returns(async () => {
                     return Promise.resolve([dbResponse]);
                 })

@@ -38,7 +38,7 @@ describe(ScanRequestController, () => {
         context.req.headers['content-type'] = 'application/json';
 
         scanDataProviderMock = Mock.ofType<ScanDataProvider>();
-        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
+        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny(), contextAwareLoggerMock.object));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
@@ -99,7 +99,9 @@ describe(ScanRequestController, () => {
                 { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
             ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 1 }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            scanDataProviderMock
+                .setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest, contextAwareLoggerMock.object))
+                .verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -125,7 +127,9 @@ describe(ScanRequestController, () => {
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
             const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            scanDataProviderMock
+                .setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest, contextAwareLoggerMock.object))
+                .verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -185,7 +189,9 @@ describe(ScanRequestController, () => {
                 { scanId: guid2, url: 'https://abs/path/', priority: priority },
                 { scanId: guid3, url: 'https://bing.com/path/', priority: priority },
             ];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            scanDataProviderMock
+                .setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest, contextAwareLoggerMock.object))
+                .verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -212,7 +218,9 @@ describe(ScanRequestController, () => {
             const expectedResponse = { scanId: guid2, url: 'https://abs/path/' };
 
             const expectedSaveRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            scanDataProviderMock
+                .setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest, contextAwareLoggerMock.object))
+                .verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 

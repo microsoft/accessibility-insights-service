@@ -14,7 +14,7 @@ export class SeedSource {
     ) {}
 
     public async getWebSites(): Promise<WebSite[]> {
-        const response = await this.cosmosContainerClient.readAllDocument<ScanRequest>();
+        const response = await this.cosmosContainerClient.readAllDocument<ScanRequest>(this.logger);
         client.ensureSuccessStatusCode(response);
         if (response.item.length > 0) {
             this.logger.logInfo(`[Sender] retrieve ${response.item[0].websites.length} website documents`);

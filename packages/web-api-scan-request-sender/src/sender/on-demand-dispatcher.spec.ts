@@ -229,7 +229,7 @@ describe('Dispatcher', () => {
         continuationToken: string,
     ): void {
         pageScanRequestProvider
-            .setup(async p => p.getRequests(previousContinuationToken))
+            .setup(async p => p.getRequests(loggerMock.object, previousContinuationToken))
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 

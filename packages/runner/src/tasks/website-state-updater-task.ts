@@ -27,9 +27,10 @@ export class WebsiteStateUpdaterTask {
             async (scanResult: PageScanResult, metadata: ScanMetadata, timestamp: Date) => {
                 const targetWebsiteItem = await this.getWebsiteItemToUpdate(scanResult, metadata, timestamp);
 
-                return this.cosmosContainerClient.writeDocument<Website>(targetWebsiteItem, websiteRootPartitionKey);
+                return this.cosmosContainerClient.writeDocument<Website>(targetWebsiteItem, this.logger, websiteRootPartitionKey);
             },
             this.retryOptions,
+            this.logger,
             pageScanResult,
             scanMetadata,
             runTime,
@@ -39,7 +40,11 @@ export class WebsiteStateUpdaterTask {
     private async getWebsiteItemToUpdate(pageScanResult: PageScanResult, scanMetadata: ScanMetadata, runTime: Date): Promise<Website> {
         let targetWebsiteItem: Website;
         const websiteDocumentId = this.websiteFactory.createWebsiteDocumentId(scanMetadata.baseUrl);
-        const sourceWebsiteItem = await this.cosmosContainerClient.readDocument<Website>(websiteDocumentId, websiteRootPartitionKey);
+        const sourceWebsiteItem = await this.cosmosContainerClient.readDocument<Website>(
+            websiteDocumentId,
+            this.logger,
+            websiteRootPartitionKey,
+        );
 
         if (sourceWebsiteItem.statusCode === 200) {
             this.logger.logInfo(

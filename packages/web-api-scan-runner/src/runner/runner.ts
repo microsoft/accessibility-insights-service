@@ -58,14 +58,14 @@ export class Runner {
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
         this.logger.logInfo(`Reading page scan run result.`);
-        pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
+        pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id, this.logger);
         this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: pageScanResult.batchRequestId });
 
         this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         pageScanResult = this.resetPageScanResultState(pageScanResult);
-        pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult, this.logger);
 
         try {
             browser = await this.webDriverTask.launch();
@@ -90,7 +90,7 @@ export class Runner {
         }
 
         this.logger.logInfo(`Writing page scan run result to a storage.`);
-        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult, this.logger);
     }
 
     private async scan(pageScanResult: OnDemandPageScanResult): Promise<void> {

@@ -4,7 +4,7 @@ import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { BaseLogger } from 'logger';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
@@ -19,15 +19,13 @@ export class CosmosClientWrapper {
     public static readonly PARTITION_KEY_NAME: string = '/partitionKey';
     public static readonly MAXIMUM_ITEM_COUNT: number = 100;
 
-    constructor(
-        @inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider,
-        @inject(Logger) private readonly logger: Logger,
-    ) {}
+    constructor(@inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider) {}
 
     public async upsertItems<T extends CosmosDocument>(
         items: T[],
         dbName: string,
         collectionName: string,
+        logger: BaseLogger,
         partitionKey?: string,
     ): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
@@ -39,7 +37,7 @@ export class CosmosClientWrapper {
                     try {
                         await container.items.upsert(item, this.getOptions(item, partitionKey));
                     } catch (error) {
-                        this.logFailedResponse('upsertItem', error, {
+                        this.logFailedResponse(logger, 'upsertItem', error, {
                             db: dbName,
                             collection: collectionName,
                             itemId: item.id,
@@ -56,6 +54,7 @@ export class CosmosClientWrapper {
         item: T,
         dbName: string,
         collectionName: string,
+        logger: BaseLogger,
         partitionKey?: string,
     ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
@@ -68,7 +67,7 @@ export class CosmosClientWrapper {
                 statusCode: 200,
             };
         } catch (error) {
-            this.logFailedResponse('upsertItem', error, {
+            this.logFailedResponse(logger, 'upsertItem', error, {
                 db: dbName,
                 collection: collectionName,
                 itemId: item.id,
@@ -79,7 +78,11 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async readAllItem<T extends CosmosDocument>(dbName: string, collectionName: string): Promise<CosmosOperationResponse<T[]>> {
+    public async readAllItem<T extends CosmosDocument>(
+        dbName: string,
+        collectionName: string,
+        logger: BaseLogger,
+    ): Promise<CosmosOperationResponse<T[]>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
@@ -95,7 +98,7 @@ export class CosmosClientWrapper {
                 statusCode: 200,
             };
         } catch (error) {
-            this.logFailedResponse('readAllItems', error, { db: dbName, collection: collectionName });
+            this.logFailedResponse(logger, 'readAllItems', error, { db: dbName, collection: collectionName });
 
             return this.getFailedOperationResponse(error);
         }
@@ -105,6 +108,7 @@ export class CosmosClientWrapper {
         dbName: string,
         collectionName: string,
         query: cosmos.SqlQuerySpec | string,
+        logger: BaseLogger,
         continuationToken?: string,
         partitionKey?: string,
     ): Promise<CosmosOperationResponse<T[]>> {
@@ -156,7 +160,7 @@ export class CosmosClientWrapper {
                 continuationToken: continuationTokenResponse,
             };
         } catch (error) {
-            this.logFailedResponse('queryItems', error, { db: dbName, collection: collectionName, query: JSON.stringify(query) });
+            this.logFailedResponse(logger, 'queryItems', error, { db: dbName, collection: collectionName, query: JSON.stringify(query) });
 
             return this.getFailedOperationResponse(error);
         }
@@ -166,6 +170,7 @@ export class CosmosClientWrapper {
         id: string,
         dbName: string,
         collectionName: string,
+        logger: BaseLogger,
         partitionKey?: string,
     ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
@@ -180,7 +185,7 @@ export class CosmosClientWrapper {
                 statusCode: 200,
             };
         } catch (error) {
-            this.logFailedResponse('readItem', error, {
+            this.logFailedResponse(logger, 'readItem', error, {
                 db: dbName,
                 collection: collectionName,
                 itemId: id,
@@ -191,14 +196,14 @@ export class CosmosClientWrapper {
         }
     }
 
-    public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
+    public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string, logger: BaseLogger): Promise<void> {
         const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
         const container = await this.getContainer(dbName, collectionName);
 
         try {
             await container.item(id).delete(options);
         } catch (error) {
-            this.logFailedResponse('deleteItem', error, {
+            this.logFailedResponse(logger, 'deleteItem', error, {
                 db: dbName,
                 collection: collectionName,
                 itemId: id,
@@ -261,6 +266,7 @@ export class CosmosClientWrapper {
     }
 
     private logFailedResponse(
+        logger: BaseLogger,
         operation: CosmosOperation,
         error: any,
         properties?: {
@@ -269,7 +275,7 @@ export class CosmosClientWrapper {
     ): void {
         const errorResponse = client.getErrorResponse(error);
         if (errorResponse !== undefined) {
-            this.logger.logError(`[storage-client] The Cosmos DB '${operation}' operation failed.`, {
+            logger.logError(`[storage-client] The Cosmos DB '${operation}' operation failed.`, {
                 statusCode: errorResponse.statusCode.toString(),
                 response: errorResponse.response === undefined ? 'undefined' : errorResponse.response.toString(),
                 ...properties,

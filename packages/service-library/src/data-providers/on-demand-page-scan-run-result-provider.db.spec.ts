@@ -5,9 +5,9 @@ import 'reflect-metadata';
 import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator, HashGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger } from 'logger';
+import { BaseLogger, Logger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
-import { Mock } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
@@ -17,6 +17,7 @@ import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-res
 describe('OnDemandPageScanRunResultProvider.Db', () => {
     // tslint:disable-next-line: mocha-no-side-effect-code
     const dbHelper = new DbMockHelper();
+    let loggerMock: IMock<BaseLogger>;
 
     it('no-op', () => {
         // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
@@ -31,12 +32,11 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
         }, 30000);
 
         beforeEach(() => {
-            const loggerMock = Mock.ofType<Logger>();
+            loggerMock = Mock.ofType<BaseLogger>();
             const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,
                 dbHelper.dbContainer.collectionName,
-                loggerMock.object,
             );
 
             testSubject = new OnDemandPageScanRunResultProvider(
@@ -98,9 +98,12 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 ...result3,
                 partitionKey: 'pageScanRunResult-605',
             };
-            await testSubject.writeScanRuns([result1, result2, result3]);
+            await testSubject.writeScanRuns([result1, result2, result3], loggerMock.object);
 
-            const itemsInDb = await testSubject.readScanRuns([partitionKey1Guid1, partitionKey2Guid1, partitionKey1Guid2]);
+            const itemsInDb = await testSubject.readScanRuns(
+                [partitionKey1Guid1, partitionKey2Guid1, partitionKey1Guid2],
+                loggerMock.object,
+            );
 
             expect(itemsInDb.length).toBe(3);
             maskSystemProperties(itemsInDb);
@@ -127,8 +130,8 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
             const resultUpdate = cloneDeep(result);
             resultUpdate.scanResult = { state: 'pass', issueCount: 3 };
 
-            await testSubject.writeScanRuns([result]);
-            const itemsInDb = await testSubject.updateScanRun(result);
+            await testSubject.writeScanRuns([result], loggerMock.object);
+            const itemsInDb = await testSubject.updateScanRun(result, loggerMock.object);
 
             maskSystemProperties([itemsInDb]);
             expect(itemsInDb).toEqual(expectedSavedResult);

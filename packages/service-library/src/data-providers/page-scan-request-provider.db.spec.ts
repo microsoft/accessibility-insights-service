@@ -3,15 +3,16 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
-import { Logger } from 'logger';
+import { BaseLogger, Logger } from 'logger';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
-import { Mock } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
 describe('PageScanRequestProvider.Db', () => {
     // tslint:disable-next-line: mocha-no-side-effect-code
     const dbHelper = new DbMockHelper();
+    let loggerMock: IMock<BaseLogger>;
 
     it('no-op', () => {
         // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
@@ -26,12 +27,12 @@ describe('PageScanRequestProvider.Db', () => {
         }, 30000);
 
         beforeEach(() => {
-            const loggerMock = Mock.ofType<Logger>();
+            loggerMock = Mock.ofType<BaseLogger>();
+
             const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,
                 dbHelper.dbContainer.collectionName,
-                loggerMock.object,
             );
 
             testSubject = new PageScanRequestProvider(cosmosContainerClient);
@@ -65,9 +66,9 @@ describe('PageScanRequestProvider.Db', () => {
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
 
-            await testSubject.insertRequests([request1, request2, request3]);
+            await testSubject.insertRequests([request1, request2, request3], loggerMock.object);
 
-            const itemsInDb = await testSubject.getRequests();
+            const itemsInDb = await testSubject.getRequests(loggerMock.object);
 
             expect(itemsInDb.item.length).toBe(3);
             expect(itemsInDb.item[0]).toMatchObject(request2);
@@ -99,11 +100,11 @@ describe('PageScanRequestProvider.Db', () => {
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
 
-            await testSubject.insertRequests([request1, request2, requestNotToBeDeleted]);
+            await testSubject.insertRequests([request1, request2, requestNotToBeDeleted], loggerMock.object);
 
-            await testSubject.deleteRequests([request1.id, request2.id]);
+            await testSubject.deleteRequests([request1.id, request2.id], loggerMock.object);
 
-            const requests = await testSubject.getRequests();
+            const requests = await testSubject.getRequests(loggerMock.object);
 
             expect(requests.item.length).toBe(1);
             expect(requests.item[0]).toMatchObject(requestNotToBeDeleted);

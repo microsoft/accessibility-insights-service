@@ -31,7 +31,7 @@ describe('CosmosClientWrapper', () => {
         setupVerifiableGetDbCall();
         setupVerifiableGetCollectionCall();
         loggerMock = Mock.ofType(Logger);
-        testSubject = new CosmosClientWrapper(cosmosClientProviderStub, loggerMock.object);
+        testSubject = new CosmosClientWrapper(cosmosClientProviderStub);
     });
 
     describe('readItem()', () => {
@@ -47,7 +47,7 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup(c => c.item('id')).returns(() => itemMock.object);
             itemMock.setup(async i => i.read({ partitionKey: partitionKey })).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readItem('id', dbName, collectionName, partitionKey);
+            const result = await testSubject.readItem('id', dbName, collectionName, loggerMock.object, partitionKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -70,7 +70,7 @@ describe('CosmosClientWrapper', () => {
                 .setup(async i => i.read({ partitionKey: partitionKey }))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitionKey);
+            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, loggerMock.object, partitionKey);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -93,7 +93,7 @@ describe('CosmosClientWrapper', () => {
                 .setup(async i => i.read(undefined))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.readItem(responseItem.id, dbName, collectionName);
+            const result = await testSubject.readItem(responseItem.id, dbName, collectionName, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -130,7 +130,7 @@ describe('CosmosClientWrapper', () => {
                 .setup(async qi => qi.executeNext())
                 .returns(async () => Promise.resolve({ result: items, statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } }));
 
-            const result = await testSubject.readItems(dbName, collectionName, query);
+            const result = await testSubject.readItems(dbName, collectionName, query, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -171,7 +171,7 @@ describe('CosmosClientWrapper', () => {
                     return Promise.resolve({ result: <any[]>[], statusCode: 200, headers: { 'x-ms-continuation': 'abdf12345fd' } });
                 });
 
-            const result = await testSubject.readItems(dbName, collectionName, query);
+            const result = await testSubject.readItems(dbName, collectionName, query, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -187,7 +187,7 @@ describe('CosmosClientWrapper', () => {
                 .returns(async () => Promise.resolve({} as any))
                 .verifiable();
 
-            await testSubject.deleteItem('id', dbName, collectionName, partitionKey);
+            await testSubject.deleteItem('id', dbName, collectionName, partitionKey, loggerMock.object);
 
             itemMock.verifyAll();
             verifyMocks();
@@ -211,7 +211,7 @@ describe('CosmosClientWrapper', () => {
 
             itemsMock.setup(async i => i.upsert<DbItemMock>(item, undefined)).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName);
+            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             verifyMocks();
@@ -241,7 +241,7 @@ describe('CosmosClientWrapper', () => {
                 .setup(async i => i.upsert<DbItemMock>(item, options))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName);
+            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             verifyMocks();
@@ -266,7 +266,7 @@ describe('CosmosClientWrapper', () => {
                 .setup(async i => i.upsert<DbItemMock>(item, undefined))
                 .returns(async () => Promise.resolve({ body: responseItem as any, item: undefined }));
 
-            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName);
+            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, loggerMock.object);
 
             expect(result).toEqual(expectedResult);
             verifyMocks();
@@ -300,7 +300,7 @@ describe('CosmosClientWrapper', () => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            await testSubject.upsertItems(items, dbName, collectionName, loggerMock.object, partitionKey);
 
             verifyMocks();
         });
@@ -328,7 +328,7 @@ describe('CosmosClientWrapper', () => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            await testSubject.upsertItems(items, dbName, collectionName, loggerMock.object, partitionKey);
 
             verifyMocks();
         });
@@ -356,7 +356,7 @@ describe('CosmosClientWrapper', () => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            await testSubject.upsertItems(items, dbName, collectionName, loggerMock.object, partitionKey);
 
             verifyMocks();
         });
@@ -377,7 +377,7 @@ describe('CosmosClientWrapper', () => {
 
             loggerMock.setup(o => o.logError(`[storage-client] The Cosmos DB 'upsertItem' operation failed.`, It.isAny())).verifiable();
 
-            await expect(testSubject.upsertItems(items, dbName, collectionName)).rejects.toEqual(errorResponse);
+            await expect(testSubject.upsertItems(items, dbName, collectionName, loggerMock.object)).rejects.toEqual(errorResponse);
 
             verifyMocks();
         });

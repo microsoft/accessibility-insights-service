@@ -74,7 +74,6 @@ describe(PageDocumentProvider, () => {
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,
                 dbHelper.dbContainer.collectionName,
-                loggerMock.object,
             );
 
             beforeLastReferenceSeenTime = currentMoment()
@@ -173,7 +172,7 @@ describe(PageDocumentProvider, () => {
                 ]);
                 queryResults = [pageAfterMinLastReferenceSeen1, pageAfterMinLastReferenceSeen2];
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             }, 3000);
@@ -195,7 +194,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems([pageWithLastRunNull, pageWithLastRunNotFound, pageWithLastRunInfo]);
                 queryResults = [pageWithLastRunNull, pageWithLastRunNotFound];
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             }, 3000);
@@ -207,7 +206,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 1);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 1, loggerMock.object);
 
                 expect(actualResults.length).toBe(1);
             }, 3000);
@@ -221,7 +220,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
                 queryResults = [basePage1, basePage2];
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 10);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -236,7 +235,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5, loggerMock.object);
 
                 expect(actualResults.length).toBe(3);
             }, 3000);
@@ -248,7 +247,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesNeverScanned(website, 5);
+                const actualResults = await testSubject.getPagesNeverScanned(website, 5, loggerMock.object);
 
                 expect(actualResults.length).toBe(2);
             }, 3000);
@@ -290,7 +289,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -324,7 +323,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -367,7 +366,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithOrder([page3, page1, page2], actualResults);
             });
@@ -410,7 +409,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems(queryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 2);
+                const actualResults = await testSubject.getPagesScanned(website, 2, loggerMock.object);
 
                 expect(actualResults.length).toBe(2);
             });
@@ -454,7 +453,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -510,7 +509,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -547,7 +546,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -596,7 +595,7 @@ describe(PageDocumentProvider, () => {
                 await dbHelper.upsertItems(queryResults);
                 await dbHelper.upsertItems(nonQueryResults);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -642,7 +641,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -686,7 +685,7 @@ describe(PageDocumentProvider, () => {
 
                 await dbHelper.upsertItems([basePage1, basePage2, childPage]);
 
-                const actualResults = await testSubject.getPagesScanned(website, 10);
+                const actualResults = await testSubject.getPagesScanned(website, 10, loggerMock.object);
 
                 verifyQueryResultsWithoutOrder(queryResults, actualResults);
             });
@@ -703,7 +702,7 @@ describe(PageDocumentProvider, () => {
                 const actualWebsiteIds = [] as string[];
                 await dbHelper.upsertItems(Array.from(allWebsites));
 
-                const actualQueryResults = await testSubject.getWebsites();
+                const actualQueryResults = await testSubject.getWebsites(loggerMock.object);
                 actualQueryResults.item.forEach(w => {
                     actualWebsiteIds.push(w.websiteId);
                 });

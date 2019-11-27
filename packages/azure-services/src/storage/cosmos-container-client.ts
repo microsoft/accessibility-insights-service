@@ -3,7 +3,7 @@
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { BaseLogger, Logger } from 'logger';
 import * as util from 'util';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
@@ -19,27 +19,27 @@ export class CosmosContainerClient {
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,
         private readonly collectionName: string,
-        private readonly logger: Logger,
     ) {}
 
-    public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);
+    public async readDocument<T>(documentId: string, logger: BaseLogger, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, logger, partitionKey);
     }
 
-    public async readAllDocument<T>(): Promise<CosmosOperationResponse<T[]>> {
-        return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
+    public async readAllDocument<T>(logger: BaseLogger): Promise<CosmosOperationResponse<T[]>> {
+        return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName, logger);
     }
 
     public async queryDocuments<T>(
         query: cosmos.SqlQuerySpec | string,
+        logger: BaseLogger,
         continuationToken?: string,
         partitionKey?: string,
     ): Promise<CosmosOperationResponse<T[]>> {
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, logger, continuationToken, partitionKey);
     }
 
-    public async deleteDocument(id: string, partitionKey: string): Promise<void> {
-        await this.cosmosClientWrapper.deleteItem(id, this.dbName, this.collectionName, partitionKey);
+    public async deleteDocument(id: string, partitionKey: string, logger: BaseLogger): Promise<void> {
+        await this.cosmosClientWrapper.deleteItem(id, this.dbName, this.collectionName, partitionKey, logger);
     }
 
     /**
@@ -50,11 +50,16 @@ export class CosmosContainerClient {
      * @param document Document to write to a storage
      * @param partitionKey The storage partition key
      */
-    public async writeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async writeDocument<T extends CosmosDocument>(
+        document: T,
+        logger: BaseLogger,
+        partitionKey?: string,
+    ): Promise<CosmosOperationResponse<T>> {
         return this.cosmosClientWrapper.upsertItem<T>(
             document,
             this.dbName,
             this.collectionName,
+            logger,
             this.getEffectivePartitionKey(document, partitionKey),
         );
     }
@@ -71,7 +76,11 @@ export class CosmosContainerClient {
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
      */
-    public async mergeOrWriteDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async mergeOrWriteDocument<T extends CosmosDocument>(
+        document: T,
+        logger: BaseLogger,
+        partitionKey?: string,
+    ): Promise<CosmosOperationResponse<T>> {
         if (document.id === undefined) {
             return Promise.reject(
                 'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
@@ -79,9 +88,15 @@ export class CosmosContainerClient {
         }
 
         const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
-        const response = await this.cosmosClientWrapper.readItem<T>(document.id, this.dbName, this.collectionName, effectivePartitionKey);
+        const response = await this.cosmosClientWrapper.readItem<T>(
+            document.id,
+            this.dbName,
+            this.collectionName,
+            logger,
+            effectivePartitionKey,
+        );
         if (response.statusCode === 404) {
-            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, logger, effectivePartitionKey);
         }
 
         const mergedDocument = response.item;
@@ -97,7 +112,7 @@ export class CosmosContainerClient {
         // normalize document properties by converting from null to undefined
         const normalizedDocument = <T>this.getNormalizeMergedDocument(mergedDocument);
 
-        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName, effectivePartitionKey);
+        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName, logger, effectivePartitionKey);
     }
 
     /**
@@ -111,16 +126,16 @@ export class CosmosContainerClient {
      * @param documents Documents to merge with the current corresponding storage documents
      * @param partitionKey The storage partition key
      */
-    public async mergeOrWriteDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
+    public async mergeOrWriteDocuments<T extends CosmosDocument>(documents: T[], logger: BaseLogger, partitionKey?: string): Promise<void> {
         await Promise.all(
             documents.map(async document => {
-                await this.mergeOrWriteDocument(document, partitionKey);
+                await this.mergeOrWriteDocument(document, logger, partitionKey);
             }),
         );
     }
 
-    public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
-        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, partitionKey);
+    public async writeDocuments<T>(documents: T[], logger: BaseLogger, partitionKey?: string): Promise<void> {
+        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, logger, partitionKey);
     }
 
     public async tryExecuteOperation<T>(
@@ -130,6 +145,7 @@ export class CosmosContainerClient {
             intervalMilliseconds: 500,
             retryingOnStatusCodes: [412 /* PreconditionFailed */],
         },
+        logger: BaseLogger,
         ...args: any[]
     ): Promise<CosmosOperationResponse<T>> {
         return new Promise(async (resolve, reject) => {
@@ -147,17 +163,17 @@ export class CosmosContainerClient {
                     const operationResponse = await operation(...args);
 
                     if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
-                        this.logger.logInfo(`[storage-client] Operation completed. Response status code ${operationResponse.statusCode}.`);
+                        logger.logInfo(`[storage-client] Operation completed. Response status code ${operationResponse.statusCode}.`);
                         resolve(operationResponse);
 
                         break;
                     } else if (Date.now() > timeoutTimestamp) {
-                        this.logger.logWarn(`[storage-client] Operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
+                        logger.logWarn(`[storage-client] Operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
                         reject(operationResponse);
 
                         break;
                     } else {
-                        this.logger.logInfo(
+                        logger.logInfo(
                             `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${
                                 operationResponse.statusCode
                             }.`,

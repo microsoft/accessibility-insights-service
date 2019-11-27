@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
+import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { ItemType, RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -14,15 +15,17 @@ describe('Scan request Sender', () => {
     let testSubject: ScanRequestSender;
     let storageConfigStub: StorageConfig;
     let pageDocumentProviderMock: IMock<PageDocumentProvider>;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         storageConfigStub = {
             scanQueue: 'test-scan-queue',
         };
 
+        loggerMock = Mock.ofType(Logger);
         queueMock = Mock.ofType<Queue>();
         pageDocumentProviderMock = Mock.ofType<PageDocumentProvider>();
-        testSubject = new ScanRequestSender(pageDocumentProviderMock.object, queueMock.object, storageConfigStub);
+        testSubject = new ScanRequestSender(pageDocumentProviderMock.object, queueMock.object, storageConfigStub, loggerMock.object);
     });
 
     afterEach(() => {
@@ -42,7 +45,7 @@ describe('Scan request Sender', () => {
                 .verifiable(Times.once());
 
             pageDocumentProviderMock
-                .setup(async o => o.updatePageProperties(page, It.isAny()))
+                .setup(async o => o.updatePageProperties(page, It.isAny(), loggerMock.object))
                 .callback((p, d) => {
                     websitePageUpdateDelta = d;
                 })
@@ -68,7 +71,7 @@ describe('Scan request Sender', () => {
                 .verifiable(Times.once());
 
             pageDocumentProviderMock
-                .setup(async o => o.updatePageProperties(page, It.isAny()))
+                .setup(async o => o.updatePageProperties(page, It.isAny(), loggerMock.object))
                 .callback((p, d) => {
                     websitePageUpdateDelta = d;
                 })

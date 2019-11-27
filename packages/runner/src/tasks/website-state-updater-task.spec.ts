@@ -39,7 +39,7 @@ beforeEach(() => {
 
     let targetWebsiteServerItem: Website;
     cosmosContainerClientMock
-        .setup(async o => o.writeDocument<Website>(It.isAny(), websitePartitioningKey))
+        .setup(async o => o.writeDocument<Website>(It.isAny(), loggerMock.object, websitePartitioningKey))
         .callback(item => {
             targetWebsiteServerItem = item;
         })
@@ -71,7 +71,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteCreatedItem = <Website>(<unknown>{ type: 'Website', operation: 'created' });
         const websiteServerItem = createWebsiteServerItem(404);
         cosmosContainerClientMock
-            .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId', loggerMock.object, websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock
@@ -94,7 +94,7 @@ describe('WebsiteStateUpdaterTask', () => {
         const websiteUpdatedItem = <Website>(<unknown>{ type: 'Website', operation: 'updated' });
         const websiteServerItem = createWebsiteServerItem(200);
         cosmosContainerClientMock
-            .setup(async o => o.readDocument<Website>('websiteDocumentId', websitePartitioningKey))
+            .setup(async o => o.readDocument<Website>('websiteDocumentId', loggerMock.object, websitePartitioningKey))
             .returns(async () => Promise.resolve(websiteServerItem))
             .verifiable(Times.once());
         websiteFactoryMock
@@ -118,7 +118,7 @@ async function setupTryExecuteOperationCallback(): Promise<CosmosOperationRespon
     return new Promise(async (resolve, reject) => {
         let operationResult: CosmosOperationResponse<Website>;
         cosmosContainerClientMock
-            .setup(async o => o.tryExecuteOperation(It.isAny(), retryOptions, pageScanResult, scanMetadata, It.isAny()))
+            .setup(async o => o.tryExecuteOperation(It.isAny(), retryOptions, loggerMock.object, pageScanResult, scanMetadata, It.isAny()))
             .callback(async (operation, options, scanResult, metadata, timestamp) => {
                 try {
                     operationResult = await operation(scanResult, metadata, timestamp);

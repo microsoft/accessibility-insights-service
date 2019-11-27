@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
+import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { PageScanRequestProvider } from './page-scan-request-provider';
@@ -11,9 +12,11 @@ import { PageScanRequestProvider } from './page-scan-request-provider';
 
 describe(PageScanRequestProvider, () => {
     let testSubject: PageScanRequestProvider;
+    let loggerMock: IMock<Logger>;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 
     beforeEach(() => {
+        loggerMock = Mock.ofType(Logger);
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>(undefined, MockBehavior.Strict);
         testSubject = new PageScanRequestProvider(cosmosContainerClientMock.object);
     });
@@ -35,11 +38,11 @@ describe(PageScanRequestProvider, () => {
         };
         const requests = [request1, request2];
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments(requests))
+            .setup(c => c.writeDocuments(requests, loggerMock.object))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 
-        await testSubject.insertRequests([request1, request2]);
+        await testSubject.insertRequests([request1, request2], loggerMock.object);
 
         cosmosContainerClientMock.verifyAll();
     });
@@ -65,6 +68,7 @@ describe(PageScanRequestProvider, () => {
             .setup(c =>
                 c.queryDocuments(
                     `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority desc`,
+                    loggerMock.object,
                     continuationToken,
                     PartitionKey.pageScanRequestDocuments,
                 ),
@@ -72,7 +76,7 @@ describe(PageScanRequestProvider, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await testSubject.getRequests(continuationToken, itemCount);
+        const actualResponse = await testSubject.getRequests(loggerMock.object, continuationToken, itemCount);
 
         cosmosContainerClientMock.verifyAll();
         expect(actualResponse).toBe(response);
@@ -83,15 +87,15 @@ describe(PageScanRequestProvider, () => {
         const request2Id = 'id2';
 
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request1Id, PartitionKey.pageScanRequestDocuments))
+            .setup(c => c.deleteDocument(request1Id, PartitionKey.pageScanRequestDocuments, loggerMock.object))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
         cosmosContainerClientMock
-            .setup(c => c.deleteDocument(request2Id, PartitionKey.pageScanRequestDocuments))
+            .setup(c => c.deleteDocument(request2Id, PartitionKey.pageScanRequestDocuments, loggerMock.object))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 
-        await testSubject.deleteRequests([request1Id, request2Id]);
+        await testSubject.deleteRequests([request1Id, request2Id], loggerMock.object);
 
         cosmosContainerClientMock.verifyAll();
     });

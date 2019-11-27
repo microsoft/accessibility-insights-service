@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import { BaseLogger } from 'logger';
 import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 
 @injectable()
@@ -11,7 +12,7 @@ export class ScanDataProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async writeScanRunBatchRequest(batchId: string, scanRunBatchResponse: ScanRunBatchRequest[]): Promise<void> {
+    public async writeScanRunBatchRequest(batchId: string, scanRunBatchResponse: ScanRunBatchRequest[], logger: BaseLogger): Promise<void> {
         const scanRunBatchRequest: OnDemandPageScanBatchRequest = {
             id: batchId,
             itemType: ItemType.scanRunBatchRequest,
@@ -19,12 +20,12 @@ export class ScanDataProvider {
             scanRunBatchRequest: scanRunBatchResponse,
         };
 
-        await this.cosmosContainerClient.writeDocument(scanRunBatchRequest);
+        await this.cosmosContainerClient.writeDocument(scanRunBatchRequest, logger);
 
         return;
     }
 
-    public async deleteBatchRequest(request: OnDemandPageScanBatchRequest): Promise<void> {
-        await this.cosmosContainerClient.deleteDocument(request.id, request.partitionKey);
+    public async deleteBatchRequest(request: OnDemandPageScanBatchRequest, logger: BaseLogger): Promise<void> {
+        await this.cosmosContainerClient.deleteDocument(request.id, request.partitionKey, logger);
     }
 }

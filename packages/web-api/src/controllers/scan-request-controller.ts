@@ -61,7 +61,7 @@ export class ScanRequestController extends ApiController {
         }
         const batchId = this.guidGenerator.createGuid();
         const processedData = this.getProcessedRequestData(batchId, payload);
-        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
+        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb, this.contextAwareLogger);
         this.context.res = {
             status: 202, // Accepted
             body: this.getResponse(processedData),

@@ -216,7 +216,7 @@ describe('Dispatcher', () => {
         continuationToken: string,
     ): void {
         pageDocumentProviderMock
-            .setup(async p => p.getReadyToScanPages(previousContinuationToken))
+            .setup(async p => p.getReadyToScanPages(loggerMock.object, previousContinuationToken))
             .returns(async () => Promise.resolve(createWebPagesRequestResponse(webPages, continuationToken)));
     }
 

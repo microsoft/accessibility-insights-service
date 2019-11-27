@@ -66,7 +66,7 @@ describe(BatchScanResultController, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         onDemandPageScanRunResultProviderMock
             // tslint:disable-next-line: no-unsafe-any
-            .setup(async o => o.readScanRuns(It.isAny()))
+            .setup(async o => o.readScanRuns(It.isAny(), contextAwareLoggerMockMock.object))
             .returns(async () => Promise.resolve([scanFetchedResponse]));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);

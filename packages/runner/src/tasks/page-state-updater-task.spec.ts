@@ -4,6 +4,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
+import { Logger } from 'logger';
 import { PageObjectFactory } from 'service-library';
 import { ItemType, PageScanResult, RunResult, RunState, ScanLevel, WebsitePage } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
@@ -14,6 +15,7 @@ import { PageStateUpdaterTask } from './page-state-updater-task';
 let pageObjectFactoryMock: IMock<PageObjectFactory>;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 let pageStateUpdaterTask: PageStateUpdaterTask;
+let loggerMock: IMock<Logger>;
 
 const scanMetadata: ScanMetadata = {
     websiteId: 'websiteId',
@@ -26,7 +28,8 @@ const scanMetadata: ScanMetadata = {
 beforeEach(() => {
     pageObjectFactoryMock = Mock.ofType<PageObjectFactory>();
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
-    pageStateUpdaterTask = new PageStateUpdaterTask(cosmosContainerClientMock.object, pageObjectFactoryMock.object);
+    loggerMock = Mock.ofType(Logger);
+    pageStateUpdaterTask = new PageStateUpdaterTask(cosmosContainerClientMock.object, pageObjectFactoryMock.object, loggerMock.object);
 });
 
 afterEach(() => {
@@ -48,7 +51,7 @@ describe('PageStateUpdaterTask', () => {
             .returns(() => websitePage)
             .verifiable(Times.once());
         cosmosContainerClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .setup(async o => o.mergeOrWriteDocument(websitePage, loggerMock.object))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
@@ -80,7 +83,7 @@ describe('PageStateUpdaterTask', () => {
             .returns(() => websitePage)
             .verifiable(Times.once());
         cosmosContainerClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .setup(async o => o.mergeOrWriteDocument(websitePage, loggerMock.object))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
@@ -102,7 +105,7 @@ describe('PageStateUpdaterTask', () => {
             .returns(() => websitePage)
             .verifiable(Times.once());
         cosmosContainerClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .setup(async o => o.mergeOrWriteDocument(websitePage, loggerMock.object))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 
@@ -125,7 +128,7 @@ describe('PageStateUpdaterTask', () => {
             .returns(() => websitePage)
             .verifiable(Times.once());
         cosmosContainerClientMock
-            .setup(async o => o.mergeOrWriteDocument(websitePage))
+            .setup(async o => o.mergeOrWriteDocument(websitePage, loggerMock.object))
             .returns(async () => Promise.resolve({ statusCode: 202, item: websitePage }))
             .verifiable(Times.once());
 

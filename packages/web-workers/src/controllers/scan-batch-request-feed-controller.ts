@@ -78,7 +78,7 @@ export class ScanBatchRequestFeedController extends WebController {
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
-            await this.scanDataProvider.deleteBatchRequest(batchDocument);
+            await this.scanDataProvider.deleteBatchRequest(batchDocument, this.contextAwareLogger);
             this.contextAwareLogger.logInfo(
                 `[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`,
                 this.getLogPropertiesForRequests(requests, batchDocument.id),
@@ -104,7 +104,7 @@ export class ScanBatchRequestFeedController extends WebController {
             };
         });
 
-        await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
+        await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments, this.contextAwareLogger);
         this.contextAwareLogger.logInfo(
             `[ScanBatchRequestFeedController] Added requests to permanent container`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
@@ -122,7 +122,7 @@ export class ScanBatchRequestFeedController extends WebController {
             };
         });
 
-        await this.pageScanRequestProvider.insertRequests(requestDocuments);
+        await this.pageScanRequestProvider.insertRequests(requestDocuments, this.contextAwareLogger);
         this.contextAwareLogger.logInfo(
             `[ScanBatchRequestFeedController] Added requests to queue container`,
             this.getLogPropertiesForRequests(requests, batchRequestId),

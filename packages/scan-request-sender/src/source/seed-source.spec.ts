@@ -18,7 +18,7 @@ describe('Scan Source', () => {
     beforeEach(() => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         cosmosContainerClientMock
-            .setup(async o => o.readAllDocument<ScanRequest>())
+            .setup(async o => o.readAllDocument<ScanRequest>(loggerMock.object))
             .returns(async () => Promise.resolve(getScanRequestTestData()))
             .verifiable(Times.once());
         loggerMock = Mock.ofType(Logger);

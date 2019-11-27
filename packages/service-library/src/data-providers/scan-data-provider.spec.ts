@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
+import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from './scan-data-provider';
@@ -11,6 +12,7 @@ import { ScanDataProvider } from './scan-data-provider';
 
 let scanDataProvider: ScanDataProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
+let loggerMock: IMock<Logger>;
 
 beforeEach(() => {
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
@@ -27,14 +29,15 @@ describe(ScanDataProvider, () => {
             },
         ];
 
+        loggerMock = Mock.ofType<Logger>();
         let document: OnDemandPageScanBatchRequest;
         cosmosContainerClientMock
-            .setup(async o => o.writeDocument(It.isAny()))
+            .setup(async o => o.writeDocument(It.isAny(), loggerMock.object))
             .callback(async d => (document = d))
             .verifiable(Times.once());
 
         const batchId = 'batchId-1';
-        await scanDataProvider.writeScanRunBatchRequest(batchId, scanRunBatchResponse);
+        await scanDataProvider.writeScanRunBatchRequest(batchId, scanRunBatchResponse, loggerMock.object);
 
         expect(document.scanRunBatchRequest).toEqual(scanRunBatchResponse);
         expect(document.id).toEqual(batchId);

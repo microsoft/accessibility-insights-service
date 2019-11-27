@@ -3,6 +3,7 @@
 import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { RunState, ScanRequestMessage, WebsitePage, WebsitePageExtra } from 'storage-documents';
 
@@ -12,6 +13,7 @@ export class ScanRequestSender {
         @inject(PageDocumentProvider) private readonly pageDocumentProvider: PageDocumentProvider,
         @inject(Queue) private readonly queue: Queue,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async sendRequestToScan(websitePage: WebsitePage[]): Promise<void> {
@@ -50,6 +52,6 @@ export class ScanRequestSender {
             },
         };
 
-        await this.pageDocumentProvider.updatePageProperties(websitePage, websitePageState);
+        await this.pageDocumentProvider.updatePageProperties(websitePage, websitePageState, this.logger);
     }
 }

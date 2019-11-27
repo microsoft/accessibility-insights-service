@@ -7,9 +7,9 @@ import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
 import * as crypto from 'crypto';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { BaseLogger, Logger } from 'logger';
 import { ItemType, StorageDocument, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
-import { Mock } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { PageObjectFactory } from '../factories/page-object-factory';
 
 export interface DbContainer {
@@ -27,6 +27,7 @@ export class DbMockHelper {
     public cosmosClient: CosmosClientWrapper;
     private readonly pageFactory = new PageObjectFactory(new HashGenerator());
     private azureCosmosClient: cosmos.CosmosClient;
+    private loggerMock: IMock<BaseLogger>;
 
     public isDbTestSupported(): boolean {
         if (cosmosDbUrl === undefined || cosmosDbKey === undefined) {
@@ -44,8 +45,9 @@ export class DbMockHelper {
             collectionName: collectionName === undefined ? this.createRandomString('col') : collectionName,
         };
 
+        this.loggerMock = Mock.ofType<BaseLogger>();
         this.azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
-        this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient), Mock.ofType<Logger>().object);
+        this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient));
 
         await this.deleteDbContainer(this.dbContainer);
         await this.createDbContainer(this.dbContainer);
@@ -160,11 +162,17 @@ export class DbMockHelper {
     }
 
     public async deleteAllDocuments(): Promise<void> {
-        const items = await this.cosmosClient.readAllItem(this.dbContainer.dbName, this.dbContainer.collectionName);
+        const items = await this.cosmosClient.readAllItem(this.dbContainer.dbName, this.dbContainer.collectionName, this.loggerMock.object);
 
         await Promise.all(
             items.item.map(async item => {
-                await this.cosmosClient.deleteItem(item.id, this.dbContainer.dbName, this.dbContainer.collectionName, item.partitionKey);
+                await this.cosmosClient.deleteItem(
+                    item.id,
+                    this.dbContainer.dbName,
+                    this.dbContainer.collectionName,
+                    item.partitionKey,
+                    this.loggerMock.object,
+                );
             }),
         );
     }

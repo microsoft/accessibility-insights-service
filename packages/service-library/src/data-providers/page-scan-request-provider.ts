@@ -3,6 +3,7 @@
 
 import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import { BaseLogger } from 'logger';
 import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 
 @injectable()
@@ -13,6 +14,7 @@ export class PageScanRequestProvider {
     ) {}
 
     public async getRequests(
+        logger: BaseLogger,
         continuationToken?: string,
         itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
@@ -20,19 +22,20 @@ export class PageScanRequestProvider {
 
         return this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(
             query,
+            logger,
             continuationToken,
             PartitionKey.pageScanRequestDocuments,
         );
     }
 
-    public async insertRequests(requests: OnDemandPageScanRequest[]): Promise<void> {
-        return this.cosmosContainerClient.writeDocuments(requests);
+    public async insertRequests(requests: OnDemandPageScanRequest[], logger: BaseLogger): Promise<void> {
+        return this.cosmosContainerClient.writeDocuments(requests, logger);
     }
 
-    public async deleteRequests(ids: string[]): Promise<void> {
+    public async deleteRequests(ids: string[], logger: BaseLogger): Promise<void> {
         await Promise.all(
             ids.map(async id => {
-                await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);
+                await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments, logger);
             }),
         );
     }

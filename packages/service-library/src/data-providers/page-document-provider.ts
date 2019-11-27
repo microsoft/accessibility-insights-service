@@ -4,6 +4,7 @@ import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperat
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import { BaseLogger } from 'logger';
 import * as moment from 'moment';
 import { ItemType, RunState, Website, WebsitePage, WebsitePageBase, WebsitePageExtra } from 'storage-documents';
 
@@ -15,15 +16,16 @@ export class PageDocumentProvider {
     ) {}
 
     public async getReadyToScanPages(
+        logger: BaseLogger,
         continuationToken?: string,
         pageBatchSize: number = 1,
     ): Promise<CosmosOperationResponse<WebsitePage[]>> {
         const pages: WebsitePage[] = [];
 
-        const response = await this.getWebsites(continuationToken);
+        const response = await this.getWebsites(logger, continuationToken);
         await Promise.all(
             response.item.map(async website => {
-                const websitePages = await this.getReadyToScanPagesForWebsite(website, pageBatchSize);
+                const websitePages = await this.getReadyToScanPagesForWebsite(website, logger, pageBatchSize);
                 pages.push(...websitePages);
             }),
         );
@@ -35,22 +37,22 @@ export class PageDocumentProvider {
         };
     }
 
-    public async getReadyToScanPagesForWebsite(website: Website, itemCount: number = 1): Promise<WebsitePage[]> {
-        const pagesNotScannedBefore = await this.getPagesNeverScanned(website, itemCount);
+    public async getReadyToScanPagesForWebsite(website: Website, logger: BaseLogger, itemCount: number = 1): Promise<WebsitePage[]> {
+        const pagesNotScannedBefore = await this.getPagesNeverScanned(website, itemCount, logger);
         if (pagesNotScannedBefore.length >= itemCount) {
             return pagesNotScannedBefore;
         }
 
-        const pagesScannedAtLeastOnce = await this.getPagesScanned(website, itemCount - pagesNotScannedBefore.length);
+        const pagesScannedAtLeastOnce = await this.getPagesScanned(website, itemCount - pagesNotScannedBefore.length, logger);
 
         return pagesNotScannedBefore.concat(pagesScannedAtLeastOnce);
     }
 
-    public async getWebsites(continuationToken?: string): Promise<CosmosOperationResponse<Website[]>> {
+    public async getWebsites(logger: BaseLogger, continuationToken?: string): Promise<CosmosOperationResponse<Website[]>> {
         const partitionKey = 'website';
         const query = `SELECT * FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
 
-        const response = await this.cosmosContainerClient.queryDocuments<Website>(query, continuationToken, partitionKey);
+        const response = await this.cosmosContainerClient.queryDocuments<Website>(query, logger, continuationToken, partitionKey);
 
         client.ensureSuccessStatusCode(response);
 
@@ -60,6 +62,7 @@ export class PageDocumentProvider {
     public async updatePageProperties(
         websitePage: WebsitePageBase,
         properties: WebsitePageExtra,
+        logger: BaseLogger,
     ): Promise<CosmosOperationResponse<WebsitePage>> {
         const propertiesToUpdate: WebsitePageBase = {
             id: websitePage.id,
@@ -72,10 +75,10 @@ export class PageDocumentProvider {
 
         _.merge(propertiesToUpdate, properties);
 
-        return this.cosmosContainerClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate);
+        return this.cosmosContainerClient.mergeOrWriteDocument<WebsitePage>(propertiesToUpdate, logger);
     }
 
-    public async getPagesNeverScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
+    public async getPagesNeverScanned(website: Website, itemCount: number, logger: BaseLogger): Promise<WebsitePage[]> {
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
     c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
@@ -83,11 +86,11 @@ export class PageDocumentProvider {
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
         return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, logger, token, website.websiteId);
         });
     }
 
-    public async getPagesScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
+    public async getPagesScanned(website: Website, itemCount: number, logger: BaseLogger): Promise<WebsitePage[]> {
         const scanConfig = await this.getScanConfig();
 
         const maxRescanAfterFailureTime = moment()
@@ -110,7 +113,7 @@ export class PageDocumentProvider {
     ) order by c.lastRun.runTime asc`;
 
         return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, logger, token, website.websiteId);
         });
     }
 
