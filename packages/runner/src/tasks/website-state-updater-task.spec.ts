@@ -32,6 +32,8 @@ let loggerMock: IMock<Logger>;
 const websitePartitioningKey = 'website';
 
 beforeEach(() => {
+    loggerMock = Mock.ofType(Logger);
+
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
     websiteFactoryMock = Mock.ofType<WebsiteFactory>();
 
@@ -50,8 +52,6 @@ beforeEach(() => {
         .setup(o => o.createWebsiteDocumentId(scanMetadata.baseUrl))
         .returns(() => 'websiteDocumentId')
         .verifiable(Times.once());
-
-    loggerMock = Mock.ofType(Logger);
 
     websiteStateUpdaterTask = new WebsiteStateUpdaterTask(
         cosmosContainerClientMock.object,
@@ -119,7 +119,7 @@ async function setupTryExecuteOperationCallback(): Promise<CosmosOperationRespon
         let operationResult: CosmosOperationResponse<Website>;
         cosmosContainerClientMock
             .setup(async o => o.tryExecuteOperation(It.isAny(), retryOptions, loggerMock.object, pageScanResult, scanMetadata, It.isAny()))
-            .callback(async (operation, options, scanResult, metadata, timestamp) => {
+            .callback(async (operation, options, logger, scanResult, metadata, timestamp) => {
                 try {
                     operationResult = await operation(scanResult, metadata, timestamp);
                     resolve(operationResult);

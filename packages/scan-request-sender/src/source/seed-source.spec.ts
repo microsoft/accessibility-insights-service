@@ -16,12 +16,13 @@ describe('Scan Source', () => {
     let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
+        loggerMock = Mock.ofType(Logger);
+
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
         cosmosContainerClientMock
             .setup(async o => o.readAllDocument<ScanRequest>(loggerMock.object))
             .returns(async () => Promise.resolve(getScanRequestTestData()))
             .verifiable(Times.once());
-        loggerMock = Mock.ofType(Logger);
         testSubject = new SeedSource(cosmosContainerClientMock.object, loggerMock.object);
     });
     it('get websites to scan', async () => {

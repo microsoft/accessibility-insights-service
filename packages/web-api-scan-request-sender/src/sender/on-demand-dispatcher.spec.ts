@@ -164,7 +164,7 @@ describe('Dispatcher', () => {
         setupVerifiableQueueSizeCall();
 
         pageScanRequestProvider
-            .setup(async p => p.getRequests(It.isAny()))
+            .setup(async p => p.getRequests(loggerMock.object, It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 

@@ -154,7 +154,7 @@ describe('Dispatcher', () => {
         setupVerifiableQueueSizeCall();
 
         pageDocumentProviderMock
-            .setup(async p => p.getReadyToScanPages(It.isAny()))
+            .setup(async p => p.getReadyToScanPages(loggerMock.object, It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 

@@ -52,6 +52,8 @@ describe(BatchScanResultController, () => {
     };
 
     beforeEach(() => {
+        contextAwareLoggerMockMock = Mock.ofType<ContextAwareLogger>();
+
         context = <Context>(<unknown>{
             req: {
                 url: `${baseUrl}scans/$batch/`,
@@ -86,8 +88,6 @@ describe(BatchScanResultController, () => {
                     scanRequestProcessingDelayInSeconds: 120,
                 } as RestApiConfig;
             });
-
-        contextAwareLoggerMockMock = Mock.ofType<ContextAwareLogger>();
 
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         scanResponseConverterMock
