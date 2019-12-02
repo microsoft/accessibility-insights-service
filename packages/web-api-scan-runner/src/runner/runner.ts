@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AxeResults } from 'axe-core';
-import { convertAxeToSarif, SarifLog } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements } from 'logger';
-import { reporterFactory } from 'markreay-accessibility-insights-report';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
@@ -19,26 +17,12 @@ import {
     ReportFormat,
     ScanError,
 } from 'storage-documents';
+import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 
 // tslint:disable: no-null-keyword no-any
-
-function convertAxeToHtml(results: AxeResults, pageTitle: string): string {
-    const reporter = reporterFactory();
-    const params = {
-        results: results,
-        description: 'Automated report',
-        scanContext: {
-            browserSpec: 'BROWSER_SPEC',
-            browserVersion: 'BROWSER_VERSION',
-            pageTitle: pageTitle,
-        },
-    };
-
-    return reporter.fromAxeResult(params).asHTML();
-}
 
 @injectable()
 export class Runner {
@@ -52,14 +36,8 @@ export class Runner {
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
-        private readonly convertAxeToSarifFunc = convertAxeToSarif,
-        private readonly convertAxeToHtmlFunc = convertAxeToHtml,
-    ) {
-        this.reportGenerationFunctions = {
-            sarif: (ar, p) => JSON.stringify(this.convertAxeToSarifFunc(ar)),
-            html: this.convertAxeToHtmlFunc,
-        };
-    }
+        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
+    ) {}
 
     public async run(): Promise<void> {
         let browser: Browser;
@@ -119,10 +97,7 @@ export class Runner {
             this.logger.trackEvent('ScanTaskSucceeded');
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = [
-                await this.saveScanReport(axeScanResults, 'sarif'),
-                await this.saveScanReport(axeScanResults, 'html'),
-            ];
+            pageScanResult.reports = await Promise.all(this.generateAndSaveScanReports(axeScanResults));
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
@@ -162,23 +137,26 @@ export class Runner {
         }
     }
 
-    private async saveScanReport(axeResults: AxeScanResults, format: ReportFormat): Promise<OnDemandPageScanReport> {
-        this.logger.logInfo(`Converting scan run result to ${format}.`);
+    private generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport>[] {
         axeResults.results.inapplicable = [];
         axeResults.results.incomplete = [];
         axeResults.results.passes = [];
 
-        const report = this.reportGenerationFunctions[format](axeResults.results, axeResults.pageTitle);
+        this.logger.logInfo(`Generating reports from scan results`);
+        const reports = this.reportGenerator.generateReports(axeResults);
 
-        this.logger.logInfo(`Saving ${format} report to a blob storage.`);
-        const reportId = this.guidGenerator.createGuid();
-        const href = await this.pageScanRunReportService.saveReport(reportId, report);
-        this.logger.logInfo(`${format} report saved to a blob ${href}`);
+        return reports.map(async report => this.saveScanReport(report));
+    }
+
+    private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
+        this.logger.logInfo(`Saving ${report.format} report to a blob storage.`);
+        const href = await this.pageScanRunReportService.saveReport(report.id, report.report);
+        this.logger.logInfo(`${report.format} report saved to a blob ${href}`);
 
         return {
-            format,
+            format: report.format,
             href,
-            reportId,
+            reportId: report.id,
         };
     }
 
