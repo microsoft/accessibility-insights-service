@@ -351,8 +351,8 @@
                                 "position": {
                                     "x": 0,
                                     "y": 4,
-                                    "colSpan": 6,
-                                    "rowSpan": 4
+                                    "colSpan": 12,
+                                    "rowSpan": 5
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -367,7 +367,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "requests\r\n| summarize Average_Response_Time=(avg(duration) / 1000) by name\n"
+                                            "value": "let dataset=requests\r\n| where client_Type != \"Browser\" \r\n| extend OperationName=operation_Name;\r\ndataset\r\n| summarize Count=sum(itemCount), AvgDuration=avg(duration), (50thPercentile, 95thPercentile, 99thPercentile)=percentiles(duration, 50, 95, 99) by OperationName\r\n// calculate duration percentiles and count for all requests (overall)\r\n| union(dataset\r\n| summarize Count=sum(itemCount), AvgDuration=avg(duration), (50thPercentile, 95thPercentile, 99thPercentile)=percentiles(duration, 50, 95, 99)\r\n| extend OperationName=\"Overall\")\r\n| order by Count desc\r\n"
                                         },
                                         {
                                             "name": "TimeRange",
@@ -383,11 +383,11 @@
                                         },
                                         {
                                             "name": "PartTitle",
-                                            "value": "API Response Time (Seconds)"
+                                            "value": "API Performance"
                                         },
                                         {
                                             "name": "PartSubTitle",
-                                            "value": "Average response time per API endpoint"
+                                            "value": "Request count & duration in milliseconds"
                                         },
                                         {
                                             "name": "resourceTypeMode",
@@ -420,81 +420,10 @@
                             },
                             "5": {
                                 "position": {
-                                    "x": 6,
-                                    "y": 4,
-                                    "colSpan": 6,
-                                    "rowSpan": 4
-                                },
-                                "metadata": {
-                                    "inputs": [
-                                        {
-                                            "name": "ComponentId",
-                                            "value": {
-                                                "SubscriptionId": "[subscription().subscriptionId]",
-                                                "ResourceGroup": "[resourceGroup().name]",
-                                                "Name": "[parameters('appInsightsName')]",
-                                                "ResourceId": "[variables('appInsightsResourceId')]"
-                                            }
-                                        },
-                                        {
-                                            "name": "Query",
-                                            "value": "requests\n| summarize No_of_Requests = dcount(id) by name\n"
-                                        },
-                                        {
-                                            "name": "TimeRange",
-                                            "value": "P1D"
-                                        },
-                                        {
-                                            "name": "Version",
-                                            "value": "1.0"
-                                        },
-                                        {
-                                            "name": "PartId",
-                                            "value": "02da057d-376e-44a5-8d92-33b3c6476bba"
-                                        },
-                                        {
-                                            "name": "PartTitle",
-                                            "value": "API Request Count"
-                                        },
-                                        {
-                                            "name": "PartSubTitle",
-                                            "value": "Number of requests per API endpoint"
-                                        },
-                                        {
-                                            "name": "resourceTypeMode",
-                                            "value": "components"
-                                        },
-                                        {
-                                            "name": "ControlType",
-                                            "value": "AnalyticsGrid"
-                                        },
-                                        {
-                                            "name": "Dimensions",
-                                            "isOptional": true
-                                        },
-                                        {
-                                            "name": "DashboardId",
-                                            "isOptional": true
-                                        },
-                                        {
-                                            "name": "SpecificChart",
-                                            "isOptional": true
-                                        }
-                                    ],
-                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
-                                    "settings": {},
-                                    "asset": {
-                                        "idInputName": "ComponentId",
-                                        "type": "ApplicationInsights"
-                                    }
-                                }
-                            },
-                            "6": {
-                                "position": {
                                     "x": 12,
                                     "y": 4,
                                     "colSpan": 6,
-                                    "rowSpan": 4
+                                    "rowSpan": 5
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -552,12 +481,12 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "7": {
+                            "6": {
                                 "position": {
                                     "x": 18,
                                     "y": 4,
-                                    "colSpan": 6,
-                                    "rowSpan": 4
+                                    "colSpan": 10,
+                                    "rowSpan": 5
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -571,7 +500,7 @@
                                                                 "id": "[variables('webApiFunctionAppResourceId')]"
                                                             },
                                                             "name": "Http2xx",
-                                                            "aggregationType": 7,
+                                                            "aggregationType": 1,
                                                             "namespace": "microsoft.web/sites",
                                                             "metricVisualization": {
                                                                 "displayName": "Http 2xx",
@@ -583,7 +512,7 @@
                                                                 "id": "[variables('webApiFunctionAppResourceId')]"
                                                             },
                                                             "name": "Http401",
-                                                            "aggregationType": 7,
+                                                            "aggregationType": 1,
                                                             "namespace": "microsoft.web/sites",
                                                             "metricVisualization": {
                                                                 "displayName": "Http 401",
@@ -595,7 +524,7 @@
                                                                 "id": "[variables('webApiFunctionAppResourceId')]"
                                                             },
                                                             "name": "Http403",
-                                                            "aggregationType": 7,
+                                                            "aggregationType": 1,
                                                             "namespace": "microsoft.web/sites",
                                                             "metricVisualization": {
                                                                 "displayName": "Http 403",
@@ -607,10 +536,58 @@
                                                                 "id": "[variables('webApiFunctionAppResourceId')]"
                                                             },
                                                             "name": "Http5xx",
-                                                            "aggregationType": 7,
+                                                            "aggregationType": 1,
                                                             "namespace": "microsoft.web/sites",
                                                             "metricVisualization": {
                                                                 "displayName": "Http Server Errors",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('webApiFunctionAppResourceId')]"
+                                                            },
+                                                            "name": "Http4xx",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http 4xx",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('webApiFunctionAppResourceId')]"
+                                                            },
+                                                            "name": "Http3xx",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http 3xx",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('webApiFunctionAppResourceId')]"
+                                                            },
+                                                            "name": "Requests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Requests",
+                                                                "resourceDisplayName": "web-api-azure-function"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('webApiFunctionAppResourceId')]"
+                                                            },
+                                                            "name": "Http101",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.web/sites",
+                                                            "metricVisualization": {
+                                                                "displayName": "Http 101",
                                                                 "resourceDisplayName": "web-api-azure-function"
                                                             }
                                                         }
@@ -647,10 +624,10 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "8": {
+                            "7": {
                                 "position": {
                                     "x": 0,
-                                    "y": 9,
+                                    "y": 10,
                                     "colSpan": 6,
                                     "rowSpan": 4
                                 },
@@ -729,10 +706,10 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "9": {
+                            "8": {
                                 "position": {
                                     "x": 6,
-                                    "y": 9,
+                                    "y": 10,
                                     "colSpan": 6,
                                     "rowSpan": 4
                                 },
@@ -809,10 +786,10 @@
                                     }
                                 }
                             },
-                            "10": {
+                            "9": {
                                 "position": {
                                     "x": 12,
-                                    "y": 9,
+                                    "y": 10,
                                     "colSpan": 9,
                                     "rowSpan": 4
                                 },
@@ -911,10 +888,10 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "11": {
+                            "10": {
                                 "position": {
                                     "x": 0,
-                                    "y": 13,
+                                    "y": 14,
                                     "colSpan": 6,
                                     "rowSpan": 4
                                 },
@@ -969,10 +946,10 @@
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
                             },
-                            "12": {
+                            "11": {
                                 "position": {
                                     "x": 6,
-                                    "y": 13,
+                                    "y": 14,
                                     "colSpan": 6,
                                     "rowSpan": 4
                                 },
