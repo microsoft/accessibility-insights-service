@@ -143,7 +143,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "requests\n| summarize failedRequests = countif(substring(resultCode, 0, 1) == '5'), totalRequests=count() \n| extend reliability= strcat(floor((totalRequests - failedRequests)/todecimal(totalRequests) * 100, 3), \"%\") "
+                                            "value": "requests\n| summarize failedRequests = countif(substring(resultCode, 0, 1) == '5'), totalRequests=count()\n| extend reliability= strcat(toint((totalRequests - failedRequests)/todecimal(totalRequests) * 100 * 1000) / todecimal(1000), \"%\")\n"
                                         },
                                         {
                                             "name": "Version",
