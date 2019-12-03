@@ -18,7 +18,7 @@ import { Page, PuppeteerBrowserFactory } from './page';
 class PuppeteerBrowserMock {
     public static readonly browserVersion = 'browser version';
 
-    constructor(public readonly puppeteerPage: PuppeteerPageMock) { }
+    constructor(public readonly puppeteerPage: PuppeteerPageMock) {}
 
     public async newPage(): Promise<Puppeteer.Page> {
         return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
@@ -44,7 +44,7 @@ class PuppeteerPageMock {
         private readonly gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
         private readonly waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
         private readonly setBypassCSPMock: (enabled: boolean) => Promise<void>,
-    ) { }
+    ) {}
 
     public async goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
         if (this.viewPortSettingInvoked !== true) {

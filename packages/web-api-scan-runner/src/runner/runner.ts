@@ -146,7 +146,7 @@ export class Runner {
 
     private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
         this.logger.logInfo(`Saving ${report.format} report to a blob storage.`);
-        const href = await this.pageScanRunReportService.saveReport(report.id, report.report);
+        const href = await this.pageScanRunReportService.saveReport(report.id, report.content);
         this.logger.logInfo(`${report.format} report saved to a blob ${href}`);
 
         return {

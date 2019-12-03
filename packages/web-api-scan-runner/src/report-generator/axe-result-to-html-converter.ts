@@ -12,7 +12,7 @@ import { AxeResultConverter, ReportGenerationParams } from './axe-result-convert
 export class AxeResultToHtmlConverter implements AxeResultConverter {
     public readonly reportType: ReportFormat = 'html';
 
-    constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) { }
+    constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
 
     public convert(results: AxeResults, params: ReportGenerationParams): string {
         const reporter = this.reporterFactoryFunc();

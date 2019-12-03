@@ -77,12 +77,12 @@ describe(Runner, () => {
     const reportId2 = 'report guid 2';
 
     const generatedReport1: GeneratedReport = {
-        report: 'test report content 1',
+        content: 'test report content 1',
         format: 'sarif',
         id: reportId1,
     };
     const generatedReport2: GeneratedReport = {
-        report: 'test report content 2',
+        content: 'test report content 2',
         format: 'html',
         id: reportId2,
     };
@@ -371,7 +371,7 @@ describe(Runner, () => {
 
     function setupSaveReportCall(report: GeneratedReport, href: string): void {
         pageScanRunReportServiceMock
-            .setup(async s => s.saveReport(report.id, report.report))
+            .setup(async s => s.saveReport(report.id, report.content))
             .returns(async () => Promise.resolve(href))
             .verifiable();
     }

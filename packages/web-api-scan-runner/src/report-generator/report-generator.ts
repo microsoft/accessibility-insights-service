@@ -9,7 +9,7 @@ import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter } from './axe-result-converter';
 
 export type GeneratedReport = {
-    report: string;
+    content: string;
     id: string;
     format: ReportFormat;
 };
@@ -19,7 +19,7 @@ export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
-    ) { }
+    ) {}
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {
         const params = {
@@ -29,7 +29,7 @@ export class ReportGenerator {
 
         return this.axeResultConverters.map<GeneratedReport>(axeResultConverter => {
             return {
-                report: axeResultConverter.convert(axeResults.results, params),
+                content: axeResultConverter.convert(axeResults.results, params),
                 id: this.guidGenerator.createGuid(),
                 format: axeResultConverter.reportType,
             };

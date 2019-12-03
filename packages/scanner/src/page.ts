@@ -18,7 +18,7 @@ export class Page {
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(Logger) private readonly logger: Logger,
-    ) { }
+    ) {}
 
     public async create(): Promise<void> {
         this.browser = this.browserFactory();
