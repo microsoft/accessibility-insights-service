@@ -10,7 +10,7 @@ import { AxeResultConverter, ReportGenerationParams } from './axe-result-convert
 
 @injectable()
 export class AxeResultToSarifConverter implements AxeResultConverter {
-    public readonly reportType: ReportFormat = 'sarif';
+    public readonly targetReportFormat: ReportFormat = 'sarif';
 
     constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {}
 

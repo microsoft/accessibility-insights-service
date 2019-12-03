@@ -13,8 +13,11 @@ import { AxeResultConverter, ReportGenerationParams } from './axe-result-convert
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
+    public readonly targetReportFormat: ReportFormat;
 
-    constructor(public readonly reportValue: string, public readonly reportType: ReportFormat) {}
+    constructor(public readonly reportValue: string, reportType: ReportFormat) {
+        this.targetReportFormat = reportType;
+    }
 
     public convert(axeResults: AxeResults, params: ReportGenerationParams): string {
         this.convertCallCount += 1;

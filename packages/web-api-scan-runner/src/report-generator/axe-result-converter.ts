@@ -10,7 +10,7 @@ export type ReportGenerationParams = {
 };
 
 export interface AxeResultConverter {
-    readonly reportType: ReportFormat;
+    readonly targetReportFormat: ReportFormat;
 
     convert(results: AxeResults, params: ReportGenerationParams): string;
 }

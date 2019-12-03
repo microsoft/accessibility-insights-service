@@ -33,7 +33,7 @@ describe('AxeResultToHtmlConverter', () => {
     });
 
     it('has correct report type', () => {
-        expect(axeHtmlResultConverter.reportType).toEqual('html');
+        expect(axeHtmlResultConverter.targetReportFormat).toEqual('html');
     });
 
     it('convert', () => {

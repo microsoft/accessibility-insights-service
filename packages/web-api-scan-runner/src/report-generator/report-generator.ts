@@ -31,7 +31,7 @@ export class ReportGenerator {
             return {
                 content: axeResultConverter.convert(axeResults.results, params),
                 id: this.guidGenerator.createGuid(),
-                format: axeResultConverter.reportType,
+                format: axeResultConverter.targetReportFormat,
             };
         });
     }

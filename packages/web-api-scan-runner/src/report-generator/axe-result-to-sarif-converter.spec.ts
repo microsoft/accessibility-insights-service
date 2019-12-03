@@ -28,7 +28,7 @@ describe('AxeResultToSarifConverter', () => {
     });
 
     it('has correct report type', () => {
-        expect(axeSarifResultConverter.reportType).toEqual('sarif');
+        expect(axeSarifResultConverter.targetReportFormat).toEqual('sarif');
     });
 
     it('convert', () => {

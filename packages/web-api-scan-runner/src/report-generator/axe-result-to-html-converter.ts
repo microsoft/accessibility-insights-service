@@ -11,7 +11,7 @@ import { htmlReportStrings } from './html-report-strings';
 
 @injectable()
 export class AxeResultToHtmlConverter implements AxeResultConverter {
-    public readonly reportType: ReportFormat = 'html';
+    public readonly targetReportFormat: ReportFormat = 'html';
 
     constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
 
