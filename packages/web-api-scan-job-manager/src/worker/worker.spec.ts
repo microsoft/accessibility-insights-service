@@ -7,7 +7,6 @@ import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { BatchPoolMeasurements, Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
-
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
@@ -23,6 +22,26 @@ let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<Logger>;
 const activeToRunningTasksRatioDefault = 2;
 const addTasksIntervalInSecondsDefault = 1;
+const dateNow = new Date('2019-12-12T12:00:00.000Z');
+let poolMetricsInfo = {
+    id: 'pool-id',
+    maxTasksPerPool: 4,
+    load: {
+        activeTasks: 4,
+        runningTasks: 4,
+    },
+};
+const poolLoadSnapshot = {
+    tasksIncrementCountPerInterval: 60,
+    targetActiveToRunningTasksRatio: 2,
+    configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+    poolId: poolMetricsInfo.id,
+    samplingIntervalInSeconds: 5,
+    tasksProcessingSpeedPerInterval: 7,
+    tasksProcessingSpeedPerMinute: 13,
+    timestamp: dateNow,
+    ...poolMetricsInfo.load,
+};
 
 describe(Worker, () => {
     beforeEach(() => {
@@ -46,8 +65,10 @@ describe(Worker, () => {
             })
             .verifiable(Times.atLeastOnce());
 
-        poolLoadGeneratorMock.object.activeToRunningTasksRatio = 1;
-        poolLoadGeneratorMock.setup(o => o.processingSpeedPerMinute).returns(() => 1);
+        poolLoadGeneratorMock
+            .setup(async o => o.getPoolLoadSnapshot(poolMetricsInfo))
+            .returns(async () => Promise.resolve(poolLoadSnapshot))
+            .verifiable(Times.once());
 
         batchMock
             .setup(async o => o.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true))
@@ -83,27 +104,6 @@ describe(Worker, () => {
             jobTasks.push(jobTask);
         }
 
-        const poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 4,
-            load: {
-                activeTasks: 4,
-                runningTasks: 4,
-            },
-        };
-
-        const samplingIntervalInSeconds = 9999;
-
-        poolLoadGeneratorMock
-            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
-            .returns(async () => Promise.resolve(8))
-            .verifiable(Times.once());
-
-        poolLoadGeneratorMock
-            .setup(o => o.samplingIntervalInSeconds)
-            .returns(() => samplingIntervalInSeconds)
-            .verifiable(Times.once());
-
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, queueMessages))
             .returns(async () => Promise.resolve(jobTasks))
@@ -134,7 +134,7 @@ describe(Worker, () => {
 
         const expectedMeasurements: BatchPoolMeasurements = {
             runningTasks: poolMetricsInfo.load.runningTasks,
-            samplingIntervalInSeconds,
+            samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
             maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
         };
 
@@ -153,19 +153,11 @@ describe(Worker, () => {
     });
 
     it('skip adding tasks when pool is overloaded', async () => {
-        const poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 4,
-            load: {
-                activeTasks: 4,
-                runningTasks: 4,
-            },
-        };
+        poolLoadSnapshot.tasksIncrementCountPerInterval = 0;
         poolLoadGeneratorMock
-            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
-            .returns(async () => Promise.resolve(0))
+            .setup(async o => o.getPoolLoadSnapshot(poolMetricsInfo))
+            .returns(async () => Promise.resolve(poolLoadSnapshot))
             .verifiable(Times.once());
-
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
             .returns(async () => Promise.resolve([]))
@@ -182,22 +174,11 @@ describe(Worker, () => {
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
 
         await worker.run();
+        // reset default setup
+        poolLoadSnapshot.tasksIncrementCountPerInterval = 60;
     });
 
     it('skip adding tasks when message queue is empty', async () => {
-        const poolMetricsInfo = {
-            id: 'pool-id',
-            maxTasksPerPool: 4,
-            load: {
-                activeTasks: 4,
-                runningTasks: 4,
-            },
-        };
-        poolLoadGeneratorMock
-            .setup(async o => o.getTasksIncrementCount(poolMetricsInfo))
-            .returns(async () => Promise.resolve(8))
-            .verifiable(Times.once());
-
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
             .returns(async () => Promise.resolve([]))
@@ -206,7 +187,6 @@ describe(Worker, () => {
             .setup(async o => o.getPoolMetricsInfo())
             .returns(async () => Promise.resolve(poolMetricsInfo))
             .verifiable(Times.once());
-
         queueMock
             .setup(async o => o.getMessages())
             .returns(async () => Promise.resolve([]))
@@ -215,8 +195,10 @@ describe(Worker, () => {
 
         await worker.run();
     });
+
     it('Continue waiting until all active tasks are completed', async () => {
-        const poolMetricsInfo = {
+        let poolMetricsInfoCallbackCount = 0;
+        poolMetricsInfo = {
             id: 'pool-id',
             maxTasksPerPool: 4,
             load: {
@@ -224,16 +206,15 @@ describe(Worker, () => {
                 runningTasks: 4,
             },
         };
-        let poolMetricsInfoCallbackCount = 0;
         poolLoadGeneratorMock
             .setup(async o =>
-                o.getTasksIncrementCount(
+                o.getPoolLoadSnapshot(
                     It.is(actualMetrics => {
                         return _.isEqual(poolMetricsInfo, actualMetrics);
                     }),
                 ),
             )
-            .returns(async () => Promise.resolve(8))
+            .returns(async () => Promise.resolve(poolLoadSnapshot))
             .verifiable(Times.exactly(2));
         batchMock
             .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
@@ -248,6 +229,56 @@ describe(Worker, () => {
                 if (poolMetricsInfoCallbackCount > 1) {
                     poolMetricsInfo.load.activeTasks = 0;
                     poolMetricsInfo.load.runningTasks = 1;
+
+                    return Promise.resolve(poolMetricsInfo);
+                } else {
+                    return Promise.resolve(poolMetricsInfo);
+                }
+            })
+            .verifiable(Times.exactly(2));
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.exactly(2));
+        // let it exit by itself
+        worker.runOnce = false;
+        await worker.run();
+    });
+
+    it('Continue waiting until all running tasks are completed', async () => {
+        let poolMetricsInfoCallbackCount = 0;
+        poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 4,
+                runningTasks: 4,
+            },
+        };
+        poolLoadGeneratorMock
+            .setup(async o =>
+                o.getPoolLoadSnapshot(
+                    It.is(actualMetrics => {
+                        return _.isEqual(poolMetricsInfo, actualMetrics);
+                    }),
+                ),
+            )
+            .returns(async () => Promise.resolve(poolLoadSnapshot))
+            .verifiable(Times.exactly(2));
+        batchMock
+            .setup(async o => o.createTasks(process.env.AZ_BATCH_JOB_ID, It.isAny()))
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.never());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .callback(q => {
+                poolMetricsInfoCallbackCount += 1;
+            })
+            .returns(async () => {
+                if (poolMetricsInfoCallbackCount > 1) {
+                    poolMetricsInfo.load.activeTasks = 1;
+                    poolMetricsInfo.load.runningTasks = 0;
 
                     return Promise.resolve(poolMetricsInfo);
                 } else {

@@ -3,9 +3,9 @@
 import { Message, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { BatchPoolMeasurements, Logger } from 'logger';
+import { cloneDeepWith } from 'lodash';
+import { Logger } from 'logger';
 import * as moment from 'moment';
-
 import { Batch } from '../batch/batch';
 import { JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
@@ -32,14 +32,15 @@ export class Worker {
         // tslint:disable-next-line: no-constant-condition
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-            const tasksIncrementCount = await this.poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo);
+            const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
 
             let tasksQueuedCount = 0;
-            if (tasksIncrementCount > 0) {
-                const scanMessages = await this.getMessages(tasksIncrementCount);
+            if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
+                const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-                    if (poolMetricsInfo.load.activeTasks === 0 && poolMetricsInfo.load.runningTasks === 1) {
+                    // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
+                    if (poolMetricsInfo.load.runningTasks + poolMetricsInfo.load.activeTasks === 1) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
                         break;
                     }
@@ -50,30 +51,21 @@ export class Worker {
                 }
             }
 
+            // set the actual number of tasks added to the batch pool to process
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
-            const runningTasks = poolMetricsInfo.load.runningTasks;
-            const samplingIntervalInSeconds = this.poolLoadGenerator.samplingIntervalInSeconds;
-            const maxParallelTasks = poolMetricsInfo.maxTasksPerPool;
-
-            this.logger.logInfo('Pool load statistics', {
-                activeTasks: poolMetricsInfo.load.activeTasks.toString(),
-                runningTasks: runningTasks.toString(),
-                requestedTasksToAddPerInterval: tasksIncrementCount.toString(),
-                tasksAddedPerInterval: tasksQueuedCount.toString(),
-                samplingIntervalInSeconds: samplingIntervalInSeconds.toString(),
-                processingSpeedTasksPerMinute: this.poolLoadGenerator.processingSpeedPerMinute.toString(),
-                activeToRunningTasksRatio: this.poolLoadGenerator.activeToRunningTasksRatio.toString(),
-            });
-
-            const batchPoolMeasurements: BatchPoolMeasurements = {
-                runningTasks,
-                samplingIntervalInSeconds,
-                maxParallelTasks,
-            };
+            this.logger.logInfo(
+                'Pool load statistics',
+                // tslint:disable-next-line: no-unsafe-any
+                cloneDeepWith(poolLoadSnapshot, value => (value !== undefined ? value.toString() : 'undefined')),
+            );
 
             // tslint:disable-next-line: no-null-keyword
-            this.logger.trackEvent('BatchPoolStats', null, batchPoolMeasurements);
+            this.logger.trackEvent('BatchPoolStats', null, {
+                runningTasks: poolMetricsInfo.load.runningTasks,
+                samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
+                maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
+            });
 
             if (this.runOnce) {
                 break;

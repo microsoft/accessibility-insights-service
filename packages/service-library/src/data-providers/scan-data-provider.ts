@@ -20,8 +20,6 @@ export class ScanDataProvider {
         };
 
         await this.cosmosContainerClient.writeDocument(scanRunBatchRequest);
-
-        return;
     }
 
     public async deleteBatchRequest(request: OnDemandPageScanBatchRequest): Promise<void> {

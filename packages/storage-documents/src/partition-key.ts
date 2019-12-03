@@ -3,4 +3,5 @@
 export enum PartitionKey {
     scanRunBatchRequests = 'scanRunBatchRequests',
     pageScanRequestDocuments = 'pageScanRequestDocuments',
+    batchPoolLoadSnapshots = 'batchPoolLoadSnapshots',
 }
