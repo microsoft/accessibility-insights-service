@@ -3,10 +3,10 @@
         "logInConsole": true
     },
     "queueConfig": {
-        "maxQueueSize": 2000
+        "maxQueueSize": 200
     },
     "taskConfig": {
-        "taskTimeoutInMinutes": 3
+        "taskTimeoutInMinutes": 5
     },
 
     "scanConfig": {
