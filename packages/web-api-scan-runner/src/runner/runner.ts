@@ -93,7 +93,7 @@ export class Runner {
             this.logger.trackEvent('ScanTaskSucceeded');
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = await Promise.all(this.generateAndSaveScanReports(axeScanResults));
+            pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
@@ -133,7 +133,7 @@ export class Runner {
         }
     }
 
-    private generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport>[] {
+    private async generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
         axeResults.results.inapplicable = [];
         axeResults.results.incomplete = [];
         axeResults.results.passes = [];
@@ -141,7 +141,7 @@ export class Runner {
         this.logger.logInfo(`Generating reports from scan results`);
         const reports = this.reportGenerator.generateReports(axeResults);
 
-        return reports.map(async report => this.saveScanReport(report));
+        return Promise.all(reports.map(async report => this.saveScanReport(report)));
     }
 
     private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {

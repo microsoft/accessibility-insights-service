@@ -7,6 +7,7 @@ import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportGenerationParams } from './axe-result-converter';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
+import { htmlReportStrings } from './html-report-strings';
 
 describe('AxeResultToHtmlConverter', () => {
     let axeHtmlResultConverter: AxeResultToHtmlConverter;
@@ -38,8 +39,8 @@ describe('AxeResultToHtmlConverter', () => {
     it('convert', () => {
         const reportParameters = {
             results: axeResults,
-            description: 'Automated report',
-            serviceName: 'Accessibility Insights Service',
+            description: htmlReportStrings.reportDescription,
+            serviceName: htmlReportStrings.serviceName,
             scanContext: {
                 browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,

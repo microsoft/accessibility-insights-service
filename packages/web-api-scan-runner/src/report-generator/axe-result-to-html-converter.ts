@@ -7,6 +7,7 @@ import { inject, injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
+import { htmlReportStrings } from './html-report-strings';
 
 @injectable()
 export class AxeResultToHtmlConverter implements AxeResultConverter {
@@ -19,8 +20,8 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
 
         const htmlReportParams: AxeReportParameters = {
             results: results,
-            description: 'Automated report',
-            serviceName: 'Accessibility Insights Service',
+            description: htmlReportStrings.reportDescription,
+            serviceName: htmlReportStrings.serviceName,
             scanContext: {
                 browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
