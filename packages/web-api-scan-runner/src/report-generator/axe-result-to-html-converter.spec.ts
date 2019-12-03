@@ -3,45 +3,10 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { SarifLog } from 'axe-sarif-converter';
 import { Report, Reporter, ReporterFactory } from 'markreay-accessibility-insights-report';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeResultToHtmlConverter, AxeResultToSarifConverter, ReportGenerationParams } from './axe-result-converters';
-
-describe('AxeResultToSarifConverter', () => {
-    let axeSarifResultConverter: AxeResultToSarifConverter;
-    let sarifReport: SarifLog;
-    let convertAxeToSarifFuncMock: IMock<(axeResults: AxeResults) => SarifLog>;
-    let axeResults: AxeResults;
-    const params: ReportGenerationParams = {
-        pageTitle: 'page title',
-    };
-
-    beforeEach(() => {
-        sarifReport = ({ sarifLog: true } as unknown) as SarifLog;
-        convertAxeToSarifFuncMock = Mock.ofInstance((ar: AxeResults) => sarifReport);
-        axeSarifResultConverter = new AxeResultToSarifConverter(convertAxeToSarifFuncMock.object);
-        axeResults = ({
-            testResults: true,
-        } as unknown) as AxeResults;
-    });
-
-    it('has correct report type', () => {
-        expect(axeSarifResultConverter.reportType).toEqual('sarif');
-    });
-
-    it('convert', () => {
-        convertAxeToSarifFuncMock
-            .setup(f => f(axeResults))
-            .returns(() => sarifReport)
-            .verifiable(Times.once());
-
-        const report = axeSarifResultConverter.convert(axeResults, params);
-
-        convertAxeToSarifFuncMock.verifyAll();
-        expect(report).toEqual(JSON.stringify(sarifReport));
-    });
-});
+import { ReportGenerationParams } from './axe-result-converter';
+import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 
 describe('AxeResultToHtmlConverter', () => {
     let axeHtmlResultConverter: AxeResultToHtmlConverter;

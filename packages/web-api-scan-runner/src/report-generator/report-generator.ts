@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
-import { AxeResultConverter } from './axe-result-converters';
+import { AxeResultConverter } from './axe-result-converter';
 
 export type GeneratedReport = {
     report: string;

@@ -3,14 +3,13 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { SarifLog } from 'axe-sarif-converter';
 import { GeneratedReport, ReportGenerator } from './report-generator';
 
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeResultConverter, ReportGenerationParams } from './axe-result-converters';
+import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 
 class AxeResultConverterStub extends AxeResultConverter {
     public convertCallCount = 0;
