@@ -1800,7 +1800,7 @@ abort-controller@^3.0.0:
   dependencies:
     event-target-shim "^5.0.0"
 
-accessibility-insights-report@0.1.0, accessibility-insights-report@^0.1.0:
+accessibility-insights-report@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-0.1.0.tgz#36273d7fcdd71e59d798a9d3757f0a7c7ced8edd"
   integrity sha512-HTDR3N1J/oA7RP2Tg5CS6oR2Pt0jDZPg9kdjfu/6eHoWVe6I8E2LNMUSFbAwvfX7fOah7LyTg/7uPQY35LCftQ==

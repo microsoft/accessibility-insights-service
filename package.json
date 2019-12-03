@@ -144,8 +144,5 @@
         "axe-core": "^3.3.2",
         "lodash": "^4.17.14",
         "https-proxy-agent": "^3.0.1"
-    },
-    "dependencies": {
-        "accessibility-insights-report": "0.1.0"
     }
 }
