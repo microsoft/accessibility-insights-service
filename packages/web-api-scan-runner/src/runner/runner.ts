@@ -14,7 +14,6 @@ import {
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
-    ReportFormat,
     ScanError,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -26,7 +25,6 @@ import { WebDriverTask } from '../tasks/web-driver-task';
 
 @injectable()
 export class Runner {
-    private readonly reportGenerationFunctions: { [formatName: string]: (axeResults: AxeResults, pageTitle: string) => string };
 
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
@@ -37,7 +35,7 @@ export class Runner {
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-    ) {}
+    ) { }
 
     public async run(): Promise<void> {
         let browser: Browser;

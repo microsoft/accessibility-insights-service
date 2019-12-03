@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { GuidGenerator } from 'common';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
@@ -14,11 +14,12 @@ export type GeneratedReport = {
     format: ReportFormat;
 };
 
+@injectable()
 export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        private readonly axeResultConverters: AxeResultConverter[],
-    ) {}
+        @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
+    ) { }
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {
         const params = { pageTitle: axeResults.pageTitle };

@@ -3,7 +3,7 @@
 
 import { AxeResults } from 'axe-core';
 import { convertAxeToSarif, SarifLog } from 'axe-sarif-converter';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { ReporterFactory } from 'markreay-accessibility-insights-report';
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
@@ -12,13 +12,14 @@ export type ReportGenerationParams = {
     pageTitle: string;
 };
 
+@injectable()
 export abstract class AxeResultConverter {
     public readonly reportType: ReportFormat;
 
-    // tslint:disable-next-line: no-any
     public abstract convert(results: AxeResults, params: ReportGenerationParams): string;
 }
 
+@injectable()
 export class AxeResultToHtmlConverter extends AxeResultConverter {
     public readonly reportType: ReportFormat = 'html';
 
@@ -42,6 +43,7 @@ export class AxeResultToHtmlConverter extends AxeResultConverter {
     }
 }
 
+@injectable()
 export class AxeResultToSarifConverter extends AxeResultConverter {
     public readonly reportType: ReportFormat = 'sarif';
 
