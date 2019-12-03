@@ -2,16 +2,14 @@
 // Licensed under the MIT License.
 
 import { AxeResults } from 'axe-core';
-import { injectable } from 'inversify';
 import { ReportFormat } from 'storage-documents';
 
 export type ReportGenerationParams = {
     pageTitle: string;
 };
 
-@injectable()
-export abstract class AxeResultConverter {
-    public readonly reportType: ReportFormat;
+export interface AxeResultConverter {
+    readonly reportType: ReportFormat;
 
-    public abstract convert(results: AxeResults, params: ReportGenerationParams): string;
+    convert(results: AxeResults, params: ReportGenerationParams): string;
 }

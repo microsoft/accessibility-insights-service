@@ -11,12 +11,10 @@ import { ReportFormat } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 
-class AxeResultConverterStub extends AxeResultConverter {
+class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
 
-    constructor(public readonly reportValue: string, public readonly reportType: ReportFormat) {
-        super();
-    }
+    constructor(public readonly reportValue: string, public readonly reportType: ReportFormat) {}
 
     public convert(axeResults: AxeResults, params: ReportGenerationParams): string {
         this.convertCallCount += 1;
@@ -64,9 +62,9 @@ describe('ReportGenerator', () => {
         reportGenerator.generateReports(axeResults);
 
         // tslint:disable-next-line:prefer-const
-        for (let axeResultConverter of axeResultConverters) {
+        axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
             expect(axeResultConverter.convertCallCount).toBe(1);
-        }
+        });
     });
 
     it('generates reports', () => {

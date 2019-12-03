@@ -9,12 +9,10 @@ import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 
 @injectable()
-export class AxeResultToSarifConverter extends AxeResultConverter {
+export class AxeResultToSarifConverter implements AxeResultConverter {
     public readonly reportType: ReportFormat = 'sarif';
 
-    constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {
-        super();
-    }
+    constructor(@inject(iocTypeNames.ConvertAxeToSarifFunc) private readonly convertAxeToSarifFunc: (axeResults: AxeResults) => SarifLog) {}
 
     public convert(results: AxeResults, params: ReportGenerationParams): string {
         const sarifResults = this.convertAxeToSarifFunc(results);
