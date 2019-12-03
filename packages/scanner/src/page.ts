@@ -12,15 +12,17 @@ export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 @injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
+    public browser: Puppeteer.Browser;
 
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(Logger) private readonly logger: Logger,
-    ) {}
+    ) { }
 
     public async create(): Promise<void> {
-        this.puppeteerPage = await this.browserFactory().newPage();
+        this.browser = this.browserFactory();
+        this.puppeteerPage = await this.browser.newPage();
     }
 
     public async enableBypassCSP(): Promise<void> {
@@ -92,6 +94,7 @@ export class Page {
         const scanResults: AxeScanResults = {
             results: axeResults,
             pageTitle: await this.puppeteerPage.title(),
+            browserSpec: await this.browser.version(),
         };
 
         if (response.request().redirectChain().length > 0) {

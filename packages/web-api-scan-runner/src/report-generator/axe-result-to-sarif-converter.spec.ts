@@ -15,6 +15,7 @@ describe('AxeResultToSarifConverter', () => {
     let axeResults: AxeResults;
     const params: ReportGenerationParams = {
         pageTitle: 'page title',
+        browserSpec: 'browser version',
     };
 
     beforeEach(() => {

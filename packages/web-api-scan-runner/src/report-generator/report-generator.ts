@@ -19,10 +19,13 @@ export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
-    ) {}
+    ) { }
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {
-        const params = { pageTitle: axeResults.pageTitle };
+        const params = {
+            pageTitle: axeResults.pageTitle,
+            browserSpec: axeResults.browserSpec,
+        };
 
         return this.axeResultConverters.map<GeneratedReport>(axeResultConverter => {
             return {

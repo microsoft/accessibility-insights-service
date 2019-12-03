@@ -12,7 +12,7 @@ import { AxeResultConverter, ReportGenerationParams } from './axe-result-convert
 export class AxeResultToHtmlConverter implements AxeResultConverter {
     public readonly reportType: ReportFormat = 'html';
 
-    constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) {}
+    constructor(@inject(iocTypeNames.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory) { }
 
     public convert(results: AxeResults, params: ReportGenerationParams): string {
         const reporter = this.reporterFactoryFunc();
@@ -22,7 +22,7 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
             description: 'Automated report',
             serviceName: 'Accessibility Insights Service',
             scanContext: {
-                browserSpec: 'BROWSER_SPEC',
+                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };

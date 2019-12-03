@@ -15,6 +15,20 @@ import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
 
+class PuppeteerBrowserMock {
+    public static readonly browserVersion = 'browser version';
+
+    constructor(public readonly puppeteerPage: PuppeteerPageMock) { }
+
+    public async newPage(): Promise<Puppeteer.Page> {
+        return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
+    }
+
+    public async version(): Promise<string> {
+        return Promise.resolve(PuppeteerBrowserMock.browserVersion);
+    }
+}
+
 class PuppeteerPageMock {
     public static readonly pageTitle = 'page title';
 
@@ -30,7 +44,7 @@ class PuppeteerPageMock {
         private readonly gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
         private readonly waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
         private readonly setBypassCSPMock: (enabled: boolean) => Promise<void>,
-    ) {}
+    ) { }
 
     public async goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
         if (this.viewPortSettingInvoked !== true) {
@@ -55,14 +69,6 @@ class PuppeteerPageMock {
 
     public async title(): Promise<string> {
         return PuppeteerPageMock.pageTitle;
-    }
-}
-
-class PuppeteerBrowserMock {
-    constructor(public readonly puppeteerPage: PuppeteerPageMock) {}
-
-    public async newPage(): Promise<Puppeteer.Page> {
-        return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
     }
 }
 
@@ -152,6 +158,7 @@ describe('Page', () => {
         const scanResults: AxeScanResults = {
             results: axeResults,
             pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
         };
         const response: Puppeteer.Response = makeResponse({});
         gotoMock
@@ -255,6 +262,7 @@ describe('Page', () => {
             results: axeResults,
             scannedUrl: redirectToUrl,
             pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
         };
         const response: Puppeteer.Response = makeResponse({ withRedirect: true });
         gotoMock

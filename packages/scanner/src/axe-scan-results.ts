@@ -25,4 +25,5 @@ export interface AxeScanResults {
     unscannable?: boolean;
     scannedUrl?: string;
     pageTitle?: string;
+    browserSpec?: string;
 }

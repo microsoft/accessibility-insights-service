@@ -16,6 +16,7 @@ describe('AxeResultToHtmlConverter', () => {
     let axeResults: AxeResults;
     const params: ReportGenerationParams = {
         pageTitle: 'page title',
+        browserSpec: 'browser version',
     };
 
     beforeEach(() => {
@@ -40,7 +41,7 @@ describe('AxeResultToHtmlConverter', () => {
             description: 'Automated report',
             serviceName: 'Accessibility Insights Service',
             scanContext: {
-                browserSpec: 'BROWSER_SPEC',
+                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };
