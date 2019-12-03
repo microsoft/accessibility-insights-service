@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Report, Reporter, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
-import { Report, Reporter, ReporterFactory } from 'markreay-accessibility-insights-report';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportGenerationParams } from './axe-result-converter';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
@@ -38,9 +38,9 @@ describe('AxeResultToHtmlConverter', () => {
         const reportParameters = {
             results: axeResults,
             description: 'Automated report',
+            serviceName: 'Accessibility Insights Service',
             scanContext: {
                 browserSpec: 'BROWSER_SPEC',
-                browserVersion: 'BROWSER_VERSION',
                 pageTitle: params.pageTitle,
             },
         };

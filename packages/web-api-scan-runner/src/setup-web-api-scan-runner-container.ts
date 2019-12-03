@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { reporterFactory } from 'accessibility-insights-report';
 import { convertAxeToSarif } from 'axe-sarif-converter';
 import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { registerLoggerToContainer } from 'logger';
-import { reporterFactory } from 'markreay-accessibility-insights-report';
 import { registerScannerToContainer } from 'scanner';
 import { registerServiceLibraryToContainer } from 'service-library';
 import { iocTypeNames } from './ioc-types';

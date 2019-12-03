@@ -19,7 +19,7 @@ export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
-    ) { }
+    ) {}
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {
         const params = { pageTitle: axeResults.pageTitle };

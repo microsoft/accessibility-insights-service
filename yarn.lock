@@ -1800,6 +1800,20 @@ abort-controller@^3.0.0:
   dependencies:
     event-target-shim "^5.0.0"
 
+accessibility-insights-report@0.1.0, accessibility-insights-report@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-0.1.0.tgz#36273d7fcdd71e59d798a9d3757f0a7c7ced8edd"
+  integrity sha512-HTDR3N1J/oA7RP2Tg5CS6oR2Pt0jDZPg9kdjfu/6eHoWVe6I8E2LNMUSFbAwvfX7fOah7LyTg/7uPQY35LCftQ==
+  dependencies:
+    axe-core "3.3.2"
+    classnames "^2.2.6"
+    lodash "^4.17.15"
+    moment "^2.24.0"
+    office-ui-fabric-react "6.210.5"
+    react "^16.12.0"
+    react-dom "^16.12.0"
+    uuid "^3.3.3"
+
 acorn-globals@^4.1.0:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-4.3.4.tgz#9fa1926addc11c97308c4e66d7add0d40c3272e7"
@@ -5955,20 +5969,6 @@ map-visit@^1.0.0:
   integrity sha1-7Nyo8TFE5mDxtb1B8S80edmN+48=
   dependencies:
     object-visit "^1.0.0"
-
-markreay-accessibility-insights-report@0.0.3, markreay-accessibility-insights-report@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/markreay-accessibility-insights-report/-/markreay-accessibility-insights-report-0.0.3.tgz#e71c141601ebc0957b63cf9b4e6fe50ba592ebd3"
-  integrity sha512-ng4Bs/pThfZKRzJ8Y+Reoe/1oIYYnRVMYiQU1aaX6wsjP8LKscl0iMN7cdDycepeJ6Fi9pIbqfEPyX9WCCubSA==
-  dependencies:
-    axe-core "3.3.2"
-    classnames "^2.2.6"
-    lodash "^4.17.15"
-    moment "^2.24.0"
-    office-ui-fabric-react "6.210.5"
-    react "^16.12.0"
-    react-dom "^16.12.0"
-    uuid "^3.3.3"
 
 math-random@^1.0.1:
   version "1.0.4"
