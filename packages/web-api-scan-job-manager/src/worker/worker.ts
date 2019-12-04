@@ -6,9 +6,12 @@ import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
+import { BatchPoolLoadSnapshotProvider } from 'service-library';
+import { StorageDocument } from 'storage-documents';
 import { Batch } from '../batch/batch';
+import { BatchConfig } from '../batch/batch-config';
 import { JobTaskState } from '../batch/job-task';
-import { PoolLoadGenerator } from '../batch/pool-load-generator';
+import { PoolLoadGenerator, PoolLoadSnapshot } from '../batch/pool-load-generator';
 
 @injectable()
 export class Worker {
@@ -22,6 +25,8 @@ export class Worker {
         @inject(Batch) private readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
+        @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
+        @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {}
@@ -33,6 +38,7 @@ export class Worker {
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
             const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
+            await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
             let tasksQueuedCount = 0;
             if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
@@ -110,9 +116,18 @@ export class Worker {
         return jobQueuedTasks.length;
     }
 
+    private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
+        await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot({
+            // tslint:disable-next-line: no-object-literal-type-assertion
+            ...({} as StorageDocument),
+            batchAccountName: this.batchConfig.accountName,
+            ...poolLoadSnapshot,
+        });
+    }
+
     private async init(): Promise<void> {
         this.jobManagerConfig = await this.serviceConfig.getConfigValue('jobManagerConfig');
-        this.jobId = await this.batch.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true);
+        this.jobId = await this.batch.createJobIfNotExists(this.batchConfig.jobId, true);
         this.restartAfterTime = moment()
             .add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour')
             .toDate();

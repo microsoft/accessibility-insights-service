@@ -52,6 +52,7 @@ describe(Batch, () => {
             accountName: '',
             accountUrl: '',
             poolId: 'poolId',
+            jobId: '',
         };
         taskEnvSettings = 'env settings' as any;
         taskResourceFiles = 'task resource files' as any;
