@@ -20,7 +20,7 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
 
         const htmlReportParams: AxeReportParameters = {
             results: results,
-            description: htmlReportStrings.reportDescription,
+            description: this.createDescription(results),
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
                 browserSpec: params.browserSpec,
@@ -29,5 +29,11 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
         };
 
         return reporter.fromAxeResult(htmlReportParams).asHTML();
+    }
+
+    private createDescription(results: AxeResults): string {
+        const reportGenerationTime = new Date();
+
+        return `Automated report for accessibility scan of url ${results.url} completed at ${reportGenerationTime.toUTCString()}.`;
     }
 }
