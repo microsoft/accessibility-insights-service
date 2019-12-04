@@ -6,6 +6,7 @@ import * as inversify from 'inversify';
 import { registerLoggerToContainer } from 'logger';
 import { registerScannerToContainer } from 'scanner';
 import { registerServiceLibraryToContainer } from 'service-library';
+import { registerReportGeneratorToContainer } from './report-generator/register-report-generator-to-container';
 
 export function setupWebApiScanRequestSenderContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
@@ -14,6 +15,7 @@ export function setupWebApiScanRequestSenderContainer(): inversify.Container {
     registerAzureServicesToContainer(container);
     registerScannerToContainer(container);
     registerServiceLibraryToContainer(container);
+    registerReportGeneratorToContainer(container);
 
     return container;
 }

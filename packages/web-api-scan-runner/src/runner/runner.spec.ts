@@ -3,16 +3,16 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { convertAxeToSarif } from 'axe-sarif-converter';
 import { GuidGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger, loggerTypes, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
+import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
-import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
+import { ItemType, OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
@@ -31,8 +31,7 @@ describe(Runner, () => {
     let loggerMock: IMock<Logger>;
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let convertAxeToSarifMock: IMock<typeof convertAxeToSarif>;
-    let convertAxeToHtmlMock: IMock<(ar: AxeResults) => string>;
+    let reportGeneratorMock: IMock<ReportGenerator>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -54,6 +53,8 @@ describe(Runner, () => {
         batchRequestId: 'batch-id',
     };
 
+    const pageTitle = 'page title';
+
     const passedAxeScanResults: AxeScanResults = {
         results: {
             url: 'url',
@@ -64,6 +65,7 @@ describe(Runner, () => {
             inapplicable: [],
         } as AxeResults,
         unscannable: false,
+        pageTitle: pageTitle,
     };
 
     const unscannableAxeScanResults: AxeScanResults = {
@@ -71,10 +73,31 @@ describe(Runner, () => {
         error: 'test scan error - not a valid page',
     };
 
-    const sarifBlobFilePath = 'test sarif blob path';
-    const htmlBlobFilePath = 'test html blob path';
-    const parsedSarifContent = { testSarifContent: true } as any;
-    const htmlContent = 'test html content';
+    const reportId1 = 'report guid 1';
+    const reportId2 = 'report guid 2';
+
+    const generatedReport1: GeneratedReport = {
+        content: 'test report content 1',
+        format: 'sarif',
+        id: reportId1,
+    };
+    const generatedReport2: GeneratedReport = {
+        content: 'test report content 2',
+        format: 'html',
+        id: reportId2,
+    };
+
+    const onDemandReport1: OnDemandPageScanReport = {
+        format: generatedReport1.format,
+        reportId: reportId1,
+        href: 'report blob path 1',
+    };
+    const onDemandReport2: OnDemandPageScanReport = {
+        format: generatedReport2.format,
+        reportId: reportId2,
+        href: 'report blob path 2',
+    };
+
     const axeScanResultsWithViolations: AxeScanResults = {
         results: {
             url: 'url',
@@ -94,11 +117,10 @@ describe(Runner, () => {
             inapplicable: [],
         } as AxeResults,
         unscannable: false,
+        pageTitle: pageTitle,
     };
 
     let dateNow: Date;
-    const sarifReportGuid = 'sarif report guid';
-    const htmlReportGuid = 'html report guid';
 
     beforeEach(() => {
         browser = <Browser>{};
@@ -110,13 +132,14 @@ describe(Runner, () => {
         scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
         guidGeneratorMock.setup(g => g.getGuidTimestamp('id')).returns(() => new Date());
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
-        convertAxeToSarifMock = Mock.ofInstance(convertAxeToSarif, MockBehavior.Strict);
-        convertAxeToHtmlMock = Mock.ofInstance((results: AxeResults) => htmlContent);
+
+        reportGeneratorMock = Mock.ofType<ReportGenerator>();
+
         runner = new Runner(
             guidGeneratorMock.object,
             scanMetadataConfig.object,
@@ -125,8 +148,7 @@ describe(Runner, () => {
             webDriverTaskMock.object,
             loggerMock.object,
             pageScanRunReportServiceMock.object,
-            convertAxeToSarifMock.object,
-            convertAxeToHtmlMock.object,
+            reportGeneratorMock.object,
         );
     });
 
@@ -170,11 +192,8 @@ describe(Runner, () => {
             .returns(async () => Promise.resolve(passedAxeScanResults))
             .verifiable();
 
-        setupConvertAxeToSarifCall(passedAxeScanResults);
-        setupConvertAxeToHtmlCall(passedAxeScanResults);
-
-        setupSaveSarifReportCall();
-        setupSaveHtmlReportCall();
+        setupGenerateReportsCall(passedAxeScanResults);
+        setupSaveAllReportsCall();
         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
@@ -224,11 +243,8 @@ describe(Runner, () => {
             .returns(async () => Promise.resolve(passedAxeScanResults))
             .verifiable();
 
-        setupConvertAxeToSarifCall(passedAxeScanResults);
-        setupConvertAxeToHtmlCall(passedAxeScanResults);
-
-        setupSaveSarifReportCall();
-        setupSaveHtmlReportCall();
+        setupGenerateReportsCall(passedAxeScanResults);
+        setupSaveAllReportsCall();
         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
 
         await runner.run();
@@ -245,11 +261,8 @@ describe(Runner, () => {
             .returns(async () => Promise.resolve(axeScanResultsWithViolations))
             .verifiable();
 
-        setupConvertAxeToSarifCall(axeScanResultsWithViolations);
-        setupConvertAxeToHtmlCall(axeScanResultsWithViolations);
-
-        setupSaveSarifReportCall();
-        setupSaveHtmlReportCall();
+        setupGenerateReportsCall(axeScanResultsWithViolations);
+        setupSaveAllReportsCall();
         setupUpdateScanRunResultCall(getScanResultWithViolations());
 
         await runner.run();
@@ -282,10 +295,8 @@ describe(Runner, () => {
                 return passedAxeScanResults;
             })
             .verifiable();
-        setupConvertAxeToSarifCall(passedAxeScanResults);
-        setupConvertAxeToHtmlCall(passedAxeScanResults);
-        setupSaveSarifReportCall();
-        setupSaveHtmlReportCall();
+        setupGenerateReportsCall(passedAxeScanResults);
+        setupSaveAllReportsCall();
         const scanResult = getScanResultWithNoViolations();
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
@@ -321,10 +332,8 @@ describe(Runner, () => {
                 return unscannableAxeScanResults;
             })
             .verifiable();
-        setupConvertAxeToSarifCall(unscannableAxeScanResults);
-        setupConvertAxeToHtmlCall(passedAxeScanResults);
-        setupSaveSarifReportCall();
-        setupSaveHtmlReportCall();
+        setupGenerateReportsCall(unscannableAxeScanResults);
+        setupSaveAllReportsCall();
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
@@ -333,18 +342,8 @@ describe(Runner, () => {
         loggerMock.verifyAll();
     });
 
-    function setupConvertAxeToSarifCall(scanResults: AxeScanResults): void {
-        convertAxeToSarifMock
-            .setup(c => c(scanResults.results))
-            .returns(() => parsedSarifContent)
-            .verifiable();
-    }
-
-    function setupConvertAxeToHtmlCall(scanResults: AxeScanResults): void {
-        convertAxeToHtmlMock
-            .setup(c => c(scanResults.results))
-            .returns(() => htmlContent)
-            .verifiable();
+    function setupGenerateReportsCall(scanResults: AxeScanResults): void {
+        reportGeneratorMock.setup(r => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
     function setupReadScanResultCall(scanResult: any): void {
@@ -365,17 +364,15 @@ describe(Runner, () => {
         return result;
     }
 
-    function setupSaveSarifReportCall(): void {
-        pageScanRunReportServiceMock
-            .setup(async s => s.saveReport(sarifReportGuid, JSON.stringify(parsedSarifContent)))
-            .returns(async () => Promise.resolve(sarifBlobFilePath))
-            .verifiable();
+    function setupSaveAllReportsCall(): void {
+        setupSaveReportCall(generatedReport1, onDemandReport1.href);
+        setupSaveReportCall(generatedReport2, onDemandReport2.href);
     }
 
-    function setupSaveHtmlReportCall(): void {
+    function setupSaveReportCall(report: GeneratedReport, href: string): void {
         pageScanRunReportServiceMock
-            .setup(async s => s.saveReport(htmlReportGuid, htmlContent))
-            .returns(async () => Promise.resolve(htmlBlobFilePath))
+            .setup(async s => s.saveReport(report.id, report.content))
+            .returns(async () => Promise.resolve(href))
             .verifiable();
     }
 
@@ -410,18 +407,7 @@ describe(Runner, () => {
             state: 'pass',
         };
 
-        result.reports = [
-            {
-                format: 'sarif',
-                href: sarifBlobFilePath,
-                reportId: sarifReportGuid,
-            },
-            {
-                format: 'html',
-                href: htmlBlobFilePath,
-                reportId: htmlReportGuid,
-            },
-        ];
+        result.reports = [onDemandReport1, onDemandReport2];
 
         return result;
     }
@@ -438,18 +424,7 @@ describe(Runner, () => {
             state: 'fail',
         };
 
-        result.reports = [
-            {
-                format: 'sarif',
-                href: sarifBlobFilePath,
-                reportId: sarifReportGuid,
-            },
-            {
-                format: 'html',
-                href: htmlBlobFilePath,
-                reportId: htmlReportGuid,
-            },
-        ];
+        result.reports = [onDemandReport1, onDemandReport2];
 
         return result;
     }
@@ -477,8 +452,8 @@ describe(Runner, () => {
         scanRequestTime.setSeconds(scanRequestTime.getSeconds() - queueTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock
             .setup(g => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)
@@ -486,8 +461,8 @@ describe(Runner, () => {
         scanCompleteTime.setSeconds(scanCompleteTime.getSeconds() + executionTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => sarifReportGuid);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => htmlReportGuid);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock
             .setup(g => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)

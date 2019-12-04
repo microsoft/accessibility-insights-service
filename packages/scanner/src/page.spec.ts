@@ -11,12 +11,27 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import { WebDriver } from 'service-library';
-import { log } from 'util';
-import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
+import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
 
+class PuppeteerBrowserMock {
+    public static readonly browserVersion = 'browser version';
+
+    constructor(public readonly puppeteerPage: PuppeteerPageMock) {}
+
+    public async newPage(): Promise<Puppeteer.Page> {
+        return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
+    }
+
+    public async version(): Promise<string> {
+        return Promise.resolve(PuppeteerBrowserMock.browserVersion);
+    }
+}
+
 class PuppeteerPageMock {
+    public static readonly pageTitle = 'page title';
+
     private readonly expectedViewPortSetting: Puppeteer.Viewport = {
         width: 1920,
         height: 1080,
@@ -51,13 +66,9 @@ class PuppeteerPageMock {
         expect(viewport).toEqual(this.expectedViewPortSetting);
         this.viewPortSettingInvoked = true;
     }
-}
 
-class PuppeteerBrowserMock {
-    constructor(public readonly puppeteerPage: PuppeteerPageMock) {}
-
-    public async newPage(): Promise<Puppeteer.Page> {
-        return Promise.resolve(<Puppeteer.Page>(<unknown>this.puppeteerPage));
+    public async title(): Promise<string> {
+        return PuppeteerPageMock.pageTitle;
     }
 }
 
@@ -144,7 +155,11 @@ describe('Page', () => {
     it('should analyze accessibility issues, even if error thrown when waitForNavigation', async () => {
         const scanUrl = 'https://www.example.com';
         const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
-        const scanResults: AxeScanResults = { results: axeResults };
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
+        };
         const response: Puppeteer.Response = makeResponse({});
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
@@ -246,6 +261,8 @@ describe('Page', () => {
         const scanResults: AxeScanResults = {
             results: axeResults,
             scannedUrl: redirectToUrl,
+            pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
         };
         const response: Puppeteer.Response = makeResponse({ withRedirect: true });
         gotoMock

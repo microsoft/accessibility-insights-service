@@ -12,6 +12,7 @@ export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 @injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
+    public browser: Puppeteer.Browser;
 
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
@@ -20,7 +21,8 @@ export class Page {
     ) {}
 
     public async create(): Promise<void> {
-        this.puppeteerPage = await this.browserFactory().newPage();
+        this.browser = this.browserFactory();
+        this.puppeteerPage = await this.browser.newPage();
     }
 
     public async enableBypassCSP(): Promise<void> {
@@ -87,18 +89,20 @@ export class Page {
         }
 
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
-        const scanResults = await axePuppeteer.analyze();
+        const axeResults = await axePuppeteer.analyze();
+
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            pageTitle: await this.puppeteerPage.title(),
+            browserSpec: await this.browser.version(),
+        };
 
         if (response.request().redirectChain().length > 0) {
-            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${scanResults.url}`);
-
-            return {
-                results: scanResults,
-                scannedUrl: scanResults.url,
-            };
-        } else {
-            return { results: scanResults };
+            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${axeResults.url}`);
+            scanResults.scannedUrl = axeResults.url;
         }
+
+        return scanResults;
     }
 
     public async close(): Promise<void> {
