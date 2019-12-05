@@ -17,3 +17,4 @@ export { client } from './storage/client';
 export { cosmosContainerClientTypes } from './ioc-types';
 export { BlobContentDownloadResponse, BlobStorageClient } from './azure-blob/blob-storage-client';
 export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
+export { StorageContainerSASUrlProvider } from './azure-blob/container-sas-url-provider';

@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
-import { Message } from 'azure-services';
+// tslint:disable-next-line: no-submodule-imports
+import { OutputFile } from '@azure/batch/esm/models';
+import { Message, StorageContainerSASUrlProvider } from 'azure-services';
 import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
@@ -17,12 +19,15 @@ import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
 export class Batch {
+    public static readonly batchLogContainerName = 'batch-logs';
+
     public constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
         @inject(webApiJobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @inject(Logger) private readonly logger: Logger,
+        @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
     ) {}
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
@@ -142,11 +147,18 @@ export class Batch {
         const jobTasks: Map<string, JobTask> = new Map();
         const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
         const maxTaskDurationInMinutes = (await this.getTaskConfig()).taskTimeoutInMinutes;
+        let sasUrl: string;
+
+        try {
+            sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
+        } catch (error) {
+            this.logger.logError(`encounter error while generating sas url ${error}`);
+        }
 
         messages.forEach(message => {
             const jobTask = new JobTask(message.messageId);
             jobTasks.set(jobTask.id, jobTask);
-            const taskAddParameter = this.getTaskAddParameter(jobTask.id, message.messageText, maxTaskDurationInMinutes);
+            const taskAddParameter = this.getTaskAddParameter(jobId, jobTask.id, message.messageText, maxTaskDurationInMinutes, sasUrl);
             taskAddParameters.push(taskAddParameter);
         });
 
@@ -166,20 +178,42 @@ export class Batch {
     }
 
     private getTaskAddParameter(
+        jobId: string,
         jobTaskId: string,
         messageText: string,
         maxTaskDurationInMinutes: number,
+        sasUrl: string,
     ): BatchServiceModels.TaskAddParameter {
         const message = JSON.parse(messageText);
         const commandLine = this.runnerTaskConfig.getCommandLine(message);
-
-        return {
+        const taskParameter: BatchServiceModels.TaskAddParameter = {
             id: jobTaskId,
             commandLine: commandLine,
             resourceFiles: this.runnerTaskConfig.getResourceFiles(),
             environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
             constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
         };
+
+        if (!_.isNil(sasUrl)) {
+            taskParameter.outputFiles = this.getOutFilesConfiguration(jobId, jobTaskId, sasUrl);
+        }
+
+        return taskParameter;
+    }
+
+    private getOutFilesConfiguration(jobId: string, jobTaskId: string, sasUrl: string): OutputFile[] {
+        return [
+            {
+                filePattern: `../std*.txt`,
+                destination: {
+                    container: {
+                        path: `${jobId}/${jobTaskId}`,
+                        containerUrl: sasUrl,
+                    },
+                },
+                uploadOptions: { uploadCondition: 'taskcompletion' },
+            },
+        ];
     }
 
     private async getTaskConfig(): Promise<TaskRuntimeConfig> {
