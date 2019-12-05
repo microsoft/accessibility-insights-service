@@ -103,7 +103,7 @@ To debug packages locally follow the generic steps below.
 
 ## Telemetry and Monitoring
 
-During deployment, an azure dashboard will be created to track service metrics and telemetry data.
+During deployment, the Azure dashboard will be created to track service metrics and telemetry data.
 
 -   Documentation for all telemetry events sent can be found [here](packages/logger/README.md)
 -   Documentation for the azure dashboard created upon deployment can be found [here](packages/resource-deployment/templates/README.md)

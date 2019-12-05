@@ -3,12 +3,15 @@
 import { Message, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { BatchPoolMeasurements, Logger } from 'logger';
+import { cloneDeepWith } from 'lodash';
+import { Logger } from 'logger';
 import * as moment from 'moment';
-
+import { BatchPoolLoadSnapshotProvider } from 'service-library';
+import { StorageDocument } from 'storage-documents';
 import { Batch } from '../batch/batch';
+import { BatchConfig } from '../batch/batch-config';
 import { JobTaskState } from '../batch/job-task';
-import { PoolLoadGenerator } from '../batch/pool-load-generator';
+import { PoolLoadGenerator, PoolLoadSnapshot } from '../batch/pool-load-generator';
 
 @injectable()
 export class Worker {
@@ -22,6 +25,8 @@ export class Worker {
         @inject(Batch) private readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
+        @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
+        @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
     ) {}
@@ -32,14 +37,16 @@ export class Worker {
         // tslint:disable-next-line: no-constant-condition
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-            const tasksIncrementCount = await this.poolLoadGenerator.getTasksIncrementCount(poolMetricsInfo);
+            const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
+            await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
             let tasksQueuedCount = 0;
-            if (tasksIncrementCount > 0) {
-                const scanMessages = await this.getMessages(tasksIncrementCount);
+            if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
+                const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-                    if (poolMetricsInfo.load.activeTasks === 0 && poolMetricsInfo.load.runningTasks === 1) {
+                    // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
+                    if (poolMetricsInfo.load.runningTasks + poolMetricsInfo.load.activeTasks === 1) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
                         break;
                     }
@@ -50,30 +57,21 @@ export class Worker {
                 }
             }
 
+            // set the actual number of tasks added to the batch pool to process
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
-            const runningTasks = poolMetricsInfo.load.runningTasks;
-            const samplingIntervalInSeconds = this.poolLoadGenerator.samplingIntervalInSeconds;
-            const maxParallelTasks = poolMetricsInfo.maxTasksPerPool;
-
-            this.logger.logInfo('Pool load statistics', {
-                activeTasks: poolMetricsInfo.load.activeTasks.toString(),
-                runningTasks: runningTasks.toString(),
-                requestedTasksToAddPerInterval: tasksIncrementCount.toString(),
-                tasksAddedPerInterval: tasksQueuedCount.toString(),
-                samplingIntervalInSeconds: samplingIntervalInSeconds.toString(),
-                processingSpeedTasksPerMinute: this.poolLoadGenerator.processingSpeedPerMinute.toString(),
-                activeToRunningTasksRatio: this.poolLoadGenerator.activeToRunningTasksRatio.toString(),
-            });
-
-            const batchPoolMeasurements: BatchPoolMeasurements = {
-                runningTasks,
-                samplingIntervalInSeconds,
-                maxParallelTasks,
-            };
+            this.logger.logInfo(
+                'Pool load statistics',
+                // tslint:disable-next-line: no-unsafe-any
+                cloneDeepWith(poolLoadSnapshot, value => (value !== undefined ? value.toString() : 'undefined')),
+            );
 
             // tslint:disable-next-line: no-null-keyword
-            this.logger.trackEvent('BatchPoolStats', null, batchPoolMeasurements);
+            this.logger.trackEvent('BatchPoolStats', null, {
+                runningTasks: poolMetricsInfo.load.runningTasks,
+                samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
+                maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
+            });
 
             if (this.runOnce) {
                 break;
@@ -118,9 +116,18 @@ export class Worker {
         return jobQueuedTasks.length;
     }
 
+    private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
+        await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot({
+            // tslint:disable-next-line: no-object-literal-type-assertion
+            ...({} as StorageDocument),
+            batchAccountName: this.batchConfig.accountName,
+            ...poolLoadSnapshot,
+        });
+    }
+
     private async init(): Promise<void> {
         this.jobManagerConfig = await this.serviceConfig.getConfigValue('jobManagerConfig');
-        this.jobId = await this.batch.createJobIfNotExists(process.env.AZ_BATCH_JOB_ID, true);
+        this.jobId = await this.batch.createJobIfNotExists(this.batchConfig.jobId, true);
         this.restartAfterTime = moment()
             .add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour')
             .toDate();
