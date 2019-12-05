@@ -74,6 +74,10 @@ export function registerAzureServicesToContainer(container: Container, credentia
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
+    container.bind(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'systemData');
+    });
+
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);

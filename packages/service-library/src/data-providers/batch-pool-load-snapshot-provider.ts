@@ -7,7 +7,7 @@ import { BatchPoolLoadSnapshot, ItemType, PartitionKey } from 'storage-documents
 @injectable()
 export class BatchPoolLoadSnapshotProvider {
     public constructor(
-        @inject(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)
+        @inject(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 

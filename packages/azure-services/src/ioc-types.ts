@@ -31,4 +31,5 @@ export const cosmosContainerClientTypes = {
     OnDemandScanBatchRequestsCosmosContainerClient: 'onDemandScanBatchRequestsCosmosContainerClient',
     OnDemandScanRunsCosmosContainerClient: 'onDemandScanRunsCosmosContainerClient',
     OnDemandScanRequestsCosmosContainerClient: 'onDemandScanRequestsCosmosContainerClient',
+    OnDemandSystemDataCosmosContainerClient: 'onDemandSystemDataCosmosContainerClient',
 };
