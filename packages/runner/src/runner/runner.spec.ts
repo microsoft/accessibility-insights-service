@@ -4,11 +4,11 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { IssueScanResults, ItemType, PageScanResult, RunState, WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../../test-utilities/mockable-logger';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { CrawlerTask } from '../tasks/crawler-task';
@@ -31,7 +31,7 @@ let dataFactoryTaskMock: IMock<DataFactoryTask>;
 let websiteStateUpdaterTaskMock: IMock<WebsiteStateUpdaterTask>;
 let scanMetadataConfig: IMock<ScanMetadataConfig>;
 let pageStateUpdaterTaskMock: IMock<PageStateUpdaterTask>;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 
 const scanMetadata: ScanMetadata = {
     websiteId: 'websiteId',
@@ -123,7 +123,7 @@ beforeEach(() => {
     websiteStateUpdaterTaskMock = Mock.ofType<WebsiteStateUpdaterTask>();
     scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
     pageStateUpdaterTaskMock = Mock.ofType(PageStateUpdaterTask);
-    loggerMock = Mock.ofType(Logger);
+    loggerMock = Mock.ofType(MockableLogger);
 
     scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
 });

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { createCrawlResult, getNotAllowedUrls } from '../../test-utilities/common-mock-methods';
+import { MockableLogger } from '../../test-utilities/mockable-logger';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
 import { CrawlerConnectOptions, CrawlerLaunchOptions, CrawlerRequestOptions } from './hc-crawler-types';
 
@@ -12,11 +12,11 @@ describe('LaunchOptionsFactory', () => {
     let baseUrl: string;
     let testSubject: HCCrawlerOptionsFactory;
     let browserWSEndPoint: string;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let processMock: IMock<typeof process>;
     beforeEach(() => {
         baseUrl = 'https://www.microsoft.com';
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         processMock = Mock.ofInstance(process);
         testSubject = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object);
         browserWSEndPoint = 'ws://localhost';

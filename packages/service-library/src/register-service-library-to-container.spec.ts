@@ -7,6 +7,7 @@ import { Container } from 'inversify';
 import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { registerServiceLibraryToContainer } from './register-service-library-to-container';
+import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver/web-driver';
 
 // tslint:disable: no-unsafe-any no-any
@@ -17,7 +18,7 @@ describe(registerServiceLibraryToContainer, () => {
 
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
 
         container.bind(Logger).toConstantValue(loggerMock.object);
     });

@@ -9,16 +9,17 @@ import { IMock, Mock } from 'typemoq';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { registerScannerToContainer } from './register-scanner-to-container';
 import { Scanner } from './scanner';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-unsafe-any no-any
 
 describe(registerScannerToContainer, () => {
     let container: Container;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
 
         container.bind(Logger).toConstantValue(loggerMock.object);
     });

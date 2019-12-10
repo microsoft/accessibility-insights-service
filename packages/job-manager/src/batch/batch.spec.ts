@@ -7,10 +7,10 @@ import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/
 import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
 import { Message } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
-import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { BatchServiceClientProvider } from '../job-manager-ioc-types';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
 import { JobTaskState } from './job-task';
@@ -40,7 +40,7 @@ describe(Batch, () => {
     let taskMock: IMock<Task>;
     let poolMock: IMock<Pool>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let taskEnvSettings: BatchServiceModels.EnvironmentSetting[];
     let taskResourceFiles: BatchServiceModels.ResourceFile[];
     let serviceConfigMock: IMock<ServiceConfiguration>;
@@ -77,7 +77,7 @@ describe(Batch, () => {
             pool: poolMock.object,
         } as unknown) as BatchServiceClient;
 
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
 
         batch = new Batch(serviceConfigMock.object, config, runnerTaskConfigMock.object, batchServiceClientProviderStub, loggerMock.object);

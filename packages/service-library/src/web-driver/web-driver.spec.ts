@@ -3,9 +3,9 @@
 // tslint:disable:no-import-side-effect no-unsafe-any
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
@@ -22,7 +22,7 @@ class PuppeteerBrowserMock {
 
 let testSubject: WebDriver;
 let puppeteer: typeof Puppeteer;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 
@@ -36,7 +36,7 @@ beforeEach(() => {
 
     puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
-    loggerMock = Mock.ofType(Logger);
+    loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(loggerMock.object, puppeteer);
 });
 

@@ -3,9 +3,9 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { ScanRequest, WebSite } from '../request-type/website';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SeedSource } from './seed-source';
 
 // tslint:disable: no-unsafe-any
@@ -13,7 +13,7 @@ import { SeedSource } from './seed-source';
 describe('Scan Source', () => {
     let testSubject: SeedSource;
     let cosmosContainerClientMock: IMock<CosmosContainerClient>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
@@ -21,7 +21,7 @@ describe('Scan Source', () => {
             .setup(async o => o.readAllDocument<ScanRequest>())
             .returns(async () => Promise.resolve(getScanRequestTestData()))
             .verifiable(Times.once());
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         testSubject = new SeedSource(cosmosContainerClientMock.object, loggerMock.object);
     });
     it('get websites to scan', async () => {

@@ -12,6 +12,8 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
+export class MockableLogger extends Logger {}
+
 interface QueryDataProviderStubResponse<T> {
     continuationToken: string;
     data: T[];
@@ -41,7 +43,7 @@ class QueryDataProviderStub<T> {
 }
 
 describe('Dispatcher', () => {
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let scanRequestSenderMock: IMock<OnDemandScanRequestSender>;
     let dispatcher: OnDemandDispatcher;
@@ -56,7 +58,7 @@ describe('Dispatcher', () => {
             .setup(async s => s.getConfigValue('queueConfig'))
             .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
 
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         pageScanRequestProvider = Mock.ofType(PageScanRequestProvider);
         scanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
         dispatcher = new OnDemandDispatcher(

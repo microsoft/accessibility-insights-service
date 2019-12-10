@@ -6,8 +6,8 @@ import * as _ from 'lodash';
 import * as utils from 'util';
 
 import { AvailabilityTelemetry } from './availablity-telemetry';
-import { LogLevel } from './logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
+import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { BaseTelemetryMeasurements, TelemetryMeasurements } from './logger-event-measurements';

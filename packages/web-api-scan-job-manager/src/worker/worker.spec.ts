@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Message, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
-import { BatchPoolMeasurements, Logger } from 'logger';
+import { BatchPoolMeasurements } from 'logger';
 import { BatchPoolLoadSnapshotProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -13,8 +13,8 @@ import { Batch } from '../batch/batch';
 import { BatchConfig } from '../batch/batch-config';
 import { JobTask, JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
-
 // tslint:disable: no-unsafe-any
 
 let worker: Worker;
@@ -22,7 +22,7 @@ let batchMock: IMock<Batch>;
 let queueMock: IMock<Queue>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
 const batchConfig: BatchConfig = {
     accountName: 'batch-account-name',
@@ -59,7 +59,7 @@ describe(Worker, () => {
         queueMock = Mock.ofType(Queue);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
 
         queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');

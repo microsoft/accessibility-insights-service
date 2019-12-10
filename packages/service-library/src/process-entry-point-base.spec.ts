@@ -8,6 +8,7 @@ import * as _ from 'lodash';
 import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ProcessEntryPointBase } from './process-entry-point-base';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-unsafe-any no-any
 
@@ -38,7 +39,7 @@ describe(ProcessEntryPointBase, () => {
     let containerMock: IMock<Container>;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         dotEnvConfigStub = {};
         containerMock = Mock.ofType(Container);
 
