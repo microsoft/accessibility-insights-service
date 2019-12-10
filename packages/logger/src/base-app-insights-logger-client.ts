@@ -5,7 +5,7 @@ import { Contracts, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { BaseTelemetryProperties, TelemetryMeasurements } from '.';
 import { AvailabilityTelemetry } from './availablity-telemetry';
-import { LogLevel } from './base-logger';
+import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 

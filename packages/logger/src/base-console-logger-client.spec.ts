@@ -7,7 +7,7 @@ import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
 
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
-import { LogLevel } from './base-logger';
+import { LogLevel } from './logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ScanTaskStartedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
