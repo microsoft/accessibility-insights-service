@@ -23,3 +23,4 @@ export { Batch } from './azure-batch/batch';
 export { BatchConfig } from './azure-batch/batch-config';
 export * from './azure-batch/pool-load-generator';
 export * from './azure-batch/job-task';
+export { BatchServiceClientProvider } from './ioc-types';

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
-import { Message } from 'azure-services';
+import { AzureServicesIocTypes, BatchServiceClientProvider, Message } from 'azure-services';
 import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
@@ -9,7 +9,6 @@ import * as _ from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { VError } from 'verror';
-import { BatchServiceClientProvider, jobManagerIocTypeNames } from '../job-manager-ioc-types';
 import { BatchConfig } from './batch-config';
 import { JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
@@ -21,7 +20,7 @@ export class Batch {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
-        @inject(jobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
+        @inject(AzureServicesIocTypes.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
