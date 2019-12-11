@@ -6,12 +6,12 @@ import 'reflect-metadata';
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
 import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
-import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider } from '../ioc-types';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
 import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
@@ -43,7 +43,7 @@ describe(Batch, () => {
     let poolMock: IMock<Pool>;
     let storageContainerSASUrlProviderMock: IMock<StorageContainerSASUrlProvider>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let batchTaskParameterProvider: IMock<BatchTaskParameterProvider>;
     let maxTaskDurationInMinutes: number;
@@ -81,7 +81,7 @@ describe(Batch, () => {
             task: taskMock.object,
             pool: poolMock.object,
         } as unknown) as BatchServiceClient;
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
         storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);
         storageContainerSASUrlProviderMock
