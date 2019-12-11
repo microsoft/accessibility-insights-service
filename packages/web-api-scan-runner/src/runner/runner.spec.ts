@@ -21,6 +21,8 @@ import { Runner } from './runner';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
+class MockableLogger extends Logger {}
+
 describe(Runner, () => {
     let runner: Runner;
     let browser: Browser;
@@ -28,7 +30,7 @@ describe(Runner, () => {
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let scannerTaskMock: IMock<ScannerTask>;
     let scanMetadataConfig: IMock<ScanMetadataConfig>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let reportGeneratorMock: IMock<ReportGenerator>;
@@ -125,7 +127,7 @@ describe(Runner, () => {
     beforeEach(() => {
         browser = <Browser>{};
         webDriverTaskMock = Mock.ofType(WebDriverTask, MockBehavior.Strict);
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
         scannerTaskMock = Mock.ofType<ScannerTask>();

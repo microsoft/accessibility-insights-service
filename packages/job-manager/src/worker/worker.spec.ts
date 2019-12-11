@@ -5,11 +5,11 @@ import 'reflect-metadata';
 import { Message, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
 
 // tslint:disable: no-unsafe-any
@@ -19,7 +19,7 @@ let batchMock: IMock<Batch>;
 let queueMock: IMock<Queue>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 const activeToRunningTasksRatioDefault = 2;
 const addTasksIntervalInSecondsDefault = 1;
 
@@ -30,7 +30,7 @@ describe(Worker, () => {
         queueMock = Mock.ofType(Queue);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
 
         queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
 

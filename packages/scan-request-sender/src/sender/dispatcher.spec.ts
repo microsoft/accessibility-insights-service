@@ -5,10 +5,10 @@ import 'reflect-metadata';
 
 import { CosmosOperationResponse } from 'azure-services';
 import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { WebsitePage } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Dispatcher } from './dispatcher';
 import { ScanRequestSender } from './scan-request-sender';
 
@@ -41,7 +41,7 @@ class QueryDataProviderStub<T> {
 }
 
 describe('Dispatcher', () => {
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let pageDocumentProviderMock: IMock<PageDocumentProvider>;
     let scanRequestSenderMock: IMock<ScanRequestSender>;
     let dispatcher: Dispatcher;
@@ -56,7 +56,7 @@ describe('Dispatcher', () => {
             .setup(async s => s.getConfigValue('queueConfig'))
             .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
 
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         pageDocumentProviderMock = Mock.ofType(PageDocumentProvider);
         scanRequestSenderMock = Mock.ofType(ScanRequestSender, MockBehavior.Strict);
         dispatcher = new Dispatcher(

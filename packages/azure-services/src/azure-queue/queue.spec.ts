@@ -5,9 +5,9 @@ import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
 import { ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { Message } from './message';
 import { Queue } from './queue';
@@ -21,7 +21,7 @@ describe(Queue, () => {
     let queueURLProviderMock: IMock<QueueURLProvider>;
     let messagesURLProviderMock: IMock<MessagesURLProvider>;
     let messageIdURLProviderMock: IMock<MessageIdURLProvider>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let serviceURLMock: IMock<ServiceURL>;
     let queueURLMock: IMock<QueueURL>;
     let deadQueueURLMock: IMock<QueueURL>;
@@ -45,7 +45,7 @@ describe(Queue, () => {
         messagesURLMock = Mock.ofType<MessagesURL>();
         deadMessagesURLMock = Mock.ofType<MessagesURL>();
         messageIdUrlMock = Mock.ofType<MessageIdURL>();
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
             .setup(async s => s.getConfigValue('queueConfig'))
