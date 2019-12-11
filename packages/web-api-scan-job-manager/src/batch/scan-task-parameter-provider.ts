@@ -5,13 +5,13 @@ import { BatchTaskParameterProvider } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import * as moment from 'moment';
-import { RunnerTaskConfig } from './runner-task-config';
+import { ScannerBatchTaskConfig } from './scanner-batch-task-config';
 
 @injectable()
 export class ScanTaskParameterProvider implements BatchTaskParameterProvider {
     public constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
+        @inject(ScannerBatchTaskConfig) private readonly runnerTaskConfig: ScannerBatchTaskConfig,
     ) {}
 
     public async getTaskParameter(taskId: string, messageText: string): Promise<BatchServiceModels.TaskAddParameter> {

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Message, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
@@ -8,10 +8,6 @@ import { Logger } from 'logger';
 import * as moment from 'moment';
 import { BatchPoolLoadSnapshotProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
-import { Batch } from '../batch/batch';
-import { BatchConfig } from '../batch/batch-config';
-import { JobTaskState } from '../batch/job-task';
-import { PoolLoadGenerator, PoolLoadSnapshot } from '../batch/pool-load-generator';
 
 @injectable()
 export class Worker {

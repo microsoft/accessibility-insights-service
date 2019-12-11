@@ -2,17 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Message, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoadGenerator, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { BatchPoolMeasurements, Logger } from 'logger';
 import { BatchPoolLoadSnapshotProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { Batch } from '../batch/batch';
-import { BatchConfig } from '../batch/batch-config';
-import { JobTask, JobTaskState } from '../batch/job-task';
-import { PoolLoadGenerator } from '../batch/pool-load-generator';
 import { Worker } from './worker';
 
 // tslint:disable: no-unsafe-any

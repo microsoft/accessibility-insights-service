@@ -9,6 +9,7 @@ import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, S
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
+import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
@@ -90,6 +91,10 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .inSingletonScope();
     container.bind(Queue).toSelf();
 
+    container
+        .bind(Batch)
+        .toSelf()
+        .inSingletonScope();
     container
         .bind(BatchConfig)
         .toSelf()

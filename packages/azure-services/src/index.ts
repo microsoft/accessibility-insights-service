@@ -19,3 +19,7 @@ export { BlobContentDownloadResponse, BlobStorageClient } from './azure-blob/blo
 export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
 export { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 export { BatchTaskParameterProvider } from './azure-batch/batch-task-parameter-provider';
+export { Batch } from './azure-batch/batch';
+export { BatchConfig } from './azure-batch/batch-config';
+export * from './azure-batch/pool-load-generator';
+export * from './azure-batch/job-task';

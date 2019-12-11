@@ -165,7 +165,7 @@ describe(Batch, () => {
             const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
             let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
 
-            for (let i = 0; i < messagesCount; i += 1) {
+            for (let i = 0; i < messagesCount; i++) {
                 const message = {
                     messageText: '{}',
                     messageId: `message-id-${i}`,

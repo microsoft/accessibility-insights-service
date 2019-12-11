@@ -3,12 +3,10 @@
 import 'reflect-metadata';
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { CredentialsProvider, Queue, SecretProvider } from 'azure-services';
+import { Batch, CredentialsProvider, Queue, SecretProvider } from 'azure-services';
+import { ServiceConfiguration } from 'common';
 import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
-import { Batch } from './batch/batch';
-
-import { ServiceConfiguration } from 'common';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
 import { BatchServiceClientProvider, webApiJobManagerIocTypeNames } from './web-api-job-manager-ioc-types';
 
@@ -20,7 +18,6 @@ describe(setupWebApiScanJobManagerContainer, () => {
 
     beforeEach(() => {
         process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
-
         process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
         process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
@@ -38,7 +35,6 @@ describe(setupWebApiScanJobManagerContainer, () => {
             container = setupWebApiScanJobManagerContainer();
             credentialsProviderMock = Mock.ofType(CredentialsProvider);
             credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
-
             credentialsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
 
             stubBinding(container, SecretProvider, secretProviderMock.object);
