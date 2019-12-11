@@ -9,6 +9,7 @@ import { ConsoleLoggerClient } from './console-logger-client';
 import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
 import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
 import { ContextAwareLogger } from './context-aware-logger';
+import { GlobalLogger } from './global-logger';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 
@@ -34,7 +35,7 @@ export function registerLoggerToContainer(container: Container): void {
             const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
 
-            return new Logger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
         })
         .inSingletonScope();
 

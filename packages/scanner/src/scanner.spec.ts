@@ -4,8 +4,8 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -16,12 +16,12 @@ describe('Scanner', () => {
     let pageMock: IMock<Page>;
     let scanner: Scanner;
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         axeBrowserFactoryMock = Mock.ofType();
         pageMock = Mock.ofType2<Page>(Page, [axeBrowserFactoryMock.object]);
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         scanner = new Scanner(pageMock.object, loggerMock.object);
     });
 

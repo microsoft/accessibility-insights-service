@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ContextAwareLogger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
 
 // tslint:disable: no-any no-unsafe-any
@@ -42,20 +42,20 @@ describe(WebController, () => {
     let context: Context;
     let testSubject: TestableWebController;
     const invocationId = 'test-invocation-id';
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
 
-        testSubject = new TestableWebController(contextAwareLoggerMock.object);
+        testSubject = new TestableWebController(loggerMock.object);
 
-        contextAwareLoggerMock.setup(l => l.setup(It.isAny())).returns(() => Promise.resolve(undefined));
+        loggerMock.setup(l => l.setup(It.isAny())).returns(() => Promise.resolve(undefined));
     });
 
     it('should setup context aware logger', async () => {
-        contextAwareLoggerMock.reset();
-        contextAwareLoggerMock
+        loggerMock.reset();
+        loggerMock
             .setup(l =>
                 l.setup(
                     It.isValue({
@@ -69,7 +69,7 @@ describe(WebController, () => {
             .verifiable(Times.once());
 
         await testSubject.invoke(context, 'valid');
-        contextAwareLoggerMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('should handle request if request is valid', async () => {
