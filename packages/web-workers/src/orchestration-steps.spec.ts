@@ -7,7 +7,6 @@ import 'reflect-metadata';
 import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { isNil } from 'lodash';
-import { ContextAwareLogger } from 'logger';
 import * as moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -20,6 +19,7 @@ import {
 } from './controllers/activity-request-data';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
 import { GeneratorExecutor } from './test-utilities/generator-executor';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable:no-object-literal-type-assertion no-unsafe-any no-any no-null-keyword
 
@@ -38,7 +38,7 @@ describe(OrchestrationStepsImpl, () => {
         maxScanWaitTimeInSeconds: 20,
         urlToScan: 'https://www.bing.com',
     };
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     const scanUrl = 'https://www.bing.com';
     const scanId = 'test-scan-id';
     let currentUtcDateTime: Date;
@@ -50,7 +50,7 @@ describe(OrchestrationStepsImpl, () => {
         orchestrationContext.setup(oc => oc.isReplaying).returns(() => true);
         orchestrationContext.setup(oc => oc.currentUtcDateTime).returns(() => currentUtcDateTime);
 
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
 
         context = <IOrchestrationFunctionContext>(<unknown>{
             bindingDefinitions: {},
@@ -64,7 +64,7 @@ describe(OrchestrationStepsImpl, () => {
             df: orchestrationContext.object,
         });
 
-        testSubject = new OrchestrationStepsImpl(context, availabilityTestConfig, contextAwareLoggerMock.object);
+        testSubject = new OrchestrationStepsImpl(context, availabilityTestConfig, loggerMock.object);
     });
 
     afterEach(() => {

@@ -5,7 +5,7 @@
 import { AvailabilityTestConfig } from 'common';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
 import { isNil } from 'lodash';
-import { ContextAwareLogger, LogLevel } from 'logger';
+import { Logger, LogLevel } from 'logger';
 import * as moment from 'moment';
 import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { ActivityAction } from './contracts/activity-actions';
@@ -44,7 +44,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     constructor(
         private readonly context: IOrchestrationFunctionContext,
         private readonly availabilityTestConfig: AvailabilityTestConfig,
-        private readonly logger: ContextAwareLogger,
+        private readonly logger: Logger,
     ) {}
 
     public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
