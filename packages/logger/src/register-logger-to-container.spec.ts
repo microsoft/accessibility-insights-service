@@ -10,6 +10,8 @@ import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
 import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
+import { ContextAwareLogger } from './context-aware-logger';
+import { GlobalLogger } from './global-logger';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
@@ -44,6 +46,7 @@ describe(registerGlobalLoggerToContainer, () => {
         const logger = container.get(Logger);
 
         verifySingletonDependencyResolution(Logger);
+        expect(logger instanceof GlobalLogger).toBeTruthy();
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter(c => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
@@ -77,6 +80,7 @@ describe(registerContextAwareLoggerToContainer, () => {
         registerContextAwareLoggerToContainer(container);
 
         const logger = container.get(Logger);
+        expect(logger instanceof ContextAwareLogger).toBeTruthy();
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);

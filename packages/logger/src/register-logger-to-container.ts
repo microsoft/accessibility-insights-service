@@ -29,6 +29,8 @@ export function registerGlobalLoggerToContainer(container: Container): void {
 
 export function registerContextAwareLoggerToContainer(container: Container): void {
     registerLoggerDependenciesToContainer(container);
+    container.bind(ContextAwareAppInsightsLoggerClient).toSelf();
+    container.bind(ContextAwareConsoleLoggerClient).toSelf();
 
     container.bind(Logger).toDynamicValue(context => {
         const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
