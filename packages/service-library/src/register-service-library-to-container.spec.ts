@@ -14,7 +14,7 @@ import { WebDriver } from './web-driver/web-driver';
 
 describe(registerServiceLibraryToContainer, () => {
     let container: Container;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });

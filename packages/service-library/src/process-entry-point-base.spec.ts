@@ -34,7 +34,7 @@ describe(ProcessEntryPointBase, () => {
     }
 
     let testSubject: TestEntryPoint;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let dotEnvConfigStub: DotenvConfigOutput;
     let containerMock: IMock<Container>;
 

@@ -4,9 +4,9 @@
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';
-import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import { CosmosClientProvider } from '../ioc-types';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { CosmosClientWrapper } from './cosmos-client-wrapper';
 import { CosmosDocument } from './cosmos-document';
@@ -20,7 +20,7 @@ describe('CosmosClientWrapper', () => {
     let itemsMock: IMock<cosmos.Items>;
     let itemMock: IMock<cosmos.Item>;
     let queryIteratorMock: IMock<cosmos.QueryIterator<any>>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     const partitionKey = 'partitionKey';
     const dbName = 'stub db';
     const collectionName = 'stub collection';
@@ -30,7 +30,7 @@ describe('CosmosClientWrapper', () => {
         setupCosmosMocks();
         setupVerifiableGetDbCall();
         setupVerifiableGetCollectionCall();
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         testSubject = new CosmosClientWrapper(cosmosClientProviderStub, loggerMock.object);
     });
 

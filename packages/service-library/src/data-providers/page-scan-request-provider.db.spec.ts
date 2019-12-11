@@ -3,10 +3,10 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
-import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 import { Mock } from 'typemoq';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
 describe('PageScanRequestProvider.Db', () => {
@@ -26,7 +26,7 @@ describe('PageScanRequestProvider.Db', () => {
         }, 30000);
 
         beforeEach(() => {
-            const loggerMock = Mock.ofType<Logger>();
+            const loggerMock = Mock.ofType<MockableLogger>();
             const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,
