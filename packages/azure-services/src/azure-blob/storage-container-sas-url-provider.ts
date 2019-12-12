@@ -1,12 +1,11 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
 import { ContainerSASPermissions, generateBlobSASQueryParameters, SASProtocol, SharedKeyCredential } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import * as moment from 'moment';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { secretNames } from '../key-vault/secret-names';
 import { SecretProvider } from '../key-vault/secret-provider';
-
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 
 @injectable()
 export class StorageContainerSASUrlProvider {

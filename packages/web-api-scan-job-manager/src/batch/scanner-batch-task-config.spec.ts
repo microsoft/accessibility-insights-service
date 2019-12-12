@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import { BatchServiceModels } from '@azure/batch';
-import { RunnerTaskConfig } from './runner-task-config';
+import { ScannerBatchTaskConfig } from './scanner-batch-task-config';
 // tslint:disable: no-object-literal-type-assertion
 
-describe(RunnerTaskConfig, () => {
-    let testSubject: RunnerTaskConfig;
+describe(ScannerBatchTaskConfig, () => {
+    let testSubject: ScannerBatchTaskConfig;
     let processStub: NodeJS.Process;
     const appInsightsKey = 'app insights key1';
     const keyVaultUrl = 'key vault url1';
@@ -22,7 +22,7 @@ describe(RunnerTaskConfig, () => {
             } as NodeJS.ProcessEnv,
         } as NodeJS.Process;
 
-        testSubject = new RunnerTaskConfig(processStub);
+        testSubject = new ScannerBatchTaskConfig(processStub);
     });
 
     it('builds command line', () => {

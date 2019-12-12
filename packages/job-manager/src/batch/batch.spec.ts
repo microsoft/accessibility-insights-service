@@ -5,11 +5,10 @@ import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
 import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
-import { Message } from 'azure-services';
+import { BatchServiceClientProvider, Message } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { BatchServiceClientProvider } from '../job-manager-ioc-types';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';

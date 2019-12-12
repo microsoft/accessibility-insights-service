@@ -2,15 +2,14 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Queue } from 'azure-services';
+import { Batch, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Container } from 'inversify';
-import { Batch } from './batch/batch';
-import { setupJobManagerContainer } from './setup-job-manager-container';
+import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
 
 // tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
 
-describe(setupJobManagerContainer, () => {
+describe(setupWebApiScanJobManagerContainer, () => {
     const batchAccountUrl = 'test-batch-account-url';
     const batchAccountName = 'test-batch-account-name';
 
@@ -22,7 +21,7 @@ describe(setupJobManagerContainer, () => {
     });
 
     it('resolves service config to singleton value', () => {
-        const container = setupJobManagerContainer();
+        const container = setupWebApiScanJobManagerContainer();
         const serviceConfig = container.get(ServiceConfiguration);
 
         expect(serviceConfig).toBeInstanceOf(ServiceConfiguration);
@@ -30,7 +29,7 @@ describe(setupJobManagerContainer, () => {
     });
 
     it('verify JobManager dependencies resolution', () => {
-        const container = setupJobManagerContainer();
+        const container = setupWebApiScanJobManagerContainer();
 
         verifyNonSingletonDependencyResolution(container, Queue);
         verifySingletonDependencyResolution(container, Batch);
