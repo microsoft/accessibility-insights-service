@@ -67,7 +67,11 @@
         {
             "name": "web-api-client",
             "path": "../packages/web-api-client"
-        }，
+        },
+        {
+            "name": "cli",
+            "path": "../packages/cli"
+        },
         {
             "name": "root",
             "path": "../"
