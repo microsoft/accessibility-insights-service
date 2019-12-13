@@ -14,7 +14,7 @@ export class ScanRunner {
         try {
             const browser = await this.webDriver.launch();
 
-            return this.scanner.scan(url);
+            return await this.scanner.scan(url);
         } catch (error) {
             console.log(`Page scan run failed.`, { error });
             throw error;

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import { Container } from 'inversify';
+import { isEmpty } from 'lodash';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { ReportGenerator } from './report-generator';
@@ -9,6 +10,7 @@ import { ScanArguments } from './scan-arguments';
 import { ScanRunner } from './scan-runner';
 
 export class CliEntryPoint extends ProcessEntryPointBase {
+    public domainNameRegExp = new RegExp('^(?:http://|www.|https://)([^/]+)', 'igm');
     private scanArguments: ScanArguments;
 
     public setScanArguments(scanArguments: ScanArguments): void {
@@ -26,14 +28,18 @@ export class CliEntryPoint extends ProcessEntryPointBase {
         const axeResults = await scanRunner.scan(this.scanArguments.url);
         console.log(`accessibility issue count ${JSON.stringify(axeResults.results.violations.length)}`);
         const reportContent = reportGenerator.generateReport(axeResults);
-        this.saveHtmlReport(axeResults.pageTitle, reportContent);
+        const fileName = `./${this.domainNameRegExp.exec(this.scanArguments.url)[1]}.html`;
+
+        this.saveHtmlReport(fileName, reportContent);
     }
 
-    private saveHtmlReport(pageTitle: string, content: string): void {
+    private saveHtmlReport(fileName: string, content: string): void {
         // tslint:disable-next-line: non-literal-fs-path
-        fs.writeFile(`${pageTitle}.html`, content, err => {
-            if (err !== undefined) {
-                throw err;
+        fs.writeFile(fileName, content, err => {
+            if (!isEmpty(err)) {
+                console.log(`error while saving file ${err}`);
+            } else {
+                console.log(`scan report saved ${fileName}`);
             }
         });
     }

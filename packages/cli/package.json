@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "tsc && echo",
+        "build": "webpack --config ./webpack.config.js --colors",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
@@ -23,6 +23,8 @@
         "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
         "@types/request-promise": "^4.1.44",
+        "copy-webpack-plugin": "^4.6.0",
+        "fork-ts-checker-webpack-plugin": "^0.5.2",
         "jest": "^24.9.0",
         "jest-circus": "^24.9.0",
         "jest-junit": "^8.0.0",
@@ -31,9 +33,12 @@
         "tslint": "^5.12.1",
         "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
-        "typescript": "^3.6.2"
+        "typescript": "^3.6.2",
+        "webpack": "^4.29.4",
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
+        "dotenv": "^6.2.0",
         "common": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
@@ -42,10 +47,13 @@
         "yargs": "^13.2.1",
         "scanner": "1.0.0",
         "logger": "1.0.0",
-        "accessibility-insights-report": "^0.1.0"
+        "accessibility-insights-report": "^0.1.0",
+        "puppeteer": "^1.12.2",
+        "axe-core": "3.3.2",
+        "axe-puppeteer": "^1.0.0"
     },
     "bin": {
-        "ais": "./dist/ais-cli.js"
+        "ais": "./dist/ai-scan.js"
     },
     "engines": {
         "node": ">=10"

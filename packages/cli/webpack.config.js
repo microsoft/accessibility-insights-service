@@ -11,11 +11,11 @@ const copyWebpackPlugin = require('copy-webpack-plugin');
 module.exports = env => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
-
     return {
         devtool: 'cheap-source-map',
+        externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer'],
         entry: {
-            ['ais-cli']: path.resolve('./src/index.ts'),
+            ['ai-scan']: path.resolve('./src/index.ts'),
         },
         mode: 'development',
         module: {
