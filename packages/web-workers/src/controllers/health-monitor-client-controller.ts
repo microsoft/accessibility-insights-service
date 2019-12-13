@@ -44,7 +44,6 @@ export class HealthMonitorClientController extends WebController {
         this.contextAwareLogger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
 
         const activityCallback = this.activityCallbacks[activityRequestData.activityName];
-
         const result = await activityCallback(activityRequestData.data);
         this.contextAwareLogger.logInfo(
             `${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`,
@@ -59,7 +58,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse>> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.postScanUrl(data.scanUrl, data.priority);
 
         return response.toJSON();
@@ -67,7 +65,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly getScanResult = async (data: GetScanResultData): Promise<SerializableResponse<ScanResultResponse>> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.getScanStatus(data.scanId);
 
         return response.toJSON();
@@ -75,7 +72,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.getScanReport(data.scanId, data.reportId);
         response.body = undefined;
 
@@ -84,7 +80,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly getHealthStatus = async (): Promise<SerializableResponse> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.checkHealth();
 
         return response.toJSON();
