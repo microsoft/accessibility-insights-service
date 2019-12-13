@@ -3,10 +3,9 @@
 
 import 'reflect-metadata';
 
-// tslint:disable-next-line:no-submodule-imports
+// tslint:disable:no-submodule-imports
+import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-
-import { AvailabilityTestConfig, RestApiConfig } from 'common';
 import { isNil } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import * as moment from 'moment';
@@ -77,7 +76,7 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor(testSubject.callHealthCheckActivity());
+            generatorExecutor = new GeneratorExecutor(testSubject.invokeHealthCheckRestApi());
             activityRequestData = {
                 activityName: ActivityAction.getHealthStatus,
                 data: undefined,
@@ -118,7 +117,7 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.callSubmitScanRequestActivity(scanUrl));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl));
             activityRequestData = {
                 activityName: ActivityAction.createScanRequest,
                 data: {
@@ -192,7 +191,7 @@ describe(OrchestrationStepsImpl, () => {
         const reportId = 'test-report-id';
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.getScanReport(scanId, reportId));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeGetScanReportRestApi(scanId, reportId));
             activityRequestData = {
                 activityName: ActivityAction.getScanReport,
                 data: {
@@ -238,7 +237,7 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.verifyScanSubmitted(scanId));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.validateScanRequestSubmissionState(scanId));
             activityRequestData = {
                 activityName: ActivityAction.getScanResult,
                 data: {
@@ -320,7 +319,7 @@ describe(OrchestrationStepsImpl, () => {
         let nextTime3: moment.Moment;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanCompletion(scanId));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.waitForScanRequestCompletion(scanId));
 
             availabilityTestConfig.scanWaitIntervalInSeconds = 10;
             availabilityTestConfig.maxScanWaitTimeInSeconds = 10 * 2 + 1;

@@ -67,13 +67,13 @@ class OrchestrationStepsStub implements OrchestrationSteps {
 
     constructor(private readonly availabilityTestConfig: AvailabilityTestConfig) {}
 
-    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse> {
+    public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse> {
         this.orchestratorStepsCallCount.callHealthCheckCount += 1;
         this.throwExceptionIfExpected();
         yield undefined;
     }
 
-    public *getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
+    public *invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.getScanReportCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -82,7 +82,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *waitForScanCompletion(scanId: string): Generator<any, ScanRunResultResponse, any> {
+    public *waitForScanRequestCompletion(scanId: string): Generator<any, ScanRunResultResponse, any> {
         this.orchestratorStepsCallCount.waitForScanCompletionCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -103,7 +103,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield scanRunResultResponse;
     }
 
-    public *verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void> {
+    public *validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.verifyScanSubmittedCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -111,7 +111,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *callSubmitScanRequestActivity(url: string): Generator<any, string, any> {
+    public *invokeSubmitScanRequestRestApi(url: string): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
