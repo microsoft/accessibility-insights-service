@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { TelemetryClient } from 'applicationinsights';
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
 
@@ -38,10 +38,49 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
     });
 
     describe('setup', () => {
+        let rootLoggerSetup: boolean;
+
+        beforeEach(() => {
+            rootLoggerSetup = false;
+            rootLoggerClient.setup(r => r.setup()).callback(() => (rootLoggerSetup = true));
+            rootLoggerClient.setup(r => r.isSetup()).returns(() => rootLoggerSetup);
+        });
+
         it('should create telemetry client with base properties', async () => {
             await testSubject.setup({ source: 'foo' });
 
             expect(testSubject.getTelemetryClient().commonProperties).toEqual({ source: 'foo' });
+        });
+
+        it('isSetup returns correct values', async () => {
+            expect(testSubject.isSetup()).toBe(false);
+
+            await testSubject.setup({});
+
+            expect(testSubject.isSetup()).toBe(true);
+        });
+
+        it('should only initialize rootLoggerClient once', async () => {
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
+
+            rootLoggerClient
+                .setup(r => r.setup())
+                .callback(() => (rootLoggerSetup = true))
+                .verifiable(Times.once());
+
+            await testSubject.setup({});
+            await siblingTestSubject.setup({});
+
+            rootLoggerClient.verifyAll();
+        });
+
+        it('isSetup works as expected with shared rootLoggerClient', async () => {
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
+
+            await testSubject.setup({});
+
+            expect(testSubject.isSetup()).toBe(true);
+            expect(siblingTestSubject.isSetup()).toBe(false);
         });
     });
 

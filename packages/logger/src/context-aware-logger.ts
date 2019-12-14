@@ -5,7 +5,6 @@ import { injectable } from 'inversify';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 
-@injectable()
 export class ContextAwareLogger extends Logger {
     constructor(loggerClients: LoggerClient[], currentProcess: typeof process) {
         super(loggerClients, currentProcess);

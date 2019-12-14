@@ -6,7 +6,6 @@ import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 
-@injectable()
 export class GlobalLogger extends Logger {
     constructor(loggerClients: LoggerClient[], currentProcess: typeof process) {
         super(loggerClients, currentProcess);

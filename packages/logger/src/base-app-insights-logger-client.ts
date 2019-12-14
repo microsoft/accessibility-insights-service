@@ -15,6 +15,8 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
 
     public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
 
+    public abstract isSetup(): boolean;
+
     public trackMetric(name: string, value: number): void {
         this.telemetryClient.trackMetric({
             name: name,
