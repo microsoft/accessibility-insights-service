@@ -29,7 +29,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
 
         const batchPoolLoadSnapshotDocument = {
             ...batchPoolLoadSnapshot,
-            id: `${batchPoolLoadSnapshot.batchAccountName}.${batchPoolLoadSnapshot.poolId}`,
+            id: `${batchPoolLoadSnapshot.batchAccountName}.${'urlScanPool'}`,
             itemType: ItemType.batchPoolLoadSnapshot,
             partitionKey: PartitionKey.batchPoolLoadSnapshots,
         };
@@ -40,7 +40,10 @@ describe(BatchPoolLoadSnapshotProvider, () => {
             .callback(async d => (document = d))
             .verifiable(Times.once());
 
-        await batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot(<BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot));
+        await batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot(
+            <BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot),
+            'urlScanPool',
+        );
 
         expect(document).toEqual(batchPoolLoadSnapshotDocument);
         cosmosContainerClientMock.verifyAll();
@@ -48,8 +51,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
 
     it('read batch pool load snapshot from a Cosmos DB', async () => {
         const batchAccountName = 'batchAccountName-1';
-        const poolId = 'poolId-1';
-        const id = `${batchAccountName}.${poolId}`;
+        const id = `${batchAccountName}.${'urlScanPool'}`;
 
         const batchPoolLoadSnapshot = {
             id: id,
@@ -62,7 +64,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
             )
             .verifiable(Times.once());
 
-        const batchPoolLoadSnapshotResult = await batchPoolLoadSnapshotProvider.readBatchPoolLoadSnapshot(batchAccountName, poolId);
+        const batchPoolLoadSnapshotResult = await batchPoolLoadSnapshotProvider.readBatchPoolLoadSnapshot(batchAccountName, 'urlScanPool');
 
         expect(batchPoolLoadSnapshotResult).toEqual(batchPoolLoadSnapshot);
         cosmosContainerClientMock.verifyAll();

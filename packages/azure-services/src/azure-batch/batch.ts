@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports
 import { BatchServiceModels } from '@azure/batch';
-import { OutputFile } from '@azure/batch/esm/models';
+import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
@@ -28,6 +28,25 @@ export class Batch {
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public async getTaskRunIntervals(maxResults: number = 10): Promise<number[]> {
+        const jobIdPrefix = this.config.jobId.split(':')[0];
+        const jobListFilterClause = `id startswith '${jobIdPrefix}' and executionInfo/poolId eq '${this.config.poolId}'`;
+        const jobs = await this.getJobList({ filter: jobListFilterClause, maxResults: maxResults });
+
+        const taskIdPrefix = this.config.taskId.split(':')[0];
+        const taskListFilterClause = `id startswith '${taskIdPrefix}'`;
+        const tasks = [];
+        await Promise.all(
+            jobs.map(async job => {
+                // select only job schedule related task
+                const jobTasks = await this.getTaskList(job.id, { filter: taskListFilterClause, maxResults: 1 });
+                tasks.push(...jobTasks);
+            }),
+        );
+
+        return [];
+    }
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
         const maxTasksPerPool = await this.getMaxTasksPerPool();
@@ -119,23 +138,49 @@ export class Batch {
 
     private async getActiveJobIds(): Promise<string[]> {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
-        const options = {
-            jobListOptions: { filter: filterClause },
+        const jobs = await this.getJobList({ filter: filterClause });
+
+        return jobs.map(i => i.id);
+    }
+
+    private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
+        const jobs = [];
+        const listOptions = {
+            jobListOptions: options,
         };
 
-        const jobs = [];
         const client = await this.batchClientProvider();
-        const jobListResponse = await client.job.list(options);
+        const jobListResponse = await client.job.list(listOptions);
         jobs.push(...jobListResponse.values());
 
         let odatanextLink = jobListResponse.odatanextLink;
         while (odatanextLink !== undefined) {
-            const jobListResponseNext = await client.job.listNext(odatanextLink, options);
+            const jobListResponseNext = await client.job.listNext(odatanextLink, listOptions);
             jobs.push(...jobListResponseNext.values());
             odatanextLink = jobListResponseNext.odatanextLink;
         }
 
-        return jobs.map(i => i.id);
+        return jobs;
+    }
+
+    private async getTaskList(jobId: string, options?: TaskListOptions): Promise<CloudTask[]> {
+        const tasks = [];
+        const listOptions = {
+            taskListOptions: options,
+        };
+
+        const client = await this.batchClientProvider();
+        const taskListResponse = await client.task.list(jobId, options);
+        tasks.push(...taskListResponse.values());
+
+        let odatanextLink = taskListResponse.odatanextLink;
+        while (odatanextLink !== undefined) {
+            const jobListResponseNext = await client.task.listNext(odatanextLink, listOptions);
+            tasks.push(...jobListResponseNext.values());
+            odatanextLink = jobListResponseNext.odatanextLink;
+        }
+
+        return tasks;
     }
 
     private async addTaskCollection(jobId: string, messages: Message[]): Promise<JobTask[]> {

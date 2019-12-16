@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { CosmosOperationResponse } from 'azure-services';
 import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import { PageScanRequestProvider } from 'service-library';
+import { BatchPoolLoadSnapshotProvider, PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
@@ -43,12 +43,13 @@ class QueryDataProviderStub<T> {
 }
 
 describe('Dispatcher', () => {
+    const maxQueueSize = 10;
     let loggerMock: IMock<MockableLogger>;
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let scanRequestSenderMock: IMock<OnDemandScanRequestSender>;
     let dispatcher: OnDemandDispatcher;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    const maxQueueSize = 10;
+    let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
     let currentQueueSize: number;
 
     beforeEach(() => {
@@ -61,11 +62,13 @@ describe('Dispatcher', () => {
         loggerMock = Mock.ofType(MockableLogger);
         pageScanRequestProvider = Mock.ofType(PageScanRequestProvider);
         scanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
+        batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
         dispatcher = new OnDemandDispatcher(
             pageScanRequestProvider.object,
-            loggerMock.object,
             scanRequestSenderMock.object,
+            batchPoolLoadSnapshotProviderMock.object,
             serviceConfigMock.object,
+            loggerMock.object,
         );
     });
 

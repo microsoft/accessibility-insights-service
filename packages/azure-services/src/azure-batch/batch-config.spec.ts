@@ -12,11 +12,13 @@ describe(BatchConfig, () => {
         process.env.AZ_BATCH_ACCOUNT_URL = 'test account url';
         process.env.AZ_BATCH_POOL_ID = 'pool id';
         process.env.AZ_BATCH_JOB_ID = 'job id';
+        process.env.AZ_BATCH_TASK_ID = 'task id';
         batchConfig = new BatchConfig();
 
         expect(batchConfig.accountName).toEqual(process.env.AZ_BATCH_ACCOUNT_NAME);
         expect(batchConfig.accountUrl).toEqual(process.env.AZ_BATCH_ACCOUNT_URL);
         expect(batchConfig.poolId).toEqual(process.env.AZ_BATCH_POOL_ID);
         expect(batchConfig.jobId).toEqual(process.env.AZ_BATCH_JOB_ID);
+        expect(batchConfig.taskId).toEqual(process.env.AZ_BATCH_TASK_ID);
     });
 });

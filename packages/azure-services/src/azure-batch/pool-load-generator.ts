@@ -64,7 +64,9 @@ export class PoolLoadGenerator {
 
     private async calculateTasksIncrementCount(poolMetricsInfo: PoolMetricsInfo): Promise<void> {
         if (this.lastTasksIncrementCount === undefined) {
-            return this.calculateInitialTaskIncrementCount(poolMetricsInfo);
+            await this.calculateInitialTaskIncrementCount(poolMetricsInfo);
+
+            return;
         }
 
         this.processingSpeed = this.lastTasksIncrementCount + this.lastPoolLoad.activeTasks - poolMetricsInfo.load.activeTasks;

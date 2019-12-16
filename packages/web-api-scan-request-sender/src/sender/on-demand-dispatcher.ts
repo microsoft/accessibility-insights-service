@@ -4,39 +4,46 @@ import { client, CosmosOperationResponse } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { PageScanRequestProvider } from 'service-library';
+import { BatchPoolLoadSnapshotProvider, PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 @injectable()
 export class OnDemandDispatcher {
+    private defaultQueueSize: number;
+
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
-        @inject(Logger) private readonly logger: Logger,
         @inject(OnDemandScanRequestSender) private readonly sender: OnDemandScanRequestSender,
+        @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async dispatchOnDemandScanRequests(): Promise<void> {
-        const configQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
-        this.logger.logInfo(`[Sender] Maximum queue size configuration set to ${configQueueSize}`);
+        const configQueueSize = 0;
+        this.defaultQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
+        this.logger.logInfo(`[Sender] The configured target queue size is ${configQueueSize}`);
+
         let currentQueueSize = await this.sender.getCurrentQueueSize();
-        this.logger.logInfo(`[Sender] Current queue size is ${currentQueueSize}`);
+        this.logger.logInfo(`[Sender] The current queue size is ${currentQueueSize}`);
+
         if (currentQueueSize >= configQueueSize) {
-            this.logger.logWarn('[Sender] Unable to queue new scan request as queue already reached to its maximum capacity');
+            this.logger.logWarn('[Sender] Skipping updating the queue. The queue has reached its projected capacity');
 
             return;
         }
 
         let itemCount;
         let continuationToken;
-
         do {
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
                     continuationToken,
                 );
+
                 client.ensureSuccessStatusCode(response);
+
                 continuationToken = response.continuationToken;
                 itemCount = response.item.length;
                 if (itemCount > 0) {
@@ -56,5 +63,18 @@ export class OnDemandDispatcher {
         }
 
         this.logger.logInfo(`[Sender] Sending scan requests completed. Queue size ${currentQueueSize}`);
+    }
+
+    private async getTargetQueueSize(): Promise<number> {
+        const poolLoadSnapshot = await this.batchPoolLoadSnapshotProvider.readBatchPoolLoadSnapshot(
+            process.env.AZ_BATCH_ACCOUNT_NAME,
+            'urlScanPool',
+        );
+
+        if (poolLoadSnapshot === undefined) {
+            return this.defaultQueueSize;
+        }
+
+        return poolLoadSnapshot.tasksIncrementCountPerInterval;
     }
 }

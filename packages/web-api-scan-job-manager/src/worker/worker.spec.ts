@@ -329,6 +329,7 @@ function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): vo
                 It.is(d => {
                     return _.isEqual(document, d);
                 }),
+                'urlScanPool',
             ),
         )
         .verifiable(times);
