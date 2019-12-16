@@ -108,7 +108,10 @@
             "./packages/web-workers/test-results",
             "./packages/web-api-client/dist",
             "./packages/web-api-client/node_modules",
-            "./packages/web-api-client/test-results"
+            "./packages/web-api-client/test-results",
+            "./packages/functional-tests/dist",
+            "./packages/functional-tests/node_modules",
+            "./packages/functional-tests/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [
