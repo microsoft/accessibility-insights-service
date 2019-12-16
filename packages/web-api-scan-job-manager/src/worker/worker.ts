@@ -113,15 +113,12 @@ export class Worker {
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
-        await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot(
-            {
-                // tslint:disable-next-line: no-object-literal-type-assertion
-                ...({} as StorageDocument),
-                batchAccountName: this.batchConfig.accountName,
-                ...poolLoadSnapshot,
-            },
-            'urlScanPool',
-        );
+        await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot({
+            // tslint:disable-next-line: no-object-literal-type-assertion
+            ...({} as StorageDocument),
+            batchAccountName: this.batchConfig.accountName,
+            ...poolLoadSnapshot,
+        });
     }
 
     private async init(): Promise<void> {

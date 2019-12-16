@@ -4,8 +4,6 @@ import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-service
 import { inject, injectable } from 'inversify';
 import { BatchPoolLoadSnapshot, ItemType, PartitionKey } from 'storage-documents';
 
-export declare type BatchPoolAlias = 'urlScanPool';
-
 @injectable()
 export class BatchPoolLoadSnapshotProvider {
     public constructor(
@@ -13,16 +11,16 @@ export class BatchPoolLoadSnapshotProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async writeBatchPoolLoadSnapshot(batchPoolLoadSnapshot: BatchPoolLoadSnapshot, batchPoolAlias: BatchPoolAlias): Promise<void> {
-        batchPoolLoadSnapshot.id = this.getDocumentId(batchPoolLoadSnapshot.batchAccountName, batchPoolAlias);
+    public async writeBatchPoolLoadSnapshot(batchPoolLoadSnapshot: BatchPoolLoadSnapshot): Promise<void> {
+        batchPoolLoadSnapshot.id = this.getDocumentId(batchPoolLoadSnapshot.batchAccountName, batchPoolLoadSnapshot.poolId);
         batchPoolLoadSnapshot.itemType = ItemType.batchPoolLoadSnapshot;
         batchPoolLoadSnapshot.partitionKey = PartitionKey.batchPoolLoadSnapshots;
 
         await this.cosmosContainerClient.writeDocument(batchPoolLoadSnapshot);
     }
 
-    public async readBatchPoolLoadSnapshot(batchAccountName: string, batchPoolAlias: BatchPoolAlias): Promise<BatchPoolLoadSnapshot> {
-        const documentId = this.getDocumentId(batchAccountName, batchPoolAlias);
+    public async readBatchPoolLoadSnapshot(batchAccountName: string, poolId: string): Promise<BatchPoolLoadSnapshot> {
+        const documentId = this.getDocumentId(batchAccountName, poolId);
         const response = await this.cosmosContainerClient.readDocument<BatchPoolLoadSnapshot>(
             documentId,
             PartitionKey.batchPoolLoadSnapshots,
@@ -31,7 +29,7 @@ export class BatchPoolLoadSnapshotProvider {
         return response.item;
     }
 
-    private getDocumentId(batchAccountName: string, batchPoolAlias: string): string {
-        return `${batchAccountName}.${batchPoolAlias}`;
+    private getDocumentId(batchAccountName: string, poolId: string): string {
+        return `${batchAccountName}.${poolId}`;
     }
 }
