@@ -3,35 +3,43 @@
 
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
-import { ConsoleLoggerClient, Logger, loggerTypes, registerLoggerToContainer } from 'logger';
-import { registerScannerToContainer } from 'scanner';
-import { registerServiceLibraryToContainer } from 'service-library';
-import { ReportGenerator } from './report-generator';
-import { ScanRunner } from './scan-runner';
-
+import { Browser } from 'puppeteer';
+import { CommandRunner } from './command-runner';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { ReportGenerator } from './report/report-generator';
+import { AIScanner } from './scanner/ai-scanner';
+import { ScanRunner } from './scanner/scan-runner';
+import { WebDriver } from './web-driver/web-driver';
 export function setupCliContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
-    registerLoggerToContainer(container);
-    registerScannerToContainer(container);
     container
         .bind(ScanRunner)
         .toSelf()
         .inSingletonScope();
-    container.unbind(Logger);
     container
-        .bind(Logger)
-        .toDynamicValue(context => {
-            const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
-
-            return new Logger([consoleLoggerClient], context.container.get(loggerTypes.Process));
-        })
+        .bind(AIScanner)
+        .toSelf()
         .inSingletonScope();
-    registerServiceLibraryToContainer(container);
     container.bind('ReporterFactory').toConstantValue(reporterFactory);
     container
         .bind(ReportGenerator)
         .toSelf()
         .inSingletonScope();
+    container
+        .bind(CommandRunner)
+        .toSelf()
+        .inSingletonScope();
+
+    container
+        .bind<AxePuppeteerFactory>(AxePuppeteerFactory)
+        .toSelf()
+        .inSingletonScope();
+
+    container.bind<inversify.interfaces.Factory<Browser>>('Factory<Browser>').toFactory<Browser>(context => {
+        return () => {
+            return context.container.get<WebDriver>(WebDriver).browser;
+        };
+    });
 
     return container;
 }

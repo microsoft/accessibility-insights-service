@@ -2,5 +2,5 @@
 // Licensed under the MIT License.
 export interface ScanArguments {
     url: string;
-    maxDepth: number;
+    output: string;
 }

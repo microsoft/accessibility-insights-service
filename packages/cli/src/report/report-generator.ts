@@ -1,6 +1,6 @@
 import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
-import { AxeScanResults } from 'scanner';
+import { AxeScanResults } from '../scanner/axe-scan-results';
 
 @injectable()
 export class ReportGenerator {

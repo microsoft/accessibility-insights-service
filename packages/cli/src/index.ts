@@ -3,22 +3,21 @@
 import 'reflect-metadata';
 import * as yargs from 'yargs';
 import { CliEntryPoint } from './cli-entry-point';
-import { ScanArguments } from './scan-arguments';
+import { ScanArguments } from './scanner/scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
 
 (async () => {
-    const argv = (yargs
-        .usage('Usage: $0 -url url -maxdepth depth')
+    const scanArguments = (yargs
+        .usage('Usage: $0 -url url')
         .options({
-            url: { type: 'string', describe: 'url to scan for accessibility' },
-            maxdepth: { type: 'number', demandOption: false, nargs: 1 },
+            url: { type: 'string', describe: 'url to scan for accessibility', demandOption: true },
+            output: { type: 'string', describe: 'output directory' },
         })
         .describe('help', 'show help').argv as unknown) as ScanArguments;
 
     const cliEntryPoint = new CliEntryPoint(setupCliContainer());
-    cliEntryPoint.setScanArguments(argv);
-    await cliEntryPoint.start();
+    await cliEntryPoint.runScan(scanArguments);
 })().catch(error => {
-    console.log('Exception thrown in runner: ', error);
+    console.log('Exception thrown in scanner: ', error);
     process.exit(1);
 });

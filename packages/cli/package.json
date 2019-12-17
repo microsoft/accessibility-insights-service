@@ -1,5 +1,5 @@
 {
-    "name": "ais-cli",
+    "name": "ai-scan",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
@@ -10,8 +10,13 @@
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
         "test": "jest --coverage --colors"
     },
+    "files": [
+        "dist/",
+        "../../LICENSE",
+        "README.md"
+    ],
     "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
-    "main": "dist/index.js",
+    "main": "dist/ai-scan.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
@@ -19,6 +24,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
+        "@types/cli-spinner": "^0.2.0",
         "@types/jest": "^24.0.11",
         "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
@@ -39,23 +45,21 @@
     },
     "dependencies": {
         "dotenv": "^6.2.0",
-        "common": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
         "reflect-metadata": "^0.1.13",
-        "service-library": "1.0.0",
         "yargs": "^13.2.1",
-        "scanner": "1.0.0",
-        "logger": "1.0.0",
         "accessibility-insights-report": "^0.1.0",
         "puppeteer": "^1.12.2",
         "axe-core": "3.3.2",
-        "axe-puppeteer": "^1.0.0"
+        "axe-puppeteer": "^1.0.0",
+        "filenamify-url": "2.1.0",
+        "cli-spinner": "^0.2.10"
     },
     "bin": {
-        "ais": "./dist/ai-scan.js"
+        "ai-scan": "dist/ai-scan.js"
     },
     "engines": {
-        "node": ">=10"
+        "node": ">=12.6.0"
     }
 }
