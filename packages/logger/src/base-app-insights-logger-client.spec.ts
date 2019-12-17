@@ -41,10 +41,6 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.telemetryClientMock.setup(t => t.config).returns(() => this.appInsightsConfigMock.object as any);
     }
 
-    public isSetup(): boolean {
-        return true;
-    }
-
     public getTelemetryClient(): appInsights.TelemetryClient {
         return this.telemetryClient;
     }

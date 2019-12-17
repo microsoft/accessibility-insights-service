@@ -43,7 +43,7 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         beforeEach(() => {
             rootLoggerSetup = false;
             rootLoggerClient.setup(r => r.setup()).callback(() => (rootLoggerSetup = true));
-            rootLoggerClient.setup(r => r.isSetup()).returns(() => rootLoggerSetup);
+            rootLoggerClient.setup(r => r.isInitialized()).returns(() => rootLoggerSetup);
         });
 
         it('should create telemetry client with base properties', async () => {
@@ -52,12 +52,12 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
             expect(testSubject.getTelemetryClient().commonProperties).toEqual({ source: 'foo' });
         });
 
-        it('isSetup returns correct values', async () => {
-            expect(testSubject.isSetup()).toBe(false);
+        it('isInitialized returns correct values', async () => {
+            expect(testSubject.isInitialized()).toBe(false);
 
             await testSubject.setup({});
 
-            expect(testSubject.isSetup()).toBe(true);
+            expect(testSubject.isInitialized()).toBe(true);
         });
 
         it('should only initialize rootLoggerClient once', async () => {
@@ -74,13 +74,13 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
             rootLoggerClient.verifyAll();
         });
 
-        it('isSetup works as expected with shared rootLoggerClient', async () => {
+        it('isInitialized works as expected with shared rootLoggerClient', async () => {
             const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
 
             await testSubject.setup({});
 
-            expect(testSubject.isSetup()).toBe(true);
-            expect(siblingTestSubject.isSetup()).toBe(false);
+            expect(testSubject.isInitialized()).toBe(true);
+            expect(siblingTestSubject.isInitialized()).toBe(false);
         });
     });
 

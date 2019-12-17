@@ -8,14 +8,11 @@ import { loggerTypes } from './logger-types';
 
 @injectable()
 export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
-    private initialized: boolean;
-
     constructor(
         @inject(loggerTypes.AppInsights) private readonly appInsightsObject: typeof appInsights,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {
         super();
-        this.initialized = false;
     }
 
     public async setup(baseProperties?: { [property: string]: string }): Promise<void> {
@@ -42,10 +39,6 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.telemetryClient = this.appInsightsObject.defaultClient;
 
         this.initialized = true;
-    }
-
-    public isSetup(): boolean {
-        return this.initialized;
     }
 
     protected getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {

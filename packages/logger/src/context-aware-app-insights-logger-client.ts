@@ -20,13 +20,14 @@ export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerCl
             ...baseProperties,
         };
 
-        if (!this.rootLoggerClient.isSetup()) {
+        if (!this.rootLoggerClient.isInitialized()) {
             await this.rootLoggerClient.setup();
         }
+        this.initialized = true;
     }
 
-    public isSetup(): boolean {
-        return this.telemetryClient !== undefined && this.rootLoggerClient.isSetup();
+    public isInitialized(): boolean {
+        return super.isInitialized() && this.rootLoggerClient.isInitialized();
     }
 
     protected getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {

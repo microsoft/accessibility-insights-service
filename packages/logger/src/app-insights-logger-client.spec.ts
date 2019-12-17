@@ -84,12 +84,12 @@ describe(AppInsightsLoggerClient, () => {
             verifyMocks();
         });
 
-        it('isSetup', async () => {
-            expect(testSubject.isSetup()).toBe(false);
+        it('isInitialized', async () => {
+            expect(testSubject.isInitialized()).toBe(false);
 
             await testSubject.setup(null);
 
-            expect(testSubject.isSetup()).toBe(true);
+            expect(testSubject.isInitialized()).toBe(true);
         });
     });
 
