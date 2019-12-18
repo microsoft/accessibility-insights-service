@@ -48,36 +48,6 @@ export abstract class TestGroup {
     // tslint:disable-next-line: no-empty
     protected cleanup(): void {}
 
-    protected expectEqual<T>(expected: T, actual: T, message?: string): void {
-        if (expected !== actual) {
-            throw new Error(`[E2E Validation failed] ${message}`);
-        }
-    }
-
-    protected expectTrue<T>(actual: boolean, message?: string): void {
-        if (actual !== true) {
-            throw new Error(`[E2E Validation failed] ${message}`);
-        }
-    }
-
-    protected expectFalse<T>(actual: boolean, message?: string): void {
-        if (actual !== false) {
-            throw new Error(`[E2E Validation failed] ${message}`);
-        }
-    }
-
-    protected expectToBeDefined<T>(actual: T, message?: string): void {
-        if (isNullOrUndefined(actual)) {
-            throw new Error(`[E2E Validation failed] ${message}`);
-        }
-    }
-
-    protected expectToBeNotDefined<T>(actual: T, message?: string): void {
-        if (!isNullOrUndefined(actual)) {
-            throw new Error(`[E2E Validation failed] ${message}`);
-        }
-    }
-
     protected ensureSuccessStatusCode(response: SerializableResponse): void {
         if (response.statusCode < 200 || response.statusCode >= 300) {
             this.log(`[E2E] Scan request failed`, LogLevel.error, {
@@ -89,12 +59,44 @@ export abstract class TestGroup {
     }
 
     protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse): void {
-        if (!isEqual(HttpResponse.getErrorResponse(webApiErrorCode), response)) {
+        const expectedResponse = HttpResponse.getErrorResponse(webApiErrorCode);
+        if (!isEqual(expectedResponse, response)) {
             this.log(`[E2E] Scan response not as expected`, LogLevel.error, {
-                requestResponse: JSON.stringify(response),
+                expectedResponse: JSON.stringify(response),
+                actualResponse: JSON.stringify(response),
             });
 
             throw new Error(`Request not as expected ${JSON.stringify(response)}`);
+        }
+    }
+
+    protected expectEqual<T>(expected: T, actual: T, message?: string): void {
+        if (expected !== actual) {
+            throw new Error(`[E2E] Validation failed: ${message}`);
+        }
+    }
+
+    protected expectTrue<T>(actual: boolean, message?: string): void {
+        if (actual !== true) {
+            throw new Error(`[E2E] Validation failed: ${message}`);
+        }
+    }
+
+    protected expectFalse<T>(actual: boolean, message?: string): void {
+        if (actual !== false) {
+            throw new Error(`[E2E] Validation failed: ${message}`);
+        }
+    }
+
+    protected expectToBeDefined<T>(actual: T, message?: string): void {
+        if (isNullOrUndefined(actual)) {
+            throw new Error(`[E2E] Validation failed: ${message}`);
+        }
+    }
+
+    protected expectToBeNotDefined<T>(actual: T, message?: string): void {
+        if (!isNullOrUndefined(actual)) {
+            throw new Error(`[E2E] Validation failed: ${message}`);
         }
     }
 
