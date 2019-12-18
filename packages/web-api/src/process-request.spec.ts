@@ -44,14 +44,13 @@ describe(processWebRequest, () => {
             },
         } as unknown) as Context;
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
-        //console.log = jest.fn();
     });
 
     afterEach(() => {
         delete process.env.APPINSIGHTS_INSTRUMENTATIONKEY;
     });
 
-    it('handles request', async () => {
+    it('Returns response from controller', async () => {
         const args = ['arg1', 'arg2'];
 
         const response = (await processWebRequest(context, TestableController, args)) as TestRequestResponse;
@@ -63,9 +62,11 @@ describe(processWebRequest, () => {
         const args = ['arg1', 'arg2'];
 
         const response1 = (await processWebRequest(context, TestableController, args)) as TestRequestResponse;
+        expect(response1.controller).toBeDefined();
         const logger1 = response1.controller.logger;
 
         const response2 = (await processWebRequest(context, TestableController, args)) as TestRequestResponse;
+        expect(response2.controller).toBeDefined();
         const logger2 = response2.controller.logger;
 
         expect(logger1).toBeDefined();
