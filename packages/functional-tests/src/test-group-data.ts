@@ -2,6 +2,17 @@
 // Licensed under the MIT License.
 import { Url } from 'url';
 
+export interface TestGroupData {
+    testGroupName: string;
+    data?: TestContextData;
+}
+
+export interface TestContextData {
+    scanUrl?: string;
+    scanId?: string;
+    reportId?: string;
+}
+
 interface SerializableRequest {
     uri: Url;
     method: string;

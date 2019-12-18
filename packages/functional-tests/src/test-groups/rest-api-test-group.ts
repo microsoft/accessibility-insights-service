@@ -11,6 +11,9 @@ export class RestApiTestGroup extends TestGroup {
         this.registerTestCase(async () => this.testGetScanStatus());
         this.registerTestCase(async () => this.testGetScanStatusWithInvalidGuid());
         this.registerTestCase(async () => this.testGetScanStatusWithInvalidScanId());
+        this.registerTestCase(async () => this.testGetScanReport());
+        this.registerTestCase(async () => this.testGetScanReportWithInvalidGuid());
+        this.registerTestCase(async () => this.testGetScanReportWithInvalidScanId());
     }
 
     private async testHealthCheck(): Promise<void> {
@@ -28,10 +31,10 @@ export class RestApiTestGroup extends TestGroup {
     }
 
     private async testGetScanStatus(): Promise<void> {
-        const response = await this.a11yServiceClient.getScanStatus(this.scanId);
+        const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
 
         this.ensureSuccessStatusCode(response);
-        this.expectEqual(this.scanId, response.body.scanId, 'Get Scan Response should return the scan id that we queried');
+        this.expectEqual(this.testContextData.scanId, response.body.scanId, 'Get Scan Response should return the scan id that we queried');
     }
 
     private async testGetScanStatusWithInvalidGuid(): Promise<void> {
@@ -43,6 +46,25 @@ export class RestApiTestGroup extends TestGroup {
     private async testGetScanStatusWithInvalidScanId(): Promise<void> {
         const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
         const response = await this.a11yServiceClient.getScanStatus(invalidGuid);
+
+        this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response);
+    }
+
+    private async testGetScanReport(): Promise<void> {
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, this.testContextData.reportId);
+
+        this.ensureSuccessStatusCode(response);
+    }
+
+    private async testGetScanReportWithInvalidGuid(): Promise<void> {
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, 'invalid-guid');
+
+        this.expectErrorResponse(WebApiErrorCodes.invalidResourceId, response);
+    }
+
+    private async testGetScanReportWithInvalidScanId(): Promise<void> {
+        const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
 
         this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response);
     }

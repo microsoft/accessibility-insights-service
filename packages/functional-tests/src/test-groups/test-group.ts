@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient } from 'azure-services';
 import { AvailabilityTestConfig, GuidGenerator } from 'common';
+import { isEqual } from 'lodash';
 import { Logger, LogLevel } from 'logger';
+import { HttpResponse, WebApiErrorCode } from 'service-library';
 import { isNullOrUndefined } from 'util';
 import { A11yServiceClient } from 'web-api-client';
 
-import { isEqual } from 'lodash';
-import { HttpResponse, WebApiErrorCode } from 'service-library';
-import { SerializableResponse } from '../request-data';
+import { SerializableResponse, TestContextData } from '../test-group-data';
 
 export abstract class TestGroup {
     private readonly testCases: (() => Promise<void>)[] = [];
 
     constructor(
         protected readonly buildId: string,
-        protected readonly scanId: string,
+        protected readonly testContextData: TestContextData,
         protected readonly testGroupName: string,
         protected readonly a11yServiceClient: A11yServiceClient,
         protected readonly cosmosContainerClient: CosmosContainerClient,
@@ -25,13 +25,15 @@ export abstract class TestGroup {
         protected readonly testConfig: AvailabilityTestConfig,
     ) {}
 
-    public async run(): Promise<void> {
+    public async run(): Promise<TestContextData> {
         this.registerTestCases();
         this.initialize();
         this.testCases.forEach(async test => {
             await test();
         });
         this.cleanup();
+
+        return this.testContextData;
     }
 
     protected abstract registerTestCases(): void;
