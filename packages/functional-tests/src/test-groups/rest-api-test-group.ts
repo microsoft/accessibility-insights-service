@@ -23,13 +23,15 @@ export class RestApiTestGroup extends TestGroup {
         const response = await this.a11yServiceClient.postScanUrl(this.testConfig.urlToScan);
 
         this.ensureSuccessStatusCode(response);
+        this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse');
+        this.expectTrue(this.guidGenerator.isValidV6Guid(response.body[0].scanId), 'Post Scan API should return a valid v6 guid');
     }
 
     private async testGetScanStatus(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.scanId);
 
         this.ensureSuccessStatusCode(response);
-        this.expectEqual(this.scanId, response.body.scanId);
+        this.expectEqual(this.scanId, response.body.scanId, 'Get Scan Response should return the scan id that we queried');
     }
 
     private async testGetScanStatusWithInvalidGuid(): Promise<void> {

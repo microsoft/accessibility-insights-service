@@ -20,6 +20,7 @@ export abstract class TestGroup {
         protected readonly a11yServiceClient: A11yServiceClient,
         protected readonly cosmosContainerClient: CosmosContainerClient,
         protected readonly logger: Logger,
+        protected readonly guidGenerator: GuidGenerator,
         protected readonly defaultLogProps: { [name: string]: string },
         protected readonly testConfig: AvailabilityTestConfig,
     ) {}
@@ -51,6 +52,18 @@ export abstract class TestGroup {
         }
     }
 
+    protected expectTrue<T>(actual: boolean, message?: string): void {
+        if (actual !== true) {
+            throw new Error(`[E2E Validation failed] ${message}`);
+        }
+    }
+
+    protected expectFalse<T>(actual: boolean, message?: string): void {
+        if (actual !== false) {
+            throw new Error(`[E2E Validation failed] ${message}`);
+        }
+    }
+
     protected expectToBeDefined<T>(actual: T, message?: string): void {
         if (isNullOrUndefined(actual)) {
             throw new Error(`[E2E Validation failed] ${message}`);
@@ -75,7 +88,7 @@ export abstract class TestGroup {
 
     protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse): void {
         if (!isEqual(HttpResponse.getErrorResponse(webApiErrorCode), response)) {
-            this.log(`[E2E] Scan request not as expected`, LogLevel.error, {
+            this.log(`[E2E] Scan response not as expected`, LogLevel.error, {
                 requestResponse: JSON.stringify(response),
             });
 
