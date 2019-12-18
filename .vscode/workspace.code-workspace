@@ -71,10 +71,18 @@
         {
             "name": "functional-tests",
             "path": "../packages/functional-tests"
-        },        
+        },
+        {
+            "name": "app-insights-client",
+            "path": "../packages/app-insights-client"
+        },
         {
             "name": "root",
             "path": "../"
+        },
+        {
+            "name": "app-insights-client",
+            "path": "C:/repos/accessibility-insights-service/packages/app-insights-client"
         }
     ],
     "settings": {
