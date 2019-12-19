@@ -111,10 +111,7 @@
             "./packages/web-api-client/test-results",
             "./packages/functional-tests/dist",
             "./packages/functional-tests/node_modules",
-            "./packages/functional-tests/test-results",
-            "./packages/app-insights-client/dist",
-            "./packages/app-insights-client/node_modules",
-            "./packages/app-insights-client/test_results"
+            "./packages/functional-tests/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [
