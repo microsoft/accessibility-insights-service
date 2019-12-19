@@ -3,7 +3,7 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { ApiController } from 'service-library';
+import { ApiController, HealthReport } from 'service-library';
 
 @injectable()
 export class HealthCheckController extends ApiController {
@@ -19,8 +19,17 @@ export class HealthCheckController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         this.logger.trackEvent('HealthCheck');
+
+        const healthReport: HealthReport = {
+            buildVersion: '0.0.0',
+            testRuns: [],
+            testsPassed: 0,
+            testsFailed: 0,
+        };
+
         this.context.res = {
             status: 200, // OK
+            body: healthReport,
         };
     }
 

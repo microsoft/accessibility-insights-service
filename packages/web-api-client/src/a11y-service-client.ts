@@ -3,7 +3,7 @@
 import { injectable } from 'inversify';
 import { Response } from 'request';
 import * as request from 'request-promise';
-import { ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
+import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -59,7 +59,7 @@ export class A11yServiceClient {
         return (await this.signRequest()).get(requestUrl);
     }
 
-    public async checkHealth(): Promise<ResponseWithBodyType> {
+    public async checkHealth(): Promise<ResponseWithBodyType<HealthReport>> {
         const requestUrl: string = `${this.requestBaseUrl}/health`;
 
         return (await this.signRequest()).get(requestUrl);
