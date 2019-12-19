@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name>
+Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name> -a <webApiAdClientId> -p <webApiAdClientSecret> -i <appInsightsApiKey>
 "
     exit 1
 }
@@ -103,7 +103,7 @@ getStorageAccessKey() {
 }
 
 # Read script arguments
-while getopts ":c:r:s:k:a:p:" option; do
+while getopts ":c:r:s:k:a:p:i:" option; do
     case $option in
     c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
@@ -111,12 +111,13 @@ while getopts ":c:r:s:k:a:p:" option; do
     k) keyVault=${OPTARG} ;;
     a) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
+    i) appInsightsApiKey=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $appInsightsApiKey ]]; then
     echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault"
 
     exitWithUsageInfo
@@ -144,3 +145,5 @@ pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
 pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
 getTenantId
 pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
+
+pushSecretToKeyVault "appInsightsApiKey" "$appInsightsApiKey"

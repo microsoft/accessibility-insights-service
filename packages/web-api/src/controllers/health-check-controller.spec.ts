@@ -7,6 +7,7 @@ import { ServiceConfiguration } from 'common';
 import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
+import { ApplicationInsightsClient } from 'azure-services';
 import { HealthCheckController } from './health-check-controller';
 
 describe(HealthCheckController, () => {
@@ -14,6 +15,7 @@ describe(HealthCheckController, () => {
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
+    let appInsightsClientMock: IMock<ApplicationInsightsClient>;
 
     beforeEach(() => {
         context = <Context>(<unknown>{
@@ -29,7 +31,8 @@ describe(HealthCheckController, () => {
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
 
         loggerMock = Mock.ofType<MockableLogger>();
-        healthCheckController = new HealthCheckController(serviceConfigurationMock.object, loggerMock.object);
+        appInsightsClientMock = Mock.ofType<ApplicationInsightsClient>();
+        healthCheckController = new HealthCheckController(serviceConfigurationMock.object, loggerMock.object, appInsightsClientMock.object);
         healthCheckController.context = context;
     });
 

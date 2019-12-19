@@ -107,6 +107,10 @@
                             "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').InstrumentationKey]"
                         },
                         {
+                            "name": "APPINSIGHTS_APPID",
+                            "value": "[reference(concat('microsoft.insights/components/', parameters('appInsightsName')), '2015-05-01').AppId]"
+                        },
+                        {
                             "name": "KEY_VAULT_URL",
                             "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
                         }

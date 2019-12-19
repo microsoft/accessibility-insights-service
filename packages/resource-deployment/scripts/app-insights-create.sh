@@ -9,6 +9,7 @@ set -eo pipefail
 export resourceGroupName
 export subscription
 export appInsightsKey
+export appInsightsApiKey
 
 exitWithUsageInfo() {
     echo "
@@ -49,3 +50,6 @@ echo "Successfully created Application Insights '$appInsightsName'"
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 echo "App Insights key fetched '$appInsightsKey'"
+
+appInsightsApiKey=$(az monitor app-insights api-key create --app "$appInsightsName" --resource-group "$resourceGroupName" --api-key "$appInsightsName-api-key" --read-properties ReadTelemetry --query "apiKey")
+echo "App Insights API Key created '$appInsightsApiKey'"
