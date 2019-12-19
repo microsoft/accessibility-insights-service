@@ -32,7 +32,7 @@ describe(ApplicationInsightsClient, () => {
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId, apiKey, false, requestStub);
+        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub);
     });
 
     afterEach(() => {
@@ -40,33 +40,30 @@ describe(ApplicationInsightsClient, () => {
         postMock.verifyAll();
     });
 
-    describe('verify default options', () => {
-        test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
-            requestStub.defaults = defaultsMock.object;
+    it('verify default options', () => {
+        const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
+        requestStub.defaults = defaultsMock.object;
 
-            defaultsMock
-                .setup(d =>
-                    d({
-                        forever: true,
-                        resolveWithFullResponse: true,
-                        json: true,
-                        simple: throwOnFailure,
-                        headers: {
-                            'X-Api-Key': apiKey,
-                        },
-                    }),
-                )
-                .returns(() => 'some object' as any)
-                .verifiable(Times.once());
+        defaultsMock
+            .setup(d =>
+                d({
+                    forever: true,
+                    resolveWithFullResponse: true,
+                    json: true,
+                    headers: {
+                        'X-Api-Key': apiKey,
+                    },
+                }),
+            )
+            .returns(() => 'some object' as any)
+            .verifiable(Times.once());
 
-            testSubject = new ApplicationInsightsClient(appId, apiKey, throwOnFailure, requestStub);
+        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub);
 
-            defaultsMock.verifyAll();
-        });
+        defaultsMock.verifyAll();
     });
 
-    it('query', async () => {
+    describe('executeQuery', () => {
         const query = 'query string';
         const timespan = 'timespan';
 
@@ -75,18 +72,45 @@ describe(ApplicationInsightsClient, () => {
             query,
             timespan,
         };
-        const options = { body: requestBody };
-        postMock
-            .setup(req => req(`${baseUrl}/query`, options))
-            .returns(async () => Promise.resolve(response))
-            .verifiable(Times.once());
+        const options = {
+            body: requestBody,
+            simple: false,
+        };
+        let requestUrl: string;
 
-        const actualResponse = await testSubject.query(query, timespan);
+        beforeEach(() => {
+            requestUrl = `${baseUrl}/query`;
+        });
 
-        expect(actualResponse).toEqual(response);
+        it('executeQuery', async () => {
+            options.simple = testSubject.throwOnRequestFailure;
+
+            postMock
+                .setup(req => req(requestUrl, options))
+                .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+
+            const actualResponse = await testSubject.executeQuery(query, timespan);
+
+            expect(actualResponse).toEqual(response);
+        });
+
+        test.each([true, false])('executeQuery when throwOnFailure is %o', async (throwOnFailure: boolean) => {
+            testSubject.throwOnRequestFailure = throwOnFailure;
+            options.simple = throwOnFailure;
+
+            postMock
+                .setup(req => req(requestUrl, options))
+                .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+
+            const actualResponse = await testSubject.executeQuery(query, timespan);
+
+            expect(actualResponse).toEqual(response);
+        });
     });
 
-    describe('events', () => {
+    describe('queryEvents', () => {
         const eventType = 'event type';
         const response = { statusCode: 200 };
         let eventsUrl: string;
@@ -95,31 +119,54 @@ describe(ApplicationInsightsClient, () => {
             eventsUrl = `${baseUrl}/events/${eventType}`;
         });
 
-        it('without query parameters', async () => {
-            const options = { qs: undefined as EventsQueryOptions };
+        it('queryEvents without query parameters', async () => {
+            const options = {
+                qs: undefined as EventsQueryOptions,
+                simple: testSubject.throwOnRequestFailure,
+            };
             getMock
                 .setup(req => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
-            const actualResponse = await testSubject.events(eventType);
+            const actualResponse = await testSubject.queryEvents(eventType);
 
             expect(actualResponse).toEqual(response);
         });
 
-        it('with query parameters', async () => {
+        it('queryEvents with query parameters', async () => {
             const eventsQueryOptions: EventsQueryOptions = {
                 timespan: 'timespan',
                 $filter: 'filter',
             };
-            const options = { qs: eventsQueryOptions };
+            const options = {
+                qs: eventsQueryOptions,
+                simple: testSubject.throwOnRequestFailure,
+            };
 
             getMock
                 .setup(req => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
-            const actualResponse = await testSubject.events(eventType, eventsQueryOptions);
+            const actualResponse = await testSubject.queryEvents(eventType, eventsQueryOptions);
+
+            expect(actualResponse).toEqual(response);
+        });
+
+        test.each([true, false])('queryEvents when throwOnFailure is %o', async (throwOnFailure: boolean) => {
+            testSubject.throwOnRequestFailure = throwOnFailure;
+            const options = {
+                qs: undefined as EventsQueryOptions,
+                simple: throwOnFailure,
+            };
+
+            getMock
+                .setup(req => req(eventsUrl, options))
+                .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
+
+            const actualResponse = await testSubject.queryEvents(eventType);
 
             expect(actualResponse).toEqual(response);
         });

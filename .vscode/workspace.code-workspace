@@ -79,10 +79,6 @@
         {
             "name": "root",
             "path": "../"
-        },
-        {
-            "name": "app-insights-client",
-            "path": "C:/repos/accessibility-insights-service/packages/app-insights-client"
         }
     ],
     "settings": {
