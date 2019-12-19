@@ -45,22 +45,22 @@ export abstract class FunctionalTestGroup {
     // tslint:disable-next-line: no-empty
     protected cleanup(): void {}
 
-    protected ensureSuccessStatusCode(response: SerializableResponse): void {
+    protected ensureSuccessStatusCode(response: SerializableResponse, message?: string): void {
         if (response.statusCode < 200 || response.statusCode >= 300) {
             this.log(`[E2E] Scan request failed`, LogLevel.error, {
                 requestResponse: JSON.stringify(response),
+                message,
             });
 
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         }
     }
 
-    protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse): void {
-        const expectedResponse = HttpResponse.getErrorResponse(webApiErrorCode);
-        if (!isEqual(expectedResponse, response)) {
+    protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse, message?: string): void {
+        if (!isEqual(webApiErrorCode.statusCode, response.statusCode)) {
             this.log(`[E2E] Scan response not as expected`, LogLevel.error, {
-                expectedResponse: JSON.stringify(response),
-                actualResponse: JSON.stringify(response),
+                response: JSON.stringify(response),
+                message,
             });
 
             throw new Error(`Request not as expected ${JSON.stringify(response)}`);
