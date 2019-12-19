@@ -44,7 +44,6 @@ describe(processWebRequest, () => {
             },
         } as unknown) as Context;
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
-        //console.log = jest.fn();
     });
 
     afterEach(() => {
