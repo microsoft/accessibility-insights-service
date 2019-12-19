@@ -52,7 +52,7 @@ export abstract class FunctionalTestGroup {
                 message,
             });
 
-            throw new Error(`Request failed ${JSON.stringify(response)}`);
+            throw new Error(`Request failed ${message} ${JSON.stringify(response)}`);
         }
     }
 
@@ -63,7 +63,7 @@ export abstract class FunctionalTestGroup {
                 message,
             });
 
-            throw new Error(`Request not as expected ${JSON.stringify(response)}`);
+            throw new Error(`Request not as expected: ${message} ${JSON.stringify(response)}`);
         }
     }
 
