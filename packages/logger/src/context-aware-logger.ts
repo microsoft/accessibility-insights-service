@@ -1,11 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
 import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 
-@injectable()
 export class ContextAwareLogger extends Logger {
     constructor(loggerClients: LoggerClient[], currentProcess: typeof process) {
         super(loggerClients, currentProcess);

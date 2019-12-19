@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 import { ApiController, HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
 import { Readable } from 'stream';
 import { BodyParser } from './../utils/body-parser';
@@ -16,10 +16,10 @@ export class ScanReportController extends ApiController {
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(Logger) logger: Logger,
         private readonly bodyParser: BodyParser = new BodyParser(),
     ) {
-        super(contextAwareLogger);
+        super(logger);
     }
 
     public async handleRequest(): Promise<void> {
@@ -43,6 +43,6 @@ export class ScanReportController extends ApiController {
             body: content,
         };
 
-        this.contextAwareLogger.logInfo('Report fetched from blob store.', { reportId });
+        this.logger.logInfo('Report fetched from blob store.', { reportId });
     }
 }
