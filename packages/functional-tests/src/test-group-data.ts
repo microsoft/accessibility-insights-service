@@ -8,7 +8,9 @@ export interface TestGroupData {
 }
 
 export interface TestContextData {
-    scanUrl?: string;
+    testGroupName: string;
+    buildId: string;
+    scanUrl: string;
     scanId?: string;
     reportId?: string;
 }

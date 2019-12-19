@@ -2,16 +2,16 @@
 // Licensed under the MIT License.
 import { WebApiErrorCodes } from 'service-library';
 
-import { TestGroup } from './test-group';
+import { FunctionalTestGroup } from './functional-test-group';
 
-export class RestApiTestGroup extends TestGroup {
+export class RestApiTestGroup extends FunctionalTestGroup {
     protected registerTestCases(): void {
         this.registerTestCase(async () => this.testHealthCheck());
         this.registerTestCase(async () => this.testPostScan());
-        this.registerTestCase(async () => this.testGetScanStatus());
+        // this.registerTestCase(async () => this.testGetScanStatus());
         this.registerTestCase(async () => this.testGetScanStatusWithInvalidGuid());
         this.registerTestCase(async () => this.testGetScanStatusWithInvalidScanId());
-        this.registerTestCase(async () => this.testGetScanReport());
+        // this.registerTestCase(async () => this.testGetScanReport());
         this.registerTestCase(async () => this.testGetScanReportWithInvalidGuid());
         this.registerTestCase(async () => this.testGetScanReportWithInvalidScanId());
     }
@@ -23,7 +23,7 @@ export class RestApiTestGroup extends TestGroup {
     }
 
     private async testPostScan(): Promise<void> {
-        const response = await this.a11yServiceClient.postScanUrl(this.testConfig.urlToScan);
+        const response = await this.a11yServiceClient.postScanUrl(this.testContextData.scanUrl);
 
         this.ensureSuccessStatusCode(response);
         this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse');

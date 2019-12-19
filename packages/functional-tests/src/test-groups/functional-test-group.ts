@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { CosmosContainerClient } from 'azure-services';
-import { AvailabilityTestConfig, GuidGenerator } from 'common';
+import { GuidGenerator } from 'common';
 import { isEqual } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import { HttpResponse, WebApiErrorCode } from 'service-library';
@@ -10,24 +10,20 @@ import { A11yServiceClient } from 'web-api-client';
 
 import { SerializableResponse, TestContextData } from '../test-group-data';
 
-export abstract class TestGroup {
+export abstract class FunctionalTestGroup {
+    protected testContextData: TestContextData;
     private readonly testCases: (() => Promise<void>)[] = [];
 
     constructor(
-        protected readonly buildId: string,
-        protected readonly testContextData: TestContextData,
-        protected readonly testGroupName: string,
         protected readonly a11yServiceClient: A11yServiceClient,
         protected readonly cosmosContainerClient: CosmosContainerClient,
         protected readonly logger: Logger,
         protected readonly guidGenerator: GuidGenerator,
-        protected readonly defaultLogProps: { [name: string]: string },
-        protected readonly testConfig: AvailabilityTestConfig,
     ) {}
 
-    public async run(): Promise<TestContextData> {
+    public async run(testContextData: TestContextData): Promise<TestContextData> {
+        this.initialize(testContextData);
         this.registerTestCases();
-        this.initialize();
         this.testCases.forEach(async test => {
             await test();
         });
@@ -42,8 +38,9 @@ export abstract class TestGroup {
         this.testCases.push(test);
     }
 
-    // tslint:disable-next-line: no-empty
-    protected initialize(): void {}
+    protected initialize(testContextData: TestContextData): void {
+        this.testContextData = testContextData;
+    }
 
     // tslint:disable-next-line: no-empty
     protected cleanup(): void {}
@@ -102,7 +99,6 @@ export abstract class TestGroup {
 
     private log(message: string, logType: LogLevel = LogLevel.info, properties?: { [name: string]: string }): void {
         this.logger.log(message, logType, {
-            ...this.defaultLogProps,
             ...properties,
         });
     }
