@@ -31,8 +31,10 @@ describe(HealthCheckController, () => {
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
 
         loggerMock = Mock.ofType<MockableLogger>();
-        appInsightsClientMock = Mock.ofType<ApplicationInsightsClient>();
-        healthCheckController = new HealthCheckController(serviceConfigurationMock.object, loggerMock.object, appInsightsClientMock.object);
+        appInsightsClientMock = Mock.ofType(ApplicationInsightsClient);
+        healthCheckController = new HealthCheckController(serviceConfigurationMock.object, loggerMock.object, async () =>
+            Promise.resolve(appInsightsClientMock.object),
+        );
         healthCheckController.context = context;
     });
 
