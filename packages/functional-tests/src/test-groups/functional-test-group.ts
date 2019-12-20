@@ -4,7 +4,7 @@ import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { isEqual } from 'lodash';
 import { Logger, LogLevel } from 'logger';
-import { HttpResponse, WebApiErrorCode } from 'service-library';
+import { WebApiErrorCode } from 'service-library';
 import { isNullOrUndefined } from 'util';
 import { A11yServiceClient } from 'web-api-client';
 
@@ -12,7 +12,7 @@ import { SerializableResponse, TestContextData } from '../test-group-data';
 
 export abstract class FunctionalTestGroup {
     protected testContextData: TestContextData;
-    private readonly testCases: (() => Promise<void>)[] = [];
+    protected readonly testCases: (() => Promise<void>)[] = [];
 
     constructor(
         protected readonly a11yServiceClient: A11yServiceClient,
