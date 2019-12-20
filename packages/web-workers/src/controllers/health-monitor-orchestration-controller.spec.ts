@@ -8,11 +8,12 @@ import { ServiceConfiguration } from 'common';
 import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
@@ -26,10 +27,10 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         public context: Context,
         public availabilityTestConfig: AvailabilityTestConfig,
         serviceConfig: ServiceConfiguration,
-        contextAwareLogger: ContextAwareLogger,
+        logger: Logger,
         df: typeof durableFunctions,
     ) {
-        super(serviceConfig, contextAwareLogger, df);
+        super(serviceConfig, logger, df);
     }
 
     protected createOrchestrationSteps(
@@ -129,7 +130,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
 describe('HealthMonitorOrchestrationController', () => {
     let testSubject: TestableHealthMonitorOrchestrationController;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let contextStub: IOrchestrationFunctionContext;
     let df: IMock<typeof durableFunctions>;
     let availabilityTestConfig: AvailabilityTestConfig;
@@ -146,7 +147,7 @@ describe('HealthMonitorOrchestrationController', () => {
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
         orchestratorStepsStub = new OrchestrationStepsStub(availabilityTestConfig);
 
         contextStub = ({
@@ -172,7 +173,7 @@ describe('HealthMonitorOrchestrationController', () => {
             contextStub,
             availabilityTestConfig,
             serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
+            loggerMock.object,
             df.object,
         );
     });
