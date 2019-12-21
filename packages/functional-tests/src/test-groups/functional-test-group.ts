@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { isEqual } from 'lodash';
 import { Logger, LogLevel } from 'logger';
-import { HttpResponse, WebApiErrorCode } from 'service-library';
+import { WebApiErrorCode } from 'service-library';
 import { isNullOrUndefined } from 'util';
 import { A11yServiceClient } from 'web-api-client';
 
@@ -51,49 +50,45 @@ export abstract class FunctionalTestGroup {
                 requestResponse: JSON.stringify(response),
                 message,
             });
-
-            throw new Error(`Request failed ${message} ${JSON.stringify(response)}`);
         }
     }
 
     protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse, message?: string): void {
-        if (!isEqual(webApiErrorCode.statusCode, response.statusCode)) {
+        if (webApiErrorCode.statusCode !== response.statusCode) {
             this.log(`[E2E] Scan response not as expected`, LogLevel.error, {
                 response: JSON.stringify(response),
                 message,
             });
-
-            throw new Error(`Request not as expected: ${message} ${JSON.stringify(response)}`);
         }
     }
 
     protected expectEqual<T>(expected: T, actual: T, message?: string): void {
         if (expected !== actual) {
-            throw new Error(`[E2E] Validation failed: ${message}`);
+            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
         }
     }
 
     protected expectTrue<T>(actual: boolean, message?: string): void {
         if (actual !== true) {
-            throw new Error(`[E2E] Validation failed: ${message}`);
+            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
         }
     }
 
     protected expectFalse<T>(actual: boolean, message?: string): void {
         if (actual !== false) {
-            throw new Error(`[E2E] Validation failed: ${message}`);
+            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
         }
     }
 
     protected expectToBeDefined<T>(actual: T, message?: string): void {
         if (isNullOrUndefined(actual)) {
-            throw new Error(`[E2E] Validation failed: ${message}`);
+            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
         }
     }
 
     protected expectToBeNotDefined<T>(actual: T, message?: string): void {
         if (!isNullOrUndefined(actual)) {
-            throw new Error(`[E2E] Validation failed: ${message}`);
+            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
         }
     }
 
