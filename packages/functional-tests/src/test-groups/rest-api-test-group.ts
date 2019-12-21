@@ -16,57 +16,65 @@ export class RestApiTestGroup extends FunctionalTestGroup {
         this.registerTestCase(async () => this.testGetScanReportWithInvalidScanId());
     }
 
-    private async testHealthCheck(): Promise<void> {
+    private async testHealthCheck(): Promise<boolean> {
         const response = await this.a11yServiceClient.checkHealth();
 
-        this.ensureSuccessStatusCode(response, 'testHealthCheck');
+        return this.ensureSuccessStatusCode(response, 'testHealthCheck');
     }
 
-    private async testPostScan(): Promise<void> {
+    private async testPostScan(): Promise<boolean> {
         const response = await this.a11yServiceClient.postScanUrl(this.testContextData.scanUrl);
 
-        this.ensureSuccessStatusCode(response, 'testPostScan');
-        this.expectToBeDefined(response.body, 'Post Scan API should return response with defined body');
-        this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse in body');
-        this.expectTrue(this.guidGenerator.isValidV6Guid(response.body[0].scanId), 'Post Scan API should return a valid v6 guid');
+        return (
+            this.ensureSuccessStatusCode(response, 'testPostScan') &&
+            this.expectToBeDefined(response.body, 'Post Scan API should return response with defined body') &&
+            this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse in body') &&
+            this.expectTrue(this.guidGenerator.isValidV6Guid(response.body[0].scanId), 'Post Scan API should return a valid v6 guid')
+        );
     }
 
-    private async testGetScanStatus(): Promise<void> {
+    private async testGetScanStatus(): Promise<boolean> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
 
-        this.ensureSuccessStatusCode(response, 'testGetScanStatus');
-        this.expectEqual(this.testContextData.scanId, response.body.scanId, 'Get Scan Response should return the scan id that we queried');
+        return (
+            this.ensureSuccessStatusCode(response, 'testGetScanStatus') &&
+            this.expectEqual(
+                this.testContextData.scanId,
+                response.body.scanId,
+                'Get Scan Response should return the scan id that we queried',
+            )
+        );
     }
 
-    private async testGetScanStatusWithInvalidGuid(): Promise<void> {
+    private async testGetScanStatusWithInvalidGuid(): Promise<boolean> {
         const response = await this.a11yServiceClient.getScanStatus('invalid-guid');
 
-        this.expectErrorResponse(WebApiErrorCodes.invalidResourceId, response, 'testGetScanStatusWithInvalidGuid');
+        return this.expectErrorResponse(WebApiErrorCodes.invalidResourceId, response, 'testGetScanStatusWithInvalidGuid');
     }
 
-    private async testGetScanStatusWithInvalidScanId(): Promise<void> {
+    private async testGetScanStatusWithInvalidScanId(): Promise<boolean> {
         const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
         const response = await this.a11yServiceClient.getScanStatus(invalidGuid);
 
-        this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response, 'testGetScanStatusWithInvalidScanId');
+        return this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response, 'testGetScanStatusWithInvalidScanId');
     }
 
-    private async testGetScanReport(): Promise<void> {
+    private async testGetScanReport(): Promise<boolean> {
         const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, this.testContextData.reportId);
 
-        this.ensureSuccessStatusCode(response, 'testGetScanReport');
+        return this.ensureSuccessStatusCode(response, 'testGetScanReport');
     }
 
-    private async testGetScanReportWithInvalidGuid(): Promise<void> {
+    private async testGetScanReportWithInvalidGuid(): Promise<boolean> {
         const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, 'invalid-guid');
 
-        this.expectErrorResponse(WebApiErrorCodes.invalidResourceId, response, 'testGetScanReportWithInvalidGuid');
+        return this.expectErrorResponse(WebApiErrorCodes.invalidResourceId, response, 'testGetScanReportWithInvalidGuid');
     }
 
-    private async testGetScanReportWithInvalidScanId(): Promise<void> {
+    private async testGetScanReportWithInvalidScanId(): Promise<boolean> {
         const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
         const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
 
-        this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response, 'testGetScanReportWithInvalidScanId');
+        return this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, response, 'testGetScanReportWithInvalidScanId');
     }
 }

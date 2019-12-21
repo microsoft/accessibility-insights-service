@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { ContextAwareLogger } from 'logger';
+import { ContextAwareLogger, LogLevel } from 'logger';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
@@ -16,6 +16,7 @@ import { RestApiTestGroup } from './rest-api-test-group';
 const reportId = 'reportId';
 const scanId = 'scanId';
 const scanUrl = 'scanUrl';
+let singleTestResult: boolean;
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {
     public makeCalls = async () => {
@@ -42,6 +43,8 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
 
     private readonly modifyReportId = async () => {
         this.testContextData.reportId = 'new-report-id';
+
+        return singleTestResult;
     };
 }
 
@@ -59,6 +62,7 @@ describe(RestApiTestGroup, () => {
             scanId,
             reportId,
         };
+        singleTestResult = true;
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
         loggerMock = Mock.ofType(ContextAwareLogger);
@@ -72,6 +76,23 @@ describe(RestApiTestGroup, () => {
         );
 
         guidGeneratorMock.setup(gm => gm.isValidV6Guid(It.isAny())).returns(() => true);
+    });
+
+    it('runs successfully and log info', async () => {
+        loggerMock.setup(lm => lm.log('[E2E] Test Group Passed', LogLevel.info, It.isAny())).verifiable(Times.once());
+
+        await testSubject.run(testContextData);
+
+        loggerMock.verifyAll();
+    });
+
+    it('test failed and failure info logged', async () => {
+        singleTestResult = false;
+        loggerMock.setup(lm => lm.log('[E2E] Test Group Failed', LogLevel.info, It.isAny())).verifiable(Times.once());
+
+        await testSubject.run(testContextData);
+
+        loggerMock.verifyAll();
     });
 
     it('runs and modifies test context data', async () => {
@@ -91,9 +112,9 @@ describe(RestApiTestGroup, () => {
     });
 
     it('could log errors in app insights', () => {
-        loggerMock.setup(lm => lm.log('[E2E] Validation failed', It.isAny(), It.isAny())).verifiable(Times.exactly(5));
-        loggerMock.setup(lm => lm.log('[E2E] Scan request failed', It.isAny(), It.isAny())).verifiable(Times.once());
-        loggerMock.setup(lm => lm.log('[E2E] Scan response not as expected', It.isAny(), It.isAny())).verifiable(Times.once());
+        loggerMock.setup(lm => lm.log('[E2E] Validation failed', LogLevel.error, It.isAny())).verifiable(Times.exactly(5));
+        loggerMock.setup(lm => lm.log('[E2E] Scan request failed', LogLevel.error, It.isAny())).verifiable(Times.once());
+        loggerMock.setup(lm => lm.log('[E2E] Scan response not as expected', LogLevel.error, It.isAny())).verifiable(Times.once());
 
         testSubject.logErrors();
 

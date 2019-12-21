@@ -7,11 +7,15 @@ export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
         this.registerTestCase(async () => this.testScanRequestPersisted());
     }
 
-    private async testScanRequestPersisted(): Promise<void> {
+    private async testScanRequestPersisted(): Promise<boolean> {
         const scanRunResult = await this.onDemandPageScanRunResultProvider.readScanRun(this.testContextData.scanId);
 
-        this.expectToBeDefined(scanRunResult, 'testScanRequestPersisted');
+        if (this.expectToBeDefined(scanRunResult, 'testScanRequestPersisted')) {
+            this.testContextData.scanRunState = scanRunResult.run.state;
 
-        this.testContextData.scanRunState = scanRunResult.run.state;
+            return true;
+        }
+
+        return false;
     }
 }

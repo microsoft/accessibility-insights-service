@@ -10,7 +10,7 @@ import { SerializableResponse, TestContextData } from '../test-group-data';
 
 export abstract class FunctionalTestGroup {
     protected testContextData: TestContextData;
-    private readonly testCases: (() => Promise<void>)[] = [];
+    private readonly testCases: (() => Promise<boolean>)[] = [];
 
     constructor(
         protected readonly a11yServiceClient: A11yServiceClient,
@@ -22,9 +22,18 @@ export abstract class FunctionalTestGroup {
     public async run(testContextData: TestContextData): Promise<TestContextData> {
         this.initialize(testContextData);
         this.registerTestCases();
-        this.testCases.forEach(async test => {
-            await test();
-        });
+
+        const groupTestResults = await Promise.all(this.testCases.map(testCase => testCase()));
+        const groupTestResult = groupTestResults.reduce((prevTestsResult, currentTestResult) => {
+            return prevTestsResult && currentTestResult;
+        }, true);
+
+        if (groupTestResult === true) {
+            this.onTestGroupSucceed();
+        } else {
+            this.onTestGroupFailed();
+        }
+
         this.cleanup();
 
         return this.testContextData;
@@ -32,12 +41,20 @@ export abstract class FunctionalTestGroup {
 
     protected abstract registerTestCases(): void;
 
-    protected registerTestCase(test: () => Promise<void>): void {
+    protected registerTestCase(test: () => Promise<boolean>): void {
         this.testCases.push(test);
     }
 
     protected initialize(testContextData: TestContextData): void {
         this.testContextData = testContextData;
+    }
+
+    protected onTestGroupSucceed(): void {
+        this.log('[E2E] Test Group Passed');
+    }
+
+    protected onTestGroupFailed(): void {
+        this.log('[E2E] Test Group Failed');
     }
 
     // tslint:disable-next-line: no-empty
