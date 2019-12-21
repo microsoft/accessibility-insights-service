@@ -26,7 +26,8 @@ export class RestApiTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.postScanUrl(this.testContextData.scanUrl);
 
         this.ensureSuccessStatusCode(response, 'testPostScan');
-        this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse');
+        this.expectToBeDefined(response.body, 'Post Scan API should return response with defined body');
+        this.expectEqual(1, response.body.length, 'Post Scan API should return one ScanRunResponse in body');
         this.expectTrue(this.guidGenerator.isValidV6Guid(response.body[0].scanId), 'Post Scan API should return a valid v6 guid');
     }
 
