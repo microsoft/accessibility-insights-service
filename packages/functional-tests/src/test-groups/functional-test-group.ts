@@ -62,33 +62,29 @@ export abstract class FunctionalTestGroup {
         }
     }
 
-    protected expectEqual<T>(expected: T, actual: T, message?: string): void {
-        if (expected !== actual) {
-            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
-        }
+    protected expectEqual<T>(expected: T, actual: T, testInfo?: string): void {
+        this.logValidationErrorIf(expected !== actual, testInfo);
     }
 
-    protected expectTrue<T>(actual: boolean, message?: string): void {
-        if (actual !== true) {
-            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
-        }
+    protected expectTrue<T>(actual: boolean, testInfo?: string): void {
+        this.logValidationErrorIf(actual !== true, testInfo);
     }
 
-    protected expectFalse<T>(actual: boolean, message?: string): void {
-        if (actual !== false) {
-            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
-        }
+    protected expectFalse<T>(actual: boolean, testInfo?: string): void {
+        this.logValidationErrorIf(actual !== false, testInfo);
     }
 
-    protected expectToBeDefined<T>(actual: T, message?: string): void {
-        if (isNullOrUndefined(actual)) {
-            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
-        }
+    protected expectToBeDefined<T>(actual: T, testInfo?: string): void {
+        this.logValidationErrorIf(isNullOrUndefined(actual), testInfo);
     }
 
-    protected expectToBeNotDefined<T>(actual: T, message?: string): void {
-        if (!isNullOrUndefined(actual)) {
-            this.log(`[E2E] Validation failed`, LogLevel.error, { message });
+    protected expectToBeNotDefined<T>(actual: T, testInfo?: string): void {
+        this.logValidationErrorIf(!isNullOrUndefined(actual), testInfo);
+    }
+
+    private logValidationErrorIf(evaluation: boolean, testInfo: string): void {
+        if (evaluation === true) {
+            this.log(`[E2E] Validation failed`, LogLevel.error, { testInfo });
         }
     }
 
