@@ -42,7 +42,7 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
     }
 
     private readonly modifyReportId = async () => {
-        this.testContextData.reportId = 'new-report-id';
+        this.testContextData.reports[0].reportId = 'new-report-id';
 
         return singleTestResult;
     };
@@ -60,7 +60,7 @@ describe(RestApiTestGroup, () => {
         testContextData = {
             scanUrl,
             scanId,
-            reportId,
+            reports: [{ reportId } as any],
         };
         singleTestResult = true;
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
@@ -97,7 +97,7 @@ describe(RestApiTestGroup, () => {
 
     it('runs and modifies test context data', async () => {
         const res = await testSubject.run(testContextData);
-        expect(res.reportId).not.toEqual(reportId);
+        expect(res.reports[0].reportId).not.toEqual(reportId);
     });
 
     it('could make calls with a11yServiceClient', async () => {

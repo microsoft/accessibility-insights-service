@@ -60,7 +60,7 @@ export class RestApiTestGroup extends FunctionalTestGroup {
     }
 
     private async testGetScanReport(): Promise<boolean> {
-        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, this.testContextData.reportId);
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, this.testContextData.reports[0].reportId);
 
         return this.ensureSuccessStatusCode(response, 'testGetScanReport');
     }

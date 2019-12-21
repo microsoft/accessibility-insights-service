@@ -24,9 +24,7 @@ export abstract class FunctionalTestGroup {
         this.registerTestCases();
 
         const groupTestResults = await Promise.all(this.testCases.map(testCase => testCase()));
-        const groupTestResult = groupTestResults.reduce((prevTestsResult, currentTestResult) => {
-            return prevTestsResult && currentTestResult;
-        }, true);
+        const groupTestResult = groupTestResults.every(result => result);
 
         if (groupTestResult === true) {
             this.onTestGroupSucceed();
