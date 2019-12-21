@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { Logger, LogLevel } from 'logger';
-import { WebApiErrorCode } from 'service-library';
+import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { isNullOrUndefined } from 'util';
 import { A11yServiceClient } from 'web-api-client';
 
@@ -15,7 +14,7 @@ export abstract class FunctionalTestGroup {
 
     constructor(
         protected readonly a11yServiceClient: A11yServiceClient,
-        protected readonly cosmosContainerClient: CosmosContainerClient,
+        protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         protected readonly logger: Logger,
         protected readonly guidGenerator: GuidGenerator,
     ) {}
@@ -44,48 +43,58 @@ export abstract class FunctionalTestGroup {
     // tslint:disable-next-line: no-empty
     protected cleanup(): void {}
 
-    protected ensureSuccessStatusCode(response: SerializableResponse, message?: string): void {
+    protected ensureSuccessStatusCode(response: SerializableResponse, message?: string): boolean {
         if (response.statusCode < 200 || response.statusCode >= 300) {
             this.log(`[E2E] Scan request failed`, LogLevel.error, {
                 requestResponse: JSON.stringify(response),
                 message,
             });
+
+            return false;
         }
+
+        return true;
     }
 
-    protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse, message?: string): void {
+    protected expectErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse, message?: string): boolean {
         if (webApiErrorCode.statusCode !== response.statusCode) {
             this.log(`[E2E] Scan response not as expected`, LogLevel.error, {
                 response: JSON.stringify(response),
                 message,
             });
+
+            return false;
         }
+
+        return true;
     }
 
-    protected expectEqual<T>(expected: T, actual: T, testInfo?: string): void {
-        this.logValidationErrorIf(expected !== actual, testInfo);
+    protected expectEqual<T>(expected: T, actual: T, testInfo?: string): boolean {
+        return this.logValidationErrorIf(expected !== actual, testInfo);
     }
 
-    protected expectTrue<T>(actual: boolean, testInfo?: string): void {
-        this.logValidationErrorIf(actual !== true, testInfo);
+    protected expectTrue<T>(actual: boolean, testInfo?: string): boolean {
+        return this.logValidationErrorIf(actual !== true, testInfo);
     }
 
-    protected expectFalse<T>(actual: boolean, testInfo?: string): void {
-        this.logValidationErrorIf(actual !== false, testInfo);
+    protected expectFalse<T>(actual: boolean, testInfo?: string): boolean {
+        return this.logValidationErrorIf(actual !== false, testInfo);
     }
 
-    protected expectToBeDefined<T>(actual: T, testInfo?: string): void {
-        this.logValidationErrorIf(isNullOrUndefined(actual), testInfo);
+    protected expectToBeDefined<T>(actual: T, testInfo?: string): boolean {
+        return this.logValidationErrorIf(isNullOrUndefined(actual), testInfo);
     }
 
-    protected expectToBeNotDefined<T>(actual: T, testInfo?: string): void {
-        this.logValidationErrorIf(!isNullOrUndefined(actual), testInfo);
+    protected expectToBeNotDefined<T>(actual: T, testInfo?: string): boolean {
+        return this.logValidationErrorIf(!isNullOrUndefined(actual), testInfo);
     }
 
-    private logValidationErrorIf(evaluation: boolean, testInfo: string): void {
+    private logValidationErrorIf(evaluation: boolean, testInfo: string): boolean {
         if (evaluation === true) {
             this.log(`[E2E] Validation failed`, LogLevel.error, { testInfo });
         }
+
+        return evaluation;
     }
 
     private log(message: string, logType: LogLevel = LogLevel.info, properties?: { [name: string]: string }): void {

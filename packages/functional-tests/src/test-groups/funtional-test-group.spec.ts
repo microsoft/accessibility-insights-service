@@ -2,13 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator } from 'common';
-import { ContextAwareLogger, LogLevel } from 'logger';
+import { ContextAwareLogger } from 'logger';
+import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
 
-import { WebApiErrorCodes } from 'service-library';
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 import { RestApiTestGroup } from './rest-api-test-group';
@@ -49,7 +48,7 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
 describe(RestApiTestGroup, () => {
     let testSubject: FunctionalTestGroupStub;
     let a11yServiceClientMock: IMock<A11yServiceClient>;
-    let cosmosClientMock: IMock<CosmosContainerClient>;
+    let scanRunProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let loggerMock: IMock<ContextAwareLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let testContextData: TestContextData;
@@ -61,13 +60,13 @@ describe(RestApiTestGroup, () => {
             reportId,
         };
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
-        cosmosClientMock = Mock.ofType(CosmosContainerClient);
+        scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
         loggerMock = Mock.ofType(ContextAwareLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
         testSubject = new FunctionalTestGroupStub(
             a11yServiceClientMock.object,
-            cosmosClientMock.object,
+            scanRunProviderMock.object,
             loggerMock.object,
             guidGeneratorMock.object,
         );
