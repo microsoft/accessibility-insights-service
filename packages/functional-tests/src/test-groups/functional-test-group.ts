@@ -52,6 +52,9 @@ export abstract class FunctionalTestGroup {
 
     protected initialize(testContextData: TestContextData): void {
         this.testContextData = testContextData;
+        Object.values(TestEnvironment).forEach((env: TestEnvironment) => {
+            this.testCaseMap[env] = [];
+        });
     }
 
     protected onTestGroupSucceed(): void {

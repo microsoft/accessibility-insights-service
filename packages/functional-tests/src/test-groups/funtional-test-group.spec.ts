@@ -8,6 +8,7 @@ import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-lib
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
 
+import { TestEnvironment } from '../common-types';
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 import { RestApiTestGroup } from './rest-api-test-group';
@@ -92,7 +93,7 @@ describe(RestApiTestGroup, () => {
         singleTestResult = false;
         loggerMock.setup(lm => lm.log('[E2E] Test Group Failed', LogLevel.info, It.isAny())).verifiable(Times.once());
 
-        await testSubject.run(testContextData);
+        await testSubject.run(testContextData, TestEnvironment.canary);
 
         loggerMock.verifyAll();
     });
