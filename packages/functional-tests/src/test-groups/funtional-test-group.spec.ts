@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { ContextAwareLogger, LogLevel } from 'logger';
+import { Logger, LogLevel } from 'logger';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
@@ -17,6 +17,8 @@ const reportId = 'reportId';
 const scanId = 'scanId';
 const scanUrl = 'scanUrl';
 let singleTestResult: boolean;
+
+class MockableLogger extends Logger {}
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {
     public makeCalls = async () => {
@@ -52,7 +54,7 @@ describe(RestApiTestGroup, () => {
     let testSubject: FunctionalTestGroupStub;
     let a11yServiceClientMock: IMock<A11yServiceClient>;
     let scanRunProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let loggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let testContextData: TestContextData;
 
@@ -65,7 +67,7 @@ describe(RestApiTestGroup, () => {
         singleTestResult = true;
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
-        loggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
         testSubject = new FunctionalTestGroupStub(
