@@ -11,7 +11,7 @@ import { SerializableResponse, TestContextData } from '../test-group-data';
 
 export abstract class FunctionalTestGroup {
     protected testContextData: TestContextData;
-    private readonly testCaseMap: { [env: string]: (() => Promise<boolean>)[] } = {};
+    private readonly testCases: (() => Promise<boolean>)[] = [];
 
     constructor(
         protected readonly a11yServiceClient: A11yServiceClient,
@@ -22,9 +22,9 @@ export abstract class FunctionalTestGroup {
 
     public async run(testContextData: TestContextData, env = TestEnvironment.canary): Promise<TestContextData> {
         this.initialize(testContextData);
-        this.registerTestCases();
+        this.registerTestCases(env);
 
-        const groupTestResults = await Promise.all(this.getTestsForEnvironment(env).map(testCase => testCase()));
+        const groupTestResults = await Promise.all(this.testCases.map(testCase => testCase()));
         const groupTestResult = groupTestResults.every(result => result);
 
         if (groupTestResult === true) {
@@ -38,23 +38,14 @@ export abstract class FunctionalTestGroup {
         return this.testContextData;
     }
 
-    protected abstract registerTestCases(): void;
+    protected abstract registerTestCases(env: TestEnvironment): void;
 
-    protected registerTestCaseForEnvironment(test: () => Promise<boolean>, env = TestEnvironment.canary): void {
-        this.getTestsForEnvironment(env).push(test);
-    }
-
-    protected registerTestCaseForAllEnvironment(test: () => Promise<boolean>): void {
-        Object.values(TestEnvironment).forEach((env: TestEnvironment) => {
-            this.registerTestCaseForEnvironment(test, env);
-        });
+    protected registerTestCase(test: () => Promise<boolean>, env = TestEnvironment.canary): void {
+        this.testCases.push(test);
     }
 
     protected initialize(testContextData: TestContextData): void {
         this.testContextData = testContextData;
-        Object.values(TestEnvironment).forEach((env: TestEnvironment) => {
-            this.testCaseMap[env] = [];
-        });
     }
 
     protected onTestGroupSucceed(): void {
@@ -112,10 +103,6 @@ export abstract class FunctionalTestGroup {
 
     protected expectToBeNotDefined<T>(actual: T, testInfo?: string): boolean {
         return this.logValidationErrorIf(!isNullOrUndefined(actual), testInfo);
-    }
-
-    private getTestsForEnvironment(env: TestEnvironment): (() => Promise<boolean>)[] {
-        return this.testCaseMap[env];
     }
 
     private logValidationErrorIf(evaluation: boolean, testInfo: string): boolean {

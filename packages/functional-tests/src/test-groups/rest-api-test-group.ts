@@ -2,18 +2,25 @@
 // Licensed under the MIT License.
 import { WebApiErrorCodes } from 'service-library';
 
+import { TestEnvironment } from '../common-types';
 import { FunctionalTestGroup } from './functional-test-group';
 
 export class RestApiTestGroup extends FunctionalTestGroup {
-    protected registerTestCases(): void {
-        this.registerTestCaseForEnvironment(async () => this.testHealthCheck());
-        this.registerTestCaseForEnvironment(async () => this.testPostScan());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanStatus());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanStatusWithInvalidGuid());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanStatusWithInvalidScanId());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanReport());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanReportWithInvalidGuid());
-        this.registerTestCaseForEnvironment(async () => this.testGetScanReportWithInvalidScanId());
+    protected registerTestCases(env: TestEnvironment): void {
+        switch (env) {
+            case TestEnvironment.canary:
+                this.registerTestCase(async () => this.testHealthCheck());
+                this.registerTestCase(async () => this.testPostScan());
+                this.registerTestCase(async () => this.testGetScanStatus());
+                this.registerTestCase(async () => this.testGetScanStatusWithInvalidGuid());
+                this.registerTestCase(async () => this.testGetScanStatusWithInvalidScanId());
+                this.registerTestCase(async () => this.testGetScanReport());
+                this.registerTestCase(async () => this.testGetScanReportWithInvalidGuid());
+                this.registerTestCase(async () => this.testGetScanReportWithInvalidScanId());
+                break;
+
+            default:
+        }
     }
 
     private async testHealthCheck(): Promise<boolean> {

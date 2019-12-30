@@ -41,7 +41,7 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
 
     // tslint:disable-next-line:
     protected registerTestCases(): void {
-        this.registerTestCaseForEnvironment(async () => this.modifyReportId());
+        this.registerTestCase(async () => this.modifyReportId());
     }
 
     private readonly modifyReportId = async () => {

@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { TestEnvironment } from '../common-types';
 import { FunctionalTestGroup } from './functional-test-group';
 
 export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
-    protected registerTestCases(): void {
-        this.registerTestCaseForEnvironment(async () => this.testScanRequestPersisted());
+    protected registerTestCases(env: TestEnvironment): void {
+        this.registerTestCase(async () => this.testScanRequestPersisted());
     }
 
     private async testScanRequestPersisted(): Promise<boolean> {

@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ScanReport, ScanRunResultResponse } from 'service-library';
+
+import { TestEnvironment } from '../common-types';
 import { FunctionalTestGroup } from './functional-test-group';
 
 export class ScanReportTestGroup extends FunctionalTestGroup {
-    protected registerTestCases(): void {
-        this.registerTestCaseForEnvironment(async () => this.testReportGenerated());
-        this.registerTestCaseForEnvironment(async () => this.testGetReports());
+    protected registerTestCases(env: TestEnvironment): void {
+        this.registerTestCase(async () => this.testReportGenerated());
+        this.registerTestCase(async () => this.testGetReports());
     }
 
     private async testReportGenerated(): Promise<boolean> {
