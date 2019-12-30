@@ -6,14 +6,14 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class RestApiTestGroup extends FunctionalTestGroup {
     protected registerTestCases(): void {
-        this.registerTestCase(async () => this.testHealthCheck());
-        this.registerTestCase(async () => this.testPostScan());
-        this.registerTestCase(async () => this.testGetScanStatus());
-        this.registerTestCase(async () => this.testGetScanStatusWithInvalidGuid());
-        this.registerTestCase(async () => this.testGetScanStatusWithInvalidScanId());
-        this.registerTestCase(async () => this.testGetScanReport());
-        this.registerTestCase(async () => this.testGetScanReportWithInvalidGuid());
-        this.registerTestCase(async () => this.testGetScanReportWithInvalidScanId());
+        this.registerTestCaseForEnvironment(async () => this.testHealthCheck());
+        this.registerTestCaseForEnvironment(async () => this.testPostScan());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanStatus());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanStatusWithInvalidGuid());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanStatusWithInvalidScanId());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanReport());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanReportWithInvalidGuid());
+        this.registerTestCaseForEnvironment(async () => this.testGetScanReportWithInvalidScanId());
     }
 
     private async testHealthCheck(): Promise<boolean> {

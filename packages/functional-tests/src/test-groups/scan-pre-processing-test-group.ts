@@ -4,7 +4,7 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
     protected registerTestCases(): void {
-        this.registerTestCase(async () => this.testScanRequestPersisted());
+        this.registerTestCaseForEnvironment(async () => this.testScanRequestPersisted());
     }
 
     private async testScanRequestPersisted(): Promise<boolean> {

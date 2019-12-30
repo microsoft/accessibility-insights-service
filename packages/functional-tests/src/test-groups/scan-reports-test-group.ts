@@ -5,8 +5,8 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class ScanReportTestGroup extends FunctionalTestGroup {
     protected registerTestCases(): void {
-        this.registerTestCase(async () => this.testReportGenerated());
-        this.registerTestCase(async () => this.testGetReports());
+        this.registerTestCaseForEnvironment(async () => this.testReportGenerated());
+        this.registerTestCaseForEnvironment(async () => this.testGetReports());
     }
 
     private async testReportGenerated(): Promise<boolean> {

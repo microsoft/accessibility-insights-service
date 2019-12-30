@@ -4,7 +4,7 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 export class PostScanTestGroup extends FunctionalTestGroup {
     protected registerTestCases(): void {
-        this.registerTestCase(async () => this.testPostScan());
+        this.registerTestCaseForEnvironment(async () => this.testPostScan());
     }
 
     private async testPostScan(): Promise<boolean> {
