@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name> -a <webApiAdClientId> -p <webApiAdClientSecret> -i <appInsightsApiKey>
+Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name> -a <webApiAdClientId> -p <webApiAdClientSecret> -i <appInsightsName>
 "
     exit 1
 }
@@ -102,6 +102,21 @@ getStorageAccessKey() {
     fi
 }
 
+createAppInsightsApiKey() {
+    apiKeyParams="--app $appInsightsName --resource-group $resourceGroupName --api-key $appInsightsName-api-key"
+
+    apiKeyExists=$(az monitor app-insights api-key show $apiKeyParams)
+
+    # If api key already exists, delete and recreate it
+    if [[ -n "$apiKeyExists" ]]; then
+        echo "Deleting existing app insights API key"
+        az monitor app-insights api-key delete $apiKeyParams 1>/dev/null
+    fi
+
+    appInsightsApiKey=$(az monitor app-insights api-key create $apiKeyParams --read-properties ReadTelemetry --query "apiKey" -o tsv)
+    echo "App Insights API key created '$appInsightsApiKey'"
+}
+
 # Read script arguments
 while getopts ":c:r:s:k:a:p:i:" option; do
     case $option in
@@ -111,14 +126,14 @@ while getopts ":c:r:s:k:a:p:i:" option; do
     k) keyVault=${OPTARG} ;;
     a) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
-    i) appInsightsApiKey=${OPTARG} ;;
+    i) appInsightsName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $appInsightsApiKey ]]; then
-    echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault"
+if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $appInsightsName ]]; then
+    echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault $appInsightsName"
 
     exitWithUsageInfo
 fi
@@ -146,4 +161,5 @@ pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
 getTenantId
 pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantId}"
 
+createAppInsightsApiKey
 pushSecretToKeyVault "appInsightsApiKey" "$appInsightsApiKey"
