@@ -4,10 +4,11 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
-import { BatchScanRequestMeasurements, ContextAwareLogger } from 'logger';
+import { BatchScanRequestMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 
 import { ScanRequestController } from './scan-request-controller';
 
@@ -22,7 +23,7 @@ describe(ScanRequestController, () => {
     let context: Context;
     let scanDataProviderMock: IMock<ScanDataProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
 
     beforeEach(() => {
@@ -53,7 +54,7 @@ describe(ScanRequestController, () => {
                 } as RestApiConfig;
             });
 
-        contextAwareLoggerMock = Mock.ofType<ContextAwareLogger>();
+        loggerMock = Mock.ofType<MockableLogger>();
     });
 
     function createScanRequestController(contextReq: Context): ScanRequestController {
@@ -61,7 +62,7 @@ describe(ScanRequestController, () => {
             scanDataProviderMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
+            loggerMock.object,
         );
         controller.context = contextReq;
 
@@ -156,12 +157,12 @@ describe(ScanRequestController, () => {
             };
 
             // tslint:disable-next-line: no-null-keyword
-            contextAwareLoggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+            loggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
 
             scanRequestController = createScanRequestController(context);
             await scanRequestController.handleRequest();
 
-            contextAwareLoggerMock.verifyAll();
+            loggerMock.verifyAll();
         });
 
         it('v1.0 accepts an array', async () => {

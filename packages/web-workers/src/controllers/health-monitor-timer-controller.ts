@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 import { WebController } from 'service-library';
 import { FunctionTimer } from '../contracts/function-timer';
 
@@ -16,15 +16,15 @@ export class HealthMonitorTimerController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(Logger) logger: Logger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {
-        super(contextAwareLogger);
+        super(logger);
     }
 
     protected async handleRequest(...args: any[]): Promise<void> {
         const funcTimer = <FunctionTimer>args[0];
-        this.contextAwareLogger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
+        this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,
             isPastDue: funcTimer.IsPastDue.toString(),
@@ -38,12 +38,12 @@ export class HealthMonitorTimerController extends WebController {
         ];
         this.context.bindings.orchestrationFunc = startArgs;
 
-        this.contextAwareLogger.logInfo(`Started new '${this.orchestrationFuncName}' orchestration function instance.`);
+        this.logger.logInfo(`Started new '${this.orchestrationFuncName}' orchestration function instance.`);
     }
 
     protected validateRequest(...args: any[]): boolean {
         if ((<FunctionTimer>args[0]).IsPastDue) {
-            this.contextAwareLogger.logWarn(`The '${this.context.executionContext.functionName}' function trigger is past due.`);
+            this.logger.logWarn(`The '${this.context.executionContext.functionName}' function trigger is past due.`);
         }
 
         return true;

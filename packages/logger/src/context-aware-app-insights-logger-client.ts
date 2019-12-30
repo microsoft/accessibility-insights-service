@@ -5,6 +5,7 @@ import { TelemetryClient } from 'applicationinsights';
 import { inject, injectable } from 'inversify';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
+import { LogLevel } from './logger';
 
 @injectable()
 export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
@@ -18,6 +19,15 @@ export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerCl
         this.telemetryClient.commonProperties = {
             ...baseProperties,
         };
+
+        if (!this.rootLoggerClient.isInitialized()) {
+            await this.rootLoggerClient.setup();
+        }
+        this.initialized = true;
+    }
+
+    public isInitialized(): boolean {
+        return super.isInitialized() && this.rootLoggerClient.isInitialized();
     }
 
     protected getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {
