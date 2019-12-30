@@ -40,8 +40,10 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
     };
 
     // tslint:disable-next-line:
-    protected registerTestCases(): void {
-        this.registerTestCase(async () => this.modifyReportId());
+    protected registerTestCases(env: TestEnvironment): void {
+        if (env === TestEnvironment.canary) {
+            this.registerTestCase(async () => this.modifyReportId());
+        }
     }
 
     private readonly modifyReportId = async () => {
@@ -84,7 +86,7 @@ describe(RestApiTestGroup, () => {
     it('runs successfully and log info', async () => {
         loggerMock.setup(lm => lm.log('[E2E] Test Group Passed', LogLevel.info, It.isAny())).verifiable(Times.once());
 
-        await testSubject.run(testContextData);
+        await testSubject.run(testContextData, TestEnvironment.canary);
 
         loggerMock.verifyAll();
     });
@@ -98,9 +100,14 @@ describe(RestApiTestGroup, () => {
         loggerMock.verifyAll();
     });
 
-    it('runs and modifies test context data', async () => {
-        const res = await testSubject.run(testContextData);
+    it('runs and modifies test context data in canary', async () => {
+        const res = await testSubject.run(testContextData, TestEnvironment.canary);
         expect(res.reports[0].reportId).not.toEqual(reportId);
+    });
+
+    it('does not run test in insider', async () => {
+        const res = await testSubject.run(testContextData, TestEnvironment.insider);
+        expect(res.reports[0].reportId).toEqual(reportId);
     });
 
     it('could make calls with a11yServiceClient', async () => {

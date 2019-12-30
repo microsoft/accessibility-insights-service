@@ -20,7 +20,7 @@ export abstract class FunctionalTestGroup {
         protected readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async run(testContextData: TestContextData, env = TestEnvironment.canary): Promise<TestContextData> {
+    public async run(testContextData: TestContextData, env: TestEnvironment): Promise<TestContextData> {
         this.initialize(testContextData);
         this.registerTestCases(env);
 
