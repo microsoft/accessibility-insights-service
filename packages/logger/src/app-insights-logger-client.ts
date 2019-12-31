@@ -37,6 +37,8 @@ export class AppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.appInsightsObject.start();
 
         this.telemetryClient = this.appInsightsObject.defaultClient;
+
+        this.initialized = true;
     }
 
     protected getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {

@@ -4,14 +4,14 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { ContextAwareLogger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { FunctionTimer } from '../contracts/function-timer';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthMonitorTimerController } from './health-monitor-timer-controller';
 
 let testSubject: HealthMonitorTimerController;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
-let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+let loggerMock: IMock<MockableLogger>;
 let context: Context;
 let guidGeneratorMock: IMock<GuidGenerator>;
 const orchestrationInstanceId = 'instance-id';
@@ -20,7 +20,7 @@ const orchestrationInstanceId = 'instance-id';
 describe('HealthMonitorTimerController', () => {
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock.setup(g => g.createGuid()).returns(() => orchestrationInstanceId);
 
@@ -33,11 +33,7 @@ describe('HealthMonitorTimerController', () => {
             bindings: { orchestrationFunc: undefined },
         });
 
-        testSubject = new HealthMonitorTimerController(
-            serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
-            guidGeneratorMock.object,
-        );
+        testSubject = new HealthMonitorTimerController(serviceConfigurationMock.object, loggerMock.object, guidGeneratorMock.object);
     });
 
     describe('invoke', () => {
@@ -56,14 +52,14 @@ describe('HealthMonitorTimerController', () => {
         it('warns if timer past due', async () => {
             const funcTimer: FunctionTimer = { IsPastDue: true };
             await testSubject.invoke(context, funcTimer);
-            contextAwareLoggerMock.verify(l => l.logWarn(It.isAny()), Times.once());
+            loggerMock.verify(l => l.logWarn(It.isAny()), Times.once());
         });
 
         it('does not warns if timer not past due', async () => {
             const funcTimer: FunctionTimer = { IsPastDue: false };
             await testSubject.invoke(context, funcTimer);
 
-            contextAwareLoggerMock.verify(l => l.logWarn(It.isAny()), Times.never());
+            loggerMock.verify(l => l.logWarn(It.isAny()), Times.never());
         });
     });
 });

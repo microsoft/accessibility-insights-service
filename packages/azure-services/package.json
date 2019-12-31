@@ -59,6 +59,8 @@
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0",
+        "request-promise": "^4.2.4",
+        "request": "^2.88.0"
         "storage-documents": "1.0.0"
     }
 }

@@ -83,6 +83,14 @@ describe(AppInsightsLoggerClient, () => {
             verifyCommonProperties(additionalCommonProps);
             verifyMocks();
         });
+
+        it('isInitialized', async () => {
+            expect(testSubject.isInitialized()).toBe(false);
+
+            await testSubject.setup(null);
+
+            expect(testSubject.isInitialized()).toBe(true);
+        });
     });
 
     describe('getAdditionalPropertiesToAddToEvent', () => {

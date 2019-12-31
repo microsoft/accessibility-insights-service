@@ -13,7 +13,13 @@ import { LoggerEvent } from './logger-event';
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     protected telemetryClient: TelemetryClient;
 
+    protected initialized: boolean = false;
+
     public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
+
+    public isInitialized(): boolean {
+        return this.initialized;
+    }
 
     public trackMetric(name: string, value: number): void {
         this.telemetryClient.trackMetric({

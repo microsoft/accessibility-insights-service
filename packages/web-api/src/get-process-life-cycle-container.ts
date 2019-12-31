@@ -5,15 +5,15 @@ import { CredentialType, registerAzureServicesToContainer } from 'azure-services
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
-import { registerLoggerToContainer } from 'logger';
+import { registerContextAwareLoggerToContainer } from 'logger';
 
 let processLifeCycleContainer: inversify.Container;
 
 export function getProcessLifeCycleContainer(): inversify.Container {
     if (isNil(processLifeCycleContainer)) {
-        processLifeCycleContainer = new inversify.Container();
+        processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(processLifeCycleContainer);
-        registerLoggerToContainer(processLifeCycleContainer);
+        registerContextAwareLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
     }
 

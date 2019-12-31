@@ -330,7 +330,6 @@ function setupSystemDataProviderMock(times: Times = Times.once()): void {
                 It.is(d => {
                     return _.isEqual(document, d);
                 }),
-                'urlScanPool',
             ),
         )
         .verifiable(times);

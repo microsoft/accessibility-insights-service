@@ -71,7 +71,7 @@
         {
             "name": "functional-tests",
             "path": "../packages/functional-tests"
-        },        
+        },
         {
             "name": "root",
             "path": "../"

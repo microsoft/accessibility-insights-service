@@ -4,10 +4,11 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
-import { ContextAwareLogger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
+
 import { ActivityAction } from '../contracts/activity-actions';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
@@ -16,7 +17,7 @@ import { HealthMonitorClientController } from './health-monitor-client-controlle
 describe(HealthMonitorClientController, () => {
     let testSubject: HealthMonitorClientController;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let context: Context;
     let webApiClientMock: IMock<A11yServiceClient>;
     let jsonResponse: any;
@@ -24,7 +25,7 @@ describe(HealthMonitorClientController, () => {
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
         webApiClientMock = Mock.ofType(A11yServiceClient);
         context = <Context>(<unknown>{ bindingDefinitions: {}, bindings: {} });
 
@@ -36,14 +37,14 @@ describe(HealthMonitorClientController, () => {
             },
         } as ResponseWithBodyType<any>;
 
-        testSubject = new HealthMonitorClientController(serviceConfigurationMock.object, contextAwareLoggerMock.object, async () =>
+        testSubject = new HealthMonitorClientController(serviceConfigurationMock.object, loggerMock.object, async () =>
             Promise.resolve(webApiClientMock.object),
         );
     });
 
     afterEach(() => {
         webApiClientMock.verifyAll();
-        contextAwareLoggerMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     describe('invoke', () => {
@@ -120,7 +121,7 @@ describe(HealthMonitorClientController, () => {
                 name: 'track availability data name',
                 telemetry: 'availability telemetry' as any,
             };
-            contextAwareLoggerMock.setup(async l => l.trackAvailability(data.name, data.telemetry)).verifiable(Times.once());
+            loggerMock.setup(async l => l.trackAvailability(data.name, data.telemetry)).verifiable(Times.once());
 
             const args: ActivityRequestData = {
                 activityName: ActivityAction.trackAvailability,
