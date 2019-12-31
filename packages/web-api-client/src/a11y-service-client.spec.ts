@@ -140,10 +140,11 @@ describe(A11yServiceClient, () => {
     });
 
     it('checkHealth', async () => {
+        const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
         getMock
             .setup(req => req(`${baseUrl}/health`))
-            .returns(async () => Promise.resolve(null))
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
         await testSubject.checkHealth();

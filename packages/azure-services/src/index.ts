@@ -24,4 +24,5 @@ export { BatchConfig } from './azure-batch/batch-config';
 export * from './azure-batch/pool-load-generator';
 export * from './azure-batch/job-task';
 export { BatchServiceClientProvider } from './ioc-types';
-export { ApplicationInsightsClient } from './app-insights-api-client/application-insights-client';
+export { ApplicationInsightsClient, ResponseWithBodyType } from './app-insights-api-client/application-insights-client';
+export { ApplicationInsightsQueryResponse } from './app-insights-api-client/query-response';
