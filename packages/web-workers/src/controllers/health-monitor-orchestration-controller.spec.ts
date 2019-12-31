@@ -283,6 +283,8 @@ describe('HealthMonitorOrchestrationController', () => {
     });
 
     function setupServiceConfig(): void {
-        serviceConfigurationMock.setup(async sc => sc.getConfigValue('availabilityTestConfig')).returns(async () => availabilityTestConfig);
+        serviceConfigurationMock
+            .setup(async sc => sc.getConfigValue('availabilityTestConfig'))
+            .returns(async () => Promise.resolve(availabilityTestConfig));
     }
 });
