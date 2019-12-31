@@ -96,11 +96,11 @@ if [ $environment = "prod" ]; then
     createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "20000"        # 30 days
     createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "2000" # 7 days
     createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "20000"     # 7 days
-    createCosmosCollection "systemData" "$onDemandScannerDbName" "-1" "2000"
+    createCosmosCollection "systemData" "$onDemandScannerDbName" "1440" "2000"          # 1 day
 else
     createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "2000"
     createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "2000"         # 30 days
     createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "2000" # 7 days
     createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "2000"      # 7 days
-    createCosmosCollection "systemData" "$onDemandScannerDbName" "-1" "2000"
+    createCosmosCollection "systemData" "$onDemandScannerDbName" "1440" "2000"          # 1 day
 fi

@@ -17,7 +17,8 @@ describe('Scan request Sender', () => {
 
     beforeEach(() => {
         storageConfigStub = {
-            scanQueue: 'test-scan-queue',
+            storageName: 'storage-name',
+            scanQueue: 'scan-queue',
         };
 
         queueMock = Mock.ofType<Queue>();

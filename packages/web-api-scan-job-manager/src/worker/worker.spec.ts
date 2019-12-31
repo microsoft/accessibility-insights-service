@@ -6,13 +6,13 @@ import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoadGenerator, 
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { BatchPoolMeasurements } from 'logger';
-import { BatchPoolLoadSnapshotProvider } from 'service-library';
-import { StorageDocument } from 'storage-documents';
+import { SystemDataProvider } from 'service-library';
+import { BatchPoolLoadSnapshot, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
 
-// tslint:disable: no-unsafe-any
+// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-null-keyword
 
 let worker: Worker;
 let batchMock: IMock<Batch>;
@@ -20,12 +20,13 @@ let queueMock: IMock<Queue>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
-let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
+let systemDataProviderMock: IMock<SystemDataProvider>;
 const batchConfig: BatchConfig = {
     accountName: 'batch-account-name',
     accountUrl: '',
     poolId: 'pool-Id',
     jobId: 'batch-job-id',
+    taskId: 'batch-task-id',
 };
 const activeToRunningTasksRatioDefault = 2;
 const addTasksIntervalInSecondsDefault = 1;
@@ -39,13 +40,17 @@ let poolMetricsInfo = {
     },
 };
 const poolLoadSnapshot = {
+    isIdle: false,
     tasksIncrementCountPerInterval: 60,
     targetActiveToRunningTasksRatio: 2,
     configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+    targetMaxTasksPerPool: 8,
     poolId: poolMetricsInfo.id,
     samplingIntervalInSeconds: 5,
     tasksProcessingSpeedPerInterval: 7,
     tasksProcessingSpeedPerMinute: 13,
+    poolFillIntervalInSeconds: 15,
+    activityState: 1,
     timestamp: dateNow,
     ...poolMetricsInfo.load,
 };
@@ -57,7 +62,7 @@ describe(Worker, () => {
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
-        batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
+        systemDataProviderMock = Mock.ofType(SystemDataProvider);
 
         queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
 
@@ -73,7 +78,7 @@ describe(Worker, () => {
             .verifiable(Times.atLeastOnce());
 
         poolLoadGeneratorMock
-            .setup(async o => o.getPoolLoadSnapshot(poolMetricsInfo))
+            .setup(async o => o.getPoolLoadSnapshot(1, poolMetricsInfo))
             .returns(async () => Promise.resolve(poolLoadSnapshot))
             .verifiable(Times.once());
 
@@ -86,7 +91,7 @@ describe(Worker, () => {
             batchMock.object,
             queueMock.object,
             poolLoadGeneratorMock.object,
-            batchPoolLoadSnapshotProviderMock.object,
+            systemDataProviderMock.object,
             batchConfig,
             serviceConfigMock.object,
             loggerMock.object,
@@ -98,7 +103,7 @@ describe(Worker, () => {
         batchMock.verifyAll();
         queueMock.verifyAll();
         serviceConfigMock.verifyAll();
-        batchPoolLoadSnapshotProviderMock.verifyAll();
+        systemDataProviderMock.verifyAll();
     });
 
     it('add tasks to the job', async () => {
@@ -149,13 +154,8 @@ describe(Worker, () => {
             samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
             maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
         };
-        loggerMock
-            .setup(lm =>
-                // tslint:disable-next-line: no-null-keyword
-                lm.trackEvent('BatchPoolStats', null, expectedMeasurements),
-            )
-            .verifiable(Times.once());
-        setupBatchPoolLoadSnapshotProviderMock();
+        loggerMock.setup(lm => lm.trackEvent('BatchPoolStats', null, expectedMeasurements)).verifiable(Times.once());
+        setupSystemDataProviderMock();
 
         await worker.run();
 
@@ -167,7 +167,7 @@ describe(Worker, () => {
     it('skip adding tasks when pool is overloaded', async () => {
         poolLoadSnapshot.tasksIncrementCountPerInterval = 0;
         poolLoadGeneratorMock
-            .setup(async o => o.getPoolLoadSnapshot(poolMetricsInfo))
+            .setup(async o => o.getPoolLoadSnapshot(1, poolMetricsInfo))
             .returns(async () => Promise.resolve(poolLoadSnapshot))
             .verifiable(Times.once());
         batchMock
@@ -183,7 +183,7 @@ describe(Worker, () => {
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.never());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
-        setupBatchPoolLoadSnapshotProviderMock();
+        setupSystemDataProviderMock();
 
         await worker.run();
 
@@ -205,7 +205,7 @@ describe(Worker, () => {
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
-        setupBatchPoolLoadSnapshotProviderMock();
+        setupSystemDataProviderMock();
 
         await worker.run();
     });
@@ -223,6 +223,7 @@ describe(Worker, () => {
         poolLoadGeneratorMock
             .setup(async o =>
                 o.getPoolLoadSnapshot(
+                    1,
                     It.is(actualMetrics => {
                         return _.isEqual(poolMetricsInfo, actualMetrics);
                     }),
@@ -250,7 +251,7 @@ describe(Worker, () => {
                 }
             })
             .verifiable(Times.exactly(2));
-        setupBatchPoolLoadSnapshotProviderMock(Times.exactly(2));
+        setupSystemDataProviderMock(Times.exactly(2));
 
         queueMock
             .setup(async o => o.getMessages())
@@ -275,6 +276,7 @@ describe(Worker, () => {
         poolLoadGeneratorMock
             .setup(async o =>
                 o.getPoolLoadSnapshot(
+                    1,
                     It.is(actualMetrics => {
                         return _.isEqual(poolMetricsInfo, actualMetrics);
                     }),
@@ -302,7 +304,7 @@ describe(Worker, () => {
                 }
             })
             .verifiable(Times.exactly(2));
-        setupBatchPoolLoadSnapshotProviderMock(Times.exactly(2));
+        setupSystemDataProviderMock(Times.exactly(2));
 
         queueMock
             .setup(async o => o.getMessages())
@@ -315,15 +317,14 @@ describe(Worker, () => {
     });
 });
 
-function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): void {
+function setupSystemDataProviderMock(times: Times = Times.once()): void {
     const document = {
-        // tslint:disable-next-line: no-object-literal-type-assertion
         ...({} as StorageDocument),
         batchAccountName: batchConfig.accountName,
         ...poolLoadSnapshot,
     };
 
-    batchPoolLoadSnapshotProviderMock
+    systemDataProviderMock
         .setup(async o =>
             o.writeBatchPoolLoadSnapshot(
                 It.is(d => {
@@ -332,5 +333,11 @@ function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): vo
                 'urlScanPool',
             ),
         )
+        .verifiable(times);
+
+    const lastPoolLoadSnapshot = { activityState: 1 } as BatchPoolLoadSnapshot;
+    systemDataProviderMock
+        .setup(async o => o.readBatchPoolLoadSnapshot(batchConfig.accountName, 'urlScanPool'))
+        .returns(async () => Promise.resolve(lastPoolLoadSnapshot))
         .verifiable(times);
 }

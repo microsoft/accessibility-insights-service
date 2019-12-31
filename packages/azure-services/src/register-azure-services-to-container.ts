@@ -91,15 +91,15 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .inSingletonScope();
     container.bind(Queue).toSelf();
 
-    container
-        .bind(Batch)
-        .toSelf()
-        .inSingletonScope();
+    setupSingletonAzureBatchServiceClientProvider(container);
     container
         .bind(BatchConfig)
         .toSelf()
         .inSingletonScope();
-    setupSingletonAzureBatchServiceClientProvider(container);
+    container
+        .bind(Batch)
+        .toSelf()
+        .inSingletonScope();
 }
 
 async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
@@ -110,9 +110,11 @@ async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
         };
     } else {
         const secretProvider = context.container.get(SecretProvider);
+        const accountName = await secretProvider.getSecret(secretNames.storageAccountName);
+        process.env.AZURE_STORAGE_NAME = accountName;
 
         return {
-            accountName: await secretProvider.getSecret(secretNames.storageAccountName),
+            accountName: accountName,
             accountKey: await secretProvider.getSecret(secretNames.storageAccountKey),
         };
     }

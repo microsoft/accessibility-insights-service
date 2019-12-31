@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any no-object-literal-type-assertion
 import 'reflect-metadata';
 
-import { CosmosOperationResponse } from 'azure-services';
-import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
+import { CosmosOperationResponse, SystemConfig } from 'azure-services';
 import { Logger } from 'logger';
-import { BatchPoolLoadSnapshotProvider, PageScanRequestProvider } from 'service-library';
+import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { QueueSizeGenerator } from '../queue-size-generator';
 import { OnDemandDispatcher } from './on-demand-dispatcher';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
+
+// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion no-null-keyword
 
 export class MockableLogger extends Logger {}
 
@@ -44,38 +45,44 @@ class QueryDataProviderStub<T> {
 
 describe('Dispatcher', () => {
     const maxQueueSize = 10;
-    let loggerMock: IMock<MockableLogger>;
-    let pageScanRequestProvider: IMock<PageScanRequestProvider>;
-    let scanRequestSenderMock: IMock<OnDemandScanRequestSender>;
-    let dispatcher: OnDemandDispatcher;
-    let serviceConfigMock: IMock<ServiceConfiguration>;
-    let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
     let currentQueueSize: number;
+    let loggerMock: IMock<MockableLogger>;
+    let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
+    let onDemandScanRequestSenderMock: IMock<OnDemandScanRequestSender>;
+    let dispatcher: OnDemandDispatcher;
+    let queueSizeGeneratorMock: IMock<QueueSizeGenerator>;
+    let systemConfigStub: SystemConfig;
 
     beforeEach(() => {
         currentQueueSize = 1;
-        serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        serviceConfigMock
-            .setup(async s => s.getConfigValue('queueConfig'))
-            .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
+        systemConfigStub = {
+            storageName: 'storage-name',
+            scanQueue: 'scan-queue',
+            batchAccountName: 'batch-account-name',
+        };
+
+        queueSizeGeneratorMock = Mock.ofType(QueueSizeGenerator);
+        queueSizeGeneratorMock
+            .setup(async o => o.getTargetQueueSize(It.isAny()))
+            .returns(async () => Promise.resolve(maxQueueSize))
+            .verifiable();
 
         loggerMock = Mock.ofType(MockableLogger);
-        pageScanRequestProvider = Mock.ofType(PageScanRequestProvider);
-        scanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
-        batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
+        pageScanRequestProviderMock = Mock.ofType(PageScanRequestProvider);
+        onDemandScanRequestSenderMock = Mock.ofType(OnDemandScanRequestSender, MockBehavior.Strict);
         dispatcher = new OnDemandDispatcher(
-            pageScanRequestProvider.object,
-            scanRequestSenderMock.object,
-            batchPoolLoadSnapshotProviderMock.object,
-            serviceConfigMock.object,
+            pageScanRequestProviderMock.object,
+            onDemandScanRequestSenderMock.object,
+            queueSizeGeneratorMock.object,
             loggerMock.object,
         );
     });
 
     function verifyAll(): void {
-        pageScanRequestProvider.verifyAll();
-        scanRequestSenderMock.verifyAll();
+        pageScanRequestProviderMock.verifyAll();
+        onDemandScanRequestSenderMock.verifyAll();
         loggerMock.verifyAll();
+        queueSizeGeneratorMock.verifyAll();
     }
 
     test.each([maxQueueSize, maxQueueSize + 1])(
@@ -114,10 +121,7 @@ describe('Dispatcher', () => {
         const queryDataProviderStub2 = new QueryDataProviderStub<OnDemandPageScanRequest>([], 2);
 
         setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
-        loggerMock
-            // tslint:disable-next-line: no-null-keyword
-            .setup(lm => lm.trackEvent('ScanRequestQueued', null, { queuedRequests: 2 }))
-            .verifiable(Times.exactly(4));
+        loggerMock.setup(lm => lm.trackEvent('ScanRequestQueued', null, { queuedRequests: 2 })).verifiable(Times.exactly(4));
 
         await dispatcher.dispatchOnDemandScanRequests();
 
@@ -168,13 +172,13 @@ describe('Dispatcher', () => {
     it('error while retrieving documents', async () => {
         setupVerifiableQueueSizeCall();
 
-        pageScanRequestProvider
+        pageScanRequestProviderMock
             .setup(async p => p.getRequests(It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
         await expect(dispatcher.dispatchOnDemandScanRequests()).rejects.toThrowError(/Failed request response/);
-        pageScanRequestProvider.verifyAll();
+        pageScanRequestProviderMock.verifyAll();
     });
 
     function getOnDemandRequests(count: number): OnDemandPageScanRequest[] {
@@ -220,7 +224,7 @@ describe('Dispatcher', () => {
     }
 
     function setupVerifiableScanRequestCallForChunk(onDemandPageScanRequests: OnDemandPageScanRequest[]): void {
-        scanRequestSenderMock
+        onDemandScanRequestSenderMock
             .setup(async s => s.sendRequestToScan(onDemandPageScanRequests))
             .returns(async () => {
                 currentQueueSize += onDemandPageScanRequests.length;
@@ -233,27 +237,27 @@ describe('Dispatcher', () => {
         previousContinuationToken: string,
         continuationToken: string,
     ): void {
-        pageScanRequestProvider
+        pageScanRequestProviderMock
             .setup(async p => p.getRequests(previousContinuationToken))
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
     function setupPageDocumentProviderNotCalled(): void {
-        pageScanRequestProvider.setup(async p => p.getRequests(It.isAny())).verifiable(Times.never());
+        pageScanRequestProviderMock.setup(async p => p.getRequests(It.isAny())).verifiable(Times.never());
     }
+
     function setupVerifiableQueueSizeCall(): void {
-        scanRequestSenderMock
+        onDemandScanRequestSenderMock
             .setup(async s => s.getCurrentQueueSize())
             .returns(async () => Promise.resolve(currentQueueSize))
             .verifiable(Times.atLeastOnce());
     }
 
     function setupVerifiableScanRequestNotCalled(): void {
-        scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
+        onDemandScanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
     }
 
     function getErrorResponse(): CosmosOperationResponse<OnDemandPageScanRequest[]> {
-        // tslint:disable-next-line: no-object-literal-type-assertion
         return <CosmosOperationResponse<OnDemandPageScanRequest[]>>{
             type: 'CosmosOperationResponse<OnDemandPageScanRequest>',
             statusCode: 500,

@@ -12,7 +12,7 @@ import {
     OnDemandPageScanRunState,
     OnDemandScanRequestMessage,
 } from 'storage-documents';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 describe('Scan request sender', () => {
@@ -28,7 +28,8 @@ describe('Scan request sender', () => {
         MockDate.set(dateNow);
 
         storageConfigStub = {
-            scanQueue: 'test-scan-queue',
+            storageName: 'storage-name',
+            scanQueue: 'scan-queue',
         };
 
         queueMock = Mock.ofType<Queue>();

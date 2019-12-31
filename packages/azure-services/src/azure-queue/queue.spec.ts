@@ -32,7 +32,8 @@ describe(Queue, () => {
 
     beforeEach(() => {
         config = {
-            scanQueue: 'queue-1',
+            storageName: 'storage-name',
+            scanQueue: 'scan-queue',
         };
         queueServiceURLProviderMock = Mock.ofInstance((() => {}) as any);
         queueURLProviderMock = Mock.ofInstance((() => {}) as any);

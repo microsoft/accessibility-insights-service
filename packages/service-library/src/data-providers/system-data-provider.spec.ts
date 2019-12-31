@@ -5,19 +5,19 @@ import 'reflect-metadata';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { BatchPoolLoadSnapshot, ItemType, PartitionKey } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { BatchPoolLoadSnapshotProvider } from './batch-pool-load-snapshot-provider';
+import { SystemDataProvider } from './system-data-provider';
 
 // tslint:disable: no-unsafe-any
 
-let batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider;
+let systemDataProvider: SystemDataProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 
 beforeEach(() => {
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
-    batchPoolLoadSnapshotProvider = new BatchPoolLoadSnapshotProvider(cosmosContainerClientMock.object);
+    systemDataProvider = new SystemDataProvider(cosmosContainerClientMock.object);
 });
 
-describe(BatchPoolLoadSnapshotProvider, () => {
+describe(SystemDataProvider, () => {
     it('write batch pool load snapshot to a Cosmos DB', async () => {
         const batchPoolLoadSnapshot = {
             id: undefined as string,
@@ -31,7 +31,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
             ...batchPoolLoadSnapshot,
             id: `${batchPoolLoadSnapshot.batchAccountName}.${'urlScanPool'}`,
             itemType: ItemType.batchPoolLoadSnapshot,
-            partitionKey: PartitionKey.batchPoolLoadSnapshots,
+            partitionKey: PartitionKey.systemData,
         };
 
         let document: BatchPoolLoadSnapshot;
@@ -40,10 +40,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
             .callback(async d => (document = d))
             .verifiable(Times.once());
 
-        await batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot(
-            <BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot),
-            'urlScanPool',
-        );
+        await systemDataProvider.writeBatchPoolLoadSnapshot(<BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot), 'urlScanPool');
 
         expect(document).toEqual(batchPoolLoadSnapshotDocument);
         cosmosContainerClientMock.verifyAll();
@@ -58,13 +55,13 @@ describe(BatchPoolLoadSnapshotProvider, () => {
         };
 
         cosmosContainerClientMock
-            .setup(async o => o.readDocument(id, PartitionKey.batchPoolLoadSnapshots))
+            .setup(async o => o.readDocument(id, PartitionKey.systemData))
             .returns(async () =>
                 Promise.resolve(<CosmosOperationResponse<BatchPoolLoadSnapshot>>(<unknown>{ item: batchPoolLoadSnapshot })),
             )
             .verifiable(Times.once());
 
-        const batchPoolLoadSnapshotResult = await batchPoolLoadSnapshotProvider.readBatchPoolLoadSnapshot(batchAccountName, 'urlScanPool');
+        const batchPoolLoadSnapshotResult = await systemDataProvider.readBatchPoolLoadSnapshot(batchAccountName, 'urlScanPool');
 
         expect(batchPoolLoadSnapshotResult).toEqual(batchPoolLoadSnapshot);
         cosmosContainerClientMock.verifyAll();

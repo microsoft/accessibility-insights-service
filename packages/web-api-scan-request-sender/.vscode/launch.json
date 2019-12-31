@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Start debugging web-api-request-sender",
+            "name": "Start debugging web-api-scan-request-sender",
             "type": "node",
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
