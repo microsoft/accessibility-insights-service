@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger, ScanUrlsAddedMeasurements } from 'logger';
+import { Logger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -41,13 +41,13 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(Logger) logger: Logger,
     ) {
-        super(contextAwareLogger);
+        super(logger);
     }
 
     public async handleRequest(...args: unknown[]): Promise<void> {
-        this.contextAwareLogger.logInfo('processing the documents');
+        this.logger.logInfo('processing the documents');
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
@@ -57,9 +57,9 @@ export class ScanBatchRequestFeedController extends WebController {
                     addedUrls: addedRequests,
                 };
 
-                this.contextAwareLogger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
 
-                this.contextAwareLogger.logInfo(
+                this.logger.logInfo(
                     `[ScanBatchRequestFeedController] processed batch request document`,
                     this.getLogPropertiesForRequests(document.scanRunBatchRequest, document.id),
                 );
@@ -79,7 +79,7 @@ export class ScanBatchRequestFeedController extends WebController {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
-            this.contextAwareLogger.logInfo(
+            this.logger.logInfo(
                 `[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`,
                 this.getLogPropertiesForRequests(requests, batchDocument.id),
             );
@@ -105,7 +105,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
-        this.contextAwareLogger.logInfo(
+        this.logger.logInfo(
             `[ScanBatchRequestFeedController] Added requests to permanent container`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
         );
@@ -123,7 +123,7 @@ export class ScanBatchRequestFeedController extends WebController {
         });
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
-        this.contextAwareLogger.logInfo(
+        this.logger.logInfo(
             `[ScanBatchRequestFeedController] Added requests to queue container`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
         );
@@ -149,9 +149,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
         if (documents === undefined || documents.length === 0 || !documents.some(d => d.itemType === ItemType.scanRunBatchRequest)) {
-            this.contextAwareLogger.logInfo(
-                `[ScanBatchRequestFeedController] passed documents were not valid - ${JSON.stringify(documents)}`,
-            );
+            this.logger.logInfo(`[ScanBatchRequestFeedController] passed documents were not valid - ${JSON.stringify(documents)}`);
 
             return false;
         }

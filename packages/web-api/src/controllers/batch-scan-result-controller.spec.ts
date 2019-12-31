@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
-import { ContextAwareLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BatchScanResultController } from './batch-scan-result-controller';
@@ -17,7 +17,7 @@ describe(BatchScanResultController, () => {
     let context: Context;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMockMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let scanResponseConverterMock: IMock<ScanResponseConverter>;
     const apiVersion = '1.0';
@@ -87,7 +87,7 @@ describe(BatchScanResultController, () => {
                 } as RestApiConfig;
             });
 
-        contextAwareLoggerMockMock = Mock.ofType<ContextAwareLogger>();
+        loggerMock = Mock.ofType<MockableLogger>();
 
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         scanResponseConverterMock
@@ -101,7 +101,7 @@ describe(BatchScanResultController, () => {
             scanResponseConverterMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
-            contextAwareLoggerMockMock.object,
+            loggerMock.object,
         );
         controller.context = contextReq;
 

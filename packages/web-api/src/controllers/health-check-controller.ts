@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 import { ApiController } from 'service-library';
 
 @injectable()
@@ -12,13 +12,13 @@ export class HealthCheckController extends ApiController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(Logger) logger: Logger,
     ) {
-        super(contextAwareLogger);
+        super(logger);
     }
 
     public async handleRequest(): Promise<void> {
-        this.contextAwareLogger.trackEvent('HealthCheck');
+        this.logger.trackEvent('HealthCheck');
         this.context.res = {
             status: 200, // OK
         };

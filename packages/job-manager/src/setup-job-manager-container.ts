@@ -3,14 +3,14 @@
 import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import { Container } from 'inversify';
-import { registerLoggerToContainer } from 'logger';
+import { registerGlobalLoggerToContainer } from 'logger';
 import { Batch } from './batch/batch';
 import { RunnerTaskConfig } from './batch/runner-task-config';
 
 export function setupJobManagerContainer(): Container {
     const container = new Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);
-    registerLoggerToContainer(container);
+    registerGlobalLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 
     container

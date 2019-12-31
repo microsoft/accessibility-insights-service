@@ -13,7 +13,34 @@ import { GlobalLogger } from './global-logger';
 import { Logger } from './logger';
 import { loggerTypes } from './logger-types';
 
-export function registerLoggerToContainer(container: Container): void {
+export function registerGlobalLoggerToContainer(container: Container): void {
+    registerLoggerDependenciesToContainer(container);
+
+    container
+        .bind(Logger)
+        .toDynamicValue(context => {
+            const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
+            const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
+
+            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+        })
+        .inSingletonScope();
+}
+
+export function registerContextAwareLoggerToContainer(container: Container): void {
+    if (!container.isBound(Logger)) {
+        registerLoggerDependenciesToContainer(container);
+    }
+
+    container.bind(Logger).toDynamicValue(context => {
+        const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
+        const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
+
+        return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+    });
+}
+
+function registerLoggerDependenciesToContainer(container: Container): void {
     container.bind(loggerTypes.AppInsights).toConstantValue(appInsights);
     container.bind(loggerTypes.Process).toConstantValue(process);
     container
@@ -28,21 +55,4 @@ export function registerLoggerToContainer(container: Container): void {
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Argv).toConstantValue(argv);
     container.bind(loggerTypes.Console).toConstantValue(console);
-
-    container
-        .bind(Logger)
-        .toDynamicValue(context => {
-            const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
-            const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
-
-            return new GlobalLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
-        })
-        .inSingletonScope();
-
-    container.bind(ContextAwareLogger).toDynamicValue(context => {
-        const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
-        const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
-
-        return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
-    });
 }
