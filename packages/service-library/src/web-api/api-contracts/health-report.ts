@@ -14,4 +14,5 @@ export interface HealthReport {
     testRuns: TestRun[];
     testsPassed: number;
     testsFailed: number;
+    error?: string;
 }
