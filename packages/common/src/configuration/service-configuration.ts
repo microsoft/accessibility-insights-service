@@ -79,18 +79,14 @@ export class ServiceConfiguration {
         if (isNil(this.loadConfigPromise)) {
             this.loadConfigPromise = new Promise((resolve, reject) => {
                 const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
-                let configExists = false;
                 this.fileSystem.exists(ServiceConfiguration.profilePath, exists => {
                     if (exists === true) {
                         config.loadFile(ServiceConfiguration.profilePath);
                         config.validate({ allowed: 'strict' });
-                        configExists = true;
+                    } else {
+                        console.log(`Unable to load custom configuration. Using default config  - ${config}`);
                     }
                 });
-
-                if (!configExists) {
-                    console.log(`Unable to load custom configuration. Using default config  - ${config}`);
-                }
 
                 resolve(config);
             });
