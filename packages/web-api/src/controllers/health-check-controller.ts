@@ -26,8 +26,10 @@ export class HealthCheckController extends ApiController {
 
         const appInsightsClient = await this.appInsightsClientProvider();
 
+        const currentVersion = process.env.RELEASE_VERSION;
+
         const healthReport: HealthReport = {
-            buildVersion: '0.0.0',
+            buildVersion: currentVersion,
             testRuns: [],
             testsPassed: 0,
             testsFailed: 0,
