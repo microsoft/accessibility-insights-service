@@ -11,7 +11,6 @@ import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-t
 export class HealthCheckController extends ApiController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'web-api-health-check';
-    private readonly queryTimespan = 'PT6H';
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -34,8 +33,9 @@ export class HealthCheckController extends ApiController {
             testsFailed: 0,
         };
 
+        const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
         const queryString = 'customEvents | limit 5';
-        const queryResponse = await appInsightsClient.executeQuery(queryString, this.queryTimespan);
+        const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
         if (queryResponse.statusCode === 200) {
             this.logger.logInfo(`App insights api queried with result ${JSON.stringify(queryResponse)}`);
         } else {

@@ -47,12 +47,17 @@ export interface RuntimeConfig {
     jobManagerConfig: JobManagerConfig;
     restApiConfig: RestApiConfig;
     availabilityTestConfig: AvailabilityTestConfig;
+    e2eTestConfig: E2ETestConfig;
 }
 
 export interface AvailabilityTestConfig {
     urlToScan: string;
     scanWaitIntervalInSeconds: number;
     maxScanWaitTimeInSeconds: number;
+}
+
+export interface E2ETestConfig {
+    testRunQueryTimespan: string;
 }
 
 @injectable()
@@ -248,6 +253,9 @@ export class ServiceConfiguration {
                     default: 60,
                     doc: 'Time to wait before checking the url scan status again',
                 },
+            },
+            e2eTestConfig: {
+                testRunQueryTimespan: 'PT30M',
             },
         };
     }

@@ -19,6 +19,9 @@ Object {
       "format": "url",
     },
   },
+  "e2eTestConfig": Object {
+    "testRunQueryTimespan": "PT30M",
+  },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
@@ -169,6 +172,9 @@ Object {
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
+  },
+  "e2eTestConfig": Object {
+    "testRunQueryTimespan": "PT30M",
   },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
