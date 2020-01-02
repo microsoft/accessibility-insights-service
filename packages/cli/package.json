@@ -1,6 +1,6 @@
 {
-    "name": "ai-scan",
-    "version": "1.0.0",
+    "name": "accessibility-insights-scan",
+    "version": "0.1.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
@@ -41,7 +41,8 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.6.2",
         "webpack": "^4.29.4",
-        "webpack-cli": "^3.2.3"
+        "webpack-cli": "^3.2.3",
+        "shebang-loader": "^0.0.1"
     },
     "dependencies": {
         "dotenv": "^6.2.0",

@@ -9,7 +9,7 @@ A simple accessibility insights scanner for node cli.
 This package is available on [npm](http://npmjs.com) as `ai-scan`.
 
 ```sh
-npm install -g ai-scan
+npm install -g accessibility-insights-scan
 ```
 
 ## Example usage

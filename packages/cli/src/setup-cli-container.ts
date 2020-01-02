@@ -8,14 +8,9 @@ import { CommandRunner } from './command-runner';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { ReportGenerator } from './report/report-generator';
 import { AIScanner } from './scanner/ai-scanner';
-import { ScanRunner } from './scanner/scan-runner';
 import { WebDriver } from './web-driver/web-driver';
 export function setupCliContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
-    container
-        .bind(ScanRunner)
-        .toSelf()
-        .inSingletonScope();
     container
         .bind(AIScanner)
         .toSelf()

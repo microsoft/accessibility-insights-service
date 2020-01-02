@@ -4,8 +4,8 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as rl from 'readline';
 import { ReportGenerator } from './report/report-generator';
+import { AIScanner } from './scanner/ai-scanner';
 import { ScanArguments } from './scanner/scan-arguments';
-import { ScanRunner } from './scanner/scan-runner';
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
@@ -14,7 +14,7 @@ export class CommandRunner {
     public domainNameRegExp = new RegExp('^(?:http://|www.|https://)([^/]+)', 'igm');
 
     constructor(
-        @inject(ScanRunner) private readonly scanner: ScanRunner,
+        @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
     ) {}
 

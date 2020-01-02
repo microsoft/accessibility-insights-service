@@ -33,9 +33,21 @@ module.exports = env => {
                     ],
                     exclude: ['/node_modules/', /\.(spec|e2e)\.ts$/],
                 },
+                {
+                    test: /\.ts$/,
+                    use: [
+                        {
+                            loader: 'shebang-loader',
+                            options: {
+                                transpileOnly: true,
+                                experimentalWatchApi: true,
+                            },
+                        },
+                    ],
+                },
             ],
         },
-        name: 'ais-cli',
+        name: 'ai-scan',
         node: {
             __dirname: false,
         },
@@ -45,6 +57,7 @@ module.exports = env => {
             libraryTarget: 'commonjs2',
         },
         plugins: [
+            new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
