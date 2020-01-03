@@ -7,11 +7,11 @@ import { ScanError } from 'storage-documents';
 
 @injectable()
 export class ScanRunErrorConverter {
-    public getScanRunErrorCode(scanError: ScanError): ScanRunErrorCode {
+    public getScanRunErrorCode(scanError: string | ScanError): ScanRunErrorCode {
         if (isNil(scanError)) {
             return ScanRunErrorCodes.internalError;
         }
 
-        return scanErrorNameToErrorMap[scanError.errorType];
+        return scanErrorNameToErrorMap[(<ScanError>scanError).errorType];
     }
 }

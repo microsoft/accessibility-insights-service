@@ -52,5 +52,5 @@ export interface OnDemandPageScanReport {
 export interface OnDemandPageScanRunResult {
     state: OnDemandPageScanRunState;
     timestamp?: string;
-    error?: ScanError;
+    error?: string | ScanError;
 }
