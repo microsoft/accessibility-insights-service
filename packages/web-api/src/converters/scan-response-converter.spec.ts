@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { RunState as RunStateRestApi, ScanResultResponse, ScanRunErrorCodes } from 'service-library';
-import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb, ScanError } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { ScanResponseConverter } from './scan-response-converter';
@@ -13,11 +13,15 @@ import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 const apiVersion = '1.0';
 const baseUrl = 'https://localhost/api/';
-const scanRunError = 'internal-error';
+let scanRunError: ScanError;
 let scanResponseConverter: ScanResponseConverter;
 let scanRunErrorConverterMock: IMock<ScanRunErrorConverter>;
 
 beforeEach(() => {
+    scanRunError = {
+        errorType: 'InvalidUrl',
+        message: 'message',
+    };
     scanRunErrorConverterMock = Mock.ofType(ScanRunErrorConverter);
     scanRunErrorConverterMock
         .setup(o => o.getScanRunErrorCode(scanRunError))
@@ -47,7 +51,7 @@ function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
         ],
         run: {
             state: state,
-            error: 'internal-error',
+            error: scanRunError,
         },
         batchRequestId: 'batch-id',
     };
