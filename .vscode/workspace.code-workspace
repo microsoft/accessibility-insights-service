@@ -73,6 +73,10 @@
             "path": "../packages/functional-tests"
         },
         {
+            "name": "e2e-tests",
+            "path": "../packages/e2e-tests"
+        },
+        {
             "name": "root",
             "path": "../"
         }

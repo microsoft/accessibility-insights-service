@@ -17,7 +17,8 @@
         "precheckin": "npm-run-all --serial format build lint test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
-        "copyright-check": "license-check-and-add"
+        "copyright-check": "license-check-and-add",
+        "e2e": "npx jest --projects packages/e2e-tests/jest.config.js"
     },
     "author": "Microsoft",
     "license": "MIT",
@@ -111,7 +112,10 @@
             "./packages/web-api-client/test-results",
             "./packages/functional-tests/dist",
             "./packages/functional-tests/node_modules",
-            "./packages/functional-tests/test-results"
+            "./packages/functional-tests/test-results",
+            "./packages/e2e-tests/dist",
+            "./packages/e2e-tests/node_modules",
+            "./packages/e2e-tests/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [
