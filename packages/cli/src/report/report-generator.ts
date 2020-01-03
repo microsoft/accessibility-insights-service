@@ -20,7 +20,7 @@ export class ReportGenerator {
             description: `Automated report for accessibility scan of url ${
                 axeResults.results.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
-            serviceName: 'Accessibility Insights Cli',
+            serviceName: 'Accessibility Insights Scan',
             scanContext: {
                 browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
