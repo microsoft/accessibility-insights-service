@@ -62,6 +62,6 @@
         "ai-scan": "dist/ai-scan.js"
     },
     "engines": {
-        "node": ">=12.6.0"
+        "node": ">=10.18"
     }
 }
