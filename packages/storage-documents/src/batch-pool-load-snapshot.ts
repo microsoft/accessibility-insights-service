@@ -20,6 +20,6 @@ export interface BatchPoolLoadSnapshot extends StorageDocument {
      * Represents the pool activity state history as a bit flag. The latest state is a rightmost bit.
      * The idle state is represented by 0, the active state is represented by 1.
      */
-    activityState: number;
+    activityStateFlags: number;
     timestamp: Date;
 }

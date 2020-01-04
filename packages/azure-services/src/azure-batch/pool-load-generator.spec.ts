@@ -55,7 +55,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -83,7 +83,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -110,7 +110,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 54,
             tasksProcessingSpeedPerMinute: 1620,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -138,7 +138,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -165,7 +165,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: -26,
             tasksProcessingSpeedPerMinute: -780,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -193,7 +193,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -220,7 +220,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: -936,
             tasksProcessingSpeedPerMinute: -28080,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -245,7 +245,7 @@ describe(PoolLoadGenerator, () => {
             targetMaxTasksPerPool: 32,
             poolId: poolMetricsInfo.id,
             poolFillIntervalInSeconds: 15,
-            activityState: 2,
+            activityStateFlags: 2,
             timestamp: dateNow,
         } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(1, poolMetricsInfo);
@@ -271,7 +271,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 32,
             tasksProcessingSpeedPerMinute: 960,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -298,7 +298,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 74,
             tasksProcessingSpeedPerMinute: 1480,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -326,7 +326,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -354,7 +354,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 38,
             tasksProcessingSpeedPerMinute: 1140,
             poolFillIntervalInSeconds: 15,
-            activityState: 3,
+            activityStateFlags: 3,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -382,7 +382,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 2147483647,
+            activityStateFlags: 2147483647,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;
@@ -406,7 +406,7 @@ describe(PoolLoadGenerator, () => {
             targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             poolFillIntervalInSeconds: 15,
-            activityState: 2147483646,
+            activityStateFlags: 2147483646,
             timestamp: dateNow,
         } as PoolLoadSnapshot;
         const poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(2147483647, poolMetricsInfo);
@@ -433,7 +433,7 @@ describe(PoolLoadGenerator, () => {
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
             poolFillIntervalInSeconds: 15,
-            activityState: 571475009,
+            activityStateFlags: 571475009,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
         } as PoolLoadSnapshot;

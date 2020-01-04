@@ -32,7 +32,7 @@ export interface PoolLoadSnapshot {
      * Represents the pool activity state history as a bit flag. The latest state is a rightmost bit.
      * The idle state is represented by 0, the active state is represented by 1.
      */
-    activityState: number;
+    activityStateFlags: number;
     timestamp: Date;
 }
 
@@ -48,7 +48,7 @@ export class PoolLoadGenerator {
 
     public constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
 
-    public async getPoolLoadSnapshot(lastActivityState: number, poolMetricsInfo: PoolMetricsInfo): Promise<PoolLoadSnapshot> {
+    public async getPoolLoadSnapshot(lastActivityStateFlags: number, poolMetricsInfo: PoolMetricsInfo): Promise<PoolLoadSnapshot> {
         await this.calculateTasksIncrementCount(poolMetricsInfo);
         this.lastPoolLoad = poolMetricsInfo.load;
 
@@ -61,7 +61,7 @@ export class PoolLoadGenerator {
             targetActiveToRunningTasksRatio: this.activeToRunningTasksRatio,
             targetMaxTasksPerPool: Math.round(poolMetricsInfo.maxTasksPerPool * this.activeToRunningTasksRatio),
             poolFillIntervalInSeconds: (await this.getJobManagerConfig()).addTasksIntervalInSeconds,
-            activityState: this.getActivityState(lastActivityState, isIdle),
+            activityStateFlags: this.getActivityStateFlags(lastActivityStateFlags, isIdle),
             timestamp: moment().toDate(),
         };
 
@@ -125,10 +125,10 @@ export class PoolLoadGenerator {
     }
 
     // tslint:disable: no-bitwise
-    private getActivityState(lastActivityState: number, isIdle: boolean): number {
+    private getActivityStateFlags(lastActivityStateFlags: number, isIdle: boolean): number {
         const mask = 2147483647;
         // shift previous states left and reset sign bit
-        const nextState = (lastActivityState << 1) & mask;
+        const nextState = (lastActivityStateFlags << 1) & mask;
 
         // set current state bit to 0/1 for idle/active pool respectively
         return isIdle ? nextState : nextState + 1;

@@ -6,7 +6,7 @@ import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoadGenerator, 
 import { ServiceConfiguration } from 'common';
 import * as _ from 'lodash';
 import { BatchPoolMeasurements } from 'logger';
-import { SystemDataProvider } from 'service-library';
+import { ScanProcessingStateProvider } from 'service-library';
 import { BatchPoolLoadSnapshot, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -20,7 +20,7 @@ let queueMock: IMock<Queue>;
 let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
-let systemDataProviderMock: IMock<SystemDataProvider>;
+let scanProcessingStateProviderMock: IMock<ScanProcessingStateProvider>;
 const batchConfig: BatchConfig = {
     accountName: 'batch-account-name',
     accountUrl: '',
@@ -50,7 +50,7 @@ const poolLoadSnapshot = {
     tasksProcessingSpeedPerInterval: 7,
     tasksProcessingSpeedPerMinute: 13,
     poolFillIntervalInSeconds: 15,
-    activityState: 1,
+    activityStateFlags: 1,
     timestamp: dateNow,
     ...poolMetricsInfo.load,
 };
@@ -62,7 +62,7 @@ describe(Worker, () => {
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
-        systemDataProviderMock = Mock.ofType(SystemDataProvider);
+        scanProcessingStateProviderMock = Mock.ofType(ScanProcessingStateProvider);
 
         queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
 
@@ -91,7 +91,7 @@ describe(Worker, () => {
             batchMock.object,
             queueMock.object,
             poolLoadGeneratorMock.object,
-            systemDataProviderMock.object,
+            scanProcessingStateProviderMock.object,
             batchConfig,
             serviceConfigMock.object,
             loggerMock.object,
@@ -103,7 +103,7 @@ describe(Worker, () => {
         batchMock.verifyAll();
         queueMock.verifyAll();
         serviceConfigMock.verifyAll();
-        systemDataProviderMock.verifyAll();
+        scanProcessingStateProviderMock.verifyAll();
     });
 
     it('add tasks to the job', async () => {
@@ -155,7 +155,7 @@ describe(Worker, () => {
             maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
         };
         loggerMock.setup(lm => lm.trackEvent('BatchPoolStats', null, expectedMeasurements)).verifiable(Times.once());
-        setupSystemDataProviderMock();
+        setupScanProcessingStateProviderMock();
 
         await worker.run();
 
@@ -183,7 +183,7 @@ describe(Worker, () => {
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.never());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
-        setupSystemDataProviderMock();
+        setupScanProcessingStateProviderMock();
 
         await worker.run();
 
@@ -205,7 +205,7 @@ describe(Worker, () => {
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
         queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
-        setupSystemDataProviderMock();
+        setupScanProcessingStateProviderMock();
 
         await worker.run();
     });
@@ -251,7 +251,7 @@ describe(Worker, () => {
                 }
             })
             .verifiable(Times.exactly(2));
-        setupSystemDataProviderMock(Times.exactly(2));
+        setupScanProcessingStateProviderMock(Times.exactly(2));
 
         queueMock
             .setup(async o => o.getMessages())
@@ -304,7 +304,7 @@ describe(Worker, () => {
                 }
             })
             .verifiable(Times.exactly(2));
-        setupSystemDataProviderMock(Times.exactly(2));
+        setupScanProcessingStateProviderMock(Times.exactly(2));
 
         queueMock
             .setup(async o => o.getMessages())
@@ -317,14 +317,14 @@ describe(Worker, () => {
     });
 });
 
-function setupSystemDataProviderMock(times: Times = Times.once()): void {
+function setupScanProcessingStateProviderMock(times: Times = Times.once()): void {
     const document = {
         ...({} as StorageDocument),
         batchAccountName: batchConfig.accountName,
         ...poolLoadSnapshot,
     };
 
-    systemDataProviderMock
+    scanProcessingStateProviderMock
         .setup(async o =>
             o.writeBatchPoolLoadSnapshot(
                 It.is(d => {
@@ -335,8 +335,8 @@ function setupSystemDataProviderMock(times: Times = Times.once()): void {
         )
         .verifiable(times);
 
-    const lastPoolLoadSnapshot = { activityState: 1 } as BatchPoolLoadSnapshot;
-    systemDataProviderMock
+    const lastPoolLoadSnapshot = { activityStateFlags: 1 } as BatchPoolLoadSnapshot;
+    scanProcessingStateProviderMock
         .setup(async o => o.readBatchPoolLoadSnapshot(batchConfig.accountName, 'urlScanPool'))
         .returns(async () => Promise.resolve(lastPoolLoadSnapshot))
         .verifiable(times);

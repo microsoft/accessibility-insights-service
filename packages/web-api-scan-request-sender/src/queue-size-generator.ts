@@ -5,14 +5,14 @@ import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { BatchPoolAlias, SystemDataProvider } from 'service-library';
+import { BatchPoolAlias, ScanProcessingStateProvider } from 'service-library';
 import { BatchPoolLoadSnapshot, StorageDocument } from 'storage-documents';
 
 @injectable()
 export class QueueSizeGenerator {
     constructor(
         @inject(Batch) private readonly batch: Batch,
-        @inject(SystemDataProvider) private readonly systemDataProvider: SystemDataProvider,
+        @inject(ScanProcessingStateProvider) private readonly scanProcessingStateProvider: ScanProcessingStateProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(SystemConfig) private readonly systemConfig: SystemConfig,
         @inject(Logger) private readonly logger: Logger,
@@ -20,7 +20,10 @@ export class QueueSizeGenerator {
 
     public async getTargetQueueSize(currentQueueSize: number): Promise<number> {
         const senderRunIntervalInSeconds = (await this.batch.getJobScheduleRunIntervalInMinutes()) * 60;
-        const poolLoadSnapshot = await this.systemDataProvider.readBatchPoolLoadSnapshot(this.systemConfig.batchAccountName, 'urlScanPool');
+        const poolLoadSnapshot = await this.scanProcessingStateProvider.readBatchPoolLoadSnapshot(
+            this.systemConfig.batchAccountName,
+            'urlScanPool',
+        );
         if (poolLoadSnapshot === undefined) {
             const defaultQueueSize = (await this.getQueueRuntimeConfig()).maxQueueSize;
             await this.writeScanQueueLoadSnapshot(defaultQueueSize, 1, senderRunIntervalInSeconds);
@@ -60,18 +63,18 @@ export class QueueSizeGenerator {
 
     private async getQueueBufferingIndex(poolLoadSnapshot: BatchPoolLoadSnapshot, currentQueueSize: number): Promise<number> {
         // reset queue buffering index to slow start when pool continuously idle
-        if (currentQueueSize > 0 && poolLoadSnapshot.activityState === 0) {
+        if (currentQueueSize > 0 && poolLoadSnapshot.activityStateFlags === 0) {
             return 1;
         }
 
-        const scanQueueLoadSnapshot = await this.systemDataProvider.readScanQueueLoadSnapshot(
+        const scanQueueLoadSnapshot = await this.scanProcessingStateProvider.readScanQueueLoadSnapshot(
             this.systemConfig.storageName,
             'onDemandScanRequest',
         );
         const lastQueueBufferingIndex = scanQueueLoadSnapshot !== undefined ? scanQueueLoadSnapshot.queueBufferingIndex : 1;
 
         // If the queue drained since the last run, then increase the queue buffering index
-        return currentQueueSize > 0 ? lastQueueBufferingIndex : lastQueueBufferingIndex * 2;
+        return currentQueueSize > 0 ? lastQueueBufferingIndex : lastQueueBufferingIndex + 1;
     }
 
     private async writeScanQueueLoadSnapshot(
@@ -79,7 +82,7 @@ export class QueueSizeGenerator {
         queueBufferingIndex: number,
         senderRunIntervalInSeconds: number,
     ): Promise<void> {
-        await this.systemDataProvider.writeScanQueueLoadSnapshot(
+        await this.scanProcessingStateProvider.writeScanQueueLoadSnapshot(
             {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 ...({} as StorageDocument),

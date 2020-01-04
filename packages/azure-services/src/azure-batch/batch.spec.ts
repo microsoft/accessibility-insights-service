@@ -3,8 +3,8 @@
 // tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
 import 'reflect-metadata';
 
-import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
-import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
+import { BatchServiceClient, BatchServiceModels, Job, JobSchedule, Pool, Task } from '@azure/batch';
+import { JobGetTaskCountsResponse, JobListResponse, JobScheduleGetResponse, PoolGetResponse } from '@azure/batch/esm/models';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -41,6 +41,7 @@ describe(Batch, () => {
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
     let poolMock: IMock<Pool>;
+    let jobSchedule: IMock<JobSchedule>;
     let storageContainerSASUrlProviderMock: IMock<StorageContainerSASUrlProvider>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<MockableLogger>;
@@ -55,7 +56,7 @@ describe(Batch, () => {
             accountName: '',
             accountUrl: '',
             poolId: 'poolId',
-            jobId: '',
+            jobId: 'on-demand-scan-req-schedule:job-100',
             taskId: '',
         };
         taskParameter = {
@@ -77,10 +78,12 @@ describe(Batch, () => {
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
         poolMock = Mock.ofType();
+        jobSchedule = Mock.ofType();
         batchClientStub = ({
             job: jobMock.object,
             task: taskMock.object,
             pool: poolMock.object,
+            jobSchedule: jobSchedule.object,
         } as unknown) as BatchServiceClient;
         loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
@@ -97,6 +100,25 @@ describe(Batch, () => {
             config,
             loggerMock.object,
         );
+    });
+
+    describe('getJobScheduleRunIntervalInMinutes()', () => {
+        it('get job schedule run interval', async () => {
+            const jobScheduleId = 'on-demand-scan-req-schedule';
+            const jobScheduleGetResponse = {
+                schedule: {
+                    recurrenceInterval: 'PT2M', // 2 minutes
+                },
+            } as JobScheduleGetResponse;
+            jobSchedule
+                .setup(async o => o.get(jobScheduleId))
+                .returns(async () => Promise.resolve(jobScheduleGetResponse))
+                .verifiable();
+            const jobScheduleRunInterval = await batch.getJobScheduleRunIntervalInMinutes();
+
+            expect(jobScheduleRunInterval).toEqual(2);
+            jobSchedule.verifyAll();
+        });
     });
 
     describe('getPoolMetricsInfo()', () => {

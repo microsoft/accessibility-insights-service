@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { SystemDataProvider } from 'service-library';
+import { ScanProcessingStateProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
 
 @injectable()
@@ -21,7 +21,7 @@ export class Worker {
         @inject(Batch) private readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
-        @inject(SystemDataProvider) private readonly systemDataProvider: SystemDataProvider,
+        @inject(ScanProcessingStateProvider) private readonly scanProcessingStateProvider: ScanProcessingStateProvider,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
@@ -112,15 +112,21 @@ export class Worker {
     }
 
     private async getPoolLoadSnapshot(poolMetricsInfo: PoolMetricsInfo): Promise<PoolLoadSnapshot> {
-        const lastPoolLoadSnapshot = await this.systemDataProvider.readBatchPoolLoadSnapshot(this.batchConfig.accountName, 'urlScanPool');
-        const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(lastPoolLoadSnapshot.activityState, poolMetricsInfo);
+        const lastPoolLoadSnapshot = await this.scanProcessingStateProvider.readBatchPoolLoadSnapshot(
+            this.batchConfig.accountName,
+            'urlScanPool',
+        );
+        const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(
+            lastPoolLoadSnapshot !== undefined ? lastPoolLoadSnapshot.activityStateFlags : 0,
+            poolMetricsInfo,
+        );
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
         return poolLoadSnapshot;
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
-        await this.systemDataProvider.writeBatchPoolLoadSnapshot(
+        await this.scanProcessingStateProvider.writeBatchPoolLoadSnapshot(
             {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 ...({} as StorageDocument),

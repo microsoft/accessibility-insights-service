@@ -6,7 +6,7 @@ import { Batch, SystemConfig } from 'azure-services';
 import { QueueRuntimeConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { SystemDataProvider } from 'service-library';
+import { ScanProcessingStateProvider } from 'service-library';
 import { BatchPoolLoadSnapshot, ScanQueueLoadSnapshot, StorageDocument } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { QueueSizeGenerator } from './queue-size-generator';
@@ -20,7 +20,7 @@ const jobScheduleRunIntervalInMinutes = 2;
 const dateNow = new Date('2019-12-12T12:00:00.000Z');
 let loggerMock: IMock<MockableLogger>;
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let systemDataProviderMock: IMock<SystemDataProvider>;
+let scanProcessingStateProviderMock: IMock<ScanProcessingStateProvider>;
 let batchMock: IMock<Batch>;
 let currentQueueSize: number;
 let systemConfigStub: SystemConfig;
@@ -30,7 +30,7 @@ describe(QueueSizeGenerator, () => {
     beforeEach(() => {
         currentQueueSize = 7;
         loggerMock = Mock.ofType(MockableLogger);
-        systemDataProviderMock = Mock.ofType(SystemDataProvider);
+        scanProcessingStateProviderMock = Mock.ofType(ScanProcessingStateProvider);
         moment.prototype.toDate = () => dateNow;
 
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
@@ -52,7 +52,7 @@ describe(QueueSizeGenerator, () => {
 
         queueSizeGenerator = new QueueSizeGenerator(
             batchMock.object,
-            systemDataProviderMock.object,
+            scanProcessingStateProviderMock.object,
             serviceConfigMock.object,
             systemConfigStub,
             loggerMock.object,
@@ -61,7 +61,7 @@ describe(QueueSizeGenerator, () => {
 
     afterEach(() => {
         batchMock.verifyAll();
-        systemDataProviderMock.verifyAll();
+        scanProcessingStateProviderMock.verifyAll();
     });
 
     it('reset buffering index when Batch pool is stable idle and queue is not empty', async () => {
@@ -79,14 +79,14 @@ describe(QueueSizeGenerator, () => {
             isIdle: true,
             targetMaxTasksPerPool: 64,
             poolFillIntervalInSeconds: 15,
-            activityState: 0,
+            activityStateFlags: 0,
         } as BatchPoolLoadSnapshot;
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(batchPoolLoadSnapshot))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
@@ -98,13 +98,13 @@ describe(QueueSizeGenerator, () => {
 
     it('create queue size when Batch pool is idle and queue is empty', async () => {
         const queueBufferingIndex = 3;
-        const expectedTargetQueueSize = 3520;
+        const expectedTargetQueueSize = 2368;
         const expectedScanQueueLoadSnapshot = {
             ...({} as StorageDocument),
             storageAccountName: systemConfigStub.storageName,
             queueName: systemConfigStub.scanQueue,
             queueSizePerInterval: expectedTargetQueueSize,
-            queueBufferingIndex: queueBufferingIndex * 2, // should increase last index
+            queueBufferingIndex: queueBufferingIndex + 1, // should increase last index
             samplingIntervalInSeconds: jobScheduleRunIntervalInMinutes * 60,
             timestamp: moment().toDate(),
         };
@@ -112,19 +112,19 @@ describe(QueueSizeGenerator, () => {
             isIdle: true,
             targetMaxTasksPerPool: 64,
             poolFillIntervalInSeconds: 15,
-            activityState: 1,
+            activityStateFlags: 1,
         } as BatchPoolLoadSnapshot;
         const scanQueueLoadSnapshot = { queueBufferingIndex: queueBufferingIndex } as ScanQueueLoadSnapshot;
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(batchPoolLoadSnapshot))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readScanQueueLoadSnapshot(systemConfigStub.storageName, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve(scanQueueLoadSnapshot))
             .verifiable(Times.once());
@@ -136,13 +136,13 @@ describe(QueueSizeGenerator, () => {
 
     it('create queue size when Batch pool is active and queue is empty', async () => {
         const queueBufferingIndex = 3;
-        const expectedTargetQueueSize = 3130;
+        const expectedTargetQueueSize = 2108;
         const expectedScanQueueLoadSnapshot = {
             ...({} as StorageDocument),
             storageAccountName: systemConfigStub.storageName,
             queueName: systemConfigStub.scanQueue,
             queueSizePerInterval: expectedTargetQueueSize,
-            queueBufferingIndex: queueBufferingIndex * 2, // should increase last index
+            queueBufferingIndex: queueBufferingIndex + 1, // should increase last index
             samplingIntervalInSeconds: jobScheduleRunIntervalInMinutes * 60,
             timestamp: moment().toDate(),
         };
@@ -152,19 +152,19 @@ describe(QueueSizeGenerator, () => {
             poolFillIntervalInSeconds: 15,
             tasksIncrementCountPerInterval: 73,
             samplingIntervalInSeconds: 20,
-            activityState: 3,
+            activityStateFlags: 3,
         } as BatchPoolLoadSnapshot;
         const scanQueueLoadSnapshot = { queueBufferingIndex: queueBufferingIndex } as ScanQueueLoadSnapshot;
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(batchPoolLoadSnapshot))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readScanQueueLoadSnapshot(systemConfigStub.storageName, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve(scanQueueLoadSnapshot))
             .verifiable(Times.once());
@@ -192,19 +192,19 @@ describe(QueueSizeGenerator, () => {
             poolFillIntervalInSeconds: 15,
             tasksIncrementCountPerInterval: 73,
             samplingIntervalInSeconds: 20,
-            activityState: 3,
+            activityStateFlags: 3,
         } as BatchPoolLoadSnapshot;
         const scanQueueLoadSnapshot = { queueBufferingIndex: queueBufferingIndex } as ScanQueueLoadSnapshot;
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(batchPoolLoadSnapshot))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readScanQueueLoadSnapshot(systemConfigStub.storageName, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve(scanQueueLoadSnapshot))
             .verifiable(Times.once());
@@ -230,19 +230,19 @@ describe(QueueSizeGenerator, () => {
             isIdle: true,
             targetMaxTasksPerPool: 64,
             poolFillIntervalInSeconds: 15,
-            activityState: 1,
+            activityStateFlags: 1,
         } as BatchPoolLoadSnapshot;
         const scanQueueLoadSnapshot = { queueBufferingIndex: queueBufferingIndex } as ScanQueueLoadSnapshot;
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(batchPoolLoadSnapshot))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readScanQueueLoadSnapshot(systemConfigStub.storageName, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve(scanQueueLoadSnapshot))
             .verifiable(Times.once());
@@ -264,11 +264,11 @@ describe(QueueSizeGenerator, () => {
             timestamp: moment().toDate(),
         };
 
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.readBatchPoolLoadSnapshot(systemConfigStub.batchAccountName, 'urlScanPool'))
             .returns(async () => Promise.resolve(undefined))
             .verifiable(Times.once());
-        systemDataProviderMock
+        scanProcessingStateProviderMock
             .setup(async o => o.writeScanQueueLoadSnapshot(expectedScanQueueLoadSnapshot, 'onDemandScanRequest'))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());

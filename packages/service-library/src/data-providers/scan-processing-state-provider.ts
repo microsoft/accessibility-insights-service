@@ -8,7 +8,7 @@ export declare type BatchPoolAlias = 'urlScanPool';
 export declare type StorageQueueAlias = 'onDemandScanRequest';
 
 @injectable()
-export class SystemDataProvider {
+export class ScanProcessingStateProvider {
     public constructor(
         @inject(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,

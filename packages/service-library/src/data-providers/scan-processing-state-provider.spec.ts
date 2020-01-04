@@ -5,19 +5,19 @@ import 'reflect-metadata';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { BatchPoolLoadSnapshot, ItemType, PartitionKey } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
-import { SystemDataProvider } from './system-data-provider';
+import { ScanProcessingStateProvider } from './scan-processing-state-provider';
 
 // tslint:disable: no-unsafe-any
 
-let systemDataProvider: SystemDataProvider;
+let scanProcessingStateProvider: ScanProcessingStateProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 
 beforeEach(() => {
     cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
-    systemDataProvider = new SystemDataProvider(cosmosContainerClientMock.object);
+    scanProcessingStateProvider = new ScanProcessingStateProvider(cosmosContainerClientMock.object);
 });
 
-describe(SystemDataProvider, () => {
+describe(ScanProcessingStateProvider, () => {
     it('write batch pool load snapshot to a Cosmos DB', async () => {
         const batchPoolLoadSnapshot = {
             id: undefined as string,
@@ -40,7 +40,10 @@ describe(SystemDataProvider, () => {
             .callback(async d => (document = d))
             .verifiable(Times.once());
 
-        await systemDataProvider.writeBatchPoolLoadSnapshot(<BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot), 'urlScanPool');
+        await scanProcessingStateProvider.writeBatchPoolLoadSnapshot(
+            <BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot),
+            'urlScanPool',
+        );
 
         expect(document).toEqual(batchPoolLoadSnapshotDocument);
         cosmosContainerClientMock.verifyAll();
@@ -61,7 +64,7 @@ describe(SystemDataProvider, () => {
             )
             .verifiable(Times.once());
 
-        const batchPoolLoadSnapshotResult = await systemDataProvider.readBatchPoolLoadSnapshot(batchAccountName, 'urlScanPool');
+        const batchPoolLoadSnapshotResult = await scanProcessingStateProvider.readBatchPoolLoadSnapshot(batchAccountName, 'urlScanPool');
 
         expect(batchPoolLoadSnapshotResult).toEqual(batchPoolLoadSnapshot);
         cosmosContainerClientMock.verifyAll();
