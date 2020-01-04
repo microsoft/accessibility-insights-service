@@ -10,7 +10,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
-import { registerLoggerToContainer } from 'logger';
+import { registerGlobalLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -19,6 +19,7 @@ import { CredentialsProvider } from './credentials/credentials-provider';
 import { CredentialType } from './credentials/msi-credential-provider';
 import {
     AzureKeyVaultClientProvider,
+    BatchServiceClientProvider,
     BlobServiceClientProvider,
     CosmosClientProvider,
     cosmosContainerClientTypes,
@@ -30,24 +31,66 @@ import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 
+describe('BatchServiceClient', () => {
+    let secretProviderMock: IMock<SecretProvider>;
+    let container: Container;
+    let credentialsProviderMock: IMock<CredentialsProvider>;
+    let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
+    const batchAccountUrl = 'test-batch-account-url';
+    const batchAccountName = 'test-batch-account-name';
+
+    beforeEach(() => {
+        process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
+        process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
+        process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
+        process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
+
+        secretProviderMock = Mock.ofType(SecretProvider);
+
+        container = new Container({ autoBindInjectable: true });
+        registerAzureServicesToContainer(container, CredentialType.AppService);
+        credentialsProviderMock = Mock.ofType(CredentialsProvider);
+        credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
+        credentialsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+
+        stubBinding(container, SecretProvider, secretProviderMock.object);
+        stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
+    });
+
+    it('resolves BatchServiceClient', async () => {
+        const batchServiceClientProvider: BatchServiceClientProvider = container.get(iocTypeNames.BatchServiceClientProvider);
+        const batchServiceClient = await batchServiceClientProvider();
+
+        expect(batchServiceClient.credentials).toBe(credentialsStub);
+        expect(batchServiceClient.batchUrl).toBe(batchAccountUrl);
+    });
+
+    it('resolves BatchServiceClient top singleton value', async () => {
+        const batchServiceClientProvider1: BatchServiceClientProvider = container.get(iocTypeNames.BatchServiceClientProvider);
+        const batchServiceClientProvider2: BatchServiceClientProvider = container.get(iocTypeNames.BatchServiceClientProvider);
+
+        expect(await batchServiceClientProvider1()).toBe(await batchServiceClientProvider2());
+    });
+});
+
 describe(registerAzureServicesToContainer, () => {
     let container: Container;
 
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
-        registerLoggerToContainer(container);
+        registerGlobalLoggerToContainer(container);
     });
 
     it('verify singleton resolution', async () => {
         registerAzureServicesToContainer(container, CredentialType.AppService);
 
-        verifySingletonDependencyResolution(StorageConfig);
-        verifySingletonDependencyResolution(SecretProvider);
-        verifySingletonDependencyResolution(CredentialsProvider);
+        verifySingletonDependencyResolution(container, StorageConfig);
+        verifySingletonDependencyResolution(container, SecretProvider);
+        verifySingletonDependencyResolution(container, CredentialsProvider);
 
-        verifySingletonDependencyResolutionWithValue(iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
-        verifySingletonDependencyResolutionWithValue(iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
-        verifySingletonDependencyResolutionWithValue(iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
+        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
+        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
+        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
 
         expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
@@ -55,31 +98,39 @@ describe(registerAzureServicesToContainer, () => {
     it('verify non-singleton resolution', () => {
         registerAzureServicesToContainer(container);
 
-        verifyNonSingletonDependencyResolution(Queue);
-        verifyNonSingletonDependencyResolution(CosmosClientWrapper);
+        verifyNonSingletonDependencyResolution(container, Queue);
+        verifyNonSingletonDependencyResolution(container, CosmosClientWrapper);
     });
 
     it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
-        verifyCosmosContainerClient(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
+        verifyCosmosContainerClient(container, cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
         verifyCosmosContainerClient(
+            container,
             cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
             'onDemandScanner',
             'scanRequests',
         );
         verifyCosmosContainerClient(
+            container,
             cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient,
             'onDemandScanner',
             'scanBatchRequests',
         );
         verifyCosmosContainerClient(
+            container,
             cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,
             'onDemandScanner',
             'scanRequests',
         );
 
-        verifyCosmosContainerClient(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient, 'onDemandScanner', 'scanRuns');
+        verifyCosmosContainerClient(
+            container,
+            cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient,
+            'onDemandScanner',
+            'scanRuns',
+        );
     });
 
     describe('BlobServiceClientProvider', () => {
@@ -104,7 +155,7 @@ describe(registerAzureServicesToContainer, () => {
                 .verifiable(Times.once());
 
             registerAzureServicesToContainer(container);
-            stubBinding(SecretProvider, secretProviderMock.object);
+            stubBinding(container, SecretProvider, secretProviderMock.object);
 
             const blobServiceClientProvider = container.get<BlobServiceClientProvider>(iocTypeNames.BlobServiceClientProvider);
 
@@ -137,7 +188,7 @@ describe(registerAzureServicesToContainer, () => {
                 .verifiable(Times.once());
 
             registerAzureServicesToContainer(container);
-            stubBinding(SecretProvider, secretProviderMock.object);
+            stubBinding(container, SecretProvider, secretProviderMock.object);
         });
 
         afterEach(() => {
@@ -170,7 +221,7 @@ describe(registerAzureServicesToContainer, () => {
             credentialsProviderMock = Mock.ofType(CredentialsProvider);
             registerAzureServicesToContainer(container);
 
-            stubBinding(CredentialsProvider, credentialsProviderMock.object);
+            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
 
             credentialsProviderMock
                 .setup(async c => c.getCredentialsForKeyVault())
@@ -211,7 +262,7 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).returns(async () => Promise.resolve(cosmosDbKey));
 
             registerAzureServicesToContainer(container);
-            stubBinding(SecretProvider, secretProviderMock.object);
+            stubBinding(container, SecretProvider, secretProviderMock.object);
         });
 
         it('verify CosmosClientProvider resolution', async () => {
@@ -231,30 +282,30 @@ describe(registerAzureServicesToContainer, () => {
             expect(await cosmosClient1Promise).toBe(await cosmosClient2Promise);
         });
     });
-
-    function stubBinding(bindingName: interfaces.ServiceIdentifier<any>, value: any): void {
-        container.unbind(bindingName);
-        container.bind(bindingName).toDynamicValue(() => value);
-    }
-
-    function verifySingletonDependencyResolution(key: any): void {
-        expect(container.get(key)).toBeDefined();
-        expect(container.get(key)).toBe(container.get(key));
-    }
-
-    function verifySingletonDependencyResolutionWithValue(key: any, value: any): void {
-        expect(container.get(key)).toBe(value);
-        verifySingletonDependencyResolution(key);
-    }
-
-    function verifyNonSingletonDependencyResolution(key: any): void {
-        expect(container.get(key)).toBeDefined();
-        expect(container.get(key)).not.toBe(container.get(key));
-    }
-
-    function verifyCosmosContainerClient(cosmosContainerType: string, dbName: string, collectionName: string): void {
-        const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
-        expect((cosmosContainerClient as any).dbName).toBe(dbName);
-        expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
-    }
 });
+
+function stubBinding(container: Container, bindingName: interfaces.ServiceIdentifier<any>, value: any): void {
+    container.unbind(bindingName);
+    container.bind(bindingName).toDynamicValue(() => value);
+}
+
+function verifySingletonDependencyResolution(container: Container, key: any): void {
+    expect(container.get(key)).toBeDefined();
+    expect(container.get(key)).toBe(container.get(key));
+}
+
+function verifySingletonDependencyResolutionWithValue(container: Container, key: any, value: any): void {
+    expect(container.get(key)).toBe(value);
+    verifySingletonDependencyResolution(container, key);
+}
+
+function verifyNonSingletonDependencyResolution(container: Container, key: any): void {
+    expect(container.get(key)).toBeDefined();
+    expect(container.get(key)).not.toBe(container.get(key));
+}
+
+function verifyCosmosContainerClient(container: Container, cosmosContainerType: string, dbName: string, collectionName: string): void {
+    const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
+    expect((cosmosContainerClient as any).dbName).toBe(dbName);
+    expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
+}

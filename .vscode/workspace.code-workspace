@@ -69,9 +69,13 @@
             "path": "../packages/web-api-client"
         },
         {
+            "name": "functional-tests",
+            "path": "../packages/functional-tests"
+        },
+        {
             "name": "cli",
             "path": "../packages/cli"
-        },
+        }
         {
             "name": "root",
             "path": "../"
@@ -106,7 +110,8 @@
             "injectable",
             "inversify",
             "typemoq",
-            "upsert"
+            "upsert",
+            "serializable"
         ],
         "csharp.suppressDotnetRestoreNotification": true
     },

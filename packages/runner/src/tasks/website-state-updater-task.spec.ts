@@ -5,9 +5,9 @@ import 'reflect-metadata';
 import '../../test-utilities/common-mock-methods';
 
 import { CosmosContainerClient, CosmosOperationResponse, RetryOptions } from 'azure-services';
-import { Logger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../../test-utilities/mockable-logger';
 import { WebsiteFactory } from '../factories/website-factory';
 import { ScanMetadata } from '../types/scan-metadata';
 import { WebsiteStateUpdaterTask } from './website-state-updater-task';
@@ -28,7 +28,7 @@ const scanMetadata: ScanMetadata = {
 };
 let pageScanResult: PageScanResult;
 let websiteStateUpdaterTask: WebsiteStateUpdaterTask;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 const websitePartitioningKey = 'website';
 
 beforeEach(() => {
@@ -51,7 +51,7 @@ beforeEach(() => {
         .returns(() => 'websiteDocumentId')
         .verifiable(Times.once());
 
-    loggerMock = Mock.ofType(Logger);
+    loggerMock = Mock.ofType(MockableLogger);
 
     websiteStateUpdaterTask = new WebsiteStateUpdaterTask(
         cosmosContainerClientMock.object,

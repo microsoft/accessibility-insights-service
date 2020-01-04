@@ -1,8 +1,7 @@
-import { AvailabilityTelemetry } from 'logger';
-import { Url } from 'url';
-
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { AvailabilityTelemetry } from 'logger';
+import { Url } from 'url';
 
 export interface ActivityRequestData {
     activityName: string;

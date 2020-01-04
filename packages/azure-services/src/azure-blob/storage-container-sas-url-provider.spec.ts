@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { secretNames } from '../key-vault/secret-names';
 import { SecretProvider } from '../key-vault/secret-provider';
-import { StorageContainerSASUrlProvider } from './container-sas-url-provider';
+import { StorageContainerSASUrlProvider } from './storage-container-sas-url-provider';
 
 describe(StorageContainerSASUrlProvider, () => {
     let blobServiceClientMock: IMock<BlobServiceClient>;
@@ -19,6 +19,7 @@ describe(StorageContainerSASUrlProvider, () => {
     const storageAccountName = 'test-storage-account-name';
     const storageAccountKey = 'test-storage-account-key';
     const containerUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/';
+
     beforeEach(() => {
         blobServiceClientMock = Mock.ofType(BlobServiceClient);
         blobClientMock = Mock.ofType(BlobClient);
@@ -38,6 +39,7 @@ describe(StorageContainerSASUrlProvider, () => {
 
         testSubject = new StorageContainerSASUrlProvider(async () => blobServiceClientMock.object, secretProviderMock.object);
     });
+
     it('successfully generated sas url', async () => {
         const sasUrl = await testSubject.generateSASUrl(containerName);
         expect(sasUrl).toBeDefined();

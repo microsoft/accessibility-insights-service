@@ -5,7 +5,7 @@ import { Contracts, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
 import { BaseTelemetryProperties, TelemetryMeasurements } from '.';
 import { AvailabilityTelemetry } from './availablity-telemetry';
-import { LogLevel } from './base-logger';
+import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 
@@ -13,7 +13,13 @@ import { LoggerEvent } from './logger-event';
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     protected telemetryClient: TelemetryClient;
 
+    protected initialized: boolean = false;
+
     public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
+
+    public isInitialized(): boolean {
+        return this.initialized;
+    }
 
     public trackMetric(name: string, value: number): void {
         this.telemetryClient.trackMetric({

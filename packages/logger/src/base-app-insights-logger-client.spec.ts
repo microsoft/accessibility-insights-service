@@ -7,8 +7,8 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
 import { AvailabilityTelemetry } from './availablity-telemetry';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
-import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
+import { LogLevel } from './logger';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 

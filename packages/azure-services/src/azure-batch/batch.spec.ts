@@ -5,16 +5,17 @@ import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
 import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
-import { Message, StorageContainerSASUrlProvider } from 'azure-services';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
-import { Logger } from 'logger';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { BatchServiceClientProvider } from '../web-api-job-manager-ioc-types';
+import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
+import { Message } from '../azure-queue/message';
+import { BatchServiceClientProvider } from '../ioc-types';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
+import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
 import { JobTaskState } from './job-task';
-import { RunnerTaskConfig } from './runner-task-config';
 
 export interface JobListItemStub {
     id: string;
@@ -32,21 +33,22 @@ export class JobListStub {
 
 describe(Batch, () => {
     const jobId1 = 'job-1';
+    const containerSASUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/?sv=blah$se=blah';
+
     let batch: Batch;
     let config: BatchConfig;
     let batchClientStub: BatchServiceClient;
-    let runnerTaskConfigMock: IMock<RunnerTaskConfig>;
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
     let poolMock: IMock<Pool>;
     let storageContainerSASUrlProviderMock: IMock<StorageContainerSASUrlProvider>;
     let batchServiceClientProviderStub: BatchServiceClientProvider;
-    let loggerMock: IMock<Logger>;
-    let taskEnvSettings: BatchServiceModels.EnvironmentSetting[];
-    let taskResourceFiles: BatchServiceModels.ResourceFile[];
+    let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
+    let batchTaskParameterProvider: IMock<BatchTaskParameterProvider>;
     let maxTaskDurationInMinutes: number;
-    const containerSASUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/?sv=blah$se=blah';
+    let taskParameter: BatchServiceModels.TaskAddParameter;
+
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
         config = {
@@ -55,9 +57,13 @@ describe(Batch, () => {
             poolId: 'poolId',
             jobId: '',
         };
-        taskEnvSettings = 'env settings' as any;
-        taskResourceFiles = 'task resource files' as any;
-
+        taskParameter = {
+            id: 'taskId',
+            commandLine: 'commandLine',
+            resourceFiles: 'resourceFiles' as any,
+            environmentSettings: 'environmentSettings' as any,
+            constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
+        };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
             .setup(async s => s.getConfigValue('taskConfig'))
@@ -66,10 +72,7 @@ describe(Batch, () => {
                     taskTimeoutInMinutes: maxTaskDurationInMinutes,
                 } as TaskRuntimeConfig;
             });
-        runnerTaskConfigMock = Mock.ofType(RunnerTaskConfig);
-        runnerTaskConfigMock.setup(t => t.getEnvironmentSettings()).returns(() => taskEnvSettings);
-        runnerTaskConfigMock.setup(t => t.getResourceFiles()).returns(() => taskResourceFiles);
-
+        batchTaskParameterProvider = Mock.ofType<BatchTaskParameterProvider>();
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
         poolMock = Mock.ofType();
@@ -78,8 +81,7 @@ describe(Batch, () => {
             task: taskMock.object,
             pool: poolMock.object,
         } as unknown) as BatchServiceClient;
-
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         batchServiceClientProviderStub = async () => batchClientStub;
         storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);
         storageContainerSASUrlProviderMock
@@ -88,12 +90,11 @@ describe(Batch, () => {
                 return containerSASUrl;
             });
         batch = new Batch(
-            serviceConfigMock.object,
-            config,
-            runnerTaskConfigMock.object,
             batchServiceClientProviderStub,
-            loggerMock.object,
+            batchTaskParameterProvider.object,
             storageContainerSASUrlProviderMock.object,
+            config,
+            loggerMock.object,
         );
     });
 
@@ -145,6 +146,7 @@ describe(Batch, () => {
 
             expect(poolMetricsInfo).toEqual(poolMetricsInfoExpected);
             poolMock.verifyAll();
+            jobMock.verifyAll();
         });
     });
 
@@ -159,22 +161,38 @@ describe(Batch, () => {
         it('should add no more than 100 tasks in a single Batch API call', async () => {
             const messagesCount = 103;
             const messages = [];
-            let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
             const tasksAddedBatchCount: number[] = [];
+            const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
+            let taskAddCollectionResponse: BatchServiceModels.TaskAddCollectionResponse;
 
-            for (let i = 0; i < messagesCount; i += 1) {
-                messages.push({
+            for (let i = 0; i < messagesCount; i++) {
+                const message = {
                     messageText: '{}',
                     messageId: `message-id-${i}`,
+                };
+                messages.push(message);
+
+                taskAddParameters.push({
+                    id: '',
+                    commandLine: `commandLine-${i}`,
+                    resourceFiles: `resourceFiles-${i}` as any,
+                    environmentSettings: `environmentSettings-${i}` as any,
+                    constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
                 });
+
+                batchTaskParameterProvider
+                    .setup(async o => o.getTaskParameter(It.is(actualId => isExpectedId(actualId, message.messageId)), message.messageText))
+                    .callback((taskId, messageText) => (taskAddParameters[i].id = taskId))
+                    .returns(async () => Promise.resolve(taskAddParameters[i]))
+                    .verifiable(Times.once());
             }
 
             taskMock
                 .setup(async o => o.addCollection(jobId1, It.isAny()))
-                .callback((id, taskAddParameters) => {
-                    tasksAddedBatchCount.push(taskAddParameters.length);
+                .callback((id, taskParameters) => {
+                    tasksAddedBatchCount.push(taskParameters.length);
                     taskAddCollectionResponse = <BatchServiceModels.TaskAddCollectionResponse>(<unknown>{ value: [] });
-                    taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
+                    taskParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
                         taskAddCollectionResponse.value.push({ taskId: taskAddParameter.id, status: 'success' });
                     });
                 })
@@ -188,6 +206,7 @@ describe(Batch, () => {
             expect(tasksAddedBatchCount[0]).toEqual(100);
             expect(tasksAddedBatchCount[1]).toEqual(3);
             taskMock.verifyAll();
+            batchTaskParameterProvider.verifyAll();
         });
 
         it('create new job tasks in batch request with success and failure ', async () => {
@@ -231,29 +250,51 @@ describe(Batch, () => {
                     error: 'error',
                 },
             ];
-            const expectedTaskConstraints: BatchServiceModels.TaskConstraints = {
-                maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString(),
-            };
+            const expectedTaskAddParameters = [
+                {
+                    id: '',
+                    commandLine: 'commandLine-1',
+                    resourceFiles: 'resourceFiles-1' as any,
+                    environmentSettings: 'environmentSettings-1' as any,
+                    constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
+                },
+                {
+                    id: '',
+                    commandLine: 'commandLine-2',
+                    resourceFiles: 'resourceFiles-2' as any,
+                    environmentSettings: 'environmentSettings-2' as any,
+                    constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
+                },
+            ];
 
-            let actualTaskConstraints;
             let i = 0;
             taskMock
                 .setup(async o => o.addCollection(jobId1, It.isAny()))
                 .callback((id, taskAddParameters) =>
                     taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
                         taskAddCollectionResult.value[i].taskId = taskAddParameter.id;
+                        expectedTaskAddParameters[i].id = taskAddParameter.id;
                         jobTasksExpected[i++].id = taskAddParameter.id;
-                        actualTaskConstraints = taskAddParameter.constraints;
                     }),
                 )
                 .returns(async () => Promise.resolve(taskAddCollectionResult))
                 .verifiable();
 
+            for (let k = 0; k < messages.length; k++) {
+                batchTaskParameterProvider
+                    .setup(async o =>
+                        o.getTaskParameter(It.is(actualId => isExpectedId(actualId, messages[k].messageId)), messages[k].messageText),
+                    )
+                    .callback((taskId, messageText) => (expectedTaskAddParameters[k].id = taskId))
+                    .returns(async () => Promise.resolve(expectedTaskAddParameters[k]))
+                    .verifiable(Times.once());
+            }
+
             const tasksActual = await batch.createTasks(jobId1, messages);
 
             expect(tasksActual).toEqual(jobTasksExpected);
-            expect(expectedTaskConstraints).toEqual(actualTaskConstraints);
             taskMock.verifyAll();
+            batchTaskParameterProvider.verifyAll();
         });
 
         it('verifies tasks parameters on creation', async () => {
@@ -267,17 +308,31 @@ describe(Batch, () => {
                     messageText: JSON.stringify({ msg: 'message 2 text' }),
                 },
             ];
-            const message1CommandLine = 'message 1 command line';
-            const message2CommandLine = 'message 2 command line';
+            const expectedTaskAddParameters = [
+                {
+                    id: 'taskId-1',
+                    commandLine: 'commandLine-1',
+                    resourceFiles: 'resourceFiles-1' as any,
+                    environmentSettings: 'environmentSettings-1' as any,
+                    constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
+                },
+                {
+                    id: 'taskId-2',
+                    commandLine: 'commandLine-2',
+                    resourceFiles: 'resourceFiles-2' as any,
+                    environmentSettings: 'environmentSettings-2' as any,
+                    constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
+                },
+            ];
 
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[0].messageText)))
-                .returns(() => message1CommandLine)
-                .verifiable();
-            runnerTaskConfigMock
-                .setup(t => t.getCommandLine(JSON.parse(messages[1].messageText)))
-                .returns(() => message2CommandLine)
-                .verifiable();
+            for (let k = 0; k < messages.length; k++) {
+                batchTaskParameterProvider
+                    .setup(async o =>
+                        o.getTaskParameter(It.is(actualId => isExpectedId(actualId, messages[k].messageId)), messages[k].messageText),
+                    )
+                    .returns(async () => Promise.resolve(expectedTaskAddParameters[k]))
+                    .verifiable(Times.once());
+            }
 
             let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
             taskMock
@@ -289,23 +344,11 @@ describe(Batch, () => {
 
             await batch.createTasks(jobId1, messages);
 
-            verifyTaskAddParameter(actualTaskAddParameters[0], message1CommandLine, messages[0].messageId);
-            verifyTaskAddParameter(actualTaskAddParameters[1], message2CommandLine, messages[1].messageId);
-
+            expect(actualTaskAddParameters[0]).toEqual(expectedTaskAddParameters[0]);
+            expect(actualTaskAddParameters[1]).toEqual(expectedTaskAddParameters[1]);
             taskMock.verifyAll();
-            runnerTaskConfigMock.verifyAll();
+            batchTaskParameterProvider.verifyAll();
         });
-
-        function verifyTaskAddParameter(
-            actualTaskAddParameter: BatchServiceModels.TaskAddParameter,
-            expectedCommandLineMessage: string,
-            messageId: string,
-        ): void {
-            expect(actualTaskAddParameter.commandLine).toEqual(expectedCommandLineMessage);
-            expect(actualTaskAddParameter.environmentSettings).toEqual(taskEnvSettings);
-            expect(actualTaskAddParameter.resourceFiles).toEqual(taskResourceFiles);
-            expect(actualTaskAddParameter.id.startsWith(`task_${messageId}_`)).toBe(true);
-        }
     });
 
     describe('createJobIfNotExists()', () => {
@@ -370,3 +413,7 @@ describe(Batch, () => {
         });
     });
 });
+
+function isExpectedId(actualId: string, messageId: string): boolean {
+    return actualId.startsWith(`task_${messageId}_`);
+}

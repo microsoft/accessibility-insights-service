@@ -1,33 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// tslint:disable: no-submodule-imports
 import { BatchServiceModels } from '@azure/batch';
-// tslint:disable-next-line: no-submodule-imports
 import { OutputFile } from '@azure/batch/esm/models';
-import { Message, StorageContainerSASUrlProvider } from 'azure-services';
-import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
+import { System } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
-import * as moment from 'moment';
 import { VError } from 'verror';
-import { BatchServiceClientProvider, webApiJobManagerIocTypeNames } from '../web-api-job-manager-ioc-types';
+import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
+import { Message } from '../azure-queue/message';
+import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
+import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
 import { JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
-import { RunnerTaskConfig } from './runner-task-config';
 
 @injectable()
 export class Batch {
     public static readonly batchLogContainerName = 'batch-logs';
 
     public constructor(
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(BatchConfig) private readonly config: BatchConfig,
-        @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
-        @inject(webApiJobManagerIocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
+        @inject(iocTypeNames.BatchTaskParameterProvider) private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
+        @inject(BatchConfig) private readonly config: BatchConfig,
+        @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
@@ -75,11 +74,11 @@ export class Batch {
         return serviceJobId;
     }
 
-    public async createTasks(jobId: string, messages: Message[]): Promise<JobTask[]> {
+    public async createTasks(jobId: string, queueMessages: Message[]): Promise<JobTask[]> {
         const tasks: JobTask[] = [];
 
-        // Azure Batch supports the maximum 100 tasks to be added in addTaskCollection() API call
-        const chunks = System.chunkArray(messages, 100);
+        // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
+        const chunks = System.chunkArray(queueMessages, 100);
         await Promise.all(
             chunks.map(async chunk => {
                 const taskCollection = await this.addTaskCollection(jobId, chunk);
@@ -146,21 +145,24 @@ export class Batch {
 
         const jobTasks: Map<string, JobTask> = new Map();
         const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
-        const maxTaskDurationInMinutes = (await this.getTaskConfig()).taskTimeoutInMinutes;
         let sasUrl: string;
 
         try {
             sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
         } catch (error) {
-            this.logger.logError(`encounter error while generating sas url ${error}`);
+            this.logger.logError(`Encountered the error while generating Blob Storage SAS URL. ${error}`, {
+                blobContainerName: Batch.batchLogContainerName,
+            });
         }
 
-        messages.forEach(message => {
-            const jobTask = new JobTask(message.messageId);
-            jobTasks.set(jobTask.id, jobTask);
-            const taskAddParameter = this.getTaskAddParameter(jobId, jobTask.id, message.messageText, maxTaskDurationInMinutes, sasUrl);
-            taskAddParameters.push(taskAddParameter);
-        });
+        await Promise.all(
+            messages.map(async message => {
+                const jobTask = new JobTask(message.messageId);
+                jobTasks.set(jobTask.id, jobTask);
+                const taskAddParameter = await this.getTaskAddParameter(jobId, jobTask.id, message.messageText, sasUrl);
+                taskAddParameters.push(taskAddParameter);
+            }),
+        );
 
         const client = await this.batchClientProvider();
         const taskAddCollectionResult = await client.task.addCollection(jobId, taskAddParameters);
@@ -177,46 +179,36 @@ export class Batch {
         return Array.from(jobTasks.values());
     }
 
-    private getTaskAddParameter(
+    private async getTaskAddParameter(
         jobId: string,
-        jobTaskId: string,
+        taskId: string,
         messageText: string,
-        maxTaskDurationInMinutes: number,
         sasUrl: string,
-    ): BatchServiceModels.TaskAddParameter {
-        const message = JSON.parse(messageText);
-        const commandLine = this.runnerTaskConfig.getCommandLine(message);
-        const taskParameter: BatchServiceModels.TaskAddParameter = {
-            id: jobTaskId,
-            commandLine: commandLine,
-            resourceFiles: this.runnerTaskConfig.getResourceFiles(),
-            environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
-            constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
-        };
+    ): Promise<BatchServiceModels.TaskAddParameter> {
+        const taskParameter = await this.batchTaskParameterProvider.getTaskParameter(taskId, messageText);
+        if (taskParameter === undefined) {
+            return taskParameter;
+        }
 
         if (!_.isNil(sasUrl)) {
-            taskParameter.outputFiles = this.getOutFilesConfiguration(jobId, jobTaskId, sasUrl);
+            taskParameter.outputFiles = this.getOutFilesConfiguration(jobId, taskId, sasUrl);
         }
 
         return taskParameter;
     }
 
-    private getOutFilesConfiguration(jobId: string, jobTaskId: string, sasUrl: string): OutputFile[] {
+    private getOutFilesConfiguration(jobId: string, taskId: string, sasUrl: string): OutputFile[] {
         return [
             {
                 filePattern: `../std*.txt`,
                 destination: {
                     container: {
-                        path: `${jobId}/${jobTaskId}`,
+                        path: `${jobId}/${taskId}`,
                         containerUrl: sasUrl,
                     },
                 },
                 uploadOptions: { uploadCondition: 'taskcompletion' },
             },
         ];
-    }
-
-    private async getTaskConfig(): Promise<TaskRuntimeConfig> {
-        return this.serviceConfig.getConfigValue('taskConfig');
     }
 }
