@@ -7,7 +7,7 @@ import { isEmpty } from 'lodash';
 import { loggerTypes } from 'logger';
 
 @injectable()
-export class RunnerTaskConfig {
+export class ScannerBatchTaskConfig {
     public readonly commandLineTemplate: string = '/bin/bash -c \'start-web-api-scan-runner.sh "%id%" "%url%" %priority%\'';
 
     private environmentSettings: BatchServiceModels.EnvironmentSetting[];

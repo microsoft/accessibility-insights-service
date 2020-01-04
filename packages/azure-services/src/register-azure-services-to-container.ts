@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
@@ -8,7 +9,9 @@ import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, S
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { Logger } from 'logger';
-import { StorageContainerSASUrlProvider } from './azure-blob/container-sas-url-provider';
+import { Batch } from './azure-batch/batch';
+import { BatchConfig } from './azure-batch/batch-config';
+import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -87,6 +90,16 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .toSelf()
         .inSingletonScope();
     container.bind(Queue).toSelf();
+
+    container
+        .bind(Batch)
+        .toSelf()
+        .inSingletonScope();
+    container
+        .bind(BatchConfig)
+        .toSelf()
+        .inSingletonScope();
+    setupSingletonAzureBatchServiceClientProvider(container);
 }
 
 async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
@@ -155,5 +168,14 @@ function setupSingletonCosmosClientProvider(container: interfaces.Container): vo
 
             return new CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
         }
+    });
+}
+
+function setupSingletonAzureBatchServiceClientProvider(container: Container): void {
+    IoC.setupSingletonProvider(iocTypeNames.BatchServiceClientProvider, container, async (context: interfaces.Context) => {
+        const batchConfig = context.container.get(BatchConfig);
+        const credentialProvider = context.container.get(CredentialsProvider);
+
+        return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
     });
 }

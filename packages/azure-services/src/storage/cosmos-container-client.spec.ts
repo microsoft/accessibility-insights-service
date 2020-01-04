@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
 import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-response';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { CosmosContainerClient } from './cosmos-container-client';
 
 // tslint:disable: no-import-side-effect no-any no-unsafe-any no-null-keyword
@@ -20,7 +20,7 @@ const partitionKey = 'default-partitionKey';
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let cosmosContainerClient: CosmosContainerClient;
 let operationCallbackMock: IMock<OperationCallback>;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 
 const retryOptions = {
     timeoutMilliseconds: 1000,
@@ -31,7 +31,7 @@ const retryOptions = {
 beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
     operationCallbackMock = Mock.ofType<OperationCallback>();
-    loggerMock = Mock.ofType(Logger);
+    loggerMock = Mock.ofType(MockableLogger);
     cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
 });
 

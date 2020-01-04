@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ActivityAction } from '../src/contracts/activity-actions';
 import { HealthMonitorClientController } from '../src/controllers/health-monitor-client-controller';
-import { processWebRequest } from '../src/process-request';
+import { processWebRequest } from '../src/process-web-request';
 
 /**
  * The orchestration activity function to execute workflow actions.

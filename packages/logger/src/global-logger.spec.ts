@@ -6,18 +6,18 @@ import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availablity-telemetry';
-import { LogLevel } from './base-logger';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
-import { Logger } from './logger';
+import { GlobalLogger } from './global-logger';
+import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
 
-describe(Logger, () => {
+describe(GlobalLogger, () => {
     let loggerClient1Mock: IMock<LoggerClient>;
     let loggerClient2Mock: IMock<LoggerClient>;
-    let testSubject: Logger;
+    let testSubject: GlobalLogger;
     let processStub: typeof process;
 
     beforeEach(() => {
@@ -25,7 +25,7 @@ describe(Logger, () => {
         loggerClient1Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
 
-        testSubject = new Logger([loggerClient1Mock.object, loggerClient2Mock.object], processStub);
+        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], processStub);
     });
 
     describe('setup', () => {

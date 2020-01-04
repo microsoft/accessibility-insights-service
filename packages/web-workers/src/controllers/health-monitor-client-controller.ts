@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger } from 'logger';
-import { ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { Logger } from 'logger';
+import { HealthReport, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
 import { ActivityAction } from '../contracts/activity-actions';
 import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
 import {
@@ -25,10 +25,10 @@ export class HealthMonitorClientController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(ContextAwareLogger) contextAwareLogger: ContextAwareLogger,
+        @inject(Logger) logger: Logger,
         @inject(iocTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
     ) {
-        super(contextAwareLogger);
+        super(logger);
 
         this.activityCallbacks = {
             [ActivityAction.createScanRequest]: this.createScanRequest,
@@ -41,14 +41,11 @@ export class HealthMonitorClientController extends WebController {
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
         const activityRequestData = args[0] as ActivityRequestData;
-        this.contextAwareLogger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
+        this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
 
         const activityCallback = this.activityCallbacks[activityRequestData.activityName];
-
         const result = await activityCallback(activityRequestData.data);
-        this.contextAwareLogger.logInfo(
-            `${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`,
-        );
+        this.logger.logInfo(`${activityRequestData.activityName} activity action completed with result ${JSON.stringify(result)}`);
 
         return result;
     }
@@ -59,7 +56,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse>> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.postScanUrl(data.scanUrl, data.priority);
 
         return response.toJSON();
@@ -67,7 +63,6 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly getScanResult = async (data: GetScanResultData): Promise<SerializableResponse<ScanResultResponse>> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.getScanStatus(data.scanId);
 
         return response.toJSON();
@@ -75,22 +70,20 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.getScanReport(data.scanId, data.reportId);
         response.body = undefined;
 
         return response.toJSON();
     };
 
-    private readonly getHealthStatus = async (): Promise<SerializableResponse> => {
+    private readonly getHealthStatus = async (): Promise<SerializableResponse<HealthReport>> => {
         const webApiClient = await this.webApiClientProvider();
-
         const response = await webApiClient.checkHealth();
 
         return response.toJSON();
     };
 
     private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {
-        this.contextAwareLogger.trackAvailability(data.name, data.telemetry);
+        this.logger.trackAvailability(data.name, data.telemetry);
     };
 }

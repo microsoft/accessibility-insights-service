@@ -9,11 +9,11 @@ import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
 
 import { ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
 import { WebDriver } from 'service-library';
 import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 class PuppeteerBrowserMock {
     public static readonly browserVersion = 'browser version';
@@ -84,10 +84,10 @@ describe('Page', () => {
     let page: Page;
     let gotoOptions: Puppeteer.DirectNavigationOptions;
     let waitOptions: Puppeteer.DirectNavigationOptions;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
 
         gotoOptions = {
             waitUntil: ['load' as Puppeteer.LoadEvent],
@@ -231,7 +231,7 @@ describe('Page', () => {
     });
 
     it.skip('validates scanning in dev box', async () => {
-        const webDriver = new WebDriver(Mock.ofType(Logger).object);
+        const webDriver = new WebDriver(Mock.ofType(MockableLogger).object);
         const browser = await webDriver.launch();
         const getBrowser = () => {
             return browser;

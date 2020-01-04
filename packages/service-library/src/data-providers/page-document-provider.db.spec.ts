@@ -5,11 +5,11 @@ import 'reflect-metadata';
 
 import { CosmosContainerClient } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration } from 'common';
-import { Logger } from 'logger';
 import * as moment from 'moment';
 import { RunState, Website, WebsitePage } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PageDocumentProvider } from './page-document-provider';
 
 // tslint:disable-next-line: mocha-no-side-effect-code
@@ -37,7 +37,7 @@ describe(PageDocumentProvider, () => {
     if (dbHelper.isDbTestSupported()) {
         const currentMoment = () => moment(currentTime);
 
-        let loggerMock: IMock<Logger>;
+        let loggerMock: IMock<MockableLogger>;
         let serviceConfigMock: IMock<ServiceConfiguration>;
         let scanConfig: ScanRunTimeConfig;
         let testSubject: PageDocumentProvider;
@@ -69,7 +69,7 @@ describe(PageDocumentProvider, () => {
             serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
 
             website = dbHelper.createWebsiteDocument({ websiteId: dbHelper.createRandomString('websiteId') });
-            loggerMock = Mock.ofType<Logger>();
+            loggerMock = Mock.ofType<MockableLogger>();
             const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,

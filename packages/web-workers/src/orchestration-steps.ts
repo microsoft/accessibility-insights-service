@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// tslint:disable-next-line: no-submodule-imports
-import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
-
+// tslint:disable: no-submodule-imports no-unsafe-any
 import { AvailabilityTestConfig } from 'common';
+import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
 import { isNil } from 'lodash';
-import { ContextAwareLogger, LogLevel } from 'logger';
+import { Logger, LogLevel } from 'logger';
 import * as moment from 'moment';
 import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { ActivityAction } from './contracts/activity-actions';
@@ -32,28 +31,28 @@ export interface OrchestrationTelemetryProperties {
 }
 
 export interface OrchestrationSteps {
-    callHealthCheckActivity(): Generator<Task, void, SerializableResponse>;
-    getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
-    waitForScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
-    verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void>;
-    callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse>;
+    invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
+    invokeSubmitScanRequestRestApi(url: string): Generator<Task, string, SerializableResponse>;
+    validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
+    waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
+    invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
 }
+
 export class OrchestrationStepsImpl implements OrchestrationSteps {
     public static readonly activityTriggerFuncName = 'health-monitor-client-func';
 
     constructor(
         private readonly context: IOrchestrationFunctionContext,
         private readonly availabilityTestConfig: AvailabilityTestConfig,
-        private readonly logger: ContextAwareLogger,
+        private readonly logger: Logger,
     ) {}
 
-    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse & void> {
+    public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
         yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
     }
 
-    public *getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
+    public *invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
         const activityName = ActivityAction.getScanReport;
-
         const requestData: GetScanReportData = {
             scanId: scanId,
             reportId: reportId,
@@ -68,7 +67,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Successfully fetched scan report');
     }
 
-    public *waitForScanCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
+    public *waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void> {
         let scanRunState: RunState = 'pending';
         let scanStatus: ScanRunResultResponse;
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
@@ -76,7 +75,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const scanWaitIntervalInSeconds = this.availabilityTestConfig.scanWaitIntervalInSeconds;
         let scanStatusResponse: SerializableResponse;
 
-        this.logOrchestrationStep('Starting waitForScanCompletion');
+        this.logOrchestrationStep('Starting wait for scan request completion');
 
         while (
             scanRunState !== 'completed' &&
@@ -101,9 +100,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
                 waitEndTime: waitEndTime.toJSON(),
             });
 
-            // tslint:disable-next-line: no-unsafe-any
             scanStatusResponse = yield* this.callGetScanStatusActivity(scanId);
-            // tslint:disable-next-line: no-unsafe-any
             scanStatus = yield* this.getScanStatus(scanStatusResponse);
 
             scanRunState = scanStatus.run.state;
@@ -112,7 +109,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
         if (scanRunState === 'completed') {
-            this.logOrchestrationStep('waitForScanCompletion completed successfully', LogLevel.info, {
+            this.logOrchestrationStep('Wait for scan request completion succeeded', LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
@@ -125,34 +122,33 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
                 requestResponse: scanStatusResponseString,
             });
 
-            this.logOrchestrationStep('waitForScanCompletion failed', LogLevel.error, {
+            const traceData = {
                 requestResponse: scanStatusResponseString,
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
                 waitEndTime: waitEndTime.toJSON(),
-            });
+            };
+            this.logOrchestrationStep('Wait for scan request completion failed', LogLevel.error, traceData);
 
-            throw new Error('waitForScanCompletion failed');
+            throw new Error(`Wait for scan request completion failed. ${JSON.stringify(traceData)}`);
         }
 
         return scanStatus;
     }
 
-    public *verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void> {
+    public *validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void> {
         const response = yield* this.callGetScanStatusActivity(scanId);
-
         yield* this.getScanStatus(response);
-        this.logOrchestrationStep('verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
+        this.logOrchestrationStep('Verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
     }
 
-    public *callSubmitScanRequestActivity(url: string): Generator<Task, string, SerializableResponse & void> {
+    public *invokeSubmitScanRequestRestApi(url: string): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateScanRequestData = {
             scanUrl: url,
             priority: 1000,
         };
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
-
         const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createScanRequest);
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId}`);
 
@@ -262,10 +258,12 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             this.logOrchestrationStep('Scan request failed', LogLevel.error, {
                 requestResponse: JSON.stringify(response),
             });
+
             yield* this.trackAvailability(false, {
                 activityName: ActivityAction.getScanResult,
                 requestResponse: JSON.stringify(response),
             });
+
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         }
     }

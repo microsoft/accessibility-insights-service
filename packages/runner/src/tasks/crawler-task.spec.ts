@@ -3,9 +3,9 @@
 // tslint:disable: no-object-literal-type-assertion
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../../test-utilities/mockable-logger';
 import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
 import { HCCrawlerOptionsFactory } from '../crawler/hc-crawler-options-factory';
 import { CrawlerConnectOptions } from '../crawler/hc-crawler-types';
@@ -27,7 +27,7 @@ let hcCrawlerConnectMock: IMock<HCCrawlerConnect>;
 let hcCrawlerTyped: HCCrawlerTyped;
 let linkExplorerMock: IMock<LinkExplorer>;
 let crawlerTask: CrawlerTask;
-let loggerMock: IMock<Logger>;
+let loggerMock: IMock<MockableLogger>;
 
 beforeEach(() => {
     browserMock = new BrowserMock();
@@ -37,7 +37,7 @@ beforeEach(() => {
     hcCrawlerConnectMock = Mock.ofType<HCCrawlerConnect>();
     linkExplorerMock = Mock.ofType<LinkExplorer>();
     HCCrawler.connect = hcCrawlerConnectMock.object;
-    loggerMock = Mock.ofType(Logger);
+    loggerMock = Mock.ofType(MockableLogger);
     crawlerTask = new CrawlerTask(hcCrawlerOptionsFactoryMock.object, loggerMock.object, linkExplorerFactoryMock.object);
 });
 

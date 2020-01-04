@@ -5,11 +5,11 @@ import 'reflect-metadata';
 import { CosmosContainerClient } from 'azure-services';
 import { GuidGenerator, HashGenerator } from 'common';
 import { cloneDeep } from 'lodash';
-import { Logger } from 'logger';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { Mock } from 'typemoq';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { DbMockHelper } from '../test-utilities/db-mock-helpers';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
 
 // tslint:disable: no-any
@@ -31,7 +31,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
         }, 30000);
 
         beforeEach(() => {
-            const loggerMock = Mock.ofType<Logger>();
+            const loggerMock = Mock.ofType<MockableLogger>();
             const cosmosContainerClient = new CosmosContainerClient(
                 dbHelper.cosmosClient,
                 dbHelper.dbContainer.dbName,

@@ -3,7 +3,6 @@
 //tslint:disable no-unsafe-any no-floating-promises
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import {
     createCrawlerRequestOptions,
@@ -11,6 +10,7 @@ import {
     getNotAllowedUrls,
     getPromisableDynamicMock,
 } from '../../test-utilities/common-mock-methods';
+import { MockableLogger } from '../../test-utilities/mockable-logger';
 import { CrawlerScanResults } from './crawler-scan-results';
 import { HCCrawlerTyped } from './hc-crawler';
 import { HCCrawlerOptionsFactory } from './hc-crawler-options-factory';
@@ -21,7 +21,7 @@ describe('LinkExplorer', () => {
     let crawlerMock: IMock<HCCrawlerTyped>;
     let linkExplorer: LinkExplorer;
     let launchOptionsStub: CrawlerLaunchOptions;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<MockableLogger>;
     let processMock: IMock<typeof process>;
     const testUrl = 'https://www.microsoft.com';
     const baeUrl = testUrl;
@@ -32,7 +32,7 @@ describe('LinkExplorer', () => {
         crawlerMock.setup(async cm => cm.close()).returns(async () => Promise.resolve());
 
         crawlerMock = getPromisableDynamicMock(crawlerMock);
-        loggerMock = Mock.ofType(Logger);
+        loggerMock = Mock.ofType(MockableLogger);
         processMock = Mock.ofInstance(process);
         launchOptionsStub = new HCCrawlerOptionsFactory(loggerMock.object, processMock.object).createConnectOptions(
             testUrl,

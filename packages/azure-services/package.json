@@ -43,6 +43,7 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
+        "@azure/batch": "^7.0.0",
         "@azure/cosmos": "^2.1.2",
         "@azure/identity": "^1.0.0-preview.3",
         "@azure/keyvault": "^0.1.0",
@@ -57,6 +58,8 @@
         "logger": "1.0.0",
         "pretty-format": "^24.7.0",
         "reflect-metadata": "^0.1.13",
-        "verror": "^1.10.0"
+        "verror": "^1.10.0",
+        "request-promise": "^4.2.4",
+        "request": "^2.88.0"
     }
 }

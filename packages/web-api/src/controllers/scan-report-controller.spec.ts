@@ -5,10 +5,10 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { ContextAwareLogger } from 'logger';
 import { HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
 import { Readable } from 'stream';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 
 import { BodyParser } from './../utils/body-parser';
 import { ScanReportController } from './scan-report-controller';
@@ -18,7 +18,7 @@ describe(ScanReportController, () => {
     let context: Context;
     let reportServiceMock: IMock<PageScanRunReportService>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const validId = 'valid-id';
     const notFoundId = 'not-found-id';
@@ -71,7 +71,7 @@ describe(ScanReportController, () => {
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
 
-        contextAwareLoggerMock = Mock.ofType<ContextAwareLogger>();
+        loggerMock = Mock.ofType<MockableLogger>();
     });
 
     function createScanResultController(contextReq: Context): ScanReportController {
@@ -79,7 +79,7 @@ describe(ScanReportController, () => {
             reportServiceMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
+            loggerMock.object,
             bodyParserMock.object,
         );
         controller.context = contextReq;

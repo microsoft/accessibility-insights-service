@@ -8,11 +8,12 @@ import { ServiceConfiguration } from 'common';
 import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
-import { ContextAwareLogger } from 'logger';
+import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
@@ -26,10 +27,10 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         public context: Context,
         public availabilityTestConfig: AvailabilityTestConfig,
         serviceConfig: ServiceConfiguration,
-        contextAwareLogger: ContextAwareLogger,
+        logger: Logger,
         df: typeof durableFunctions,
     ) {
-        super(serviceConfig, contextAwareLogger, df);
+        super(serviceConfig, logger, df);
     }
 
     protected createOrchestrationSteps(
@@ -67,13 +68,13 @@ class OrchestrationStepsStub implements OrchestrationSteps {
 
     constructor(private readonly availabilityTestConfig: AvailabilityTestConfig) {}
 
-    public *callHealthCheckActivity(): Generator<Task, void, SerializableResponse> {
+    public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse> {
         this.orchestratorStepsCallCount.callHealthCheckCount += 1;
         this.throwExceptionIfExpected();
         yield undefined;
     }
 
-    public *getScanReport(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
+    public *invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.getScanReportCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -82,7 +83,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *waitForScanCompletion(scanId: string): Generator<any, ScanRunResultResponse, any> {
+    public *waitForScanRequestCompletion(scanId: string): Generator<any, ScanRunResultResponse, any> {
         this.orchestratorStepsCallCount.waitForScanCompletionCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -103,7 +104,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield scanRunResultResponse;
     }
 
-    public *verifyScanSubmitted(scanId: string): Generator<Task, void, SerializableResponse & void> {
+    public *validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.verifyScanSubmittedCount += 1;
         this.throwExceptionIfExpected();
         expect(scanId).toBe(this.scanId);
@@ -111,7 +112,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *callSubmitScanRequestActivity(url: string): Generator<any, string, any> {
+    public *invokeSubmitScanRequestRestApi(url: string): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
@@ -129,7 +130,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
 describe('HealthMonitorOrchestrationController', () => {
     let testSubject: TestableHealthMonitorOrchestrationController;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
-    let contextAwareLoggerMock: IMock<ContextAwareLogger>;
+    let loggerMock: IMock<MockableLogger>;
     let contextStub: IOrchestrationFunctionContext;
     let df: IMock<typeof durableFunctions>;
     let availabilityTestConfig: AvailabilityTestConfig;
@@ -146,7 +147,7 @@ describe('HealthMonitorOrchestrationController', () => {
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-        contextAwareLoggerMock = Mock.ofType(ContextAwareLogger);
+        loggerMock = Mock.ofType(MockableLogger);
         orchestratorStepsStub = new OrchestrationStepsStub(availabilityTestConfig);
 
         contextStub = ({
@@ -172,7 +173,7 @@ describe('HealthMonitorOrchestrationController', () => {
             contextStub,
             availabilityTestConfig,
             serviceConfigurationMock.object,
-            contextAwareLoggerMock.object,
+            loggerMock.object,
             df.object,
         );
     });
