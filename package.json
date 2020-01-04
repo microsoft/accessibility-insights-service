@@ -17,8 +17,7 @@
         "precheckin": "npm-run-all --serial format build lint test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
-        "copyright-check": "license-check-and-add",
-        "e2e": "npx jest --projects packages/e2e-tests/jest.config.js"
+        "copyright-check": "license-check-and-add"
     },
     "author": "Microsoft",
     "license": "MIT",

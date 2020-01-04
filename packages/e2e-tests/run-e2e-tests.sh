@@ -14,7 +14,7 @@ export authorityUrl
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -s <subscription> -g <resource group> -u <scan url> -a <api version> -c <client id> -t <client secret> -o <authority url>
+Usage: $0 -s <subscription> -g <resource group> -u <scan url> -a <api version> -c <client id> -t <client secret> -o <authority url> [ -m <max attempts, default is 1>]
 "
     exit 1
 }
@@ -35,7 +35,7 @@ getApiBaseUrl() {
 }
 
 # Read script arguments
-while getopts ":s:g:u:b:a:c:t:o:" option; do
+while getopts ":s:g:u:b:a:c:t:o:m:" option; do
     case $option in
     s) subscription=${OPTARG} ;;
     g) resourceGroup=${OPTARG} ;;
@@ -44,6 +44,7 @@ while getopts ":s:g:u:b:a:c:t:o:" option; do
     c) clientId=${OPTARG} ;;
     t) clientSecret=${OPTARG} ;;
     o) authorityUrl=${OPTARG} ;;
+    m) maxAttempts=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -52,6 +53,19 @@ if [[ -z $subscription ]] || [[ -z $resourceGroup ]] || [[ -z $scanUrl ]] || [[ 
     exitWithUsageInfo
 fi
 
+if [[ -z $maxAttempts ]]; then
+    maxAttempts=1
+fi
+
 getApiBaseUrl
 
-yarn e2e
+numAttempts=0
+
+until yarn test --projects packages/e2e-tests/jest.config.js; do
+    numAttempts=$((numAttempts + 1))
+    if [ $numAttempts -ge $maxAttempts ]; then
+        echo "E2E Tests failed after $numAttempts attempts."
+        exit 1
+    fi
+    echo "E2E Tests failed. Rerunning..."
+done
