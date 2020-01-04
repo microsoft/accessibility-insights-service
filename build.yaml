@@ -69,6 +69,7 @@ steps:
               resource-deployment/dist/**/*
               web-api/dist/**/*
               web-workers/dist/**/*
+              e2e-tests/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
