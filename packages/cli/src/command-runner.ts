@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
 import * as filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
@@ -7,8 +10,6 @@ import { ReportGenerator } from './report/report-generator';
 import { AIScanner } from './scanner/ai-scanner';
 import { ScanArguments } from './scanner/scan-arguments';
 
-// Copyright (c) Microsoft Corporation. All rights reserved.
-// Licensed under the MIT License.
 @injectable()
 export class CommandRunner {
     public domainNameRegExp = new RegExp('^(?:http://|www.|https://)([^/]+)', 'igm');

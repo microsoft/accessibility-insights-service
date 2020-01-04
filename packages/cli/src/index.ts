@@ -2,6 +2,7 @@
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 import * as yargs from 'yargs';
 import { CliEntryPoint } from './cli-entry-point';
