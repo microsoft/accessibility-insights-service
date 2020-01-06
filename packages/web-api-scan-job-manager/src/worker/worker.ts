@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
@@ -25,6 +25,7 @@ export class Worker {
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
+        private readonly system: typeof System = System,
     ) {}
 
     public async run(): Promise<void> {
@@ -73,12 +74,24 @@ export class Worker {
                 break;
             }
 
-            if (moment().toDate() > this.restartAfterTime) {
+            if (moment().toDate() >= this.restartAfterTime) {
                 this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
+                await this.waitForChildTasks();
                 break;
             }
 
-            await System.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
+            await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
+        }
+    }
+
+    private async waitForChildTasks(): Promise<void> {
+        this.logger.logInfo('Waiting for child tasks to complete');
+
+        let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
+
+        while (poolMetricsInfo.load.activeTasks !== 0 || poolMetricsInfo.load.runningTasks > 1) {
+            await this.system.wait(5000);
+            poolMetricsInfo = await this.batch.getPoolMetricsInfo();
         }
     }
 
