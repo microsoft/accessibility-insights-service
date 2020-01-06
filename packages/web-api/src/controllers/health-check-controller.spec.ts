@@ -17,6 +17,9 @@ describe(HealthCheckController, () => {
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
     let appInsightsClientMock: IMock<ApplicationInsightsClient>;
+    const e2eTestConfig = {
+        testRunQueryTimespan: 'timespan',
+    };
 
     beforeEach(() => {
         context = <Context>(<unknown>{
@@ -30,6 +33,7 @@ describe(HealthCheckController, () => {
         });
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
+        serviceConfigurationMock.setup(async s => s.getConfigValue('e2eTestConfig')).returns(async () => Promise.resolve(e2eTestConfig));
 
         loggerMock = Mock.ofType<MockableLogger>();
         appInsightsClientMock = Mock.ofType(ApplicationInsightsClient);
