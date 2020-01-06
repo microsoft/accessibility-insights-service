@@ -39,7 +39,7 @@ export class Worker {
                 const scanMessages = await this.getMessages(tasksIncrementCount);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-                    if (poolMetricsInfo.load.activeTasks === 0 && poolMetricsInfo.load.runningTasks === 1) {
+                    if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
                         break;
                     }
@@ -81,10 +81,15 @@ export class Worker {
 
         let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
 
-        while (poolMetricsInfo.load.activeTasks !== 0 || poolMetricsInfo.load.runningTasks > 1) {
+        while (this.hasChildTasksRunning(poolMetricsInfo)) {
             await this.system.wait(5000);
             poolMetricsInfo = await this.batch.getPoolMetricsInfo();
         }
+    }
+
+    private hasChildTasksRunning(poolMetricsInfo: PoolMetricsInfo): boolean {
+        // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
+        return poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks > 1;
     }
 
     private async getMessages(messagesCount: number): Promise<Message[]> {
