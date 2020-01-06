@@ -2,7 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ScanReport, ScanRunErrorResponse, ScanRunResultResponse } from 'service-library';
+import { ResponseWithBodyType } from 'azure-services';
+import { GuidGenerator } from 'common';
+import * as request from 'request-promise';
+import { ScanReport, ScanRunErrorResponse, ScanRunResultResponse, WebApiErrorCode, WebApiErrorCodes } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 
 describe('Web Api E2E Tests', () => {
@@ -15,8 +18,12 @@ describe('Web Api E2E Tests', () => {
     let clientSecret: string;
     let authorityUrl: string;
 
+    const invalidGuid = '00000000-0000-0000-0000-000000000000';
+
     let webApiCredential: A11yServiceCredential;
     let webApiClient: A11yServiceClient;
+
+    let guidGenerator: GuidGenerator;
 
     beforeEach(() => {
         scanUrl = process.env.scanUrl;
@@ -27,13 +34,11 @@ describe('Web Api E2E Tests', () => {
         clientSecret = process.env.clientSecret;
         authorityUrl = process.env.authorityUrl;
 
+        validateInputs();
+
         webApiCredential = new A11yServiceCredential(clientId, clientSecret, clientId, authorityUrl);
         webApiClient = new A11yServiceClient(webApiCredential, baseUrl, apiVersion);
-    });
-
-    it('Validate inputs', () => {
-        expect(scanUrl).toBeDefined();
-        expect(baseUrl).toBeDefined();
+        guidGenerator = new GuidGenerator();
     });
 
     it(
@@ -52,6 +57,81 @@ describe('Web Api E2E Tests', () => {
         },
         timeout,
     );
+
+    it(
+        'Missing api version',
+        async () => {
+            webApiClient = new A11yServiceClient(webApiCredential, baseUrl, '');
+            const submitScanResponse = await webApiClient.postScanUrl(scanUrl);
+            validateWebApiError(submitScanResponse, WebApiErrorCodes.missingApiVersionQueryParameter);
+        },
+        timeout,
+    );
+
+    it(
+        'Invalid api version',
+        async () => {
+            webApiClient = new A11yServiceClient(webApiCredential, baseUrl, 'invalidApiVersion');
+            const submitScanResponse = await webApiClient.postScanUrl(scanUrl);
+            validateWebApiError(submitScanResponse, WebApiErrorCodes.unsupportedApiVersion);
+        },
+        timeout,
+    );
+
+    it(
+        'Invalid scan url',
+        async () => {
+            const submitScanResponse = await webApiClient.postScanUrl('invalidUrl');
+            const expectedError = [{ error: WebApiErrorCodes.invalidURL.error, url: 'invalidUrl' }];
+            expect(submitScanResponse.statusCode).toBe(202);
+            expect(submitScanResponse.body).toEqual(expectedError);
+        },
+        timeout,
+    );
+
+    it(
+        'out of range priority',
+        async () => {
+            const submitScanResponse = await webApiClient.postScanUrl(scanUrl, 999999999999999);
+            const expectedError = [{ error: WebApiErrorCodes.outOfRangePriority.error, url: scanUrl }];
+            expect(submitScanResponse.statusCode).toBe(202);
+            expect(submitScanResponse.body).toEqual(expectedError);
+        },
+        timeout,
+    );
+
+    it(
+        'get status of invalid scan id',
+        async () => {
+            const scanStatusResponse = await webApiClient.getScanStatus(invalidGuid);
+            validateWebApiError(scanStatusResponse, WebApiErrorCodes.invalidResourceId);
+        },
+        timeout,
+    );
+
+    it(
+        'invalidReportId',
+        async () => {
+            const getReportResponse = await webApiClient.getScanReport(invalidGuid, invalidGuid);
+            validateWebApiError(getReportResponse, WebApiErrorCodes.invalidResourceId);
+        },
+        timeout,
+    );
+
+    it('NonexistantReportId', async () => {
+        const nonexistantReportId = guidGenerator.createGuid();
+        const getReportResponse = await webApiClient.getScanReport(invalidGuid, nonexistantReportId);
+        validateWebApiError(getReportResponse, WebApiErrorCodes.resourceNotFound);
+    });
+
+    function validateInputs(): void {
+        expect(scanUrl).toBeDefined();
+        expect(baseUrl).toBeDefined();
+        expect(apiVersion).toBeDefined();
+        expect(clientId).toBeDefined();
+        expect(clientSecret).toBeDefined();
+        expect(authorityUrl).toBeDefined();
+    }
 
     async function getScanId(): Promise<string> {
         const scanSubmissionResponse = await webApiClient.postScanUrl(scanUrl);
@@ -102,5 +182,11 @@ describe('Web Api E2E Tests', () => {
             const getReportResponse = await webApiClient.getScanReport(scanId, reportId);
             expect(getReportResponse.statusCode).toBe(200);
         });
+    }
+
+    function validateWebApiError(response: ResponseWithBodyType<unknown>, expectedError: WebApiErrorCode, expectedStatusCode?: number) {
+        const statusCode = expectedStatusCode === undefined ? expectedError.statusCode : expectedStatusCode;
+        expect(response.statusCode).toBe(statusCode);
+        expect(response.body).toEqual({ error: expectedError.error });
     }
 });
