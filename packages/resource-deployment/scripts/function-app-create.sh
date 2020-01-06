@@ -24,8 +24,7 @@ Usage: $0 \
 -c <Azure AD application client ID> \
 -e <environment> \
 -k <Key Vault to grant Azure Function App an access to> \
--d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> \
--v <release version>
+-d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
 "
     exit 1
 }
@@ -152,8 +151,6 @@ deployWebWorkersArmTemplate() {
 
     waitForFunctionAppServiceDeploymentCompletion $webWorkersFunctionAppName
     echo "Successfully deployed Azure Function App '$webWorkersFunctionAppName'"
-
-    az functionapp config appsettings set --name $webWorkersFunctionAppName --resource-group $resourceGroupName --settings "RELEASE_VERSION=$releaseVersion" 1>/dev/null
 }
 
 deployWebApiFunctionApp() {
@@ -173,21 +170,18 @@ deployWebWorkersFunctionApp() {
 }
 
 # Read script arguments
-while getopts ":r:c:e:k:d:v:" option; do
+while getopts ":r:c:e:k:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
-    v) releaseVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $webApiAdClientId ] || [ -z $releaseVersion ]; then
-    echo "HELLO"
-    echo "Release version: $releaseVersion"
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $webApiAdClientId ]; then
     exitWithUsageInfo
 fi
 
