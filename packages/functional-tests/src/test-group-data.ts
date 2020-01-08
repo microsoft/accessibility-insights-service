@@ -1,7 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { GuidGenerator } from 'common';
+import { Logger } from 'logger';
+import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanRunState } from 'storage-documents';
 import { Url } from 'url';
+import { A11yServiceClient } from 'web-api-client';
+import { FunctionalTestGroup } from './test-groups/functional-test-group';
 
 export interface TestGroupData {
     testGroupName: string;
@@ -27,3 +32,10 @@ export interface SerializableResponse<T = {}> {
     headers: { [key: string]: unknown };
     request: SerializableRequest;
 }
+
+export type FunctionalTestGroupCreator = (
+    a11yServiceClient: A11yServiceClient,
+    onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+    logger: Logger,
+    guidGenerator: GuidGenerator,
+) => FunctionalTestGroup;

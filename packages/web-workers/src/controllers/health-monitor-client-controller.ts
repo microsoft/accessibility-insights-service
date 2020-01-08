@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
+import { FunctionalTestGroup, FunctionalTestGroupFactory, TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { HealthReport, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
-import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
 import {
     ActivityRequestData,
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
+    RunFunctionalTestGroupData,
     SerializableResponse,
     TrackAvailabilityData,
 } from './activity-request-data';
@@ -26,7 +28,8 @@ export class HealthMonitorClientController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) logger: Logger,
-        @inject(iocTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
+        @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
+        @inject(FunctionalTestGroupFactory) protected readonly functionalTestGroupFactory: FunctionalTestGroupFactory,
     ) {
         super(logger);
 
@@ -36,6 +39,7 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.getScanReport]: this.getScanReport,
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
             [ActivityAction.trackAvailability]: this.trackAvailability,
+            [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
         };
     }
 
@@ -85,5 +89,11 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {
         this.logger.trackAvailability(data.name, data.telemetry);
+    };
+
+    private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<TestContextData> => {
+        const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName, this.logger);
+
+        return functionalTestGroup.run(data.testContextData, data.env);
     };
 }

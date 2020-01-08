@@ -4,6 +4,7 @@
 // tslint:disable: no-submodule-imports no-unsafe-any
 import { AvailabilityTestConfig } from 'common';
 import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
+import { TestEnvironment } from 'functional-tests';
 import { isNil } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import * as moment from 'moment';
@@ -14,6 +15,7 @@ import {
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
+    RunFunctionalTestGroupData,
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
@@ -36,6 +38,7 @@ export interface OrchestrationSteps {
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
+    runFunctionalTests(): Generator<Task, void, SerializableResponse & void>;
 }
 
 export class OrchestrationStepsImpl implements OrchestrationSteps {
@@ -153,6 +156,22 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId}`);
 
         return scanId;
+    }
+
+    public *runFunctionalTests(): Generator<Task, void, SerializableResponse & void> {
+        const testData: RunFunctionalTestGroupData = {
+            testGroupName: 'PostScan',
+            testContextData: {
+                scanUrl: 'https://www.bing.com',
+            },
+            env: TestEnvironment.canary,
+        };
+
+        this.logOrchestrationStep('Running PostScan functional test');
+
+        yield* this.callWebRequestActivity(ActivityAction.runFunctionalTestGroup, testData);
+
+        this.logOrchestrationStep('Completed functional test run');
     }
 
     private *callGetScanStatusActivity(scanId: string): Generator<Task, SerializableResponse, SerializableResponse & void> {

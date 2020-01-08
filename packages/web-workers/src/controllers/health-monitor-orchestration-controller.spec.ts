@@ -51,6 +51,7 @@ export interface OrchestratorStepsCallCount {
     waitForScanCompletionCount: number;
     verifyScanSubmittedCount: number;
     callSubmitScanRequest: number;
+    runFunctionalTestsCount: number;
 }
 
 class OrchestrationStepsStub implements OrchestrationSteps {
@@ -60,6 +61,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         waitForScanCompletionCount: 0,
         verifyScanSubmittedCount: 0,
         callSubmitScanRequest: 0,
+        runFunctionalTestsCount: 0,
     };
 
     public scanId = 'scan-id';
@@ -118,6 +120,13 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
 
         return yield this.scanId;
+    }
+
+    public *runFunctionalTests(): Generator<Task, void, SerializableResponse & void> {
+        this.orchestratorStepsCallCount.runFunctionalTestsCount += 1;
+        this.throwExceptionIfExpected();
+
+        yield undefined;
     }
 
     private throwExceptionIfExpected(): void {
@@ -235,6 +244,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 getScanReportCount: 0,
                 verifyScanSubmittedCount: 0,
                 waitForScanCompletionCount: 0,
+                runFunctionalTestsCount: 0,
             };
 
             const actualStepsCallCount: OrchestratorStepsCallCount = orchestratorStepsStub.orchestratorStepsCallCount;

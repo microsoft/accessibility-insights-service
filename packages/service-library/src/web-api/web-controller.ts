@@ -49,6 +49,7 @@ export abstract class WebController {
             apiVersion: this.apiVersion,
             controller: this.constructor.name,
             invocationId: this.context.invocationId,
+            releaseNumber: process.env.RELEASE_VERSION,
         };
     }
 
