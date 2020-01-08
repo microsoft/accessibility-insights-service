@@ -35,13 +35,17 @@ export class HealthCheckController extends ApiController {
             testsFailed: 0,
         };
 
-        const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
-        const queryString = 'customEvents | limit 5';
-        const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
-        if (queryResponse.statusCode === 200) {
-            this.logger.logInfo(`App insights api queried with result ${JSON.stringify(queryResponse)}`);
+        if (currentVersion === undefined) {
+            healthReport.error = 'No release version number is configured';
         } else {
-            healthReport.error = `App insights api query failed with status ${queryResponse.statusCode}`;
+            const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
+            const queryString = 'customEvents | limit 5';
+            const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
+            if (queryResponse.statusCode === 200) {
+                this.logger.logInfo(`App insights api queried with result ${JSON.stringify(queryResponse)}`);
+            } else {
+                healthReport.error = `App insights api query failed with status ${queryResponse.statusCode}`;
+            }
         }
 
         this.context.res = {
