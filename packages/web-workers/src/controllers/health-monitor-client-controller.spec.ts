@@ -49,7 +49,6 @@ describe(HealthMonitorClientController, () => {
         functionalTestGroupStub = new FunctionalTestGroupStub(
             webApiClientMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            loggerMock.object,
             guidGeneratorMock.object,
         );
 

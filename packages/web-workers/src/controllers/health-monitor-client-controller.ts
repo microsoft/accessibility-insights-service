@@ -94,6 +94,7 @@ export class HealthMonitorClientController extends WebController {
     private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<TestContextData> => {
         const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName, this.logger);
 
-        return functionalTestGroup.run(data.testContextData, data.env);
+        //return functionalTestGroup.run(data.testContextData, data.env);
+        return undefined;
     };
 }

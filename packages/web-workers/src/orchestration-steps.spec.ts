@@ -36,12 +36,7 @@ describe(OrchestrationStepsImpl, () => {
     let context: IOrchestrationFunctionContext;
     let orchestrationContext: IMock<DurableOrchestrationContext>;
     let testSubject: OrchestrationStepsImpl;
-    const availabilityTestConfig: AvailabilityTestConfig = {
-        scanWaitIntervalInSeconds: 10,
-        maxScanWaitTimeInSeconds: 20,
-        urlToScan: 'https://www.bing.com',
-        testEnv: TestEnvironment.canary,
-    };
+    let availabilityTestConfig: AvailabilityTestConfig;
     let loggerMock: IMock<MockableLogger>;
     const scanUrl = 'https://www.bing.com';
     const scanId = 'test-scan-id';
@@ -53,6 +48,13 @@ describe(OrchestrationStepsImpl, () => {
         orchestrationContext.setup(oc => oc.instanceId).returns(() => 'test instance id');
         orchestrationContext.setup(oc => oc.isReplaying).returns(() => true);
         orchestrationContext.setup(oc => oc.currentUtcDateTime).returns(() => currentUtcDateTime);
+
+        availabilityTestConfig = {
+            scanWaitIntervalInSeconds: 10,
+            maxScanWaitTimeInSeconds: 20,
+            urlToScan: 'https://www.bing.com',
+            testEnv: TestEnvironment[TestEnvironment.canary],
+        };
 
         loggerMock = Mock.ofType(MockableLogger);
 
@@ -461,7 +463,7 @@ describe(OrchestrationStepsImpl, () => {
                     data: {
                         testGroupName,
                         testContextData,
-                        env: availabilityTestConfig.testEnv,
+                        env: 1,
                     },
                 };
             });

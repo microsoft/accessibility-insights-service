@@ -156,8 +156,10 @@ describe('HealthMonitorOrchestrationController', () => {
             urlToScan: 'some-url',
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
-            testEnv: TestEnvironment.canary,
+            testEnv: TestEnvironment[TestEnvironment.canary],
         };
+        console.log(TestEnvironment);
+        console.log(TestEnvironment['canary']);
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);

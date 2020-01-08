@@ -28,15 +28,15 @@ export class FunctionalTestGroupFactory {
         const webApiClient = await this.a11yServiceClientProvider();
         switch (testGroupName) {
             case 'PostScan':
-                return new PostScanTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, logger, this.guidGenerator);
+                return new PostScanTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'RestApi':
-                return new RestApiTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, logger, this.guidGenerator);
+                return new RestApiTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'ScanPreProcessing':
-                return new ScanPreProcessingTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, logger, this.guidGenerator);
+                return new ScanPreProcessingTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'ScanQueueing':
-                return new ScanQueuingTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, logger, this.guidGenerator);
+                return new ScanQueuingTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'ScanReports':
-                return new ScanReportTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, logger, this.guidGenerator);
+                return new ScanReportTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             default:
                 throw new Error(`No factory for FunctionalTestGroup with name ${testGroupName}`);
         }
