@@ -3,34 +3,56 @@
 import 'reflect-metadata';
 
 import { Message, Queue } from 'azure-services';
-import { ServiceConfiguration } from 'common';
+import { ServiceConfiguration, System } from 'common';
 import * as _ from 'lodash';
-import { IMock, It, Mock, Times } from 'typemoq';
+import * as moment from 'moment';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { Batch } from '../batch/batch';
 import { JobTask, JobTaskState } from '../batch/job-task';
 import { PoolLoadGenerator } from '../batch/pool-load-generator';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
 
-// tslint:disable: no-unsafe-any
+// tslint:disable: no-unsafe-any no-object-literal-type-assertion
 
-let worker: Worker;
-let batchMock: IMock<Batch>;
-let queueMock: IMock<Queue>;
-let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
-let serviceConfigMock: IMock<ServiceConfiguration>;
-let loggerMock: IMock<MockableLogger>;
-const activeToRunningTasksRatioDefault = 2;
-const addTasksIntervalInSecondsDefault = 1;
+// tslint:disable-next-line: mocha-no-side-effect-code
+const unMockedMoment = jest.requireActual('moment') as typeof moment;
+let currentTime: string;
+
+jest.mock('moment', () => {
+    return () => {
+        return {
+            subtract: (amount: moment.DurationInputArg1, unit: moment.unitOfTime.DurationConstructor) =>
+                unMockedMoment(currentTime).subtract(amount, unit),
+            add: (amount: moment.DurationInputArg1, unit: moment.unitOfTime.DurationConstructor) =>
+                unMockedMoment(currentTime).add(amount, unit),
+            toDate: () => unMockedMoment(currentTime).toDate(),
+        } as moment.Moment;
+    };
+});
 
 describe(Worker, () => {
+    let worker: Worker;
+    let batchMock: IMock<Batch>;
+    let queueMock: IMock<Queue>;
+    let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
+    let loggerMock: IMock<MockableLogger>;
+    const activeToRunningTasksRatioDefault = 2;
+    const addTasksIntervalInSecondsDefault = 1;
+    let systemMock: IMock<typeof System>;
+    let maxWallClockTimeInHours: number;
+
     beforeEach(() => {
+        currentTime = '2019-01-01';
         process.env.AZ_BATCH_JOB_ID = 'batch-job-id';
         batchMock = Mock.ofType(Batch);
         queueMock = Mock.ofType(Queue);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
+        systemMock = Mock.ofInstance(System, MockBehavior.Strict);
+        maxWallClockTimeInHours = 1;
 
         queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
 
@@ -40,7 +62,7 @@ describe(Worker, () => {
                 return {
                     activeToRunningTasksRatio: activeToRunningTasksRatioDefault,
                     addTasksIntervalInSeconds: addTasksIntervalInSecondsDefault,
-                    maxWallClockTimeInHours: 1,
+                    maxWallClockTimeInHours: maxWallClockTimeInHours,
                 };
             })
             .verifiable(Times.atLeastOnce());
@@ -53,7 +75,14 @@ describe(Worker, () => {
             .returns(async () => Promise.resolve(process.env.AZ_BATCH_JOB_ID))
             .verifiable(Times.once());
 
-        worker = new Worker(batchMock.object, queueMock.object, poolLoadGeneratorMock.object, serviceConfigMock.object, loggerMock.object);
+        worker = new Worker(
+            batchMock.object,
+            queueMock.object,
+            poolLoadGeneratorMock.object,
+            serviceConfigMock.object,
+            loggerMock.object,
+            systemMock.object,
+        );
         worker.runOnce = true;
     });
 
@@ -61,6 +90,7 @@ describe(Worker, () => {
         batchMock.verifyAll();
         queueMock.verifyAll();
         serviceConfigMock.verifyAll();
+        systemMock.verifyAll();
     });
 
     it('add tasks to the job', async () => {
@@ -192,6 +222,7 @@ describe(Worker, () => {
 
         await worker.run();
     });
+
     it('Continue waiting until all active and running tasks are completed', async () => {
         const poolMetricsInfo = {
             id: 'pool-id',
@@ -237,10 +268,72 @@ describe(Worker, () => {
             .setup(async o => o.getMessages())
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.exactly(2));
+
+        systemMock
+            .setup(async s => s.wait(1000))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
+
         // let it exit by itself
         worker.runOnce = false;
         await worker.run();
     });
+
+    it('Terminate if restart timeout has reached', async () => {
+        const startTime = currentTime;
+
+        const poolMetricsInfo = {
+            id: 'pool-id',
+            maxTasksPerPool: 4,
+            load: {
+                activeTasks: 5,
+                runningTasks: 6,
+            },
+        };
+        let poolMetricsInfoCallbackCount = 0;
+        poolLoadGeneratorMock
+            .setup(async o =>
+                o.getTasksIncrementCount(
+                    It.is(actualMetrics => {
+                        return _.isEqual(poolMetricsInfo, actualMetrics);
+                    }),
+                ),
+            )
+            .returns(async () => Promise.resolve(8));
+
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .callback(q => {
+                poolMetricsInfoCallbackCount += 1;
+                currentTime = moment(startTime)
+                    .add(maxWallClockTimeInHours, 'hour')
+                    .toDate()
+                    .toJSON();
+                poolMetricsInfo.load.activeTasks = poolMetricsInfo.load.activeTasks > 0 ? poolMetricsInfo.load.activeTasks - 1 : 0;
+                poolMetricsInfo.load.runningTasks = poolMetricsInfo.load.runningTasks > 1 ? poolMetricsInfo.load.runningTasks - 1 : 1;
+            })
+            .returns(async () => {
+                return Promise.resolve(poolMetricsInfo);
+            });
+
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
+
+        systemMock
+            .setup(async s => s.wait(5000))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.exactly(3));
+
+        // let it exit by itself
+        worker.runOnce = false;
+        await worker.run();
+
+        expect(poolMetricsInfo.load.activeTasks).toBe(0);
+        expect(poolMetricsInfo.load.runningTasks).toBe(1);
+    });
+
     it('terminate only if there are no active task and only manager task is running', async () => {
         const poolMetricsInfo = {
             id: 'pool-id',
