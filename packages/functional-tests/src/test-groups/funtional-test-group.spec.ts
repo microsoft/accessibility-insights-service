@@ -3,131 +3,64 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { Logger, LogLevel } from 'logger';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
-
-import { TestEnvironment } from '../common-types';
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 import { RestApiTestGroup } from './rest-api-test-group';
 
-// tslint:disable: no-empty no-object-literal-type-assertion no-any no-unsafe-any
-const reportId = 'reportId';
-const scanId = 'scanId';
-const scanUrl = 'scanUrl';
-let singleTestResult: boolean;
+// tslint:disable:  no-any
 
-class MockableLogger extends Logger {}
-
-class FunctionalTestGroupStub extends FunctionalTestGroup {
-    public makeCalls = async () => {
-        await this.a11yServiceClient.checkHealth();
-        await this.a11yServiceClient.postScanUrl(scanUrl);
-        await this.a11yServiceClient.getScanStatus(scanId);
-        await this.a11yServiceClient.getScanReport(scanId, reportId);
-    };
-
-    public logErrors = () => {
-        this.expectEqual(1, 2);
-        this.expectErrorResponse(WebApiErrorCodes.resourceNotFound, { statusCode: 200 } as any);
-        this.ensureSuccessStatusCode({ statusCode: 404 } as any);
-        this.expectFalse(true);
-        this.expectTrue(false);
-        this.expectToBeDefined(undefined);
-        this.expectToBeNotDefined('hello');
-    };
-
-    // tslint:disable-next-line:
-    protected registerTestCases(env: TestEnvironment): void {
-        if (env === TestEnvironment.canary) {
-            this.registerTestCase(async () => this.modifyReportId());
-        }
-    }
-
-    private readonly modifyReportId = async () => {
-        this.testContextData.reports[0].reportId = 'new-report-id';
-
-        return singleTestResult;
-    };
-}
+class FunctionalTestGroupStub extends FunctionalTestGroup {}
 
 describe(RestApiTestGroup, () => {
     let testSubject: FunctionalTestGroupStub;
     let a11yServiceClientMock: IMock<A11yServiceClient>;
     let scanRunProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let testContextData: TestContextData;
 
     beforeEach(() => {
         testContextData = {
-            scanUrl,
-            scanId,
-            reports: [{ reportId } as any],
+            scanUrl: 'scanUrl',
+            scanId: 'scanId',
+            reports: [{ reportId: 'reportId' } as any],
         };
-        singleTestResult = true;
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
-        loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
-        testSubject = new FunctionalTestGroupStub(
-            a11yServiceClientMock.object,
-            scanRunProviderMock.object,
-            loggerMock.object,
-            guidGeneratorMock.object,
-        );
-
-        guidGeneratorMock.setup(gm => gm.isValidV6Guid(It.isAny())).returns(() => true);
+        testSubject = new FunctionalTestGroupStub(a11yServiceClientMock.object, scanRunProviderMock.object, guidGeneratorMock.object);
     });
 
-    it('runs successfully and log info', async () => {
-        loggerMock.setup(lm => lm.log('[E2E] Test Group Passed', LogLevel.info, It.isAny())).verifiable(Times.once());
+    it('should set test context', async () => {
+        testSubject.setTestContext(testContextData);
 
-        await testSubject.run(testContextData, TestEnvironment.canary);
-
-        loggerMock.verifyAll();
+        expect(testSubject.testContextData).toEqual(testContextData);
     });
 
-    it('test failed and failure info logged', async () => {
-        singleTestResult = false;
-        loggerMock.setup(lm => lm.log('[E2E] Test Group Failed', LogLevel.info, It.isAny())).verifiable(Times.once());
+    it('validate ensureResponseSuccessStatusCode()', async () => {
+        testSubject.ensureResponseSuccessStatusCode({ statusCode: 204 } as any);
 
-        await testSubject.run(testContextData, TestEnvironment.canary);
-
-        loggerMock.verifyAll();
+        let pass = false;
+        try {
+            testSubject.ensureResponseSuccessStatusCode({ statusCode: 404 } as any);
+        } catch (error) {
+            pass = true;
+        }
+        expect(pass).toBeTruthy();
     });
 
-    it('runs and modifies test context data in canary', async () => {
-        const res = await testSubject.run(testContextData, TestEnvironment.canary);
-        expect(res.reports[0].reportId).not.toEqual(reportId);
-    });
+    it('validate expectWebApiErrorResponse()', async () => {
+        testSubject.expectWebApiErrorResponse(WebApiErrorCodes.resourceNotFound, { statusCode: 404 } as any);
 
-    it('does not run test in insider', async () => {
-        const res = await testSubject.run(testContextData, TestEnvironment.insider);
-        expect(res.reports[0].reportId).toEqual(reportId);
-    });
-
-    it('could make calls with a11yServiceClient', async () => {
-        a11yServiceClientMock.setup(acm => acm.checkHealth()).verifiable();
-        a11yServiceClientMock.setup(acm => acm.getScanStatus(scanId)).verifiable();
-        a11yServiceClientMock.setup(acm => acm.postScanUrl(scanUrl)).verifiable();
-        a11yServiceClientMock.setup(acm => acm.getScanReport(scanId, reportId)).verifiable();
-
-        await testSubject.makeCalls();
-
-        a11yServiceClientMock.verifyAll();
-    });
-
-    it('could log errors in app insights', () => {
-        loggerMock.setup(lm => lm.log('[E2E] Validation failed', LogLevel.error, It.isAny())).verifiable(Times.exactly(5));
-        loggerMock.setup(lm => lm.log('[E2E] Scan request failed', LogLevel.error, It.isAny())).verifiable(Times.once());
-        loggerMock.setup(lm => lm.log('[E2E] Scan response not as expected', LogLevel.error, It.isAny())).verifiable(Times.once());
-
-        testSubject.logErrors();
-
-        loggerMock.verifyAll();
+        let pass = false;
+        try {
+            testSubject.expectWebApiErrorResponse(WebApiErrorCodes.resourceNotFound, { statusCode: 200 } as any);
+        } catch (error) {
+            pass = true;
+        }
+        expect(pass).toBeTruthy();
     });
 });
