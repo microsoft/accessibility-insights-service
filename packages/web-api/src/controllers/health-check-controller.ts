@@ -4,7 +4,7 @@ import { ApplicationInsightsClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { ApiController, HealthReport } from 'service-library';
+import { ApiController, HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
 @injectable()
@@ -36,7 +36,9 @@ export class HealthCheckController extends ApiController {
         };
 
         if (currentVersion === undefined) {
-            healthReport.error = 'No release version number is configured';
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
+
+            return;
         } else {
             const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
             const queryString = 'customEvents | limit 5';

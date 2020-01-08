@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { HealthReport } from 'service-library';
+import { HealthReport, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthCheckController } from './health-check-controller';
@@ -76,17 +76,14 @@ describe(HealthCheckController, () => {
         appInsightsClientMock.verifyAll();
     });
 
-    it('Return error if release version is not set', async () => {
+    it('Return error response if release version is not set', async () => {
         delete process.env.RELEASE_VERSION;
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
-            statusCode: 200,
-            body: undefined,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        const expectedError = WebApiErrorCodes.missingReleaseVersion;
 
         await healthCheckController.handleRequest();
 
-        expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toEqual('No release version number is configured');
+        expect(context.res.status).toEqual(expectedError.statusCode);
+        expect(context.res.body).toEqual({ error: expectedError.error });
     });
 
     it('Test report contains correct version number', async () => {
