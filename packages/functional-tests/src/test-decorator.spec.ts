@@ -25,9 +25,10 @@ class TestGroupStub {
 
 describe(test, () => {
     it('should process method decorator', () => {
+        const testsCount = 2;
         const target = new TestGroupStub();
         const metadata = Reflect.getMetadata(definedTestsMetadataKey, target.constructor) as TestDefinition[];
-        expect(2).toEqual(metadata.length);
+        expect(metadata.length).toEqual(testsCount);
         expect({
             testContainer: target.constructor.name,
             testName: 'testB',
