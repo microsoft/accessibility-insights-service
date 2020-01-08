@@ -19,6 +19,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
+        "@types/chai": "^4.2.7",
         "@types/jest": "^24.0.11",
         "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
@@ -41,6 +42,7 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "web-api-client": "1.0.0",
-        "storage-documents": "1.0.0"
+        "storage-documents": "1.0.0",
+        "chai": "^4.2.0"
     }
 }
