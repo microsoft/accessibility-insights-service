@@ -4,6 +4,7 @@
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
+import { TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { WebController } from 'service-library';
@@ -55,13 +56,24 @@ export class HealthMonitorOrchestrationController extends WebController {
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
 
-            // yield* orchestrationSteps.invokeHealthCheckRestApi();
-            // const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
-            // yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
-            // const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
-            // yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, scanRunStatus.reports[0].reportId);
+            yield* orchestrationSteps.invokeHealthCheckRestApi();
+            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
+            yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
+            const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
+            const reportId = scanRunStatus.reports[0].reportId;
+            yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
 
-            yield* orchestrationSteps.runFunctionalTests();
+            const testContextData: TestContextData = {
+                scanUrl: availabilityTestConfig.urlToScan,
+                scanId,
+            };
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, [
+                'PostScan',
+                'ScanPreProcessing',
+                'ScanQueueing',
+                'RestApi',
+                'ScanReports',
+            ]);
         });
     }
 

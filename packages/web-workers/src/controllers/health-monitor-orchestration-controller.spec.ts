@@ -4,10 +4,10 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ServiceConfiguration } from 'common';
-import { AvailabilityTestConfig } from 'common/dist/configuration/service-configuration';
+import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
-import { IOrchestrationFunctionContext, Task } from 'durable-functions/lib/src/classes';
+import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
+import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -122,7 +122,10 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield this.scanId;
     }
 
-    public *runFunctionalTests(): Generator<Task, void, SerializableResponse & void> {
+    public *runFunctionalTestGroups(
+        testContextData: TestContextData,
+        testGroupNames: TestGroupName[],
+    ): Generator<TaskSet, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.runFunctionalTestsCount += 1;
         this.throwExceptionIfExpected();
 
@@ -153,6 +156,7 @@ describe('HealthMonitorOrchestrationController', () => {
             urlToScan: 'some-url',
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
+            testEnv: TestEnvironment.canary,
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -271,11 +275,15 @@ describe('HealthMonitorOrchestrationController', () => {
             expectedStepsCallCount.getScanReportCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
+            orchestratorIterator.next();
+            expectedStepsCallCount.runFunctionalTestsCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+
             expect(orchestratorIterator.next().done).toBe(true);
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
         });
 
-        test.each([0, 1, 2, 3, 4])('activities throw exception on step %o', async failedStep => {
+        test.each([0, 1, 2, 3, 4, 5])('activities throw exception on step %o', async failedStep => {
             await testSubject.invoke(contextStub);
 
             for (let stepNum = 0; stepNum < failedStep; stepNum += 1) {
