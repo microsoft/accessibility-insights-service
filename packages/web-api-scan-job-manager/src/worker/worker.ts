@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
@@ -25,6 +25,7 @@ export class Worker {
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
+        private readonly system: typeof System = System,
     ) {}
 
     public async run(): Promise<void> {
@@ -41,8 +42,7 @@ export class Worker {
                 const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-                    // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
-                    if (poolMetricsInfo.load.runningTasks + poolMetricsInfo.load.activeTasks === 1) {
+                    if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
                         break;
                     }
@@ -73,13 +73,30 @@ export class Worker {
                 break;
             }
 
-            if (moment().toDate() > this.restartAfterTime) {
+            if (moment().toDate() >= this.restartAfterTime) {
                 this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
+                await this.waitForChildTasks();
                 break;
             }
 
-            await System.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
+            await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
         }
+    }
+
+    private async waitForChildTasks(): Promise<void> {
+        this.logger.logInfo('Waiting for child tasks to complete');
+
+        let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
+
+        while (this.hasChildTasksRunning(poolMetricsInfo)) {
+            await this.system.wait(5000);
+            poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        }
+    }
+
+    private hasChildTasksRunning(poolMetricsInfo: PoolMetricsInfo): boolean {
+        // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
+        return poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks > 1;
     }
 
     private async getMessages(messagesCount: number): Promise<Message[]> {
