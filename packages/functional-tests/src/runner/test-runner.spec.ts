@@ -13,21 +13,21 @@ import { TestRunner } from './test-runner';
 class TestGroupStub {
     @test(TestEnvironment.insider)
     public async testA(): Promise<void> {
-        throw new Error('async error Test A');
+        throw new Error('Error while invoked test A');
     }
 
     public testB(): void {
-        console.log('Test B');
+        console.log('Invoked test B');
     }
 
     @test(TestEnvironment.all)
     public testC(): void {
-        console.log('Test C');
+        console.log('Invoked test C');
     }
 
     @test(TestEnvironment.canary)
     public testD(): void {
-        console.log('Test D');
+        console.log('Invoked test D');
     }
 }
 
@@ -74,10 +74,11 @@ describe(TestRunner, () => {
             .verifiable(Times.once());
         loggerMock
             .setup(o =>
-                o.log(`[E2E] Tests ${testContainerName} completed`, LogLevel.info, {
+                o.log(`[E2E] Test container ${testContainerName} pass`, LogLevel.info, {
                     source: 'e2e',
                     testContainer: testContainerName,
                     environment: 'canary',
+                    result: 'pass',
                 }),
             )
             .verifiable(Times.once());
@@ -95,7 +96,7 @@ describe(TestRunner, () => {
                     testName: 'testA',
                     environment: 'insider',
                     result: 'fail',
-                    error: 'async error Test A',
+                    error: 'Error while invoked test A',
                 }),
             )
             .verifiable(Times.once());
@@ -112,10 +113,11 @@ describe(TestRunner, () => {
             .verifiable(Times.once());
         loggerMock
             .setup(o =>
-                o.log(`[E2E] Tests ${testContainerName} completed`, LogLevel.info, {
+                o.log(`[E2E] Test container ${testContainerName} fail`, LogLevel.info, {
                     source: 'e2e',
                     testContainer: testContainerName,
                     environment: 'insider',
+                    result: 'fail',
                 }),
             )
             .verifiable(Times.once());

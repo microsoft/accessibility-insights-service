@@ -9,17 +9,17 @@ import { definedTestsMetadataKey, test } from './test-decorator';
 
 class TestGroupStub {
     public testA(): void {
-        console.log('Test A');
+        console.log('Invoked test A');
     }
 
     @test(TestEnvironment.all)
     public testB(): void {
-        console.log('Test B');
+        console.log('Invoked test B');
     }
 
     @test(TestEnvironment.canary)
     public testC(): void {
-        console.log('Test C');
+        console.log('Invoked test C');
     }
 }
 

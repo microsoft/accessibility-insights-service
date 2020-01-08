@@ -18,8 +18,6 @@ export function test(
     environments: TestEnvironment,
 ): (target: object, propertyKey: string, descriptor: PropertyDescriptor) => PropertyDescriptor {
     return (target: object, propertyKey: string, descriptor: PropertyDescriptor): PropertyDescriptor => {
-        console.log(TestEnvironment[environments]);
-
         const metadata = getDefinedTestsMetadata(target);
         metadata.push({
             testContainer: target.constructor.name,

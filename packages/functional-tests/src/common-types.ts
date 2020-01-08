@@ -17,5 +17,5 @@ export interface TestDefinition {
     testContainer: string;
     testName: string;
     environments: TestEnvironment;
-    testImplFunc(): any;
+    testImplFunc(...args: any[]): any;
 }

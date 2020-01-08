@@ -22,26 +22,34 @@ export interface TestContainerLogProperties {
     source: LogSource;
     testContainer: string;
     environment: string;
+    result: TestResult;
 }
 
 export class TestRunner {
     public constructor(@inject(Logger) private readonly logger: Logger) {}
 
-    public async run(testImpl: object, env: TestEnvironment): Promise<void> {
-        const definedTests = getDefinedTestsMetadata(testImpl);
+    public async run(testContainer: object, env: TestEnvironment): Promise<void> {
+        const definedTests = getDefinedTestsMetadata(testContainer);
         // tslint:disable-next-line: no-bitwise
         const targetedTests = definedTests.filter(definedTest => definedTest.environments & env);
-        await Promise.all(targetedTests.map(async targetedTest => this.runTest(targetedTest, env)));
+        let containerPass = true;
+        await Promise.all(
+            targetedTests.map(async targetedTest => {
+                const testPass = await this.runTest(targetedTest, env);
+                containerPass = containerPass && testPass;
+            }),
+        );
 
-        const testContainerName = testImpl.constructor.name;
-        this.log(`[E2E] Tests ${testContainerName} completed`, LogLevel.info, {
+        const testContainerName = testContainer.constructor.name;
+        this.log(`[E2E] Test container ${testContainerName} ${containerPass ? 'pass' : 'fail'}`, LogLevel.info, {
             source: 'e2e',
             testContainer: testContainerName,
             environment: TestEnvironment[env],
+            result: containerPass ? 'pass' : 'fail',
         });
     }
 
-    private async runTest(testDefinition: TestDefinition, env: TestEnvironment): Promise<void> {
+    private async runTest(testDefinition: TestDefinition, env: TestEnvironment): Promise<boolean> {
         try {
             await Promise.resolve(testDefinition.testImplFunc());
 
@@ -52,6 +60,8 @@ export class TestRunner {
                 environment: TestEnvironment[env],
                 result: 'pass',
             });
+
+            return true;
         } catch (error) {
             this.log(`[E2E] Test ${testDefinition.testContainer}.${testDefinition.testName} fail`, LogLevel.error, {
                 source: 'e2e',
@@ -61,6 +71,8 @@ export class TestRunner {
                 result: 'fail',
                 error: error.message !== undefined ? error.message : error,
             });
+
+            return false;
         }
     }
 
