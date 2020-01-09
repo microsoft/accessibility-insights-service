@@ -15,7 +15,8 @@ export declare type WebApiErrorCodeName =
     | 'UnsupportedContentType'
     | 'UnsupportedApiVersion'
     | 'OutOfRangePriority'
-    | 'MalformedBody';
+    | 'MalformedBody'
+    | 'MissingReleaseVersion';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -128,6 +129,15 @@ export class WebApiErrorCodes {
             code: 'MalformedBody',
             codeId: 4011,
             message: 'The request body does not match the API schema for the given API version.',
+        },
+    };
+
+    public static missingReleaseVersion: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'MissingReleaseVersion',
+            codeId: 4012,
+            message: 'No release version is configured.',
         },
     };
 

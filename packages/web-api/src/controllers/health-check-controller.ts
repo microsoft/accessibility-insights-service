@@ -4,7 +4,7 @@ import { ApplicationInsightsClient } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { ApiController, HealthReport } from 'service-library';
+import { ApiController, HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
 @injectable()
@@ -26,20 +26,28 @@ export class HealthCheckController extends ApiController {
 
         const appInsightsClient = await this.appInsightsClientProvider();
 
+        const currentVersion = process.env.RELEASE_VERSION;
+
         const healthReport: HealthReport = {
-            buildVersion: '0.0.0',
+            buildVersion: currentVersion,
             testRuns: [],
             testsPassed: 0,
             testsFailed: 0,
         };
 
-        const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
-        const queryString = 'customEvents | limit 5';
-        const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
-        if (queryResponse.statusCode === 200) {
-            this.logger.logInfo(`App insights api queried with result ${JSON.stringify(queryResponse)}`);
+        if (currentVersion === undefined) {
+            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
+
+            return;
         } else {
-            healthReport.error = `App insights api query failed with status ${queryResponse.statusCode}`;
+            const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
+            const queryString = 'customEvents | limit 5';
+            const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
+            if (queryResponse.statusCode === 200) {
+                this.logger.logInfo(`App insights api queried with result ${JSON.stringify(queryResponse)}`);
+            } else {
+                healthReport.error = `App insights api query failed with status ${queryResponse.statusCode}`;
+            }
         }
 
         this.context.res = {

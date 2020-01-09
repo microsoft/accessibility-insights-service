@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
+import { HealthReport, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthCheckController } from './health-check-controller';
@@ -20,8 +21,10 @@ describe(HealthCheckController, () => {
     const e2eTestConfig = {
         testRunQueryTimespan: 'timespan',
     };
+    const releaseVersion = 'test version';
 
     beforeEach(() => {
+        process.env.RELEASE_VERSION = releaseVersion;
         context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -64,16 +67,43 @@ describe(HealthCheckController, () => {
             statusCode: 404,
             body: undefined,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-
-        appInsightsClientMock
-            .setup(async a => a.executeQuery(It.isAny(), It.isAny()))
-            .returns(async () => failureResponse)
-            .verifiable();
+        setupAppInsightsResponse(failureResponse);
 
         await healthCheckController.handleRequest();
 
         expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toBeDefined();
+        expect(context.res.body.error).toEqual('App insights api query failed with status 404');
         appInsightsClientMock.verifyAll();
     });
+
+    it('Return error response if release version is not set', async () => {
+        delete process.env.RELEASE_VERSION;
+        const expectedError = WebApiErrorCodes.missingReleaseVersion;
+
+        await healthCheckController.handleRequest();
+
+        expect(context.res.status).toEqual(expectedError.statusCode);
+        expect(context.res.body).toEqual({ error: expectedError.error });
+    });
+
+    it('Test report contains correct version number', async () => {
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+            statusCode: 200,
+            body: undefined,
+        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        setupAppInsightsResponse(successResponse);
+
+        await healthCheckController.handleRequest();
+
+        expect(context.res.status).toEqual(200);
+        expect(context.res.body.buildVersion).toEqual(releaseVersion);
+        appInsightsClientMock.verifyAll();
+    });
+
+    function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>): void {
+        appInsightsClientMock
+            .setup(async a => a.executeQuery(It.isAny(), It.isAny()))
+            .returns(async () => response)
+            .verifiable();
+    }
 });
