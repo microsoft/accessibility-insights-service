@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { TestContextData, TestEnvironment, TestGroupConstructor } from 'functional-tests';
+import { FunctionalTestGroupCreator, TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
 import { Url } from 'url';
 
@@ -29,7 +29,7 @@ export interface TrackAvailabilityData {
 }
 
 export interface RunFunctionalTestGroupData {
-    testGroup: TestGroupConstructor;
+    testGroupName: TestGroupName;
     testContextData: TestContextData;
     env: TestEnvironment;
 }

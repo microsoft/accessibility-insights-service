@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Logger, LogLevel } from 'logger';
 import { LogSource, TestDefinition, TestEnvironment, TestResult } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
@@ -25,6 +25,7 @@ export interface TestContainerLogProperties {
     result: TestResult;
 }
 
+@injectable()
 export class TestRunner {
     public constructor(@inject(Logger) private readonly logger: Logger) {}
 
