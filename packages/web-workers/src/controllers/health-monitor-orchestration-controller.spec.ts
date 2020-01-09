@@ -7,7 +7,7 @@ import { Context } from '@azure/functions';
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { TestContextData, TestEnvironment, TestGroupConstructor } from 'functional-tests';
 import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -124,7 +124,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
 
     public *runFunctionalTestGroups(
         testContextData: TestContextData,
-        testGroupNames: TestGroupName[],
+        testGroups: TestGroupConstructor[],
     ): Generator<TaskSet, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.runFunctionalTestsCount += 1;
         this.throwExceptionIfExpected();
@@ -158,8 +158,6 @@ describe('HealthMonitorOrchestrationController', () => {
             maxScanWaitTimeInSeconds: 20,
             testEnv: TestEnvironment[TestEnvironment.canary],
         };
-        console.log(TestEnvironment);
-        console.log(TestEnvironment['canary']);
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);

@@ -4,7 +4,14 @@
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { TestContextData } from 'functional-tests';
+import {
+    PostScanTestGroup,
+    TestContextData,
+    ScanPreProcessingTestGroup,
+    ScanQueuingTestGroup,
+    RestApiTestGroup,
+    ScanReportTestGroup,
+} from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { WebController } from 'service-library';
@@ -68,11 +75,11 @@ export class HealthMonitorOrchestrationController extends WebController {
                 scanId,
             };
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, [
-                'PostScan',
-                'ScanPreProcessing',
-                'ScanQueueing',
-                'RestApi',
-                'ScanReports',
+                PostScanTestGroup,
+                ScanPreProcessingTestGroup,
+                ScanQueuingTestGroup,
+                RestApiTestGroup,
+                ScanReportTestGroup,
             ]);
         });
     }

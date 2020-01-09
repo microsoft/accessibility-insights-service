@@ -6,7 +6,7 @@ import 'reflect-metadata';
 // tslint:disable:no-submodule-imports
 import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor } from 'functional-tests';
 import { isNil } from 'lodash';
 import * as moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
@@ -30,6 +30,24 @@ class MockableDurableOrchestrationContext extends DurableOrchestrationContext {
     public readonly currentUtcDateTime: Date = null;
     // tslint:disable-next-line:variable-name
     public readonly Task: ITaskMethods = null;
+}
+
+class FunctionalTestGroupStub1 extends FunctionalTestGroup {
+    public async run(testContextData: TestContextData, env: TestEnvironment): Promise<TestContextData> {
+        return testContextData;
+    }
+
+    // tslint:disable-next-line:no-empty
+    protected registerTestCases(env: TestEnvironment): void {}
+}
+
+class FunctionalTestGroupStub2 extends FunctionalTestGroup {
+    public async run(testContextData: TestContextData, env: TestEnvironment): Promise<TestContextData> {
+        return testContextData;
+    }
+
+    // tslint:disable-next-line:no-empty
+    protected registerTestCases(env: TestEnvironment): void {}
 }
 
 describe(OrchestrationStepsImpl, () => {
@@ -452,16 +470,16 @@ describe(OrchestrationStepsImpl, () => {
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
         };
-        const testGroupNames: TestGroupName[] = ['PostScan', 'RestApi'];
+        const testGroups: TestGroupConstructor[] = [FunctionalTestGroupStub1, FunctionalTestGroupStub2];
         let taskMethodsMock: IMock<ITaskMethods>;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroupNames));
-            activityRequestData = testGroupNames.map((testGroupName: TestGroupName) => {
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.runFunctionalTestGroups(testContextData, testGroups));
+            activityRequestData = testGroups.map((testGroup: TestGroupConstructor) => {
                 return {
                     activityName: ActivityAction.runFunctionalTestGroup,
                     data: {
-                        testGroupName,
+                        testGroup,
                         testContextData,
                         env: 1,
                     },

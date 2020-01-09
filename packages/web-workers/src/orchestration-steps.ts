@@ -4,7 +4,7 @@
 // tslint:disable: no-submodule-imports no-unsafe-any
 import { AvailabilityTestConfig } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { TestContextData, TestEnvironment, TestGroupConstructor } from 'functional-tests';
 import { isNil } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import * as moment from 'moment';
@@ -40,7 +40,7 @@ export interface OrchestrationSteps {
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
     runFunctionalTestGroups(
         testContextData: TestContextData,
-        testGroupNames: TestGroupName[],
+        testGroupNames: TestGroupConstructor[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
 }
 
@@ -161,10 +161,10 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return scanId;
     }
 
-    public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {
-        const parallelTasks = testGroupNames.map((testGroupName: TestGroupName) => {
+    public *runFunctionalTestGroups(testContextData: TestContextData, testGroups: TestGroupConstructor[]): Generator<TaskSet, void, void> {
+        const parallelTasks = testGroups.map((testGroup: TestGroupConstructor) => {
             const testData: RunFunctionalTestGroupData = {
-                testGroupName,
+                testGroup,
                 testContextData,
                 env: this.getTestEnvironment(this.availabilityTestConfig.testEnv),
             };
@@ -177,11 +177,11 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             return this.context.df.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData);
         });
 
-        this.logOrchestrationStep(`Starting run of functional tests: ${testGroupNames}`);
+        this.logOrchestrationStep(`Starting run of functional tests: ${testGroups.map(tg => tg.name)}`);
 
         yield this.context.df.Task.all(parallelTasks);
 
-        this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
+        this.logOrchestrationStep(`Completed functional tests: ${testGroups.map(tg => tg.name)}`);
     }
 
     private getTestEnvironment(envName: string): TestEnvironment {

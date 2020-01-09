@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ServiceConfiguration } from 'common';
-import { FunctionalTestGroup, FunctionalTestGroupFactory, TestContextData } from 'functional-tests';
+import { GuidGenerator, ServiceConfiguration } from 'common';
+import { RestApiTestGroup, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { HealthReport, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
 import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
@@ -29,7 +29,9 @@ export class HealthMonitorClientController extends WebController {
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) logger: Logger,
         @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
-        @inject(FunctionalTestGroupFactory) protected readonly functionalTestGroupFactory: FunctionalTestGroupFactory,
+        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
+        @inject(TestRunner) protected readonly testRunner: TestRunner,
     ) {
         super(logger);
 
@@ -91,10 +93,11 @@ export class HealthMonitorClientController extends WebController {
         this.logger.trackAvailability(data.name, data.telemetry);
     };
 
-    private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<TestContextData> => {
-        const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName, this.logger);
+    private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<void> => {
+        const webApiClient = await this.webApiClientProvider();
+        const functionalTestGroup = new data.testGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
+        functionalTestGroup.setTestContext(data.testContextData);
 
-        //return functionalTestGroup.run(data.testContextData, data.env);
-        return undefined;
+        await this.testRunner.run(functionalTestGroup, data.env);
     };
 }

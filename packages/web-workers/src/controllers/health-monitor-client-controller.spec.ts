@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 
-import { FunctionalTestGroup, FunctionalTestGroupFactory, TestContextData, TestEnvironment } from 'functional-tests';
+import { FunctionalTestGroup, TestContextData, TestEnvironment, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -17,8 +17,14 @@ import { HealthMonitorClientController } from './health-monitor-client-controlle
 // tslint:disable:no-object-literal-type-assertion no-any no-unsafe-any
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {
+    public testContextData: TestContextData;
+
     public async run(testContextData: TestContextData, env: TestEnvironment): Promise<TestContextData> {
         return testContextData;
+    }
+
+    public setTestContext(testContextData: TestContextData): void {
+        this.testContextData = testContextData;
     }
 
     // tslint:disable-next-line:no-empty
@@ -33,24 +39,20 @@ describe(HealthMonitorClientController, () => {
     let webApiClientMock: IMock<A11yServiceClient>;
     let jsonResponse: any;
     let expectedResponse: ResponseWithBodyType<any>;
-    let functionalTestGroupFactoryMock: IMock<FunctionalTestGroupFactory>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let functionalTestGroupStub: FunctionalTestGroupStub;
+    let functionalTestGroupMock: IMock<FunctionalTestGroupStub>;
+    let testRunnerMock: IMock<TestRunner>;
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         webApiClientMock = Mock.ofType(A11yServiceClient);
-        functionalTestGroupFactoryMock = Mock.ofType(FunctionalTestGroupFactory);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
         context = <Context>(<unknown>{ bindingDefinitions: {}, bindings: {} });
-        functionalTestGroupStub = new FunctionalTestGroupStub(
-            webApiClientMock.object,
-            onDemandPageScanRunResultProviderMock.object,
-            guidGeneratorMock.object,
-        );
+        functionalTestGroupMock = Mock.ofType(FunctionalTestGroupStub);
+        testRunnerMock = Mock.ofType(TestRunner);
 
         jsonResponse = { testResponse: true } as any;
         expectedResponse = {
@@ -64,7 +66,9 @@ describe(HealthMonitorClientController, () => {
             serviceConfigurationMock.object,
             loggerMock.object,
             async () => Promise.resolve(webApiClientMock.object),
-            functionalTestGroupFactoryMock.object,
+            onDemandPageScanRunResultProviderMock.object,
+            guidGeneratorMock.object,
+            testRunnerMock.object,
         );
     });
 
@@ -158,7 +162,7 @@ describe(HealthMonitorClientController, () => {
 
         it('handles runFunctionalTestGroup', async () => {
             const data: RunFunctionalTestGroupData = {
-                testGroupName: 'PostScan',
+                testGroup: FunctionalTestGroupStub,
                 testContextData: {
                     scanUrl: 'scanUrl',
                 },
@@ -169,14 +173,20 @@ describe(HealthMonitorClientController, () => {
                 data: data,
             };
 
-            functionalTestGroupFactoryMock
-                .setup(async f => f.createFunctionalTestGroup(data.testGroupName, loggerMock.object))
-                .returns(async () => Promise.resolve(functionalTestGroupStub))
-                .verifiable();
+            let testContainer: any;
+            testRunnerMock
+                .setup(async t => t.run(It.isAny(), TestEnvironment.canary))
+                .callback(testGroup => {
+                    testContainer = testGroup;
+                })
+                .verifiable(Times.once());
 
-            const result = await testSubject.invoke(context, args);
-            functionalTestGroupFactoryMock.verifyAll();
-            expect(result).toEqual(data.testContextData);
+            await testSubject.invoke(context, args);
+
+            const functionalTestGroup = testContainer as FunctionalTestGroupStub;
+            expect(functionalTestGroup).toBeDefined();
+            expect(functionalTestGroup.testContextData).toEqual(data.testContextData);
+            testRunnerMock.verifyAll();
         });
     });
 });
