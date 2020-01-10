@@ -36,6 +36,8 @@ export class HealthMonitorClientController extends WebController {
     ) {
         super(logger);
 
+        testRunner.setLogger(this.logger);
+
         this.activityCallbacks = {
             [ActivityAction.createScanRequest]: this.createScanRequest,
             [ActivityAction.getScanResult]: this.getScanResult,
@@ -95,8 +97,7 @@ export class HealthMonitorClientController extends WebController {
     };
 
     private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<void> => {
-        const webApiClient = await this.webApiClientProvider();
-        const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName, this.logger);
+        const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName);
         functionalTestGroup.setTestContext(data.testContextData);
 
         await this.testRunner.run(functionalTestGroup, data.env);

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
 import { Logger } from 'logger';
-import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, ScanRunResultResponse } from 'service-library';
 import { OnDemandPageScanReport, OnDemandPageScanRunState } from 'storage-documents';
 import { Url } from 'url';
 import { A11yServiceClient } from 'web-api-client';
@@ -16,8 +16,7 @@ export interface TestGroupData {
 export interface TestContextData {
     scanUrl: string;
     scanId?: string;
-    scanRunState?: OnDemandPageScanRunState;
-    reports?: OnDemandPageScanReport[];
+    reportId?: string;
 }
 
 interface SerializableRequest {

@@ -172,8 +172,9 @@ describe(HealthMonitorClientController, () => {
 
             let testContainer: any;
             functionalTestGroupFactoryMock
-                .setup(async f => f.createFunctionalTestGroup('PostScan', loggerMock.object))
+                .setup(async f => f.createFunctionalTestGroup('PostScan'))
                 .returns(async (name, logger) => Promise.resolve(functionalTestGroupMock.object));
+            testRunnerMock.setup(t => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
                 .setup(async t => t.run(It.isAny(), TestEnvironment.canary))
                 .callback(testGroup => {

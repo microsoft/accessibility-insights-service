@@ -10,6 +10,16 @@ import { TestRunner } from './test-runner';
 
 // tslint:disable: no-unsafe-any
 
+class TestGroupWithContext {
+    public var1: string = 'some value';
+
+    @test(TestEnvironment.all)
+    public async test(): Promise<void> {
+        expect(this.var1).toBeDefined();
+        expect(this.var1).toEqual('some value');
+    }
+}
+
 class TestGroupStub {
     @test(TestEnvironment.insider)
     public async testA(): Promise<void> {
@@ -41,7 +51,8 @@ describe(TestRunner, () => {
         testContainer = new TestGroupStub();
         testContainerName = testContainer.constructor.name;
         loggerMock = Mock.ofType();
-        testRunner = new TestRunner(loggerMock.object);
+        testRunner = new TestRunner();
+        testRunner.setLogger(loggerMock.object);
     });
 
     afterEach(() => {
@@ -123,5 +134,33 @@ describe(TestRunner, () => {
             .verifiable(Times.once());
 
         await testRunner.run(testContainer, TestEnvironment.insider);
+    });
+
+    it('Runs test with correct context', async () => {
+        const testContainerWithContext: TestGroupWithContext = new TestGroupWithContext();
+        testContainerName = testContainerWithContext.constructor.name;
+        loggerMock
+            .setup(o =>
+                o.log(`[E2E] Test ${testContainerName}.test pass`, LogLevel.info, {
+                    source: 'e2e',
+                    testContainer: testContainerName,
+                    testName: 'test',
+                    environment: 'all',
+                    result: 'pass',
+                }),
+            )
+            .verifiable(Times.once());
+        loggerMock
+            .setup(o =>
+                o.log(`[E2E] Test container ${testContainerName} pass`, LogLevel.info, {
+                    source: 'e2e',
+                    testContainer: testContainerName,
+                    environment: 'all',
+                    result: 'pass',
+                }),
+            )
+            .verifiable(Times.once());
+
+        await testRunner.run(testContainerWithContext, TestEnvironment.all);
     });
 });

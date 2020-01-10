@@ -6,6 +6,7 @@ import { GuidGenerator } from 'common';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, Mock } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
+
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 import { RestApiTestGroup } from './rest-api-test-group';
@@ -25,7 +26,7 @@ describe(RestApiTestGroup, () => {
         testContextData = {
             scanUrl: 'scanUrl',
             scanId: 'scanId',
-            reports: [{ reportId: 'reportId' } as any],
+            reportId: 'reportId',
         };
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);

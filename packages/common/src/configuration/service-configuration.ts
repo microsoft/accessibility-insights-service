@@ -255,7 +255,7 @@ export class ServiceConfiguration {
                     doc: 'Time to wait before checking the url scan status again',
                 },
                 testEnv: {
-                    format: ['canary', 'insider', 'production'],
+                    format: String,
                     default: 'canary',
                     doc: 'Environment to run tests for',
                 },

@@ -27,16 +27,24 @@ export interface TestContainerLogProperties {
 
 @injectable()
 export class TestRunner {
-    public constructor(@inject(Logger) private readonly logger: Logger) {}
+    private logger: Logger;
+
+    public setLogger(logger: Logger): void {
+        this.logger = logger;
+    }
 
     public async run(testContainer: object, env: TestEnvironment): Promise<void> {
+        if (this.logger === undefined) {
+            throw new Error('No logger set');
+        }
+
         const definedTests = getDefinedTestsMetadata(testContainer);
         // tslint:disable-next-line: no-bitwise
         const targetedTests = definedTests.filter(definedTest => definedTest.environments & env);
         let containerPass = true;
         await Promise.all(
             targetedTests.map(async targetedTest => {
-                const testPass = await this.runTest(targetedTest, env);
+                const testPass = await this.runTest(targetedTest, env, testContainer);
                 containerPass = containerPass && testPass;
             }),
         );
@@ -50,9 +58,9 @@ export class TestRunner {
         });
     }
 
-    private async runTest(testDefinition: TestDefinition, env: TestEnvironment): Promise<boolean> {
+    private async runTest(testDefinition: TestDefinition, env: TestEnvironment, testContainer: object): Promise<boolean> {
         try {
-            await Promise.resolve(testDefinition.testImplFunc());
+            await Promise.resolve(testDefinition.testImplFunc.call(testContainer));
 
             this.log(`[E2E] Test ${testDefinition.testContainer}.${testDefinition.testName} pass`, LogLevel.info, {
                 source: 'e2e',

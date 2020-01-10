@@ -66,6 +66,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
                 scanId,
+                reportId,
             };
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, [
                 'PostScan',

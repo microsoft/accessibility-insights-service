@@ -5,7 +5,7 @@ import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
+import { A11yServiceClient, A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
 import { PostScanTestGroup } from './test-groups/post-scan-test-group';
 import { RestApiTestGroup } from './test-groups/rest-api-test-group';
@@ -24,7 +24,7 @@ export class FunctionalTestGroupFactory {
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
     ) {}
 
-    public async createFunctionalTestGroup(testGroupName: TestGroupName, logger: Logger): Promise<FunctionalTestGroup> {
+    public async createFunctionalTestGroup(testGroupName: TestGroupName): Promise<FunctionalTestGroup> {
         const webApiClient = await this.a11yServiceClientProvider();
         switch (testGroupName) {
             case 'PostScan':

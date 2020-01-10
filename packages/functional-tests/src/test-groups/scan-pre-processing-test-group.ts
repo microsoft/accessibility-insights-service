@@ -13,6 +13,5 @@ export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
         const scanRunResult = await this.onDemandPageScanRunResultProvider.readScanRun(this.testContextData.scanId);
 
         expect(scanRunResult, 'Expected a valid scan result').to.not.be.undefined;
-        this.testContextData.scanRunState = scanRunResult.run.state;
     }
 }
