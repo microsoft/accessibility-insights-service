@@ -4,5 +4,5 @@ export { TestEnvironment } from './common-types';
 export { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
 export { FunctionalTestGroup } from './test-groups/functional-test-group';
 export { TestGroupData, TestContextData, FunctionalTestGroupCreator } from './test-group-data';
-export { FunctionalTestGroupFactory, TestGroupName } from './functional-test-group-factory';
+export { TestGroupName, TestGroupConstructor, functionalTestGroupTypes } from './functional-test-group-types';
 export { TestRunner } from './runner/test-runner';

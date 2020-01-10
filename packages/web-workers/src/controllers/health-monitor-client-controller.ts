@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { FunctionalTestGroupFactory, TestRunner } from 'functional-tests';
+import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
@@ -32,7 +32,7 @@ export class HealthMonitorClientController extends WebController {
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(TestRunner) protected readonly testRunner: TestRunner,
-        @inject(FunctionalTestGroupFactory) protected readonly functionalTestGroupFactory: FunctionalTestGroupFactory,
+        protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
     ) {
         super(logger);
 
@@ -97,7 +97,9 @@ export class HealthMonitorClientController extends WebController {
     };
 
     private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<void> => {
-        const functionalTestGroup = await this.functionalTestGroupFactory.createFunctionalTestGroup(data.testGroupName);
+        const webApiClient = await this.webApiClientProvider();
+        const functionalTestGroupCtor = this.testGroupTypes[data.testGroupName];
+        const functionalTestGroup = new functionalTestGroupCtor(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
         functionalTestGroup.setTestContext(data.testContextData);
 
         await this.testRunner.run(functionalTestGroup, data.env);
