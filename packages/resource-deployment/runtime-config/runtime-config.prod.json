@@ -18,7 +18,7 @@
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300
     },
-    "AvailabilityTestConfig": {
+    "availabilityTestConfig": {
         "testEnv": "production"
     }
 }

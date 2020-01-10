@@ -185,16 +185,16 @@ if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z 
     exitWithUsageInfo
 fi
 
-installAzureFunctionsCoreTools
+# installAzureFunctionsCoreTools
 
 webWorkersPackageName="web-workers"
 webApiPackageName="web-api"
 
-deployWebWorkersFunctionApp
+# deployWebWorkersFunctionApp
 deployWebApiFunctionApp
 
 publishFunctionAppScripts $webApiPackageName $webApiFunctionAppName
-publishFunctionAppScripts $webWorkersPackageName $webWorkersFunctionAppName
+# publishFunctionAppScripts $webWorkersPackageName $webWorkersFunctionAppName
 
 # Export the last created web-api function app service name to be used by the API Management install script
 functionAppName="$webApiFunctionAppName"
