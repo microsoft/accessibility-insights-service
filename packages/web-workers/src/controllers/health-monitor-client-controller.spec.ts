@@ -188,6 +188,7 @@ describe(HealthMonitorClientController, () => {
             await testSubject.invoke(context, args);
 
             const functionalTestGroupStub = testContainer as FunctionalTestGroupStub;
+            expect(functionalTestGroupStub).toBeDefined();
             expect(functionalTestGroupStub.testContextData).toEqual(data.testContextData);
             testRunnerMock.verifyAll();
         });

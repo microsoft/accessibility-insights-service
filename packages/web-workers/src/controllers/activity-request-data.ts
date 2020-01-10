@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { FunctionalTestGroupCreator, TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
 import { Url } from 'url';
 

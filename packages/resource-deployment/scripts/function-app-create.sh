@@ -185,7 +185,7 @@ if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z 
     exitWithUsageInfo
 fi
 
-# installAzureFunctionsCoreTools
+installAzureFunctionsCoreTools
 
 webWorkersPackageName="web-workers"
 webApiPackageName="web-api"

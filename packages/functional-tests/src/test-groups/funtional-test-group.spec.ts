@@ -6,7 +6,6 @@ import { GuidGenerator } from 'common';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, Mock } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
-
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 
