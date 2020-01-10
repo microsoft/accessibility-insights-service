@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as request from 'request-promise';
+import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
-
 import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -16,7 +15,7 @@ describe(A11yServiceClient, () => {
     let credMock: IMock<A11yServiceCredential>;
     let requestStub: any;
     let getMock: IMock<(url: string) => {}>;
-    let postMock: IMock<(url: string, options?: request.RequestPromiseOptions) => {}>;
+    let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
 
     beforeEach(() => {
         getMock = Mock.ofInstance(() => {
@@ -26,7 +25,7 @@ describe(A11yServiceClient, () => {
             return null;
         });
         requestStub = {
-            defaults: (options: request.RequestPromiseOptions) => requestStub,
+            defaults: (options: requestPromise.RequestPromiseOptions) => requestStub,
             get: getMock.object,
             post: postMock.object,
         };
@@ -50,7 +49,7 @@ describe(A11yServiceClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
+            const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock

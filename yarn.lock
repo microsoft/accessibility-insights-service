@@ -1490,6 +1490,16 @@
     "@types/tough-cookie" "*"
     form-data "^2.5.0"
 
+"@types/request@^2.47.0":
+  version "2.48.4"
+  resolved "https://registry.yarnpkg.com/@types/request/-/request-2.48.4.tgz#df3d43d7b9ed3550feaa1286c6eabf0738e6cf7e"
+  integrity sha512-W1t1MTKYR8PxICH+A4HgEIPuAC3sbljoEVfyZbeFJJDbr30guDspJri2XOaM2E+Un7ZjrihaDi7cf6fPa2tbgw==
+  dependencies:
+    "@types/caseless" "*"
+    "@types/node" "*"
+    "@types/tough-cookie" "*"
+    form-data "^2.5.0"
+
 "@types/sarif@>=2.1.1 <=2.1.2":
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/@types/sarif/-/sarif-2.1.2.tgz#91d9f9e793fadbba36239f03ec996987b2e25635"

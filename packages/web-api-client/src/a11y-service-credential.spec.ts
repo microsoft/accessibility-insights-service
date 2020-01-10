@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import * as request from 'request-promise';
+import * as requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
 
 import { A11yServiceCredential } from './a11y-service-credential';
@@ -12,7 +12,7 @@ import { A11yServiceCredential } from './a11y-service-credential';
 describe(A11yServiceCredential, () => {
     let authenticationContextMock: IMock<AuthenticationContext>;
     let testSubject: A11yServiceCredential;
-    let requestMock: IMock<typeof request>;
+    let requestMock: IMock<typeof requestPromise>;
     const clientId = 'client-id';
     const clientMockSec = 'random-string';
     const authorityUrl = 'authorityUrl';
@@ -26,7 +26,7 @@ describe(A11yServiceCredential, () => {
 
     beforeEach(() => {
         error = null;
-        requestMock = Mock.ofType<typeof request>(null);
+        requestMock = Mock.ofType<typeof requestPromise>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
 
         testSubject = new A11yServiceCredential(clientId, clientMockSec, resource, authorityUrl, authenticationContextMock.object);

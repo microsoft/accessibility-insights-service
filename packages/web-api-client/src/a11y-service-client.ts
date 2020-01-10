@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 import { Response } from 'request';
-import * as request from 'request-promise';
+import * as requestPromise from 'request-promise';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
-
 import { A11yServiceCredential } from './a11y-service-credential';
+
+// tslint:disable: no-any no-unsafe-any
 
 export interface ResponseWithBodyType<T = {}> extends Response {
     body: T;
@@ -13,8 +14,8 @@ export interface ResponseWithBodyType<T = {}> extends Response {
 
 @injectable()
 export class A11yServiceClient {
-    private readonly defaultRequestObject: typeof request;
-    private readonly defaultOptions: request.RequestPromiseOptions = {
+    private readonly defaultRequestObject: typeof requestPromise;
+    private readonly defaultOptions: requestPromise.RequestPromiseOptions = {
         forever: true,
         qs: {
             'api-version': this.apiVersion,
@@ -31,7 +32,7 @@ export class A11yServiceClient {
         private readonly requestBaseUrl: string,
         private readonly apiVersion = '1.0',
         private readonly throwOnRequestFailure: boolean = false,
-        httpRequest = request,
+        httpRequest: any = requestPromise,
     ) {
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
@@ -42,7 +43,7 @@ export class A11yServiceClient {
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: request.RequestPromiseOptions = { body: requestBody };
+        const options: requestPromise.RequestPromiseOptions = { body: requestBody };
 
         return (await this.signRequest()).post(requestUrl, options);
     }
@@ -65,7 +66,7 @@ export class A11yServiceClient {
         return (await this.signRequest()).get(requestUrl);
     }
 
-    private async signRequest(): Promise<typeof request> {
+    private async signRequest(): Promise<typeof requestPromise> {
         return this.credential.signRequest(this.defaultRequestObject);
     }
 }

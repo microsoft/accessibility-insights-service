@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { VError } from 'verror';
-import { AvailabilityTelemetry } from './availablity-telemetry';
+import { AvailabilityTelemetry } from './availability-telemetry';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
 import { TelemetryMeasurements } from './logger-event-measurements';
