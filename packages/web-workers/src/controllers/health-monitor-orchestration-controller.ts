@@ -55,26 +55,24 @@ export class HealthMonitorOrchestrationController extends WebController {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
-
-            yield* orchestrationSteps.invokeHealthCheckRestApi();
-            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
-            yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
-            const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
-            const reportId = scanRunStatus.reports[0].reportId;
-            yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
-
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
-                scanId,
-                reportId,
             };
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, [
-                'PostScan',
-                'ScanPreProcessing',
-                'ScanQueueing',
-                'RestApi',
-                'ScanReports',
-            ]);
+
+            yield* orchestrationSteps.invokeHealthCheckRestApi();
+
+            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
+            testContextData.scanId = scanId;
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['PostScan', 'ScanStatus']);
+
+            yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
+            const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['ScanPreProcessing', 'ScanQueueing']);
+
+            const reportId = scanRunStatus.reports[0].reportId;
+            testContextData.reportId = reportId;
+            yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['ScanReports']);
         });
     }
 

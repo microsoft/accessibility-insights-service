@@ -3,17 +3,16 @@
 
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
-import { A11yServiceClient, A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
+import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
 import { PostScanTestGroup } from './test-groups/post-scan-test-group';
-import { RestApiTestGroup } from './test-groups/rest-api-test-group';
 import { ScanPreProcessingTestGroup } from './test-groups/scan-pre-processing-test-group';
 import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
+import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
 
-export type TestGroupName = 'PostScan' | 'RestApi' | 'ScanPreProcessing' | 'ScanQueueing' | 'ScanReports';
+export type TestGroupName = 'PostScan' | 'ScanStatus' | 'ScanPreProcessing' | 'ScanQueueing' | 'ScanReports';
 
 @injectable()
 export class FunctionalTestGroupFactory {
@@ -29,8 +28,8 @@ export class FunctionalTestGroupFactory {
         switch (testGroupName) {
             case 'PostScan':
                 return new PostScanTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
-            case 'RestApi':
-                return new RestApiTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
+            case 'ScanStatus':
+                return new ScanStatusTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'ScanPreProcessing':
                 return new ScanPreProcessingTestGroup(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
             case 'ScanQueueing':

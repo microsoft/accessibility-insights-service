@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { expect } from 'chai';
-import { ScanReport, ScanRunResultResponse } from 'service-library';
+import { ScanReport, ScanRunResultResponse, WebApiErrorCodes } from 'service-library';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
@@ -15,7 +15,7 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
 
         this.ensureResponseSuccessStatusCode(response);
         expect((<ScanRunResultResponse>response.body).reports, 'Expected a valid reports response result').to.not.be.undefined;
-        expect((<ScanRunResultResponse>response.body).reports.length, 'Expected at least a single report to be returned').to.be.true;
+        expect((<ScanRunResultResponse>response.body).reports, 'Expected two reports to be returned').to.have.lengthOf(2);
     }
 
     @test(TestEnvironment.all)
@@ -30,5 +30,21 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
                 expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
             }),
         );
+    }
+
+    @test(TestEnvironment.all)
+    public async testGetScanReportWithInvalidGuid(): Promise<void> {
+        const invalidGuid = '00000000-0000-0000-0000-000000000000';
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
+
+        this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
+    }
+
+    @test(TestEnvironment.all)
+    public async testGetScanReportWithInvalidScanId(): Promise<void> {
+        const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
+
+        this.expectWebApiErrorResponse(WebApiErrorCodes.resourceNotFound, response);
     }
 }

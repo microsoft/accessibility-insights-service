@@ -452,7 +452,7 @@ describe(OrchestrationStepsImpl, () => {
         const testContextData: TestContextData = {
             scanUrl: 'scan url',
         };
-        const testGroupNames: TestGroupName[] = ['PostScan', 'RestApi'];
+        const testGroupNames: TestGroupName[] = ['PostScan', 'ScanStatus'];
         let taskMethodsMock: IMock<ITaskMethods>;
 
         beforeEach(() => {

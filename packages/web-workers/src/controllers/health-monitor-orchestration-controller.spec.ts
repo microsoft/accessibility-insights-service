@@ -67,6 +67,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
     public scanId = 'scan-id';
     public reportId = 'report-id';
     public shouldThrowException = false;
+    public functionalTestsRun: TestGroupName[] = [];
 
     constructor(private readonly availabilityTestConfig: AvailabilityTestConfig) {}
 
@@ -127,6 +128,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.runFunctionalTestsCount += 1;
+        this.functionalTestsRun.push(...testGroupNames);
         this.throwExceptionIfExpected();
 
         yield undefined;
@@ -252,6 +254,7 @@ describe('HealthMonitorOrchestrationController', () => {
             };
 
             const actualStepsCallCount: OrchestratorStepsCallCount = orchestratorStepsStub.orchestratorStepsCallCount;
+            const expectedTests: TestGroupName[] = [];
 
             await testSubject.invoke(contextStub);
 
@@ -264,6 +267,12 @@ describe('HealthMonitorOrchestrationController', () => {
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
+            expectedTests.push('PostScan', 'ScanStatus');
+            expectedStepsCallCount.runFunctionalTestsCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+            expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
             expectedStepsCallCount.verifyScanSubmittedCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
@@ -272,18 +281,26 @@ describe('HealthMonitorOrchestrationController', () => {
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
+            expectedTests.push('ScanPreProcessing', 'ScanQueueing');
+            expectedStepsCallCount.runFunctionalTestsCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+            expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
             expectedStepsCallCount.getScanReportCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
+            expectedTests.push('ScanReports');
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+            expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
 
             expect(orchestratorIterator.next().done).toBe(true);
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
         });
 
-        test.each([0, 1, 2, 3, 4, 5])('activities throw exception on step %o', async failedStep => {
+        test.each([0, 1, 2, 3, 4, 5, 6, 7])('activities throw exception on step %o', async failedStep => {
             await testSubject.invoke(contextStub);
 
             for (let stepNum = 0; stepNum < failedStep; stepNum += 1) {
