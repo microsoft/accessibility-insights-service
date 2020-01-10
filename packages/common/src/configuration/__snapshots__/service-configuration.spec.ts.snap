@@ -16,11 +16,7 @@ Object {
     "testEnv": Object {
       "default": "canary",
       "doc": "Environment to run tests for",
-      "format": Array [
-        "canary",
-        "insider",
-        "production",
-      ],
+      "format": [Function],
     },
     "urlToScan": Object {
       "default": "https://www.bing.com",
@@ -179,11 +175,7 @@ Object {
     "testEnv": Object {
       "default": "canary",
       "doc": "Environment to run tests for",
-      "format": Array [
-        "canary",
-        "insider",
-        "production",
-      ],
+      "format": [Function],
     },
     "urlToScan": Object {
       "default": "https://www.bing.com",
