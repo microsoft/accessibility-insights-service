@@ -13,6 +13,11 @@ Object {
       "doc": "Time to wait before checking the url scan status again",
       "format": "int",
     },
+    "testEnv": Object {
+      "default": "canary",
+      "doc": "Environment to run tests for",
+      "format": [Function],
+    },
     "urlToScan": Object {
       "default": "https://www.bing.com",
       "doc": "Url to scan for availability testing",
@@ -166,6 +171,11 @@ Object {
       "default": 60,
       "doc": "Time to wait before checking the url scan status again",
       "format": "int",
+    },
+    "testEnv": Object {
+      "default": "canary",
+      "doc": "Environment to run tests for",
+      "format": [Function],
     },
     "urlToScan": Object {
       "default": "https://www.bing.com",

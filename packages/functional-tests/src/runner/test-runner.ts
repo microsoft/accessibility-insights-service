@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { TestDefinition, TestEnvironment, TestResult } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
@@ -28,11 +28,15 @@ export interface TestContainerLogProperties {
     result: TestResult;
 }
 
+@injectable()
 export class TestRunner {
-    public constructor(
-        @inject(Logger) private readonly logger: Logger,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-    ) {}
+    private logger: Logger;
+
+    public constructor(@inject(GuidGenerator) private readonly guidGenerator: GuidGenerator) {}
+
+    public setLogger(logger: Logger): void {
+        this.logger = logger;
+    }
 
     public async runAll(testContainers: object[], env: TestEnvironment, releaseId: string, runId?: string): Promise<void> {
         const currentRunId = runId !== undefined ? runId : this.guidGenerator.createGuid();
@@ -40,6 +44,10 @@ export class TestRunner {
     }
 
     public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId?: string): Promise<void> {
+        if (this.logger === undefined) {
+            throw new Error('No logger set');
+        }
+
         const currentRunId = runId !== undefined ? runId : this.guidGenerator.createGuid();
         const definedTests = getDefinedTestsMetadata(testContainer);
         // tslint:disable-next-line: no-bitwise
@@ -47,7 +55,8 @@ export class TestRunner {
         let containerPass = true;
         await Promise.all(
             targetedTests.map(async targetedTest => {
-                const testPass = await this.runTest(targetedTest, env, releaseId, currentRunId);
+                const testPass = await this.runTest(targetedTest, env, testContainer, releaseId, currentRunId);
+
                 containerPass = containerPass && testPass;
             }),
         );
@@ -62,9 +71,15 @@ export class TestRunner {
         });
     }
 
-    private async runTest(testDefinition: TestDefinition, env: TestEnvironment, releaseId: string, runId: string): Promise<boolean> {
+    private async runTest(
+        testDefinition: TestDefinition,
+        env: TestEnvironment,
+        testContainer: object,
+        releaseId: string,
+        runId: string,
+    ): Promise<boolean> {
         try {
-            await Promise.resolve(testDefinition.testImplFunc());
+            await Promise.resolve(testDefinition.testImplFunc.call(testContainer));
 
             this.log({
                 runId: runId,

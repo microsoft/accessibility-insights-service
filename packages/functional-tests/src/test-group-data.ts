@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { OnDemandPageScanReport, OnDemandPageScanRunState } from 'storage-documents';
 import { Url } from 'url';
 
 export interface TestGroupData {
@@ -11,8 +10,7 @@ export interface TestGroupData {
 export interface TestContextData {
     scanUrl: string;
     scanId?: string;
-    scanRunState?: OnDemandPageScanRunState;
-    reports?: OnDemandPageScanReport[];
+    reportId?: string;
 }
 
 interface SerializableRequest {

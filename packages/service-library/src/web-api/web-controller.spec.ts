@@ -43,6 +43,7 @@ describe(WebController, () => {
     let testSubject: TestableWebController;
     const invocationId = 'test-invocation-id';
     let loggerMock: IMock<MockableLogger>;
+    const releaseVersion = 'release version';
 
     beforeEach(() => {
         context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });

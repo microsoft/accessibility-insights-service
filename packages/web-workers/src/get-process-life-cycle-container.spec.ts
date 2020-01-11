@@ -7,8 +7,8 @@ import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
+import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
-import { A11yServiceClientProvider, iocTypeNames } from './ioc-types';
 
 describe(getProcessLifeCycleContainer, () => {
     let testSubject: inversify.Container;
@@ -42,8 +42,8 @@ describe(getProcessLifeCycleContainer, () => {
             .returns(async () => Promise.resolve('https://login.microsoft.com/tenantid'))
             .verifiable();
 
-        const a11yServiceClientProvider1 = testSubject.get<A11yServiceClientProvider>(iocTypeNames.A11yServiceClientProvider);
-        const a11yServiceClientProvider2 = testSubject.get<A11yServiceClientProvider>(iocTypeNames.A11yServiceClientProvider);
+        const a11yServiceClientProvider1 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
+        const a11yServiceClientProvider2 = testSubject.get<A11yServiceClientProvider>(a11yServiceClientTypeNames.A11yServiceClientProvider);
 
         await expect(a11yServiceClientProvider1()).resolves.toBeDefined();
         expect(await a11yServiceClientProvider1()).toBe(await a11yServiceClientProvider2());
