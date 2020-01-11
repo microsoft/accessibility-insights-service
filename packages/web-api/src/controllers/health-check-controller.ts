@@ -57,7 +57,7 @@ export class HealthCheckController extends ApiController {
         }
 
         const healthReport: HealthReport = {
-            buildVersion: releaseId,
+            releaseId: releaseId,
             testRuns: [],
             testsPassed: 0,
             testsFailed: 0,
