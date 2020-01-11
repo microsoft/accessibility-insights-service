@@ -5,14 +5,15 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { HealthReport, WebApiErrorCodes } from 'service-library';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { HttpResponse, WebApiErrorCodes } from 'service-library';
+import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { HealthCheckController } from './health-check-controller';
+import { HealthCheckController, HealthTarget } from './health-check-controller';
 
 // tslint:disable: no-unsafe-any no-any
 
 describe(HealthCheckController, () => {
+    const releaseTarget: HealthTarget = 'release';
     let healthCheckController: HealthCheckController;
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
@@ -46,23 +47,32 @@ describe(HealthCheckController, () => {
         healthCheckController.context = context;
     });
 
-    it('Handle request', async () => {
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
-            statusCode: 200,
-            body: undefined,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-
-        appInsightsClientMock.setup(async a => a.executeQuery(It.isAny(), It.isAny())).returns(async () => successResponse);
-        loggerMock.setup(t => t.trackEvent('HealthCheck')).verifiable(Times.once());
-
+    it('return echo health request', async () => {
         await healthCheckController.handleRequest();
 
-        expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toBeUndefined();
+        expect(context.res).toEqual({ status: 200 });
         loggerMock.verifyAll();
     });
 
-    it('Returns 200 on app insights failure', async () => {
+    it('return not found for unknown target request', async () => {
+        context.bindingData.target = 'other';
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+        loggerMock.verifyAll();
+    });
+
+    it('return missing release version when default version is unknown', async () => {
+        delete process.env.RELEASE_VERSION;
+        context.bindingData.target = releaseTarget;
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion));
+        loggerMock.verifyAll();
+    });
+
+    it('return internal error on app insights failure', async () => {
+        context.bindingData.target = releaseTarget;
         const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 404,
             body: undefined,
@@ -71,22 +81,12 @@ describe(HealthCheckController, () => {
 
         await healthCheckController.handleRequest();
 
-        expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toEqual('App insights api query failed with status 404');
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
         appInsightsClientMock.verifyAll();
     });
 
-    it('Return error response if release version is not set', async () => {
-        delete process.env.RELEASE_VERSION;
-        const expectedError = WebApiErrorCodes.missingReleaseVersion;
-
-        await healthCheckController.handleRequest();
-
-        expect(context.res.status).toEqual(expectedError.statusCode);
-        expect(context.res.body).toEqual({ error: expectedError.error });
-    });
-
     it('Test report contains correct version number', async () => {
+        context.bindingData.target = releaseTarget;
         const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 200,
             body: undefined,

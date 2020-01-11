@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import * as RequestPromise from 'request-promise';
+import * as requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
 
 export class A11yServiceCredential {
@@ -30,9 +30,9 @@ export class A11yServiceCredential {
         });
     }
 
-    public async signRequest(request: typeof RequestPromise): Promise<typeof RequestPromise> {
+    public async signRequest(request: typeof requestPromise): Promise<typeof requestPromise> {
         const accessToken = await this.getToken();
-        const authOptions: RequestPromise.RequestPromiseOptions = {
+        const authOptions: requestPromise.RequestPromiseOptions = {
             headers: {
                 authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
             },

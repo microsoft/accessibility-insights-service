@@ -6,3 +6,5 @@ export { FunctionalTestGroup } from './test-groups/functional-test-group';
 export { TestGroupData, TestContextData } from './test-group-data';
 export { TestGroupName, TestGroupConstructor, functionalTestGroupTypes } from './functional-test-group-types';
 export { TestRunner } from './runner/test-runner';
+export { test } from './test-decorator';
+export * from './common-types';
