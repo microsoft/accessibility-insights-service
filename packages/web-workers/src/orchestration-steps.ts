@@ -177,7 +177,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             return this.context.df.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData);
         });
 
-        this.logOrchestrationStep(`Starting run of functional tests: ${testGroupNames}`);
+        this.logOrchestrationStep(`Starting functional tests: ${testGroupNames}`);
 
         yield this.context.df.Task.all(parallelTasks);
 

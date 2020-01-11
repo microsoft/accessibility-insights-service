@@ -3,13 +3,13 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { Logger, LogLevel } from 'logger';
+import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { TestRunner } from './test-runner';
 
-// tslint:disable: no-unsafe-any
+// tslint:disable: no-any no-unsafe-any
 
 class TestGroupWithContext {
     public var1: string = 'some value';
@@ -80,179 +80,131 @@ describe(TestRunner, () => {
 
     it('run all tests', async () => {
         loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(5));
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    testName: 'testC',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    testName: 'testD',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            testName: 'testC',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            testName: 'testD',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            result: 'pass',
+        });
 
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerBName,
-                    testName: 'testE',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerBName,
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerBName,
+            testName: 'testE',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerBName,
+            result: 'pass',
+        });
 
         await testRunner.runAll([testContainerA, testContainerB], TestEnvironment.canary, releaseId);
     });
 
     it('run tests for the given environment only', async () => {
         loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    testName: 'testC',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    testName: 'testD',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'canary',
-                    testContainer: testContainerAName,
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            testName: 'testC',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            testName: 'testD',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'canary',
+            testContainer: testContainerAName,
+            result: 'pass',
+        });
 
         await testRunner.run(testContainerA, TestEnvironment.canary, releaseId);
     });
 
     it('handle test exception', async () => {
         loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'insider',
-                    testContainer: testContainerAName,
-                    testName: 'testA',
-                    result: 'fail',
-                    error: 'Error while invoked test A',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'insider',
-                    testContainer: testContainerAName,
-                    testName: 'testC',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'insider',
-                    testContainer: testContainerAName,
-                    result: 'fail',
-                }),
-            )
-            .verifiable(Times.once());
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'insider',
+            testContainer: testContainerAName,
+            testName: 'testA',
+            result: 'fail',
+            error: 'Error while invoked test A',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'insider',
+            testContainer: testContainerAName,
+            testName: 'testC',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'insider',
+            testContainer: testContainerAName,
+            result: 'fail',
+        });
 
         await testRunner.run(testContainerA, TestEnvironment.insider, releaseId);
     });
 
     it('Runs test with correct context', async () => {
-        const testContainerWithContext: TestGroupWithContext = new TestGroupWithContext();
+        const testContainerWithContext = new TestGroupWithContext();
         const testContainerName = testContainerWithContext.constructor.name;
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'all',
-                    testContainer: testContainerName,
-                    testName: 'test',
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
-        loggerMock
-            .setup(o =>
-                o.trackEvent('FunctionalTest', {
-                    runId: runId,
-                    releaseId: releaseId,
-                    environment: 'all',
-                    testContainer: testContainerName,
-                    result: 'pass',
-                }),
-            )
-            .verifiable(Times.once());
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'all',
+            testContainer: testContainerName,
+            testName: 'test',
+            result: 'pass',
+        });
+        setupLoggerMock({
+            runId: runId,
+            releaseId: releaseId,
+            environment: 'all',
+            testContainer: testContainerName,
+            result: 'pass',
+        });
 
         await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId);
     });
+
+    function setupLoggerMock(params: any): void {
+        loggerMock.setup(o => o.trackEvent('FunctionalTest', params)).verifiable(Times.once());
+    }
 });

@@ -45,7 +45,7 @@ export class TestRunner {
 
     public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId?: string): Promise<void> {
         if (this.logger === undefined) {
-            throw new Error('No logger set');
+            throw new Error('The logger instance is undefined. Use setLogger() to initialize the logger instance.');
         }
 
         const currentRunId = runId !== undefined ? runId : this.guidGenerator.createGuid();

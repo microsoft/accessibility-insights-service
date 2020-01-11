@@ -10,7 +10,7 @@ export interface TestRun {
 }
 
 export interface HealthReport {
-    buildVersion: string;
+    releaseId: string;
     testRuns: TestRun[];
     testsPassed: number;
     testsFailed: number;

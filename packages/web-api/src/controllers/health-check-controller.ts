@@ -42,14 +42,14 @@ export class HealthCheckController extends ApiController {
     }
 
     private async processReleaseHealthRequest(): Promise<void> {
-        const targetId = this.getTargetId();
-        if (targetId === undefined) {
+        const releaseId = this.getTargetReleaseId();
+        if (releaseId === undefined) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
 
             return;
         }
 
-        const queryResponse = await this.executeAppInsightsQuery(targetId);
+        const queryResponse = await this.executeAppInsightsQuery(releaseId);
         if (queryResponse.statusCode !== 200) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
 
@@ -57,7 +57,7 @@ export class HealthCheckController extends ApiController {
         }
 
         const healthReport: HealthReport = {
-            buildVersion: targetId,
+            buildVersion: releaseId,
             testRuns: [],
             testsPassed: 0,
             testsFailed: 0,
@@ -69,7 +69,7 @@ export class HealthCheckController extends ApiController {
         };
     }
 
-    private async executeAppInsightsQuery(targetId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
+    private async executeAppInsightsQuery(releaseId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const appInsightsClient = await this.appInsightsClientProvider();
         const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
         const queryString = 'customEvents | limit 5';
@@ -91,7 +91,7 @@ export class HealthCheckController extends ApiController {
         return queryResponse;
     }
 
-    private getTargetId(): string {
+    private getTargetReleaseId(): string {
         const targetId = <string>this.context.bindingData.targetId;
 
         return targetId !== undefined ? targetId : process.env.RELEASE_VERSION;
