@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
-import { AvailabilityTelemetry } from './availablity-telemetry';
+import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { GlobalLogger } from './global-logger';

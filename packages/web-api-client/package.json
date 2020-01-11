@@ -23,6 +23,7 @@
         "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
         "@types/request-promise": "^4.1.44",
+        "@types/request": "^2.47.0",
         "jest": "^24.9.0",
         "jest-circus": "^24.9.0",
         "jest-junit": "^8.0.0",

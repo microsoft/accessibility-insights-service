@@ -46,4 +46,5 @@ export type TelemetryMeasurements = {
     ScanTaskFailed: null;
     ScanRequestsAccepted: ScanUrlsAddedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;
+    FunctionalTest: null;
 };
