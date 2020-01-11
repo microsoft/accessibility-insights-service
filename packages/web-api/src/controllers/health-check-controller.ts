@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
+import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
+import { functionalTestGroupTypes } from 'functional-tests';
 import { inject, injectable } from 'inversify';
+import { groupBy } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController, HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
+import { ApiController, HealthReport, HttpResponse, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
+
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
 export declare type HealthTarget = 'release';
@@ -56,12 +59,7 @@ export class HealthCheckController extends ApiController {
             return;
         }
 
-        const healthReport: HealthReport = {
-            buildVersion: targetId,
-            testRuns: [],
-            testsPassed: 0,
-            testsFailed: 0,
-        };
+        const healthReport: HealthReport = this.getHealthReport(queryResponse.body, targetId);
 
         this.context.res = {
             status: 200, // OK
@@ -72,7 +70,10 @@ export class HealthCheckController extends ApiController {
     private async executeAppInsightsQuery(targetId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const appInsightsClient = await this.appInsightsClientProvider();
         const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
-        const queryString = 'customEvents | limit 5';
+        const queryString = `customEvents
+            | where name == "FunctionalTest" and customDimensions.releaseId == ${targetId}
+            | project timeCompleted = timestamp, name = customDimensions.testContainer, lastRunResult = customDimensions.result
+            | limit 500`;
         const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
         if (queryResponse.statusCode === 200) {
             this.logger.logInfo('App Insights query succeeded', {
@@ -100,6 +101,37 @@ export class HealthCheckController extends ApiController {
     private processEchoHealthRequest(): void {
         this.context.res = {
             status: 200, // OK
+        };
+    }
+
+    private getHealthReport(queryResponse: ApplicationInsightsQueryResponse, targetId: string): HealthReport {
+        const testContainers: string[] = Object.values(functionalTestGroupTypes).map(ctor => ctor.name);
+        const testRuns: TestRun[] = [];
+        queryResponse.tables[0].rows.forEach((testRecord: string[]) => {
+            testRuns.push({
+                timeCompleted: new Date(testRecord[0]),
+                name: testRecord[1],
+                lastRunResult: testRecord[2] as TestRunResult,
+            });
+        });
+
+        const groupedTestRuns = groupBy(testRuns, testRun => testRun.name);
+        let testsPassed: number = 0;
+        let testsFailed: number = 0;
+        testContainers.forEach(name => {
+            if (groupedTestRuns[name] === undefined) {
+                testsFailed += 1;
+            } else {
+                const testContainerPassed = groupedTestRuns[name].every(testRun => testRun.lastRunResult === 'pass');
+                testContainerPassed ? (testsPassed += 1) : (testsFailed += 1);
+            }
+        });
+
+        return {
+            buildVersion: targetId,
+            testRuns,
+            testsFailed,
+            testsPassed,
         };
     }
 }
