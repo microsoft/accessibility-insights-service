@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration } from 'common';
+import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { HealthReport, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
+import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
-import { A11yServiceClientProvider, iocTypeNames } from '../ioc-types';
 import {
     ActivityRequestData,
     CreateScanRequestData,
     GetScanReportData,
     GetScanResultData,
+    RunFunctionalTestGroupData,
     SerializableResponse,
     TrackAvailabilityData,
 } from './activity-request-data';
@@ -22,13 +24,20 @@ export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-client';
     private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
+    private readonly releaseId: string;
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) logger: Logger,
-        @inject(iocTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
+        @inject(a11yServiceClientTypeNames.A11yServiceClientProvider) protected readonly webApiClientProvider: A11yServiceClientProvider,
+        @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
+        @inject(TestRunner) protected readonly testRunner: TestRunner,
+        protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
     ) {
         super(logger);
+
+        testRunner.setLogger(this.logger);
 
         this.activityCallbacks = {
             [ActivityAction.createScanRequest]: this.createScanRequest,
@@ -36,7 +45,10 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.getScanReport]: this.getScanReport,
             [ActivityAction.getHealthStatus]: this.getHealthStatus,
             [ActivityAction.trackAvailability]: this.trackAvailability,
+            [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
         };
+
+        this.releaseId = process.env.RELEASE_VERSION;
     }
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
@@ -85,5 +97,14 @@ export class HealthMonitorClientController extends WebController {
 
     private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {
         this.logger.trackAvailability(data.name, data.telemetry);
+    };
+
+    private readonly runFunctionalTestGroup = async (data: RunFunctionalTestGroupData): Promise<void> => {
+        const webApiClient = await this.webApiClientProvider();
+        const functionalTestGroupCtor = this.testGroupTypes[data.testGroupName];
+        const functionalTestGroup = new functionalTestGroupCtor(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
+        functionalTestGroup.setTestContext(data.testContextData);
+
+        await this.testRunner.run(functionalTestGroup, data.env, this.releaseId);
     };
 }

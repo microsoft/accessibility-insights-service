@@ -3,13 +3,23 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { Logger } from 'logger';
+import { Logger, LogLevel } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { TestRunner } from './test-runner';
 
 // tslint:disable: no-unsafe-any
+
+class TestGroupWithContext {
+    public var1: string = 'some value';
+
+    @test(TestEnvironment.all)
+    public async test(): Promise<void> {
+        expect(this.var1).toBeDefined();
+        expect(this.var1).toEqual('some value');
+    }
+}
 
 class TestGroupAStub {
     @test(TestEnvironment.insider)
@@ -60,7 +70,8 @@ describe(TestRunner, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         guidGeneratorMock.setup(g => g.createGuid()).returns(() => runId);
 
-        testRunner = new TestRunner(loggerMock.object, guidGeneratorMock.object);
+        testRunner = new TestRunner(guidGeneratorMock.object);
+        testRunner.setLogger(loggerMock.object);
     });
 
     afterEach(() => {
@@ -213,5 +224,35 @@ describe(TestRunner, () => {
             .verifiable(Times.once());
 
         await testRunner.run(testContainerA, TestEnvironment.insider, releaseId);
+    });
+
+    it('Runs test with correct context', async () => {
+        const testContainerWithContext: TestGroupWithContext = new TestGroupWithContext();
+        const testContainerName = testContainerWithContext.constructor.name;
+        loggerMock
+            .setup(o =>
+                o.trackEvent('FunctionalTest', {
+                    runId: runId,
+                    releaseId: releaseId,
+                    environment: 'all',
+                    testContainer: testContainerName,
+                    testName: 'test',
+                    result: 'pass',
+                }),
+            )
+            .verifiable(Times.once());
+        loggerMock
+            .setup(o =>
+                o.trackEvent('FunctionalTest', {
+                    runId: runId,
+                    releaseId: releaseId,
+                    environment: 'all',
+                    testContainer: testContainerName,
+                    result: 'pass',
+                }),
+            )
+            .verifiable(Times.once());
+
+        await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId);
     });
 });

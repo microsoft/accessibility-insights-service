@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { A11yServiceClient } from 'web-api-client';
+import { A11yServiceClient } from './a11y-service-client';
 
-export const iocTypeNames = {
+export const a11yServiceClientTypeNames = {
     A11yServiceClientProvider: 'A11yServiceClientProvider',
 };
 

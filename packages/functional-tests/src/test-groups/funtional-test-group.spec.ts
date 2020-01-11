@@ -8,13 +8,12 @@ import { IMock, Mock } from 'typemoq';
 import { A11yServiceClient } from 'web-api-client';
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
-import { RestApiTestGroup } from './rest-api-test-group';
 
 // tslint:disable:  no-any
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {}
 
-describe(RestApiTestGroup, () => {
+describe(FunctionalTestGroup, () => {
     let testSubject: FunctionalTestGroupStub;
     let a11yServiceClientMock: IMock<A11yServiceClient>;
     let scanRunProviderMock: IMock<OnDemandPageScanRunResultProvider>;
@@ -25,7 +24,7 @@ describe(RestApiTestGroup, () => {
         testContextData = {
             scanUrl: 'scanUrl',
             scanId: 'scanId',
-            reports: [{ reportId: 'reportId' } as any],
+            reportId: 'reportId',
         };
         a11yServiceClientMock = Mock.ofType(A11yServiceClient);
         scanRunProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);

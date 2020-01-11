@@ -7,4 +7,5 @@ export enum ActivityAction {
     getScanReport = 'getScanReport',
     getHealthStatus = 'getHealthStatus',
     trackAvailability = 'trackAvailability',
+    runFunctionalTestGroup = 'runFunctionalTestGroup',
 }
