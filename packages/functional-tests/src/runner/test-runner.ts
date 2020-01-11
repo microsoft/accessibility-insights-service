@@ -5,7 +5,8 @@ import 'reflect-metadata';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { TestDefinition, TestEnvironment, TestResult } from '../common-types';
+import { TestRunResult } from 'service-library';
+import { TestDefinition, TestEnvironment } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
 
 // tslint:disable: no-any no-unsafe-any
@@ -16,7 +17,7 @@ export interface TestRunLogProperties {
     environment: string;
     testContainer: string;
     testName: string;
-    result: TestResult;
+    result: TestRunResult;
     error?: string;
 }
 
@@ -25,7 +26,7 @@ export interface TestContainerLogProperties {
     releaseId: string;
     environment: string;
     testContainer: string;
-    result: TestResult;
+    result: TestRunResult;
 }
 
 @injectable()

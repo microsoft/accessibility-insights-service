@@ -85,24 +85,49 @@ describe(HealthCheckController, () => {
         appInsightsClientMock.verifyAll();
     });
 
-    it('Test report contains correct version number', async () => {
+    it('returns correct health report', async () => {
         context.bindingData.target = releaseTarget;
+        context.bindingData.targetId = releaseVersion;
+        const responseBody: ApplicationInsightsQueryResponse = {
+            tables: [
+                {
+                    columns: [],
+                    rows: [
+                        ['1/11/2020, 4:30:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
+                        ['1/11/2020, 4:12:14.862 AM', 'ScanQueuingTestGroup', 'fail'],
+                        ['1/11/2020, 4:31:14.862 AM', 'ScanPreProcessingTestGroup', 'fail'],
+                        ['1/11/2020, 4:32:14.862 AM', 'ScanReportTestGroup', 'pass'],
+                        ['1/11/2020, 4:35:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
+                        ['1/11/2020, 4:50:14.862 AM', 'ScanStatusTestGroup', 'pass'],
+                        ['1/11/2020, 4:56:14.862 AM', 'PostScanTestGroup', 'pass'],
+                    ],
+                    name: 'PrimaryResult',
+                },
+            ],
+        };
+        const queryString = `customEvents
+            | where name == "FunctionalTest" and customDimensions.releaseId == ${releaseVersion}
+            | project timeCompleted = timestamp, name = customDimensions.testContainer, lastRunResult = customDimensions.result
+            | limit 500`;
         const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 200,
-            body: undefined,
+            body: responseBody,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-        setupAppInsightsResponse(successResponse);
+        setupAppInsightsResponse(successResponse, queryString);
 
         await healthCheckController.handleRequest();
 
         expect(context.res.status).toEqual(200);
         expect(context.res.body.buildVersion).toEqual(releaseVersion);
+        expect(context.res.body.testRuns.length).toEqual(7);
+        expect(context.res.body.testsFailed).toEqual(2);
+        expect(context.res.body.testsPassed).toEqual(3);
         appInsightsClientMock.verifyAll();
     });
 
-    function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>): void {
+    function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>, query = It.isAny()): void {
         appInsightsClientMock
-            .setup(async a => a.executeQuery(It.isAny(), It.isAny()))
+            .setup(async a => a.executeQuery(query, It.isAny()))
             .returns(async () => response)
             .verifiable();
     }

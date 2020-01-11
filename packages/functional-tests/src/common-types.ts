@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 // tslint:disable: no-any
-export declare type TestResult = 'pass' | 'fail';
 
 export enum TestEnvironment {
     none = 0,
