@@ -46,7 +46,6 @@ describe(WebController, () => {
     const releaseVersion = 'release version';
 
     beforeEach(() => {
-        process.env.RELEASE_VERSION = releaseVersion;
         context = <Context>(<unknown>{ bindingDefinitions: {}, res: {}, invocationId: invocationId });
         loggerMock = Mock.ofType(MockableLogger);
 
@@ -65,7 +64,6 @@ describe(WebController, () => {
                         apiVersion: testSubject.apiVersion,
                         controller: 'TestableWebController',
                         invocationId,
-                        releaseNumber: releaseVersion,
                     }),
                 ),
             )
@@ -119,7 +117,6 @@ describe(WebController, () => {
             apiVersion: testSubject.apiVersion,
             controller: 'TestableWebController',
             invocationId,
-            releaseNumber: releaseVersion,
         });
     });
 

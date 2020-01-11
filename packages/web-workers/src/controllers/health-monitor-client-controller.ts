@@ -24,6 +24,7 @@ export class HealthMonitorClientController extends WebController {
     public readonly apiVersion = '1.0';
     public readonly apiName = 'health-monitor-client';
     private readonly activityCallbacks: { [activityName: string]: (args: unknown) => Promise<unknown> };
+    private readonly releaseId: string;
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -46,6 +47,8 @@ export class HealthMonitorClientController extends WebController {
             [ActivityAction.trackAvailability]: this.trackAvailability,
             [ActivityAction.runFunctionalTestGroup]: this.runFunctionalTestGroup,
         };
+
+        this.releaseId = process.env.RELEASE_VERSION;
     }
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
@@ -102,6 +105,6 @@ export class HealthMonitorClientController extends WebController {
         const functionalTestGroup = new functionalTestGroupCtor(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
         functionalTestGroup.setTestContext(data.testContextData);
 
-        await this.testRunner.run(functionalTestGroup, data.env);
+        await this.testRunner.run(functionalTestGroup, data.env, this.releaseId);
     };
 }

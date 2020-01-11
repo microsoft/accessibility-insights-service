@@ -46,6 +46,7 @@ describe(HealthMonitorClientController, () => {
     const testGroupTypes: { [key: string]: TestGroupConstructor } = {
         PostScan: FunctionalTestGroupStub,
     };
+    const releaseId = 'release id';
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -63,6 +64,8 @@ describe(HealthMonitorClientController, () => {
                 return jsonResponse;
             },
         } as ResponseWithBodyType<any>;
+
+        process.env.RELEASE_VERSION = releaseId;
 
         testSubject = new HealthMonitorClientController(
             serviceConfigurationMock.object,
@@ -179,7 +182,7 @@ describe(HealthMonitorClientController, () => {
             let testContainer: any;
             testRunnerMock.setup(t => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
-                .setup(async t => t.run(It.isAny(), TestEnvironment.canary))
+                .setup(async t => t.run(It.isAny(), TestEnvironment.canary, releaseId))
                 .callback(testGroup => {
                     testContainer = testGroup;
                 })
