@@ -132,21 +132,21 @@ export class WebApiErrorCodes {
         },
     };
 
-    public static missingReleaseVersion: WebApiErrorCode = {
-        statusCode: 400,
-        error: {
-            code: 'MissingReleaseVersion',
-            codeId: 4012,
-            message: 'No release version is configured.',
-        },
-    };
-
     public static internalError: WebApiErrorCode = {
         statusCode: 500,
         error: {
             code: 'InternalError',
             codeId: 5001,
             message: 'The server encountered an internal error. Please retry the request.',
+        },
+    };
+
+    public static missingReleaseVersion: WebApiErrorCode = {
+        statusCode: 500,
+        error: {
+            code: 'MissingReleaseVersion',
+            codeId: 5002,
+            message: 'The release ID was not found.',
         },
     };
 }

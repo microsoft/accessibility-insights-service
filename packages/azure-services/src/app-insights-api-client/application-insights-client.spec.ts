@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import * as request from 'request-promise';
+import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 import { ApplicationInsightsClient } from './application-insights-client';
 import { EventsQueryOptions } from './events-query-options';
@@ -16,8 +16,8 @@ describe(ApplicationInsightsClient, () => {
     const apiKey = 'apiKey';
     let baseUrl: string;
     let requestStub: any;
-    let getMock: IMock<(url: string, options?: request.RequestPromiseOptions) => {}>;
-    let postMock: IMock<(url: string, options?: request.RequestPromiseOptions) => {}>;
+    let getMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
+    let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
 
     beforeEach(() => {
         baseUrl = `https://api.applicationinsights.io/v1/apps/${appId}`;
@@ -28,7 +28,7 @@ describe(ApplicationInsightsClient, () => {
             return undefined;
         });
         requestStub = {
-            defaults: (options: request.RequestPromiseOptions) => requestStub,
+            defaults: (options: requestPromise.RequestPromiseOptions) => requestStub,
             get: getMock.object,
             post: postMock.object,
         };
@@ -41,7 +41,7 @@ describe(ApplicationInsightsClient, () => {
     });
 
     it('verify default options', () => {
-        const defaultsMock = Mock.ofInstance((options: request.RequestPromiseOptions): any => {});
+        const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
         requestStub.defaults = defaultsMock.object;
 
         defaultsMock
