@@ -1,22 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { expect } from 'chai';
 import { TestEnvironment } from '../common-types';
+import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
 
-export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
-    protected registerTestCases(env: TestEnvironment): void {
-        this.registerTestCase(async () => this.testScanRequestPersisted());
-    }
+// tslint:disable: no-unused-expression
 
-    private async testScanRequestPersisted(): Promise<boolean> {
+export class ScanPreProcessingTestGroup extends FunctionalTestGroup {
+    @test(TestEnvironment.all)
+    public async testScanRequestPersisted(): Promise<void> {
         const scanRunResult = await this.onDemandPageScanRunResultProvider.readScanRun(this.testContextData.scanId);
 
-        if (this.expectToBeDefined(scanRunResult, 'testScanRequestPersisted')) {
-            this.testContextData.scanRunState = scanRunResult.run.state;
-
-            return true;
-        }
-
-        return false;
+        expect(scanRunResult, 'Expected a valid scan result').to.not.be.undefined;
     }
 }

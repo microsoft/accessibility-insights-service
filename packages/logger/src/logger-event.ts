@@ -10,4 +10,5 @@ export declare type LoggerEvent =
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'
-    | 'ScanTaskFailed';
+    | 'ScanTaskFailed'
+    | 'FunctionalTest';

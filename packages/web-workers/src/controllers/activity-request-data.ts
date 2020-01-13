@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
 import { Url } from 'url';
 
@@ -25,6 +26,12 @@ export interface GetScanReportData {
 export interface TrackAvailabilityData {
     name: string;
     telemetry: AvailabilityTelemetry;
+}
+
+export interface RunFunctionalTestGroupData {
+    testGroupName: TestGroupName;
+    testContextData: TestContextData;
+    env: TestEnvironment;
 }
 
 interface SerializableRequest {

@@ -35,5 +35,5 @@ export {
 } from './web-api/api-contracts/scan-result-response';
 export { ScanRunRequest } from './web-api/api-contracts/scan-run-request';
 export { ScanRunResponse } from './web-api/api-contracts/scan-run-response';
-export { HealthReport } from './web-api/api-contracts/health-report';
+export * from './web-api/api-contracts/health-report';
 export { BatchPoolLoadSnapshotProvider } from './data-providers/batch-pool-load-snapshot-provider';

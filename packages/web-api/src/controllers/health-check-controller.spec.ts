@@ -5,13 +5,16 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { HttpResponse, WebApiErrorCodes } from 'service-library';
+import { IMock, It, Mock } from 'typemoq';
+
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { HealthCheckController } from './health-check-controller';
+import { HealthCheckController, HealthTarget } from './health-check-controller';
 
 // tslint:disable: no-unsafe-any no-any
 
 describe(HealthCheckController, () => {
+    const releaseTarget: HealthTarget = 'release';
     let healthCheckController: HealthCheckController;
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
@@ -20,8 +23,10 @@ describe(HealthCheckController, () => {
     const e2eTestConfig = {
         testRunQueryTimespan: 'timespan',
     };
+    const releaseVersion = 'test version';
 
     beforeEach(() => {
+        process.env.RELEASE_VERSION = releaseVersion;
         context = <Context>(<unknown>{
             req: {
                 method: 'GET',
@@ -43,37 +48,88 @@ describe(HealthCheckController, () => {
         healthCheckController.context = context;
     });
 
-    it('Handle request', async () => {
-        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
-            statusCode: 200,
-            body: undefined,
-        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
-
-        appInsightsClientMock.setup(async a => a.executeQuery(It.isAny(), It.isAny())).returns(async () => successResponse);
-        loggerMock.setup(t => t.trackEvent('HealthCheck')).verifiable(Times.once());
-
+    it('return echo health request', async () => {
         await healthCheckController.handleRequest();
 
-        expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toBeUndefined();
+        expect(context.res).toEqual({ status: 200 });
         loggerMock.verifyAll();
     });
 
-    it('Returns 200 on app insights failure', async () => {
+    it('return not found for unknown target request', async () => {
+        context.bindingData.target = 'other';
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+        loggerMock.verifyAll();
+    });
+
+    it('return missing release version when default version is unknown', async () => {
+        delete process.env.RELEASE_VERSION;
+        context.bindingData.target = releaseTarget;
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion));
+        loggerMock.verifyAll();
+    });
+
+    it('return internal error on app insights failure', async () => {
+        context.bindingData.target = releaseTarget;
         const failureResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 404,
             body: undefined,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        setupAppInsightsResponse(failureResponse);
 
-        appInsightsClientMock
-            .setup(async a => a.executeQuery(It.isAny(), It.isAny()))
-            .returns(async () => failureResponse)
-            .verifiable();
+        await healthCheckController.handleRequest();
+
+        expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.internalError));
+        appInsightsClientMock.verifyAll();
+    });
+
+    it('returns correct health report', async () => {
+        context.bindingData.target = releaseTarget;
+        context.bindingData.targetId = releaseVersion;
+        const responseBody: ApplicationInsightsQueryResponse = {
+            tables: [
+                {
+                    columns: [],
+                    rows: [
+                        ['1/11/2020, 4:30:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
+                        ['1/11/2020, 4:12:14.862 AM', 'ScanQueuingTestGroup', 'fail'],
+                        ['1/11/2020, 4:31:14.862 AM', 'ScanPreProcessingTestGroup', 'fail'],
+                        ['1/11/2020, 4:32:14.862 AM', 'ScanReportTestGroup', 'pass'],
+                        ['1/11/2020, 4:35:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
+                        ['1/11/2020, 4:50:14.862 AM', 'ScanStatusTestGroup', 'pass'],
+                        ['1/11/2020, 4:56:14.862 AM', 'PostScanTestGroup', 'pass'],
+                    ],
+                    name: 'PrimaryResult',
+                },
+            ],
+        };
+        const queryString = `customEvents
+            | where name == "FunctionalTest" and customDimensions.releaseId == ${releaseVersion}
+            | project timeCompleted = timestamp, name = customDimensions.testContainer, lastRunResult = customDimensions.result
+            | limit 500`;
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+            statusCode: 200,
+            body: responseBody,
+        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        setupAppInsightsResponse(successResponse, queryString);
 
         await healthCheckController.handleRequest();
 
         expect(context.res.status).toEqual(200);
-        expect(context.res.body.error).toBeDefined();
+        expect(context.res.body.buildVersion).toEqual(releaseVersion);
+        expect(context.res.body.testRuns.length).toEqual(7);
+        expect(context.res.body.testsFailed).toEqual(2);
+        expect(context.res.body.testsPassed).toEqual(3);
         appInsightsClientMock.verifyAll();
     });
+
+    function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>, query = It.isAny()): void {
+        appInsightsClientMock
+            .setup(async a => a.executeQuery(query, It.isAny()))
+            .returns(async () => response)
+            .verifiable();
+    }
 });

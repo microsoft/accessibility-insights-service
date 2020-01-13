@@ -60,6 +60,7 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "web-api-client": "1.0.0"
+        "web-api-client": "1.0.0",
+        "functional-tests": "1.0.0"
     }
 }

@@ -16,5 +16,8 @@
     },
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300
+    },
+    "availabilityTestConfig": {
+        "testEnv": "canary"
     }
 }

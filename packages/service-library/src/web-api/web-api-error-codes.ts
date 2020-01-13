@@ -15,7 +15,8 @@ export declare type WebApiErrorCodeName =
     | 'UnsupportedContentType'
     | 'UnsupportedApiVersion'
     | 'OutOfRangePriority'
-    | 'MalformedBody';
+    | 'MalformedBody'
+    | 'MissingReleaseVersion';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -137,6 +138,15 @@ export class WebApiErrorCodes {
             code: 'InternalError',
             codeId: 5001,
             message: 'The server encountered an internal error. Please retry the request.',
+        },
+    };
+
+    public static missingReleaseVersion: WebApiErrorCode = {
+        statusCode: 500,
+        error: {
+            code: 'MissingReleaseVersion',
+            codeId: 5002,
+            message: 'The release ID was not found.',
         },
     };
 }

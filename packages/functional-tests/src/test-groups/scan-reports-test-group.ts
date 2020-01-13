@@ -1,40 +1,50 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ScanReport, ScanRunResultResponse } from 'service-library';
-
+import { expect } from 'chai';
+import { ScanReport, ScanRunResultResponse, WebApiErrorCodes } from 'service-library';
 import { TestEnvironment } from '../common-types';
+import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
 
-export class ScanReportTestGroup extends FunctionalTestGroup {
-    protected registerTestCases(env: TestEnvironment): void {
-        this.registerTestCase(async () => this.testReportGenerated());
-        this.registerTestCase(async () => this.testGetReports());
-    }
+// tslint:disable: no-unused-expression
 
-    private async testReportGenerated(): Promise<boolean> {
+export class ScanReportTestGroup extends FunctionalTestGroup {
+    @test(TestEnvironment.all)
+    public async testReportGenerated(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
 
-        return (
-            this.ensureSuccessStatusCode(response, 'testReportGenerated') &&
-            this.expectToBeDefined((<ScanRunResultResponse>response.body).reports, 'testReportGenerated') &&
-            this.expectTrue((<ScanRunResultResponse>response.body).reports.length > 0)
-        );
+        this.ensureResponseSuccessStatusCode(response);
+        expect((<ScanRunResultResponse>response.body).reports, 'Expected a valid reports response result').to.not.be.undefined;
+        expect((<ScanRunResultResponse>response.body).reports, 'Expected two reports to be returned').to.have.lengthOf(2);
     }
 
-    private async testGetReports(): Promise<boolean> {
+    @test(TestEnvironment.all)
+    public async testGetReports(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const reportsInfo = (<ScanRunResultResponse>response.body).reports;
-        const getReportResults = await Promise.all(
+        await Promise.all(
             reportsInfo.map(async (reportData: ScanReport) => {
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, reportData.reportId);
 
-                return (
-                    this.ensureSuccessStatusCode(reportResponse, 'testGetReports') &&
-                    this.expectToBeDefined(reportResponse.body, 'testGetReports')
-                );
+                this.ensureResponseSuccessStatusCode(response);
+                expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
             }),
         );
+    }
 
-        return getReportResults.every(val => val);
+    @test(TestEnvironment.all)
+    public async testGetScanReportWithInvalidGuid(): Promise<void> {
+        const invalidGuid = '00000000-0000-0000-0000-000000000000';
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
+
+        this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
+    }
+
+    @test(TestEnvironment.all)
+    public async testGetScanReportWithInvalidScanId(): Promise<void> {
+        const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
+        const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
+
+        this.expectWebApiErrorResponse(WebApiErrorCodes.resourceNotFound, response);
     }
 }

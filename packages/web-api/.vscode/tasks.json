@@ -6,9 +6,20 @@
             "command": "host start",
             "problemMatcher": "$func-watch",
             "isBackground": true,
-            "dependsOn": "copy-local-settings",
+            "dependsOn": "copy-dotenv",
             "options": {
                 "cwd": "${workspaceRoot}/dist"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "copy-dotenv",
+            "dependsOn": "copy-local-settings",
+            "windows": {
+                "command": "xcopy /Y .env .\\dist\\"
+            },
+            "osx": {
+                "command": "cp .env ./dist"
             }
         },
         {
@@ -16,12 +27,13 @@
             "label": "copy-local-settings",
             "dependsOn": "tsc",
             "windows": {
-                "command": "xcopy /Y local.settings.json .\\dist\\ & xcopy /Y .env .\\dist\\"
+                "command": "xcopy /Y local.settings.json .\\dist\\"
             },
             "osx": {
-                "command": "cp local.settings.json ./dist ; cp .env ./dist"
+                "command": "cp local.settings.json ./dist"
             }
         },
+
         {
             "type": "shell",
             "label": "tsc",

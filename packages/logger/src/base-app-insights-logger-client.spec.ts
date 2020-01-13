@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 
-import { AvailabilityTelemetry } from './availablity-telemetry';
+import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
