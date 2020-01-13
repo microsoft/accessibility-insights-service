@@ -110,6 +110,10 @@
                         {
                             "name": "WEB_API_BASE_URL",
                             "value": "[parameters('webApiBaseUrl')]"
+                        },
+                        {
+                            "name": "RELEASE_VERSION",
+                            "value": "%RELEASE_VERSION_NUMBER%"
                         }
                     ]
                 }

@@ -25,6 +25,7 @@ Usage: $0 \
 -e <environment> \
 -k <Key Vault to grant Azure Function App an access to> \
 -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
+-v <release version>
 "
     exit 1
 }
@@ -65,6 +66,13 @@ installAzureFunctionsCoreTools() {
     Linux*) installAzureFunctionsCoreToolsOnLinux ;;
     *) echo "Azure Functions Core Tools is expected to be installed on development computer. Refer to https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#v2 if tools is not installed." ;;
     esac
+}
+
+setReleaseVersionInTemplate() {
+    packageName=$1
+    templateFilePath="${0%/*}/../templates/function-$packageName-app-template.json"
+    parsedTemplateFilePath="${0%/*}/../templates/function-$packageName-app-template-parsed.json"
+    sed -e "s@%RELEASE_VERSION_NUMBER%@$releaseVersion@" "$templateFilePath" >"$parsedTemplateFilePath"
 }
 
 publishFunctionAppScripts() {
@@ -117,12 +125,12 @@ getFunctionAppPrincipalId() {
 
 deployWebApiArmTemplate() {
     functionAppNamePrefix="web-api-allyfuncapp"
-    templateFilePath="${0%/*}/../templates/function-web-api-app-template.json"
+    setReleaseVersionInTemplate $webApiPackageName
 
     echo "Deploying Azure Function App using ARM template..."
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
-        --template-file "$templateFilePath" \
+        --template-file "$parsedTemplateFilePath" \
         --parameters clientId="$webApiAdClientId" namePrefix="$functionAppNamePrefix" \
         --query "properties.outputResources[].id" \
         -o tsv)
@@ -136,12 +144,12 @@ deployWebApiArmTemplate() {
 
 deployWebWorkersArmTemplate() {
     functionAppNamePrefix="web-workers-allyfuncapp"
-    templateFilePath="${0%/*}/../templates/function-web-workers-app-template.json"
+    setReleaseVersionInTemplate $webWorkersPackageName
 
     echo "Deploying Azure Function App using ARM template..."
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
-        --template-file "$templateFilePath" \
+        --template-file "$parsedTemplateFilePath" \
         --parameters namePrefix="$functionAppNamePrefix" \
         --query "properties.outputResources[].id" \
         -o tsv)
@@ -170,18 +178,19 @@ deployWebWorkersFunctionApp() {
 }
 
 # Read script arguments
-while getopts ":r:c:e:k:d:" option; do
+while getopts ":r:c:e:k:d:v:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
+    v) releaseVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $webApiAdClientId ]; then
+if [ -z $resourceGroupName ] || [ -z $environment ] || [ -z $keyVault ] || [ -z $webApiAdClientId ] || [ -z $releaseVersion ]; then
     exitWithUsageInfo
 fi
 
