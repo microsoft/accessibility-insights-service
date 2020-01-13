@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
+import { ApplicationInsightsQueryResponse, Column, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { functionalTestGroupTypes } from 'functional-tests';
 import { inject, injectable } from 'inversify';
-import { groupBy } from 'lodash';
 import { Logger } from 'logger';
-import { ApiController, HealthReport, HttpResponse, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
-
+import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
+
+// tslint:disable: max-line-length
 
 export declare type HealthTarget = 'release';
 
@@ -45,21 +44,21 @@ export class HealthCheckController extends ApiController {
     }
 
     private async processReleaseHealthRequest(): Promise<void> {
-        const targetId = this.getTargetId();
-        if (targetId === undefined) {
+        const releaseId = this.getReleaseId();
+        if (releaseId === undefined) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.missingReleaseVersion);
 
             return;
         }
 
-        const queryResponse = await this.executeAppInsightsQuery(targetId);
+        const queryResponse = await this.executeAppInsightsQuery(releaseId);
         if (queryResponse.statusCode !== 200) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.internalError);
 
             return;
         }
 
-        const healthReport: HealthReport = this.getHealthReport(queryResponse.body, targetId);
+        const healthReport = this.getHealthReport(queryResponse.body, releaseId);
 
         this.context.res = {
             status: 200, // OK
@@ -67,13 +66,20 @@ export class HealthCheckController extends ApiController {
         };
     }
 
-    private async executeAppInsightsQuery(targetId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
+    private async executeAppInsightsQuery(releaseId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const appInsightsClient = await this.appInsightsClientProvider();
         const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
         const queryString = `customEvents
-            | where name == "FunctionalTest" and customDimensions.releaseId == ${targetId}
-            | project timeCompleted = timestamp, name = customDimensions.testContainer, lastRunResult = customDimensions.result
-            | limit 500`;
+        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.runId == toscalar(
+            customEvents
+            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
+            | top 1 by timestamp desc nulls last
+            | project tostring(customDimensions.runId)
+        )
+        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
+                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
+                  result = customDimensions.result, error = customDimensions.error
+        | order by timestamp asc nulls last`;
         const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
         if (queryResponse.statusCode === 200) {
             this.logger.logInfo('App Insights query succeeded', {
@@ -92,10 +98,53 @@ export class HealthCheckController extends ApiController {
         return queryResponse;
     }
 
-    private getTargetId(): string {
-        const targetId = <string>this.context.bindingData.targetId;
+    private getHealthReport(queryResponse: ApplicationInsightsQueryResponse, releaseId: string): HealthReport {
+        const table = queryResponse.tables[0];
+        const columns = table.columns;
 
-        return targetId !== undefined ? targetId : process.env.RELEASE_VERSION;
+        let testsPassed = 0;
+        let testsFailed = 0;
+        const testRuns: TestRun[] = [];
+        table.rows.forEach(row => {
+            const result = this.getColumnValue(columns, row, 'result') as TestRunResult;
+            if (result === 'pass') {
+                testsPassed += 1;
+            } else {
+                testsFailed += 1;
+            }
+
+            const testRun: TestRun = {
+                testContainer: this.getColumnValue(columns, row, 'testContainer'),
+                testName: this.getColumnValue(columns, row, 'testName'),
+                result: result,
+                timestamp: new Date(this.getColumnValue(columns, row, 'timestamp')),
+            };
+
+            if (result === 'fail') {
+                testRun.error = this.getColumnValue(columns, row, 'error');
+            }
+
+            testRuns.push(testRun);
+        });
+
+        const environment = this.getColumnValue(columns, table.rows[0], 'environment') as TestEnvironment;
+        const runId = this.getColumnValue(columns, table.rows[0], 'runId');
+
+        return {
+            healthStatus: testsFailed === 0 ? 'pass' : 'fail',
+            environment: environment,
+            releaseId: releaseId,
+            runId: runId,
+            testRuns: testRuns,
+            testsPassed: testsPassed,
+            testsFailed: testsFailed,
+        };
+    }
+
+    private getReleaseId(): string {
+        const releaseId = <string>this.context.bindingData.targetId;
+
+        return releaseId !== undefined ? releaseId : process.env.RELEASE_VERSION;
     }
 
     private processEchoHealthRequest(): void {
@@ -104,34 +153,9 @@ export class HealthCheckController extends ApiController {
         };
     }
 
-    private getHealthReport(queryResponse: ApplicationInsightsQueryResponse, targetId: string): HealthReport {
-        const testContainers: string[] = Object.values(functionalTestGroupTypes).map(ctor => ctor.name);
-        const testRuns: TestRun[] = [];
-        queryResponse.tables[0].rows.forEach((testRecord: string[]) => {
-            testRuns.push({
-                timeCompleted: new Date(testRecord[0]),
-                name: testRecord[1],
-                lastRunResult: testRecord[2] as TestRunResult,
-            });
-        });
+    private getColumnValue(columns: Column[], row: string[], columnName: string): string {
+        const index = columns.findIndex(c => c.name === columnName);
 
-        const groupedTestRuns = groupBy(testRuns, testRun => testRun.name);
-        let testsPassed: number = 0;
-        let testsFailed: number = 0;
-        testContainers.forEach(name => {
-            if (groupedTestRuns[name] === undefined) {
-                testsFailed += 1;
-            } else {
-                const testContainerPassed = groupedTestRuns[name].every(testRun => testRun.lastRunResult === 'pass');
-                testContainerPassed ? (testsPassed += 1) : (testsFailed += 1);
-            }
-        });
-
-        return {
-            buildVersion: targetId,
-            testRuns,
-            testsFailed,
-            testsPassed,
-        };
+        return index > -1 && row !== undefined && row.length > index ? row[columns.findIndex(c => c.name === columnName)] : undefined;
     }
 }

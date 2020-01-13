@@ -96,6 +96,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Finalizer",
             "Newable",
             "Rescan",
             "SARIF",
@@ -105,9 +106,9 @@
             "etag",
             "injectable",
             "inversify",
+            "serializable",
             "typemoq",
-            "upsert",
-            "serializable"
+            "upsert"
         ],
         "csharp.suppressDotnetRestoreNotification": true
     },

@@ -18,6 +18,6 @@
         "scanRequestProcessingDelayInSeconds": 300
     },
     "availabilityTestConfig": {
-        "testEnv": "canary"
+        "environmentDefinition": "canary"
     }
 }

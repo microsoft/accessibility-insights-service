@@ -29,9 +29,10 @@ export interface TrackAvailabilityData {
 }
 
 export interface RunFunctionalTestGroupData {
+    runId: string;
     testGroupName: TestGroupName;
     testContextData: TestContextData;
-    env: TestEnvironment;
+    environment: TestEnvironment;
 }
 
 interface SerializableRequest {

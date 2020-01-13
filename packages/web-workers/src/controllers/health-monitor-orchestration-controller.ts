@@ -73,6 +73,9 @@ export class HealthMonitorOrchestrationController extends WebController {
             testContextData.reportId = reportId;
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['ScanReports']);
+
+            // The last test group in a functional test suite to indicated a suite run completion
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['Finalizer']);
         });
     }
 

@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-type Column = {
+export type Column = {
     name: string;
     // tslint:disable-next-line:no-reserved-keywords
     type: string;
 };
 
-type Row = string[];
+export type Row = string[];
 
-type Table = {
+export type Table = {
     name: string;
     columns: Column[];
     rows: Row[];
