@@ -19,6 +19,6 @@
         "scanRequestProcessingDelayInSeconds": 300
     },
     "availabilityTestConfig": {
-        "testEnv": "production"
+        "environmentDefinition": "production"
     }
 }

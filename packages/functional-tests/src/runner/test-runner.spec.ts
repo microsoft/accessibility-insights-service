@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { GuidGenerator } from 'common';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { TestContainerLogProperties, TestEnvironment, TestRunLogProperties } from '../common-types';
@@ -58,7 +57,6 @@ describe(TestRunner, () => {
     let testContainerBName: string;
     let testRunner: TestRunner;
     let loggerMock: IMock<Logger>;
-    let guidGeneratorMock: IMock<GuidGenerator>;
 
     beforeEach(() => {
         testContainerA = new TestGroupAStub();
@@ -67,10 +65,7 @@ describe(TestRunner, () => {
         testContainerBName = testContainerB.constructor.name;
         loggerMock = Mock.ofType();
 
-        guidGeneratorMock = Mock.ofType<GuidGenerator>();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => runId);
-
-        testRunner = new TestRunner(guidGeneratorMock.object, loggerMock.object);
+        testRunner = new TestRunner(loggerMock.object);
     });
 
     afterEach(() => {
@@ -131,7 +126,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.runAll([testContainerA, testContainerB], TestEnvironment.canary, releaseId);
+        await testRunner.runAll([testContainerA, testContainerB], TestEnvironment.canary, releaseId, runId);
     });
 
     it('run tests for the given environment only', async () => {
@@ -163,7 +158,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, TestEnvironment.canary, releaseId);
+        await testRunner.run(testContainerA, TestEnvironment.canary, releaseId, runId);
     });
 
     it('handle test exception', async () => {
@@ -196,7 +191,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerA, TestEnvironment.insider, releaseId);
+        await testRunner.run(testContainerA, TestEnvironment.insider, releaseId, runId);
     });
 
     it('Runs test with correct context', async () => {
@@ -220,7 +215,7 @@ describe(TestRunner, () => {
             logSource: 'TestContainer',
         });
 
-        await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId);
+        await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId, runId);
     });
 
     function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {

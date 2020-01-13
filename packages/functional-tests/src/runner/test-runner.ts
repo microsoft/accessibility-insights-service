@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { GuidGenerator } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { Logger } from 'logger';
 import { TestContainerLogProperties, TestDefinition, TestEnvironment, TestRunLogProperties } from '../common-types';
@@ -12,33 +11,28 @@ import { getDefinedTestsMetadata } from '../test-decorator';
 
 @injectable()
 export class TestRunner {
-    public constructor(
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
-        @optional() @inject(Logger) private logger: Logger,
-    ) {}
+    public constructor(@optional() @inject(Logger) private logger: Logger) {}
 
     public setLogger(logger: Logger): void {
         this.logger = logger;
     }
 
-    public async runAll(testContainers: object[], env: TestEnvironment, releaseId: string, runId?: string): Promise<void> {
-        const currentRunId = runId !== undefined ? runId : this.guidGenerator.createGuid();
-        await Promise.all(testContainers.map(async testContainer => this.run(testContainer, env, releaseId, currentRunId)));
+    public async runAll(testContainers: object[], env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
+        await Promise.all(testContainers.map(async testContainer => this.run(testContainer, env, releaseId, runId)));
     }
 
-    public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId?: string): Promise<void> {
+    public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
         if (this.logger === undefined) {
             throw new Error('The logger instance is undefined. Use setLogger() to initialize the logger instance.');
         }
 
-        const currentRunId = runId !== undefined ? runId : this.guidGenerator.createGuid();
         const definedTests = getDefinedTestsMetadata(testContainer);
         // tslint:disable-next-line: no-bitwise
         const targetedTests = definedTests.filter(definedTest => definedTest.environments & env);
         let containerPass = true;
         await Promise.all(
             targetedTests.map(async targetedTest => {
-                const testPass = await this.runTest(targetedTest, env, testContainer, releaseId, currentRunId);
+                const testPass = await this.runTest(targetedTest, env, testContainer, releaseId, runId);
 
                 containerPass = containerPass && testPass;
             }),
@@ -47,7 +41,7 @@ export class TestRunner {
         const testContainerName = testContainer.constructor.name;
         this.log({
             logSource: 'TestContainer',
-            runId: currentRunId,
+            runId: runId,
             releaseId: releaseId,
             environment: TestEnvironment[env],
             testContainer: testContainerName,

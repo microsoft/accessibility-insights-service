@@ -4,11 +4,10 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { IMock, It, Mock, Times } from 'typemoq';
-import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
-
 import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
+import { IMock, It, Mock, Times } from 'typemoq';
+import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
@@ -47,6 +46,7 @@ describe(HealthMonitorClientController, () => {
         PostScan: FunctionalTestGroupStub,
     };
     const releaseId = 'release id';
+    const runId = 'run id';
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -103,7 +103,6 @@ describe(HealthMonitorClientController, () => {
         });
 
         it('handles getScanResult', async () => {
-            const scanUrl = 'scan-url';
             const scanId = 'scan-id';
             webApiClientMock
                 .setup(async w => w.getScanStatus(scanId))
@@ -168,11 +167,12 @@ describe(HealthMonitorClientController, () => {
 
         it('handles runFunctionalTestGroup', async () => {
             const data: RunFunctionalTestGroupData = {
+                runId: runId,
                 testGroupName: 'PostScan',
                 testContextData: {
                     scanUrl: 'scanUrl',
                 },
-                env: TestEnvironment.canary,
+                environment: TestEnvironment.canary,
             };
             const args: ActivityRequestData = {
                 activityName: ActivityAction.runFunctionalTestGroup,
@@ -182,7 +182,7 @@ describe(HealthMonitorClientController, () => {
             let testContainer: any;
             testRunnerMock.setup(t => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
-                .setup(async t => t.run(It.isAny(), TestEnvironment.canary, releaseId))
+                .setup(async t => t.run(It.isAny(), TestEnvironment.canary, releaseId, runId))
                 .callback(testGroup => {
                     testContainer = testGroup;
                 })

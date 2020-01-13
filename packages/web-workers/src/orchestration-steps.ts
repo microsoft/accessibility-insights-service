@@ -164,9 +164,10 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     public *runFunctionalTestGroups(testContextData: TestContextData, testGroupNames: TestGroupName[]): Generator<TaskSet, void, void> {
         const parallelTasks = testGroupNames.map((testGroupName: TestGroupName) => {
             const testData: RunFunctionalTestGroupData = {
+                runId: this.context.df.instanceId,
                 testGroupName,
                 testContextData,
-                env: this.getTestEnvironment(this.availabilityTestConfig.testEnv),
+                environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
             };
 
             const activityRequestData: ActivityRequestData = {
@@ -184,9 +185,9 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
     }
 
-    private getTestEnvironment(envName: string): TestEnvironment {
+    private getTestEnvironment(environment: string): TestEnvironment {
         for (const [key, value] of Object.entries(TestEnvironment)) {
-            if (key === envName) {
+            if (key === environment) {
                 return value as TestEnvironment;
             }
         }
