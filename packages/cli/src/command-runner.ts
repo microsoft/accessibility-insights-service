@@ -5,7 +5,6 @@ import * as filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import * as rl from 'readline';
 import { ReportGenerator } from './report/report-generator';
 import { AIScanner } from './scanner/ai-scanner';
 import { ScanArguments } from './scanner/scan-arguments';
@@ -31,30 +30,12 @@ export class CommandRunner {
         // tslint:disable-next-line: non-literal-fs-path
         if (!fs.existsSync(scanArguments.output)) {
             console.log('output directory does not exists.');
-            const line = rl.createInterface({
-                input: process.stdin,
-                output: process.stdout,
-            });
-            line.question('Do you want to create output directory? [Y/N]', answer => {
-                switch (answer.toLowerCase()) {
-                    case 'y':
-                        console.log(`creating output directory - ${scanArguments.output}`);
-                        // tslint:disable-next-line: non-literal-fs-path
-                        fs.mkdirSync(scanArguments.output);
-                        this.saveHtmlReport(reportFileName, reportContent);
-                        break;
-                    case 'n':
-                        console.log('Please create output directory !');
-                        process.exit(1);
-                    default:
-                        console.log('Invalid answer!');
-                        process.exit(1);
-                }
-                line.close();
-            });
-        } else {
-            this.saveHtmlReport(reportFileName, reportContent);
+            console.log(`creating output directory - ${scanArguments.output}`);
+            // tslint:disable-next-line: non-literal-fs-path
+            fs.mkdirSync(scanArguments.output);
         }
+
+        this.saveHtmlReport(reportFileName, reportContent);
     }
 
     private saveHtmlReport(fileName: string, content: string): void {

@@ -11,7 +11,7 @@ import { setupCliContainer } from './setup-cli-container';
 
 (async () => {
     const scanArguments = (yargs
-        .usage('Usage: $0 -url url')
+        .usage('Usage: $0 -url <url> -output <directoryPath>')
         .options({
             url: { type: 'string', describe: 'url to scan for accessibility', demandOption: true },
             output: { type: 'string', describe: 'output directory' },

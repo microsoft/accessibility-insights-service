@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import AxePuppeteer from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import 'reflect-metadata';
 import { IMock, Mock } from 'typemoq';
@@ -15,5 +16,6 @@ describe('AxePuppeteerFactory', () => {
     it('create axe puppeteer instance', async () => {
         const axePuppeteer = await testSubject.createAxePuppeteer(page.object);
         expect(axePuppeteer).toBeDefined();
+        expect(axePuppeteer).toBeInstanceOf(AxePuppeteer);
     });
 });

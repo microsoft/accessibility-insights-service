@@ -2,5 +2,5 @@
 // Licensed under the MIT License.
 export interface ScanArguments {
     url: string;
-    output: string;
+    output?: string;
 }
