@@ -98,6 +98,9 @@ export class Runner {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
         }
+
+        pageScanResult.run.pageTitle = axeScanResults.pageTitle;
+        pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
     }
 
     private resetPageScanResultState(originPageScanResult: OnDemandPageScanResult): OnDemandPageScanResult {
