@@ -75,6 +75,7 @@ describe(ApplicationInsightsClient, () => {
         const options = {
             body: requestBody,
             simple: false,
+            json: true,
         };
         let requestUrl: string;
 
@@ -123,6 +124,7 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 qs: undefined as EventsQueryOptions,
                 simple: testSubject.throwOnRequestFailure,
+                json: true,
             };
             getMock
                 .setup(req => req(eventsUrl, options))
@@ -142,6 +144,7 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 qs: eventsQueryOptions,
                 simple: testSubject.throwOnRequestFailure,
+                json: true,
             };
 
             getMock
@@ -159,6 +162,7 @@ describe(ApplicationInsightsClient, () => {
             const options = {
                 qs: undefined as EventsQueryOptions,
                 simple: throwOnFailure,
+                json: true,
             };
 
             getMock

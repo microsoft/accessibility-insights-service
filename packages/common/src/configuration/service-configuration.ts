@@ -54,7 +54,7 @@ export interface AvailabilityTestConfig {
     urlToScan: string;
     scanWaitIntervalInSeconds: number;
     maxScanWaitTimeInSeconds: number;
-    testEnv: string;
+    environmentDefinition: string;
 }
 
 export interface E2ETestConfig {
@@ -254,10 +254,10 @@ export class ServiceConfiguration {
                     default: 60,
                     doc: 'Time to wait before checking the url scan status again',
                 },
-                testEnv: {
+                environmentDefinition: {
                     format: String,
                     default: 'canary',
-                    doc: 'Environment to run tests for',
+                    doc: 'The environment definition used to select tests to run',
                 },
             },
             e2eTestConfig: {
