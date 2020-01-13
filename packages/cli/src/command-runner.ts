@@ -16,6 +16,7 @@ export class CommandRunner {
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
+        private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
@@ -28,11 +29,11 @@ export class CommandRunner {
         const reportFileName = `${scanArguments.output}/${filenamify(scanArguments.url, { replacement: '_' })}.html`;
 
         // tslint:disable-next-line: non-literal-fs-path
-        if (!fs.existsSync(scanArguments.output)) {
+        if (!this.fileSystemObj.existsSync(scanArguments.output)) {
             console.log('output directory does not exists.');
             console.log(`creating output directory - ${scanArguments.output}`);
             // tslint:disable-next-line: non-literal-fs-path
-            fs.mkdirSync(scanArguments.output);
+            this.fileSystemObj.mkdirSync(scanArguments.output);
         }
 
         this.saveHtmlReport(reportFileName, reportContent);
@@ -40,7 +41,7 @@ export class CommandRunner {
 
     private saveHtmlReport(fileName: string, content: string): void {
         // tslint:disable-next-line: non-literal-fs-path
-        fs.writeFileSync(fileName, content);
+        this.fileSystemObj.writeFileSync(fileName, content);
         console.log(`scan report saved successfully ${fileName}`);
     }
 }
