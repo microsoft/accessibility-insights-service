@@ -58,6 +58,8 @@ describe('Command Runner', () => {
             reportGeneratorMock.setup(rg => rg.generateReport(scanResults)).returns(() => htmlReportString);
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInput);
+
+            verifyMocks();
         });
 
         it('output directory does not exists', async () => {
@@ -78,6 +80,8 @@ describe('Command Runner', () => {
             reportGeneratorMock.setup(rg => rg.generateReport(scanResults)).returns(() => htmlReportString);
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInput);
+
+            verifyMocks();
         });
     });
     describe('scan without output parameter specified', () => {
@@ -103,6 +107,14 @@ describe('Command Runner', () => {
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInputWithoutOutput);
             expect(testInputWithoutOutput.output).toEqual('.');
+
+            verifyMocks();
         });
     });
+
+    function verifyMocks(): void {
+        scannerMock.verifyAll();
+        reportGeneratorMock.verifyAll();
+        fsMock.verifyAll();
+    }
 });
