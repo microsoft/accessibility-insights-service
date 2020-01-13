@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { GuidGenerator } from 'common';
 import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { TestEnvironment } from '../common-types';
+import { TestContainerLogProperties, TestEnvironment, TestRunLogProperties } from '../common-types';
 import { test } from '../test-decorator';
 import { TestRunner } from './test-runner';
 
@@ -70,12 +70,18 @@ describe(TestRunner, () => {
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
         guidGeneratorMock.setup(g => g.createGuid()).returns(() => runId);
 
-        testRunner = new TestRunner(guidGeneratorMock.object);
-        testRunner.setLogger(loggerMock.object);
+        testRunner = new TestRunner(guidGeneratorMock.object, loggerMock.object);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
+    });
+
+    it('override logger instance', () => {
+        const newLogger = <Logger>(<unknown>{ loggerId: 'id' });
+        expect(loggerMock.object).toEqual((<any>testRunner).logger);
+        testRunner.setLogger(newLogger);
+        expect(newLogger).toEqual((<any>testRunner).logger);
     });
 
     it('run all tests', async () => {
@@ -87,6 +93,7 @@ describe(TestRunner, () => {
             testContainer: testContainerAName,
             testName: 'testC',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -95,6 +102,7 @@ describe(TestRunner, () => {
             testContainer: testContainerAName,
             testName: 'testD',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -102,6 +110,7 @@ describe(TestRunner, () => {
             environment: 'canary',
             testContainer: testContainerAName,
             result: 'pass',
+            logSource: 'TestContainer',
         });
 
         setupLoggerMock({
@@ -111,6 +120,7 @@ describe(TestRunner, () => {
             testContainer: testContainerBName,
             testName: 'testE',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -118,6 +128,7 @@ describe(TestRunner, () => {
             environment: 'canary',
             testContainer: testContainerBName,
             result: 'pass',
+            logSource: 'TestContainer',
         });
 
         await testRunner.runAll([testContainerA, testContainerB], TestEnvironment.canary, releaseId);
@@ -132,6 +143,7 @@ describe(TestRunner, () => {
             testContainer: testContainerAName,
             testName: 'testC',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -140,6 +152,7 @@ describe(TestRunner, () => {
             testContainer: testContainerAName,
             testName: 'testD',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -147,6 +160,7 @@ describe(TestRunner, () => {
             environment: 'canary',
             testContainer: testContainerAName,
             result: 'pass',
+            logSource: 'TestContainer',
         });
 
         await testRunner.run(testContainerA, TestEnvironment.canary, releaseId);
@@ -162,6 +176,7 @@ describe(TestRunner, () => {
             testName: 'testA',
             result: 'fail',
             error: 'Error while invoked test A',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -170,6 +185,7 @@ describe(TestRunner, () => {
             testContainer: testContainerAName,
             testName: 'testC',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -177,6 +193,7 @@ describe(TestRunner, () => {
             environment: 'insider',
             testContainer: testContainerAName,
             result: 'fail',
+            logSource: 'TestContainer',
         });
 
         await testRunner.run(testContainerA, TestEnvironment.insider, releaseId);
@@ -192,6 +209,7 @@ describe(TestRunner, () => {
             testContainer: testContainerName,
             testName: 'test',
             result: 'pass',
+            logSource: 'TestRun',
         });
         setupLoggerMock({
             runId: runId,
@@ -199,12 +217,13 @@ describe(TestRunner, () => {
             environment: 'all',
             testContainer: testContainerName,
             result: 'pass',
+            logSource: 'TestContainer',
         });
 
         await testRunner.run(testContainerWithContext, TestEnvironment.all, releaseId);
     });
 
-    function setupLoggerMock(params: any): void {
-        loggerMock.setup(o => o.trackEvent('FunctionalTest', params)).verifiable(Times.once());
+    function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {
+        loggerMock.setup(o => o.trackEvent('FunctionalTest', { ...params })).verifiable(Times.once());
     }
 });

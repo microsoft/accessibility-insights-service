@@ -5,12 +5,12 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
 import { ServiceConfiguration } from 'common';
-import { HttpResponse, WebApiErrorCodes } from 'service-library';
+import { HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthCheckController, HealthTarget } from './health-check-controller';
 
-// tslint:disable: no-unsafe-any no-any
+// tslint:disable: no-unsafe-any no-any max-line-length max-func-body-length
 
 describe(HealthCheckController, () => {
     const releaseTarget: HealthTarget = 'release';
@@ -22,7 +22,7 @@ describe(HealthCheckController, () => {
     const e2eTestConfig = {
         testRunQueryTimespan: 'timespan',
     };
-    const releaseVersion = 'test version';
+    const releaseVersion = '1113';
 
     beforeEach(() => {
         process.env.RELEASE_VERSION = releaseVersion;
@@ -91,37 +91,121 @@ describe(HealthCheckController, () => {
         const responseBody: ApplicationInsightsQueryResponse = {
             tables: [
                 {
-                    columns: [],
+                    columns: [
+                        { name: 'timestamp', type: 'datetime' },
+                        { name: 'environment', type: 'dynamic' },
+                        { name: 'releaseId', type: 'dynamic' },
+                        { name: 'runId', type: 'dynamic' },
+                        { name: 'logSource', type: 'dynamic' },
+                        { name: 'testContainer', type: 'dynamic' },
+                        { name: 'testName', type: 'dynamic' },
+                        { name: 'result', type: 'dynamic' },
+                        { name: 'error', type: 'dynamic' },
+                    ],
                     rows: [
-                        ['1/11/2020, 4:30:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
-                        ['1/11/2020, 4:12:14.862 AM', 'ScanQueuingTestGroup', 'fail'],
-                        ['1/11/2020, 4:31:14.862 AM', 'ScanPreProcessingTestGroup', 'fail'],
-                        ['1/11/2020, 4:32:14.862 AM', 'ScanReportTestGroup', 'pass'],
-                        ['1/11/2020, 4:35:14.862 AM', 'ScanQueuingTestGroup', 'pass'],
-                        ['1/11/2020, 4:50:14.862 AM', 'ScanStatusTestGroup', 'pass'],
-                        ['1/11/2020, 4:56:14.862 AM', 'PostScanTestGroup', 'pass'],
+                        [
+                            '2020-01-13T03:11:00.352Z',
+                            'canary',
+                            '1113',
+                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
+                            'TestRun',
+                            'ValidationATestGroup',
+                            'testA1',
+                            'pass',
+                        ],
+                        [
+                            '2020-01-13T03:11:00.352Z',
+                            'canary',
+                            '1113',
+                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
+                            'TestRun',
+                            'ValidationBTestGroup',
+                            'testB1',
+                            'pass',
+                        ],
+                        [
+                            '2020-01-13T03:11:00.352Z',
+                            'canary',
+                            '1113',
+                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
+                            'TestRun',
+                            'FinalizerTestGroup',
+                            'functionalTestsFinalizer',
+                            'pass',
+                        ],
+                        [
+                            '2020-01-13T03:11:00.352Z',
+                            'canary',
+                            '1113',
+                            '1ea35b25-3238-68f0-774d-7c98f231af4f',
+                            'TestRun',
+                            'ValidationATestGroup',
+                            'testA3',
+                            'fail',
+                            'error from test A3',
+                        ],
                     ],
                     name: 'PrimaryResult',
                 },
             ],
         };
         const queryString = `customEvents
-            | where name == "FunctionalTest" and customDimensions.releaseId == ${releaseVersion}
-            | project timeCompleted = timestamp, name = customDimensions.testContainer, lastRunResult = customDimensions.result
-            | limit 500`;
+        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.runId == toscalar(
+            customEvents
+            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseVersion}"
+            | top 1 by timestamp desc nulls last
+            | project tostring(customDimensions.runId)
+        )
+        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
+                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
+                  result = customDimensions.result, error = customDimensions.error
+        | order by timestamp asc nulls last`;
         const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
             statusCode: 200,
             body: responseBody,
         } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
         setupAppInsightsResponse(successResponse, queryString);
 
+        const expectedResponseBody: HealthReport = {
+            healthStatus: 'fail',
+            environment: 'canary',
+            releaseId: '1113',
+            runId: '1ea35b25-3238-68f0-774d-7c98f231af4f',
+            testRuns: [
+                {
+                    testContainer: 'ValidationATestGroup',
+                    testName: 'testA1',
+                    result: 'pass',
+                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
+                },
+                {
+                    testContainer: 'ValidationBTestGroup',
+                    testName: 'testB1',
+                    result: 'pass',
+                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
+                },
+                {
+                    testContainer: 'FinalizerTestGroup',
+                    testName: 'functionalTestsFinalizer',
+                    result: 'pass',
+                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
+                },
+                {
+                    testContainer: 'ValidationATestGroup',
+                    testName: 'testA3',
+                    result: 'fail',
+                    timestamp: new Date('2020-01-13T03:11:00.352Z'),
+                    error: 'error from test A3',
+                },
+            ],
+            testsPassed: 3,
+            testsFailed: 1,
+        };
+
         await healthCheckController.handleRequest();
 
         expect(context.res.status).toEqual(200);
-        expect(context.res.body.buildVersion).toEqual(releaseVersion);
-        expect(context.res.body.testRuns.length).toEqual(7);
-        expect(context.res.body.testsFailed).toEqual(2);
-        expect(context.res.body.testsPassed).toEqual(3);
+        expect(context.res.body).toEqual(expectedResponseBody);
         appInsightsClientMock.verifyAll();
     });
 

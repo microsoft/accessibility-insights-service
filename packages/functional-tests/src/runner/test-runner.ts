@@ -3,37 +3,19 @@
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { Logger } from 'logger';
-import { TestRunResult } from 'service-library';
-import { TestDefinition, TestEnvironment } from '../common-types';
+import { TestContainerLogProperties, TestDefinition, TestEnvironment, TestRunLogProperties } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
 
 // tslint:disable: no-any no-unsafe-any
 
-export interface TestRunLogProperties {
-    runId: string;
-    releaseId: string;
-    environment: string;
-    testContainer: string;
-    testName: string;
-    result: TestRunResult;
-    error?: string;
-}
-
-export interface TestContainerLogProperties {
-    runId: string;
-    releaseId: string;
-    environment: string;
-    testContainer: string;
-    result: TestRunResult;
-}
-
 @injectable()
 export class TestRunner {
-    private logger: Logger;
-
-    public constructor(@inject(GuidGenerator) private readonly guidGenerator: GuidGenerator) {}
+    public constructor(
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @optional() @inject(Logger) private logger: Logger,
+    ) {}
 
     public setLogger(logger: Logger): void {
         this.logger = logger;
@@ -64,6 +46,7 @@ export class TestRunner {
 
         const testContainerName = testContainer.constructor.name;
         this.log({
+            logSource: 'TestContainer',
             runId: currentRunId,
             releaseId: releaseId,
             environment: TestEnvironment[env],
@@ -83,6 +66,7 @@ export class TestRunner {
             await Promise.resolve(testDefinition.testImplFunc.call(testContainer));
 
             this.log({
+                logSource: 'TestRun',
                 runId: runId,
                 releaseId: releaseId,
                 environment: TestEnvironment[env],
@@ -94,6 +78,7 @@ export class TestRunner {
             return true;
         } catch (error) {
             this.log({
+                logSource: 'TestRun',
                 runId: runId,
                 releaseId: releaseId,
                 environment: TestEnvironment[env],

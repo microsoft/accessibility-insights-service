@@ -44,6 +44,7 @@ export class ApplicationInsightsClient {
         const options: requestPromise.RequestPromiseOptions = {
             body: requestBody,
             simple: this.throwOnRequestFailure,
+            json: true,
         };
 
         return this.defaultRequestObject.post(requestUrl, options);
@@ -57,6 +58,7 @@ export class ApplicationInsightsClient {
         const options: requestPromise.RequestPromiseOptions = {
             qs: eventsOptions,
             simple: this.throwOnRequestFailure,
+            json: true,
         };
 
         return this.defaultRequestObject.get(requestUrl, options);
