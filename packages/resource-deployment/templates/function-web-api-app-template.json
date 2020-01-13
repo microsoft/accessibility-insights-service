@@ -63,6 +63,12 @@
             "metadata": {
                 "description": "Name of the key vault service"
             }
+        },
+        "releaseVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "Release version number"
+            }
         }
     },
     "resources": [
@@ -113,6 +119,10 @@
                         {
                             "name": "KEY_VAULT_URL",
                             "value": "[concat('https://', parameters('keyVaultName'), '.vault.azure.net/')]"
+                        },
+                        {
+                            "name": "RELEASE_VERSION",
+                            "value": "[parameters('releaseVersion')]"
                         }
                     ]
                 }

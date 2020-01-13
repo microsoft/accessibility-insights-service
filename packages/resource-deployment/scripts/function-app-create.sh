@@ -24,7 +24,8 @@ Usage: $0 \
 -c <Azure AD application client ID> \
 -e <environment> \
 -k <Key Vault to grant Azure Function App an access to> \
--d <path to drop folder. Will use '$dropFolder' folder relative to current working directory>
+-d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> \
+-v <release version>
 "
     exit 1
 }
@@ -123,7 +124,7 @@ deployWebApiArmTemplate() {
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
-        --parameters clientId="$webApiAdClientId" namePrefix="$functionAppNamePrefix" \
+        --parameters clientId="$webApiAdClientId" namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" \
         --query "properties.outputResources[].id" \
         -o tsv)
 
@@ -142,7 +143,7 @@ deployWebWorkersArmTemplate() {
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
-        --parameters namePrefix="$functionAppNamePrefix" \
+        --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" \
         --query "properties.outputResources[].id" \
         -o tsv)
 
@@ -170,13 +171,14 @@ deployWebWorkersFunctionApp() {
 }
 
 # Read script arguments
-while getopts ":r:c:e:k:d:" option; do
+while getopts ":r:c:e:k:d:v:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
+    v) releaseVersion=${OPTARG};;
     *) exitWithUsageInfo ;;
     esac
 done
