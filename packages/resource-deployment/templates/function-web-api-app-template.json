@@ -63,6 +63,12 @@
             "metadata": {
                 "description": "Name of the key vault service"
             }
+        },
+        "releaseVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "Release version number"
+            }
         }
     },
     "resources": [
@@ -116,7 +122,7 @@
                         },
                         {
                             "name": "RELEASE_VERSION",
-                            "value": "%RELEASE_VERSION_NUMBER%"
+                            "value": "[parameters('releaseVersion')]"
                         }
                     ]
                 }
