@@ -34,7 +34,7 @@ describe('Command Runner', () => {
     describe('scan with output parameter specified', () => {
         it('output directory exists', async () => {
             const existsSync = jest.spyOn(fs, 'existsSync').mockImplementationOnce(() => true);
-            const writeFile = jest.spyOn(fs, 'writeFile').mockImplementationOnce(() => {});
+            const writeFile = jest.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
             const mkdirSync = jest.spyOn(fs, 'mkdirSync').mockImplementationOnce(() => {});
             const testInput: ScanArguments = { url: testUrl, output: '/users/xyz' };
             scannerMock.setup(sm => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
@@ -48,7 +48,7 @@ describe('Command Runner', () => {
 
         it('output directory does not exists', async () => {
             const existsSync = jest.spyOn(fs, 'existsSync').mockImplementationOnce(() => false);
-            const writeFile = jest.spyOn(fs, 'writeFile').mockImplementationOnce(() => {});
+            const writeFile = jest.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
             const mkdirSync = jest.spyOn(fs, 'mkdirSync').mockImplementationOnce(() => {});
             const testInput: ScanArguments = { url: testUrl, output: '/users/xyz' };
             scannerMock.setup(sm => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
@@ -64,7 +64,7 @@ describe('Command Runner', () => {
         it('scan url', async () => {
             const existsSync = jest.spyOn(fs, 'existsSync').mockImplementationOnce(() => true);
             const mkdirSync = jest.spyOn(fs, 'mkdirSync').mockImplementationOnce(() => {});
-            const writeFile = jest.spyOn(fs, 'writeFile').mockImplementationOnce(() => {});
+            const writeFile = jest.spyOn(fs, 'writeFileSync').mockImplementationOnce(() => {});
 
             const testInput: ScanArguments = { url: testUrl };
             scannerMock.setup(sm => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));

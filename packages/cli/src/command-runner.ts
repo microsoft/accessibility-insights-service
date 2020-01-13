@@ -40,12 +40,7 @@ export class CommandRunner {
 
     private saveHtmlReport(fileName: string, content: string): void {
         // tslint:disable-next-line: non-literal-fs-path
-        fs.writeFile(fileName, content, err => {
-            if (!isEmpty(err)) {
-                console.log(`error while saving scan report ${err}`);
-            } else {
-                console.log(`scan report saved successfully ${fileName}`);
-            }
-        });
+        fs.writeFileSync(fileName, content);
+        console.log(`scan report saved successfully ${fileName}`);
     }
 }
