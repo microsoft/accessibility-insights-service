@@ -63,7 +63,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.trackMetric('metric1', 1);
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when value not passed', async () => {
@@ -93,7 +95,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.trackEvent('HealthCheck', { foo: 'bar' });
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when properties/measurements not passed', async () => {
@@ -129,7 +133,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.trackAvailability(name, availabilityTelemetryData);
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('invokes logger clients', async () => {
@@ -148,7 +154,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.log('trace1', LogLevel.warn);
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when properties not passed', async () => {
@@ -179,7 +187,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.logInfo('info1');
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when properties not passed', async () => {
@@ -210,7 +220,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.logWarn('warn1');
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when properties not passed', async () => {
@@ -241,7 +253,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.logError('error1');
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('when properties not passed', async () => {
@@ -328,7 +342,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.trackException(new Error('test error'));
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('trackException', async () => {
@@ -348,7 +364,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.trackExceptionAny(new Error('test error'), 'error message');
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('handles when passed error object', async () => {
@@ -390,7 +408,9 @@ describe(GlobalLogger, () => {
         it('throw if called before setup', () => {
             expect(() => {
                 testSubject.flush();
-            }).toThrowError('Logger not setup');
+            }).toThrowError(
+                'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
+            );
         });
 
         it('flushes events', async () => {
