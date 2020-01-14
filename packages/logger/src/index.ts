@@ -16,3 +16,4 @@ export {
 } from './logger-event-measurements';
 export { AvailabilityTelemetry } from './availability-telemetry';
 export { LoggerProperties } from './logger-properties';
+export { ConsoleLoggerClient } from './console-logger-client';

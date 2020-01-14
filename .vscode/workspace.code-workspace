@@ -73,6 +73,10 @@
             "path": "../packages/functional-tests"
         },
         {
+            "name": "cli",
+            "path": "../packages/cli"
+        },
+        {
             "name": "root",
             "path": "../"
         }
