@@ -111,7 +111,10 @@
             "./packages/web-api-client/test-results",
             "./packages/functional-tests/dist",
             "./packages/functional-tests/node_modules",
-            "./packages/functional-tests/test-results"
+            "./packages/functional-tests/test-results",
+            "./packages/cli/dist",
+            "./packages/cli/node_modules",
+            "./packages/cli/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [
