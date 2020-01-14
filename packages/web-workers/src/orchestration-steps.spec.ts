@@ -6,7 +6,7 @@ import 'reflect-metadata';
 // tslint:disable:no-submodule-imports
 import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { TestContextData, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
 import * as moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
@@ -56,7 +56,8 @@ describe(OrchestrationStepsImpl, () => {
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
             urlToScan: 'https://www.bing.com',
-            environmentDefinition: TestEnvironment[TestEnvironment.canary],
+            logQueryTimeRange: 'P1D',
+            environmentDefinition: 'canary',
         };
 
         loggerMock = Mock.ofType(MockableLogger);

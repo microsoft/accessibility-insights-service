@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ApplicationInsightsQueryResponse, Column, ResponseWithBodyType } from 'azure-services';
-import { ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
@@ -68,9 +68,10 @@ export class HealthCheckController extends ApiController {
 
     private async executeAppInsightsQuery(releaseId: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const appInsightsClient = await this.appInsightsClientProvider();
-        const e2eTestConfig = await this.serviceConfig.getConfigValue('e2eTestConfig');
+        const logQueryTimeRange = (await this.getAvailabilityTestConfig()).logQueryTimeRange;
         const queryString = `customEvents
-        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.runId == toscalar(
+        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.releaseId == "${releaseId}"
+        and customDimensions.runId == toscalar(
             customEvents
             | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
             | top 1 by timestamp desc nulls last
@@ -80,7 +81,7 @@ export class HealthCheckController extends ApiController {
                   logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
                   result = customDimensions.result, error = customDimensions.error
         | order by timestamp asc nulls last`;
-        const queryResponse = await appInsightsClient.executeQuery(queryString, e2eTestConfig.testRunQueryTimespan);
+        const queryResponse = await appInsightsClient.executeQuery(queryString, logQueryTimeRange);
         if (queryResponse.statusCode === 200) {
             this.logger.logInfo('App Insights query succeeded', {
                 query: queryString,
@@ -157,5 +158,9 @@ export class HealthCheckController extends ApiController {
         const index = columns.findIndex(c => c.name === columnName);
 
         return index > -1 && row !== undefined && row.length > index ? row[columns.findIndex(c => c.name === columnName)] : undefined;
+    }
+
+    private async getAvailabilityTestConfig(): Promise<AvailabilityTestConfig> {
+        return this.serviceConfig.getConfigValue('availabilityTestConfig');
     }
 }

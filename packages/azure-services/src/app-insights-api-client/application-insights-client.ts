@@ -35,11 +35,11 @@ export class ApplicationInsightsClient {
         });
     }
 
-    public async executeQuery(query: string, timespan: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
+    public async executeQuery(query: string, queryTimeRange: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const requestUrl = `${this.baseUrl}/${this.appId}/query`;
         const requestBody = {
             query,
-            timespan,
+            timespan: queryTimeRange,
         };
         const options: requestPromise.RequestPromiseOptions = {
             body: requestBody,
