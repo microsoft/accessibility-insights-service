@@ -253,7 +253,7 @@ export class ServiceConfiguration {
                 logQueryTimeRange: {
                     format: String,
                     default: 'P1D',
-                    doc: 'The Application Insights log analytics query time range',
+                    doc: 'The Application Insights query time range',
                 },
                 environmentDefinition: {
                     format: String,
