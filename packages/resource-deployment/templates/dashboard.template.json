@@ -1020,7 +1020,7 @@
                                     "x": 12,
                                     "y": 14,
                                     "rowSpan": 4,
-                                    "colSpan": 6
+                                    "colSpan": 7
                                 },
                                 "metadata": {
                                     "inputs": [
@@ -1035,7 +1035,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "customEvents\n| where name == \"FunctionalTest\"\n    and customDimensions.logSource == \"TestContainer\"\n    and customDimensions.runId == toscalar(\n        customEvents\n        | where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n        | top 1 by timestamp desc nulls last\n        | project tostring(customDimensions.runId)      )\n| project testGroup = customDimensions.testContainer,\n    result = customDimensions.result,\n    timestamp\n| where testGroup != \"FinalizerTestGroup\"\n"
+                                            "value": "customEvents\n| where name == \"FunctionalTest\"     and customDimensions.logSource == \"TestRun\"     and customDimensions.runId == toscalar(         customEvents\n| where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n| top 1 by timestamp desc nulls last\n| project tostring(customDimensions.runId)      )\n| where customDimensions.testContainer != \"FinalizerTestGroup\"\n| project testGroup = customDimensions.testContainer, testName = customDimensions.testName,     result = customDimensions.result,     timestamp\n| sort by tostring(testGroup)\n"
                                         },
                                         {
                                             "name": "TimeRange",
@@ -1051,7 +1051,7 @@
                                         },
                                         {
                                             "name": "PartTitle",
-                                            "value": "E2E Test Groups"
+                                            "value": "E2E Test Results"
                                         },
                                         {
                                             "name": "PartSubTitle",
@@ -1081,7 +1081,7 @@
                                     "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
                                     "settings": {
                                         "content": {
-                                            "PartTitle": "E2E Test Groups",
+                                            "PartTitle": "E2E Test Results",
                                             "PartSubTitle": "Results for most recent test runs"
                                         }
                                     },
@@ -1093,7 +1093,7 @@
                             },
                             "13": {
                                 "position": {
-                                    "x": 18,
+                                    "x": 19,
                                     "y": 14,
                                     "rowSpan": 4,
                                     "colSpan": 6
@@ -1117,7 +1117,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "E2E test results over time",
+                                                    "title": "E2E Test Results Over Time",
                                                     "titleKind": 1,
                                                     "visualization": {
                                                         "chartType": 2,
