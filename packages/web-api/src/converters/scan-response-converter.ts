@@ -33,6 +33,8 @@ export class ScanResponseConverter {
                         state: pageScanResultDocument.run.state,
                         timestamp: pageScanResultDocument.run.timestamp,
                         error: this.scanRunErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
+                        pageResponseCode: pageScanResultDocument.run.pageResponseCode,
+                        pageTitle: pageScanResultDocument.run.pageTitle,
                     },
                 };
             case 'completed':
@@ -47,6 +49,8 @@ export class ScanResponseConverter {
                     run: {
                         state: pageScanResultDocument.run.state,
                         timestamp: pageScanResultDocument.run.timestamp,
+                        pageResponseCode: pageScanResultDocument.run.pageResponseCode,
+                        pageTitle: pageScanResultDocument.run.pageTitle,
                     },
                 };
                 if (pageScanResultDocument.scannedUrl !== undefined) {

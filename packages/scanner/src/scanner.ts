@@ -21,7 +21,7 @@ export class Scanner {
         } catch (error) {
             this.logger.trackExceptionAny(error, `[scanner] An error occurred while scanning website page ${url}.`);
 
-            return { error: util.inspect(error) };
+            return { error: util.inspect(error), pageResponseCode: undefined };
         } finally {
             await this.page.close();
             this.logger.logInfo(`[scanner] Accessibility scanning of URL ${url} completed.`);

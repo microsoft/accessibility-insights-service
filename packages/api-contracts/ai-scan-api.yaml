@@ -203,6 +203,10 @@ components:
                         - running
                         - completed
                         - failed
+                pageResponseCode:
+                    type: integer
+                pageTitle:
+                    type: string
         ScanReport:
             type: object
             required:

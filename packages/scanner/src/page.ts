@@ -50,7 +50,7 @@ export class Page {
         } catch (err) {
             this.log(LogLevel.error, url, 'The URL navigation failed', { scanError: JSON.stringify(err) });
 
-            return { error: this.getScanErrorFromNavigationFailure((err as Error).message) };
+            return { error: this.getScanErrorFromNavigationFailure((err as Error).message), pageResponseCode: undefined };
         }
 
         if (!this.isHtmlPage(response)) {
@@ -62,9 +62,9 @@ export class Page {
                 unscannable: true,
                 error: {
                     errorType: 'InvalidContentType',
-                    responseStatusCode: response.status(),
                     message: `Content type - ${contentType}`,
                 },
+                pageResponseCode: response.status(),
             };
         }
 
@@ -74,9 +74,9 @@ export class Page {
             return {
                 error: {
                     errorType: 'HttpErrorCode',
-                    responseStatusCode: response.status(),
                     message: 'Page returned an unsuccessful response code',
                 },
+                pageResponseCode: response.status(),
             };
         }
 
@@ -95,6 +95,7 @@ export class Page {
             results: axeResults,
             pageTitle: await this.puppeteerPage.title(),
             browserSpec: await this.browser.version(),
+            pageResponseCode: response.status(),
         };
 
         if (response.request().redirectChain().length > 0) {

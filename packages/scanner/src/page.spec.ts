@@ -127,11 +127,11 @@ describe('Page', () => {
             error: {
                 errorType: 'InvalidContentType',
                 message: `Content type - ${contentType}`,
-                responseStatusCode: 200,
             },
             unscannable: true,
+            pageResponseCode: 200,
         };
-        const response: Puppeteer.Response = makeResponse({ contentType: contentType });
+        const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 200 });
 
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
@@ -159,8 +159,9 @@ describe('Page', () => {
             results: axeResults,
             pageTitle: PuppeteerPageMock.pageTitle,
             browserSpec: PuppeteerBrowserMock.browserVersion,
+            pageResponseCode: 200,
         };
-        const response: Puppeteer.Response = makeResponse({});
+        const response: Puppeteer.Response = makeResponse({ statusCode: 200 });
         gotoMock
             .setup(async goto => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
@@ -207,7 +208,8 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: { errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code', responseStatusCode: 500 },
+            error: { errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code' },
+            pageResponseCode: 500,
         };
         const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
 
@@ -263,8 +265,9 @@ describe('Page', () => {
             scannedUrl: redirectToUrl,
             pageTitle: PuppeteerPageMock.pageTitle,
             browserSpec: PuppeteerBrowserMock.browserVersion,
+            pageResponseCode: 200,
         };
-        const response: Puppeteer.Response = makeResponse({ withRedirect: true });
+        const response: Puppeteer.Response = makeResponse({ withRedirect: true, statusCode: 200 });
         gotoMock
             .setup(async goto => goto(redirectFromUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
@@ -333,6 +336,7 @@ describe('Page', () => {
                     errorType: testCase.expectedScanErrorType,
                     message: testCase.errorMessage,
                 },
+                pageResponseCode: undefined,
             };
 
             gotoMock

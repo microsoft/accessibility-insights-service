@@ -33,6 +33,7 @@ describe('ReportGenerator', () => {
     let axeResults: AxeScanResults;
 
     const pageTitle = 'test page title';
+    const pageResponseCode = 101;
     const report1: GeneratedReport = {
         content: 'report 1 content',
         format: 'sarif',
@@ -53,6 +54,7 @@ describe('ReportGenerator', () => {
             results: ({
                 testResults: true,
             } as unknown) as AxeResults,
+            pageResponseCode,
             pageTitle,
         };
         guidGeneratorMock = Mock.ofType<GuidGenerator>();

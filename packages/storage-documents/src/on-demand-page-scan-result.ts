@@ -20,7 +20,6 @@ export type ScanErrorTypes =
 
 export interface ScanError {
     errorType: ScanErrorTypes;
-    responseStatusCode?: number;
     message: string;
 }
 
@@ -53,4 +52,6 @@ export interface OnDemandPageScanRunResult {
     state: OnDemandPageScanRunState;
     timestamp?: string;
     error?: string | ScanError;
+    pageTitle?: string;
+    pageResponseCode?: number;
 }
