@@ -158,6 +158,7 @@ describe('HealthMonitorOrchestrationController', () => {
             urlToScan: 'some-url',
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
+            logQueryTimeRange: 'P1D',
             environmentDefinition: TestEnvironment[TestEnvironment.canary],
         };
 

@@ -8,6 +8,11 @@ Object {
       "doc": "The environment definition used to select tests to run",
       "format": [Function],
     },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
+      "format": [Function],
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
@@ -23,9 +28,6 @@ Object {
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
-  },
-  "e2eTestConfig": Object {
-    "testRunQueryTimespan": "PT30M",
   },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
@@ -167,6 +169,11 @@ Object {
       "doc": "The environment definition used to select tests to run",
       "format": [Function],
     },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
+      "format": [Function],
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
@@ -182,9 +189,6 @@ Object {
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
-  },
-  "e2eTestConfig": Object {
-    "testRunQueryTimespan": "PT30M",
   },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
