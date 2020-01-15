@@ -5,9 +5,9 @@ import 'reflect-metadata';
 import { ServiceConfiguration } from 'common';
 import * as moment from 'moment';
 import { IMock, Mock } from 'typemoq';
-import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
+import { PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo } from './pool-load-generator';
 
-// tslint:disable: no-unsafe-any
+// tslint:disable: no-unsafe-any no-object-literal-type-assertion
 
 let poolMetricsInfo: PoolMetricsInfo;
 let poolLoadGenerator: PoolLoadGenerator;
@@ -45,16 +45,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         const expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 60,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 1,
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         const poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });
@@ -69,16 +72,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         let expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 42,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 1,
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
@@ -92,16 +98,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 81,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 2,
             tasksProcessingSpeedPerInterval: 54,
             tasksProcessingSpeedPerMinute: 1620,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });
@@ -116,16 +125,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         let expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 63,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 1,
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
@@ -139,16 +151,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 0,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 2,
             tasksProcessingSpeedPerInterval: -26,
             tasksProcessingSpeedPerMinute: -780,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });
@@ -163,16 +178,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         let expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 42,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 1,
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
@@ -186,16 +204,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 0,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 2,
             tasksProcessingSpeedPerInterval: -936,
             tasksProcessingSpeedPerMinute: -28080,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });
@@ -211,16 +232,14 @@ describe(PoolLoadGenerator, () => {
             },
         };
         let expectedPoolLoadSnapshot = {
-            tasksIncrementCountPerInterval: 32,
+            isIdle: true,
             targetActiveToRunningTasksRatio: 1,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 32,
             poolId: poolMetricsInfo.id,
-            samplingIntervalInSeconds: 1,
-            tasksProcessingSpeedPerInterval: 0,
-            tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
-            ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
@@ -234,16 +253,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 80,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 2,
             tasksProcessingSpeedPerInterval: 32,
             tasksProcessingSpeedPerMinute: 960,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
 
@@ -257,16 +279,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 95,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 3,
             tasksProcessingSpeedPerInterval: 74,
             tasksProcessingSpeedPerMinute: 1480,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });
@@ -281,16 +306,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         let expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 42,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 1,
             tasksProcessingSpeedPerInterval: 0,
             tasksProcessingSpeedPerMinute: 0,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         let poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         poolLoadGenerator.setLastTasksIncrementCount(26);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
@@ -305,16 +333,19 @@ describe(PoolLoadGenerator, () => {
             },
         };
         expectedPoolLoadSnapshot = {
+            isIdle: false,
             tasksIncrementCountPerInterval: 73,
             targetActiveToRunningTasksRatio: 2,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            targetMaxTasksPerPool: 64,
             poolId: poolMetricsInfo.id,
             samplingIntervalInSeconds: 2,
             tasksProcessingSpeedPerInterval: 38,
             tasksProcessingSpeedPerMinute: 1140,
+            poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
             ...poolMetricsInfo.load,
-        };
+        } as PoolLoadSnapshot;
         poolLoadSnapshot = await poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         expect(poolLoadSnapshot).toEqual(expectedPoolLoadSnapshot);
     });

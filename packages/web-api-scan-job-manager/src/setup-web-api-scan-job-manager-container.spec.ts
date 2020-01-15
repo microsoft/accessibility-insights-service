@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Batch, Queue } from 'azure-services';
+import { AzureServicesIocTypes, Batch, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Container } from 'inversify';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
@@ -33,6 +33,7 @@ describe(setupWebApiScanJobManagerContainer, () => {
 
         verifyNonSingletonDependencyResolution(container, Queue);
         verifySingletonDependencyResolution(container, Batch);
+        verifySingletonDependencyResolution(container, AzureServicesIocTypes.BatchTaskParameterProvider);
     });
 
     function verifySingletonDependencyResolution(container: Container, key: any): void {
