@@ -34,8 +34,9 @@ setTimeout(async () => {
             console.log('[E2E] fetching health report');
             const response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
-                throw new Error(response.statusMessage);
+                throw new Error(JSON.stringify(response));
             }
+            console.log('[E2E] health report fetched:', JSON.stringify(response.body));
             healthStatus = response.body.healthStatus;
         } catch (error) {
             console.log('[E2E] failed to evaluate functional test results: ', error);
