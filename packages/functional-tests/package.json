@@ -43,6 +43,7 @@
         "service-library": "1.0.0",
         "web-api-client": "1.0.0",
         "storage-documents": "1.0.0",
-        "chai": "^4.2.0"
+        "chai": "^4.2.0",
+        "yargs": "15.1.0"
     }
 }
