@@ -47,18 +47,14 @@ export interface RuntimeConfig {
     jobManagerConfig: JobManagerConfig;
     restApiConfig: RestApiConfig;
     availabilityTestConfig: AvailabilityTestConfig;
-    e2eTestConfig: E2ETestConfig;
 }
 
 export interface AvailabilityTestConfig {
     urlToScan: string;
     scanWaitIntervalInSeconds: number;
     maxScanWaitTimeInSeconds: number;
-    testEnv: string;
-}
-
-export interface E2ETestConfig {
-    testRunQueryTimespan: string;
+    logQueryTimeRange: string;
+    environmentDefinition: string;
 }
 
 @injectable()
@@ -254,14 +250,16 @@ export class ServiceConfiguration {
                     default: 60,
                     doc: 'Time to wait before checking the url scan status again',
                 },
-                testEnv: {
+                logQueryTimeRange: {
+                    format: String,
+                    default: 'P1D',
+                    doc: 'The Application Insights query time range',
+                },
+                environmentDefinition: {
                     format: String,
                     default: 'canary',
-                    doc: 'Environment to run tests for',
+                    doc: 'The environment definition used to select tests to run',
                 },
-            },
-            e2eTestConfig: {
-                testRunQueryTimespan: 'PT30M',
             },
         };
     }

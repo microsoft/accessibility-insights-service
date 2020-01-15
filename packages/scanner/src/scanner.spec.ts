@@ -61,14 +61,14 @@ describe('Scanner', () => {
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
             .setup(async p => p.scanForA11yIssues(url))
-            .returns(async () => Promise.resolve({ results: axeResults }))
+            .returns(async () => Promise.resolve({ results: axeResults, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
             .setup(async p => p.scanForA11yIssues(url))
-            .returns(async () => Promise.resolve({ error: errorMessage }))
+            .returns(async () => Promise.resolve({ error: errorMessage, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 

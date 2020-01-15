@@ -1014,11 +1014,177 @@
                                     ],
                                     "type": "Extension/HubsExtension/PartType/MonitorChartPart"
                                 }
+                            },
+                            "12": {
+                                "position": {
+                                    "x": 12,
+                                    "y": 14,
+                                    "rowSpan": 4,
+                                    "colSpan": 7
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "ComponentId",
+                                            "value": {
+                                                "SubscriptionId": "[subscription().subscriptionId]",
+                                                "ResourceGroup": "[resourceGroup().name]",
+                                                "Name": "[parameters('appInsightsName')]",
+                                                "ResourceId": "[variables('appInsightsResourceId')]"
+                                            }
+                                        },
+                                        {
+                                            "name": "Query",
+                                            "value": "customEvents\n| where name == \"FunctionalTest\"     and customDimensions.logSource == \"TestRun\"     and customDimensions.runId == toscalar(         customEvents\n| where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n| top 1 by timestamp desc nulls last\n| project tostring(customDimensions.runId)      )\n| where customDimensions.testContainer != \"FinalizerTestGroup\"\n| project testGroup = customDimensions.testContainer, testName = customDimensions.testName,     result = customDimensions.result,     timestamp\n| sort by tostring(testGroup)\n"
+                                        },
+                                        {
+                                            "name": "TimeRange",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "Version",
+                                            "value": "1.0"
+                                        },
+                                        {
+                                            "name": "PartId",
+                                            "value": "6fb6698a-49fe-4cca-b565-8fc6b6367b01"
+                                        },
+                                        {
+                                            "name": "PartTitle",
+                                            "value": "E2E Test Results"
+                                        },
+                                        {
+                                            "name": "PartSubTitle",
+                                            "value": "Results for most recent test run"
+                                        },
+                                        {
+                                            "name": "resourceTypeMode",
+                                            "value": "components"
+                                        },
+                                        {
+                                            "name": "ControlType",
+                                            "value": "AnalyticsGrid"
+                                        },
+                                        {
+                                            "name": "Dimensions",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "DashboardId",
+                                            "isOptional": true
+                                        },
+                                        {
+                                            "name": "SpecificChart",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/AppInsightsExtension/PartType/AnalyticsPart",
+                                    "settings": {
+                                        "content": {
+                                            "PartTitle": "E2E Test Results",
+                                            "PartSubTitle": "Results for most recent test runs"
+                                        }
+                                    },
+                                    "asset": {
+                                        "idInputName": "ComponentId",
+                                        "type": "ApplicationInsights"
+                                    }
+                                }
+                            },
+                            "13": {
+                                "position": {
+                                    "x": 19,
+                                    "y": 14,
+                                    "rowSpan": 4,
+                                    "colSpan": 6
+                                },
+                                "metadata": {
+                                    "inputs": [
+                                        {
+                                            "name": "options",
+                                            "value": {
+                                                "chart": {
+                                                    "metrics": [
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "customEvents/count",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "metricVisualization": {
+                                                                "displayName": "Events"
+                                                            }
+                                                        }
+                                                    ],
+                                                    "title": "E2E Test Results Over Time",
+                                                    "titleKind": 1,
+                                                    "visualization": {
+                                                        "chartType": 2,
+                                                        "legendVisualization": {
+                                                            "isVisible": true,
+                                                            "position": 2,
+                                                            "hideSubtitle": false
+                                                        },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "filterCollection": {
+                                                        "filters": [
+                                                            {
+                                                                "key": "customEvent/name",
+                                                                "operator": 0,
+                                                                "values": ["FunctionalTest"]
+                                                            },
+                                                            {
+                                                                "key": "customDimensions/logSource",
+                                                                "operator": 0,
+                                                                "values": ["TestRun"]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "customDimensions/result",
+                                                        "sort": 2,
+                                                        "top": 10
+                                                    }
+                                                },
+                                                "version": 2
+                                            }
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "filters": {
+                                        "customEvent/name": {
+                                            "model": {
+                                                "operator": "equals",
+                                                "values": ["FunctionalTest"]
+                                            }
+                                        },
+                                        "customDimensions/logSource": {
+                                            "model": {
+                                                "operator": "equals",
+                                                "values": ["TestRun"]
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 },
-
                 "metadata": {
                     "model": {}
                 }

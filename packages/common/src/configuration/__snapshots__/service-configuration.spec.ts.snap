@@ -3,6 +3,16 @@
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
   "availabilityTestConfig": Object {
+    "environmentDefinition": Object {
+      "default": "canary",
+      "doc": "The environment definition used to select tests to run",
+      "format": [Function],
+    },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
+      "format": [Function],
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
@@ -13,19 +23,11 @@ Object {
       "doc": "Time to wait before checking the url scan status again",
       "format": "int",
     },
-    "testEnv": Object {
-      "default": "canary",
-      "doc": "Environment to run tests for",
-      "format": [Function],
-    },
     "urlToScan": Object {
       "default": "https://www.bing.com",
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
-  },
-  "e2eTestConfig": Object {
-    "testRunQueryTimespan": "PT30M",
   },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
@@ -162,6 +164,16 @@ Object {
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
   "availabilityTestConfig": Object {
+    "environmentDefinition": Object {
+      "default": "canary",
+      "doc": "The environment definition used to select tests to run",
+      "format": [Function],
+    },
+    "logQueryTimeRange": Object {
+      "default": "P1D",
+      "doc": "The Application Insights query time range",
+      "format": [Function],
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 600,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
@@ -172,19 +184,11 @@ Object {
       "doc": "Time to wait before checking the url scan status again",
       "format": "int",
     },
-    "testEnv": Object {
-      "default": "canary",
-      "doc": "Environment to run tests for",
-      "format": [Function],
-    },
     "urlToScan": Object {
       "default": "https://www.bing.com",
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
-  },
-  "e2eTestConfig": Object {
-    "testRunQueryTimespan": "PT30M",
   },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {

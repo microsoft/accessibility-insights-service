@@ -111,6 +111,8 @@ const axeScanResults: AxeScanResults = {
         incomplete: [],
         inapplicable: [],
     } as AxeResults,
+    pageResponseCode: 101,
+    pageTitle: 'sample page title',
 };
 
 beforeEach(() => {

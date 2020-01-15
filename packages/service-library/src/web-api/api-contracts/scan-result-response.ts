@@ -44,6 +44,8 @@ export interface ScanRun {
     state: RunState;
     timestamp?: string;
     error?: ScanRunError;
+    pageResponseCode?: number;
+    pageTitle?: string;
 }
 
 export interface ScanRunError {

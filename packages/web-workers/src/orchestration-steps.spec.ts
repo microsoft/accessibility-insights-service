@@ -6,7 +6,7 @@ import 'reflect-metadata';
 // tslint:disable:no-submodule-imports
 import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
+import { TestContextData, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
 import * as moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
@@ -15,6 +15,7 @@ import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
+    RunFunctionalTestGroupData,
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
@@ -32,6 +33,8 @@ class MockableDurableOrchestrationContext extends DurableOrchestrationContext {
     public readonly Task: ITaskMethods = null;
 }
 
+const orchestrationInstanceId = 'orchestration instance Id';
+
 describe(OrchestrationStepsImpl, () => {
     let context: IOrchestrationFunctionContext;
     let orchestrationContext: IMock<DurableOrchestrationContext>;
@@ -45,7 +48,7 @@ describe(OrchestrationStepsImpl, () => {
     beforeEach(() => {
         currentUtcDateTime = new Date(2019, 2, 1);
         orchestrationContext = Mock.ofType(MockableDurableOrchestrationContext);
-        orchestrationContext.setup(oc => oc.instanceId).returns(() => 'test instance id');
+        orchestrationContext.setup(oc => oc.instanceId).returns(() => orchestrationInstanceId);
         orchestrationContext.setup(oc => oc.isReplaying).returns(() => true);
         orchestrationContext.setup(oc => oc.currentUtcDateTime).returns(() => currentUtcDateTime);
 
@@ -53,7 +56,8 @@ describe(OrchestrationStepsImpl, () => {
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
             urlToScan: 'https://www.bing.com',
-            testEnv: TestEnvironment[TestEnvironment.canary],
+            logQueryTimeRange: 'P1D',
+            environmentDefinition: 'canary',
         };
 
         loggerMock = Mock.ofType(MockableLogger);
@@ -461,10 +465,11 @@ describe(OrchestrationStepsImpl, () => {
                 return {
                     activityName: ActivityAction.runFunctionalTestGroup,
                     data: {
+                        runId: orchestrationInstanceId,
                         testGroupName,
                         testContextData,
-                        env: 1,
-                    },
+                        environment: 1,
+                    } as RunFunctionalTestGroupData,
                 };
             });
             taskMethodsMock = Mock.ofType<ITaskMethods>();

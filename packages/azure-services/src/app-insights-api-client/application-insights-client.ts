@@ -35,15 +35,16 @@ export class ApplicationInsightsClient {
         });
     }
 
-    public async executeQuery(query: string, timespan: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
+    public async executeQuery(query: string, queryTimeRange: string): Promise<ResponseWithBodyType<ApplicationInsightsQueryResponse>> {
         const requestUrl = `${this.baseUrl}/${this.appId}/query`;
         const requestBody = {
             query,
-            timespan,
+            timespan: queryTimeRange,
         };
         const options: requestPromise.RequestPromiseOptions = {
             body: requestBody,
             simple: this.throwOnRequestFailure,
+            json: true,
         };
 
         return this.defaultRequestObject.post(requestUrl, options);
@@ -57,6 +58,7 @@ export class ApplicationInsightsClient {
         const options: requestPromise.RequestPromiseOptions = {
             qs: eventsOptions,
             simple: this.throwOnRequestFailure,
+            json: true,
         };
 
         return this.defaultRequestObject.get(requestUrl, options);

@@ -158,7 +158,8 @@ describe('HealthMonitorOrchestrationController', () => {
             urlToScan: 'some-url',
             scanWaitIntervalInSeconds: 10,
             maxScanWaitTimeInSeconds: 20,
-            testEnv: TestEnvironment[TestEnvironment.canary],
+            logQueryTimeRange: 'P1D',
+            environmentDefinition: TestEnvironment[TestEnvironment.canary],
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -292,6 +293,12 @@ describe('HealthMonitorOrchestrationController', () => {
 
             orchestratorIterator.next();
             expectedTests.push('ScanReports');
+            expectedStepsCallCount.runFunctionalTestsCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+            expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
+            expectedTests.push('Finalizer');
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
             expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);

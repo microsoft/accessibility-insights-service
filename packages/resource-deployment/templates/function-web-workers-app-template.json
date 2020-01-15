@@ -56,6 +56,12 @@
             "metadata": {
                 "description": "Base url of the web api"
             }
+        },
+        "releaseVersion": {
+            "type": "string",
+            "metadata": {
+                "description": "Release version number"
+            }
         }
     },
     "resources": [
@@ -110,6 +116,10 @@
                         {
                             "name": "WEB_API_BASE_URL",
                             "value": "[parameters('webApiBaseUrl')]"
+                        },
+                        {
+                            "name": "RELEASE_VERSION",
+                            "value": "[parameters('releaseVersion')]"
                         }
                     ]
                 }

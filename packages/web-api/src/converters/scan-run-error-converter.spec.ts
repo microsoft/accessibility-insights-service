@@ -25,7 +25,6 @@ describe(ScanRunErrorConverter, () => {
         const errorCode = testSubject.getScanRunErrorCode({
             errorType: 'InvalidContentType',
             message: 'some message',
-            responseStatusCode: 200,
         });
 
         expect(errorCode).toEqual(ScanRunErrorCodes.invalidContentType);

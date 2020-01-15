@@ -15,13 +15,13 @@ export type ScanErrorTypes =
 
 export interface ScanError {
     errorType: ScanErrorTypes;
-    responseStatusCode?: number;
     message: string;
 }
 
 export interface AxeScanResults {
     results?: AxeResults;
     error?: string | ScanError;
+    pageResponseCode: number;
     unscannable?: boolean;
     scannedUrl?: string;
     pageTitle?: string;

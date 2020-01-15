@@ -7,9 +7,8 @@ import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
-
 import { ScanResponseConverter } from '../converters/scan-response-converter';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { BatchScanResultController } from './batch-scan-result-controller';
 
 describe(BatchScanResultController, () => {

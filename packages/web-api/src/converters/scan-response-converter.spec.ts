@@ -16,6 +16,8 @@ const baseUrl = 'https://localhost/api/';
 const scanRunError = 'internal-error';
 let scanResponseConverter: ScanResponseConverter;
 let scanRunErrorConverterMock: IMock<ScanRunErrorConverter>;
+const pageTitle = 'sample page title';
+const pageResponseCode = 101;
 
 beforeEach(() => {
     scanRunErrorConverterMock = Mock.ofType(ScanRunErrorConverter);
@@ -48,6 +50,8 @@ function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
         run: {
             state: state,
             error: 'internal-error',
+            pageTitle: pageTitle,
+            pageResponseCode: pageResponseCode,
         },
         batchRequestId: 'batch-id',
     };
@@ -73,12 +77,14 @@ function getScanResultClientResponseFull(state: RunStateRestApi): ScanResultResp
         ],
         run: {
             state: state,
+            pageResponseCode: pageResponseCode,
+            pageTitle: pageTitle,
         },
     };
 }
 
 function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultResponse {
-    return {
+    const response: ScanResultResponse = {
         scanId: 'id',
         url: 'url',
         run: {
@@ -86,6 +92,13 @@ function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultRes
             error: state === 'failed' ? ScanRunErrorCodes.internalError : undefined,
         },
     };
+
+    if (state === 'completed' || state === 'failed') {
+        response.run.pageResponseCode = pageResponseCode;
+        response.run.pageTitle = pageTitle;
+    }
+
+    return response;
 }
 
 function validateConverterShortResult(dbState: RunStateDb, clientState: RunStateRestApi): void {

@@ -56,6 +56,7 @@ describe(Runner, () => {
     };
 
     const pageTitle = 'page title';
+    const pageResponseCode = 101;
 
     const passedAxeScanResults: AxeScanResults = {
         results: {
@@ -68,11 +69,14 @@ describe(Runner, () => {
         } as AxeResults,
         unscannable: false,
         pageTitle: pageTitle,
+        pageResponseCode: pageResponseCode,
     };
 
     const unscannableAxeScanResults: AxeScanResults = {
         unscannable: true,
         error: 'test scan error - not a valid page',
+        pageResponseCode: pageResponseCode,
+        pageTitle: pageTitle,
     };
 
     const reportId1 = 'report guid 1';
@@ -120,6 +124,7 @@ describe(Runner, () => {
         } as AxeResults,
         unscannable: false,
         pageTitle: pageTitle,
+        pageResponseCode: pageResponseCode,
     };
 
     let dateNow: Date;
@@ -170,7 +175,7 @@ describe(Runner, () => {
 
         setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage)));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
 
         await runner.run();
     });
@@ -229,7 +234,7 @@ describe(Runner, () => {
             .returns(async () => Promise.reject(failureMessage))
             .verifiable();
 
-        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage)));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
 
         await runner.run();
     });
@@ -378,13 +383,18 @@ describe(Runner, () => {
             .verifiable();
     }
 
-    function getFailingJobStateScanResult(error: any): OnDemandPageScanResult {
+    function getFailingJobStateScanResult(error: any, withPageInfo: boolean = true): OnDemandPageScanResult {
         const result = cloneDeep(onDemandPageScanResult);
         result.run = {
             state: 'failed',
             timestamp: dateNow.toJSON(),
             error,
         };
+
+        if (withPageInfo) {
+            result.run.pageResponseCode = pageResponseCode;
+            result.run.pageTitle = pageTitle;
+        }
 
         return result;
     }
@@ -404,6 +414,8 @@ describe(Runner, () => {
             state: 'completed',
             timestamp: dateNow.toJSON(),
             error: undefined,
+            pageResponseCode: pageResponseCode,
+            pageTitle: pageTitle,
         };
         result.scanResult = {
             state: 'pass',
@@ -420,6 +432,8 @@ describe(Runner, () => {
             state: 'completed',
             timestamp: dateNow.toJSON(),
             error: undefined,
+            pageResponseCode: pageResponseCode,
+            pageTitle: pageTitle,
         };
         result.scanResult = {
             issueCount: 3,

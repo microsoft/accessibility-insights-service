@@ -26,7 +26,7 @@ export apiTemplates="$templatesFolder"rest-api-templates
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret>
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret> -v <release version>
 where:
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
@@ -92,7 +92,7 @@ function runInParallel() {
 }
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:" option; do
+while getopts ":r:s:l:e:o:p:c:t:v:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -102,11 +102,12 @@ while getopts ":r:s:l:e:o:p:c:t:" option; do
     p) publisherEmail=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     t) webApiAdClientSecret=${OPTARG} ;;
+    v) releaseVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
     exitWithUsageInfo
 fi
 
