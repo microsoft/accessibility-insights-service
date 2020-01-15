@@ -60,8 +60,8 @@ export class A11yServiceClient {
         return (await this.signRequest()).get(requestUrl);
     }
 
-    public async checkHealth(): Promise<ResponseWithBodyType<HealthReport>> {
-        const requestUrl: string = `${this.requestBaseUrl}/health`;
+    public async checkHealth(urlSuffix = ''): Promise<ResponseWithBodyType<HealthReport>> {
+        const requestUrl: string = `${this.requestBaseUrl}/health${urlSuffix}`;
 
         return (await this.signRequest()).get(requestUrl);
     }

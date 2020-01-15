@@ -139,14 +139,15 @@ describe(A11yServiceClient, () => {
     });
 
     it('checkHealth', async () => {
+        const suffix = '/abc';
         const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
         getMock
-            .setup(req => req(`${baseUrl}/health`))
+            .setup(req => req(`${baseUrl}/health${suffix}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        await testSubject.checkHealth();
+        await testSubject.checkHealth(suffix);
     });
 
     it('should handle failure request', async () => {
