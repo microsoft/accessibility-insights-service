@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports
 import { BatchServiceModels } from '@azure/batch';
-import { CloudJob, JobListOptions, JobScheduleGetResponse, OutputFile } from '@azure/batch/esm/models';
+import { CloudJob, JobListOptions, OutputFile } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable, optional } from 'inversify';
@@ -117,12 +117,6 @@ export class Batch {
             activeTasks: activeTasks,
             runningTasks: runningTasks,
         };
-    }
-
-    private async getJobSchedule(jobScheduleId: string): Promise<JobScheduleGetResponse> {
-        const client = await this.batchClientProvider();
-
-        return client.jobSchedule.get(jobScheduleId);
     }
 
     private async getActiveJobIds(): Promise<string[]> {
