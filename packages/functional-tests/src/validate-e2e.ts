@@ -43,11 +43,12 @@ setTimeout(async () => {
         }
 
         if (healthStatus !== 'pass') {
-            setTimeout(() => {
-                console.log('[E2E] waiting for next evaluation');
-            }, evaluationInterval);
+            console.log('[E2E] e2e tests are failing. Waiting for next evaluation');
+
+            // tslint:disable-next-line: no-empty
+            setTimeout(() => {}, evaluationInterval);
+        } else {
+            console.log('[E2E] functional tests passed.');
         }
     }
 }, waitTimeBeforeEvaluation);
-
-console.log('[E2E] functional tests passed.');
