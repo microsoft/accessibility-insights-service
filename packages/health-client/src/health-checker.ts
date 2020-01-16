@@ -67,6 +67,6 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
         }
     }
 })().catch(error => {
-    console.log(`Unhandled exception. ${error}`);
+    console.log(error);
     process.exit(1);
 });
