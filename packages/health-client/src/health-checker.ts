@@ -43,7 +43,7 @@ setTimeout(async () => {
 
             const response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
-                throw new Error(JSON.stringify(response));
+                throw new Error(JSON.stringify(response.body));
             }
 
             console.log(`[health-client] Functional tests result: ${JSON.stringify(response.body)}`);
