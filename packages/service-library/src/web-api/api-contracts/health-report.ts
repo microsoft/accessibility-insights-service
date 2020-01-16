@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 export declare type TestEnvironment = 'canary' | 'insider' | 'production';
-export declare type TestRunResult = 'pass' | 'fail';
+export declare type TestRunResult = 'pass' | 'fail' | 'warn';
 
 export interface TestRun {
     testContainer: string;
