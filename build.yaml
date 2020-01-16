@@ -70,6 +70,7 @@ steps:
               web-api/dist/**/*
               web-workers/dist/**/*
               functional-tests/dist/**/*
+              health-client/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
