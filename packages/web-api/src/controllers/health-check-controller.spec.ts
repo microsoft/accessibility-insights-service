@@ -14,7 +14,7 @@ import { HealthCheckController, HealthTarget } from './health-check-controller';
 
 describe(HealthCheckController, () => {
     const releaseTarget: HealthTarget = 'release';
-    const releaseId = '1113';
+    const releaseId = '2419';
     let healthCheckController: HealthCheckController;
     let context: Context;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
@@ -114,7 +114,7 @@ describe(HealthCheckController, () => {
                         [
                             '2020-01-13T03:11:00.352Z',
                             'canary',
-                            '1113',
+                            '2419',
                             '1ea35b25-3238-68f0-774d-7c98f231af4f',
                             'TestRun',
                             'ValidationATestGroup',
@@ -124,7 +124,7 @@ describe(HealthCheckController, () => {
                         [
                             '2020-01-13T03:11:00.352Z',
                             'canary',
-                            '1113',
+                            '2419',
                             '1ea35b25-3238-68f0-774d-7c98f231af4f',
                             'TestRun',
                             'ValidationBTestGroup',
@@ -134,7 +134,7 @@ describe(HealthCheckController, () => {
                         [
                             '2020-01-13T03:11:00.352Z',
                             'canary',
-                            '1113',
+                            '2419',
                             '1ea35b25-3238-68f0-774d-7c98f231af4f',
                             'TestRun',
                             'FinalizerTestGroup',
@@ -144,7 +144,7 @@ describe(HealthCheckController, () => {
                         [
                             '2020-01-13T03:11:00.352Z',
                             'canary',
-                            '1113',
+                            '2419',
                             '1ea35b25-3238-68f0-774d-7c98f231af4f',
                             'TestRun',
                             'ValidationATestGroup',
@@ -178,7 +178,7 @@ describe(HealthCheckController, () => {
         const expectedResponseBody: HealthReport = {
             healthStatus: 'fail',
             environment: 'canary',
-            releaseId: '1113',
+            releaseId: '2419',
             runId: '1ea35b25-3238-68f0-774d-7c98f231af4f',
             testRuns: [
                 {
@@ -209,6 +209,63 @@ describe(HealthCheckController, () => {
             ],
             testsPassed: 3,
             testsFailed: 1,
+        };
+
+        await healthCheckController.handleRequest();
+
+        expect(context.res.status).toEqual(200);
+        expect(context.res.body).toEqual(expectedResponseBody);
+        appInsightsClientMock.verifyAll();
+    });
+
+    it('returns warn health report result when no test result found', async () => {
+        context.bindingData.target = releaseTarget;
+        context.bindingData.targetId = releaseId;
+        const responseBody: ApplicationInsightsQueryResponse = {
+            tables: [
+                {
+                    columns: [
+                        { name: 'timestamp', type: 'datetime' },
+                        { name: 'environment', type: 'dynamic' },
+                        { name: 'releaseId', type: 'dynamic' },
+                        { name: 'runId', type: 'dynamic' },
+                        { name: 'logSource', type: 'dynamic' },
+                        { name: 'testContainer', type: 'dynamic' },
+                        { name: 'testName', type: 'dynamic' },
+                        { name: 'result', type: 'dynamic' },
+                        { name: 'error', type: 'dynamic' },
+                    ],
+                    rows: [],
+                    name: 'PrimaryResult',
+                },
+            ],
+        };
+        const queryString = `customEvents
+        | where name == "FunctionalTest" and customDimensions.logSource == "TestRun" and customDimensions.releaseId == "${releaseId}"
+        and customDimensions.runId == toscalar(
+            customEvents
+            | where name == "FunctionalTest" and customDimensions.testContainer == "FinalizerTestGroup" and customDimensions.releaseId == "${releaseId}"
+            | top 1 by timestamp desc nulls last
+            | project tostring(customDimensions.runId)
+        )
+        | project timestamp, environment = customDimensions.environment, releaseId = customDimensions.releaseId, runId = customDimensions.runId,
+                  logSource = customDimensions.logSource, testContainer = customDimensions.testContainer, testName = customDimensions.testName,
+                  result = customDimensions.result, error = customDimensions.error
+        | order by timestamp asc nulls last`;
+        const successResponse: ResponseWithBodyType<ApplicationInsightsQueryResponse> = ({
+            statusCode: 200,
+            body: responseBody,
+        } as any) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
+        setupAppInsightsResponse(successResponse, queryString);
+
+        const expectedResponseBody: HealthReport = {
+            healthStatus: 'warn',
+            environment: undefined,
+            releaseId: '2419',
+            runId: undefined,
+            testRuns: [],
+            testsPassed: 0,
+            testsFailed: 0,
         };
 
         await healthCheckController.handleRequest();

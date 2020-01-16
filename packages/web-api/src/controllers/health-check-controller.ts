@@ -130,9 +130,10 @@ export class HealthCheckController extends ApiController {
 
         const environment = this.getColumnValue(columns, table.rows[0], 'environment') as TestEnvironment;
         const runId = this.getColumnValue(columns, table.rows[0], 'runId');
+        const healthStatus = testRuns.length > 0 ? (testsFailed === 0 ? 'pass' : 'fail') : 'warn';
 
         return {
-            healthStatus: testsFailed === 0 ? 'pass' : 'fail',
+            healthStatus,
             environment: environment,
             releaseId: releaseId,
             runId: runId,
