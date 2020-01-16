@@ -18,24 +18,23 @@ type Argv = {
     baseUrl: string;
 };
 
-console.log('[health-client] Start evaluation of functional tests result.');
-
 const argv: Argv = yargs.argv as any;
 const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl);
 const client = new A11yServiceClient(cred, argv.baseUrl);
-const testTimeoutInMinutes = 30;
+const testTimeoutInMinutes = 20;
 const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
 const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
-
-console.log(`[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`);
 
 const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boolean => {
     return currentTime.getTime() - startTime.getTime() > timeout;
 };
 
-let healthStatus: TestRunResult;
+(async () => {
+    console.log('[health-client] Start evaluation of functional tests result.');
+    console.log(`[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`);
+    await System.wait(waitTimeBeforeEvaluation);
 
-setTimeout(async () => {
+    let healthStatus: TestRunResult;
     const startTime = new Date();
     while (healthStatus !== 'pass') {
         try {
@@ -67,4 +66,7 @@ setTimeout(async () => {
             console.log('[health-client] Functional tests succeeded.');
         }
     }
-}, waitTimeBeforeEvaluation);
+})().catch(error => {
+    console.log(`Unhandled exception. ${error}`);
+    process.exit(1);
+});
