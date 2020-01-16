@@ -1,13 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { BatchPoolLoadSnapshotProvider } from 'service-library';
-import { StorageDocument } from 'storage-documents';
 
 @injectable()
 export class Worker {
@@ -21,7 +19,6 @@ export class Worker {
         @inject(Batch) private readonly batch: Batch,
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
-        @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
@@ -35,7 +32,6 @@ export class Worker {
         while (true) {
             const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
             const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
-            await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
             let tasksQueuedCount = 0;
             if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
@@ -127,15 +123,6 @@ export class Worker {
         const jobQueuedTasks = jobTasks.filter(jobTask => jobTask.state === JobTaskState.queued);
 
         return jobQueuedTasks.length;
-    }
-
-    private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
-        await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot({
-            // tslint:disable-next-line: no-object-literal-type-assertion
-            ...({} as StorageDocument),
-            batchAccountName: this.batchConfig.accountName,
-            ...poolLoadSnapshot,
-        });
     }
 
     private async init(): Promise<void> {
