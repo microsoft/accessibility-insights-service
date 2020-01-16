@@ -114,7 +114,10 @@
             "./packages/functional-tests/test-results",
             "./packages/cli/dist",
             "./packages/cli/node_modules",
-            "./packages/cli/test-results"
+            "./packages/cli/test-results",
+            "./packages/health-client/dist",
+            "./packages/health-client/node_modules",
+            "./packages/health-client/test-results"
         ],
         "file_type_method": "INCLUDE",
         "file_types": [
