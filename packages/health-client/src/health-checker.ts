@@ -42,7 +42,9 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
 
             const response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
-                throw new Error(JSON.stringify(response.body));
+                throw new Error(
+                    JSON.stringify({ statusCode: response.statusCode, statusMessage: response.statusMessage, body: response.body }),
+                );
             }
 
             console.log(`[health-client] Functional tests result: ${JSON.stringify(response.body)}`);
@@ -67,6 +69,6 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
         }
     }
 })().catch(error => {
-    console.log(error);
+    console.log(`Exception: ${error}`);
     process.exit(1);
 });
