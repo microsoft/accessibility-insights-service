@@ -73,6 +73,10 @@
             "path": "../packages/functional-tests"
         },
         {
+            "name": "health-client",
+            "path": "../packages/health-client"
+        },
+        {
             "name": "cli",
             "path": "../packages/cli"
         },
