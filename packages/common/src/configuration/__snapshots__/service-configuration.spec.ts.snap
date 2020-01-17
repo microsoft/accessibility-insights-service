@@ -24,7 +24,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://www.bing.com",
+      "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
@@ -185,7 +185,7 @@ Object {
       "format": "int",
     },
     "urlToScan": Object {
-      "default": "https://www.bing.com",
+      "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
       "format": "url",
     },
