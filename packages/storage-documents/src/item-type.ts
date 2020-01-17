@@ -8,4 +8,5 @@ export enum ItemType {
     scanRunBatchRequest = 'scanRunBatchRequest',
     onDemandPageScanRunResult = 'pageScanRunResult',
     onDemandPageScanRequest = 'pageScanRequest',
+    batchPoolLoadSnapshot = 'batchPoolLoadSnapshot',
 }

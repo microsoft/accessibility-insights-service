@@ -56,7 +56,6 @@ describe(Batch, () => {
             accountUrl: '',
             poolId: 'poolId',
             jobId: '',
-            taskId: '',
         };
         taskParameter = {
             id: 'taskId',
