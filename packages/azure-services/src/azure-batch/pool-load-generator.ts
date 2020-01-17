@@ -23,7 +23,7 @@ export interface PoolLoadSnapshot {
     tasksProcessingSpeedPerMinute?: number;
     tasksProcessingSpeedPerInterval?: number;
     tasksIncrementCountPerInterval?: number;
-    samplingIntervalInSeconds?: number;
+    samplingIntervalInSeconds: number;
     targetActiveToRunningTasksRatio: number;
     configuredMaxTasksPerPool: number;
     targetMaxTasksPerPool: number;
@@ -49,13 +49,15 @@ export class PoolLoadGenerator {
 
         // The pool has a job manager task always running
         const isIdle = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks <= 1;
+        const jobRunInterval = (await this.getJobManagerConfig()).addTasksIntervalInSeconds;
         const idlePoolLoadSnapshot = {
             poolId: poolMetricsInfo.id,
             isIdle: isIdle,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
             targetActiveToRunningTasksRatio: this.activeToRunningTasksRatio,
             targetMaxTasksPerPool: Math.round(poolMetricsInfo.maxTasksPerPool * this.activeToRunningTasksRatio),
-            poolFillIntervalInSeconds: (await this.getJobManagerConfig()).addTasksIntervalInSeconds,
+            samplingIntervalInSeconds: jobRunInterval,
+            poolFillIntervalInSeconds: jobRunInterval,
             timestamp: moment().toDate(),
         };
 

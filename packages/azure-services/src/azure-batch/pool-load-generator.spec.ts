@@ -237,6 +237,7 @@ describe(PoolLoadGenerator, () => {
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
             targetMaxTasksPerPool: 32,
             poolId: poolMetricsInfo.id,
+            samplingIntervalInSeconds: 15,
             poolFillIntervalInSeconds: 15,
             timestamp: dateNow,
         } as PoolLoadSnapshot;
