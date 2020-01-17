@@ -7,7 +7,7 @@ import { TestRunResult } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
 
-// tslint:disable: radix no-any
+// tslint:disable: radix no-any strict-boolean-expressions
 type Argv = {
     clientId: string;
     clientSecret: string;
@@ -61,7 +61,11 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
                 throw new Error('[health-client] Functional tests result validation timed out.');
             }
 
-            console.log('[health-client] Functional tests are failing. Waiting for next evaluation result.');
+            console.log(
+                `[health-client] Functional tests health status: ${
+                    healthStatus ? healthStatus : 'unknown'
+                } . Waiting for next evaluation result.`,
+            );
 
             await System.wait(evaluationInterval);
         } else {
