@@ -78,6 +78,10 @@ export function registerAzureServicesToContainer(container: Container, credentia
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
+    container.bind(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient).toDynamicValue(context => {
+        return createCosmosContainerClient(context.container, 'onDemandScanner', 'systemData');
+    });
+
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
@@ -87,15 +91,15 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .inSingletonScope();
     container.bind(Queue).toSelf();
 
-    setupSingletonAzureBatchServiceClientProvider(container);
-    container
-        .bind(BatchConfig)
-        .toSelf()
-        .inSingletonScope();
     container
         .bind(Batch)
         .toSelf()
         .inSingletonScope();
+    container
+        .bind(BatchConfig)
+        .toSelf()
+        .inSingletonScope();
+    setupSingletonAzureBatchServiceClientProvider(container);
 }
 
 async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {

@@ -17,17 +17,14 @@ export interface PoolMetricsInfo {
 
 export interface PoolLoadSnapshot {
     poolId: string;
-    isIdle: boolean;
-    activeTasks?: number;
-    runningTasks?: number;
-    tasksProcessingSpeedPerMinute?: number;
-    tasksProcessingSpeedPerInterval?: number;
-    tasksIncrementCountPerInterval?: number;
-    samplingIntervalInSeconds?: number;
+    activeTasks: number;
+    runningTasks: number;
+    tasksProcessingSpeedPerInterval: number;
+    tasksProcessingSpeedPerMinute: number;
+    tasksIncrementCountPerInterval: number;
     targetActiveToRunningTasksRatio: number;
     configuredMaxTasksPerPool: number;
-    targetMaxTasksPerPool: number;
-    poolFillIntervalInSeconds: number;
+    samplingIntervalInSeconds: number;
     timestamp: Date;
 }
 
@@ -39,7 +36,7 @@ export class PoolLoadGenerator {
     private lastPoolLoad: PoolLoad;
     private lastTasksIncrementCount: number;
     private processingSpeed = 0;
-    private samplingTimestamp: number;
+    private timestamp: number;
 
     public constructor(@inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration) {}
 
@@ -47,31 +44,18 @@ export class PoolLoadGenerator {
         await this.calculateTasksIncrementCount(poolMetricsInfo);
         this.lastPoolLoad = poolMetricsInfo.load;
 
-        // The pool has a job manager task always running
-        const isIdle = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks <= 1;
-        const idlePoolLoadSnapshot = {
+        return {
             poolId: poolMetricsInfo.id,
-            isIdle: isIdle,
+            tasksProcessingSpeedPerInterval: this.processingSpeed,
+            tasksProcessingSpeedPerMinute: Math.round((60 / this.samplingIntervalInSeconds) * this.processingSpeed),
+            activeTasks: poolMetricsInfo.load.activeTasks,
+            runningTasks: poolMetricsInfo.load.runningTasks,
             configuredMaxTasksPerPool: poolMetricsInfo.maxTasksPerPool,
+            tasksIncrementCountPerInterval: this.lastTasksIncrementCount,
             targetActiveToRunningTasksRatio: this.activeToRunningTasksRatio,
-            targetMaxTasksPerPool: Math.round(poolMetricsInfo.maxTasksPerPool * this.activeToRunningTasksRatio),
-            poolFillIntervalInSeconds: (await this.getJobManagerConfig()).addTasksIntervalInSeconds,
+            samplingIntervalInSeconds: this.samplingIntervalInSeconds,
             timestamp: moment().toDate(),
         };
-
-        if (isIdle) {
-            return idlePoolLoadSnapshot;
-        } else {
-            return {
-                ...idlePoolLoadSnapshot,
-                activeTasks: poolMetricsInfo.load.activeTasks,
-                runningTasks: poolMetricsInfo.load.runningTasks,
-                tasksProcessingSpeedPerInterval: this.processingSpeed,
-                tasksProcessingSpeedPerMinute: Math.round((60 / this.samplingIntervalInSeconds) * this.processingSpeed),
-                tasksIncrementCountPerInterval: this.lastTasksIncrementCount,
-                samplingIntervalInSeconds: this.samplingIntervalInSeconds,
-            };
-        }
     }
 
     public setLastTasksIncrementCount(lastTasksIncrementCount: number): void {
@@ -92,8 +76,8 @@ export class PoolLoadGenerator {
             Math.ceil(this.processingSpeed / 2);
         this.lastTasksIncrementCount = tasksIncrementCount > 0 ? tasksIncrementCount : 0;
 
-        this.samplingIntervalInSeconds = process.hrtime()[0] - this.samplingTimestamp;
-        this.samplingTimestamp = process.hrtime()[0];
+        this.samplingIntervalInSeconds = process.hrtime()[0] - this.timestamp;
+        this.timestamp = process.hrtime()[0];
     }
 
     private setActiveToRunningTasksRatio(activeTasks: number, maxTasksPerPool: number): void {
@@ -111,7 +95,7 @@ export class PoolLoadGenerator {
 
         this.defaultActiveToRunningTasksRatio = configActiveToRunningTasksRatio;
         this.activeToRunningTasksRatio = configActiveToRunningTasksRatio;
-        this.samplingTimestamp = process.hrtime()[0];
+        this.timestamp = process.hrtime()[0];
     }
 
     private async getJobManagerConfig(): Promise<JobManagerConfig> {

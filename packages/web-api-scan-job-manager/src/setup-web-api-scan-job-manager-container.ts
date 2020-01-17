@@ -19,9 +19,11 @@ export function setupWebApiScanJobManagerContainer(): Container {
         .inSingletonScope();
 
     container
-        .bind<BatchTaskParameterProvider>(AzureServicesIocTypes.BatchTaskParameterProvider)
-        .to(ScanTaskParameterProvider)
+        .bind(ScanTaskParameterProvider)
+        .toSelf()
         .inSingletonScope();
+
+    container.bind<BatchTaskParameterProvider>(AzureServicesIocTypes.BatchTaskParameterProvider).to(ScanTaskParameterProvider);
 
     return container;
 }
