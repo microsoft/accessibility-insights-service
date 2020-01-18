@@ -25,7 +25,7 @@ import { FunctionalTestGroup } from './test-groups/functional-test-group';
 // tslint:disable: mocha-no-side-effect-code no-any no-unsafe-any mocha-unneeded-done strict-boolean-expressions
 
 describe('functional tests', () => {
-    // need to provide by user
+    // need to provide by user. DO NOT CHECK IN
     const clientId = process.env.SP_CLIENT_ID || '';
     const clientSecret = process.env.SP_PASSWORD || '';
     const tenantId = process.env.SP_TENANT || '';
