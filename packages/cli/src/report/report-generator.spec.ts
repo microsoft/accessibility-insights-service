@@ -38,7 +38,6 @@ describe('ReportGenerator', () => {
     it('generate report ', () => {
         const params = {
             pageTitle: axeScanResults.pageTitle,
-            browserSpec: axeScanResults.browserSpec,
         };
         const htmlReportParams: AxeReportParameters = {
             results: axeScanResults.results,
@@ -47,7 +46,6 @@ describe('ReportGenerator', () => {
             } completed at ${reportGenerationTime.toUTCString()}.`,
             serviceName: 'Accessibility Insights Scan',
             scanContext: {
-                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };

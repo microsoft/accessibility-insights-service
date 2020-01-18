@@ -56,7 +56,8 @@
         "axe-core": "3.3.2",
         "axe-puppeteer": "^1.0.0",
         "filenamify-url": "2.1.0",
-        "cli-spinner": "^0.2.10"
+        "cli-spinner": "^0.2.10",
+        "react-helmet": "^5.2.0"
     },
     "bin": {
         "ai-scan": "dist/ai-scan.js"

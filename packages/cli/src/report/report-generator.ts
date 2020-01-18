@@ -11,7 +11,6 @@ export class ReportGenerator {
     public generateReport(axeResults: AxeScanResults): string {
         const params = {
             pageTitle: axeResults.pageTitle,
-            browserSpec: axeResults.browserSpec,
         };
         const reportGenerationTime = new Date();
 
@@ -24,7 +23,6 @@ export class ReportGenerator {
             } completed at ${reportGenerationTime.toUTCString()}.`,
             serviceName: 'Accessibility Insights Scan',
             scanContext: {
-                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };
