@@ -24,21 +24,6 @@ import { FunctionalTestGroup } from './test-groups/functional-test-group';
 
 // tslint:disable: mocha-no-side-effect-code no-any no-unsafe-any mocha-unneeded-done strict-boolean-expressions
 
-const testIf = (name: string, condition: () => boolean | Promise<boolean>, callback: any) => {
-    test(
-        name,
-        async done => {
-            if (await condition()) {
-                callback(done);
-            } else {
-                console.log(`[Functional Test '${name}' Skipped]`);
-                done();
-            }
-        },
-        10 * 60 * 1000,
-    );
-};
-
 describe('functional tests', () => {
     // need to provide by user
     const clientId = process.env.SP_CLIENT_ID || '';
@@ -85,22 +70,21 @@ describe('functional tests', () => {
         testRunner.setLogger(logger);
         testContextData = {
             scanUrl: 'https://www.washington.edu/accesscomputing/AU/before.html',
-            scanId: '1ea398d9-8688-64e1-c425-63ffb362d8cd',
         };
     });
 
-    // testIf('PostScan', isServiceCredProvided, async (done: jest.DoneCallback) => {
-    //     const postScanTests = getTests('PostScan');
-    //     await testRunner.run(postScanTests, TestEnvironment.all, releaseIdStub, runIdStub);
-    //     done();
-    // });
+    testIf('PostScan', isServiceCredProvided, async (done: jest.DoneCallback) => {
+        const postScanTests = getTests('PostScan');
+        await testRunner.run(postScanTests, TestEnvironment.all, releaseIdStub, runIdStub);
+        done();
+    });
 
-    // testIf('ScanStatus', isServiceCredProvided, async (done: jest.DoneCallback) => {
-    //     const scanStatusTests = getTests('ScanStatus');
-    //     testContextData.scanId = (await a11yServiceClient.postScanUrl(testContextData.scanUrl)).body[0].scanId;
-    //     await testRunner.run(scanStatusTests, TestEnvironment.all, releaseIdStub, runIdStub);
-    //     done();
-    // });
+    testIf('ScanStatus', isServiceCredProvided, async (done: jest.DoneCallback) => {
+        const scanStatusTests = getTests('ScanStatus');
+        testContextData.scanId = (await a11yServiceClient.postScanUrl(testContextData.scanUrl)).body[0].scanId;
+        await testRunner.run(scanStatusTests, TestEnvironment.all, releaseIdStub, runIdStub);
+        done();
+    });
 
     testIf('ScanExecution', isServiceCredProvided, async (done: jest.DoneCallback) => {
         const scanRunResultResponse = await waitForScanRequestCompletion();
@@ -147,6 +131,21 @@ describe('functional tests', () => {
             !isEmpty(apimName) &&
             !isEmpty(cosmosKey) &&
             !isEmpty(cosmosUrl)
+        );
+    }
+
+    function testIf(name: string, condition: () => boolean | Promise<boolean>, callback: any): void {
+        test(
+            name,
+            async done => {
+                if (await condition()) {
+                    callback(done);
+                } else {
+                    console.log(`[Functional Test '${name}' Skipped]`);
+                    done();
+                }
+            },
+            10 * 60 * 1000,
         );
     }
 
