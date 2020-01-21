@@ -2,18 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CosmosClient } from '@azure/cosmos';
-import { CosmosClientWrapper, CosmosContainerClient } from 'azure-services';
-import { GuidGenerator, HashGenerator, ServiceConfiguration, System } from 'common';
+import { CredentialType, registerAzureServicesToContainer } from 'azure-services';
+import { GuidGenerator, ServiceConfiguration, setupRuntimeConfigContainer, System } from 'common';
+import * as dotenv from 'dotenv';
+import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ConsoleLoggerClient, GlobalLogger } from 'logger';
-import {
-    OnDemandPageScanRunResultProvider,
-    PartitionKeyFactory,
-    RunState,
-    ScanResultResponse,
-    ScanRunResultResponse,
-} from 'service-library';
+import { ConsoleLoggerClient, GlobalLogger, Logger } from 'logger';
+import { OnDemandPageScanRunResultProvider, RunState, ScanResultResponse, ScanRunResultResponse } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 
 import { TestEnvironment } from './common-types';
@@ -25,46 +20,37 @@ import { FunctionalTestGroup } from './test-groups/functional-test-group';
 // tslint:disable: mocha-no-side-effect-code no-any no-unsafe-any mocha-unneeded-done strict-boolean-expressions
 
 describe('functional tests', () => {
-    // need to provide by user. DO NOT CHECK IN
-    const clientId = process.env.SP_CLIENT_ID || '';
-    const clientSecret = process.env.SP_PASSWORD || '';
-    const tenantId = process.env.SP_TENANT || '';
-    const apimName = process.env.APIM_SERVICE_NAME || '';
-    const cosmosKey = process.env.COSMOS_DB_KEY || '';
-    const cosmosUrl = process.env.COSMOS_DB_URL || '';
-    // static values
-    const dbName = 'onDemandScanner';
-    const collectionName = 'scanRuns';
+    dotenv.config({ path: `${__dirname}/.env` });
+    const clientId = process.env.SP_CLIENT_ID;
+    const clientSecret = process.env.SP_PASSWORD;
+    const tenantId = process.env.SP_TENANT;
+    const apimName = process.env.APIM_SERVICE_NAME;
+    const cosmosKey = process.env.COSMOS_DB_KEY;
+    const cosmosUrl = process.env.COSMOS_DB_URL;
 
-    let consoleLoggerClient: ConsoleLoggerClient;
     let logger: GlobalLogger;
-    let cred: A11yServiceCredential;
     let a11yServiceClient: A11yServiceClient;
     let testRunner: TestRunner;
     let guidGenerator: GuidGenerator;
     let testContextData: TestContextData;
-    let cosmosClientWrapper: CosmosClientWrapper;
-    let cosmosContainerClient: CosmosContainerClient;
     let onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
     let releaseIdStub: string;
     let runIdStub: string;
 
     beforeAll(async () => {
         if (isServiceCredProvided()) {
-            consoleLoggerClient = new ConsoleLoggerClient(new ServiceConfiguration(), console);
-            logger = new GlobalLogger([consoleLoggerClient], process);
-            cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
+            const container = new Container({ autoBindInjectable: true });
+            setupRuntimeConfigContainer(container);
+            container.bind(Logger).toDynamicValue(_ => {
+                return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
+            });
+            registerAzureServicesToContainer(container, CredentialType.AppService);
+            const cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
             a11yServiceClient = new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
-            testRunner = new TestRunner(logger);
-            guidGenerator = new GuidGenerator();
-            cosmosClientWrapper = new CosmosClientWrapper(async () => {
-                return new CosmosClient({ endpoint: cosmosUrl, auth: { masterKey: cosmosKey } });
-            }, logger);
-            cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapper, dbName, collectionName, logger);
-            onDemandPageScanRunResultProvider = new OnDemandPageScanRunResultProvider(
-                cosmosContainerClient,
-                new PartitionKeyFactory(new HashGenerator(), guidGenerator),
-            );
+            onDemandPageScanRunResultProvider = container.get(OnDemandPageScanRunResultProvider);
+            guidGenerator = container.get(GuidGenerator);
+            logger = container.get(Logger);
+            testRunner = container.get(TestRunner);
             await logger.setup({
                 source: 'dev box',
             });
