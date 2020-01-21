@@ -50,27 +50,29 @@ describe('functional tests', () => {
     let onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
 
     beforeAll(async () => {
-        consoleLoggerClient = new ConsoleLoggerClient(new ServiceConfiguration(), console);
-        logger = new GlobalLogger([consoleLoggerClient], process);
-        cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
-        a11yServiceClient = new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
-        testRunner = new TestRunner(logger);
-        guidGenerator = new GuidGenerator();
-        cosmosClientWrapper = new CosmosClientWrapper(async () => {
-            return new CosmosClient({ endpoint: cosmosUrl, auth: { masterKey: cosmosKey } });
-        }, logger);
-        cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapper, dbName, collectionName, logger);
-        onDemandPageScanRunResultProvider = new OnDemandPageScanRunResultProvider(
-            cosmosContainerClient,
-            new PartitionKeyFactory(new HashGenerator(), guidGenerator),
-        );
-        await logger.setup({
-            source: 'dev box',
-        });
-        testRunner.setLogger(logger);
-        testContextData = {
-            scanUrl: 'https://www.washington.edu/accesscomputing/AU/before.html',
-        };
+        if (isServiceCredProvided()) {
+            consoleLoggerClient = new ConsoleLoggerClient(new ServiceConfiguration(), console);
+            logger = new GlobalLogger([consoleLoggerClient], process);
+            cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
+            a11yServiceClient = new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
+            testRunner = new TestRunner(logger);
+            guidGenerator = new GuidGenerator();
+            cosmosClientWrapper = new CosmosClientWrapper(async () => {
+                return new CosmosClient({ endpoint: cosmosUrl, auth: { masterKey: cosmosKey } });
+            }, logger);
+            cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapper, dbName, collectionName, logger);
+            onDemandPageScanRunResultProvider = new OnDemandPageScanRunResultProvider(
+                cosmosContainerClient,
+                new PartitionKeyFactory(new HashGenerator(), guidGenerator),
+            );
+            await logger.setup({
+                source: 'dev box',
+            });
+            testRunner.setLogger(logger);
+            testContextData = {
+                scanUrl: 'https://www.washington.edu/accesscomputing/AU/before.html',
+            };
+        }
     });
 
     testIf('PostScan', isServiceCredProvided, async (done: jest.DoneCallback) => {
