@@ -29,14 +29,12 @@ describe('functional tests', () => {
     const clientId = process.env.SP_CLIENT_ID || '';
     const clientSecret = process.env.SP_PASSWORD || '';
     const tenantId = process.env.SP_TENANT || '';
-    const apimName = process.env.APIM_Name || '';
+    const apimName = process.env.APIM_SERVICE_NAME || '';
     const cosmosKey = process.env.COSMOS_DB_KEY || '';
     const cosmosUrl = process.env.COSMOS_DB_URL || '';
     // static values
     const dbName = 'onDemandScanner';
     const collectionName = 'scanRuns';
-    const releaseIdStub = 'release-id';
-    const runIdStub = 'run-id';
 
     let consoleLoggerClient: ConsoleLoggerClient;
     let logger: GlobalLogger;
@@ -48,6 +46,8 @@ describe('functional tests', () => {
     let cosmosClientWrapper: CosmosClientWrapper;
     let cosmosContainerClient: CosmosContainerClient;
     let onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider;
+    let releaseIdStub: string;
+    let runIdStub: string;
 
     beforeAll(async () => {
         if (isServiceCredProvided()) {
@@ -72,6 +72,10 @@ describe('functional tests', () => {
             testContextData = {
                 scanUrl: 'https://www.washington.edu/accesscomputing/AU/before.html',
             };
+            releaseIdStub = `dev-${guidGenerator.createGuid()}`;
+            runIdStub = `dev-${guidGenerator.createGuid()}`;
+        } else {
+            console.log('One or more service credentials is missing. Skipping All functional tests.');
         }
     });
 
@@ -137,7 +141,7 @@ describe('functional tests', () => {
                 if (await condition()) {
                     callback(done);
                 } else {
-                    console.log(`[Functional Test '${name}' Skipped]`);
+                    console.log(`Functional Test '${name}' Skipped`);
                     done();
                 }
             },
