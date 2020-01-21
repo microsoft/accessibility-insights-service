@@ -140,7 +140,7 @@ export class ServiceConfiguration {
                 },
                 maxWallClockTimeInHours: {
                     format: 'int',
-                    default: 29,
+                    default: 5,
                     doc: 'The amount of time the job manager instance will run.',
                 },
             },
@@ -237,7 +237,7 @@ export class ServiceConfiguration {
             availabilityTestConfig: {
                 urlToScan: {
                     format: 'url',
-                    default: 'https://www.bing.com',
+                    default: 'https://www.washington.edu/accesscomputing/AU/before.html',
                     doc: 'Url to scan for availability testing',
                 },
                 maxScanWaitTimeInSeconds: {

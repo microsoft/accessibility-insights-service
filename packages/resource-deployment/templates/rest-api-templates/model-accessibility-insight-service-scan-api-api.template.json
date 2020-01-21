@@ -306,6 +306,85 @@
             ]
         },
         {
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTargetedTestResults')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
+                "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d704a4ef518fc0430710495')]"
+            ],
+            "properties": {
+                "displayName": "Get targeted test results",
+                "method": "GET",
+                "urlTemplate": "/health/release/{targetId}?api-version={apiVersion}",
+                "templateParameters": [
+                    {
+                        "name": "targetId",
+                        "description": "The id of the release to query for test results",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    },
+                    {
+                        "name": "apiVersion",
+                        "description": "The client api version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "responses": []
+            }
+        },
+        {
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTargetedTestResults/policy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getTargetedTestResults')]"
+            ],
+            "properties": {
+                "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<redirect-content-urls />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+                "format": "xml"
+            }
+        },
+        {
+            "type": "Microsoft.ApiManagement/service/apis/operations",
+            "apiVersion": "2019-01-01",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTestResults')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]",
+                "[resourceId('Microsoft.ApiManagement/service/apis/schemas', parameters('apimServiceName'), 'accessibility-insight-service-scan-api', '5d704a4ef518fc0430710495')]"
+            ],
+            "properties": {
+                "displayName": "Get test results",
+                "method": "GET",
+                "urlTemplate": "/health/release?api-version={apiVersion}",
+                "templateParameters": [
+                    {
+                        "name": "apiVersion",
+                        "description": "The client api version",
+                        "type": "string",
+                        "required": true,
+                        "values": []
+                    }
+                ],
+                "responses": []
+            }
+        },
+        {
+            "type": "Microsoft.ApiManagement/service/apis/operations/policies",
+            "apiVersion": "2019-01-01",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/getTestResults/policy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','getTestResults')]"
+            ],
+            "properties": {
+                "value": "[concat('<policies>\r\n\t<inbound>\r\n\t\t<base />\r\n\t\t<set-backend-service id=\"apim-generated-policy\" backend-id=\"', parameters('functionName'), '\" />\r\n\t</inbound>\r\n\t<backend>\r\n\t\t<base />\r\n\t</backend>\r\n\t<outbound>\r\n\t\t<base />\r\n\t\t<redirect-content-urls />\r\n\t</outbound>\r\n\t<on-error>\r\n\t\t<base />\r\n\t</on-error>\r\n</policies>')]",
+                "format": "xml"
+            }
+        },
+        {
             "properties": {
                 "templateParameters": [],
                 "description": "Ping for server availability",

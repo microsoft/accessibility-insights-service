@@ -5,7 +5,7 @@ import { BatchServiceModels } from '@azure/batch';
 import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
-import { inject, injectable, optional } from 'inversify';
+import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { VError } from 'verror';
@@ -23,9 +23,7 @@ export class Batch {
 
     public constructor(
         @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @optional()
-        @inject(iocTypeNames.BatchTaskParameterProvider)
-        private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
+        @inject(iocTypeNames.BatchTaskParameterProvider) private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
@@ -176,29 +174,23 @@ export class Batch {
 
     private async getActiveJobIds(): Promise<string[]> {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
-        const jobs = await this.getJobList({ filter: filterClause });
-
-        return jobs.map(i => i.id);
-    }
-
-    private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
-        const jobs = [];
-        const listOptions = {
-            jobListOptions: options,
+        const options = {
+            jobListOptions: { filter: filterClause },
         };
 
+        const jobs = [];
         const client = await this.batchClientProvider();
-        const jobListResponse = await client.job.list(listOptions);
+        const jobListResponse = await client.job.list(options);
         jobs.push(...jobListResponse.values());
 
         let odatanextLink = jobListResponse.odatanextLink;
         while (odatanextLink !== undefined) {
-            const jobListResponseNext = await client.job.listNext(odatanextLink, listOptions);
+            const jobListResponseNext = await client.job.listNext(odatanextLink, options);
             jobs.push(...jobListResponseNext.values());
             odatanextLink = jobListResponseNext.odatanextLink;
         }
 
-        return jobs;
+        return jobs.map(i => i.id);
     }
 
     private async addTaskCollection(jobId: string, messages: Message[]): Promise<JobTask[]> {
