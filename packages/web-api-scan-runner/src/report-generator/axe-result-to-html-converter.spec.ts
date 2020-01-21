@@ -19,7 +19,6 @@ describe('AxeResultToHtmlConverter', () => {
     let axeResults: AxeResults;
     const params: ReportGenerationParams = {
         pageTitle: 'page title',
-        browserSpec: 'browser version',
     };
     let time: Date;
 
@@ -47,7 +46,6 @@ describe('AxeResultToHtmlConverter', () => {
             description: `Automated report for accessibility scan of url ${scanUrl} completed at ${time.toUTCString()}.`,
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };
