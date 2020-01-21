@@ -1,10 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement max-func-body-length
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
-import { JobGetTaskCountsResponse, JobListResponse, PoolGetResponse } from '@azure/batch/esm/models';
+import {
+    ErrorCategory,
+    JobGetTaskCountsResponse,
+    JobListResponse,
+    PoolGetResponse,
+    TaskExecutionInformation,
+    TaskFailureInformation,
+    TaskListResponse,
+} from '@azure/batch/esm/models';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import * as moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -15,7 +23,7 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
 import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
-import { JobTaskState } from './job-task';
+import { BatchTask, JobTaskState } from './job-task';
 
 export interface JobListItemStub {
     id: string;
@@ -27,6 +35,16 @@ export class JobListStub {
     public constructor(public items: JobListItemStub[]) {}
 
     public values(): JobListItemStub[] {
+        return this.items;
+    }
+}
+
+export class TaskListStub {
+    public odatanextLink: string;
+
+    public constructor(public items: any[]) {}
+
+    public values(): any[] {
         return this.items;
     }
 }
@@ -55,7 +73,7 @@ describe(Batch, () => {
             accountName: '',
             accountUrl: '',
             poolId: 'poolId',
-            jobId: '',
+            jobId: 'jobId',
         };
         taskParameter = {
             id: 'taskId',
@@ -96,6 +114,111 @@ describe(Batch, () => {
             config,
             loggerMock.object,
         );
+    });
+
+    describe('getFailedTasks()', () => {
+        it('get failed tasks', async () => {
+            const taskArguments = {
+                arg1: 'arg-1-value',
+                arg2: 'arg-2-value',
+            };
+            const tasks = [
+                {
+                    // task with full error info
+                    id: 'id-1',
+                    environmentSettings: [
+                        { name: 'name-1', value: 'value-1' },
+                        { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
+                    ] as BatchServiceModels.EnvironmentSetting[],
+                    executionInfo: {
+                        exitCode: 1,
+                        result: 'failure',
+                        failureInfo: {
+                            category: 'userError' as ErrorCategory,
+                            code: '1',
+                            message: 'Task Error Message',
+                        } as TaskFailureInformation,
+                    } as TaskExecutionInformation,
+                },
+                {
+                    // task with partial error info
+                    id: 'id-2',
+                    environmentSettings: [
+                        { name: 'name-1', value: 'value-1' },
+                        { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
+                    ] as BatchServiceModels.EnvironmentSetting[],
+                    executionInfo: {
+                        exitCode: 1,
+                        result: 'failure',
+                        failureInfo: undefined,
+                    } as TaskExecutionInformation,
+                },
+                {
+                    // task without environment settings
+                    id: 'id-3',
+                    environmentSettings: undefined,
+                    executionInfo: {
+                        exitCode: 1,
+                        result: 'failure',
+                        failureInfo: undefined,
+                    } as TaskExecutionInformation,
+                },
+                {
+                    // task without TASK_ARGUMENTS environment value
+                    id: 'id-4',
+                    environmentSettings: [{ name: 'name-1', value: 'value-1' }] as BatchServiceModels.EnvironmentSetting[],
+                    executionInfo: {
+                        exitCode: 1,
+                        result: 'failure',
+                        failureInfo: {
+                            category: 'userError' as ErrorCategory,
+                            code: '1',
+                            message: 'Task Error Message',
+                        } as TaskFailureInformation,
+                    } as TaskExecutionInformation,
+                },
+            ];
+
+            const items1 = new TaskListStub(tasks.slice(0, 2));
+            items1.odatanextLink = 'odatanextLink-1';
+            const items2 = new TaskListStub(tasks.slice(2, 4));
+
+            const options = {
+                taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'failure'` },
+            };
+            taskMock
+                .setup(async o => o.list(config.jobId, options))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items1)))
+                .verifiable();
+            taskMock
+                .setup(async o => o.listNext(items1.odatanextLink, options))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items2)))
+                .verifiable();
+
+            const expectedFailedTasks: BatchTask[] = [
+                {
+                    id: 'id-1',
+                    taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
+                    exitCode: 1,
+                    result: 'failure',
+                    failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                },
+                { id: 'id-2', taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}', exitCode: 1, result: 'failure' },
+                { id: 'id-3', taskArguments: undefined, exitCode: 1, result: 'failure' },
+                {
+                    id: 'id-4',
+                    taskArguments: undefined,
+                    exitCode: 1,
+                    result: 'failure',
+                    failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                },
+            ];
+
+            const failedTasks = await batch.getFailedTasks(config.jobId);
+
+            expect(failedTasks).toEqual(expectedFailedTasks);
+            taskMock.verifyAll();
+        });
     });
 
     describe('getPoolMetricsInfo()', () => {

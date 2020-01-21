@@ -34,7 +34,8 @@ export class Batch {
         const tasks = await this.getFailedTaskList(jobId);
         tasks.map(task => {
             const taskArguments =
-                task.environmentSettings !== undefined ? task.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS').value : undefined;
+                task.environmentSettings !== undefined ? task.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS') : undefined;
+
             let failureInfo: BatchTaskFailureInfo;
             if (task.executionInfo.failureInfo !== undefined) {
                 failureInfo = {
@@ -46,16 +47,14 @@ export class Batch {
 
             batchTasks.push({
                 id: task.id,
-                taskArguments,
+                taskArguments: taskArguments !== undefined ? taskArguments.value : undefined,
                 exitCode: task.executionInfo.exitCode,
                 result: task.executionInfo.result,
                 failureInfo,
             });
         });
 
-        console.log(tasks.length);
-
-        return undefined;
+        return batchTasks;
     }
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
@@ -174,23 +173,29 @@ export class Batch {
 
     private async getActiveJobIds(): Promise<string[]> {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
-        const options = {
-            jobListOptions: { filter: filterClause },
+        const jobs = await this.getJobList({ filter: filterClause });
+
+        return jobs.map(i => i.id);
+    }
+
+    private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
+        const jobs = [];
+        const listOptions = {
+            jobListOptions: options,
         };
 
-        const jobs = [];
         const client = await this.batchClientProvider();
-        const jobListResponse = await client.job.list(options);
+        const jobListResponse = await client.job.list(listOptions);
         jobs.push(...jobListResponse.values());
 
         let odatanextLink = jobListResponse.odatanextLink;
         while (odatanextLink !== undefined) {
-            const jobListResponseNext = await client.job.listNext(odatanextLink, options);
+            const jobListResponseNext = await client.job.listNext(odatanextLink, listOptions);
             jobs.push(...jobListResponseNext.values());
             odatanextLink = jobListResponseNext.odatanextLink;
         }
 
-        return jobs.map(i => i.id);
+        return jobs;
     }
 
     private async addTaskCollection(jobId: string, messages: Message[]): Promise<JobTask[]> {
