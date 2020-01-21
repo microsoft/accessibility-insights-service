@@ -113,12 +113,6 @@ describe('functional tests', () => {
         done();
     });
 
-    testIf('ScanReport Snapshot', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const report = (await a11yServiceClient.getScanReport(testContextData.scanId, testContextData.reportId)).body;
-        expect(report).toMatchSnapshot();
-        done();
-    });
-
     testIf('Finalizer', isServiceCredProvided, async (done: jest.DoneCallback) => {
         const finalizerTests = getTests('Finalizer');
         await testRunner.run(finalizerTests, TestEnvironment.all, releaseIdStub, runIdStub);
