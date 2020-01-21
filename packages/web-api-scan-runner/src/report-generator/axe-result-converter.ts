@@ -6,7 +6,6 @@ import { ReportFormat } from 'storage-documents';
 
 export type ReportGenerationParams = {
     pageTitle: string;
-    browserSpec: string;
 };
 
 export interface AxeResultConverter {

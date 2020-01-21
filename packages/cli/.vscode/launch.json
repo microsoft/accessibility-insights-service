@@ -8,10 +8,9 @@
             "name": "Start debugging cli",
             "type": "node",
             "request": "launch",
-            "outFiles": ["${workspaceFolder}/dist/index.js"],
-            "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/src/index.ts",
-            "preLaunchTask": "tsc",
+            "cwd": "${workspaceFolder}/dist",
+            "program": "${workspaceFolder}/dist/ai-scan.js",
+            "preLaunchTask": "build",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "args": ["--url=\"https://www.stackoverflow.com/\""]

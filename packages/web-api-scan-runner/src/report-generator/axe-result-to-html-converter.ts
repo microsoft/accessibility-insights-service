@@ -23,7 +23,6 @@ export class AxeResultToHtmlConverter implements AxeResultConverter {
             description: this.createDescription(results),
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                browserSpec: params.browserSpec,
                 pageTitle: params.pageTitle,
             },
         };

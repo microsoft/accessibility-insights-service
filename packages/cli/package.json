@@ -51,12 +51,13 @@
         "lodash": "^4.17.14",
         "reflect-metadata": "^0.1.13",
         "yargs": "^13.2.1",
-        "accessibility-insights-report": "^0.1.0",
+        "accessibility-insights-report": "^1.0.0",
         "puppeteer": "^1.12.2",
         "axe-core": "3.3.2",
         "axe-puppeteer": "^1.0.0",
         "filenamify-url": "2.1.0",
-        "cli-spinner": "^0.2.10"
+        "cli-spinner": "^0.2.10",
+        "react-helmet": "^5.2.0"
     },
     "bin": {
         "ai-scan": "dist/ai-scan.js"
