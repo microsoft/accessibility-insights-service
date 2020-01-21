@@ -26,6 +26,9 @@ export class Worker {
     ) {}
 
     public async run(): Promise<void> {
+        // const tasks = await this.batch.getFailedTasks('1env');
+        // console.log(tasks.length);
+
         await this.init();
 
         // tslint:disable-next-line: no-constant-condition

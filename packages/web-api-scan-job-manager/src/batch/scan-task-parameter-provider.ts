@@ -18,12 +18,13 @@ export class ScanTaskParameterProvider implements BatchTaskParameterProvider {
         const message = JSON.parse(messageText);
         const commandLine = this.runnerTaskConfig.getCommandLine(message);
         const maxTaskDurationInMinutes = (await this.getTaskConfig()).taskTimeoutInMinutes;
+        const environmentSettings = [...this.runnerTaskConfig.getEnvironmentSettings(), { name: 'TASK_ARGUMENTS', value: messageText }];
 
         return {
             id: taskId,
             commandLine: commandLine,
             resourceFiles: this.runnerTaskConfig.getResourceFiles(),
-            environmentSettings: this.runnerTaskConfig.getEnvironmentSettings(),
+            environmentSettings,
             constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
         };
     }

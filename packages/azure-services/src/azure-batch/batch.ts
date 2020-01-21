@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports
 import { BatchServiceModels } from '@azure/batch';
-import { CloudJob, JobListOptions, OutputFile } from '@azure/batch/esm/models';
+import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable, optional } from 'inversify';
@@ -14,7 +14,7 @@ import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
 import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
-import { JobTask, JobTaskState } from './job-task';
+import { BatchTask, BatchTaskErrorCategory, BatchTaskFailureInfo, JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 
 @injectable()
@@ -30,6 +30,35 @@ export class Batch {
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
+        const batchTasks: BatchTask[] = [];
+        const tasks = await this.getFailedTaskList(jobId);
+        tasks.map(task => {
+            const taskArguments =
+                task.environmentSettings !== undefined ? task.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS').value : undefined;
+            let failureInfo: BatchTaskFailureInfo;
+            if (task.executionInfo.failureInfo !== undefined) {
+                failureInfo = {
+                    category: task.executionInfo.failureInfo.category as BatchTaskErrorCategory,
+                    code: task.executionInfo.failureInfo.code,
+                    message: task.executionInfo.failureInfo.message,
+                };
+            }
+
+            batchTasks.push({
+                id: task.id,
+                taskArguments,
+                exitCode: task.executionInfo.exitCode,
+                result: task.executionInfo.result,
+                failureInfo,
+            });
+        });
+
+        console.log(tasks.length);
+
+        return undefined;
+    }
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
         const maxTasksPerPool = await this.getMaxTasksPerPool();
@@ -117,6 +146,32 @@ export class Batch {
             activeTasks: activeTasks,
             runningTasks: runningTasks,
         };
+    }
+
+    private async getFailedTaskList(jobId: string): Promise<CloudTask[]> {
+        const filterClause = `state eq 'completed' and executionInfo/result eq 'failure'`;
+
+        return this.getTaskList(jobId, { filter: filterClause });
+    }
+
+    private async getTaskList(jobId: string, options?: TaskListOptions): Promise<CloudTask[]> {
+        const tasks = [];
+        const taskOptions = {
+            taskListOptions: options,
+        };
+
+        const client = await this.batchClientProvider();
+        const taskListResponse = await client.task.list(jobId, taskOptions);
+        tasks.push(...taskListResponse.values());
+
+        let odatanextLink = taskListResponse.odatanextLink;
+        while (odatanextLink !== undefined) {
+            const taskListResponseNext = await client.task.listNext(odatanextLink, taskOptions);
+            tasks.push(...taskListResponseNext.values());
+            odatanextLink = taskListResponseNext.odatanextLink;
+        }
+
+        return tasks;
     }
 
     private async getActiveJobIds(): Promise<string[]> {
