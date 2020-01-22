@@ -19,6 +19,7 @@ describe('AxePuppeteerFactory', () => {
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
+            scanTimeoutInMin: 1,
         };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);

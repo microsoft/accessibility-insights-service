@@ -13,7 +13,8 @@ export declare type ScanRunErrorCodeName =
     | 'EmptyPage'
     | 'NavigationError'
     | 'InvalidContentType'
-    | 'UrlNotResolved';
+    | 'UrlNotResolved'
+    | 'ScanTimeout';
 
 export interface ScanRunErrorCode {
     // This type is part of the REST API client response.
@@ -84,6 +85,12 @@ export class ScanRunErrorCodes {
         codeId: 9010,
         message: 'URL cannot be reached',
     };
+
+    public static scanTimedOut: ScanRunErrorCode = {
+        code: 'ScanTimeout',
+        codeId: 9011,
+        message: 'Unable to complete scan before maximum timeout value',
+    };
 }
 
 export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunErrorCode } = {
@@ -97,4 +104,5 @@ export const scanErrorNameToErrorMap: { [key in ScanRunErrorCodeName]: ScanRunEr
     NavigationError: ScanRunErrorCodes.navigationError,
     InvalidContentType: ScanRunErrorCodes.invalidContentType,
     UrlNotResolved: ScanRunErrorCodes.urlNotResolved,
+    ScanTimeout: ScanRunErrorCodes.scanTimedOut,
 };
