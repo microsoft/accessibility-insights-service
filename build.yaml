@@ -58,7 +58,7 @@ steps:
 
     - script: |
           yarn run pack
-      displayName: pack
+      displayName: create npm package zips
 
     - task: CopyFiles@2
       inputs:
