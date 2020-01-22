@@ -56,6 +56,10 @@ steps:
           summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
       displayName: publish code coverage
 
+    - script: |
+          yarn run pack
+      displayName: create npm package zips
+
     - task: CopyFiles@2
       inputs:
           SourceFolder: packages
@@ -71,6 +75,7 @@ steps:
               web-workers/dist/**/*
               functional-tests/dist/**/*
               health-client/dist/**/*
+              cli/drop/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md

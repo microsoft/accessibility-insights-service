@@ -11,6 +11,7 @@
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
         "cbuild": "npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
+        "pack": "npx lerna run pack --stream",
         "test": "npx jest",
         "lint": "npx lerna run lint --stream",
         "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.base.json --force",
