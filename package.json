@@ -151,7 +151,7 @@
     "resolutions": {
         "jquery": "^3.4.1",
         "puppeteer": "2.0.0",
-        "axe-core": "^3.3.2",
+        "axe-core": "3.3.2",
         "lodash": "^4.17.14",
         "https-proxy-agent": "^3.0.1",
         "serialize-javascript": "^2.1.1"
