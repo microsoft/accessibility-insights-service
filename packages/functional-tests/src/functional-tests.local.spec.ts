@@ -21,8 +21,8 @@ import { FunctionalTestGroup } from './test-groups/functional-test-group';
 
 describe('functional tests', () => {
     dotenv.config({ path: `${__dirname}/.env` });
-    const clientId = process.env.SP_CLIENT_ID;
-    const clientSecret = process.env.SP_PASSWORD;
+    const clientId = process.env.REST_API_SP_APP_ID;
+    const clientSecret = process.env.REST_API_SP_APP_SECRET;
     const tenantId = process.env.SP_TENANT;
     const apimName = process.env.APIM_SERVICE_NAME;
     const cosmosKey = process.env.COSMOS_DB_KEY;
@@ -39,18 +39,12 @@ describe('functional tests', () => {
 
     beforeAll(async () => {
         if (isServiceCredProvided()) {
-            const container = new Container({ autoBindInjectable: true });
-            setupRuntimeConfigContainer(container);
-            container.bind(Logger).toDynamicValue(_ => {
-                return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
-            });
-            registerAzureServicesToContainer(container, CredentialType.AppService);
-            const cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
-            a11yServiceClient = new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
+            const container = getContainer();
             onDemandPageScanRunResultProvider = container.get(OnDemandPageScanRunResultProvider);
             guidGenerator = container.get(GuidGenerator);
             logger = container.get(Logger);
             testRunner = container.get(TestRunner);
+            a11yServiceClient = container.get(A11yServiceClient);
             await logger.setup({
                 source: 'dev box',
             });
@@ -155,5 +149,22 @@ describe('functional tests', () => {
         tests.setTestContext(testContextData);
 
         return tests;
+    }
+
+    function getContainer(): Container {
+        const container = new Container({ autoBindInjectable: true });
+        setupRuntimeConfigContainer(container);
+        container.bind(Logger).toDynamicValue(_ => {
+            return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
+        });
+        registerAzureServicesToContainer(container, CredentialType.AppService);
+
+        container.bind(A11yServiceClient).toDynamicValue(_ => {
+            const cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
+
+            return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
+        });
+
+        return container;
     }
 });
