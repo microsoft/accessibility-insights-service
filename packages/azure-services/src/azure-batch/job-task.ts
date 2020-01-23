@@ -53,4 +53,5 @@ export interface BatchTask {
     exitCode: number;
     result: BatchTaskExecutionResult;
     failureInfo?: BatchTaskFailureInfo;
+    timestamp: Date;
 }

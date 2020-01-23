@@ -118,6 +118,7 @@ describe(Batch, () => {
 
     describe('getFailedTasks()', () => {
         it('get failed tasks', async () => {
+            const timestamp = new Date();
             const taskArguments = {
                 arg1: 'arg-1-value',
                 arg2: 'arg-2-value',
@@ -139,6 +140,7 @@ describe(Batch, () => {
                             message: 'Task Error Message',
                         } as TaskFailureInformation,
                     } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
                 },
                 {
                     // task with partial error info
@@ -152,6 +154,7 @@ describe(Batch, () => {
                         result: 'failure',
                         failureInfo: undefined,
                     } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
                 },
                 {
                     // task without environment settings
@@ -162,6 +165,7 @@ describe(Batch, () => {
                         result: 'failure',
                         failureInfo: undefined,
                     } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
                 },
                 {
                     // task without TASK_ARGUMENTS environment value
@@ -176,6 +180,7 @@ describe(Batch, () => {
                             message: 'Task Error Message',
                         } as TaskFailureInformation,
                     } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
                 },
             ];
 
@@ -202,15 +207,23 @@ describe(Batch, () => {
                     exitCode: 1,
                     result: 'failure',
                     failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                    timestamp,
                 },
-                { id: 'id-2', taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}', exitCode: 1, result: 'failure' },
-                { id: 'id-3', taskArguments: undefined, exitCode: 1, result: 'failure' },
+                {
+                    id: 'id-2',
+                    taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
+                    exitCode: 1,
+                    result: 'failure',
+                    timestamp,
+                },
+                { id: 'id-3', taskArguments: undefined, exitCode: 1, result: 'failure', timestamp: timestamp },
                 {
                     id: 'id-4',
                     taskArguments: undefined,
                     exitCode: 1,
                     result: 'failure',
                     failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                    timestamp,
                 },
             ];
 

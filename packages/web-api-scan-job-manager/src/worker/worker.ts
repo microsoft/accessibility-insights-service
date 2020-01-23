@@ -6,8 +6,12 @@ import { inject, injectable } from 'inversify';
 import { cloneDeepWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
-import { BatchPoolLoadSnapshotProvider } from 'service-library';
+import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
+
+export interface TaskArguments {
+    id: string;
+}
 
 @injectable()
 export class Worker {
@@ -22,6 +26,7 @@ export class Worker {
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
+        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(Logger) private readonly logger: Logger,
@@ -29,9 +34,6 @@ export class Worker {
     ) {}
 
     public async run(): Promise<void> {
-        // const tasks = await this.batch.getFailedTasks('1env');
-        // console.log(tasks.length);
-
         await this.init();
 
         // tslint:disable-next-line: no-constant-condition
@@ -79,11 +81,50 @@ export class Worker {
             if (moment().toDate() >= this.restartAfterTime) {
                 this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
                 await this.waitForChildTasks();
+                await this.completeTerminatedTasks();
+
                 break;
             }
 
             await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
         }
+    }
+
+    private async completeTerminatedTasks(): Promise<void> {
+        const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
+        await Promise.all(
+            failedTasks.map(async failedTask => {
+                // tslint:disable-next-line: no-unsafe-any
+                const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
+                if (taskArguments !== undefined && taskArguments.id !== undefined) {
+                    let pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
+                    if (pageScanResult !== undefined) {
+                        if (pageScanResult.run.state !== 'failed') {
+                            let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
+                            error =
+                                failedTask.failureInfo !== undefined
+                                    ? `${error}, Error category: ${failedTask.failureInfo.category}, Error message: ${
+                                          failedTask.failureInfo.message
+                                      }`
+                                    : error;
+
+                            pageScanResult.run = {
+                                state: 'failed',
+                                timestamp: failedTask.timestamp.toJSON(),
+                                error,
+                            };
+                            pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+                        }
+                    } else {
+                        this.logger.logError(`Task has no corresponding state in a service storage`, {
+                            taskProperties: JSON.stringify(failedTask),
+                        });
+                    }
+                } else {
+                    this.logger.logError(`Task has no run arguments defined`, { taskProperties: JSON.stringify(failedTask) });
+                }
+            }),
+        );
     }
 
     private async waitForChildTasks(): Promise<void> {

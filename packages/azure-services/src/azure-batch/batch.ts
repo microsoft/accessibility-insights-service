@@ -51,6 +51,7 @@ export class Batch {
                 exitCode: task.executionInfo.exitCode,
                 result: task.executionInfo.result,
                 failureInfo,
+                timestamp: task.stateTransitionTime,
             });
         });
 
