@@ -52,6 +52,7 @@ describe('functional tests', () => {
             testContextData = {
                 scanUrl: 'https://www.washington.edu/accesscomputing/AU/before.html',
             };
+            testContextData.scanId = (await a11yServiceClient.postScanUrl(testContextData.scanUrl)).body[0].scanId;
             releaseIdStub = `dev-${guidGenerator.createGuid()}`;
             runIdStub = `dev-${guidGenerator.createGuid()}`;
         } else {
@@ -59,49 +60,14 @@ describe('functional tests', () => {
         }
     });
 
-    testIf('PostScan', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const postScanTests = getTests('PostScan');
-        await testRunner.run(postScanTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
-
-    testIf('ScanStatus', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const scanStatusTests = getTests('ScanStatus');
-        testContextData.scanId = (await a11yServiceClient.postScanUrl(testContextData.scanUrl)).body[0].scanId;
-        await testRunner.run(scanStatusTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
+    testEach(['PostScan', 'ScanStatus'], isServiceCredProvided);
 
     testIf('ScanExecution', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const scanRunResultResponse = await waitForScanRequestCompletion();
-        expect(scanRunResultResponse.reports.length).toEqual(2);
-        testContextData.reportId = scanRunResultResponse.reports[0].reportId;
+        await waitForScanRequestCompletion();
         done();
     });
 
-    testIf('ScanPreProcessing', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const scanPreProcessingTests = getTests('ScanPreProcessing');
-        await testRunner.run(scanPreProcessingTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
-
-    testIf('ScanQueueing', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const scanQueueingTests = getTests('ScanQueueing');
-        await testRunner.run(scanQueueingTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
-
-    testIf('ScanReports', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const scanReportsTests = getTests('ScanReports');
-        await testRunner.run(scanReportsTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
-
-    testIf('Finalizer', isServiceCredProvided, async (done: jest.DoneCallback) => {
-        const finalizerTests = getTests('Finalizer');
-        await testRunner.run(finalizerTests, TestEnvironment.all, releaseIdStub, runIdStub);
-        done();
-    });
+    testEach(['ScanPreProcessing', 'ScanQueueing', 'ScanReports', 'Finalizer'], isServiceCredProvided);
 
     function isServiceCredProvided(): boolean {
         return (
@@ -127,6 +93,16 @@ describe('functional tests', () => {
             },
             10 * 60 * 1000,
         );
+    }
+
+    function testEach(names: TestGroupName[], condition: () => boolean | Promise<boolean>): void {
+        names.forEach(name => {
+            testIf(name, condition, async (done: jest.DoneCallback) => {
+                const testContainer = getTests(name);
+                await testRunner.run(testContainer, TestEnvironment.all, releaseIdStub, runIdStub);
+                done();
+            });
+        });
     }
 
     async function waitForScanRequestCompletion(): Promise<ScanRunResultResponse> {
