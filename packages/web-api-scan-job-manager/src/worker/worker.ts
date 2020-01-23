@@ -114,6 +114,8 @@ export class Worker {
                                 error,
                             };
                             pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+
+                            this.logger.logError(error, { taskProperties: JSON.stringify(failedTask) });
                         }
                     } else {
                         this.logger.logError(`Task has no corresponding state in a service storage`, {
