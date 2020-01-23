@@ -293,12 +293,13 @@ components:
                         - UrlNavigationTimeout
                         - HttpErrorCode
                         - SslError
-                        - MainResourceLoadFailure
+                        - ResourceLoadFailure
                         - InvalidUrl
                         - EmptyPage
                         - NavigationError
                         - InvalidContentType
                         - UrlNotResolved
+                        - ScanTimeout
                 codeId:
                     type: integer
                     format: int32

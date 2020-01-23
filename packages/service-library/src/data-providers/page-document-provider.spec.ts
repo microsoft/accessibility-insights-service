@@ -37,6 +37,7 @@ describe('PageDocumentProvider', () => {
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
+            scanTimeoutInMin: 1,
         };
 
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();

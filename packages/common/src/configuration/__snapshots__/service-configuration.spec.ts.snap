@@ -150,10 +150,15 @@ Object {
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
     },
+    "scanTimeoutInMin": Object {
+      "default": 3,
+      "doc": "Maximum allowed time for scanning a web page in minutes",
+      "format": "int",
+    },
   },
   "taskConfig": Object {
     "taskTimeoutInMinutes": Object {
-      "default": 3,
+      "default": 5,
       "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },
@@ -311,10 +316,15 @@ Object {
       "doc": "Minimum days since we last scanned. Pages newer than this time will not be scanned.",
       "format": "int",
     },
+    "scanTimeoutInMin": Object {
+      "default": 3,
+      "doc": "Maximum allowed time for scanning a web page in minutes",
+      "format": "int",
+    },
   },
   "taskConfig": Object {
     "taskTimeoutInMinutes": Object {
-      "default": 3,
+      "default": 5,
       "doc": "Timeout value after which the task has to be terminated",
       "format": "int",
     },

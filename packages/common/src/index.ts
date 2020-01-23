@@ -17,3 +17,5 @@ export {
     LogRuntimeConfig,
 } from './configuration/service-configuration';
 export { setupRuntimeConfigContainer } from './setup-runtime-config-container';
+
+export { PromiseUtils } from './system/promise-utils';

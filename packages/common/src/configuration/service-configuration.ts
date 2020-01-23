@@ -30,6 +30,7 @@ export interface ScanRunTimeConfig {
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
     accessibilityRuleExclusionList: string[];
+    scanTimeoutInMin: number;
 }
 
 export interface RestApiConfig {
@@ -122,7 +123,7 @@ export class ServiceConfiguration {
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
-                    default: 3,
+                    default: 5,
                     doc: 'Timeout value after which the task has to be terminated',
                 },
             },
@@ -206,6 +207,11 @@ export class ServiceConfiguration {
                         'landmark-unique',
                     ],
                     doc: 'Axe core rule exclusion list',
+                },
+                scanTimeoutInMin: {
+                    default: 3,
+                    format: 'int',
+                    doc: 'Maximum allowed time for scanning a web page in minutes',
                 },
             },
             restApiConfig: {

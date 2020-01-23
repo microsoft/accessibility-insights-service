@@ -11,7 +11,8 @@ export type ScanErrorTypes =
     | 'HttpErrorCode'
     | 'NavigationError'
     | 'InvalidContentType'
-    | 'UrlNotResolved';
+    | 'UrlNotResolved'
+    | 'ScanTimeout';
 
 export interface ScanError {
     errorType: ScanErrorTypes;
