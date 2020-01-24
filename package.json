@@ -13,6 +13,7 @@
         "build": "npx lerna run build --stream",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
+        "test-ci": "npx jest --ci --coverage && npx codecov",
         "lint": "npx lerna run lint --stream",
         "lint:fix": "tslint --fix -c ./tslint.json -p ./tsconfig.base.json --force",
         "precheckin": "npm-run-all --serial format build lint test copyright-check",
@@ -26,6 +27,7 @@
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
     "devDependencies": {
+        "codecov": "^3.6.2",
         "jest": "^24.7.1",
         "jest-circus": "^24.7.1",
         "jest-extended": "^0.11.2",
