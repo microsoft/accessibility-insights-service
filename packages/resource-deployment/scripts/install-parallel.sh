@@ -28,13 +28,15 @@ exitWithUsageInfo() {
     echo "
 Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret> -v <release version>
 where:
+
 Resource group - The name of the resource group that everything will be deployed in.
 Subscription - The subscription for the resource group.
 Environment - The environment in which the set up is running.
+Organisation name - The name of organisation.
 Publisher email - The email for notifications.
-Resource group - The resource group that this API instance needs to be added to.
-Client ID - the app registration client id used for function app authentication/ authorization.
-Client Secret - the secret used to authenticate with the AD application
+Client ID - The app registration client ID used for function app authentication.
+Client Secret - The secret used to authenticate with the AD application.
+Release Version - The deployment release version.
 Azure region - Azure region where the instances will be deployed. Available Azure regions:
     centralus
     eastasia
@@ -70,8 +72,10 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 }
 
 function waitForProcesses() {
-    local -n processesToWaitFor=$1
-    for pid in ${processesToWaitFor[@]}; do
+    local processesToWaitFor=$1
+
+    list="$processesToWaitFor[@]"
+    for pid in "${!list}"; do
         echo "Waiting for process with pid $pid"
         wait $pid
         echo "Process with pid $pid exited"
@@ -79,10 +83,11 @@ function waitForProcesses() {
 }
 
 function runInParallel() {
-    local -n processPaths=$1
+    local processPaths=$1
     local -a parallelizableProcesses
 
-    for processPath in ${processPaths[@]}; do
+    list="$processPaths[@]"
+    for processPath in "${!list}"; do
         . "${processPath}" &
         echo "Created process with pid $! for process path - $processPath"
         parallelizableProcesses+=("$!")
@@ -119,7 +124,6 @@ fi
 az account set --subscription "$subscription"
 
 . "${0%/*}/create-resource-group.sh"
-
 . "${0%/*}/create-storage-account.sh"
 
 resourceGroupSuffix=${storageAccountName:11}

@@ -97,31 +97,31 @@ export class Worker {
                 // tslint:disable-next-line: no-unsafe-any
                 const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
                 if (taskArguments !== undefined && taskArguments.id !== undefined) {
+                    let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
+                    error =
+                        failedTask.failureInfo !== undefined
+                            ? `${error}, Error category: ${failedTask.failureInfo.category}, Error message: ${
+                                  failedTask.failureInfo.message
+                              }`
+                            : error;
+
                     let pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
                     if (pageScanResult !== undefined) {
                         if (pageScanResult.run.state !== 'failed') {
-                            let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
-                            error =
-                                failedTask.failureInfo !== undefined
-                                    ? `${error}, Error category: ${failedTask.failureInfo.category}, Error message: ${
-                                          failedTask.failureInfo.message
-                                      }`
-                                    : error;
-
                             pageScanResult.run = {
                                 state: 'failed',
                                 timestamp: failedTask.timestamp.toJSON(),
                                 error,
                             };
                             pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
-
-                            this.logger.logError(error, { taskProperties: JSON.stringify(failedTask) });
                         }
                     } else {
                         this.logger.logError(`Task has no corresponding state in a service storage`, {
                             taskProperties: JSON.stringify(failedTask),
                         });
                     }
+
+                    this.logger.logError(error, { taskProperties: JSON.stringify(failedTask) });
                 } else {
                     this.logger.logError(`Task has no run arguments defined`, { taskProperties: JSON.stringify(failedTask) });
                 }
@@ -133,7 +133,6 @@ export class Worker {
         this.logger.logInfo('Waiting for child tasks to complete');
 
         let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
-
         while (this.hasChildTasksRunning(poolMetricsInfo)) {
             await this.system.wait(5000);
             poolMetricsInfo = await this.batch.getPoolMetricsInfo();

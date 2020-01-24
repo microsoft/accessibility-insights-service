@@ -128,39 +128,11 @@ describe(Worker, () => {
     });
 
     it('complete terminated tasks', async () => {
-        maxWallClockTimeInHours = 0;
         const timestamp = new Date();
         const scanId = '12';
         const taskArguments = { id: scanId };
-        const messages: Message[] = [{ messageText: '{}', messageId: 'message-id' }];
 
-        let poolMetricsInfoCallbackCount = 0;
-        batchMock
-            .setup(async o => o.getPoolMetricsInfo())
-            .callback(() => {
-                poolMetricsInfoCallbackCount += 1;
-            })
-            .returns(async () => {
-                if (poolMetricsInfoCallbackCount > 1) {
-                    poolMetricsInfo.load.activeTasks = 0;
-                    poolMetricsInfo.load.runningTasks = 1;
-
-                    return Promise.resolve(poolMetricsInfo);
-                } else {
-                    return Promise.resolve(poolMetricsInfo);
-                }
-            });
-        poolLoadGeneratorMock
-            .setup(async o =>
-                o.getPoolLoadSnapshot(
-                    It.is(actualMetrics => {
-                        return _.isEqual(poolMetricsInfo, actualMetrics);
-                    }),
-                ),
-            )
-            .returns(async () => Promise.resolve(poolLoadSnapshot));
-        queueMock.setup(async o => o.getMessages()).returns(async () => Promise.resolve(messages));
-        batchMock.setup(async o => o.createTasks(batchConfig.jobId, It.isAny())).returns(async () => Promise.resolve([]));
+        setupWorkerRunCompletelyOnce();
 
         const expectedFailedTasks: BatchTask[] = [
             {
@@ -481,6 +453,38 @@ describe(Worker, () => {
         expect(poolMetricsInfo.load.activeTasks).toBe(0);
         expect(poolMetricsInfo.load.runningTasks).toBe(1);
     });
+
+    function setupWorkerRunCompletelyOnce(): void {
+        maxWallClockTimeInHours = 0;
+        const messages: Message[] = [{ messageText: '{}', messageId: 'message-id' }];
+        let poolMetricsInfoCallbackCount = 0;
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .callback(() => {
+                poolMetricsInfoCallbackCount += 1;
+            })
+            .returns(async () => {
+                if (poolMetricsInfoCallbackCount > 1) {
+                    poolMetricsInfo.load.activeTasks = 0;
+                    poolMetricsInfo.load.runningTasks = 1;
+
+                    return Promise.resolve(poolMetricsInfo);
+                } else {
+                    return Promise.resolve(poolMetricsInfo);
+                }
+            });
+        poolLoadGeneratorMock
+            .setup(async o =>
+                o.getPoolLoadSnapshot(
+                    It.is(actualMetrics => {
+                        return _.isEqual(poolMetricsInfo, actualMetrics);
+                    }),
+                ),
+            )
+            .returns(async () => Promise.resolve(poolLoadSnapshot));
+        queueMock.setup(async o => o.getMessages()).returns(async () => Promise.resolve(messages));
+        batchMock.setup(async o => o.createTasks(batchConfig.jobId, It.isAny())).returns(async () => Promise.resolve([]));
+    }
 
     function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): void {
         const document = {
