@@ -91,15 +91,15 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .inSingletonScope();
     container.bind(Queue).toSelf();
 
-    container
-        .bind(Batch)
-        .toSelf()
-        .inSingletonScope();
+    setupSingletonAzureBatchServiceClientProvider(container);
     container
         .bind(BatchConfig)
         .toSelf()
         .inSingletonScope();
-    setupSingletonAzureBatchServiceClientProvider(container);
+    container
+        .bind(Batch)
+        .toSelf()
+        .inSingletonScope();
 }
 
 async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {

@@ -9,6 +9,8 @@ import { ScannerBatchTaskConfig } from './scanner-batch-task-config';
 
 @injectable()
 export class ScanTaskParameterProvider implements BatchTaskParameterProvider {
+    private readonly taskArgumentsValueName = 'TASK_ARGUMENTS';
+
     public constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ScannerBatchTaskConfig) private readonly runnerTaskConfig: ScannerBatchTaskConfig,
@@ -19,7 +21,8 @@ export class ScanTaskParameterProvider implements BatchTaskParameterProvider {
         const commandLine = this.runnerTaskConfig.getCommandLine(message);
         const maxTaskDurationInMinutes = (await this.getTaskConfig()).taskTimeoutInMinutes;
         const environmentSettings = this.runnerTaskConfig.getEnvironmentSettings();
-        environmentSettings.push({ name: 'TASK_ARGUMENTS', value: messageText });
+
+        this.setTaskArgumentsValue(environmentSettings, messageText);
 
         return {
             id: taskId,
@@ -28,6 +31,16 @@ export class ScanTaskParameterProvider implements BatchTaskParameterProvider {
             environmentSettings,
             constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
         };
+    }
+
+    private setTaskArgumentsValue(environmentSettings: BatchServiceModels.EnvironmentSetting[], messageText: string): void {
+        const taskArguments = { name: this.taskArgumentsValueName, value: messageText };
+        const index = environmentSettings.map(i => i.name).indexOf(this.taskArgumentsValueName);
+        if (index > -1) {
+            environmentSettings.splice(index, 1, taskArguments);
+        } else {
+            environmentSettings.push(taskArguments);
+        }
     }
 
     private async getTaskConfig(): Promise<TaskRuntimeConfig> {

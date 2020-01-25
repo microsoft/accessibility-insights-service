@@ -5,7 +5,7 @@ import { BatchServiceModels } from '@azure/batch';
 import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { VError } from 'verror';
@@ -23,7 +23,9 @@ export class Batch {
 
     public constructor(
         @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @inject(iocTypeNames.BatchTaskParameterProvider) private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
+        @optional()
+        @inject(iocTypeNames.BatchTaskParameterProvider)
+        private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
