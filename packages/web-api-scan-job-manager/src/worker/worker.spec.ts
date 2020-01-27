@@ -159,7 +159,7 @@ describe(Worker, () => {
             run: {
                 state: 'failed',
                 timestamp: timestamp.toJSON(),
-                error: 'Task was terminated unexpectedly. Exit code: 1, Error category: userError, Error message: Task Error Message',
+                error: 'Task was terminated unexpectedly. Exit code: 1, Error category: userError, Error details: Task Error Message',
             },
         } as any;
         onDemandPageScanRunResultProviderMock

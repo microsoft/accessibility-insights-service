@@ -236,7 +236,7 @@ describe(Batch, () => {
                     failureInfo: {
                         category: 'userError',
                         code: '1',
-                        message: `Message: The maximum execution time configured on the task was exceeded\nAdditionalErrorCode: FailureExitCode`,
+                        message: `Message: The maximum execution time configured on the task was exceeded, AdditionalErrorCode: FailureExitCode`,
                     },
                     timestamp,
                 },

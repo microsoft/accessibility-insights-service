@@ -43,9 +43,9 @@ export class Batch {
                 let message = '';
                 if (task.executionInfo.failureInfo.details !== undefined) {
                     task.executionInfo.failureInfo.details.forEach(details => {
-                        message = `${message}${details.name}: ${details.value}\n`;
+                        message = `${message}${details.name}: ${details.value}, `;
                     });
-                    message = message.slice(0, -1);
+                    message = message.slice(0, -2);
                 } else {
                     message = task.executionInfo.failureInfo.message;
                 }
