@@ -40,10 +40,20 @@ export class Batch {
 
             let failureInfo: BatchTaskFailureInfo;
             if (task.executionInfo.failureInfo !== undefined) {
+                let message = '';
+                if (task.executionInfo.failureInfo.details !== undefined) {
+                    task.executionInfo.failureInfo.details.forEach(details => {
+                        message = `${message}${details.name}: ${details.value}\n`;
+                    });
+                    message = message.slice(0, -1);
+                } else {
+                    message = task.executionInfo.failureInfo.message;
+                }
+
                 failureInfo = {
                     category: task.executionInfo.failureInfo.category as BatchTaskErrorCategory,
                     code: task.executionInfo.failureInfo.code,
-                    message: task.executionInfo.failureInfo.message,
+                    message,
                 };
             }
 

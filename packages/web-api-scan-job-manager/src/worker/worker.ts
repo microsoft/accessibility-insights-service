@@ -81,17 +81,24 @@ export class Worker {
             if (moment().toDate() >= this.restartAfterTime) {
                 this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
                 await this.waitForChildTasks();
-                await this.completeTerminatedTasks();
 
                 break;
             }
 
             await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
         }
+
+        await this.completeTerminatedTasks();
     }
 
     private async completeTerminatedTasks(): Promise<void> {
         const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
+        if (failedTasks === undefined || failedTasks.length === 0) {
+            this.logger.logInfo('No any job tasks has been terminated abnormally');
+
+            return;
+        }
+
         await Promise.all(
             failedTasks.map(async failedTask => {
                 // tslint:disable-next-line: no-unsafe-any

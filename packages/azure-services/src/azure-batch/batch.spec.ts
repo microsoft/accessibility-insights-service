@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement max-func-body-length
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement max-func-body-length max-line-length
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
@@ -125,8 +125,7 @@ describe(Batch, () => {
             };
             const tasks = [
                 {
-                    // task with full error info
-                    id: 'id-1',
+                    id: 'id-1: task with full failure info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -137,14 +136,23 @@ describe(Batch, () => {
                         failureInfo: {
                             category: 'userError' as ErrorCategory,
                             code: '1',
-                            message: 'Task Error Message',
+                            message: 'The task was ended by user request',
+                            details: [
+                                {
+                                    name: 'Message',
+                                    value: 'The maximum execution time configured on the task was exceeded',
+                                },
+                                {
+                                    name: 'AdditionalErrorCode',
+                                    value: 'FailureExitCode',
+                                },
+                            ],
                         } as TaskFailureInformation,
                     } as TaskExecutionInformation,
                     stateTransitionTime: timestamp,
                 },
                 {
-                    // task with partial error info
-                    id: 'id-2',
+                    id: 'id-2: task with empty failure info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -157,19 +165,38 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    // task without environment settings
-                    id: 'id-3',
-                    environmentSettings: undefined,
+                    id: 'id-3: task with empty failure details info',
+                    environmentSettings: [
+                        { name: 'name-1', value: 'value-1' },
+                        { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
+                    ] as BatchServiceModels.EnvironmentSetting[],
                     executionInfo: {
                         exitCode: 1,
                         result: 'failure',
-                        failureInfo: undefined,
+                        failureInfo: {
+                            category: 'userError' as ErrorCategory,
+                            code: '1',
+                            message: 'The task was ended by user request',
+                        } as TaskFailureInformation,
                     } as TaskExecutionInformation,
                     stateTransitionTime: timestamp,
                 },
                 {
-                    // task without TASK_ARGUMENTS environment value
-                    id: 'id-4',
+                    id: 'id-4: task without environment settings data',
+                    environmentSettings: undefined,
+                    executionInfo: {
+                        exitCode: 1,
+                        result: 'failure',
+                        failureInfo: {
+                            category: 'userError' as ErrorCategory,
+                            code: '1',
+                            message: 'The task was ended by user request',
+                        } as TaskFailureInformation,
+                    } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
+                },
+                {
+                    id: 'id-5: task without TASK_ARGUMENTS environment value',
                     environmentSettings: [{ name: 'name-1', value: 'value-1' }] as BatchServiceModels.EnvironmentSetting[],
                     executionInfo: {
                         exitCode: 1,
@@ -177,7 +204,7 @@ describe(Batch, () => {
                         failureInfo: {
                             category: 'userError' as ErrorCategory,
                             code: '1',
-                            message: 'Task Error Message',
+                            message: 'The task was ended by user request',
                         } as TaskFailureInformation,
                     } as TaskExecutionInformation,
                     stateTransitionTime: timestamp,
@@ -186,7 +213,7 @@ describe(Batch, () => {
 
             const items1 = new TaskListStub(tasks.slice(0, 2));
             items1.odatanextLink = 'odatanextLink-1';
-            const items2 = new TaskListStub(tasks.slice(2, 4));
+            const items2 = new TaskListStub(tasks.slice(2, tasks.length));
 
             const options = {
                 taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'failure'` },
@@ -202,27 +229,47 @@ describe(Batch, () => {
 
             const expectedFailedTasks: BatchTask[] = [
                 {
-                    id: 'id-1',
+                    id: 'id-1: task with full failure info',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 1,
                     result: 'failure',
-                    failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                    failureInfo: {
+                        category: 'userError',
+                        code: '1',
+                        message: `Message: The maximum execution time configured on the task was exceeded\nAdditionalErrorCode: FailureExitCode`,
+                    },
                     timestamp,
                 },
                 {
-                    id: 'id-2',
+                    id: 'id-2: task with empty failure info',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 1,
                     result: 'failure',
+                    failureInfo: undefined,
                     timestamp,
                 },
-                { id: 'id-3', taskArguments: undefined, exitCode: 1, result: 'failure', timestamp: timestamp },
                 {
-                    id: 'id-4',
+                    id: 'id-3: task with empty failure details info',
+                    taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
+                    exitCode: 1,
+                    result: 'failure',
+                    failureInfo: { category: 'userError', code: '1', message: 'The task was ended by user request' },
+                    timestamp,
+                },
+                {
+                    id: 'id-4: task without environment settings data',
                     taskArguments: undefined,
                     exitCode: 1,
                     result: 'failure',
-                    failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                    failureInfo: { category: 'userError', code: '1', message: 'The task was ended by user request' },
+                    timestamp: timestamp,
+                },
+                {
+                    id: 'id-5: task without TASK_ARGUMENTS environment value',
+                    taskArguments: undefined,
+                    exitCode: 1,
+                    result: 'failure',
+                    failureInfo: { category: 'userError', code: '1', message: 'The task was ended by user request' },
                     timestamp,
                 },
             ];

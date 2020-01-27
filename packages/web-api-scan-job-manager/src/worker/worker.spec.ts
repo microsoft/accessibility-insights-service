@@ -201,7 +201,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
         queueMock
             .setup(async o => o.getMessages())
-            .callback(q => {
+            .callback(() => {
                 scanMessagesCount += 1;
             })
             .returns(async () => {
@@ -366,7 +366,7 @@ describe(Worker, () => {
             .verifiable(Times.never());
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
-            .callback(q => {
+            .callback(() => {
                 poolMetricsInfoCallbackCount += 1;
             })
             .returns(async () => {
@@ -420,7 +420,7 @@ describe(Worker, () => {
 
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
-            .callback(q => {
+            .callback(() => {
                 poolMetricsInfoCallbackCount += 1;
                 currentTime = moment(startTime)
                     .add(maxWallClockTimeInHours, 'hour')
@@ -432,10 +432,7 @@ describe(Worker, () => {
             .returns(async () => {
                 return Promise.resolve(poolMetricsInfo);
             });
-        batchMock
-            .setup(async o => o.getFailedTasks(batchConfig.jobId))
-            .returns(async () => Promise.resolve([]))
-            .verifiable(Times.once());
+
         queueMock
             .setup(async o => o.getMessages())
             .returns(async () => Promise.resolve([]))
