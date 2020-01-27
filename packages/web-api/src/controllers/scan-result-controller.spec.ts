@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
+import * as moment from 'moment';
 import { HttpResponse, OnDemandPageScanRunResultProvider, ScanResultResponse, WebApiErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -114,11 +115,11 @@ describe(ScanResultController, () => {
         guidGeneratorMock
             .setup(gm => gm.getGuidTimestamp(scanId))
             .returns(() => time)
-            .verifiable(Times.once());
+            .verifiable(Times.atLeast(1));
     }
 
     describe('handleRequest', () => {
-        it('should return 400 for invalid scan Id', async () => {
+        it('should return 400 for invalid scan Id that is not a v6 guid', async () => {
             scanResultController = createScanResultController(context);
             guidGeneratorMock.reset();
             guidGeneratorMock
@@ -132,10 +133,24 @@ describe(ScanResultController, () => {
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
+        it('should return 400 for invalid scan Id that has a future timestamp', async () => {
+            scanResultController = createScanResultController(context);
+            const timeStamp = moment()
+                .add(1, 'year')
+                .toDate();
+            setupGetGuidTimestamp(timeStamp);
+
+            await scanResultController.handleRequest();
+
+            guidGeneratorMock.verifyAll();
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
+        });
+
         it('should return a default response for requests made too early', async () => {
             scanResultController = createScanResultController(context);
-            const timeStamp = new Date();
-            timeStamp.setFullYear(timeStamp.getFullYear() + 1);
+            const timeStamp = moment()
+                .subtract(1)
+                .toDate();
             setupGetGuidTimestamp(timeStamp);
 
             await scanResultController.handleRequest();

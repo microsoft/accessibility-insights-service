@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
+import * as moment from 'moment';
 import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 
@@ -13,11 +14,11 @@ export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly scanResponseConverter: ScanResponseConverter;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
-        const timeCurrent = new Date();
+        const timeRequested = moment(this.guidGenerator.getGuidTimestamp(scanId));
+        const timeCurrent = this.getCurrentMoment();
         const scanRequestProcessingDelayInSeconds = (await this.getRestApiConfig()).scanRequestProcessingDelayInSeconds;
 
-        return timeCurrent.getTime() - timeRequested.getTime() <= scanRequestProcessingDelayInSeconds * 1000;
+        return timeRequested.add(scanRequestProcessingDelayInSeconds, 'seconds').isAfter(timeCurrent);
     }
 
     protected async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
@@ -37,7 +38,8 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     protected isScanIdValid(scanId: string): boolean {
-        return this.guidGenerator.isValidV6Guid(scanId);
+        // also check the guid is generated in the past
+        return this.guidGenerator.isValidV6Guid(scanId) && moment(this.guidGenerator.getGuidTimestamp(scanId)).isBefore(moment());
     }
 
     protected getScanResultResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
@@ -45,5 +47,9 @@ export abstract class BaseScanResultController extends ApiController {
         const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
 
         return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResultDocument);
+    }
+
+    private getCurrentMoment(): moment.Moment {
+        return moment();
     }
 }

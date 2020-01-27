@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
+import * as moment from 'moment';
 import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -111,15 +112,16 @@ describe(BatchScanResultController, () => {
         guidGeneratorMock
             .setup(gm => gm.getGuidTimestamp(scanId))
             .returns(() => time)
-            .verifiable(Times.once());
+            .verifiable(Times.atLeast(1));
     }
 
     describe('handleRequest', () => {
         it('should return different response for different kind of scanIds', async () => {
             context.req.rawBody = JSON.stringify(batchRequestBody);
             batchScanResultController = createScanResultController(context);
-            const requestTooSoonTimeStamp = new Date();
-            requestTooSoonTimeStamp.setFullYear(requestTooSoonTimeStamp.getFullYear() + 1);
+            const requestTooSoonTimeStamp = moment()
+                .subtract(1)
+                .toDate();
             const validTimeStamp = new Date(0);
 
             setupGetGuidTimestamp(validScanId, validTimeStamp);
