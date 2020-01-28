@@ -51,7 +51,7 @@ export class Worker {
 
             let tasksQueuedCount = 0;
             if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-                let scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
+                const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
                     if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
@@ -61,8 +61,8 @@ export class Worker {
                 }
 
                 if (scanMessages.length > 0) {
-                    scanMessages = await this.dropCompletedScans(scanMessages);
-                    tasksQueuedCount = await this.addTasksToJob(scanMessages);
+                    const acceptedScanMessages = await this.dropCompletedScans(scanMessages);
+                    tasksQueuedCount = await this.addTasksToJob(acceptedScanMessages);
                 }
             }
 

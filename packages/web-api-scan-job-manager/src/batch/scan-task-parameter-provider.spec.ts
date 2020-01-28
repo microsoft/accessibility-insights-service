@@ -56,7 +56,13 @@ describe(ScanTaskParameterProvider, () => {
             id: taskId,
             commandLine: taskCommandLine,
             resourceFiles: taskResourceFiles,
-            environmentSettings: taskEnvironmentSettings,
+            environmentSettings: [
+                ...taskEnvironmentSettings,
+                {
+                    name: 'TASK_ARGUMENTS',
+                    value: '{"scanId":"scanId-1"}',
+                },
+            ],
             constraints: { maxWallClockTime: moment.duration({ minute: taskTimeoutInMinutes }).toISOString() },
         };
 
