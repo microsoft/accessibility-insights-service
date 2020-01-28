@@ -3,11 +3,13 @@
 import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { cloneDeepWith } from 'lodash';
+import { mergeWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
 import { StorageDocument } from 'storage-documents';
+
+// tslint:disable: no-unsafe-any no-any
 
 export interface TaskArguments {
     id: string;
@@ -61,11 +63,9 @@ export class Worker {
             // set the actual number of tasks added to the batch pool to process
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
-            this.logger.logInfo(
-                'Pool load statistics',
-                // tslint:disable-next-line: no-unsafe-any
-                cloneDeepWith(poolLoadSnapshot, value => (value !== undefined ? value.toString() : 'undefined')),
-            );
+            this.logger.logInfo('Pool load statistics', mergeWith({}, poolLoadSnapshot, (t, s, k) =>
+                s !== undefined ? (s.constructor.name !== 'Date' ? s.toString() : s.toJSON()) : 'undefined',
+            ) as any);
 
             // tslint:disable-next-line: no-null-keyword
             this.logger.trackEvent('BatchPoolStats', null, {
@@ -101,7 +101,6 @@ export class Worker {
 
         await Promise.all(
             failedTasks.map(async failedTask => {
-                // tslint:disable-next-line: no-unsafe-any
                 const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
                 if (taskArguments !== undefined && taskArguments.id !== undefined) {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
@@ -177,6 +176,7 @@ export class Worker {
         );
 
         const jobQueuedTasks = jobTasks.filter(jobTask => jobTask.state === JobTaskState.queued);
+        this.logger.logInfo(`Added ${jobQueuedTasks.length} new tasks`);
 
         return jobQueuedTasks.length;
     }
