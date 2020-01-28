@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
+import * as moment from 'moment';
 import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 
@@ -13,11 +14,11 @@ export abstract class BaseScanResultController extends ApiController {
     protected abstract readonly scanResponseConverter: ScanResponseConverter;
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
-        const timeRequested = this.guidGenerator.getGuidTimestamp(scanId);
-        const timeCurrent = new Date();
+        const timeRequested = moment(this.guidGenerator.getGuidTimestamp(scanId));
+        const timeCurrent = moment();
         const scanRequestProcessingDelayInSeconds = (await this.getRestApiConfig()).scanRequestProcessingDelayInSeconds;
 
-        return timeCurrent.getTime() - timeRequested.getTime() <= scanRequestProcessingDelayInSeconds * 1000;
+        return timeRequested.add(scanRequestProcessingDelayInSeconds, 'seconds').isAfter(timeCurrent);
     }
 
     protected async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
@@ -37,7 +38,11 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     protected isScanIdValid(scanId: string): boolean {
-        return this.guidGenerator.isValidV6Guid(scanId);
+        return (
+            this.guidGenerator.isValidV6Guid(scanId) &&
+            // also check the guid is generated in the past with 10 second buffer.
+            moment(this.guidGenerator.getGuidTimestamp(scanId)).isBefore(moment().add(10, 'seconds'))
+        );
     }
 
     protected getScanResultResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {

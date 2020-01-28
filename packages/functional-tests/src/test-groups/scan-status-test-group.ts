@@ -27,12 +27,12 @@ export class ScanStatusTestGroup extends FunctionalTestGroup {
         this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
     }
 
-    // Currently fails because of five minute wait (it assumes the scan id is valid and status was requested too early)
-    @test(TestEnvironment.none)
+    @test(TestEnvironment.all)
     public async testGetScanStatusWithInvalidScanId(): Promise<void> {
+        //Guid with a timestamp in 2607.
         const invalidGuid: string = '47cd7291-a928-6c96-bdb8-4be18b5a1305';
         const response = await this.a11yServiceClient.getScanStatus(invalidGuid);
 
-        this.expectWebApiErrorResponse(WebApiErrorCodes.resourceNotFound, response);
+        this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
     }
 }
