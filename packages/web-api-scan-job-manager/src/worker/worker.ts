@@ -100,8 +100,6 @@ export class Worker {
     private async completeTerminatedTasks(): Promise<void> {
         const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
         if (failedTasks === undefined || failedTasks.length === 0) {
-            this.logger.logInfo('No any job tasks has been terminated abnormally');
-
             return;
         }
 
