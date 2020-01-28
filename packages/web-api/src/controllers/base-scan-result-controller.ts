@@ -15,7 +15,7 @@ export abstract class BaseScanResultController extends ApiController {
 
     protected async isRequestMadeTooSoon(scanId: string): Promise<boolean> {
         const timeRequested = moment(this.guidGenerator.getGuidTimestamp(scanId));
-        const timeCurrent = this.getCurrentMoment();
+        const timeCurrent = moment();
         const scanRequestProcessingDelayInSeconds = (await this.getRestApiConfig()).scanRequestProcessingDelayInSeconds;
 
         return timeRequested.add(scanRequestProcessingDelayInSeconds, 'seconds').isAfter(timeCurrent);
@@ -38,8 +38,11 @@ export abstract class BaseScanResultController extends ApiController {
     }
 
     protected isScanIdValid(scanId: string): boolean {
-        // also check the guid is generated in the past
-        return this.guidGenerator.isValidV6Guid(scanId) && moment(this.guidGenerator.getGuidTimestamp(scanId)).isBefore(moment());
+        return (
+            this.guidGenerator.isValidV6Guid(scanId) &&
+            // also check the guid is generated in the past with 10 second buffer.
+            moment(this.guidGenerator.getGuidTimestamp(scanId)).isBefore(moment().add(10, 'seconds'))
+        );
     }
 
     protected getScanResultResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
@@ -47,9 +50,5 @@ export abstract class BaseScanResultController extends ApiController {
         const baseUrl = this.context.req.url.substring(0, this.context.req.url.indexOf(segment) + segment.length);
 
         return this.scanResponseConverter.getScanResultResponse(baseUrl, this.apiVersion, pageScanResultDocument);
-    }
-
-    private getCurrentMoment(): moment.Moment {
-        return moment();
     }
 }
