@@ -41,7 +41,7 @@ Object {
       "format": "int",
     },
     "maxWallClockTimeInHours": Object {
-      "default": 5,
+      "default": 2,
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
@@ -207,7 +207,7 @@ Object {
       "format": "int",
     },
     "maxWallClockTimeInHours": Object {
-      "default": 5,
+      "default": 2,
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },

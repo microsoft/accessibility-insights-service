@@ -2,20 +2,19 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoadGenerator, Queue } from 'azure-services';
+import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, Message, PoolLoadGenerator, Queue } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import * as _ from 'lodash';
 import { BatchPoolMeasurements } from 'logger';
 import * as moment from 'moment';
-import { BatchPoolLoadSnapshotProvider } from 'service-library';
-import { StorageDocument } from 'storage-documents';
+import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
+import { OnDemandPageScanRunState, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion
+// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any mocha-no-side-effect-code no-null-keyword
 
-// tslint:disable-next-line: mocha-no-side-effect-code
 const unMockedMoment = jest.requireActual('moment') as typeof moment;
 let currentTime: string;
 
@@ -39,6 +38,7 @@ describe(Worker, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
     let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
+    let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let systemMock: IMock<typeof System>;
     let maxWallClockTimeInHours: number;
     const batchConfig: BatchConfig = {
@@ -78,6 +78,7 @@ describe(Worker, () => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider);
+        onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider);
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         maxWallClockTimeInHours = 1;
 
@@ -109,6 +110,7 @@ describe(Worker, () => {
             queueMock.object,
             poolLoadGeneratorMock.object,
             batchPoolLoadSnapshotProviderMock.object,
+            onDemandPageScanRunResultProviderMock.object,
             batchConfig,
             serviceConfigMock.object,
             loggerMock.object,
@@ -123,16 +125,119 @@ describe(Worker, () => {
         serviceConfigMock.verifyAll();
         batchPoolLoadSnapshotProviderMock.verifyAll();
         systemMock.verifyAll();
+        onDemandPageScanRunResultProviderMock.verifyAll();
+    });
+
+    it('complete terminated tasks', async () => {
+        const timestamp = new Date();
+        const scanId = '12';
+        const taskArguments = { id: scanId };
+
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+        queueMock
+            .setup(async o => o.getMessages())
+            .returns(async () => Promise.resolve([]))
+            .verifiable(Times.once());
+        setupBatchPoolLoadSnapshotProviderMock();
+
+        const expectedFailedTasks: BatchTask[] = [
+            {
+                id: 'id-1',
+                taskArguments: JSON.stringify(taskArguments),
+                exitCode: 1,
+                result: 'failure',
+                failureInfo: { category: 'userError', code: '1', message: 'Task Error Message' },
+                timestamp,
+            },
+        ];
+        batchMock
+            .setup(async o => o.getFailedTasks(batchConfig.jobId))
+            .returns(async () => Promise.resolve(expectedFailedTasks))
+            .verifiable(Times.once());
+
+        const pageScanResultStorageVersion = { run: { state: 'running' } } as any;
+        onDemandPageScanRunResultProviderMock
+            .setup(async o => o.readScanRun(scanId))
+            .returns(async () => Promise.resolve(pageScanResultStorageVersion))
+            .verifiable(Times.once());
+
+        const pageScanResultUpdatedVersion = {
+            run: {
+                state: 'failed',
+                timestamp: timestamp.toJSON(),
+                error: 'Task was terminated unexpectedly. Exit code: 1, Error category: userError, Error details: Task Error Message',
+            },
+        } as any;
+        onDemandPageScanRunResultProviderMock
+            .setup(async o => o.updateScanRun(pageScanResultUpdatedVersion))
+            .returns(async () => Promise.resolve(pageScanResultUpdatedVersion))
+            .verifiable(Times.once());
+
+        await worker.run();
+    });
+
+    it('drop message for a completed scan', async () => {
+        const taskCount = 2;
+        const queueMessages: Message[] = [];
+        const jobTasks: JobTask[] = [];
+        const scanIds: string[] = [];
+        let scanMessagesCount = 0;
+        for (let i = 1; i <= taskCount; i += 1) {
+            const id = `scan-id-${i}`;
+            scanIds.push(id);
+
+            const message = {
+                messageText: JSON.stringify({ id }),
+                messageId: `message-id-${i}`,
+            };
+            queueMessages.push(message);
+
+            const jobTask = new JobTask();
+            jobTask.state = JobTaskState.queued;
+            jobTask.correlationId = message.messageId;
+            jobTasks.push(jobTask);
+        }
+        batchMock
+            .setup(async o => o.createTasks(batchConfig.jobId, queueMessages.slice(0, 1)))
+            .returns(async () => Promise.resolve(jobTasks.slice(0, 1)))
+            .verifiable(Times.once());
+        batchMock
+            .setup(async o => o.getPoolMetricsInfo())
+            .returns(async () => Promise.resolve(poolMetricsInfo))
+            .verifiable(Times.once());
+        queueMock
+            .setup(async o => o.getMessages())
+            .callback(() => {
+                scanMessagesCount += 1;
+            })
+            .returns(async () => {
+                return queueMessages.length >= scanMessagesCount
+                    ? Promise.resolve([queueMessages[scanMessagesCount - 1]])
+                    : Promise.resolve([]);
+            })
+            .verifiable(Times.exactly(taskCount + 1));
+        queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.exactly(taskCount));
+        setupBatchPoolLoadSnapshotProviderMock();
+        setupOnDemandPageScanRunResultProviderMock(scanIds, ['queued', 'failed']);
+
+        await worker.run();
     });
 
     it('add tasks to the job', async () => {
         const taskCount = 2;
         const queueMessages: Message[] = [];
         const jobTasks: JobTask[] = [];
+        const scanIds: string[] = [];
         let scanMessagesCount = 0;
         for (let i = 1; i <= taskCount; i += 1) {
+            const id = `scan-id-${i}`;
+            scanIds.push(id);
+
             const message = {
-                messageText: '{}',
+                messageText: JSON.stringify({ id }),
                 messageId: `message-id-${i}`,
             };
             queueMessages.push(message);
@@ -152,7 +257,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
         queueMock
             .setup(async o => o.getMessages())
-            .callback(q => {
+            .callback(() => {
                 scanMessagesCount += 1;
             })
             .returns(async () => {
@@ -173,13 +278,9 @@ describe(Worker, () => {
             samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
             maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
         };
-        loggerMock
-            .setup(lm =>
-                // tslint:disable-next-line: no-null-keyword
-                lm.trackEvent('BatchPoolStats', null, expectedMeasurements),
-            )
-            .verifiable(Times.once());
+        loggerMock.setup(lm => lm.trackEvent('BatchPoolStats', null, expectedMeasurements)).verifiable(Times.once());
         setupBatchPoolLoadSnapshotProviderMock();
+        setupOnDemandPageScanRunResultProviderMock(scanIds);
 
         await worker.run();
 
@@ -260,7 +361,7 @@ describe(Worker, () => {
             .verifiable(Times.never());
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
-            .callback(q => {
+            .callback(() => {
                 poolMetricsInfoCallbackCount += 1;
             })
             .returns(async () => {
@@ -317,7 +418,7 @@ describe(Worker, () => {
             .verifiable(Times.never());
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
-            .callback(q => {
+            .callback(() => {
                 poolMetricsInfoCallbackCount += 1;
             })
             .returns(async () => {
@@ -371,7 +472,7 @@ describe(Worker, () => {
 
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
-            .callback(q => {
+            .callback(() => {
                 poolMetricsInfoCallbackCount += 1;
                 currentTime = moment(startTime)
                     .add(maxWallClockTimeInHours, 'hour')
@@ -401,6 +502,20 @@ describe(Worker, () => {
         expect(poolMetricsInfo.load.activeTasks).toBe(0);
         expect(poolMetricsInfo.load.runningTasks).toBe(1);
     });
+
+    function setupOnDemandPageScanRunResultProviderMock(scanIds: string[], states: OnDemandPageScanRunState[] = []): void {
+        let i = 0;
+        const scanRuns = scanIds.map(id => {
+            const scanRun = { id, run: { state: states[i] !== undefined ? states[i] : 'queued' } } as any;
+            i = i + 1;
+
+            return scanRun;
+        });
+        onDemandPageScanRunResultProviderMock
+            .setup(async o => o.readScanRuns(scanIds))
+            .returns(async () => Promise.resolve(scanRuns))
+            .verifiable(Times.once());
+    }
 
     function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): void {
         const document = {

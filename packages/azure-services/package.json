@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Common package for CRUD operation with your azure storage",
     "scripts": {
-        "build": "tsc & echo",
+        "build": "tsc && echo",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
@@ -61,6 +61,7 @@
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0",
         "request-promise": "^4.2.4",
-        "request": "^2.88.0"
+        "request": "^2.88.0",
+        "storage-documents": "1.0.0"
     }
 }

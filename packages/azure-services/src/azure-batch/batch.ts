@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 // tslint:disable: no-submodule-imports
 import { BatchServiceModels } from '@azure/batch';
-import { OutputFile } from '@azure/batch/esm/models';
+import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
 import * as crypto from 'crypto';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { VError } from 'verror';
@@ -14,7 +14,7 @@ import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
 import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
-import { JobTask, JobTaskState } from './job-task';
+import { BatchTask, BatchTaskErrorCategory, BatchTaskFailureInfo, JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 
 @injectable()
@@ -23,11 +23,52 @@ export class Batch {
 
     public constructor(
         @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @inject(iocTypeNames.BatchTaskParameterProvider) private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
+        @optional()
+        @inject(iocTypeNames.BatchTaskParameterProvider)
+        private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
     ) {}
+
+    public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
+        const batchTasks: BatchTask[] = [];
+        const tasks = await this.getFailedTaskList(jobId);
+        tasks.map(task => {
+            const taskArguments =
+                task.environmentSettings !== undefined ? task.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS') : undefined;
+
+            let failureInfo: BatchTaskFailureInfo;
+            if (task.executionInfo.failureInfo !== undefined) {
+                let message = '';
+                if (task.executionInfo.failureInfo.details !== undefined) {
+                    task.executionInfo.failureInfo.details.forEach(details => {
+                        message = `${message}${details.name}: ${details.value}, `;
+                    });
+                    message = message.slice(0, -2);
+                } else {
+                    message = task.executionInfo.failureInfo.message;
+                }
+
+                failureInfo = {
+                    category: task.executionInfo.failureInfo.category as BatchTaskErrorCategory,
+                    code: task.executionInfo.failureInfo.code,
+                    message,
+                };
+            }
+
+            batchTasks.push({
+                id: task.id,
+                taskArguments: taskArguments !== undefined ? taskArguments.value : undefined,
+                exitCode: task.executionInfo.exitCode,
+                result: task.executionInfo.result,
+                failureInfo,
+                timestamp: task.stateTransitionTime,
+            });
+        });
+
+        return batchTasks;
+    }
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {
         const maxTasksPerPool = await this.getMaxTasksPerPool();
@@ -117,25 +158,57 @@ export class Batch {
         };
     }
 
-    private async getActiveJobIds(): Promise<string[]> {
-        const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
-        const options = {
-            jobListOptions: { filter: filterClause },
+    private async getFailedTaskList(jobId: string): Promise<CloudTask[]> {
+        const filterClause = `state eq 'completed' and executionInfo/result eq 'failure'`;
+
+        return this.getTaskList(jobId, { filter: filterClause });
+    }
+
+    private async getTaskList(jobId: string, options?: TaskListOptions): Promise<CloudTask[]> {
+        const tasks = [];
+        const taskOptions = {
+            taskListOptions: options,
         };
 
-        const jobs = [];
         const client = await this.batchClientProvider();
-        const jobListResponse = await client.job.list(options);
+        const taskListResponse = await client.task.list(jobId, taskOptions);
+        tasks.push(...taskListResponse.values());
+
+        let odatanextLink = taskListResponse.odatanextLink;
+        while (odatanextLink !== undefined) {
+            const taskListResponseNext = await client.task.listNext(odatanextLink, taskOptions);
+            tasks.push(...taskListResponseNext.values());
+            odatanextLink = taskListResponseNext.odatanextLink;
+        }
+
+        return tasks;
+    }
+
+    private async getActiveJobIds(): Promise<string[]> {
+        const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
+        const jobs = await this.getJobList({ filter: filterClause });
+
+        return jobs.map(i => i.id);
+    }
+
+    private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
+        const jobs = [];
+        const listOptions = {
+            jobListOptions: options,
+        };
+
+        const client = await this.batchClientProvider();
+        const jobListResponse = await client.job.list(listOptions);
         jobs.push(...jobListResponse.values());
 
         let odatanextLink = jobListResponse.odatanextLink;
         while (odatanextLink !== undefined) {
-            const jobListResponseNext = await client.job.listNext(odatanextLink, options);
+            const jobListResponseNext = await client.job.listNext(odatanextLink, listOptions);
             jobs.push(...jobListResponseNext.values());
             odatanextLink = jobListResponseNext.odatanextLink;
         }
 
-        return jobs.map(i => i.id);
+        return jobs;
     }
 
     private async addTaskCollection(jobId: string, messages: Message[]): Promise<JobTask[]> {

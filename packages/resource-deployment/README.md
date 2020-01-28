@@ -60,10 +60,10 @@ Get-AzureRmMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-
 
 ### 7. Deploy
 
--   Run below command to deploy Azure resources and binaries
+-   Run below script with required parameters as specified in a script's help to deploy Azure resources and binaries
 
     ```bash
-    ./dist/scripts/install.sh -r <resource group> -s <subscription name or id> -l <location> -e <environment>
+    ./dist/scripts/install-parallel.sh
     ```
 
 ### 8. Login to Azure portal to verify the resources are being created

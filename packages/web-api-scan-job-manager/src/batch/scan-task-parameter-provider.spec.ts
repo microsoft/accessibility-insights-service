@@ -14,7 +14,7 @@ import { ScannerBatchTaskConfig } from './scanner-batch-task-config';
 const taskTimeoutInMinutes = 5;
 const taskCommandLine = 'commandLine';
 const taskResourceFiles = 'resourceFiles' as any;
-const taskEnvironmentSettings = 'environmentSettings' as any;
+const taskEnvironmentSettings = [{ name: 'env_name', value: 'env_value' }] as any;
 const messageText = JSON.stringify({ scanId: 'scanId-1' });
 const taskId = 'id-1';
 let scannerBatchTaskConfigMock: IMock<ScannerBatchTaskConfig>;
@@ -56,12 +56,24 @@ describe(ScanTaskParameterProvider, () => {
             id: taskId,
             commandLine: taskCommandLine,
             resourceFiles: taskResourceFiles,
-            environmentSettings: taskEnvironmentSettings,
+            environmentSettings: [
+                ...taskEnvironmentSettings,
+                {
+                    name: 'TASK_ARGUMENTS',
+                    value: '{"scanId":"scanId-1"}',
+                },
+            ],
             constraints: { maxWallClockTime: moment.duration({ minute: taskTimeoutInMinutes }).toISOString() },
         };
 
         const actualTaskParameter = await scanTaskParameterProvider.getTaskParameter(taskId, messageText);
 
         expect(actualTaskParameter).toEqual(expectedTaskParameter);
+    });
+
+    it('create task argument parameter', async () => {
+        const actualTaskParameter = await scanTaskParameterProvider.getTaskParameter(taskId, messageText);
+
+        expect(actualTaskParameter.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS').value).toEqual(messageText);
     });
 });

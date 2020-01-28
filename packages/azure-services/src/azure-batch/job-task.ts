@@ -1,7 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+// tslint:disable: no-any
 import * as crypto from 'crypto';
 import { VError } from 'verror';
+
+export declare type BatchTaskExecutionResult = 'success' | 'failure';
+export declare type BatchTaskErrorCategory = 'userError' | 'serverError';
 
 export enum JobTaskState {
     // custom states
@@ -35,4 +39,19 @@ export class JobTask {
 
         this.id = `${prefix}${crypto.randomBytes(size).toString('hex')}`;
     }
+}
+
+export interface BatchTaskFailureInfo {
+    category: BatchTaskErrorCategory;
+    code?: string;
+    message?: string;
+}
+
+export interface BatchTask {
+    id: string;
+    taskArguments: any;
+    exitCode: number;
+    result: BatchTaskExecutionResult;
+    failureInfo?: BatchTaskFailureInfo;
+    timestamp: Date;
 }
