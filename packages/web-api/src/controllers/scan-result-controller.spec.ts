@@ -146,6 +146,20 @@ describe(ScanResultController, () => {
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId));
         });
 
+        it('should return a default response for requests made within 10 sec buffer', async () => {
+            scanResultController = createScanResultController(context);
+            const timeStamp = moment()
+                .add(1, 'second')
+                .toDate();
+            setupGetGuidTimestamp(timeStamp);
+
+            await scanResultController.handleRequest();
+
+            guidGeneratorMock.verifyAll();
+            expect(context.res.status).toEqual(200);
+            expect(context.res.body).toEqual(tooSoonRequestResponse);
+        });
+
         it('should return a default response for requests made too early', async () => {
             scanResultController = createScanResultController(context);
             const timeStamp = moment()
