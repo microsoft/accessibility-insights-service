@@ -7,12 +7,17 @@ import { mergeWith } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
-import { StorageDocument } from 'storage-documents';
+import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 
 // tslint:disable: no-unsafe-any no-any
 
 export interface TaskArguments {
     id: string;
+}
+
+export interface ScanMessage {
+    scanId: string;
+    queueMessage: Message;
 }
 
 @injectable()
@@ -46,7 +51,7 @@ export class Worker {
 
             let tasksQueuedCount = 0;
             if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-                const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
+                let scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
                 if (scanMessages.length === 0) {
                     this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
                     if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
@@ -56,6 +61,7 @@ export class Worker {
                 }
 
                 if (scanMessages.length > 0) {
+                    scanMessages = await this.dropCompletedScans(scanMessages);
                     tasksQueuedCount = await this.addTasksToJob(scanMessages);
                 }
             }
@@ -179,6 +185,42 @@ export class Worker {
         this.logger.logInfo(`Added ${jobQueuedTasks.length} new tasks`);
 
         return jobQueuedTasks.length;
+    }
+
+    private async dropCompletedScans(messages: Message[]): Promise<Message[]> {
+        const scanMessages: ScanMessage[] = messages.map(message => ({
+            scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
+            queueMessage: message,
+        }));
+
+        const scanRuns: OnDemandPageScanResult[] = [];
+        const chunks = System.chunkArray(scanMessages, 100);
+        await Promise.all(
+            chunks.map(async chunk => {
+                const scanIds = chunk.map(m => m.scanId);
+                const runs = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
+                scanRuns.push(...runs);
+            }),
+        );
+
+        const acceptedScanMessages: Message[] = [];
+        await Promise.all(
+            scanRuns.map(async scanRun => {
+                const scanMessage = scanMessages.find(message => message.scanId === scanRun.id);
+                if (scanRun.run.state === 'queued') {
+                    acceptedScanMessages.push(scanMessage.queueMessage);
+                } else {
+                    await this.queue.deleteMessage(scanMessage.queueMessage);
+                    this.logger.logWarn(
+                        `The scan request with ID ${scanMessage.scanId} has been cancelled since run state has been changed to '${
+                            scanRun.run.state
+                        }'`,
+                    );
+                }
+            }),
+        );
+
+        return acceptedScanMessages;
     }
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
