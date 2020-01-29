@@ -85,7 +85,7 @@ getCosmosDbUrl() {
 
 getCosmosAccessKey() {
 
-    cosmosAccessKey=$(az cosmosdb list-keys --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
+    cosmosAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
 
     if [[ -z $cosmosAccessKey ]]; then
         echo "Unable to get accessKey for cosmos db account $cosmosAccountName under resource group $resourceGroupName"

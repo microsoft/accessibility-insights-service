@@ -32,28 +32,27 @@ createCosmosCollection() {
     fi
 
     echo "[setup-cosmos-db] Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
-    collectionExists=$(az cosmosdb collection exists --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
-    if [ "$collectionExists" = true ]; then
+    if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "[setup-cosmos-db] Collection '$collectionName' already exists"
     else
         echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
-        az cosmosdb collection create --collection-name "$collectionName" --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --default-ttl "$ttl" 1>/dev/null
+        az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
         echo "Successfully created DB collection '$collectionName'"
     fi
+
 }
 
 createCosmosDatabase() {
     local dbName=$1
 
     echo "[setup-cosmos-db] Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
-    databaseExists=$(az cosmosdb database exists --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName")
 
-    if [ "$databaseExists" = true ]; then
+    if az cosmosdb sql database show --name "$dbName" --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "[setup-cosmos-db] Database '$dbName' already exists"
     else
         echo "[setup-cosmos-db] Creating Cosmos DB '$dbName'"
-        az cosmosdb database create --db-name "$dbName" --name "$cosmosAccountName" --resource-group-name "$resourceGroupName" 1>/dev/null
+        az cosmosdb sql database create --name "$dbName" --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" 1>/dev/null
         echo "[setup-cosmos-db] Successfully created Cosmos DB '$dbName'"
     fi
 }
