@@ -48,7 +48,10 @@ export class ScanResultController extends BaseScanResultController {
 
         if (isEmpty(scanResult)) {
             // scan result not found in result storage
-            this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            this.context.res = {
+                status: 200,
+                body: this.getTooSoonRequestResponse(scanId),
+            };
             this.logger.logInfo('Scan result not found in result storage.', { scanId });
         } else {
             this.context.res = {
