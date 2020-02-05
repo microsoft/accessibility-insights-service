@@ -1035,7 +1035,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "customEvents\n| where name == \"FunctionalTest\"     and customDimensions.logSource == \"TestRun\"     and customDimensions.runId == toscalar(         customEvents\n| where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n| top 1 by timestamp desc nulls last\n| project tostring(customDimensions.runId)      )\n| where customDimensions.testContainer != \"FinalizerTestGroup\"\n| project testGroup = customDimensions.testContainer, testName = customDimensions.testName,     result = customDimensions.result,     timestamp\n| sort by tostring(testGroup)\n"
+                                            "value": "customEvents\n| where name == \"FunctionalTest\"     and customDimensions.logSource == \"TestRun\"     and customDimensions.runId == toscalar(         customEvents\n| where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n| top 1 by timestamp desc nulls last\n| project tostring(customDimensions.runId)      )\n| where customDimensions.testContainer != \"FinalizerTestGroup\"\n| project testGroup = customDimensions.testContainer, testName = customDimensions.testName, result = customDimensions.result, releaseId = customDimensions.releaseId, timestamp\n| sort by tostring(testGroup)\n"
                                         },
                                         {
                                             "name": "TimeRange",
