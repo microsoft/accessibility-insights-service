@@ -13,7 +13,7 @@ export class WebDriver {
         this.browser = await this.puppeteer.launch({
             headless: true,
             timeout: 30000,
-            args: ['--disable-dev-shm-usage'],
+            args: ['--disable-dev-shm-usage', '--no-sandbox'],
         });
 
         return this.browser;
