@@ -58,11 +58,11 @@ export abstract class WebController {
             if (this.context.res.headers === undefined) {
                 this.context.res.headers = {
                     'content-type': jsonContentType,
-                    // 'X-Content-Type-Options': 'nosniff',
+                    'X-Content-Type-Options': 'nosniff',
                 };
             } else if (this.context.res.headers['content-type'] === undefined) {
                 this.context.res.headers['content-type'] = jsonContentType;
-                // this.context.res.headers['X-Content-Type-Options'] = 'nosniff';
+                this.context.res.headers['X-Content-Type-Options'] = 'nosniff';
             }
         }
     }
