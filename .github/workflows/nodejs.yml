@@ -38,20 +38,25 @@ jobs:
     - name: install dependencies
       run: yarn install --frozen-lockfile
     
-    - name: check formatting
-      run: yarn format-check
+    - name: install
+      uses: ianwalter/puppeteer@v2.0.0
+      with:
+          args: cd /packages/cli && yarn install
+          
+#     - name: check formatting
+#       run: yarn format-check
       
-    - name: check copyright on files
-      run: yarn copyright-check
+#     - name: check copyright on files
+#       run: yarn copyright-check
     
-    - name: clean
-      run: yarn clean
+#     - name: clean
+#       run: yarn clean
     
-    - name: build
-      run: yarn build -- -- --env.version=$BUILD_NUMBER
+#     - name: build
+#       run: yarn build -- -- --env.version=$BUILD_NUMBER
     
-    - name: run linter
-      run: yarn lint
+#     - name: run linter
+#       run: yarn lint
     
-    - name: test
-      run: yarn test --ci --coverage
+#     - name: test
+#       run: yarn test --ci --coverage
