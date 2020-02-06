@@ -11,6 +11,7 @@ export class WebDriver {
 
     public async launch(): Promise<Puppeteer.Browser> {
         this.browser = await this.puppeteer.launch({
+            executablePath: 'google-chrome-unstable',
             headless: true,
             timeout: 30000,
             args: ['--disable-dev-shm-usage', '--no-sandbox'],
