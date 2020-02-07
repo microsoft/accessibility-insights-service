@@ -14,7 +14,7 @@ export class WebDriver {
             executablePath: 'google-chrome-unstable',
             headless: true,
             timeout: 30000,
-            args: ['--disable-dev-shm-usage', '--no-sandbox'],
+            args: ['--disable-dev-shm-usage'/*, '--no-sandbox'*/],
         });
 
         return this.browser;
