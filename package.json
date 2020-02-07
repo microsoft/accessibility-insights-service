@@ -18,7 +18,8 @@
         "precheckin": "npm-run-all --serial format build lint test copyright-check",
         "format": "npx prettier --write \"**/*\"",
         "format-check": "npx prettier --check \"**/*\"",
-        "copyright-check": "license-check-and-add"
+        "copyright-check": "license-check-and-add",
+        "teste2e": "npx lerna run teste2e"
     },
     "author": "Microsoft",
     "license": "MIT",

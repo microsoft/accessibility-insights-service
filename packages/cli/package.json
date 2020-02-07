@@ -11,7 +11,8 @@
         "clean": "rimraf dist drop test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
-        "test": "jest --coverage --colors"
+        "test": "jest --coverage --colors",
+        "teste2e": "jest --coverage --colors"
     },
     "files": [
         "dist/",
