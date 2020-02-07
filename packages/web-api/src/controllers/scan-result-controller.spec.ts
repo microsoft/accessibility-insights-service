@@ -174,7 +174,7 @@ describe(ScanResultController, () => {
             expect(context.res.body).toEqual(tooSoonRequestResponse);
         });
 
-        it('should return 404 if the scan cannot be found', async () => {
+        it('should return pending if the scan cannot be found', async () => {
             scanResultController = createScanResultController(context);
             setupGetGuidTimestamp(new Date(0));
             onDemandPageScanRunResultProviderMock
@@ -188,7 +188,8 @@ describe(ScanResultController, () => {
 
             guidGeneratorMock.verifyAll();
             onDemandPageScanRunResultProviderMock.verifyAll();
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+            expect(context.res.status).toEqual(200);
+            expect(context.res.body).toEqual(tooSoonRequestResponse);
         });
 
         it('should return 200 if successfully fetched result', async () => {
