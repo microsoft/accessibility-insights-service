@@ -47,7 +47,15 @@ jobs:
       uses: ianwalter/puppeteer@v2.0.0
       with:
           args: yarn teste2e
-          
+      
+    - name: Upload reports
+      uses: actions/upload-artifact@v1.0.0
+      with:
+       # Artifact name
+       name: reports
+       # Directory containing files to upload
+       path: ${{ github.workspace }}/packages/cli/src/scanner/reports
+    
 #     - name: check formatting
 #       run: yarn format-check
       
