@@ -88,6 +88,7 @@ describe(WebController, () => {
     it('should add content-type response header if no any', async () => {
         await testSubject.invoke(context, 'valid');
         expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
     });
 
     it('should add content-type response header if if other', async () => {
@@ -96,6 +97,7 @@ describe(WebController, () => {
         };
         await testSubject.invoke(context, 'valid');
         expect(testSubject.context.res.headers['content-type']).toEqual('application/json; charset=utf-8');
+        expect(testSubject.context.res.headers['X-Content-Type-Options']).toEqual('nosniff');
     });
 
     it('should skip adding content-type response header if any', async () => {
