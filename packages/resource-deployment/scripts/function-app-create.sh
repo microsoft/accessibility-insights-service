@@ -47,7 +47,7 @@ installAzureFunctionsCoreToolsOnLinux() {
 
     echo "Installing Azure Functions Core Tools..."
     # Install the Microsoft package repository GPG key, to validate package integrity
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
     sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 
     # Verify your Ubuntu server is running one of the appropriate versions from the table below. To add the apt source, run
@@ -55,7 +55,7 @@ installAzureFunctionsCoreToolsOnLinux() {
     sudo apt-get update
 
     # Install the Core Tools package
-    sudo apt-get install azure-functions-core-tools
+    sudo apt-get install azure-functions-core-tools=2.7.1948-1
     echo "Azure Functions Core Tools installed successfully"
 }
 
