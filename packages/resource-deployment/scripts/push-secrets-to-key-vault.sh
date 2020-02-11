@@ -102,6 +102,16 @@ getStorageAccessKey() {
     fi
 }
 
+generateBlobStorageSAS() {
+    end=$(date -u -d "90 days" '+%Y-%m-%dT%H:%MZ')
+    storageAccountKey=$(az storage account generate-sas --permissions cdlruwap --account-name "$storageAccountName" --services b --resource-types sco --expiry $end -o tsv)
+
+    if [[ -z $blobStorageSAS ]]; then
+        echo "Unable to generate sas for storage account $storageAccountName"
+        exit 1
+    fi
+}
+
 createAppInsightsApiKey() {
     apiKeyParams="--app $appInsightsName --resource-group $resourceGroupName --api-key $appInsightsName-api-key"
 
@@ -155,6 +165,9 @@ pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
 getStorageAccessKey
 pushSecretToKeyVault "storageAccountKey" "$storageAccountKey"
+
+generateBlobStorageSAS
+pushSecretToKeyVault "blobStorageSAS" "$blobStorageSAS"
 
 pushSecretToKeyVault "restApiSpAppId" "$webApiAdClientId"
 pushSecretToKeyVault "restApiSpSecret" "$webApiAdClientSecret"
