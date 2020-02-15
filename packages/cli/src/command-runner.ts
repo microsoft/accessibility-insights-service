@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { Spinner } from 'cli-spinner';
 import * as filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ReportGenerator } from './report/report-generator';
 import { AIScanner } from './scanner/ai-scanner';
+import { AxeScanResults } from './scanner/axe-scan-results';
 import { ScanArguments } from './scanner/scan-arguments';
 
 @injectable()
@@ -23,7 +25,18 @@ export class CommandRunner {
         if (isEmpty(scanArguments.output)) {
             scanArguments.output = '.';
         }
-        const axeResults = await this.scanner.scan(scanArguments.url);
+
+        const spinner = new Spinner('Running scanner...');
+        let axeResults: AxeScanResults;
+
+        try {
+            spinner.start();
+
+            axeResults = await this.scanner.scan(scanArguments.url);
+        } finally {
+            spinner.stop();
+        }
+
         //console.log(`Found ${JSON.stringify(axeResults.results.violations.length)} accessibility issues`);
         const reportContent = this.reportGenerator.generateReport(axeResults);
         const reportFileName = `${scanArguments.output}/${filenamify(scanArguments.url, { replacement: '_' })}.html`;

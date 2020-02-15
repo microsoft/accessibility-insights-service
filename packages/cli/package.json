@@ -19,7 +19,7 @@
         "README.md"
     ],
     "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
-    "main": "dist/ai-scan.js",
+    "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
@@ -32,6 +32,7 @@
         "@types/lodash": "^4.14.136",
         "@types/node": "^11.13.4",
         "@types/request-promise": "^4.1.44",
+        "awesome-typescript-loader": "^5.2.1",
         "copy-webpack-plugin": "^4.6.0",
         "fork-ts-checker-webpack-plugin": "^0.5.2",
         "jest": "^24.9.0",
@@ -47,26 +48,25 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.6.2",
         "webpack": "^4.29.4",
-        "webpack-cli": "^3.2.3"
+        "webpack-cli": "^3.2.3",
+        "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
-        "dotenv": "^6.2.0",
-        "inversify": "^5.0.1",
-        "lodash": "^4.17.14",
-        "reflect-metadata": "^0.1.13",
-        "yargs": "^13.2.1",
         "accessibility-insights-report": "^1.0.0",
-        "puppeteer": "^1.12.2",
         "axe-core": "3.3.2",
         "axe-puppeteer": "^1.0.0",
         "cli-spinner": "^0.2.10",
         "dotenv": "^6.2.0",
         "filenamify-url": "2.1.0",
-        "cli-spinner": "^0.2.10",
-        "react-helmet": "^5.2.0"
+        "inversify": "^5.0.1",
+        "lodash": "^4.17.14",
+        "puppeteer": "^1.12.2",
+        "react-helmet": "^5.2.0",
+        "reflect-metadata": "^0.1.13",
+        "yargs": "^13.2.1"
     },
     "bin": {
-        "ai-scan": "dist/ai-scan.js"
+        "ai-scan": "dist/ai-scan-cli.js"
     },
     "engines": {
         "node": ">=10.18"
