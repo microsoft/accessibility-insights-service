@@ -1,10 +1,13 @@
 {
     "extends": "../../tsconfig.base.json",
-    "lib": ["es6", "dom"],
-    "types": ["reflect-metadata"],
+    "lib": [
+        "es6",
+        "dom"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "compilerOptions": {
-        "outDir": "dist"
-    }
+        "outDir": "dist",
+        "declaration": false
+    },
 }

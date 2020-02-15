@@ -5,7 +5,6 @@ const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
-const { CheckerPlugin } = require('awesome-typescript-loader');
 
 function getCommonConfig(version, generateTypings) {
     return {
@@ -17,10 +16,13 @@ function getCommonConfig(version, generateTypings) {
                     test: /\.ts$/,
                     use: [
                         {
-                            loader: 'awesome-typescript-loader',
+                            loader: 'ts-loader',
                             options: {
                                 transpileOnly: generateTypings ? false : true, // transpileOnly=false generates typings
                                 experimentalWatchApi: true,
+                                configFile: generateTypings ? 'tsconfig.sdk.json' : 'tsconfig.json',
+                                logInfoToStdOut: true,
+                                logLevel: "INFO"
                             },
                         },
                     ],
@@ -41,7 +43,6 @@ function getCommonConfig(version, generateTypings) {
             ],
         },
         plugins: [
-            new CheckerPlugin(),
             new webpack.BannerPlugin({ banner: '#!/usr/bin/env node', raw: true }),
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
@@ -55,11 +56,7 @@ function getCommonConfig(version, generateTypings) {
                     ignore: ['dist/**', 'node_modules/**'],
                 },
             ]),
-        ].concat(
-            generateTypings
-                ? [] // add type checking if transpileOnly is set to false
-                : new ForkTsCheckerWebpackPlugin(),
-        ),
+        ].concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397
