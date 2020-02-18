@@ -477,11 +477,11 @@ describe(OrchestrationStepsImpl, () => {
         });
 
         it('triggers all test groups', () => {
-            const task: Task = {
+            const task = {
                 isCompleted: true,
                 isFaulted: false,
                 action: undefined,
-            };
+            } as Task;
 
             activityRequestData.forEach((data: ActivityRequestData) => {
                 orchestrationContext
