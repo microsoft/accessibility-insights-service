@@ -10,10 +10,7 @@
         "resolveJsonModule": true,
         "sourceMap": true,
         "declaration": true,
-        "types": [
-            "reflect-metadata",
-            "@types/jest",
-        ],
+        "types": ["reflect-metadata", "@types/jest"]
     },
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,

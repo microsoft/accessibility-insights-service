@@ -22,7 +22,7 @@ function getCommonConfig(version, generateTypings) {
                                 experimentalWatchApi: true,
                                 configFile: generateTypings ? 'tsconfig.sdk.json' : 'tsconfig.json',
                                 logInfoToStdOut: true,
-                                logLevel: "INFO"
+                                logLevel: 'INFO',
                             },
                         },
                     ],
