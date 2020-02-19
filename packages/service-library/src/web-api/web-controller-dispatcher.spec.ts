@@ -83,7 +83,7 @@ describe(WebControllerDispatcher, () => {
     it('should do nothing on invoking custom action', async () => {
         webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
 
-        expect((webControllerDispatcher as any).runCustomAction()).toResolve();
+        await expect((webControllerDispatcher as any).runCustomAction()).toResolve();
     });
 
     it('return result of invoke', async () => {

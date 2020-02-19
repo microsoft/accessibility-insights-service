@@ -9,7 +9,8 @@
         "noImplicitReturns": true,
         "resolveJsonModule": true,
         "sourceMap": true,
-        "declaration": true
+        "declaration": true,
+        "types": ["reflect-metadata", "@types/jest"]
     },
     "awesomeTypescriptLoaderOptions": {
         "usePrecompiledFiles": true,
