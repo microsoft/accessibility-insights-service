@@ -23,7 +23,7 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for keyvault> 
+Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> 
 "
     exit 1
 }
