@@ -45,6 +45,13 @@
             "metadata": {
                 "description": "Name of the virtual network to be used for the batch pool nodes"
             }
+        },
+        "enableSoftDeleteOnKeyVault": {
+            "defaultValue": true,
+            "type": "bool",
+            "metadata": {
+                "description": "Enables/Disables the soft delete option in key vault"
+            }
         }
     },
     "variables": {
@@ -75,7 +82,7 @@
                 "enabledForDeployment": true,
                 "enabledForDiskEncryption": false,
                 "enabledForTemplateDeployment": false,
-                "enableSoftDelete": true
+                "enableSoftDelete": "[parameters('enableSoftDeleteOnKeyVault')]"
             },
             "resources": [
                 {

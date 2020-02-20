@@ -16,28 +16,30 @@ export keyVault
 export resourceName
 export systemAssignedIdentities
 export principalId
+export enableSoftDeleteOnKeyVault
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -v <vnet resource for batch pools> [-t <batch template file (optional)>]
+Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> 
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:t:v:" option; do
+while getopts ":r:t:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
+    k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z $batchTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
@@ -56,6 +58,7 @@ resources=$(
         --resource-group "$resourceGroupName" \
         --template-file "$batchTemplateFile" \
         --query "properties.outputResources[].id" \
+        --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
         -o tsv
 )
 
@@ -73,6 +76,10 @@ if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
     keyVault - $keyVault"
 
     exit 1
+fi
+
+if [[ -z $enableSoftDeleteOnKeyVault ]]; then
+    enableSoftDeleteOnKeyVault=true
 fi
 
 # Login into Azure Batch account
