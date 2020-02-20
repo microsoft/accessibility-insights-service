@@ -42,19 +42,8 @@ steps:
           yarn test --ci --coverage
       displayName: run unit tests
 
-    - task: PublishTestResults@2
-      inputs:
-          testResultsFiles: 'test-results/unit/junit.xml'
-          searchFolder: '$(Build.SourcesDirectory)'
-          testRunTitle: unit tests
-      condition: always()
-      displayName: publish unit test results
-
-    - task: PublishCodeCoverageResults@1
-      inputs:
-          codeCoverageTool: Cobertura
-          summaryFileLocation: '$(Build.SourcesDirectory)/test-results/unit/coverage/cobertura-coverage.xml'
-      displayName: publish code coverage
+    - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
+      displayName: Publish code coverage to codecov
 
     - script: |
           yarn run pack
