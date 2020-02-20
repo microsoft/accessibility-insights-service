@@ -43,7 +43,7 @@ function getCommonConfig(version, generateTypings) {
             ],
         },
         plugins: [
-            new webpack.BannerPlugin({ banner: (generateTypings ? '' : '#!/usr/bin/env node'), raw: true }),
+            new webpack.BannerPlugin({ banner: generateTypings ? '' : '#!/usr/bin/env node', raw: true }),
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
