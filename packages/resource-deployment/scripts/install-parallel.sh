@@ -98,7 +98,7 @@ function runInParallel() {
 }
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:v:k" option; do
+while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
