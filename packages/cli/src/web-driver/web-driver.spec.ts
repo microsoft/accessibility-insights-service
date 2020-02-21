@@ -52,4 +52,12 @@ describe('WebDriver', () => {
         expect(browser).toEqual(puppeteerBrowserMock);
         puppeteerLaunchMock.verifyAll();
     });
+
+    it('chrome path is not null', async () => {
+        const chromePath = 'path';
+        const browser = await testSubject.launch(chromePath);
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+        puppeteerLaunchMock.verifyAll();
+    });
 });
