@@ -109,7 +109,7 @@ describe('Page', () => {
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
         webDriverMock
-            .setup(wd => wd.launch())
+            .setup(wd => wd.launch(undefined))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
         puppeteerBrowserFactory

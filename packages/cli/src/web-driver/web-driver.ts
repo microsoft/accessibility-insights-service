@@ -9,12 +9,19 @@ export class WebDriver {
 
     constructor(private readonly puppeteer: typeof Puppeteer = Puppeteer) {}
 
-    public async launch(): Promise<Puppeteer.Browser> {
-        this.browser = await this.puppeteer.launch({
+    public async launch(chromePath?: string): Promise<Puppeteer.Browser> {
+        let launchOption: Puppeteer.LaunchOptions;
+        launchOption = {
             headless: true,
             timeout: 30000,
             args: ['--disable-dev-shm-usage'],
-        });
+        };
+
+        if (chromePath !== undefined) {
+            launchOption.executablePath = chromePath;
+        }
+
+        this.browser = await this.puppeteer.launch(launchOption);
 
         return this.browser;
     }

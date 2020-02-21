@@ -20,9 +20,9 @@ export class Page {
         @inject(WebDriver) private readonly webDriver: WebDriver,
     ) {}
 
-    public async create(): Promise<void> {
+    public async create(chromePath?: string): Promise<void> {
         if (isEmpty(this.browser)) {
-            this.browser = await this.webDriver.launch();
+            this.browser = await this.webDriver.launch(chromePath);
         }
         this.puppeteerPage = await this.browser.newPage();
     }

@@ -47,7 +47,7 @@ describe('AIScanner', () => {
     });
 
     function setupNewPageCall(url: string): void {
-        pageMock.setup(async p => p.create()).verifiable(Times.once());
+        pageMock.setup(async p => p.create(undefined)).verifiable(Times.once());
         pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
     }
 
