@@ -86,20 +86,25 @@ export abstract class Logger {
         this.trackException(new VError(parsedErrorObject, message));
     }
 
-    public flush(): void {
+    public async flush(): Promise<void> {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.flush());
+        const promises = this.invokeLoggerClient(client => client.flush());
+        await Promise.all(promises);
     }
 
     public setCustomProperties(properties: LoggerProperties): void {
         this.invokeLoggerClient(client => client.setCustomProperties(properties));
     }
 
-    private invokeLoggerClient(action: (loggerClient: LoggerClient) => void): void {
+    private invokeLoggerClient<T>(action: (loggerClient: LoggerClient) => T): T[] {
+        const results: T[] = [];
+
         this.loggerClients.forEach(client => {
-            action(client);
+            results.push(action(client));
         });
+
+        return results;
     }
 
     private ensureInitialized(): void {

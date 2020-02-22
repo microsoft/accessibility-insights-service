@@ -24,12 +24,12 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
                 commonProperties: null,
                 config: null,
                 channel: null,
-                trackTrace: (() => {}) as any,
-                trackMetric: (() => {}) as any,
-                trackException: (() => {}) as any,
-                flush: (() => {}) as any,
-                trackEvent: (() => {}) as any,
-                trackAvailability: (() => {}) as any,
+                trackTrace: (() => { }) as any,
+                trackMetric: (() => { }) as any,
+                trackException: (() => { }) as any,
+                flush: (async () => { }) as any,
+                trackEvent: (() => { }) as any,
+                trackAvailability: (() => { }) as any,
             } as appInsights.TelemetryClient,
             MockBehavior.Loose,
             false,
@@ -268,10 +268,15 @@ describe(BaseAppInsightsLoggerClient, () => {
             await testSubject.setup();
         });
 
-        it('flushes events', () => {
-            testSubject.telemetryClientMock.setup(t => t.flush()).verifiable();
+        it('flushes events', async () => {
+            let flushCb: Function;
+            testSubject.telemetryClientMock.setup(t => t.flush(It.isAny())).returns(options => {
+                flushCb = options.callback;
+                flushCb();
+            }).verifiable();
 
-            testSubject.flush();
+            await testSubject.flush();
+            expect(flushCb).toBeDefined();
             verifyMocks();
         });
     });

@@ -13,6 +13,6 @@ export interface LoggerClient {
     trackAvailability(name: string, telemetry: AvailabilityTelemetry): void;
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;
-    flush(): void;
+    flush(): Promise<void>;
     setCustomProperties(properties: LoggerProperties): void;
 }

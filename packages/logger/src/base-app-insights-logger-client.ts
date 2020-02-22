@@ -60,8 +60,15 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         this.telemetryClient.trackException({ exception: error, properties: { ...this.getAdditionalPropertiesToAddToEvent() } });
     }
 
-    public flush(): void {
-        this.telemetryClient.flush();
+    public async flush(): Promise<void> {
+        return new Promise((resolve) => {
+
+            this.telemetryClient.flush({
+                callback: () => {
+                    resolve();
+                }
+            });
+        });
     }
 
     public setCustomProperties(properties: { [key: string]: string }): void {

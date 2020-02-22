@@ -22,7 +22,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     constructor(
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Console) private readonly consoleObject: typeof console,
-    ) {}
+    ) { }
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
@@ -46,7 +46,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     }
 
     // tslint:disable-next-line: no-empty
-    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {}
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void { }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.executeInDebugMode(() => {
@@ -61,7 +61,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     }
 
     // tslint:disable-next-line: no-empty
-    public flush(): void {}
+    public async flush(): Promise<void> { }
 
     public setCustomProperties(properties: LoggerProperties): void {
         this.baseProperties = { ...this.baseProperties, ...properties };
