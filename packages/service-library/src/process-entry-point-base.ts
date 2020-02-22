@@ -12,6 +12,8 @@ export abstract class ProcessEntryPointBase {
     public async start(...args: any[]): Promise<void> {
         let loggerInitialized = false;
         let logger: Logger;
+        let processExitCode = 0;
+        const processObj = this.container.get<typeof process>(loggerTypes.Process);
 
         try {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
@@ -23,6 +25,7 @@ export abstract class ProcessEntryPointBase {
 
             await this.invokeCustomActionWithLogging(this.container, logger, ...args);
         } catch (error) {
+            processExitCode = 1;
             if (loggerInitialized === false) {
                 console.log('Unable to setup logger.', error);
             } else {
@@ -34,6 +37,13 @@ export abstract class ProcessEntryPointBase {
             if (loggerInitialized === true) {
                 logger.flush();
             }
+
+            if (logger !== undefined) {
+                logger.logInfo('[ProcessEntryPointBase] Exiting process.');
+            } else {
+                console.log('[ProcessEntryPointBase] Exiting process.');
+            }
+            processObj.exit(processExitCode);
         }
     }
 
