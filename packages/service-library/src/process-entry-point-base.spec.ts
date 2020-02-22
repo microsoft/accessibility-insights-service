@@ -20,6 +20,16 @@ describe(ProcessEntryPointBase, () => {
 
         public customActionToBeInvoked: () => void;
 
+        public shouldExitAfterExecution: boolean = true;
+
+        protected shouldExitAfterInvocation(): boolean {
+            if (this.shouldExitAfterExecution) {
+                return super.shouldExitAfterInvocation();
+            } else {
+                return false;
+            }
+        }
+
         protected getTelemetryBaseProperties(): BaseTelemetryProperties {
             return this.baseTelemetryProperties;
         }
@@ -52,6 +62,29 @@ describe(ProcessEntryPointBase, () => {
     describe('start', () => {
         beforeEach(() => {
             loggerMock.setup(l => l.logInfo('[ProcessEntryPointBase] Exiting process.')).verifiable(Times.once());
+        });
+
+        it('should not exit process', async () => {
+            loggerMock.reset();
+            testSubject.shouldExitAfterExecution = false;
+            const errorMsg = 'dotEnvLoadedFirst';
+            containerMock
+                .setup(c => c.get(loggerTypes.DotEnvConfig))
+                .returns(() => {
+                    throw errorMsg;
+                });
+            containerMock
+                .setup(c => c.get(It.is(val => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
+                .verifiable(Times.never());
+            loggerMock.reset();
+            processMock.setup(p => p.exit(It.isAny())).verifiable(Times.never());
+
+            await expect(testSubject.start()).rejects.toEqual(errorMsg);
+
+            expect(testSubject.customActionInvoked).toBe(false);
+            verifyNoLoggingCalls(false);
+            verifyLogFlushCall(Times.never());
+            verifyMocks();
         });
 
         it('verifies dotenv is loaded first', async () => {

@@ -38,13 +38,19 @@ export abstract class ProcessEntryPointBase {
                 logger.flush();
             }
 
-            if (logger !== undefined) {
-                logger.logInfo('[ProcessEntryPointBase] Exiting process.');
-            } else {
-                console.log('[ProcessEntryPointBase] Exiting process.');
+            if (this.shouldExitAfterInvocation()) {
+                if (logger !== undefined) {
+                    logger.logInfo('[ProcessEntryPointBase] Exiting process.');
+                } else {
+                    console.log('[ProcessEntryPointBase] Exiting process.');
+                }
+                processObj.exit(processExitCode);
             }
-            processObj.exit(processExitCode);
         }
+    }
+
+    protected shouldExitAfterInvocation(): boolean {
+        return true;
     }
 
     protected abstract getTelemetryBaseProperties(): BaseTelemetryProperties;
