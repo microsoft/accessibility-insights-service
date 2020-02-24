@@ -31,7 +31,7 @@ export class Page {
         return this.puppeteerPage.setBypassCSP(true);
     }
 
-    public async scanForA11yIssues(url: string): Promise<AxeScanResults> {
+    public async scanForA11yIssues(url: string, sourcePath?: string): Promise<AxeScanResults> {
         await this.puppeteerPage.setViewport({
             width: 1920,
             height: 1080,
@@ -90,7 +90,7 @@ export class Page {
             console.log(`Page still has network activity after the timeout ${networkLoadTimeoutInMilleSec} milliseconds`);
         }
 
-        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
+        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage, sourcePath);
         const axeResults = await axePuppeteer.analyze();
 
         const scanResults: AxeScanResults = {

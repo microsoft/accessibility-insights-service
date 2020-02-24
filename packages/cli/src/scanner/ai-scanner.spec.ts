@@ -57,14 +57,14 @@ describe('AIScanner', () => {
 
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url))
+            .setup(async p => p.scanForA11yIssues(url, undefined))
             .returns(async () => Promise.resolve({ results: axeResults }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url))
+            .setup(async p => p.scanForA11yIssues(url, undefined))
             .returns(async () => Promise.resolve({ error: errorMessage }))
             .verifiable(Times.once());
     }
