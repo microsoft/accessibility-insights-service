@@ -157,6 +157,11 @@ Object {
     },
   },
   "taskConfig": Object {
+    "exitOnComplete": Object {
+      "default": false,
+      "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
+      "format": "boolean",
+    },
     "taskTimeoutInMinutes": Object {
       "default": 5,
       "doc": "Timeout value after which the task has to be terminated",
@@ -323,6 +328,11 @@ Object {
     },
   },
   "taskConfig": Object {
+    "exitOnComplete": Object {
+      "default": false,
+      "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
+      "format": "boolean",
+    },
     "taskTimeoutInMinutes": Object {
       "default": 5,
       "doc": "Timeout value after which the task has to be terminated",

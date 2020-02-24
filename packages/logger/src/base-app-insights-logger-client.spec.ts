@@ -10,7 +10,7 @@ import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
+// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty no-unsafe-any
 
 class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     public additionalPropsToAdd = { adProp1: 'val1', adProp2: 'val2' };
@@ -24,12 +24,12 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
                 commonProperties: null,
                 config: null,
                 channel: null,
-                trackTrace: (() => { }) as any,
-                trackMetric: (() => { }) as any,
-                trackException: (() => { }) as any,
-                flush: (async () => { }) as any,
-                trackEvent: (() => { }) as any,
-                trackAvailability: (() => { }) as any,
+                trackTrace: (() => {}) as any,
+                trackMetric: (() => {}) as any,
+                trackException: (() => {}) as any,
+                flush: (async () => {}) as any,
+                trackEvent: (() => {}) as any,
+                trackAvailability: (() => {}) as any,
             } as appInsights.TelemetryClient,
             MockBehavior.Loose,
             false,
@@ -270,10 +270,13 @@ describe(BaseAppInsightsLoggerClient, () => {
 
         it('flushes events', async () => {
             let flushCb: Function;
-            testSubject.telemetryClientMock.setup(t => t.flush(It.isAny())).returns(options => {
-                flushCb = options.callback;
-                flushCb();
-            }).verifiable();
+            testSubject.telemetryClientMock
+                .setup(t => t.flush(It.isAny()))
+                .returns(options => {
+                    flushCb = options.callback;
+                    flushCb();
+                })
+                .verifiable();
 
             await testSubject.flush();
             expect(flushCb).toBeDefined();

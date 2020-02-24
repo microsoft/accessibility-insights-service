@@ -61,12 +61,11 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     }
 
     public async flush(): Promise<void> {
-        return new Promise((resolve) => {
-
+        return new Promise(resolve => {
             this.telemetryClient.flush({
                 callback: () => {
                     resolve();
-                }
+                },
             });
         });
     }

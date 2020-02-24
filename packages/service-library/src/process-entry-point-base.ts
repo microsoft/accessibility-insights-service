@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
+import { isNil } from 'lodash';
 import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
 
 // tslint:disable: no-any
@@ -14,9 +16,12 @@ export abstract class ProcessEntryPointBase {
         let logger: Logger;
         let processExitCode = 0;
         const processObj = this.container.get<typeof process>(loggerTypes.Process);
+        let taskConfig: TaskRuntimeConfig;
 
         try {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
+            const serviceConfig: ServiceConfiguration = this.container.get(ServiceConfiguration);
+            taskConfig = await serviceConfig.getConfigValue('taskConfig');
             logger = this.container.get(Logger);
 
             await logger.setup(this.getTelemetryBaseProperties());
@@ -35,10 +40,11 @@ export abstract class ProcessEntryPointBase {
             throw error;
         } finally {
             if (loggerInitialized === true) {
-                logger.flush();
+                logger.logInfo('[ProcessEntryPointBase] Flushing telemetry events');
+                await logger.flush();
             }
 
-            if (this.shouldExitAfterInvocation()) {
+            if (this.shouldExitAfterInvocation(taskConfig)) {
                 if (logger !== undefined) {
                     logger.logInfo('[ProcessEntryPointBase] Exiting process.');
                 } else {
@@ -49,8 +55,8 @@ export abstract class ProcessEntryPointBase {
         }
     }
 
-    protected shouldExitAfterInvocation(): boolean {
-        return true;
+    protected shouldExitAfterInvocation(taskConfig: TaskRuntimeConfig): boolean {
+        return !isNil(taskConfig) && taskConfig.exitOnComplete;
     }
 
     protected abstract getTelemetryBaseProperties(): BaseTelemetryProperties;

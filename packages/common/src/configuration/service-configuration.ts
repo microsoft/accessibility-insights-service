@@ -7,6 +7,7 @@ import { isNil } from 'lodash';
 
 export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
+    exitOnComplete: boolean;
 }
 
 export interface QueueRuntimeConfig {
@@ -125,6 +126,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 5,
                     doc: 'Timeout value after which the task has to be terminated',
+                },
+                exitOnComplete: {
+                    format: 'boolean',
+                    default: false,
+                    doc: 'Temporary flag to unblock tasks that get stuck with open socket issue if happens',
                 },
             },
             jobManagerConfig: {

@@ -6,7 +6,8 @@
         "maxQueueSize": 20
     },
     "taskConfig": {
-        "taskTimeoutInMinutes": 5
+        "taskTimeoutInMinutes": 5,
+        "exitOnComplete": true
     },
 
     "scanConfig": {

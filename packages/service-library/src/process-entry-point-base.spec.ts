@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import * as _ from 'lodash';
@@ -19,16 +20,7 @@ describe(ProcessEntryPointBase, () => {
         public customActionArgs: any[];
 
         public customActionToBeInvoked: () => void;
-
-        public shouldExitAfterExecution: boolean = true;
-
-        protected shouldExitAfterInvocation(): boolean {
-            if (this.shouldExitAfterExecution) {
-                return super.shouldExitAfterInvocation();
-            } else {
-                return false;
-            }
-        }
+        public taskConfig: TaskRuntimeConfig;
 
         protected getTelemetryBaseProperties(): BaseTelemetryProperties {
             return this.baseTelemetryProperties;
@@ -48,15 +40,24 @@ describe(ProcessEntryPointBase, () => {
     let dotEnvConfigStub: DotenvConfigOutput;
     let containerMock: IMock<Container>;
     let processMock: IMock<typeof process>;
+    let taskConfig: TaskRuntimeConfig;
+    let serviceConfig: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
         dotEnvConfigStub = {};
         containerMock = Mock.ofType(Container);
         processMock = Mock.ofInstance(process);
+        taskConfig = {
+            exitOnComplete: true,
+            taskTimeoutInMinutes: 100,
+        };
+        serviceConfig = Mock.ofType(ServiceConfiguration);
+        serviceConfig.setup(async s => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
 
         testSubject = new TestEntryPoint(containerMock.object);
         containerMock.setup(c => c.get(loggerTypes.Process)).returns(() => processMock.object);
+        containerMock.setup(c => c.get(ServiceConfiguration)).returns(() => serviceConfig.object);
     });
 
     describe('start', () => {
@@ -66,7 +67,7 @@ describe(ProcessEntryPointBase, () => {
 
         it('should not exit process', async () => {
             loggerMock.reset();
-            testSubject.shouldExitAfterExecution = false;
+            taskConfig.exitOnComplete = false;
             const errorMsg = 'dotEnvLoadedFirst';
             containerMock
                 .setup(c => c.get(loggerTypes.DotEnvConfig))
@@ -88,6 +89,7 @@ describe(ProcessEntryPointBase, () => {
         });
 
         it('verifies dotenv is loaded first', async () => {
+            loggerMock.reset();
             const errorMsg = 'dotEnvLoadedFirst';
             containerMock
                 .setup(c => c.get(loggerTypes.DotEnvConfig))
@@ -97,8 +99,7 @@ describe(ProcessEntryPointBase, () => {
             containerMock
                 .setup(c => c.get(It.is(val => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
                 .verifiable(Times.never());
-            loggerMock.reset();
-            setupVerifiableFailureProcessExit();
+            processMock.setup(p => p.exit(It.isAny())).verifiable(Times.never());
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
 
