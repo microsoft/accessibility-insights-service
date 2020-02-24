@@ -10,14 +10,14 @@ import { Page } from './page';
 export class AIScanner {
     constructor(@inject(Page) private readonly page: Page) {}
 
-    public async scan(url: string, chromePath?: string): Promise<AxeScanResults> {
+    public async scan(url: string, chromePath?: string, sourcePath?: string): Promise<AxeScanResults> {
         try {
             console.log(`Starting accessibility scanning of URL ${url}.`);
 
             await this.page.create(chromePath);
             await this.page.enableBypassCSP();
 
-            return await this.page.scanForA11yIssues(url);
+            return await this.page.scanForA11yIssues(url, sourcePath);
         } catch (error) {
             console.log(error, `An error occurred while scanning website page ${url}.`);
 
