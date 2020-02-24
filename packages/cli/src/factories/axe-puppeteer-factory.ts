@@ -11,12 +11,11 @@ import { RuleExclusion } from './rule-exclusion';
 @injectable()
 export class AxePuppeteerFactory {
     public async createAxePuppeteer(page: Puppeteer.Page, sourcePath?: string): Promise<AxePuppeteer> {
-        let content;
         const ruleExclusionList = new RuleExclusion();
 
         if (!isNil(sourcePath) && !isEmpty(sourcePath)) {
             // tslint:disable-next-line: non-literal-fs-path
-            content = fs.readFileSync(sourcePath);
+            const content = fs.readFileSync(sourcePath);
 
             return new AxePuppeteer(page, content.toString()).disableRules(ruleExclusionList.accessibilityRuleExclusionList);
         }
