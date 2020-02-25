@@ -7,7 +7,7 @@ import { WhyNodeRunningLogger } from 'common';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
 import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry-point';
 
-const whyNodeRunLogger = new WhyNodeRunningLogger();
+const whyNodeRunLogger = new WhyNodeRunningLogger(1000);
 whyNodeRunLogger.start();
 
 (async () => {

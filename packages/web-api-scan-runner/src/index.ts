@@ -7,7 +7,7 @@ import { WhyNodeRunningLogger } from 'common';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
 
-const whyNodeRunLogger = new WhyNodeRunningLogger(1000);
+const whyNodeRunLogger = new WhyNodeRunningLogger();
 whyNodeRunLogger.start();
 
 (async () => {
