@@ -16,5 +16,6 @@ whyNodeRunLogger.start();
     whyNodeRunLogger.stopAfterSeconds(10);
 })().catch(error => {
     console.log('Exception thrown in web api job manager: ', error);
+    whyNodeRunLogger.stopAfterSeconds(10);
     process.exit(1);
 });

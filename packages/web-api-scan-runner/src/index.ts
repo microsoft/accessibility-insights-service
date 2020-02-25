@@ -14,5 +14,6 @@ whyNodeRunLogger.start();
     await new WebApiScanRunnerEntryPoint(setupWebApiScanRequestSenderContainer()).start();
     whyNodeRunLogger.stopAfterSeconds(10);
 })().catch(() => {
+    whyNodeRunLogger.stopAfterSeconds(10);
     process.exit(1);
 });
