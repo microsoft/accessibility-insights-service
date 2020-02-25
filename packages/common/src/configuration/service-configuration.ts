@@ -128,7 +128,7 @@ export class ServiceConfiguration {
                     doc: 'Timeout value after which the task has to be terminated',
                 },
                 exitOnComplete: {
-                    format: 'boolean',
+                    format: 'Boolean',
                     default: false,
                     doc: 'Temporary flag to unblock tasks that get stuck with open socket issue if happens',
                 },

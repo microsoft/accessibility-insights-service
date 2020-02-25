@@ -160,7 +160,7 @@ Object {
     "exitOnComplete": Object {
       "default": false,
       "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
-      "format": "boolean",
+      "format": "Boolean",
     },
     "taskTimeoutInMinutes": Object {
       "default": 5,
@@ -331,7 +331,7 @@ Object {
     "exitOnComplete": Object {
       "default": false,
       "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
-      "format": "boolean",
+      "format": "Boolean",
     },
     "taskTimeoutInMinutes": Object {
       "default": 5,
