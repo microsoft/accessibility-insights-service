@@ -61,7 +61,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     }
 
     // tslint:disable-next-line: no-empty
-    public flush(): void {}
+    public async flush(): Promise<void> {}
 
     public setCustomProperties(properties: LoggerProperties): void {
         this.baseProperties = { ...this.baseProperties, ...properties };

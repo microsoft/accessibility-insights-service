@@ -405,10 +405,8 @@ describe(GlobalLogger, () => {
     });
 
     describe('flush', () => {
-        it('throw if called before setup', () => {
-            expect(() => {
-                testSubject.flush();
-            }).toThrowError(
+        it('throw if called before setup', async () => {
+            await expect(testSubject.flush()).rejects.toThrowError(
                 'The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.',
             );
         });
@@ -417,9 +415,14 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.flush()).verifiable(Times.once()));
+            invokeAllLoggerClientMocks(m =>
+                m
+                    .setup(c => c.flush())
+                    .returns(() => Promise.resolve())
+                    .verifiable(Times.once()),
+            );
 
-            testSubject.flush();
+            await testSubject.flush();
         });
     });
 
