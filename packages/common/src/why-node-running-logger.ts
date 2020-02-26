@@ -15,9 +15,9 @@ export class WhyNodeRunningLogger {
     }
 
     private static logHandles(): void {
-        WhyNodeRunningLogger.logMessage('start logging');
+        WhyNodeRunningLogger.logMessage('start logging open handles');
         dump();
-        WhyNodeRunningLogger.logMessage('after logging');
+        WhyNodeRunningLogger.logMessage('after logging open handles');
     }
 
     private static logMessage(message: string): void {
@@ -28,7 +28,6 @@ export class WhyNodeRunningLogger {
         if (isNil(this.intervalId)) {
             this.intervalId = this.globalObj.setInterval(() => {
                 WhyNodeRunningLogger.logMessage('Start interval callback');
-                WhyNodeRunningLogger.logMessage('Interval logging');
                 WhyNodeRunningLogger.logHandles();
             }, this.intervalInMillSeconds);
         }
