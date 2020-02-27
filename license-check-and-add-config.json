@@ -1,0 +1,40 @@
+{
+    "ignore": [
+        ".git",
+        "**/.vscode",
+        ".github/ISSUE_TEMPLATE",
+        "**/.env.template",
+        "./.dependabot",
+        "**/yarn.lock",
+        "**/*.log",
+        "packages/web-workers/obj",
+        "**/*.funcignore",
+        "**/.github/pull_request_template.md",
+        "**/CODEOWNERS",
+        "package.json",
+        "cred-scan-suppressions.json",
+        "**/node_modules",
+        "**/.gitattributes",
+        "**/test-results",
+        "**/dist",
+        "**/*.snap"
+    ],
+    "license": "./copyright-header.txt",
+    "licenseFormats": {
+        "yaml|npmrc|yml|ps1|gitignore|dockerignore|prettierignore|yarnrc|nsh|sh": {
+            "eachLine": {
+                "prepend": "# "
+            }
+        },
+        "ts|tsx|d.ts|js|scss|css": {
+            "eachLine": {
+                "prepend": "// "
+            }
+        },
+        "md|csproj|xml|html": {
+            "prepend": "<!--",
+            "append": "-->"
+        }
+    },
+    "trailingWhitespace": "TRIM"
+}

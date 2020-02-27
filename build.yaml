@@ -17,11 +17,11 @@ steps:
       displayName: 'install dependencies'
 
     - script: |
-          yarn format-check
+          yarn format:check
       displayName: check code formatting
 
     - script: |
-          yarn copyright-check
+          yarn copyright:check
       displayName: check for copyright headers
 
     - script: |
@@ -34,7 +34,7 @@ steps:
       displayName: build
 
     - script: |
-          yarn lint
+          yarn lint:check
       displayName: run linter
 
     - script: |
