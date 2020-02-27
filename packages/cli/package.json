@@ -52,7 +52,7 @@
     },
     "dependencies": {
         "accessibility-insights-report": "^1.0.0",
-        "axe-core": "3.3.2",
+        "axe-core": "3.5.1",
         "axe-puppeteer": "^1.0.0",
         "cli-spinner": "^0.2.10",
         "dotenv": "^6.2.0",
