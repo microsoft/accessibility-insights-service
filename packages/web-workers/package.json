@@ -33,7 +33,7 @@
         "@types/verror": "^1.10.3",
         "@types/yargs": "^12.0.9",
         "copy-webpack-plugin": "^4.6.0",
-        "fork-ts-checker-webpack-plugin": "^0.5.2",
+        "fork-ts-checker-webpack-plugin": "^4.0.5",
         "jest": "^24.9.0",
         "jest-circus": "^24.9.0",
         "jest-junit": "^8.0.0",
