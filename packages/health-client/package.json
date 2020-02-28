@@ -24,7 +24,7 @@
         "@types/lodash": "^4.14.136",
         "@types/node": "^13.7.6",
         "jest": "^24.9.0",
-        "jest-circus": "^24.9.0",
+        "jest-circus": "^25.1.0",
         "jest-junit": "^8.0.0",
         "rimraf": "^3.0.2",
         "ts-jest": "^24.0.2",

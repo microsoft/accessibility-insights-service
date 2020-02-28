@@ -31,7 +31,7 @@
     "devDependencies": {
         "codecov": "^3.6.5",
         "jest": "^24.7.1",
-        "jest-circus": "^24.7.1",
+        "jest-circus": "^25.1.0",
         "jest-extended": "^0.11.2",
         "jest-junit": "^6.3.0",
         "lerna": "^3.18.4",
