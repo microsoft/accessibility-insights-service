@@ -158,6 +158,7 @@ export class CosmosContainerClient {
                         break;
                     } else {
                         this.logger.logInfo(
+                            // tslint:disable-next-line:max-line-length
                             `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
                         );
                     }

@@ -41,6 +41,7 @@ export class Queue {
                 await this.moveToDeadQueue(queueURL, deadQueueURL, serverMessage);
 
                 this.logger.logWarn(
+                    // tslint:disable-next-line:max-line-length
                     `[Queue] Message ${serverMessage.messageId} exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
                 );
             } else {
