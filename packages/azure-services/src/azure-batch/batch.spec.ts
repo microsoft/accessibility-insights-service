@@ -364,7 +364,12 @@ describe(Batch, () => {
                 });
 
                 batchTaskParameterProvider
-                    .setup(async o => o.getTaskParameter(It.is(actualId => isExpectedId(actualId, message.messageId)), message.messageText))
+                    .setup(async o =>
+                        o.getTaskParameter(
+                            It.is(actualId => isExpectedId(actualId, message.messageId)),
+                            message.messageText,
+                        ),
+                    )
                     .callback((taskId, messageText) => (taskAddParameters[i].id = taskId))
                     .returns(async () => Promise.resolve(taskAddParameters[i]))
                     .verifiable(Times.once());
@@ -466,7 +471,10 @@ describe(Batch, () => {
             for (let k = 0; k < messages.length; k++) {
                 batchTaskParameterProvider
                     .setup(async o =>
-                        o.getTaskParameter(It.is(actualId => isExpectedId(actualId, messages[k].messageId)), messages[k].messageText),
+                        o.getTaskParameter(
+                            It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
+                            messages[k].messageText,
+                        ),
                     )
                     .callback((taskId, messageText) => (expectedTaskAddParameters[k].id = taskId))
                     .returns(async () => Promise.resolve(expectedTaskAddParameters[k]))
@@ -511,7 +519,10 @@ describe(Batch, () => {
             for (let k = 0; k < messages.length; k++) {
                 batchTaskParameterProvider
                     .setup(async o =>
-                        o.getTaskParameter(It.is(actualId => isExpectedId(actualId, messages[k].messageId)), messages[k].messageText),
+                        o.getTaskParameter(
+                            It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
+                            messages[k].messageText,
+                        ),
                     )
                     .returns(async () => Promise.resolve(expectedTaskAddParameters[k]))
                     .verifiable(Times.once());

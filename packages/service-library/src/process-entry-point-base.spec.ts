@@ -225,7 +225,14 @@ describe(ProcessEntryPointBase, () => {
     function verifyNoLoggingCalls(hasLogger: boolean = true): void {
         loggerMock.verify(l => l.log(It.isAny(), It.isAny(), It.isAny()), Times.never());
         if (hasLogger) {
-            loggerMock.verify(l => l.logInfo(It.is(s => s !== '[ProcessEntryPointBase] Exiting process.'), It.isAny()), Times.never());
+            loggerMock.verify(
+                l =>
+                    l.logInfo(
+                        It.is(s => s !== '[ProcessEntryPointBase] Exiting process.'),
+                        It.isAny(),
+                    ),
+                Times.never(),
+            );
         } else {
             loggerMock.verify(l => l.logInfo(It.isAny(), It.isAny()), Times.never());
         }

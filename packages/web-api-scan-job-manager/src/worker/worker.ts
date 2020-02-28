@@ -69,9 +69,12 @@ export class Worker {
             // set the actual number of tasks added to the batch pool to process
             this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
 
-            this.logger.logInfo('Pool load statistics', mergeWith({}, poolLoadSnapshot, (t, s, k) =>
-                s !== undefined ? (s.constructor.name !== 'Date' ? s.toString() : s.toJSON()) : 'undefined',
-            ) as any);
+            this.logger.logInfo(
+                'Pool load statistics',
+                mergeWith({}, poolLoadSnapshot, (t, s, k) =>
+                    s !== undefined ? (s.constructor.name !== 'Date' ? s.toString() : s.toJSON()) : 'undefined',
+                ) as any,
+            );
 
             // tslint:disable-next-line: no-null-keyword
             this.logger.trackEvent('BatchPoolStats', null, {
@@ -110,9 +113,8 @@ export class Worker {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
                     error =
                         failedTask.failureInfo !== undefined
-                            ? `${error}, Error category: ${failedTask.failureInfo.category}, Error details: ${
-                                  failedTask.failureInfo.message
-                              }`
+                            ? // tslint:disable-next-line:max-line-length
+                              `${error}, Error category: ${failedTask.failureInfo.category}, Error details: ${failedTask.failureInfo.message}`
                             : error;
 
                     let pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
@@ -210,9 +212,8 @@ export class Worker {
                 } else {
                     await this.queue.deleteMessage(scanMessage.queueMessage);
                     this.logger.logWarn(
-                        `The scan request with ID ${scanMessage.scanId} has been cancelled since run state has been changed to '${
-                            scanRun.run.state
-                        }'`,
+                        // tslint:disable-next-line:max-line-length
+                        `The scan request with ID ${scanMessage.scanId} has been cancelled since run state has been changed to '${scanRun.run.state}'`,
                     );
                 }
             }),

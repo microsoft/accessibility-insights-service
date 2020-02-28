@@ -54,7 +54,13 @@ describe('PageDocumentProvider', () => {
             const response: any = { item: ['web site id'], statusCode: 200 };
 
             cosmosContainerClientMock
-                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
+                .setup(s =>
+                    s.queryDocuments(
+                        It.is((q: string) => compareQuery(q, query)),
+                        token,
+                        'website',
+                    ),
+                )
                 .returns(() => Promise.resolve(response));
             await expect(pageDocumentProvider.getWebsites(token)).resolves.toBe(response);
         });
@@ -63,7 +69,13 @@ describe('PageDocumentProvider', () => {
             const response: any = { item: ['web site id'], statusCode: 401 };
 
             cosmosContainerClientMock
-                .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), token, 'website'))
+                .setup(s =>
+                    s.queryDocuments(
+                        It.is((q: string) => compareQuery(q, query)),
+                        token,
+                        'website',
+                    ),
+                )
                 .returns(() => Promise.resolve(response));
             await expect(pageDocumentProvider.getWebsites(token)).rejects.not.toBeNull();
         });
@@ -81,7 +93,13 @@ describe('PageDocumentProvider', () => {
                 const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
+                    .setup(s =>
+                        s.queryDocuments(
+                            It.is((q: string) => compareQuery(q, query)),
+                            'token1',
+                            website.websiteId,
+                        ),
+                    )
                     .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
@@ -112,7 +130,13 @@ describe('PageDocumentProvider', () => {
                 const queryResponse: CosmosOperationResponse<any> = { item: ['pageId3'], statusCode: 200 };
 
                 cosmosContainerClientMock
-                    .setup(s => s.queryDocuments(It.is((q: string) => compareQuery(q, query)), 'token1', website.websiteId))
+                    .setup(s =>
+                        s.queryDocuments(
+                            It.is((q: string) => compareQuery(q, query)),
+                            'token1',
+                            website.websiteId,
+                        ),
+                    )
                     .returns(() => Promise.resolve(queryResponse));
 
                 cosmosContainerClientMock
