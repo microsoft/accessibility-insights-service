@@ -158,9 +158,7 @@ export class CosmosContainerClient {
                         break;
                     } else {
                         this.logger.logInfo(
-                            `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${
-                                operationResponse.statusCode
-                            }.`,
+                            `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
                         );
                     }
                 } catch (error) {

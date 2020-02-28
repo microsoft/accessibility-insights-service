@@ -180,7 +180,10 @@ describe(ScanRequestController, () => {
                 { url: 'https://abs/path/', priority: priority },
                 { url: 'https://bing.com/path/', priority: priority },
             ]);
-            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }, { scanId: guid3, url: 'https://bing.com/path/' }];
+            const expectedResponse = [
+                { scanId: guid2, url: 'https://abs/path/' },
+                { scanId: guid3, url: 'https://bing.com/path/' },
+            ];
 
             const expectedSaveRequest: ScanRunBatchRequest[] = [
                 { scanId: guid2, url: 'https://abs/path/', priority: priority },
