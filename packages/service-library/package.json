@@ -25,7 +25,7 @@
         "@azure/functions": "^1.0.3",
         "@azure/cosmos": "^2.1.2",
         "@types/jest": "^24.0.11",
-        "@types/node": "^13.7.6",
+        "@types/node": "^13.7.7",
         "@types/sha.js": "^2.4.0",
         "@types/puppeteer": "^1.12.1",
         "jest": "^24.9.0",
