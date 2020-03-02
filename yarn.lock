@@ -2117,10 +2117,10 @@ acorn@^6.0.1, acorn@^6.2.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.0.tgz#b659d2ffbafa24baf5db1cdbb2c94a983ecd2784"
   integrity sha512-gac8OEcQ2Li1dxIEWGZzsp2BitJxwkwcOm0zHAJLcPJaVvm58FRnk6RkuLRpU1EujipU2ZFODv2P9DLMfnV8mw==
 
-adal-node@0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/adal-node/-/adal-node-0.2.0.tgz#9d6136e254fa8b4ccb1b1f22719632babef96378"
-  integrity sha512-DzkdOpBbOnqErw2TWT0PFA5gsKgmxIfdr/ZgL+if8+ln/tz8JAkk/MtUhH3ftnInrcJVsnR7re4UhpR+KDRnTw==
+adal-node@0.2.1:
+  version "0.2.1"
+  resolved "https://registry.yarnpkg.com/adal-node/-/adal-node-0.2.1.tgz#19e401bd579977448c1a77ce0e5b4c9accdc334e"
+  integrity sha512-C/oasZuTy0NIqh5wPWjG/09XaG+zS7elC8upf1ZVExt9lSRncme4Ejbx8CKYk+wsGgj609y84txtRAXQVvqApg==
   dependencies:
     "@types/node" "^8.0.47"
     async "^2.6.3"
