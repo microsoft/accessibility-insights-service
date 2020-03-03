@@ -4362,10 +4362,10 @@ filename-reserved-regex@^2.0.0:
   resolved "https://registry.yarnpkg.com/filename-reserved-regex/-/filename-reserved-regex-2.0.0.tgz#abf73dfab735d045440abfea2d91f389ebbfa229"
   integrity sha1-q/c9+rc10EVECr/qLZHzieu/oik=
 
-filenamify-url@2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/filenamify-url/-/filenamify-url-2.1.0.tgz#6725c9b81da9aaf1d33f48261d3fd07ebba6b4a2"
-  integrity sha512-JxfdDIWnrxaMnDl0zI36R3wtlXypmwq+m40HqWBCSrlDtSv88e17RMijipYHR7ByQEtjH6Xa71iTZD/YOZRgdg==
+filenamify-url@2.1.1:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/filenamify-url/-/filenamify-url-2.1.1.tgz#db9e8c382a3fb9e80c50bc7b596821e80fc4cf81"
+  integrity sha512-6HaMJgiRamhFMlUfCu5M8xlkgPS75p6xPZdIQwKWQrI8HcywH1+npwl3uMh9QnE8aBa/xBUNQmf4HEJVOybwpQ==
   dependencies:
     filenamify "^4.0.0"
     humanize-url "^2.0.0"
