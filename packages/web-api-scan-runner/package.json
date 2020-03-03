@@ -53,7 +53,7 @@
         "axe-sarif-converter": "^2.1.0",
         "azure-services": "1.0.0",
         "common": "1.0.0",
-        "dotenv": "^6.2.0",
+        "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
         "logger": "1.0.0",
