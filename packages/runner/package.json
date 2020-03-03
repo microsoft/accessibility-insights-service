@@ -47,7 +47,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^2.1.2",
-        "axe-core": "3.3.2",
+        "axe-core": "3.5.1",
         "axe-puppeteer": "^1.0.0",
         "azure-services": "1.0.0",
         "common": "1.0.0",
