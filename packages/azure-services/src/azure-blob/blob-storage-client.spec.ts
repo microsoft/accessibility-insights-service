@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient, Models, RestError } from '@azure/storage-blob';
+import { BlobClient, BlobDownloadResponseModel, BlobServiceClient, BlockBlobClient, ContainerClient, RestError } from '@azure/storage-blob';
 import { IMock, Mock } from 'typemoq';
 import { BlobContentDownloadResponse, BlobStorageClient } from './blob-storage-client';
 
@@ -34,7 +34,7 @@ describe(BlobStorageClient, () => {
 
             blobClientMock
                 .setup(async b => b.download(0, undefined))
-                .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as Models.BlobDownloadResponse))
+                .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as BlobDownloadResponseModel))
                 .verifiable();
 
             const response = await testSubject.getBlobContent(containerName, blobName);
