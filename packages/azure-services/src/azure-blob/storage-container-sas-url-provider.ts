@@ -21,13 +21,13 @@ export class StorageContainerSASUrlProvider {
         const accountKey = await this.secretProvider.getSecret(secretNames.storageAccountKey);
         const containerSAS = generateBlobSASQueryParameters(
             {
-                expiryTime: moment()
+                expiresOn: moment()
                     .add(1, 'days')
                     .toDate(),
                 containerName: containerName,
                 permissions: BlobSASPermissions.parse('w'),
-                protocol: SASProtocol.HTTPSandHTTP,
-                startTime: moment().toDate(),
+                protocol: SASProtocol.HttpsAndHttp,
+                startsOn: moment().toDate(),
             },
             new StorageSharedKeyCredential(accountName, accountKey),
         );
