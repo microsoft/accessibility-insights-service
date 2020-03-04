@@ -38,5 +38,6 @@ export class RuleExclusion {
         'landmark-unique',
         'meta-viewport',
         'accesskeys',
+        'landmark-no-duplicate-main',
     ];
 }

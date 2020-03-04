@@ -211,6 +211,7 @@ export class ServiceConfiguration {
                         'landmark-unique',
                         'meta-viewport',
                         'accesskeys',
+                        'landmark-no-duplicate-main',
                     ],
                     doc: 'Axe core rule exclusion list',
                 },
