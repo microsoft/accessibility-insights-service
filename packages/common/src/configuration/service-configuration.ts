@@ -210,7 +210,7 @@ export class ServiceConfiguration {
                         'scrollable-region-focusable',
                         'landmark-unique',
                         'meta-viewport',
-                        'access-keys',
+                        'accesskeys',
                     ],
                     doc: 'Axe core rule exclusion list',
                 },

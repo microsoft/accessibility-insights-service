@@ -37,6 +37,6 @@ export class RuleExclusion {
         'scrollable-region-focusable',
         'landmark-unique',
         'meta-viewport',
-        'access-keys',
+        'accesskeys',
     ];
 }
