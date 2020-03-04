@@ -206,6 +206,7 @@ export class ServiceConfiguration {
                         'aria-allowed-role',
                         'css-orientation-lock',
                         'form-field-multiple-labels',
+                        'label-content-name-mismatch',
                         'landmark-complementary-is-top-level',
                         'scrollable-region-focusable',
                         'landmark-unique',
