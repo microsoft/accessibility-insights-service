@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { BlobSASPermissions, generateBlobSASQueryParameters, SASProtocol, StorageSharedKeyCredential } from '@azure/storage-blob';
+import { ContainerSASPermissions, generateBlobSASQueryParameters, SASProtocol, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import * as moment from 'moment';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
@@ -25,7 +25,7 @@ export class StorageContainerSASUrlProvider {
                     .add(1, 'days')
                     .toDate(),
                 containerName: containerName,
-                permissions: BlobSASPermissions.parse('w'),
+                permissions: ContainerSASPermissions.parse('w'),
                 protocol: SASProtocol.HttpsAndHttp,
                 startsOn: moment().toDate(),
             },
