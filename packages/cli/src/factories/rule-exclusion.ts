@@ -33,10 +33,10 @@ export class RuleExclusion {
         'aria-allowed-role',
         'css-orientation-lock',
         'form-field-multiple-labels',
-        'label-content-name-mismatch',
         'landmark-complementary-is-top-level',
         'scrollable-region-focusable',
-        'label-content-name-mismatch',
         'landmark-unique',
+        'meta-viewport',
+        'access-keys',
     ];
 }
