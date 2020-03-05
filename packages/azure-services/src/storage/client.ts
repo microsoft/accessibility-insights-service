@@ -24,7 +24,7 @@ export namespace client {
     export function getErrorResponse<T>(error: any): CosmosOperationResponse<T> {
         if (error.code !== undefined) {
             return {
-                response: error.body,
+                response: error.message,
                 statusCode: error.code,
             };
         } else {
