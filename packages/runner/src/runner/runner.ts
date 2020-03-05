@@ -60,13 +60,13 @@ export class Runner {
             const issueScanResults = this.dataFactoryTask.toScanResultsModel(axeScanResults, scanMetadata);
             // store accessibility issues model in a storage
             this.logger.logInfo(`Storing accessibility issues found in page ${scanMetadata.scanUrl}`);
-            await this.storageTask.writeResults(issueScanResults.results, scanMetadata.websiteId);
+            await this.storageTask.writeResults(issueScanResults.results);
 
             // convert scan results to a page scan history storage model
             const pageScanResult = this.dataFactoryTask.toPageScanResultModel(crawlerScanResults, issueScanResults, scanMetadata, runTime);
             // store page scan history model in a storage
             this.logger.logInfo(`Storing page scan result information for ${scanMetadata.scanUrl}`);
-            await this.storageTask.writeResult(pageScanResult, scanMetadata.websiteId);
+            await this.storageTask.writeResult(pageScanResult);
 
             // set scanned page run state to corresponding page run result
             this.logger.logInfo(`Setting page scan result state on the page document`);

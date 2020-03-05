@@ -39,7 +39,7 @@ beforeEach(() => {
 
     let targetWebsiteServerItem: Website;
     cosmosContainerClientMock
-        .setup(async o => o.writeDocument<Website>(It.isAny(), websitePartitioningKey))
+        .setup(async o => o.writeDocument<Website>(It.isAny()))
         .callback(item => {
             targetWebsiteServerItem = item;
         })

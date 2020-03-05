@@ -9,12 +9,12 @@ export class StorageTask {
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async writeResults<T>(results: T[], partitionKey?: string): Promise<void> {
-        await this.cosmosContainerClient.writeDocuments<T>(results, partitionKey);
+    public async writeResults<T>(results: T[]): Promise<void> {
+        await this.cosmosContainerClient.writeDocuments<T>(results);
     }
 
-    public async writeResult<T>(result: T, partitionKey?: string): Promise<void> {
-        await this.cosmosContainerClient.writeDocument<T>(result, partitionKey);
+    public async writeResult<T>(result: T): Promise<void> {
+        await this.cosmosContainerClient.writeDocument<T>(result);
     }
 
     public async mergeResults<T>(results: T[], partitionKey?: string): Promise<void> {

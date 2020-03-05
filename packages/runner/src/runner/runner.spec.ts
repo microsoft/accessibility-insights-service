@@ -155,7 +155,7 @@ describe('runner', () => {
             .verifiable(Times.once());
 
         storageTaskMock
-            .setup(async o => o.writeResult(pageScanResult, scanMetadata.websiteId))
+            .setup(async o => o.writeResult(pageScanResult))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
@@ -163,7 +163,7 @@ describe('runner', () => {
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
         storageTaskMock
-            .setup(async o => o.writeResults(issueScanResults.results, scanMetadata.websiteId))
+            .setup(async o => o.writeResults(issueScanResults.results))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 

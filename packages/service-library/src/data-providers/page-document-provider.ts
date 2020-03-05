@@ -48,9 +48,10 @@ export class PageDocumentProvider {
 
     public async getWebsites(continuationToken?: string): Promise<CosmosOperationResponse<Website[]>> {
         const partitionKey = 'website';
-        const query = `SELECT * FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
+        // tslint:disable-next-line: max-line-length
+        const query = `SELECT * FROM c WHERE c.partitionKey = "${partitionKey}" and c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
 
-        const response = await this.cosmosContainerClient.queryDocuments<Website>(query, continuationToken, partitionKey);
+        const response = await this.cosmosContainerClient.queryDocuments<Website>(query, continuationToken);
 
         client.ensureSuccessStatusCode(response);
 
@@ -77,13 +78,13 @@ export class PageDocumentProvider {
 
     public async getPagesNeverScanned(website: Website, itemCount: number): Promise<WebsitePage[]> {
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
-    c.itemType = '${ItemType.page}' and c.websiteId = '${
+    c.partitionKey = "${website.websiteId}" and c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
         }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
 
         return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token);
         });
     }
 
@@ -98,7 +99,7 @@ export class PageDocumentProvider {
             .toJSON();
 
         const query = `SELECT TOP ${itemCount} * FROM c WHERE
-    c.itemType = '${ItemType.page}' and c.websiteId = '${
+    c.partitionKey = "${website.websiteId}" and c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
         }' and c.lastReferenceSeen >= '${await this.getMinLastReferenceSeenValue()}' and ${this.getPageScanningCondition(website)}
     and (
@@ -110,7 +111,7 @@ export class PageDocumentProvider {
     ) order by c.lastRun.runTime asc`;
 
         return this.cosmosContainerClient.executeQueryWithContinuationToken<WebsitePage>(async token => {
-            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token, website.websiteId);
+            return this.cosmosContainerClient.queryDocuments<WebsitePage>(query, token);
         });
     }
 

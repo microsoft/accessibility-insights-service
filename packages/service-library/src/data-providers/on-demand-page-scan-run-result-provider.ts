@@ -35,9 +35,8 @@ export class OnDemandPageScanRunResultProvider {
             Object.keys(scanIdsByPartition).map(async pKey => {
                 return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async token => {
                     return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
-                        this.getReadScanQueryForScanIds(scanIdsByPartition[pKey]),
+                        this.getReadScanQueryForScanIds(scanIdsByPartition[pKey], pKey),
                         token,
-                        pKey,
                     );
                 });
             }),
@@ -61,13 +60,13 @@ export class OnDemandPageScanRunResultProvider {
 
         await Promise.all(
             Object.keys(scanRunsByPartition).map(async pKey => {
-                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
+                return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey]);
             }),
         );
     }
 
-    private getReadScanQueryForScanIds(scanIds: string[]): string {
-        return `select * from c where c.id in (\"${scanIds.join('", "')}\")`;
+    private getReadScanQueryForScanIds(scanIds: string[], partitionKey: string): string {
+        return `select * from c where c.partitionKey = "${partitionKey}" and c.id in (\"${scanIds.join('", "')}\")`;
     }
 
     private setSystemProperties(pageScanResult: OnDemandPageScanResult): void {

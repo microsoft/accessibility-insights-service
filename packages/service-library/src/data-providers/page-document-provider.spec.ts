@@ -47,7 +47,7 @@ describe('PageDocumentProvider', () => {
     });
 
     describe('getWebsites', () => {
-        const query = getWebSiteIdsQuery();
+        const query = getWebSiteIdsQuery('website');
         const token = 'continuationToken';
 
         it('returns website ids when success', async () => {
@@ -58,7 +58,6 @@ describe('PageDocumentProvider', () => {
                     s.queryDocuments(
                         It.is((q: string) => compareQuery(q, query)),
                         token,
-                        'website',
                     ),
                 )
                 .returns(() => Promise.resolve(response));
@@ -73,7 +72,6 @@ describe('PageDocumentProvider', () => {
                     s.queryDocuments(
                         It.is((q: string) => compareQuery(q, query)),
                         token,
-                        'website',
                     ),
                 )
                 .returns(() => Promise.resolve(response));
@@ -97,7 +95,6 @@ describe('PageDocumentProvider', () => {
                         s.queryDocuments(
                             It.is((q: string) => compareQuery(q, query)),
                             'token1',
-                            website.websiteId,
                         ),
                     )
                     .returns(() => Promise.resolve(queryResponse));
@@ -134,7 +131,6 @@ describe('PageDocumentProvider', () => {
                         s.queryDocuments(
                             It.is((q: string) => compareQuery(q, query)),
                             'token1',
-                            website.websiteId,
                         ),
                     )
                     .returns(() => Promise.resolve(queryResponse));
@@ -301,8 +297,8 @@ describe('PageDocumentProvider', () => {
     function compareQuery(q1: string, q2: string): boolean {
         return q1.replace(/\s+/g, ' ') === q2.replace(/\s+/g, ' ');
     }
-    function getWebSiteIdsQuery(): string {
-        return `SELECT * FROM c WHERE c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
+    function getWebSiteIdsQuery(pk: string): string {
+        return `SELECT * FROM c WHERE c.partitionKey = "${pk}" and c.itemType = '${ItemType.website}' ORDER BY c.websiteId`;
     }
     function getPageScanningCondition(website: Website): string {
         return website.deepScanningEnabled ? '1=1' : 'c.basePage = true';
@@ -348,7 +344,9 @@ describe('PageDocumentProvider', () => {
     }
     function getPagesNeverScannedQuery(website: Website, itemCount: number): string {
         return `SELECT TOP ${itemCount} * FROM c WHERE
-        c.itemType = 'page' and c.websiteId = '${website.websiteId}' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}'
+        c.partitionKey = "${website.websiteId}" and c.itemType = 'page' and c.websiteId = '${
+            website.websiteId
+        }' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}'
         and ${getPageScanningCondition(website)}
         and (IS_NULL(c.lastRun) or NOT IS_DEFINED(c.lastRun))`;
     }
@@ -361,7 +359,7 @@ describe('PageDocumentProvider', () => {
             .toJSON();
 
         return `SELECT TOP ${itemCount} * FROM c WHERE
-            c.itemType = '${ItemType.page}' and c.websiteId = '${
+        c.partitionKey = "${website.websiteId}" and c.itemType = '${ItemType.page}' and c.websiteId = '${
             website.websiteId
         }' and c.lastReferenceSeen >= '${getMinLastReferenceSeenValue()}' and ${getPageScanningCondition(website)}
             and (
