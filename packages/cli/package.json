@@ -59,7 +59,7 @@
         "filenamify-url": "2.1.1",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
-        "puppeteer": "^1.12.2",
+        "puppeteer": "^2.1.1",
         "react-helmet": "^5.2.0",
         "reflect-metadata": "^0.1.13",
         "yargs": "^13.2.1"

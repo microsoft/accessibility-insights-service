@@ -39,7 +39,7 @@
     "dependencies": {
         "axe-core": "3.3.2",
         "axe-puppeteer": "^1.0.0",
-        "puppeteer": "^1.12.2",
+        "puppeteer": "^2.1.1",
         "common": "1.0.0",
         "service-library": "1.0.0",
         "logger": "1.0.0",
