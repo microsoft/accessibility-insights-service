@@ -32,7 +32,7 @@ export class CosmosClientWrapper {
             await Promise.all(
                 chunk.map(async item => {
                     try {
-                        const a = await container.items.upsert(item, this.getOptions(item));
+                        await container.items.upsert(item, this.getOptions(item));
                     } catch (error) {
                         this.logFailedResponse('upsertItem', error, {
                             db: dbName,
