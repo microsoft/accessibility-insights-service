@@ -30,12 +30,8 @@ export class CosmosContainerClient {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
-    public async queryDocuments<T>(
-        query: cosmos.SqlQuerySpec | string,
-        continuationToken?: string,
-        partitionKey?: string,
-    ): Promise<CosmosOperationResponse<T[]>> {
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
+    public async queryDocuments<T>(query: cosmos.SqlQuerySpec | string, continuationToken?: string): Promise<CosmosOperationResponse<T[]>> {
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken);
     }
 
     public async deleteDocument(id: string, partitionKey: string): Promise<void> {
@@ -44,19 +40,10 @@ export class CosmosContainerClient {
 
     /**
      * Writes document to a storage.
-     *
-     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
-     *
      * @param document Document to write to a storage
-     * @param partitionKey The storage partition key
      */
-    public async writeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.upsertItem<T>(
-            document,
-            this.dbName,
-            this.collectionName,
-            this.getEffectivePartitionKey(document, partitionKey),
-        );
+    public async writeDocument<T extends CosmosDocument>(document: T): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName);
     }
 
     /**
@@ -81,7 +68,7 @@ export class CosmosContainerClient {
         const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
         const response = await this.cosmosClientWrapper.readItem<T>(document.id, this.dbName, this.collectionName, effectivePartitionKey);
         if (response.statusCode === 404) {
-            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName);
         }
 
         const mergedDocument = response.item;
@@ -97,7 +84,7 @@ export class CosmosContainerClient {
         // normalize document properties by converting from null to undefined
         const normalizedDocument = <T>this.getNormalizeMergedDocument(mergedDocument);
 
-        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName, effectivePartitionKey);
+        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName);
     }
 
     /**
@@ -119,8 +106,8 @@ export class CosmosContainerClient {
         );
     }
 
-    public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
-        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, partitionKey);
+    public async writeDocuments<T>(documents: T[]): Promise<void> {
+        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName);
     }
 
     public async tryExecuteOperation<T>(

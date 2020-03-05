@@ -172,22 +172,21 @@ export class CosmosClientWrapper {
         }
     }
 
-    // public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
-    //     const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
-    //     const container = await this.getContainer(dbName, collectionName);
+    public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
+        const container = await this.getContainer(dbName, collectionName);
 
-    //     try {
-    //         await container.item(id).delete(options);
-    //     } catch (error) {
-    //         this.logFailedResponse('deleteItem', error, {
-    //             db: dbName,
-    //             collection: collectionName,
-    //             itemId: id,
-    //             partitionKey: partitionKey,
-    //         });
-    //         throw error;
-    //     }
-    // }
+        try {
+            await container.item(id, partitionKey).delete();
+        } catch (error) {
+            this.logFailedResponse('deleteItem', error, {
+                db: dbName,
+                collection: collectionName,
+                itemId: id,
+                partitionKey: partitionKey,
+            });
+            throw error;
+        }
+    }
 
     private async getContainer(dbName: string, collectionName: string): Promise<cosmos.Container> {
         const db = await this.getDatabase(dbName);
