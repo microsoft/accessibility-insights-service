@@ -9,12 +9,10 @@ import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-requ
 import { WebApiScanRequestSenderEntryPoint } from './web-api-scan-request-sender-entry-point';
 
 const whyNodeRunLogger = new WhyNodeRunningLogger();
-whyNodeRunLogger.start();
 
 (async () => {
     await new WebApiScanRequestSenderEntryPoint(setupWebApiScanRequestSenderContainer()).start();
-    whyNodeRunLogger.stopAfterSeconds(10);
-})().catch(() => {
-    whyNodeRunLogger.stopAfterSeconds(10);
+    await whyNodeRunLogger.logAfterSeconds(10);
+})().catch(async () => {
     process.exit(1);
 });

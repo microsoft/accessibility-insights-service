@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
-import { loggerTypes } from 'logger';
-import { IMock, Mock } from 'typemoq';
+import { Logger, loggerTypes } from 'logger';
+import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
@@ -56,10 +56,22 @@ describe(WebControllerDispatcher, () => {
         processLifeCycleContainerMock = Mock.ofType(Container);
 
         containerMock.setup(c => c.get(TestableWebController)).returns(() => testableWebController);
+        containerMock.setup(c => c.get(Logger)).returns(() => loggerMock.object);
+    });
+
+    afterEach(() => {
+        loggerMock.verifyAll();
+        containerMock.verifyAll();
+        processLifeCycleContainerMock.verifyAll();
     });
 
     it('should invoke controller instance with args', async () => {
         webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
+
+        loggerMock
+            .setup(l => l.setup())
+            .returns(() => Promise.resolve())
+            .verifiable(Times.once());
 
         await webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context, 1, 'a');
 
@@ -92,6 +104,11 @@ describe(WebControllerDispatcher, () => {
     });
 
     it('return result of invoke', async () => {
+        loggerMock
+            .setup(l => l.setup())
+            .returns(() => Promise.resolve())
+            .verifiable(Times.once());
+
         webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
         await expect(webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context)).resolves.toBe(
             TestableWebController.handleRequestResult,
