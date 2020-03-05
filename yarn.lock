@@ -2,13 +2,6 @@
 # yarn lockfile v1
 
 
-"@azure/abort-controller@1.0.0-preview.1":
-  version "1.0.0-preview.1"
-  resolved "https://registry.yarnpkg.com/@azure/abort-controller/-/abort-controller-1.0.0-preview.1.tgz#75b8ac03f7647a9f4a047e23ffe2e3ea037eb60a"
-  integrity sha512-NnJqi6oHqt06Q2hz4nO1HO0QlyusBa3E/wezvn9flHEtl0IHYSmzGbtlb+MaAJ5GzxwqSevQ4q1+4B8fvVijOA==
-  dependencies:
-    tslib "^1.9.3"
-
 "@azure/abort-controller@^1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@azure/abort-controller/-/abort-controller-1.0.1.tgz#8510935b25ac051e58920300e9d7b511ca6e656a"
@@ -28,18 +21,10 @@
     tslib "^1.9.3"
     url-parse "^1.4.7"
 
-"@azure/core-asynciterator-polyfill@^1.0.0-preview.1":
+"@azure/core-asynciterator-polyfill@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@azure/core-asynciterator-polyfill/-/core-asynciterator-polyfill-1.0.0.tgz#dcccebb88406e5c76e0e1d52e8cc4c43a68b3ee7"
   integrity sha512-kmv8CGrPfN9SwMwrkiBK9VTQYxdFQEGe0BmQk+M8io56P9KNzpAxcWE/1fxJj7uouwN4kXF0BHW8DNlgx+wtCg==
-
-"@azure/core-auth@1.0.0-preview.2":
-  version "1.0.0-preview.2"
-  resolved "https://registry.yarnpkg.com/@azure/core-auth/-/core-auth-1.0.0-preview.2.tgz#470157370f15359a43c65e2cf457468d29dde249"
-  integrity sha512-QATxlKPP2Yld8+eg8Hz8mXmowlG/z9B53HTkjBz0oJIzR+dBm9HJY2bPnT7RB8nyqdnm8JpU2mIp8YVZZO6ubg==
-  dependencies:
-    "@azure/abort-controller" "1.0.0-preview.1"
-    tslib "^1.9.3"
 
 "@azure/core-auth@^1.0.0":
   version "1.0.2"
@@ -50,22 +35,6 @@
     "@azure/core-tracing" "1.0.0-preview.7"
     "@opentelemetry/types" "^0.2.0"
     tslib "^1.9.3"
-
-"@azure/core-http@1.0.0-preview.2":
-  version "1.0.0-preview.2"
-  resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-1.0.0-preview.2.tgz#623acdcdda6340650b9055efc69b12df836a4c27"
-  integrity sha512-7zvbuMxwFjqvZ8knyEky+tWJYq6nK/pDIOI44nuCsdzdeCA8G9Ul3tXuQ+1lI4NOUfd2Scj8Ckgb4Xh9+ckOuw==
-  dependencies:
-    "@azure/core-auth" "1.0.0-preview.2"
-    "@types/tunnel" "^0.0.1"
-    axios "^0.19.0"
-    form-data "^2.5.0"
-    process "^0.11.10"
-    tough-cookie "^3.0.1"
-    tslib "^1.9.3"
-    tunnel "^0.0.6"
-    uuid "^3.3.2"
-    xml2js "^0.4.19"
 
 "@azure/core-http@^1.0.0":
   version "1.0.3"
@@ -88,12 +57,23 @@
     uuid "^3.3.2"
     xml2js "^0.4.19"
 
-"@azure/core-paging@1.0.0-preview.1":
-  version "1.0.0-preview.1"
-  resolved "https://registry.yarnpkg.com/@azure/core-paging/-/core-paging-1.0.0-preview.1.tgz#b7762a5a5d97069bcb8b7ced824848124faa1085"
-  integrity sha512-mZHkadyAbhV1+brHEsWICnURW6E72D2HReM+8MWDn5oVJdlxD51w14PeqsOZC4UDYv4x2Eww5+PFRTEOrNB1Uw==
+"@azure/core-lro@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@azure/core-lro/-/core-lro-1.0.1.tgz#8a018fd76bc842475bd6bcb8a09d0cf45c62005b"
+  integrity sha512-RIrM6CTRoYoJEXpCuAr8vanXxlFBCCaHpa/PCSUfcYe6B9pAdSi1DTUZZ+2w2ysNIMHB9MyOLEAkzZ/4NCJIdQ==
   dependencies:
-    "@azure/core-asynciterator-polyfill" "^1.0.0-preview.1"
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-http" "^1.0.0"
+    "@opentelemetry/types" "^0.2.0"
+    events "^3.0.0"
+    tslib "^1.10.0"
+
+"@azure/core-paging@^1.0.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/core-paging/-/core-paging-1.1.0.tgz#568c0e6d6d7590902f1d9cbe7d7cefed427552f7"
+  integrity sha512-Di26joIBaa5E/YAIAcis2LytbNy/LKTmgj+CUYZ8aLnzrN8h9AgVNASYOFXf+weJFD0pyaTAeW4GAt6P9NDFWw==
+  dependencies:
+    "@azure/core-asynciterator-polyfill" "^1.0.0"
 
 "@azure/core-tracing@1.0.0-preview.7":
   version "1.0.0-preview.7"
@@ -206,16 +186,20 @@
     "@azure/ms-rest-js" "^1.8.6"
     adal-node "^0.1.28"
 
-"@azure/storage-blob@12.0.0-preview.2":
-  version "12.0.0-preview.2"
-  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.0.0-preview.2.tgz#ba3a0362b5aa1e1167e820edd6bb41295d1bbffa"
-  integrity sha512-YOZ3l065gmnaLdcpkyY+C02x2yi9XFo5ARZQGtoDMUz7VD+QzIbDwWsYlWOArVEm5Dxhl3v1zKJ1V6bi06iHEQ==
+"@azure/storage-blob@12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.1.0.tgz#02d388b8bd1463c6836a1b7802a9e50ce2cc6e68"
+  integrity sha512-fdYDpxRmdqOqoIwuKHV1w6lfAcBcZTdnxl0a1iHFsVoo5m3Vifawmvw6p/mhk3qFAavpchiOdthUfVJ78xurzA==
   dependencies:
-    "@azure/abort-controller" "1.0.0-preview.1"
-    "@azure/core-http" "1.0.0-preview.2"
-    "@azure/core-paging" "1.0.0-preview.1"
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-http" "^1.0.0"
+    "@azure/core-lro" "^1.0.0"
+    "@azure/core-paging" "^1.0.0"
+    "@azure/core-tracing" "1.0.0-preview.7"
+    "@azure/logger" "^1.0.0"
+    "@opentelemetry/types" "^0.2.0"
     events "^3.0.0"
-    tslib "^1.9.3"
+    tslib "^1.10.0"
 
 "@azure/storage-queue@^10.1.0":
   version "10.3.0"

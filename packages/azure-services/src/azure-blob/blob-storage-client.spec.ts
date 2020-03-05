@@ -3,8 +3,9 @@
 
 import 'reflect-metadata';
 
-import { BlobClient, BlobServiceClient, BlockBlobClient, ContainerClient, Models, RestError } from '@azure/storage-blob';
+import { BlobClient, BlobDownloadResponseModel, BlobServiceClient, BlockBlobClient, ContainerClient, RestError } from '@azure/storage-blob';
 import { IMock, Mock } from 'typemoq';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { BlobContentDownloadResponse, BlobStorageClient } from './blob-storage-client';
 
 // tslint:disable: no-any no-object-literal-type-assertion
@@ -18,9 +19,14 @@ describe(BlobStorageClient, () => {
     const blobName = 'blob name1';
 
     beforeEach(() => {
-        blobServiceClientMock = Mock.ofType(BlobServiceClient);
-        blobClientMock = Mock.ofType(BlobClient);
-        containerClientMock = Mock.ofType(ContainerClient);
+        blobServiceClientMock = Mock.ofType<BlobServiceClient>();
+        blobServiceClientMock = getPromisableDynamicMock(blobServiceClientMock);
+
+        blobClientMock = Mock.ofType<BlobClient>();
+        blobClientMock = getPromisableDynamicMock(blobClientMock);
+
+        containerClientMock = Mock.ofType<ContainerClient>();
+        containerClientMock = getPromisableDynamicMock(containerClientMock);
 
         blobServiceClientMock.setup(b => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
         containerClientMock.setup(c => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
@@ -34,7 +40,7 @@ describe(BlobStorageClient, () => {
 
             blobClientMock
                 .setup(async b => b.download(0, undefined))
-                .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as Models.BlobDownloadResponse))
+                .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as BlobDownloadResponseModel))
                 .verifiable();
 
             const response = await testSubject.getBlobContent(containerName, blobName);
@@ -69,7 +75,8 @@ describe(BlobStorageClient, () => {
         const content = 'blob content 1';
 
         beforeEach(() => {
-            blockBlobClientMock = Mock.ofType(BlockBlobClient);
+            blockBlobClientMock = Mock.ofType<BlockBlobClient>();
+            blockBlobClientMock = getPromisableDynamicMock(blockBlobClientMock);
             blobClientMock.setup(b => b.getBlockBlobClient()).returns(() => blockBlobClientMock.object);
         });
 
