@@ -128,7 +128,7 @@ export class DbMockHelper {
         await db.containers.createIfNotExists(
             {
                 id: container.collectionName,
-                partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME] },
+                partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
             },
             { offerThroughput: 1000 },
         );
