@@ -8,6 +8,7 @@ import { TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { WebController } from 'service-library';
+import { e2eTestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 
 @injectable()
@@ -59,23 +60,25 @@ export class HealthMonitorOrchestrationController extends WebController {
                 scanUrl: availabilityTestConfig.urlToScan,
             };
 
+            orchestrationSteps.logTestRunStart();
+
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
             const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
             testContextData.scanId = scanId;
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['PostScan', 'ScanStatus']);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanSubmissionTests);
 
             yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
             const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['ScanPreProcessing', 'ScanQueueing']);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionTests);
 
             const reportId = scanRunStatus.reports[0].reportId;
             testContextData.reportId = reportId;
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['ScanReports']);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
 
             // The last test group in a functional test suite to indicated a suite run completion
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, ['Finalizer']);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.finalizerTests);
         });
     }
 

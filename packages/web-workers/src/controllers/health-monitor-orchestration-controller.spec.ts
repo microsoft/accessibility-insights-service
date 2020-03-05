@@ -134,6 +134,8 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
+    public logTestRunStart(): void {}
+
     private throwExceptionIfExpected(): void {
         if (this.shouldThrowException) {
             throw new Error('test error at orchestration step');

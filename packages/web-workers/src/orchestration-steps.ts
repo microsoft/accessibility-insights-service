@@ -19,6 +19,7 @@ import {
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
+import { getAllTestGroupNames } from './e2e-test-group-names';
 
 export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
@@ -42,6 +43,7 @@ export interface OrchestrationSteps {
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
+    logTestRunStart(): void;
 }
 
 export class OrchestrationStepsImpl implements OrchestrationSteps {
@@ -183,6 +185,17 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         yield this.context.df.Task.all(parallelTasks);
 
         this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
+    }
+
+    public logTestRunStart(): void {
+        const testGroupNamesStr = (getAllTestGroupNames() as string[]).reduce((prevValue, currentValue) => `${prevValue},${currentValue}`);
+        const properties = {
+            ...this.getDefaultLogProperties(),
+            functionalTestGroups: testGroupNamesStr,
+            runId: this.context.df.instanceId,
+            environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
+        };
+        this.logOrchestrationStep('Starting functional test orchestration.', LogLevel.info, properties);
     }
 
     private getTestEnvironment(environment: string): TestEnvironment {
