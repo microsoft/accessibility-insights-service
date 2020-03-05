@@ -2,17 +2,8 @@
 // Licensed under the MIT License.
 import { dump } from 'wtfnode';
 
-import { isNil } from 'lodash';
-
 export class WhyNodeRunningLogger {
-    private intervalId: NodeJS.Timeout;
-
-    constructor(private readonly intervalInMillSeconds: number = 500, private readonly globalObj = global) {}
-
-    public static LOGNOW(): void {
-        WhyNodeRunningLogger.logMessage('Adhoc request');
-        WhyNodeRunningLogger.logHandles();
-    }
+    constructor(private readonly globalObj = global) {}
 
     private static logHandles(): void {
         WhyNodeRunningLogger.logMessage('start logging open handles');
@@ -24,27 +15,18 @@ export class WhyNodeRunningLogger {
         console.log(`[WhyNodeRunningLogger][${new Date().toUTCString()}] ${message}`);
     }
 
-    public start(): void {
-        if (isNil(this.intervalId)) {
-            this.intervalId = this.globalObj.setInterval(() => {
-                WhyNodeRunningLogger.logMessage('Start interval callback');
+    public log(): void {
+        WhyNodeRunningLogger.logHandles();
+    }
+
+    public async logAfterSeconds(timeoutInSeconds: number): Promise<void> {
+        return new Promise(resolve => {
+            this.globalObj.setTimeout(() => {
+                WhyNodeRunningLogger.logMessage(`Logging after ${timeoutInSeconds}`);
                 WhyNodeRunningLogger.logHandles();
-            }, this.intervalInMillSeconds);
-        }
-    }
 
-    public stop(): void {
-        if (!isNil(this.intervalId)) {
-            WhyNodeRunningLogger.logMessage('Stopped interval callback');
-            this.globalObj.clearInterval(this.intervalId);
-            WhyNodeRunningLogger.logHandles();
-            this.intervalId = undefined;
-        }
-    }
-
-    public stopAfterSeconds(timeoutInSeconds: number): void {
-        this.globalObj.setTimeout(() => {
-            this.stop();
-        }, timeoutInSeconds * 1000);
+                resolve();
+            }, timeoutInSeconds * 1000);
+        });
     }
 }
