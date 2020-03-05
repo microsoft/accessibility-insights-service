@@ -64,9 +64,8 @@ describe(PageScanRequestProvider, () => {
         cosmosContainerClientMock
             .setup(c =>
                 c.queryDocuments(
-                    `SELECT TOP ${itemCount} * FROM c WHERE c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority desc`,
+                    `SELECT TOP ${itemCount} * FROM c WHERE c.partitionKey = "${PartitionKey.pageScanRequestDocuments}" and c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority desc`,
                     continuationToken,
-                    PartitionKey.pageScanRequestDocuments,
                 ),
             )
             .returns(() => Promise.resolve(response))

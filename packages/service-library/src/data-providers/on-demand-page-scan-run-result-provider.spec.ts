@@ -101,12 +101,17 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition1id1", "partition1id2")', 'token1', 'bucket1'))
+                .setup(c =>
+                    c.queryDocuments(
+                        'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
+                        'token1',
+                    ),
+                )
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', 'token1', 'bucket2'))
+                .setup(c => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
                 .returns(() => Promise.reject('sample test error'))
                 .verifiable();
 
@@ -133,12 +138,17 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition1id1", "partition1id2")', 'token1', 'bucket1'))
+                .setup(c =>
+                    c.queryDocuments(
+                        'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
+                        'token1',
+                    ),
+                )
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.id in ("partition2id1")', 'token1', 'bucket2'))
+                .setup(c => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
                 .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
