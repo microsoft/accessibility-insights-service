@@ -4,7 +4,7 @@ import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { BlobServiceClient, SharedKeyCredential as SharedKeyCredentialBlob } from '@azure/storage-blob';
+import { BlobServiceClient, StorageSharedKeyCredential as SharedKeyCredentialBlob } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';

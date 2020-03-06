@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
@@ -45,21 +45,21 @@
         "tslint": "^6.0.0",
         "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
-        "typescript": "^3.6.2",
+        "typescript": "^3.8.3",
         "webpack": "^4.42.0",
         "webpack-cli": "^3.2.3",
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
-        "accessibility-insights-report": "^1.0.1",
-        "axe-core": "3.3.2",
+        "accessibility-insights-report": "^1.0.2",
+        "axe-core": "3.5.1",
         "axe-puppeteer": "^1.0.0",
         "cli-spinner": "^0.2.10",
         "dotenv": "^8.2.0",
         "filenamify-url": "2.1.1",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
-        "puppeteer": "^1.12.2",
+        "puppeteer": "^2.1.1",
         "react-helmet": "^5.2.0",
         "reflect-metadata": "^0.1.13",
         "yargs": "^13.2.1"

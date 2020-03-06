@@ -36,7 +36,10 @@ export class RuleExclusion {
         'label-content-name-mismatch',
         'landmark-complementary-is-top-level',
         'scrollable-region-focusable',
-        'label-content-name-mismatch',
         'landmark-unique',
+        'meta-viewport',
+        'accesskeys',
+        'landmark-no-duplicate-main',
+        'identical-links-same-purpose',
     ];
 }

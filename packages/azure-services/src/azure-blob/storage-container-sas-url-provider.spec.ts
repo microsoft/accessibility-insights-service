@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { secretNames } from '../key-vault/secret-names';
 import { SecretProvider } from '../key-vault/secret-provider';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { StorageContainerSASUrlProvider } from './storage-container-sas-url-provider';
 
 describe(StorageContainerSASUrlProvider, () => {
@@ -21,10 +22,18 @@ describe(StorageContainerSASUrlProvider, () => {
     const containerUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/';
 
     beforeEach(() => {
-        blobServiceClientMock = Mock.ofType(BlobServiceClient);
-        blobClientMock = Mock.ofType(BlobClient);
-        containerClientMock = Mock.ofType(ContainerClient);
-        secretProviderMock = Mock.ofType(SecretProvider);
+        blobServiceClientMock = Mock.ofType<BlobServiceClient>();
+        blobServiceClientMock = getPromisableDynamicMock(blobServiceClientMock);
+
+        blobClientMock = Mock.ofType<BlobClient>();
+        blobClientMock = getPromisableDynamicMock(blobClientMock);
+
+        containerClientMock = Mock.ofType<ContainerClient>();
+        containerClientMock = getPromisableDynamicMock(containerClientMock);
+
+        secretProviderMock = Mock.ofType<SecretProvider>();
+        secretProviderMock = getPromisableDynamicMock(secretProviderMock);
+
         blobServiceClientMock.setup(b => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
         containerClientMock.setup(c => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
         containerClientMock.setup(c => c.url).returns(() => containerUrl);
