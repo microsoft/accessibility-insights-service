@@ -89,7 +89,7 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
 for pool in $pools; do
-    . "${0%/*}/batch-pool-enable-msi.sh"
+    . "${0%/*}/batch-pool-setup.sh"
 
     for principalId in "${systemAssignedIdentities[@]}"; do
         . "${0%/*}/key-vault-enable-msi.sh"

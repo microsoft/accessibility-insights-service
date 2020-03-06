@@ -12,7 +12,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
+Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id> -k <log analytics workspace key>
 "
     exit 1
 }
@@ -75,6 +75,45 @@ getVmssInfo() {
 }
 
 assignSystemIdentity() {
+    local vmssResourceGroup=$1
+    local vmssName=$2
+
+    systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    systemAssignedIdentities+=("$systemAssignedIdentity")
+
+    echo \
+        "VMSS Resource configuration:
+  Pool: $pool
+  VMSS resource group: $vmssResourceGroup
+  VMSS name: $vmssName
+  System-assigned identity: $systemAssignedIdentity
+  "
+}
+
+enableAzureMonitor() {
+    local vmssResourceGroup=$1
+    local vmssName=$2
+    local result
+
+    echo "Enabling OmsAgentForLinux extension on $vmssName"
+    result=$(az vmss extension set --resource-group "$vmssResourceGroup" --vmss-name "$vmssName" --name OmsAgentForLinux --publisher Microsoft.EnterpriseCloud.Monitoring --protected-settings "{\"workspaceKey\":\"$logAnalyticsWorkspaceKey\"}" --settings "{\"workspaceId\":\"$logAnalyticsWorkspaceId\"}" -o tsv --query "virtualMachineProfile.extensionProfile.extensions[?type=='OmsAgentForLinux'].type|[0]")
+
+    if [ "$result" != "OmsAgentForLinux" ]; then
+        echo "Unable to enable OmsAgentForLinux on vmss $vmssName"
+        exit 1
+    fi
+
+    echo "Enabling DependencyAgentLinux extension on $vmssName"
+    result=$(az vmss extension set --resource-group "$vmssResourceGroup" --vmss-name "$vmssName" --name DependencyAgentLinux --publisher Microsoft.Azure.Monitoring.DependencyAgent -o tsv --query "virtualMachineProfile.extensionProfile.extensions[?type=='DependencyAgentLinux'].type|[0]")
+
+    if [ "$result" != "DependencyAgentLinux" ]; then
+        echo "Unable to enable DependencyAgentLinux on vmss $vmssName"
+        exit 1
+    fi
+
+}
+
+setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
@@ -92,25 +131,19 @@ assignSystemIdentity() {
             exit 1
         fi
 
-        systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-        systemAssignedIdentities+=($systemAssignedIdentity)
-
-        echo \
-            "VMSS Resource configuration:
-  Pool: $pool
-  VMSS resource group: $vmssResourceGroup
-  VMSS name: $vmssName
-  System-assigned identity: $systemAssignedIdentity
-"
+        assignSystemIdentity "$vmssResourceGroup" "$vmssName"
+        enableAzureMonitor "$vmssResourceGroup" "$vmssName"
     done
 }
 
 # Read script arguments
-while getopts ":r:a:p:" option; do
+while getopts ":r:a:p:w:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
+    w) logAnalyticsWorkspaceId=${OPTARG} ;;
+    k) logAnalyticsWorkspaceKey=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -137,4 +170,4 @@ getPoolNodeCount
 getVmssInfo
 
 # Enable system-assigned managed identity on VMSS resources
-assignSystemIdentity
+setupVmss
