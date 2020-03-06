@@ -40,5 +40,6 @@ export class RuleExclusion {
         'meta-viewport',
         'accesskeys',
         'landmark-no-duplicate-main',
+        'identical-links-same-purpose',
     ];
 }

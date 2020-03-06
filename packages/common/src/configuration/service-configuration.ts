@@ -213,6 +213,7 @@ export class ServiceConfiguration {
                         'meta-viewport',
                         'accesskeys',
                         'landmark-no-duplicate-main',
+                        'identical-links-same-purpose',
                     ],
                     doc: 'Axe core rule exclusion list',
                 },
