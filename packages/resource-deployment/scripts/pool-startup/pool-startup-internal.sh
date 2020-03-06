@@ -55,7 +55,7 @@ npm install yargs@13.2.4 applicationinsights@1.4.0
 
 cd "$RUNNER_SHARED_LOCATION"
 echo "Installing runner dependencies"
-npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.3.2 axe-puppeteer@1.0.0 applicationinsights@1.4.0
+npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.5.1 axe-puppeteer@1.0.0 applicationinsights@1.4.0
 
 cd "$WEB_API_SCAN_JOB_MANAGER_SHARED_LOCATION"
 echo "Installing web api scan job manager dependencies"
@@ -63,7 +63,7 @@ npm install yargs@13.2.4 applicationinsights@1.4.0
 
 cd "$WEB_API_SCAN_RUNNER_SHARED_LOCATION"
 echo "Installing web api scan runner dependencies"
-npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.3.2 axe-puppeteer@1.0.0 applicationinsights@1.4.0
+npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.5.1 axe-puppeteer@1.0.0 applicationinsights@1.4.0
 
 cd "$SCAN_REQUEST_SENDER_SHARED_LOCATION"
 echo "Installing scan request sender dependencies"

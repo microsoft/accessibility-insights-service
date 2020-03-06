@@ -48,7 +48,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^2.1.2",
-        "axe-core": "3.3.2",
+        "axe-core": "3.5.1",
         "axe-puppeteer": "^1.0.0",
         "axe-sarif-converter": "^2.1.0",
         "azure-services": "1.0.0",
@@ -65,6 +65,6 @@
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
         "yargs": "^13.2.1",
-        "accessibility-insights-report": "^1.0.1"
+        "accessibility-insights-report": "^1.0.2"
     }
 }
