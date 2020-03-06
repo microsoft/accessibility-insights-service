@@ -17,23 +17,27 @@ export resourceName
 export systemAssignedIdentities
 export principalId
 export enableSoftDeleteOnKeyVault
+export logAnalyticsWorkspaceId
+export logAnalyticsWorkspaceKey
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> 
+Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> -w <log analytics workspace Id> -z <log analytics workspace key> 
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:t:k:" option; do
+while getopts ":r:t:k:w:z:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
     k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
+    w) logAnalyticsWorkspaceId=${OPTARG} ;;
+    z) logAnalyticsWorkspaceKey=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
