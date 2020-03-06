@@ -102,7 +102,18 @@ assignSystemIdentity() {
   VMSS name: $vmssName
   System-assigned identity: $systemAssignedIdentity
 "
+
+    addResourceGroupNameTagToVMSS $vmssQueryConditions $vmssName
+
     done
+}
+
+addResourceGroupNameTagToVMSS(){
+    vmssResourceGroup=$1
+    vmssName=$2
+    az resource tag --tags "ResourceGroupName=$resourceName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
+
+    echo "Tag ResourceGroupName=$resourceName was added to $vmssName vmss under vmssResourceGroup resource group"
 }
 
 # Read script arguments
