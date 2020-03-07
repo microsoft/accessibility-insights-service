@@ -4,12 +4,12 @@ import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
 import { CosmosOperationResponse } from './cosmos-operation-response';
-import { isEmpty } from 'lodash';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -256,6 +256,6 @@ export class CosmosClientWrapper {
     }
 
     private assignPartitionKey<T extends CosmosDocument>(item: T, partitionKey: string): void {
-        if (isEmpty(item.partitionKey) && !isEmpty(partitionKey)) item.partitionKey = partitionKey;
+        if (isEmpty(item.partitionKey) && !isEmpty(partitionKey)) { item.partitionKey = partitionKey; }
     }
 }
