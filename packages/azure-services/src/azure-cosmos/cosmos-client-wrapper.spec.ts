@@ -34,6 +34,58 @@ describe('CosmosClientWrapper', () => {
         testSubject = new CosmosClientWrapper(cosmosClientProviderStub, loggerMock.object);
     });
 
+    describe('readAllItem()', () => {
+        it('handles error response', async () => {
+            const expectedResult = {
+                response: 'NotFound',
+                statusCode: 404,
+            };
+            const responseError: cosmos.ErrorResponse = {
+                message: 'NotFound',
+                name: 'NotFound',
+                code: 404,
+            };
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            itemsMock.setup(i => i.readAll()).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async qm => qm.fetchAll()).returns(async () => Promise.reject(responseError));
+
+            const result = await testSubject.readAllItem(dbName, collectionName);
+            expect(result).toEqual(expectedResult);
+            itemsMock.verifyAll();
+            queryIteratorMock.verifyAll();
+            verifyMocks();
+        });
+
+        it('read all items', async () => {
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                    _etag: 'etag-1',
+                    _ts: 123456789,
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propA',
+                    _etag: 'etag-1',
+                    _ts: 123456789,
+                },
+            ];
+            const response: cosmos.FeedResponse<cosmos.ItemDefinition> = {
+                resources: items,
+            } as any;
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            itemsMock.setup(i => i.readAll()).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async qm => qm.fetchAll()).returns(async () => Promise.resolve(response));
+
+            const result = await testSubject.readAllItem(dbName, collectionName);
+            expect(result.item).toEqual(items);
+            itemsMock.verifyAll();
+            queryIteratorMock.verifyAll();
+            verifyMocks();
+        });
+    });
+
     describe('readItem()', () => {
         it('read item with failed response ', async () => {
             const expectedResult = {
@@ -95,6 +147,29 @@ describe('CosmosClientWrapper', () => {
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, undefined);
+
+            expect(result).toEqual(expectedResult);
+            itemMock.verifyAll();
+            verifyMocks();
+        });
+    });
+
+    describe('readItems()', () => {
+        it('read items with failed response ', async () => {
+            const expectedResult = {
+                response: 'NotFound',
+                statusCode: 404,
+            };
+            const responseError: cosmos.ErrorResponse = {
+                message: 'NotFound',
+                name: 'NotFound',
+                code: 404,
+            };
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            itemsMock.setup(i => i.query('query', It.isAny())).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async qm => qm.fetchNext()).returns(async () => Promise.reject(responseError));
+
+            const result = await testSubject.readItems(dbName, collectionName, 'query');
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
@@ -178,9 +253,39 @@ describe('CosmosClientWrapper', () => {
             itemMock.verifyAll();
             verifyMocks();
         });
+
+        it('read items that has no content', async () => {
+            const query = "SELECT * from C where C.itemType = 'Page'";
+            const items: any = undefined;
+            const expectedResult = {
+                item: [] as any[],
+                statusCode: 204,
+            };
+
+            let iterationCount = 1;
+            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            queryIteratorMock
+                .setup(async qi => qi.fetchNext())
+                .returns(async () => {
+                    if (iterationCount > 1) {
+                        return Promise.resolve({ resources: items, statusCode: 200 } as any);
+                    }
+
+                    iterationCount = iterationCount + 1;
+
+                    return Promise.resolve({ resources: items, statusCode: 200, continuationToken: 'abdf12345fd' });
+                });
+
+            const result = await testSubject.readItems(dbName, collectionName, query);
+
+            expect(result).toEqual(expectedResult);
+            itemMock.verifyAll();
+            verifyMocks();
+        });
     });
 
-    describe('delete()', () => {
+    describe('deleteItem()', () => {
         it('deletes item', async () => {
             collectionMock.setup(c => c.item('id', partitionKey)).returns(() => itemMock.object);
             itemMock
@@ -246,6 +351,37 @@ describe('CosmosClientWrapper', () => {
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
+
+            expect(result).toEqual(expectedResult);
+            verifyMocks();
+        });
+
+        it('upsert item with partition key defined with item itself', async () => {
+            const item = {
+                id: 'id-1',
+                propA: 'propA',
+                _etag: 'etag-1',
+                partitionKey,
+            };
+            const responseItem = {
+                id: 'id-1',
+                propA: 'propA',
+                _etag: 'etag-1',
+                _ts: 123456789,
+            };
+            const expectedResult = {
+                item: responseItem,
+                statusCode: 200,
+            };
+            const options = {
+                accessCondition: { type: 'IfMatch', condition: responseItem._etag },
+            };
+
+            itemsMock
+                .setup(async i => i.upsert<DbItemMock>(item, options))
+                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
+
+            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, 'should not use this partition key');
 
             expect(result).toEqual(expectedResult);
             verifyMocks();

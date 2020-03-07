@@ -9,6 +9,7 @@ import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
 import { CosmosOperationResponse } from './cosmos-operation-response';
+import { isEmpty } from 'lodash';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -37,7 +38,7 @@ export class CosmosClientWrapper {
             await Promise.all(
                 chunk.map(async item => {
                     try {
-                        item.partitionKey = partitionKey;
+                        this.assignPartitionKey(item, partitionKey);
                         await container.items.upsert(item, this.getOptions(item));
                     } catch (error) {
                         this.logFailedResponse('upsertItem', error, {
@@ -61,7 +62,7 @@ export class CosmosClientWrapper {
     ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
         try {
-            item.partitionKey = partitionKey;
+            this.assignPartitionKey(item, partitionKey);
             const response = await container.items.upsert(item, this.getOptions(item));
             const itemT = <T>(<unknown>response.resource);
 
@@ -220,13 +221,9 @@ export class CosmosClientWrapper {
         if (item !== undefined && item._etag !== undefined) {
             const accessCondition = { type: 'IfMatch', condition: item._etag };
 
-            if (requestOpts !== undefined) {
-                requestOpts.accessCondition = accessCondition;
-            } else {
-                requestOpts = {
-                    accessCondition: accessCondition,
-                };
-            }
+            requestOpts = {
+                accessCondition: accessCondition,
+            };
         }
 
         return requestOpts;
@@ -256,5 +253,9 @@ export class CosmosClientWrapper {
                 ...properties,
             });
         }
+    }
+
+    private assignPartitionKey<T extends CosmosDocument>(item: T, partitionKey: string): void {
+        if (isEmpty(item.partitionKey) && !isEmpty(partitionKey)) item.partitionKey = partitionKey;
     }
 }
