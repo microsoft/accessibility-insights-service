@@ -10,9 +10,12 @@ set -eo pipefail
 # export vmssResourceGroups
 # export systemAssignedIdentities
 
+# Set default ARM template file
+configureMonitoreForVmssTemplateFile="${0%/*}/../templates/configure-vmss-insights.template.json"
+
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id> -k <log analytics workspace key>
+Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id>
 "
     exit 1
 }
@@ -93,24 +96,19 @@ assignSystemIdentity() {
 enableAzureMonitor() {
     local vmssResourceGroup=$1
     local vmssName=$2
-    local result
+    local vmssLocation=$3
 
-    echo "Enabling OmsAgentForLinux extension on $vmssName"
-    result=$(az vmss extension set --resource-group "$vmssResourceGroup" --vmss-name "$vmssName" --name OmsAgentForLinux --publisher Microsoft.EnterpriseCloud.Monitoring --protected-settings "{\"workspaceKey\":\"$logAnalyticsWorkspaceKey\"}" --settings "{\"workspaceId\":\"$logAnalyticsWorkspaceId\"}" -o tsv --query "virtualMachineProfile.extensionProfile.extensions[?type=='OmsAgentForLinux'].type|[0]")
+    resources=$(
+        az group deployment create \
+            --resource-group "$vmssResourceGroup" \
+            --template-file "$configureMonitoreForVmssTemplateFile" \
+            --parameters VmssName="$vmssName" WorkspaceResourceId="$logAnalyticsWorkspaceId" VmssLocation="$vmssLocation" WorkspaceResourceGroup="$resourceGroupName" \
+            --query "properties.outputResources[].id" \
+            -o tsv
+    )
 
-    if [ "$result" != "OmsAgentForLinux" ]; then
-        echo "Unable to enable OmsAgentForLinux on vmss $vmssName"
-        exit 1
-    fi
-
-    echo "Enabling DependencyAgentLinux extension on $vmssName"
-    result=$(az vmss extension set --resource-group "$vmssResourceGroup" --vmss-name "$vmssName" --name DependencyAgentLinux --publisher Microsoft.Azure.Monitoring.DependencyAgent -o tsv --query "virtualMachineProfile.extensionProfile.extensions[?type=='DependencyAgentLinux'].type|[0]")
-
-    if [ "$result" != "DependencyAgentLinux" ]; then
-        echo "Unable to enable DependencyAgentLinux on vmss $vmssName"
-        exit 1
-    fi
-
+    echo "Successfully Enabled Monitor. 
+        Created Resources - $resources"
 }
 
 setupVmss() {
@@ -125,6 +123,7 @@ setupVmss() {
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssDeployedQuery\" -o tsv"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
+        vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
         vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
         if [ "$vmssStatus" != "Succeeded" ]; then
             echo "Deployment of vmss $vmssName failed with status $vmssStatus"
@@ -132,18 +131,17 @@ setupVmss() {
         fi
 
         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-        enableAzureMonitor "$vmssResourceGroup" "$vmssName"
+        enableAzureMonitor "$vmssResourceGroup" "$vmssName" "$vmssLocation"
     done
 }
 
 # Read script arguments
-while getopts ":r:a:p:w:k:" option; do
+while getopts ":r:a:p:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
     w) logAnalyticsWorkspaceId=${OPTARG} ;;
-    k) logAnalyticsWorkspaceKey=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done

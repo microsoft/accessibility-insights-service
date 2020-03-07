@@ -1,0 +1,93 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "VmssName": {
+            "type": "String",
+            "metadata": {
+                "description": "VMSS name."
+            }
+        },
+        "VmssLocation": {
+            "type": "String",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "The Virtual Machine Location."
+            }
+        },
+        "WorkspaceResourceGroup": {
+            "type": "String",
+            "metadata": {
+                "description": "Resource group where workspace is present"
+            }
+        },
+        "osType": {
+            "type": "String",
+            "defaultValue": "Linux",
+            "metadata": {
+                "description": "OS Type, Example: Linux / Windows"
+            }
+        },
+        "WorkspaceName": {
+            "type": "String",
+            "metadata": {
+                "description": "Workspace name"
+            }
+        }
+    },
+    "variables": {
+        "VmssResourceId": "[resourceId('Microsoft.Compute/virtualMachineScaleSets', parameters('VmssName'))]",
+        "WorkspaceResourceId": "[resourceId(parameters('WorkspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('WorkspaceName'))]",
+        "DaExtensionName": "[if(equals(toLower(parameters('osType')), 'windows'), 'DependencyAgentWindows', 'DependencyAgentLinux')]",
+        "DaExtensionType": "[if(equals(toLower(parameters('osType')), 'windows'), 'DependencyAgentWindows', 'DependencyAgentLinux')]",
+        "DaExtensionVersion": "9.5",
+        "MmaExtensionName": "[if(equals(toLower(parameters('osType')), 'windows'), 'MMAExtension', 'OMSExtension')]",
+        "MmaExtensionType": "[if(equals(toLower(parameters('osType')), 'windows'), 'MicrosoftMonitoringAgent', 'OmsAgentForLinux')]",
+        "MmaExtensionVersion": "[if(equals(toLower(parameters('osType')), 'windows'), '1.0', '1.4')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachineScaleSets",
+            "apiVersion": "2018-10-01",
+            "name": "[parameters('VmssName')]",
+            "location": "[parameters('VmssLocation')]",
+            "resources": [
+                {
+                    "type": "extensions",
+                    "apiVersion": "2018-10-01",
+                    "name": "[variables('DaExtensionName')]",
+                    "location": "[parameters('VmssLocation')]",
+                    "dependsOn": ["[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"],
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                        "type": "[variables('DaExtensionType')]",
+                        "typeHandlerVersion": "[variables('DaExtensionVersion')]",
+                        "autoUpgradeMinorVersion": true
+                    }
+                },
+                {
+                    "type": "extensions",
+                    "apiVersion": "2018-10-01",
+                    "name": "[variables('MmaExtensionName')]",
+                    "location": "[parameters('VmssLocation')]",
+                    "dependsOn": ["[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"],
+                    "properties": {
+                        "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                        "type": "[variables('MmaExtensionType')]",
+                        "typeHandlerVersion": "[variables('MmaExtensionVersion')]",
+                        "autoUpgradeMinorVersion": "true",
+                        "settings": {
+                            "workspaceId": "[reference(variables('WorkspaceResourceId'), '2015-03-20').customerId]",
+                            "azureResourceId": "[variables('VmssResourceId')]",
+                            "stopOnMultipleConnections": "true"
+                        },
+                        "protectedSettings": {
+                            "workspaceKey": "[listKeys(variables('WorkspaceResourceId'), '2015-03-20').primarySharedKey]"
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "outputs": {}
+}
