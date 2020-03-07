@@ -112,7 +112,7 @@ addResourceGroupNameTagToVMSS(){
     vmssResourceGroup=$1
     vmssName=$2
     
-    az resource tag --tags "ResourceGroupName=$resourceGroupName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
+    az resource update --set tag.ResourceGroupName="$resourceGroupName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
 
     echo "Tag ResourceGroupName=$resourceGroupName was added to $vmssName vmss under $vmssResourceGroup resource group"
 }
