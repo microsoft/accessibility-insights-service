@@ -98,6 +98,7 @@ enableAzureMonitor() {
     local vmssName=$2
     local vmssLocation=$3
 
+    echo "Enabling azure monitor on $vmssName"
     resources=$(
         az group deployment create \
             --resource-group "$vmssResourceGroup" \
