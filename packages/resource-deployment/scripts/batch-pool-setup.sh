@@ -74,7 +74,7 @@ getVmssInfo() {
     echo ""
 }
 
-assignSystemIdentity() {
+setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
@@ -92,21 +92,30 @@ assignSystemIdentity() {
             exit 1
         fi
 
-        systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-        systemAssignedIdentities+=($systemAssignedIdentity)
+         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
 
-        echo \
-            "VMSS Resource configuration:
+        addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
+
+    done
+}
+
+assignSystemIdentity() {
+    local vmssResourceGroup=$1
+    local vmssName=$2
+
+    systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    systemAssignedIdentities+=("$systemAssignedIdentity")
+
+    echo \
+        "VMSS Resource configuration:
   Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
   System-assigned identity: $systemAssignedIdentity
-"
-
-    addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
-
-    done
+  "
 }
+
 
 addResourceGroupNameTagToVMSS(){
     vmssResourceGroup=$1
@@ -148,5 +157,5 @@ getPoolNodeCount
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Enable system-assigned managed identity on VMSS resources
-assignSystemIdentity
+# Enable system-assigned managed identity and add resource group name as a tag on VMSS resources
+setupVmss
