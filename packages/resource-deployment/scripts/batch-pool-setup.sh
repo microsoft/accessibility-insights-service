@@ -102,7 +102,7 @@ enableAzureMonitor() {
         az group deployment create \
             --resource-group "$vmssResourceGroup" \
             --template-file "$configureMonitoreForVmssTemplateFile" \
-            --parameters VmssName="$vmssName" WorkspaceResourceId="$logAnalyticsWorkspaceId" VmssLocation="$vmssLocation" WorkspaceResourceGroup="$resourceGroupName" \
+            --parameters VmssName="$vmssName" WorkspaceName="$logAnalyticsWorkspaceId" VmssLocation="$vmssLocation" WorkspaceResourceGroup="$resourceGroupName" \
             --query "properties.outputResources[].id" \
             -o tsv
     )
