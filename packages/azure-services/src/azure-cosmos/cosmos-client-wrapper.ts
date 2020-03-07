@@ -256,6 +256,8 @@ export class CosmosClientWrapper {
     }
 
     private assignPartitionKey<T extends CosmosDocument>(item: T, partitionKey: string): void {
-        if (isEmpty(item.partitionKey) && !isEmpty(partitionKey)) { item.partitionKey = partitionKey; }
+        if (isEmpty(item.partitionKey) && !isEmpty(partitionKey)) {
+            item.partitionKey = partitionKey;
+        }
     }
 }
