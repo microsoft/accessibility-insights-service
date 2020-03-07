@@ -121,7 +121,9 @@ setupVmss() {
 
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
         vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+        vmssUpdatedCommand="az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+        
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
@@ -132,6 +134,8 @@ setupVmss() {
         fi
 
         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
+        
         enableAzureMonitor "$vmssResourceGroup" "$vmssName" "$vmssLocation"
     done
 }
