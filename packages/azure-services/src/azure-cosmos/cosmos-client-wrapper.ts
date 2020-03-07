@@ -3,9 +3,9 @@
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
-import * as _ from 'lodash';
 import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
+
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
