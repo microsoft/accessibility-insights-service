@@ -93,7 +93,7 @@ setupVmss() {
         fi
 
          assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
+         az resource wait -n "$vmssName" -g "$vmssResourceGroup" --resource-type "Microsoft.DocumentDB/databaseAccounts" --exists --updated --timeout "1800"
 
         addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
 
