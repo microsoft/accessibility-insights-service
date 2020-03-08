@@ -93,7 +93,7 @@ setupVmss() {
         fi
 
          assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-         az resource wait -n "$vmssName" -g "$vmssResourceGroup" --resource-type "Microsoft.DocumentDB/databaseAccounts" --exists --updated --timeout "1800"
+         az resource wait -n "$vmssName" -g "$vmssResourceGroup" --resource-type "Microsoft.Compute/virtualMachineScaleSets" --exists --updated --timeout "1800" --interval "5"
 
         addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
 
