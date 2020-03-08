@@ -40,10 +40,10 @@
         "WorkspaceResourceId": "[resourceId(parameters('WorkspaceResourceGroup'), 'Microsoft.OperationalInsights/workspaces', parameters('WorkspaceName'))]",
         "DaExtensionName": "[if(equals(toLower(parameters('osType')), 'windows'), 'DependencyAgentWindows', 'DependencyAgentLinux')]",
         "DaExtensionType": "[if(equals(toLower(parameters('osType')), 'windows'), 'DependencyAgentWindows', 'DependencyAgentLinux')]",
-        "DaExtensionVersion": "9.5",
+        "DaExtensionVersion": "9.10",
         "MmaExtensionName": "[if(equals(toLower(parameters('osType')), 'windows'), 'MMAExtension', 'OMSExtension')]",
         "MmaExtensionType": "[if(equals(toLower(parameters('osType')), 'windows'), 'MicrosoftMonitoringAgent', 'OmsAgentForLinux')]",
-        "MmaExtensionVersion": "[if(equals(toLower(parameters('osType')), 'windows'), '1.0', '1.4')]"
+        "MmaExtensionVersion": "[if(equals(toLower(parameters('osType')), 'windows'), '1.0', '1.12')]"
     },
     "resources": [
         {
@@ -55,19 +55,6 @@
                 {
                     "type": "extensions",
                     "apiVersion": "2018-10-01",
-                    "name": "[variables('DaExtensionName')]",
-                    "location": "[parameters('VmssLocation')]",
-                    "dependsOn": ["[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"],
-                    "properties": {
-                        "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
-                        "type": "[variables('DaExtensionType')]",
-                        "typeHandlerVersion": "[variables('DaExtensionVersion')]",
-                        "autoUpgradeMinorVersion": true
-                    }
-                },
-                {
-                    "type": "extensions",
-                    "apiVersion": "2018-10-01",
                     "name": "[variables('MmaExtensionName')]",
                     "location": "[parameters('VmssLocation')]",
                     "dependsOn": ["[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"],
@@ -75,7 +62,7 @@
                         "publisher": "Microsoft.EnterpriseCloud.Monitoring",
                         "type": "[variables('MmaExtensionType')]",
                         "typeHandlerVersion": "[variables('MmaExtensionVersion')]",
-                        "autoUpgradeMinorVersion": "true",
+                        "autoUpgradeMinorVersion": true,
                         "settings": {
                             "workspaceId": "[reference(variables('WorkspaceResourceId'), '2015-03-20').customerId]",
                             "azureResourceId": "[variables('VmssResourceId')]",
@@ -84,6 +71,22 @@
                         "protectedSettings": {
                             "workspaceKey": "[listKeys(variables('WorkspaceResourceId'), '2015-03-20').primarySharedKey]"
                         }
+                    }
+                },
+                {
+                    "type": "extensions",
+                    "apiVersion": "2018-10-01",
+                    "name": "[variables('DaExtensionName')]",
+                    "location": "[parameters('VmssLocation')]",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]",
+                        "[variables('MmaExtensionName')]"
+                    ],
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Monitoring.DependencyAgent",
+                        "type": "[variables('DaExtensionType')]",
+                        "typeHandlerVersion": "[variables('DaExtensionVersion')]",
+                        "autoUpgradeMinorVersion": true
                     }
                 }
             ]

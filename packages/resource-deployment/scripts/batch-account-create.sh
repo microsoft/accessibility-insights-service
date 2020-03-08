@@ -18,32 +18,41 @@ export systemAssignedIdentities
 export principalId
 export enableSoftDeleteOnKeyVault
 export logAnalyticsWorkspaceId
-export logAnalyticsWorkspaceKey
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> -w <log analytics workspace Id> -z <log analytics workspace key> 
+Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable soft delete for Azure Key Vault> -w <log analytics workspace Id>
 "
     exit 1
 }
 
+function waitForProcesses() {
+    local processesToWaitFor=$1
+
+    list="$processesToWaitFor[@]"
+    for pid in "${!list}"; do
+        echo "Waiting for process with pid $pid"
+        wait $pid
+        echo "Process with pid $pid exited"
+    done
+}
+
 # Read script arguments
-while getopts ":r:t:k:w:z:" option; do
+while getopts ":r:t:k:w:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
     k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
     w) logAnalyticsWorkspaceId=${OPTARG} ;;
-    z) logAnalyticsWorkspaceKey=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z $batchTemplateFile ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z $batchTemplateFile ]] || [[ -z $logAnalyticsWorkspaceId ]]; then
     exitWithUsageInfo
 fi
 
@@ -92,13 +101,13 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
+parallelProcesses=()
+echo "Running pool setup in parallel"
 for pool in $pools; do
-    . "${0%/*}/batch-pool-setup.sh"
-
-    for principalId in "${systemAssignedIdentities[@]}"; do
-        . "${0%/*}/key-vault-enable-msi.sh"
-        . "${0%/*}/role-assign-for-sp.sh"
-    done
+    . "${0%/*}/batch-pool-setup.sh" &
+    parallelProcesses+=("$!")
 done
+waitForProcesses parallelProcesses
 
 echo "The '$batchAccountName' Azure Batch account successfully deployed"
+

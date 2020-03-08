@@ -12,10 +12,11 @@ set -eo pipefail
 
 # Set default ARM template file
 configureMonitoreForVmssTemplateFile="${0%/*}/../templates/configure-vmss-insights.template.json"
+checkVmssStatusBeforeSetup=true
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id>
+Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id> -k <kevault name>
 "
     exit 1
 }
@@ -81,16 +82,19 @@ assignSystemIdentity() {
     local vmssResourceGroup=$1
     local vmssName=$2
 
-    systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-    systemAssignedIdentities+=("$systemAssignedIdentity")
+    principalId=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    systemAssignedIdentities+=("$principalId")
 
     echo \
         "VMSS Resource configuration:
   Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
-  System-assigned identity: $systemAssignedIdentity
+  System-assigned identity: $principalId
   "
+    
+    . "${0%/*}/key-vault-enable-msi.sh"
+    . "${0%/*}/role-assign-for-sp.sh"
 }
 
 enableAzureMonitor() {
@@ -98,60 +102,67 @@ enableAzureMonitor() {
     local vmssName=$2
     local vmssLocation=$3
 
-    echo "Enabling azure monitor on $vmssName"
-    resources=$(
-        az group deployment create \
-            --resource-group "$vmssResourceGroup" \
-            --template-file "$configureMonitoreForVmssTemplateFile" \
-            --parameters VmssName="$vmssName" WorkspaceName="$logAnalyticsWorkspaceId" VmssLocation="$vmssLocation" WorkspaceResourceGroup="$resourceGroupName" \
-            --query "properties.outputResources[].id" \
-            -o tsv
-    )
+    echo "Waiting for vmss $vmssName to be in Succeeded state"
+    az vmss wait --updated --timeout 1800 --name "$vmssName" --resource-group "$vmssResourceGroup"
+    
+    # Instead of sleep, We may need to look up batch pool nodes & then wait till startup task is completed
+    echo "Sleep for 600 seconds"
+    sleep 600
 
-    echo "Successfully Enabled Monitor. 
-        Created Resources - $resources"
+    echo "Enabling azure monitor on $vmssName for pool $pool"
+    command=". ${0%/*}/enable-azure-monitor-vmss.sh"
+    maxRetryCount=5
+    retryWaitTimeInSeconds=180
+    . "${0%/*}/run-with-retry.sh"
+
+    echo "Successfully Enabled Azure Monitor on $vmssName under pool $pool"
 }
 
 setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
-        echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
+        echo "Running setup for VMSS resource group $vmssResourceGroup for pool $pool"
 
         # Wait until we are certain the resource group exists
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
         vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
-        vmssUpdatedCommand="az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+        vmssCreatedCommand="az vmss list --query \"$vmssDeployedQuery\" -o tsv"
         
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedCommand"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
-        vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
-        if [ "$vmssStatus" != "Succeeded" ]; then
-            echo "Deployment of vmss $vmssName failed with status $vmssStatus"
-            exit 1
+       
+        if [[ $checkVmssStatusBeforeSetup == true ]]; then
+            echo "Checking vmss status - $vmssName"
+            vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
+            if [ "$vmssStatus" != "Succeeded" ]; then
+                echo "Deployment of vmss $vmssName failed with status $vmssStatus"
+                exit 1
+            fi
         fi
 
         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssUpdatedCommand"
-        
+
         enableAzureMonitor "$vmssResourceGroup" "$vmssName" "$vmssLocation"
+
     done
 }
 
 # Read script arguments
-while getopts ":r:a:p:w:" option; do
+while getopts ":r:a:p:w:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
     w) logAnalyticsWorkspaceId=${OPTARG} ;;
+    k) keyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $logAnalyticsWorkspaceId ]] || [[ -z $keyVault ]]; then
     exitWithUsageInfo
 fi
 

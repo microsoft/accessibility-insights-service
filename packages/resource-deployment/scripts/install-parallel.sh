@@ -135,6 +135,7 @@ apiManagementName="apim-a11y$resourceGroupSuffix"
 webApiFuncAppName="web-api-allyfuncapp$resourceGroupSuffix"
 appInsightsName="allyinsights$resourceGroupSuffix"
 logAnalyticsWorkspaceId="allylogAnalytics$resourceGroupSuffix"
+
 echo "Starting parallel processes.."
 
 . "${0%/*}/create-api-management.sh" &
@@ -170,3 +171,5 @@ parallelProcesses=(
     "${0%/*}/create-dashboard.sh"
 )
 runInParallel parallelProcesses
+
+exit 0
