@@ -34,7 +34,7 @@ killIfProcessExists ()
             killIfProcessExists "$childPid"
         done
 
-        kill $currentPid
+        kill -9 $currentPid
         echo "killed process $currentPid"
     fi
 }
