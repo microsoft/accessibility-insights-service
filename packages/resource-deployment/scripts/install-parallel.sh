@@ -115,7 +115,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
     exitWithUsageInfo
 fi
 
@@ -171,5 +171,4 @@ parallelProcesses=(
     "${0%/*}/create-dashboard.sh"
 )
 runInParallel parallelProcesses
-
-exit 0
+echo "Installation completed."

@@ -30,6 +30,62 @@ getPoolNodeCount() {
     echo "  Pool nodes total $poolNodeCount"
 }
 
+waitForNodesToStart() {
+    local hasStarted=false
+    local nodeType=$1
+    local retryCount=60;
+    local waitTime=600
+    local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
+
+    echo "Waiting for $nodeType nodes under $pool to start"
+
+    local endTime=$((SECONDS + waitTime))
+    printf " - Running .."
+    while [ $SECONDS -le $endTime ]; do
+        local idleCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.idle" \
+                                -o tsv
+                            )
+        local runningCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.running" \
+                                -o tsv
+                            ) 
+        local startTaskFailedCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.startTaskFailed" \
+                                -o tsv
+                            ) 
+
+        local totalCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.total" \
+                                -o tsv
+                            ) 
+        
+        local stableCount=$(( $idleCount + $runningCount +  $startTaskFailedCount ))
+
+        if [[ $stableCount == $totalCount ]]; then
+            echo "Nodes under $nodeType for pool: $pool under  has started."
+            hasStarted=true
+            break;
+        else
+            printf "."
+            sleep 5
+        fi
+    done
+
+    echo "Currrent Pool Status $pool for $nodeType:"
+    az batch pool node-counts list --query "$nodeTypeContentSelector"
+    
+    if [[ $hasStarted == false ]]; then
+        echo "Pool $pool & $nodeType is not in the expected state."
+        exit 1
+    fi
+}
+
+waitForPoolNodesToStart() {
+    waitForNodesToStart "dedicated"
+    waitForNodesToStart "lowPriority"
+}
+
 getVmssInfo() {
     echo "Retrieving information about the '$pool' Batch pool VMSS resources"
 
@@ -105,14 +161,13 @@ enableAzureMonitor() {
     echo "Waiting for vmss $vmssName to be in Succeeded state"
     az vmss wait --updated --timeout 1800 --name "$vmssName" --resource-group "$vmssResourceGroup"
     
-    # Instead of sleep, We may need to look up batch pool nodes & then wait till startup task is completed
-    echo "Sleep for 600 seconds"
-    sleep 600
+    # Wait for nodes to start to avoid any lock / communication issues
+    waitForPoolNodesToStart
 
     echo "Enabling azure monitor on $vmssName for pool $pool"
     command=". ${0%/*}/enable-azure-monitor-vmss.sh"
-    maxRetryCount=5
-    retryWaitTimeInSeconds=180
+    maxRetryCount=2
+    retryWaitTimeInSeconds=60
     . "${0%/*}/run-with-retry.sh"
 
     echo "Successfully Enabled Azure Monitor on $vmssName under pool $pool"

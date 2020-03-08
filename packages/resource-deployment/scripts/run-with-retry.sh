@@ -19,7 +19,7 @@ killIfProcessExists ()
 {
     local currentPid=$1
     processKilled=false
-    
+
     if [[ -z $currentPid ]]; then
         return
     fi
@@ -50,7 +50,7 @@ killProcessWithProcesstree() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -c <command to execute> -maxRetryCount -r <max retry count>
+Usage: $0 -c <command to execute> -maxRetryCount -r <max retry count> -t <command execution time> -w <retry wait time>
 "
     exit 1
 }
@@ -102,7 +102,7 @@ runWithRetry() {
         killProcessWithProcesstree $waitPid
         killProcessWithProcesstree $commandPid
 
-        if [[ $exitCode -eq 0 && $processKilled == false ]]; then
+        if [[ $exitCode == 0 && $processKilled == false ]]; then
            break
         fi
 
