@@ -33,8 +33,7 @@ getPoolNodeCount() {
 waitForNodesToStart() {
     local hasStarted=false
     local nodeType=$1
-    local retryCount=60;
-    local waitTime=600
+    local waitTime=900
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
     echo "Waiting for $nodeType nodes under $pool to start"
