@@ -158,9 +158,6 @@ enableAzureMonitor() {
     local vmssName=$2
     local vmssLocation=$3
 
-    echo "Waiting for vmss $vmssName to be in Succeeded state"
-    az vmss wait --updated --timeout 1800 --name "$vmssName" --resource-group "$vmssResourceGroup"
-    
     # Wait for nodes to start to avoid any lock / communication issues
     waitForPoolNodesToStart
 
