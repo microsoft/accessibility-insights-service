@@ -6,9 +6,6 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-export logAnalyticsWorkspaceId
-export resourceName
-
 # Set default ARM template file
 logAnalyticsTemplateFile="${0%/*}/../templates/log-analytics-workspace.template.json"
 

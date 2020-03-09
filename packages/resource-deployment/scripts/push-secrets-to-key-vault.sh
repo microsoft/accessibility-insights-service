@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name> -a <webApiAdClientId> -p <webApiAdClientSecret> -i <appInsightsName>
+Usage: $0 -r <resource group> -c <webApiAdClientId> -p <webApiAdClientSecret>
 "
     exit 1
 }
@@ -118,25 +118,24 @@ createAppInsightsApiKey() {
 }
 
 # Read script arguments
-while getopts ":c:r:s:k:a:p:i:" option; do
+while getopts ":r:c:p:" option; do
     case $option in
-    c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
-    s) storageAccountName=${OPTARG} ;;
-    k) keyVault=${OPTARG} ;;
-    a) webApiAdClientId=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
-    i) appInsightsName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
+
 # Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $appInsightsName ]]; then
-    echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault $appInsightsName"
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+    echo "$resourceGroupSuffix $resourceGroupName"
 
     exitWithUsageInfo
 fi
+
+. "${0%/*}/set-resource-names.sh"
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 

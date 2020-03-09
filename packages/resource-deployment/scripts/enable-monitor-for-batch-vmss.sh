@@ -103,6 +103,8 @@ while getopts ":v:r:p:" option; do
     esac
 done
 
+. "${0%/*}/set-resource-names.sh"
+
 echo "
 Enabling monitor for vmss:
 vmssName:$vmssName

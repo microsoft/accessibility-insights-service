@@ -39,6 +39,8 @@ while getopts ":v:r:p:" option; do
     esac
 done
 
+. "${0%/*}/set-resource-names.sh"
+
 echo "
 Assigning System identity for:
 vmssName:$vmssName

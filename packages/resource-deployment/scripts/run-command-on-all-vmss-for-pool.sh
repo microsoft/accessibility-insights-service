@@ -23,7 +23,7 @@ export vmssLocation
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -a <batch account> -p <batch pool> -w <log analytics workspace Id> -k <kevault name>
+Usage: $0 -r <resource group> -p <batch pool> -c <command to execute> -n <command name>
 "
     exit 1
 }
@@ -114,6 +114,7 @@ setupVmss() {
 
     done
 }
+. "${0%/*}/set-resource-names.sh"
 
 echo "inside pool setup"
 echo "
@@ -125,13 +126,10 @@ keyVault: $keyVault
 commandName: $commandName
 "
 # Read script arguments
-while getopts ":r:a:p:w:k:c:n:" option; do
+while getopts ":r:p:c:n:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
-    w) logAnalyticsWorkspaceId=${OPTARG} ;;
-    k) keyVault=${OPTARG} ;;
     c) command=${OPTARG} ;;
     n) commandName=${OPTARG} ;;
     *) exitWithUsageInfo ;;

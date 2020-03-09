@@ -28,7 +28,7 @@ for arg in "$@"; do
     previousFlag=$arg
 done
 
-if [ -z $resourceName ] || [ -z $timeout ]; then
+if [ -z "$resourceName" ] || [ -z "$timeout" ]; then
     exitWithUsageInfo
 fi
 

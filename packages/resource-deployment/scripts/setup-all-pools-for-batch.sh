@@ -14,7 +14,6 @@ export resourceName
 export systemAssignedIdentities
 export principalId
 export enableSoftDeleteOnKeyVault
-export logAnalyticsWorkspaceId
 
 trap "kill 0" EXIT
 
@@ -36,6 +35,28 @@ function waitForProcesses() {
     done
 }
 
+function setupPools() {
+    # Enable managed identity on Batch pools
+    pools=$(az batch pool list --query "[].id" -o tsv)
+
+    echo "Setup system identity for created pools"
+    for pool in $pools; do
+        command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
+        commandName="System identity for pool $pool"
+        . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
+    done
+
+    echo "Setup monitor for pools in parallel"
+    parallelProcesses=()
+    for pool in $pools; do
+        command=". ${0%/*}/enable-monitor-for-batch-vmss.sh"
+        commandName="Setup monitor for pool $pool"
+        . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
+        parallelProcesses+=("$!")
+    done
+    waitForProcesses parallelProcesses
+}
+
 # Read script arguments
 while getopts ":r:" option; do
     case $option in
@@ -54,38 +75,12 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-batchAccountName=$(az batch account list \
-    --resource-group "$resourceGroupName" \
-    --query "[?starts_with(name, 'allybatch')].name|[0]" \
-    -o tsv)
-echo "Fetched batch account $batchAccountName"
-
-resourceGroupSuffix=${batchAccountName:9}
-logAnalyticsWorkspaceId="allylogAnalytics$resourceGroupSuffix"
-keyVault="allyvault$resourceGroupSuffix"
+. "${0%/*}/set-resource-names.sh"
 
 # Login into Azure Batch account
 echo "Logging into '$batchAccountName' Azure Batch account"
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-# Enable managed identity on Batch pools
-pools=$(az batch pool list --query "[].id" -o tsv)
-
-echo "Setup system identity for created pools"
-for pool in $pools; do
-    command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-    commandName="System identity for pool $pool"
-    . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
-done
-
-echo "Setup monitor for pools in parallel"
-parallelProcesses=()
-for pool in $pools; do
-    command=". ${0%/*}/enable-monitor-for-batch-vmss.sh"
-    commandName="Setup monitor for pool $pool"
-    . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
-    parallelProcesses+=("$!")
-done
-waitForProcesses parallelProcesses
+setupPools
 
 echo "Successfully enabled Azure Monitor for batch account pools - $batchAccountName"

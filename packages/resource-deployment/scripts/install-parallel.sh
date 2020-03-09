@@ -131,12 +131,7 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-resource-group.sh"
 . "${0%/*}/create-storage-account.sh"
 
-resourceGroupSuffix=${storageAccountName:11}
-cosmosAccountName="allycosmos$resourceGroupSuffix"
-apiManagementName="apim-a11y$resourceGroupSuffix"
-webApiFuncAppName="web-api-allyfuncapp$resourceGroupSuffix"
-appInsightsName="allyinsights$resourceGroupSuffix"
-logAnalyticsWorkspaceId="allylogAnalytics$resourceGroupSuffix"
+. "${0%/*}/set-resource-names.sh"
 
 echo "Starting parallel processes.."
 
