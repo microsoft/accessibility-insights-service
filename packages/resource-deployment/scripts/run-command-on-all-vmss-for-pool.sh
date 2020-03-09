@@ -87,8 +87,7 @@ getVmssInfo() {
 
 
 setupVmss() {
-    for currentVmssResourceGroup in "${vmssResourceGroups[@]}"; do
-        vmssResourceGroup="$currentVmssResourceGroup"
+    for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Running setup for VMSS resource group $vmssResourceGroup for pool $pool"
 
         # Wait until we are certain the resource group exists
