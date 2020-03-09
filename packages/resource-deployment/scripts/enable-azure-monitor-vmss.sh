@@ -57,60 +57,6 @@ enableAzureMonitor() {
     echo "Created resources for vmss $vmssName & pool $pool:
          resources: $resources
     "
-
-    # logAnalyticsWorkspaceKey=$(
-    #     az monitor log-analytics workspace get-shared-keys \
-    #             --resource-group "$resourceGroupName" \
-    #             --workspace-name "$logAnalyticsWorkspaceId" \
-    #             --query primarySharedKey \
-    #             -o tsv
-    # )
-
-    # logAnalyticsWorkspaceCustomerId=$(
-    #     az monitor log-analytics workspace show \
-    #             --resource-group "$resourceGroupName" \
-    #             --workspace-name "$logAnalyticsWorkspaceId" \
-    #             --query customerId \
-    #             -o tsv
-    # )
-
-    # echo "Enabling OmsAgentForLinux extension on $vmssName"
-    # result=$(
-    #     az vmss extension set \
-    #         --resource-group "$vmssResourceGroup" \
-    #         --vmss-name "$vmssName" \
-    #         --name OmsAgentForLinux \
-    #         --publisher Microsoft.EnterpriseCloud.Monitoring \
-    #         --protected-settings "{\"workspaceKey\":\"$logAnalyticsWorkspaceKey\"}" \
-    #         --settings "{\"workspaceId\":\"$logAnalyticsWorkspaceCustomerId\"}" \
-    #         -o tsv \
-    #         --query "virtualMachineProfile.extensionProfile.extensions[?type=='OmsAgentForLinux'].type|[0]"
-    #     )
-
-    # if [ "$result" != "OmsAgentForLinux" ]; then
-    #     echo "Unable to enable OmsAgentForLinux on vmss $vmssName"
-    #     exit 1
-    # fi
-
-    # sleep 60
-
-    # echo "Enabling DependencyAgentLinux extension on $vmssName"
-    # result=$(
-    #     az vmss extension set \
-    #     --resource-group "$vmssResourceGroup" \
-    #     --vmss-name "$vmssName" \
-    #     --name DependencyAgentLinux \
-    #     --force-update \
-    #     --publisher Microsoft.Azure.Monitoring.DependencyAgent \
-    #     -o tsv \
-    #     --query "virtualMachineProfile.extensionProfile.extensions[?type=='DependencyAgentLinux'].type|[0]"
-    # )
-
-    # if [ "$result" != "DependencyAgentLinux" ]; then
-    #     echo "Unable to enable DependencyAgentLinux on vmss $vmssName"
-    #     exit 1
-    # fi
-
     echo "Successfully Enabled Azure Monitor on $vmssName"
 }
 

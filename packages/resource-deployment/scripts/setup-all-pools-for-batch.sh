@@ -23,7 +23,6 @@ Usage: $0 -r <resource group>
     exit 1
 }
 
-
 function waitForProcesses() {
     local processesToWaitFor=$1
 
@@ -36,7 +35,7 @@ function waitForProcesses() {
 }
 
 # Read script arguments
-while getopts ":r:t:k:w:" option; do
+while getopts ":r:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -44,7 +43,7 @@ while getopts ":r:t:k:w:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z $batchTemplateFile ]] || [[ -z $logAnalyticsWorkspaceId ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
@@ -53,14 +52,15 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-batchAccountName=$(az batch account list \ 
-                    --resource-group demuruge4 \
-                    --query "[?starts_with(name, 'allybatch')].name|[0]" \
-                    -o tsv
-                )
+batchAccountName=$(az batch account list \
+    --resource-group "$resourceGroupName" \
+    --query "[?starts_with(name, 'allybatch')].name|[0]" \
+    -o tsv)
+echo "Fetched batch account $batchAccountName"
 
 resourceGroupSuffix=${batchAccountName:9}
 logAnalyticsWorkspaceId="allylogAnalytics$resourceGroupSuffix"
+keyVault="allyvault$resourceGroupSuffix"
 
 # Login into Azure Batch account
 echo "Logging into '$batchAccountName' Azure Batch account"

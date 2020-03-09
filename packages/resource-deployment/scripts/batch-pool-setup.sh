@@ -12,7 +12,6 @@ set -eo pipefail
 
 # Set default ARM template file
 configureMonitoreForVmssTemplateFile="${0%/*}/../templates/configure-vmss-insights.template.json"
-checkVmssStatusBeforeSetup=true
 
 exitWithUsageInfo() {
     echo "
@@ -185,13 +184,11 @@ setupVmss() {
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
        
-        if [[ $checkVmssStatusBeforeSetup == true ]]; then
-            echo "Checking vmss status - $vmssName"
-            vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
-            if [ "$vmssStatus" != "Succeeded" ]; then
-                echo "Deployment of vmss $vmssName failed with status $vmssStatus"
-                exit 1
-            fi
+        echo "Checking vmss status - $vmssName"
+        vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
+        if [ "$vmssStatus" != "Succeeded" ]; then
+            echo "Deployment of vmss $vmssName failed with status $vmssStatus"
+            exit 1
         fi
 
         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
