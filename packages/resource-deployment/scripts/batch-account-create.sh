@@ -103,13 +103,10 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
-parallelProcesses=()
-echo "Running pool setup in parallel"
+
 for pool in $pools; do
-    . "${0%/*}/batch-pool-setup.sh" &
-    parallelProcesses+=("$!")
+    . "${0%/*}/batch-pool-setup.sh"
 done
-waitForProcesses parallelProcesses
 
 echo "The '$batchAccountName' Azure Batch account successfully deployed"
 

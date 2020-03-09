@@ -29,13 +29,5 @@ fi
 
 # Grant permissions to the managed identity
 echo "Granting '$principalId' service principal permissions to '$keyVault' key vault"
-
-# Need to retry setting permission to avoid conflict with another keyvault policy update when run in parallel
-command="az keyvault set-policy --name \"$keyVault\" --object-id \"$principalId\" --secret-permissions get list 1>/dev/null"
-commandName="Enable keyvault access to service principal $principalId"
-maxRetryCount=5
-#Using random wait time to avoid conflict again happening at the next time
-retryWaitTimeInSeconds=$(( $RANDOM%10 ))
-. "${0%/*}/run-with-retry.sh"
-
+az keyvault set-policy --name "$keyVault" --object-id "$principalId" --secret-permissions get list 1>/dev/null
 echo "  Permission successfully granted."
