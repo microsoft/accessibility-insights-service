@@ -2,20 +2,19 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { TestGroupName } from 'functional-tests';
-import { getAllTestGroupNames } from './e2e-test-group-names';
+import { getAllTestGroupClassNames } from './e2e-test-group-names';
 
-describe(getAllTestGroupNames, () => {
-    const expectedTestGroupNames: TestGroupName[] = [
-        'PostScan',
-        'ScanStatus',
-        'ScanPreProcessing',
-        'ScanQueueing',
-        'ScanReports',
-        'Finalizer',
+describe(getAllTestGroupClassNames, () => {
+    const expectedTestGroupNames: string[] = [
+        'PostScanTestGroup',
+        'ScanStatusTestGroup',
+        'ScanPreProcessingTestGroup',
+        'ScanQueuingTestGroup',
+        'ScanReportTestGroup',
+        'FinalizerTestGroup',
     ];
 
     it('returns all test group names', () => {
-        expect(getAllTestGroupNames().sort()).toEqual(expectedTestGroupNames.sort());
+        expect(getAllTestGroupClassNames().sort()).toEqual(expectedTestGroupNames.sort());
     });
 });

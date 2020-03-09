@@ -19,7 +19,7 @@ import {
     SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
-import { getAllTestGroupNames } from './e2e-test-group-names';
+import { getAllTestGroupClassNames } from './e2e-test-group-names';
 
 export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
@@ -53,7 +53,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         private readonly context: IOrchestrationFunctionContext,
         private readonly availabilityTestConfig: AvailabilityTestConfig,
         private readonly logger: Logger,
-    ) {}
+    ) { }
 
     public *invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse & void> {
         yield* this.callWebRequestActivity(ActivityAction.getHealthStatus);
@@ -188,7 +188,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     }
 
     public logTestRunStart(): void {
-        const testGroupNamesStr = (getAllTestGroupNames() as string[]).reduce((prevValue, currentValue) => `${prevValue},${currentValue}`);
+        const testGroupNamesStr = (getAllTestGroupClassNames()).reduce((prevValue, currentValue) => `${prevValue},${currentValue}`);
         const properties = {
             ...this.getDefaultLogProperties(),
             functionalTestGroups: testGroupNamesStr,
