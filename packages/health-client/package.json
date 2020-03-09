@@ -42,6 +42,6 @@
         "web-api-client": "1.0.0",
         "functional-tests": "1.0.0",
         "chai": "^4.2.0",
-        "yargs": "15.1.0"
+        "yargs": "15.3.0"
     }
 }
