@@ -158,7 +158,6 @@ runInParallel parallelProcesses
 # Additionally, these should run sequentially because of interdependence.
 
 . "${0%/*}/batch-account-create.sh"
-. "${0%/*}/push-secrets-to-key-vault.sh"
 
 parallelProcesses=(
     "${0%/*}/function-app-create.sh"

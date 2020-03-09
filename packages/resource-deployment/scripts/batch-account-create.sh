@@ -79,6 +79,8 @@ resources=$(
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.KeyVault/vaults" -r "$resources"
 keyVault="$resourceName"
 
+. "${0%/*}/push-secrets-to-key-vault.sh"
+
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Batch/batchAccounts" -r "$resources"
 batchAccountName="$resourceName"
 
@@ -98,6 +100,7 @@ fi
 # Login into Azure Batch account
 echo "Logging into '$batchAccountName' Azure Batch account"
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
