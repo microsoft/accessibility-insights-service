@@ -22,8 +22,6 @@ export logAnalyticsWorkspaceId
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
-trap "kill 0" EXIT
-
 exitWithUsageInfo() {
     echo "
 Usage: $0 -r <resource group> -k <enable soft delete on keyvault>

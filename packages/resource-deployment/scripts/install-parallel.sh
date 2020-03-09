@@ -73,8 +73,6 @@ Azure region - Azure region where the instances will be deployed. Available Azur
     exit 1
 }
 
-trap "kill 0" EXIT
-
 function waitForProcesses() {
     local processesToWaitFor=$1
 

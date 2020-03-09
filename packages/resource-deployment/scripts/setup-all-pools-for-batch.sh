@@ -15,8 +15,6 @@ export systemAssignedIdentities
 export principalId
 export enableSoftDeleteOnKeyVault
 
-trap "kill 0" EXIT
-
 exitWithUsageInfo() {
     echo "
 Usage: $0 -r <resource group>
