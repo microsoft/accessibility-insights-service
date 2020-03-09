@@ -356,37 +356,6 @@ describe('CosmosClientWrapper', () => {
             verifyMocks();
         });
 
-        it('upsert item with partition key defined with item itself', async () => {
-            const item = {
-                id: 'id-1',
-                propA: 'propA',
-                _etag: 'etag-1',
-                partitionKey,
-            };
-            const responseItem = {
-                id: 'id-1',
-                propA: 'propA',
-                _etag: 'etag-1',
-                _ts: 123456789,
-            };
-            const expectedResult = {
-                item: responseItem,
-                statusCode: 200,
-            };
-            const options = {
-                accessCondition: { type: 'IfMatch', condition: responseItem._etag },
-            };
-
-            itemsMock
-                .setup(async i => i.upsert<DbItemMock>(item, options))
-                .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
-
-            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, 'should not use this partition key');
-
-            expect(result).toEqual(expectedResult);
-            verifyMocks();
-        });
-
         it('upsert item without etag condition with success', async () => {
             const item = {
                 id: 'id-1',

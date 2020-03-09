@@ -22,7 +22,7 @@ export class PageScanRequestProvider {
     }
 
     public async insertRequests(requests: OnDemandPageScanRequest[]): Promise<void> {
-        return this.cosmosContainerClient.writeDocuments(requests);
+        return this.cosmosContainerClient.writeDocuments(requests, PartitionKey.pageScanRequestDocuments);
     }
 
     public async deleteRequests(ids: string[]): Promise<void> {

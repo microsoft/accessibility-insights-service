@@ -35,7 +35,7 @@ describe(PageScanRequestProvider, () => {
         };
         const requests = [request1, request2];
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments(requests))
+            .setup(c => c.writeDocuments(requests, PartitionKey.pageScanRequestDocuments))
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 
