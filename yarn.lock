@@ -9963,10 +9963,10 @@ which@^2.0.1:
   dependencies:
     isexe "^2.0.0"
 
-why-is-node-running@^2.1.0:
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/why-is-node-running/-/why-is-node-running-2.1.0.tgz#e71a9816a32ca4d4f759aabe90edd1007d805f48"
-  integrity sha512-oLmJ1uZOaKra+GDmYcUHMnVhi4CnZnlt4IE3J05ZDSEAiejeB5dMoR4a4rGcMWRy1Avx24dGTw8yxJ/+EmwPBQ==
+why-is-node-running@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/why-is-node-running/-/why-is-node-running-2.1.2.tgz#05465c17ca3ea4ab9624c8b7407535234d4b0ce1"
+  integrity sha512-TwUeoRNMAWy8jAD8oFLtgmYKecZkH3yCtbQ17CYVCxd1WaPJAEB6oqkNgm0o+wIzxJi1oHUkOxMk0M/t5jCGeA==
   dependencies:
     stackback "0.0.2"
 
