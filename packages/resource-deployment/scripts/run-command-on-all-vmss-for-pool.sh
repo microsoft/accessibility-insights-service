@@ -5,13 +5,21 @@
 
 set -eo pipefail
 
+#!/bin/bash
+
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+set -eo pipefail
+
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
 # export vmssResourceGroups
 # export systemAssignedIdentities
 
-# Set default ARM template file
-configureMonitoreForVmssTemplateFile="${0%/*}/../templates/configure-vmss-insights.template.json"
+export vmssResourceGroup
+export vmssName
+export vmssLocation
 
 exitWithUsageInfo() {
     echo "
@@ -27,61 +35,6 @@ getPoolNodeCount() {
     lowPriorityNodes=$(az batch pool show --pool-id "$pool" --query "targetLowPriorityNodes" -o tsv)
     poolNodeCount=$((dedicatedNodes + lowPriorityNodes))
     echo "  Pool nodes total $poolNodeCount"
-}
-
-waitForNodesToStart() {
-    local hasStarted=false
-    local nodeType=$1
-    local waitTime=900
-    local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
-
-    echo "Waiting for $nodeType nodes under $pool to start"
-
-    local endTime=$((SECONDS + waitTime))
-    printf " - Running .."
-    while [ $SECONDS -le $endTime ]; do
-        local idleCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.idle" \
-                                -o tsv
-                            )
-        local runningCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.running" \
-                                -o tsv
-                            ) 
-        local startTaskFailedCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.startTaskFailed" \
-                                -o tsv
-                            ) 
-
-        local totalCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.total" \
-                                -o tsv
-                            ) 
-        
-        local stableCount=$(( $idleCount + $runningCount +  $startTaskFailedCount ))
-
-        if [[ $stableCount == $totalCount ]]; then
-            echo "Nodes under $nodeType for pool: $pool under  has started."
-            hasStarted=true
-            break;
-        else
-            printf "."
-            sleep 5
-        fi
-    done
-
-    echo "Currrent Pool Status $pool for $nodeType:"
-    az batch pool node-counts list --query "$nodeTypeContentSelector"
-    
-    if [[ $hasStarted == false ]]; then
-        echo "Pool $pool & $nodeType is not in the expected state."
-        exit 1
-    fi
-}
-
-waitForPoolNodesToStart() {
-    waitForNodesToStart "dedicated"
-    waitForNodesToStart "lowPriority"
 }
 
 getVmssInfo() {
@@ -132,45 +85,10 @@ getVmssInfo() {
     echo ""
 }
 
-assignSystemIdentity() {
-    local vmssResourceGroup=$1
-    local vmssName=$2
-
-    principalId=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-    systemAssignedIdentities+=("$principalId")
-
-    echo \
-        "VMSS Resource configuration:
-  Pool: $pool
-  VMSS resource group: $vmssResourceGroup
-  VMSS name: $vmssName
-  System-assigned identity: $principalId
-  "
-    
-    . "${0%/*}/key-vault-enable-msi.sh"
-    . "${0%/*}/role-assign-for-sp.sh"
-}
-
-enableAzureMonitor() {
-    local vmssResourceGroup=$1
-    local vmssName=$2
-    local vmssLocation=$3
-
-    # Wait for nodes to start to avoid any lock / communication issues
-    waitForPoolNodesToStart
-
-    echo "Enabling azure monitor on $vmssName for pool $pool"
-    command=". ${0%/*}/enable-azure-monitor-vmss.sh"
-    commandName="Enable monitor for vmss $vmssName of pool $pool"
-    maxRetryCount=2
-    retryWaitTimeInSeconds=60
-    . "${0%/*}/run-with-retry.sh"
-
-    echo "Successfully Enabled Azure Monitor on $vmssName under pool $pool"
-}
 
 setupVmss() {
-    for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
+    for currentVmssResourceGroup in "${vmssResourceGroups[@]}"; do
+        vmssResourceGroup="$currentVmssResourceGroup"
         echo "Running setup for VMSS resource group $vmssResourceGroup for pool $pool"
 
         # Wait until we are certain the resource group exists
@@ -192,26 +110,36 @@ setupVmss() {
             exit 1
         fi
 
-        assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-
-        enableAzureMonitor "$vmssResourceGroup" "$vmssName" "$vmssLocation"
+        echo "Invoking command $commandName"
+        eval "$command"
 
     done
 }
 
+echo "inside pool setup"
+echo "
+resource group:$resourceGroupName
+batch:$batchAccountName
+pool:$pool
+logAnalyticsWorkspaceId:$logAnalyticsWorkspaceId
+keyVault: $keyVault
+commandName: $commandName
+"
 # Read script arguments
-while getopts ":r:a:p:w:k:" option; do
+while getopts ":r:a:p:w:k:c:n:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
     w) logAnalyticsWorkspaceId=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
+    c) command=${OPTARG} ;;
+    n) commandName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $logAnalyticsWorkspaceId ]] || [[ -z $keyVault ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $logAnalyticsWorkspaceId ]] || [[ -z $keyVault ]] ||  [[ -z $command ]] ||  [[ -z $commandName ]]; then
     exitWithUsageInfo
 fi
 

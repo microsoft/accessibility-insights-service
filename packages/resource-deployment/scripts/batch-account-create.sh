@@ -93,20 +93,7 @@ if [[ -z $batchAccountName ]] || [[ -z $keyVault ]]; then
     exit 1
 fi
 
-if [[ -z $enableSoftDeleteOnKeyVault ]]; then
-    enableSoftDeleteOnKeyVault=true
-fi
-
-# Login into Azure Batch account
-echo "Logging into '$batchAccountName' Azure Batch account"
-az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
-
-# Enable managed identity on Batch pools
-pools=$(az batch pool list --query "[].id" -o tsv)
-
-for pool in $pools; do
-    . "${0%/*}/batch-pool-setup.sh"
-done
+. "${0%/*}/setup-all-pools-for-batch.sh"
 
 echo "The '$batchAccountName' Azure Batch account successfully deployed"
 

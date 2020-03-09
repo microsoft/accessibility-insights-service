@@ -70,12 +70,20 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
-parallelProcesses=()
-checkVmssStatusBeforeSetup=false
 
-echo "Running pool setup in parallel"
+echo "Setup system identity for created pools"
 for pool in $pools; do
-    . "${0%/*}/batch-pool-setup.sh" &
+    command="${0%/*}/enable-system-identity-for-batch-vmss.sh"
+    commandName="System identity for pool $pool"
+    . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
+done
+
+echo "Setup monitor for pools in parallel"
+parallelProcesses=()
+for pool in $pools; do
+    command="${0%/*}/enable-monitor-for-batch-vmss.sh"
+    commandName="Setup monitor for pool $pool"
+    . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
     parallelProcesses+=("$!")
 done
 waitForProcesses parallelProcesses
