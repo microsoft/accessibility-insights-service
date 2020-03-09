@@ -16,13 +16,13 @@ steps:
           yarn install --frozen-lockfile
       displayName: 'install dependencies'
 
-    - script: |
-          yarn format:check
-      displayName: check code formatting
+    # - script: |
+    #       yarn format:check
+    #   displayName: check code formatting
 
-    - script: |
-          yarn copyright:check
-      displayName: check for copyright headers
+    # - script: |
+    #       yarn copyright:check
+    #   displayName: check for copyright headers
 
     - script: |
           yarn clean
@@ -33,17 +33,17 @@ steps:
           yarn build -- -- --env.version=$(Build.BuildId)
       displayName: build
 
-    - script: |
-          yarn lint:check
-      displayName: run linter
+    # - script: |
+    #       yarn lint:check
+    #   displayName: run linter
 
-    - script: |
-          export NODE_OPTIONS=--max_old_space_size=4096
-          yarn test --ci --coverage
-      displayName: run unit tests
+    # - script: |
+    #       export NODE_OPTIONS=--max_old_space_size=4096
+    #       yarn test --ci --coverage
+    #   displayName: run unit tests
 
-    - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
-      displayName: Publish code coverage to codecov
+    # - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
+    #   displayName: Publish code coverage to codecov
 
     - script: |
           yarn run pack
