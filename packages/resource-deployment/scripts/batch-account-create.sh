@@ -101,7 +101,6 @@ fi
 echo "Logging into '$batchAccountName' Azure Batch account"
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-
 # Enable managed identity on Batch pools
 pools=$(az batch pool list --query "[].id" -o tsv)
 parallelProcesses=()

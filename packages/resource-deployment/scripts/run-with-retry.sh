@@ -8,10 +8,11 @@
 # intentionally ignored -e option for this file, to not interrupt retry logic
 set -eo pipefail
 
-export maxRetryCount=5
-export retryWaitTimeInSeconds=60
-export maxCommandExecutionTimeInSeconds=600
+export maxRetryCount
+export retryWaitTimeInSeconds
+export maxCommandExecutionTimeInSeconds
 export command
+export commandName
 
 processKilled=false
 
@@ -71,11 +72,23 @@ if [[ -z $command ]]; then
     exitWithUsageInfo
 fi
 
+if [[ -z $maxRetryCount ]]; then
+    maxRetryCount=5
+fi
+
+if [[ -z $retryWaitTimeInSeconds ]]; then
+    retryWaitTimeInSeconds=60
+fi
+
+if [[ -z $maxCommandExecutionTimeInSeconds ]]; then
+    maxCommandExecutionTimeInSeconds=600
+fi
+
 # intentionally ignored -e option for this file, to not interrupt retry logic
 set +e
 
 killCreatedProcesses() {
-    echo "[run-with-retry] Exiting process $0"
+    echo "[run-with-retry - $commandName] Exiting process $0"
     killProcessWithProcesstree $waitPid
     killProcessWithProcesstree $commandPid
 }
@@ -107,16 +120,25 @@ runWithRetry() {
         fi
 
         if [[ $commandRetryCount -eq $maxRetryCount ]]; then
-            echo "Maximum retry count reached. command failed"
+            echo "Maximum retry count reached. command failed
+                command: $commandName
+            "
             exit 1
         else
-            echo "Retry count - $commandRetryCount. command failed"
+            echo "Retry count - $commandRetryCount. command failed
+               command: $commandName
+               "
         fi
 
+        echo "[run-with-retry] Sleeping $retryWaitTimeInSeconds for 
+            command: $commandName
+        "
         sleep $retryWaitTimeInSeconds
     done
 
-    echo "Successfully executed command after retry count - $commandRetryCount"
+    echo "Successfully executed command after retry count - $commandRetryCount
+          command: $commandName
+          "
 }
 
 runWithRetry

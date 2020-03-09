@@ -161,6 +161,7 @@ enableAzureMonitor() {
 
     echo "Enabling azure monitor on $vmssName for pool $pool"
     command=". ${0%/*}/enable-azure-monitor-vmss.sh"
+    commandName="Enable monitor for vmss $vmssName of pool $pool"
     maxRetryCount=2
     retryWaitTimeInSeconds=60
     . "${0%/*}/run-with-retry.sh"
