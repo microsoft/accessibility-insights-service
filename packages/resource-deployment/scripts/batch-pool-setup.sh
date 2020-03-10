@@ -74,7 +74,7 @@ getVmssInfo() {
     echo ""
 }
 
-assignSystemIdentity() {
+setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
 
@@ -92,17 +92,38 @@ assignSystemIdentity() {
             exit 1
         fi
 
-        systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-        systemAssignedIdentities+=($systemAssignedIdentity)
+         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
+         az resource wait -n "$vmssName" -g "$vmssResourceGroup" --resource-type "Microsoft.Compute/virtualMachineScaleSets" --exists --updated --timeout "1800" --interval "5"
 
-        echo \
-            "VMSS Resource configuration:
+        addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
+
+    done
+}
+
+assignSystemIdentity() {
+    local vmssResourceGroup=$1
+    local vmssName=$2
+
+    systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
+    systemAssignedIdentities+=("$systemAssignedIdentity")
+
+    echo \
+        "VMSS Resource configuration:
   Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
   System-assigned identity: $systemAssignedIdentity
-"
-    done
+  "
+}
+
+
+addResourceGroupNameTagToVMSS(){
+    vmssResourceGroup=$1
+    vmssName=$2
+    
+    az resource update --set tags.ResourceGroupName="$resourceGroupName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
+
+    echo "Tag ResourceGroupName=$resourceGroupName was added to $vmssName vmss under $vmssResourceGroup resource group"
 }
 
 # Read script arguments
@@ -136,5 +157,5 @@ getPoolNodeCount
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Enable system-assigned managed identity on VMSS resources
-assignSystemIdentity
+# Enable system-assigned managed identity and add resource group name as a tag on VMSS resources
+setupVmss
