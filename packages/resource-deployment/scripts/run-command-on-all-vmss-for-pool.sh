@@ -85,7 +85,6 @@ getVmssInfo() {
     echo ""
 }
 
-
 setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
         echo "Running setup for VMSS resource group $vmssResourceGroup for pool $pool"
@@ -157,5 +156,5 @@ getPoolNodeCount
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Enable system-assigned managed identity on VMSS resources
+# Invoke command on each vmss
 setupVmss
