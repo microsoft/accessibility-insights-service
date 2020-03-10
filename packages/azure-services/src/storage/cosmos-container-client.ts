@@ -30,12 +30,8 @@ export class CosmosContainerClient {
         return this.cosmosClientWrapper.readAllItem<T>(this.dbName, this.collectionName);
     }
 
-    public async queryDocuments<T>(
-        query: cosmos.SqlQuerySpec | string,
-        continuationToken?: string,
-        partitionKey?: string,
-    ): Promise<CosmosOperationResponse<T[]>> {
-        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken, partitionKey);
+    public async queryDocuments<T>(query: cosmos.SqlQuerySpec | string, continuationToken?: string): Promise<CosmosOperationResponse<T[]>> {
+        return this.cosmosClientWrapper.readItems(this.dbName, this.collectionName, query, continuationToken);
     }
 
     public async deleteDocument(id: string, partitionKey: string): Promise<void> {
@@ -120,7 +116,10 @@ export class CosmosContainerClient {
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
-        await this.cosmosClientWrapper.upsertItems<T>(documents, this.dbName, this.collectionName, partitionKey);
+        documents.forEach(async document => {
+            const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+            await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+        });
     }
 
     public async tryExecuteOperation<T>(

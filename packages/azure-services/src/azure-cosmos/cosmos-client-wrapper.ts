@@ -3,8 +3,9 @@
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
-import * as _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { Logger } from 'logger';
+
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
@@ -28,7 +29,7 @@ export class CosmosClientWrapper {
         items: T[],
         dbName: string,
         collectionName: string,
-        partitionKey?: string,
+        partitionKey: string,
     ): Promise<void> {
         const container = await this.getContainer(dbName, collectionName);
         const chunks = System.chunkArray(items, 10);
@@ -37,7 +38,8 @@ export class CosmosClientWrapper {
             await Promise.all(
                 chunk.map(async item => {
                     try {
-                        await container.items.upsert(item, this.getOptions(item, partitionKey));
+                        this.assignPartitionKey(item, partitionKey);
+                        await container.items.upsert(item, this.getOptions(item));
                     } catch (error) {
                         this.logFailedResponse('upsertItem', error, {
                             db: dbName,
@@ -56,12 +58,13 @@ export class CosmosClientWrapper {
         item: T,
         dbName: string,
         collectionName: string,
-        partitionKey?: string,
+        partitionKey: string,
     ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
         try {
-            const response = await container.items.upsert(item, this.getOptions(item, partitionKey));
-            const itemT = <T>(<unknown>response.body);
+            this.assignPartitionKey(item, partitionKey);
+            const response = await container.items.upsert(item, this.getOptions(item));
+            const itemT = <T>(<unknown>response.resource);
 
             return {
                 item: itemT,
@@ -83,10 +86,10 @@ export class CosmosClientWrapper {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            const response = await container.items.readAll().toArray();
+            const response = await container.items.readAll().fetchAll();
             const itemsT: T[] = [];
 
-            response.result.forEach(document => {
+            response.resources.forEach(document => {
                 itemsT.push(<T>(<unknown>document));
             });
 
@@ -106,47 +109,37 @@ export class CosmosClientWrapper {
         collectionName: string,
         query: cosmos.SqlQuerySpec | string,
         continuationToken?: string,
-        partitionKey?: string,
     ): Promise<CosmosOperationResponse<T[]>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
             const itemsT: T[] = [];
-            const feedOptions: cosmos.FeedOptions =
-                partitionKey === undefined
-                    ? {
-                          maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
-                          enableCrossPartitionQuery: true,
-                          continuation: continuationToken,
-                      }
-                    : {
-                          maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
-                          partitionKey: partitionKey,
-                          continuation: continuationToken,
-                      };
+            const feedOptions: cosmos.FeedOptions = {
+                maxItemCount: CosmosClientWrapper.MAXIMUM_ITEM_COUNT,
+                continuation: continuationToken,
+            };
 
             const queryIterator = container.items.query(query, feedOptions);
 
             let partitionQueryResult;
             do {
-                partitionQueryResult = await queryIterator.executeNext();
+                partitionQueryResult = await queryIterator.fetchNext();
             } while (
                 partitionQueryResult !== undefined &&
-                partitionQueryResult.result !== undefined &&
-                partitionQueryResult.result.length === 0
+                partitionQueryResult.resources !== undefined &&
+                partitionQueryResult.resources.length === 0
             );
 
-            if (partitionQueryResult.result === undefined) {
+            if (partitionQueryResult.resources === undefined) {
                 return {
                     item: itemsT,
                     statusCode: 204, // HTTP NO CONTENT
                 };
             }
 
-            const continuationTokenResponse =
-                partitionQueryResult.headers !== undefined ? partitionQueryResult.headers['x-ms-continuation'] : undefined;
+            const continuationTokenResponse = partitionQueryResult.continuationToken;
 
-            partitionQueryResult.result.forEach(item => {
+            partitionQueryResult.resources.forEach(item => {
                 itemsT.push(<T>(<unknown>item));
             });
 
@@ -166,14 +159,13 @@ export class CosmosClientWrapper {
         id: string,
         dbName: string,
         collectionName: string,
-        partitionKey?: string,
+        partitionKey: string,
     ): Promise<CosmosOperationResponse<T>> {
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
-            const response = await container.item(id).read(options);
-            const itemT = <T>(<unknown>response.body);
+            const response = await container.item(id, partitionKey).read();
+            const itemT = <T>(<unknown>response.resource);
 
             return {
                 item: itemT,
@@ -192,11 +184,10 @@ export class CosmosClientWrapper {
     }
 
     public async deleteItem(id: string, dbName: string, collectionName: string, partitionKey: string): Promise<void> {
-        const options: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
         const container = await this.getContainer(dbName, collectionName);
 
         try {
-            await container.item(id).delete(options);
+            await container.item(id, partitionKey).delete();
         } catch (error) {
             this.logFailedResponse('deleteItem', error, {
                 db: dbName,
@@ -224,28 +215,15 @@ export class CosmosClientWrapper {
         return cosmosClient.database(databaseId);
     }
 
-    private getOptions<T extends CosmosDocument>(item: T, partitionKey: string): cosmos.RequestOptions {
-        let requestOpts: cosmos.RequestOptions = this.getRequestOptionsWithPartitionKey(partitionKey);
+    private getOptions<T extends CosmosDocument>(item: T): cosmos.RequestOptions {
+        let requestOpts: cosmos.RequestOptions;
 
         if (item !== undefined && item._etag !== undefined) {
             const accessCondition = { type: 'IfMatch', condition: item._etag };
 
-            if (requestOpts !== undefined) {
-                requestOpts.accessCondition = accessCondition;
-            } else {
-                requestOpts = {
-                    accessCondition: accessCondition,
-                };
-            }
-        }
-
-        return requestOpts;
-    }
-
-    private getRequestOptionsWithPartitionKey(partitionKey?: string): cosmos.RequestOptions {
-        let requestOpts: cosmos.RequestOptions;
-        if (partitionKey !== undefined) {
-            requestOpts = { partitionKey: partitionKey };
+            requestOpts = {
+                accessCondition: accessCondition,
+            };
         }
 
         return requestOpts;
@@ -274,6 +252,12 @@ export class CosmosClientWrapper {
                 response: errorResponse.response === undefined ? 'undefined' : errorResponse.response.toString(),
                 ...properties,
             });
+        }
+    }
+
+    private assignPartitionKey<T extends CosmosDocument>(item: T, partitionKey: string): void {
+        if (!isEmpty(partitionKey)) {
+            item.partitionKey = partitionKey;
         }
     }
 }

@@ -269,9 +269,8 @@ describe('CosmosContainerClient', () => {
             },
         ];
         cosmosClientWrapperMock
-            .setup(async o => o.upsertItems(items, dbName, collectionName, partitionKey))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.once());
+            .setup(async o => o.upsertItem(It.isAny(), dbName, collectionName, partitionKey))
+            .verifiable(Times.exactly(2));
 
         await cosmosContainerClient.writeDocuments(items, partitionKey);
 

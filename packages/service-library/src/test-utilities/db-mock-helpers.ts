@@ -44,7 +44,7 @@ export class DbMockHelper {
             collectionName: collectionName === undefined ? this.createRandomString('col') : collectionName,
         };
 
-        this.azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, auth: { masterKey: cosmosDbKey } });
+        this.azureCosmosClient = new cosmos.CosmosClient({ endpoint: cosmosDbUrl, key: cosmosDbKey });
         this.cosmosClient = new CosmosClientWrapper(() => Promise.resolve(this.azureCosmosClient), Mock.ofType<MockableLogger>().object);
 
         await this.deleteDbContainer(this.dbContainer);
@@ -128,7 +128,7 @@ export class DbMockHelper {
         await db.containers.createIfNotExists(
             {
                 id: container.collectionName,
-                partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME], kind: cosmos.PartitionKind.Hash },
+                partitionKey: { paths: [CosmosClientWrapper.PARTITION_KEY_NAME] },
             },
             { offerThroughput: 1000 },
         );
