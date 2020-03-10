@@ -5,13 +5,6 @@
 
 set -eo pipefail
 
-#!/bin/bash
-
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
-set -eo pipefail
-
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
 # export vmssResourceGroups

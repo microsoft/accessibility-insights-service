@@ -5,14 +5,6 @@
 
 set -eo pipefail
 
-#!/bin/bash
-
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
-set -eo pipefail
-
-
 export resourceGroupName
 export batchAccountName
 export keyVault
