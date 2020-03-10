@@ -48,6 +48,6 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 restartBatchPools

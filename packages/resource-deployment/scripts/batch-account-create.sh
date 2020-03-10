@@ -90,7 +90,7 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"

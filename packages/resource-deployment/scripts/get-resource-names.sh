@@ -14,8 +14,8 @@ storageAccountName=$(az storage account list \
                         -o tsv
                     )
 
-if [[ -z "$storageAccountName" ]]; then
-    echo "Unable to get storage account."
+if [[ -z $storageAccountName ]]; then
+    echo "Unable to get storage account for resource group $resourceGroupName"
     exit 1
 fi
 

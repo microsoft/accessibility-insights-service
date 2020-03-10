@@ -58,7 +58,7 @@ while ([ -z "$resourceExists" ] || [ "$resourceExists" = false ]) && [ $SECONDS 
 done
 
 # Exit if timed out
-if [ -z "$resourceExists" ] || [ "$resourceExists" = false ]; then
+if [[ -z $resourceExists ] || [[ $resourceExists = false ]]; then
     echo "Could not find resource $resourceName after $timeout seconds"
     exit 1
 fi

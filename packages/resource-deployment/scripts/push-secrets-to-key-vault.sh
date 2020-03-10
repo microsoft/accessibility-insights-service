@@ -130,12 +130,14 @@ done
 
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
-    echo "$resourceGroupSuffix $resourceGroupName"
-
+    echo "
+    resourceGroupName: $resourceGroupName 
+    webApiAdClientId: $webApiAdClientId
+    "
     exitWithUsageInfo
 fi
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 

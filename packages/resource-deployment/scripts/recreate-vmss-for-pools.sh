@@ -11,6 +11,9 @@ export keyVault
 export enableSoftDeleteOnKeyVault
 export pools
 
+areVmssOld=false
+recycleVmssIntervalDays=15
+
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
@@ -88,6 +91,43 @@ waitForNodesToGoIdleByNodeType() {
     fi
 }
 
+function checkIfVmssAreOld {
+    areVmssOld=false
+    local hasCreatedDateTags=false
+    
+    local createdDates=$(az vmss list \
+        --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
+        -o tsv
+    )
+    
+    echo "VMSS created dates: $createdDates"
+
+    for createdDate in $createdDates; do
+        hasCreatedDateTags=true
+        local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
+        local currentDate=$(date "+%Y-%m-%d")
+        
+        if [[ "$currentDate" -ge "$recycleDate" ]]; then
+            echo "Found vmss with older created date $createdDate. 
+                Expected to be not older than $recycleVmssIntervalDays days.
+                Marking all vmss as old
+            "
+            areVmssOld=true
+            break
+        else
+            echo "Found vmss to be new. Next recycle date - $recycleDate"
+        fi
+        
+    done
+    
+    if [[ $hasCreatedDateTags == false ]]; then
+        echo "Unable to find VmssCreatedDate tag. Assuming vmss are old."
+        areVmssOld=true
+    fi
+
+    echo "Are vmss old? - $areVmssOld"
+}
+
 function waitForPoolsToBeIdle() {
     for pool in $pools; do
         waitForNodesToGoIdleByNodeType "$pool" "dedicated"
@@ -131,6 +171,12 @@ function scaleUpPools {
 }
 
 function recreatePoolVmss() {
+    checkIfVmssAreOld
+
+    if [[ $areVmssOld == false ]]; then
+        return
+    fi
+
     # Login into Azure Batch account
     echo "Logging into '$batchAccountName' Azure Batch account"
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
@@ -147,7 +193,6 @@ function recreatePoolVmss() {
     scaleDownPools
     scaleUpPools
     . "${0%/*}/setup-all-pools-for-batch.sh"
-    . "${0%/*}/restart-vm-pools.sh"
     enableJobSchedule
 }
 
@@ -170,7 +215,7 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 recreatePoolVmss
 

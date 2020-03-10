@@ -12,10 +12,35 @@ Usage: $0 -v <vmss name> -r <vmss resource group> -b <batch resource group name>
     exit 1
 }
 
-addResourceGroupNameTagToVMSS(){
-    az resource update --set tags.ResourceGroupName="$resourceGroupName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
+addTagToVmss() {
+    tagName="$1"
+    tagValue="$2"
 
-    echo "Tag ResourceGroupName=$resourceGroupName was added to $vmssName vmss under $vmssResourceGroup resource group"
+    az resource update \
+        --set tags.$tagName="$tagValue" \
+        -g "$vmssResourceGroup" \
+        -n "$vmssName" \
+        --resource-type "Microsoft.Compute/virtualMachineScaleSets" \
+        --query "tags" \
+        -o tsv
+
+    echo "Tag $tagName=$tagValue was added to $vmssName vmss under $vmssResourceGroup resource group"
+}
+
+addResourceGroupNameTagToVMSS(){
+  
+    addTagToVmss "ResourceGroupName" "$resourceGroupName"
+
+    local vmssCreatedTime=$(az vmss show \
+                                --name "$vmssName" \
+                                --resource-group "$vmssResourceGroup" \
+                                --query "tags.VmssCreatedDate" \
+                                -o tsv
+                           )
+    if [[ -z $vmssCreatedTime ]]; then
+        local currentTime=$(date "+%Y-%m-%d")
+        addTagToVmss "VmssCreatedDate" "$currentTime"
+    fi
 }
 
 # Read script arguments
@@ -28,7 +53,7 @@ while getopts ":v:r:b:" option; do
     esac
 done
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 echo "
 Assigning Tag for:

@@ -73,7 +73,7 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 # Login into Azure Batch account
 echo "Logging into '$batchAccountName' Azure Batch account"

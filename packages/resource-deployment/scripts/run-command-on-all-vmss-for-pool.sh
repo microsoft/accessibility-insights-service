@@ -80,7 +80,9 @@ getVmssInfo() {
 
 setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
-        echo "Running setup for VMSS resource group $vmssResourceGroup for pool $pool"
+        echo "Running command for VMSS resource group $vmssResourceGroup for pool $pool
+            command: $commandName    
+        "
 
         # Wait until we are certain the resource group exists
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
@@ -106,16 +108,16 @@ setupVmss() {
 
     done
 }
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
-echo "inside pool setup"
-echo "
+echo "Invoked command to run all vmss for pools with args:
 resource group:$resourceGroupName
 batch:$batchAccountName
 pool:$pool
 keyVault: $keyVault
 commandName: $commandName
 "
+
 # Read script arguments
 while getopts ":r:p:c:n:" option; do
     case $option in

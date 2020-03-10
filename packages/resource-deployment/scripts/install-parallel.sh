@@ -128,7 +128,7 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-resource-group.sh"
 . "${0%/*}/create-storage-account.sh"
 
-. "${0%/*}/set-resource-names.sh"
+. "${0%/*}/get-resource-names.sh"
 
 echo "Starting parallel processes.."
 
@@ -161,6 +161,7 @@ waitForProcesses apiManagmentProcess
 parallelProcesses=(
     "${0%/*}/deploy-rest-api.sh"
     "${0%/*}/create-dashboard.sh"
+    "${0%/*}/recreate-vmss-for-pools.sh"
 )
 runInParallel parallelProcesses
 echo "Installation completed."
