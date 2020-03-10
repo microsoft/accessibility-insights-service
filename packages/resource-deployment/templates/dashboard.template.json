@@ -757,7 +757,11 @@
                                                             {
                                                                 "key": "customEvent/name",
                                                                 "operator": 0,
-                                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                                                "values": [
+                                                                    "ScanTaskFailed",
+                                                                    "ScanTaskCompleted",
+                                                                    "ScanTaskSucceeded"
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -780,7 +784,11 @@
                                         "customEvent/name": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                                "values": [
+                                                    "ScanTaskFailed",
+                                                    "ScanTaskCompleted",
+                                                    "ScanTaskSucceeded"
+                                                ]
                                             }
                                         }
                                     }
@@ -1035,7 +1043,7 @@
                                         },
                                         {
                                             "name": "Query",
-                                            "value": "customEvents\n| where name == \"FunctionalTest\"     and customDimensions.logSource == \"TestRun\"     and customDimensions.runId == toscalar(         customEvents\n| where name == \"FunctionalTest\" and customDimensions.testContainer == \"FinalizerTestGroup\"\n| top 1 by timestamp desc nulls last\n| project tostring(customDimensions.runId)      )\n| where customDimensions.testContainer != \"FinalizerTestGroup\"\n| project testGroup = customDimensions.testContainer, testName = customDimensions.testName, result = customDimensions.result, releaseId = customDimensions.releaseId, timestamp\n| sort by tostring(testGroup)\n"
+                                            "value": "let functionalTestEvents = customEvents\r\n| where name == \"FunctionalTest\";\r\nlet lastCompletedRun = functionalTestEvents\r\n| where customDimensions.testContainer == \"FinalizerTestGroup\"\r\n| top 1 by timestamp desc nulls last\r\n| project runId = customDimensions.runId, releaseId = tostring(customDimensions.releaseId), key=1;\r\nlet lastStartedRun = functionalTestEvents\r\n| top 1 by timestamp desc nulls last\r\n| project runId = customDimensions.runId, releaseId = tostring(customDimensions.releaseId), key=1;\r\nlet runId = toscalar(lastCompletedRun\r\n| join kind=fullouter lastStartedRun on key\r\n| project value = tostring(iff(isnotnull(releaseId) and releaseId == releaseId1, runId, runId1)));\r\nlet relevantTestEvents = functionalTestEvents\r\n| where customDimensions.runId == runId;\r\nlet completeTestRuns = relevantTestEvents\r\n| where customDimensions.logSource == \"TestRun\"\r\n| project testContainerName = tostring(customDimensions.testContainer), testName = tostring(customDimensions.testName), result = tostring(customDimensions.result), releaseId = customDimensions.releaseId, timestamp;\r\nlet completeTestContainers = relevantTestEvents\r\n| where customDimensions.logSource == \"TestContainer\"\r\n| project testContainerName = tostring(customDimensions.testContainer);\r\nlet testContainerNames = traces\r\n| where message == \"Starting functional test orchestration.\"\r\n| top 1 by timestamp\r\n| project testContainerName = split(tostring(customDimensions.functionalTestGroups), \",\")\r\n| mv-expand testContainerName\r\n| project testContainerName = tostring(testContainerName);\r\ntestContainerNames\r\n| project testContainerName, testName = \"Additional tests\", result = \"incomplete\"\r\n| join kind=leftanti completeTestContainers on testContainerName\r\n| union completeTestRuns\r\n| where testContainerName != \"FinalizerTestGroup\"\r\n| sort by testContainerName\r\n"
                                         },
                                         {
                                             "name": "TimeRange",
@@ -1142,12 +1150,16 @@
                                                             {
                                                                 "key": "customEvent/name",
                                                                 "operator": 0,
-                                                                "values": ["FunctionalTest"]
+                                                                "values": [
+                                                                    "FunctionalTest"
+                                                                ]
                                                             },
                                                             {
                                                                 "key": "customDimensions/logSource",
                                                                 "operator": 0,
-                                                                "values": ["TestRun"]
+                                                                "values": [
+                                                                    "TestRun"
+                                                                ]
                                                             }
                                                         ]
                                                     },
@@ -1170,13 +1182,17 @@
                                         "customEvent/name": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": ["FunctionalTest"]
+                                                "values": [
+                                                    "FunctionalTest"
+                                                ]
                                             }
                                         },
                                         "customDimensions/logSource": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": ["TestRun"]
+                                                "values": [
+                                                    "TestRun"
+                                                ]
                                             }
                                         }
                                     }
