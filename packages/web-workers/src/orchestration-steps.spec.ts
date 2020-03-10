@@ -8,6 +8,7 @@ import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
+import { LogLevel } from 'logger';
 import * as moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -503,6 +504,30 @@ describe(OrchestrationStepsImpl, () => {
             expect(taskList[1]).toEqual(task);
 
             taskMethodsMock.verifyAll();
+        });
+    });
+
+    describe('Log test run start', () => {
+        const testGroupNames = ['testGroup1', 'testGroup2'];
+        const testGroupNamesStr = 'testGroup1,testGroup2';
+        const getTestGroupNamesFunc = () => testGroupNames;
+        let expectedLogProperties: { [name: string]: string };
+
+        beforeEach(() => {
+            expectedLogProperties = {
+                ...getDefaultTelemetryProperties(),
+                functionalTestGroups: testGroupNamesStr,
+                runId: orchestrationInstanceId,
+                environment: availabilityTestConfig.environmentDefinition,
+            };
+        });
+
+        it('logTestRunStart', async () => {
+            loggerMock.setup(l => l.log('Starting functional test orchestration', LogLevel.info, expectedLogProperties));
+
+            testSubject.logTestRunStart(getTestGroupNamesFunc);
+
+            loggerMock.verifyAll();
         });
     });
 

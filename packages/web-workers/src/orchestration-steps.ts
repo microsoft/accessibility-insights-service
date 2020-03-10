@@ -187,15 +187,15 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
     }
 
-    public logTestRunStart(): void {
-        const testGroupNamesStr = getAllTestGroupClassNames().reduce((prevValue, currentValue) => `${prevValue},${currentValue}`);
+    public logTestRunStart(getTestGroupNamesFunc: () => string[] = getAllTestGroupClassNames): void {
+        const testGroupNamesStr = getTestGroupNamesFunc().reduce((prevValue, currentValue) => `${prevValue},${currentValue}`);
         const properties = {
             ...this.getDefaultLogProperties(),
             functionalTestGroups: testGroupNamesStr,
             runId: this.context.df.instanceId,
-            environment: this.getTestEnvironment(this.availabilityTestConfig.environmentDefinition),
+            environment: this.availabilityTestConfig.environmentDefinition,
         };
-        this.logOrchestrationStep('Starting functional test orchestration.', LogLevel.info, properties);
+        this.logger.log('Starting functional test orchestration.', LogLevel.info, properties);
     }
 
     private getTestEnvironment(environment: string): TestEnvironment {

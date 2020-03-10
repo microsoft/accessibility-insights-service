@@ -52,6 +52,7 @@ export interface OrchestratorStepsCallCount {
     verifyScanSubmittedCount: number;
     callSubmitScanRequest: number;
     runFunctionalTestsCount: number;
+    logTestRunStartCount: number;
 }
 
 class OrchestrationStepsStub implements OrchestrationSteps {
@@ -62,6 +63,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         verifyScanSubmittedCount: 0,
         callSubmitScanRequest: 0,
         runFunctionalTestsCount: 0,
+        logTestRunStartCount: 0,
     };
 
     public scanId = 'scan-id';
@@ -134,7 +136,9 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public logTestRunStart(): void {}
+    public logTestRunStart(): void {
+        this.orchestratorStepsCallCount.logTestRunStartCount += 1;
+    }
 
     private throwExceptionIfExpected(): void {
         if (this.shouldThrowException) {
@@ -254,6 +258,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 verifyScanSubmittedCount: 0,
                 waitForScanCompletionCount: 0,
                 runFunctionalTestsCount: 0,
+                logTestRunStartCount: 0,
             };
 
             const actualStepsCallCount: OrchestratorStepsCallCount = orchestratorStepsStub.orchestratorStepsCallCount;
@@ -262,6 +267,7 @@ describe('HealthMonitorOrchestrationController', () => {
             await testSubject.invoke(contextStub);
 
             orchestratorIterator.next();
+            expectedStepsCallCount.logTestRunStartCount += 1;
             expectedStepsCallCount.callHealthCheckCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
