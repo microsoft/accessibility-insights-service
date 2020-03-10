@@ -18,7 +18,7 @@ update_configs:
                 dependency_name: 'axe-core'
 
     - package_manager: 'dotnet:nuget'
-      directory: '/'
+      directory: '/packages/web-workers/'
       update_schedule: 'daily'
       default_labels:
           - 'category: engineering'
