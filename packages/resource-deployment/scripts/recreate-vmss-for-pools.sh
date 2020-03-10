@@ -146,6 +146,11 @@ function recreatePoolVmss() {
     pools=$(az batch pool list --query "[].id" -o tsv)
 
     disableJobSchedule
+
+    echo "sleeping 10 seconds to wait for any jobs that got kicked off
+     before disabling schedule to start using the nodes"
+    sleep 10
+
     waitForPoolsToBeIdle
     scaleDownPools
     scaleUpPools
