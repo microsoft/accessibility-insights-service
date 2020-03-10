@@ -17,6 +17,7 @@ export resourceGroupName
 export batchAccountName
 export keyVault
 export enableSoftDeleteOnKeyVault
+export pools
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
@@ -39,9 +40,70 @@ function waitForProcesses() {
     done
 }
 
-function scaleDownPools() {
-    pools=$(az batch pool list --query "[].id" -o tsv)
+function setJobScheduleStatus {
+    local status=$1
 
+    local schedules=$(az batch job-schedule list --query "[].id" -o tsv)
+
+    for schedule in $schedules; do
+        echo "Setting job schedule $schedule status to $status"
+        az batch job-schedule $status --job-schedule-id "$schedule"
+    done
+}
+
+function disableJobSchedule {
+    setJobScheduleStatus "disable"
+}
+
+function enableJobSchedule {
+    setJobScheduleStatus "enable"
+}
+
+waitForNodesToGoIdleByNodeType() {
+    local hasStarted=false
+    local pool=$1
+    local nodeType=$2
+    local waitTime=1800
+    local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
+
+    echo "Waiting for $nodeType nodes under $pool to go idle"
+
+    local endTime=$((SECONDS + waitTime))
+    printf " - Running .."
+    while [ $SECONDS -le $endTime ]; do
+
+        local runningCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.running" \
+                                -o tsv
+                            ) 
+        
+        if [[ $runningCount == 0 ]]; then
+            echo "Nodes under $nodeType for pool: $pool under  has started."
+            hasStarted=true
+            break;
+        else
+            printf "."
+            sleep 5
+        fi
+    done
+
+    echo "Currrent Pool Status $pool for $nodeType:"
+    az batch pool node-counts list --query "$nodeTypeContentSelector"
+    
+    if [[ $hasStarted == false ]]; then
+        echo "Pool $pool & $nodeType is not in the expected state."
+        exit 1
+    fi
+}
+
+function waitForPoolsToBeIdle() {
+    for pool in $pools; do
+        waitForNodesToGoIdleByNodeType "$pool" "dedicated"
+        waitForNodesToGoIdleByNodeType "$pool" "lowPriority"
+    done
+}
+
+function scaleDownPools() {
     parallelProcesses=()
     echo "Resizing all pools size to 0"
     for pool in $pools; do
@@ -64,15 +126,8 @@ function scaleDownPools() {
     done
 }
 
-function recreatePoolVmss() {
-    # Login into Azure Batch account
-    echo "Logging into '$batchAccountName' Azure Batch account"
-    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
-
-    scaleDownPools
-
-    # Deploy Azure Batch account using resource manager template
-    echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
+function scaleUpPools {
+    echo "Scaling up pools: Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
     resources=$(
         az group deployment create \
             --resource-group "$resourceGroupName" \
@@ -81,8 +136,21 @@ function recreatePoolVmss() {
             --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
             -o tsv
     )
+}
 
+function recreatePoolVmss() {
+    # Login into Azure Batch account
+    echo "Logging into '$batchAccountName' Azure Batch account"
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+
+    pools=$(az batch pool list --query "[].id" -o tsv)
+
+    disableJobSchedule
+    waitForPoolsToBeIdle
+    scaleDownPools
+    scaleUpPools
     . "${0%/*}/setup-all-pools-for-batch.sh"
+    enableJobSchedule
 }
 
 # Read script arguments
