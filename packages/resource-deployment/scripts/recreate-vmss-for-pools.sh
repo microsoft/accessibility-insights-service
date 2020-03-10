@@ -150,6 +150,7 @@ function recreatePoolVmss() {
     scaleDownPools
     scaleUpPools
     . "${0%/*}/setup-all-pools-for-batch.sh"
+    . "${0%/*}/restart-vm-pools.sh"
     enableJobSchedule
 }
 

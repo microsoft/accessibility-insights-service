@@ -6,44 +6,32 @@
 set -eo pipefail
 
 export resourceGroupName
-export subscription
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -s <subscription name or id>
+Usage: $0 -r <resource group>
 "
     exit 1
 }
 
-getBatchAccountName() {
-    declare -n refResult=$1
-
-    echo "Fetching batch account name under resource group $resourceGroupName"
-    # shellcheck disable=SC2034
-    refResult=$(az batch account list --resource-group "$resourceGroupName" --subscription "$subscription" --query "[0].name" -o tsv)
-    echo "Found batch account name - $refResult"
-}
 
 restartBatchPools() {
-    local batchAccountName
-    getBatchAccountName batchAccountName
-
     # Login into Azure Batch account
     echo "Logging into '$batchAccountName' Azure Batch account"
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
     echo "Querying pools for $batchAccountName"
-    batchPoolIds=$(az batch pool list --account-name "$batchAccountName" --subscription "$subscription" --query "[*].id" -o tsv)
+    local batchPoolIds=$(az batch pool list --account-name "$batchAccountName" --query "[*].id" -o tsv)
 
     for poolId in $batchPoolIds; do
         local poolNodeIds
 
         echo "Querying node list for poolId $poolId"
-        poolNodeIds=$(az batch node list --account-name "$batchAccountName" --subscription "$subscription" --pool-id "$poolId" --query "[*].id" -o tsv)
+        poolNodeIds=$(az batch node list --account-name "$batchAccountName" --pool-id "$poolId" --query "[*].id" -o tsv)
 
         for nodeId in $poolNodeIds; do
             echo "Restarting node with nodeId $nodeId under poolId $poolId"
-            az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --subscription $subscription --node-reboot-option taskcompletion 1>/dev/null
+            az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --node-reboot-option taskcompletion 1>/dev/null
         done
     done
 }
@@ -52,13 +40,14 @@ restartBatchPools() {
 while getopts ":r:s:l:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    s) subscription=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
+
+. "${0%/*}/set-resource-names.sh"
 
 restartBatchPools
