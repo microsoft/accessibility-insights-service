@@ -757,11 +757,7 @@
                                                             {
                                                                 "key": "customEvent/name",
                                                                 "operator": 0,
-                                                                "values": [
-                                                                    "ScanTaskFailed",
-                                                                    "ScanTaskCompleted",
-                                                                    "ScanTaskSucceeded"
-                                                                ]
+                                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
                                                             }
                                                         ]
                                                     },
@@ -784,11 +780,7 @@
                                         "customEvent/name": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": [
-                                                    "ScanTaskFailed",
-                                                    "ScanTaskCompleted",
-                                                    "ScanTaskSucceeded"
-                                                ]
+                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
                                             }
                                         }
                                     }
@@ -1150,16 +1142,12 @@
                                                             {
                                                                 "key": "customEvent/name",
                                                                 "operator": 0,
-                                                                "values": [
-                                                                    "FunctionalTest"
-                                                                ]
+                                                                "values": ["FunctionalTest"]
                                                             },
                                                             {
                                                                 "key": "customDimensions/logSource",
                                                                 "operator": 0,
-                                                                "values": [
-                                                                    "TestRun"
-                                                                ]
+                                                                "values": ["TestRun"]
                                                             }
                                                         ]
                                                     },
@@ -1182,17 +1170,13 @@
                                         "customEvent/name": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": [
-                                                    "FunctionalTest"
-                                                ]
+                                                "values": ["FunctionalTest"]
                                             }
                                         },
                                         "customDimensions/logSource": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": [
-                                                    "TestRun"
-                                                ]
+                                                "values": ["TestRun"]
                                             }
                                         }
                                     }
