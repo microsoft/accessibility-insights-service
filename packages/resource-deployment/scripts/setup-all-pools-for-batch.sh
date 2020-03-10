@@ -44,11 +44,11 @@ function setupPools() {
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
     done
 
-    echo "Setup tags & monitor for pools in parallel"
+    echo "Setup tags in parallel"
     parallelProcesses=()
     for pool in $pools; do
-        command=". \"${0%/*}/add-tags-for-batch-vmss.sh\" ; . \"${0%/*}/enable-monitor-for-batch-vmss.sh\""
-        commandName="Setup tags & monitor for pool $pool"
+        command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""
+        commandName="Setup tags for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh" &
         parallelProcesses+=("$!")
     done
@@ -81,4 +81,4 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 
 setupPools
 
-echo "Successfully enabled Azure Monitor for batch account pools - $batchAccountName"
+echo "Successfully setup all pools for batch account $batchAccountName"

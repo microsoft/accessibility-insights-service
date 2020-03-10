@@ -17,7 +17,6 @@ export resourceName
 export systemAssignedIdentities
 export principalId
 export enableSoftDeleteOnKeyVault
-export logAnalyticsWorkspaceId
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"

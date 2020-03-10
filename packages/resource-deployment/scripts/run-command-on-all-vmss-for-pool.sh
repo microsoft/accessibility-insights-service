@@ -120,7 +120,6 @@ echo "
 resource group:$resourceGroupName
 batch:$batchAccountName
 pool:$pool
-logAnalyticsWorkspaceId:$logAnalyticsWorkspaceId
 keyVault: $keyVault
 commandName: $commandName
 "
@@ -135,7 +134,7 @@ while getopts ":r:p:c:n:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $logAnalyticsWorkspaceId ]] || [[ -z $keyVault ]] ||  [[ -z $command ]] ||  [[ -z $commandName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $keyVault ]] ||  [[ -z $command ]] ||  [[ -z $commandName ]]; then
     exitWithUsageInfo
 fi
 

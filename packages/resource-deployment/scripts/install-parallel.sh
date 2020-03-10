@@ -24,7 +24,6 @@ export webApiAdClientSecret
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export enableSoftDeleteOnKeyVault=true
-export logAnalyticsWorkspaceId
 
 exitWithUsageInfo() {
     echo "
@@ -143,7 +142,6 @@ parallelProcesses=(
     "${0%/*}/setup-cosmos-db.sh"
     "${0%/*}/create-vnet.sh"
     "${0%/*}/app-insights-create.sh"
-    "${0%/*}/create-log-analytics-workspace.sh"
 )
 runInParallel parallelProcesses
 
