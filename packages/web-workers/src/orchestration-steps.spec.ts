@@ -511,19 +511,23 @@ describe(OrchestrationStepsImpl, () => {
         const testGroupNames = ['testGroup1', 'testGroup2'];
         const testGroupNamesStr = 'testGroup1,testGroup2';
         const getTestGroupNamesFunc = () => testGroupNames;
+        const releaseId = 'release id';
         let expectedLogProperties: { [name: string]: string };
 
         beforeEach(() => {
             expectedLogProperties = {
                 ...getDefaultTelemetryProperties(),
+                source: 'BeginTestSuite',
                 functionalTestGroups: testGroupNamesStr,
                 runId: orchestrationInstanceId,
+                releaseId: releaseId,
                 environment: availabilityTestConfig.environmentDefinition,
             };
+            process.env.RELEASE_VERSION = releaseId;
         });
 
         it('logTestRunStart', async () => {
-            loggerMock.setup(l => l.log('Starting functional test orchestration', LogLevel.info, expectedLogProperties));
+            loggerMock.setup(l => l.trackEvent('FunctionalTest', expectedLogProperties));
 
             testSubject.logTestRunStart(getTestGroupNamesFunc);
 
