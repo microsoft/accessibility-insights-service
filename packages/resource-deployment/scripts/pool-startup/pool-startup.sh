@@ -12,15 +12,17 @@ runWithRetry() {
     local retryCount=0
     local maxRetryCount=5
 
+    echo "restoring dpkg configuration"
+    dpkg --configure -ay
+
     until "${0%/*}/pool-startup-internal.sh"; do
         ((retryCount++))
 
         if ((retryCount == maxRetryCount)); then
             echo "Maximum retry count reached. Pool startup script failed"
             exit 1
-        else
-            echo "Retry count - $retryCount. Pool startup script failed"
         fi
+        echo "Retry count - $retryCount. Pool startup script failed"
     done
 
     echo "Successfully completed pool startup script execution after retry count - $retryCount"

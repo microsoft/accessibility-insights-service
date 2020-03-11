@@ -5,11 +5,6 @@
 
 set -eo pipefail
 
-# The script will enable system-assigned managed identity on Batch pool VMSS
-
-# export vmssResourceGroups
-# export systemAssignedIdentities
-
 export vmssResourceGroup
 export vmssName
 export vmssLocation

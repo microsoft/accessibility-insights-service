@@ -22,16 +22,7 @@ Usage: $0 -r <resource group>
     exit 1
 }
 
-function waitForProcesses() {
-    local processesToWaitFor=$1
-
-    list="$processesToWaitFor[@]"
-    for pid in "${!list}"; do
-        echo "Waiting for process with pid $pid"
-        wait $pid
-        echo "Process with pid $pid exited"
-    done
-}
+. "${0%/*}/process-utilities.sh"
 
 function setupPools() {
     # Enable managed identity on Batch pools
