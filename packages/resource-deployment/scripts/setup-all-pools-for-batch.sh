@@ -40,7 +40,7 @@ function setupPools() {
     echo "Setup system identity for created pools"
     for pool in $pools; do
         command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="System identity for pool $pool"
+        commandName="Enable System identity for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
     done
 

@@ -55,7 +55,7 @@ function enableJobSchedule {
 }
 
 waitForNodesToGoIdleByNodeType() {
-    local hasStarted=false
+    local isIdle=false
     local pool=$1
     local nodeType=$2
     local waitTime=1800
@@ -73,8 +73,8 @@ waitForNodesToGoIdleByNodeType() {
                             ) 
         
         if [[ $runningCount == 0 ]]; then
-            echo "Nodes under $nodeType for pool: $pool under  has started."
-            hasStarted=true
+            echo "$nodeType nodes under pool: $pool are idle."
+            isIdle=true
             break;
         else
             printf "."
@@ -85,7 +85,7 @@ waitForNodesToGoIdleByNodeType() {
     echo "Currrent Pool Status $pool for $nodeType:"
     az batch pool node-counts list --query "$nodeTypeContentSelector"
     
-    if [[ $hasStarted == false ]]; then
+    if [[ $isIdle == false ]]; then
         echo "Pool $pool & $nodeType is not in the expected state."
         exit 1
     fi
@@ -107,7 +107,7 @@ function checkIfVmssAreOld {
         local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
         local currentDate=$(date "+%Y-%m-%d")
         
-        if [[ "$currentDate" -ge "$recycleDate" ]]; then
+        if [[ "$currentDate" > "$recycleDate" ]] || [[ "$currentDate" == "$recycleDate" ]]; then
             echo "Found vmss with older created date $createdDate. 
                 Expected to be not older than $recycleVmssIntervalDays days.
                 Marking all vmss as old
