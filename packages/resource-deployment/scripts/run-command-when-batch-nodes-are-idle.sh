@@ -67,12 +67,27 @@ waitForNodesToGoIdleByNodeType() {
     printf " - Running .."
     while [ $SECONDS -le $endTime ]; do
 
-        local runningCount=$(az batch pool node-counts list \
+        local totalCount=$(az batch pool node-counts list \
                                 --query "$nodeTypeContentSelector.running" \
                                 -o tsv
-                            ) 
-        
-        if [[ $runningCount == 0 ]]; then
+                            )
+        local idleCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.idle" \
+                                -o tsv
+                            )  
+        local startTaskFailedCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.startTaskFailed" \
+                                -o tsv
+                            )  
+
+        local unusableCount=$(az batch pool node-counts list \
+                                --query "$nodeTypeContentSelector.unusable" \
+                                -o tsv
+                            )  
+
+        local stableCount=$(( $idleCount + $startTaskFailedCount + $unusableCount ))
+
+        if [[ $stableCount == $totalCount ]]; then
             echo "$nodeType nodes under pool: $pool are idle."
             isIdle=true
             break;
