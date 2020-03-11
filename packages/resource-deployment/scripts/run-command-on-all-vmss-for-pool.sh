@@ -88,10 +88,10 @@ setupVmss() {
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
-        vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
-        vmssCreatedCommand="az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+        vmssDeployedSearchPattern="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
+        vmssCreatedQuery="az vmss list --query \"$vmssDeployedSearchPattern\" -o tsv"
         
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedCommand"
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedQuery"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
