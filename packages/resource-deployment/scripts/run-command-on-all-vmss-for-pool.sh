@@ -10,9 +10,13 @@ set -eo pipefail
 # export vmssResourceGroups
 # export systemAssignedIdentities
 
+export vmssResourceGroup
+export vmssName
+export vmssLocation
+
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -a <batch account> -p <batch pool>
+Usage: $0 -r <resource group> -p <batch pool> -c <command to execute> -n <command name>
 "
     exit 1
 }
@@ -76,67 +80,56 @@ getVmssInfo() {
 
 setupVmss() {
     for vmssResourceGroup in "${vmssResourceGroups[@]}"; do
-        echo "Enabling system-assigned managed identity for VMSS resource group $vmssResourceGroup"
+        echo "Running command for VMSS resource group $vmssResourceGroup for pool $pool
+            command: $commandName    
+        "
 
         # Wait until we are certain the resource group exists
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az group exists --name $vmssResourceGroup"
 
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
-        vmssDeployedQuery="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
-        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "az vmss list --query \"$vmssDeployedQuery\" -o tsv"
+        vmssDeployedSearchPattern="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
+        vmssCreatedQuery="az vmss list --query \"$vmssDeployedSearchPattern\" -o tsv"
+        
+        . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedQuery"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
+        vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
+       
+        echo "Checking vmss status - $vmssName"
         vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
         if [ "$vmssStatus" != "Succeeded" ]; then
             echo "Deployment of vmss $vmssName failed with status $vmssStatus"
             exit 1
         fi
 
-         assignSystemIdentity "$vmssResourceGroup" "$vmssName"
-         az resource wait -n "$vmssName" -g "$vmssResourceGroup" --resource-type "Microsoft.Compute/virtualMachineScaleSets" --exists --updated --timeout "1800" --interval "5"
-
-        addResourceGroupNameTagToVMSS $vmssResourceGroup $vmssName
+        echo "Invoking command $commandName"
+        eval "$command"
 
     done
 }
+. "${0%/*}/get-resource-names.sh"
 
-assignSystemIdentity() {
-    local vmssResourceGroup=$1
-    local vmssName=$2
-
-    systemAssignedIdentity=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
-    systemAssignedIdentities+=("$systemAssignedIdentity")
-
-    echo \
-        "VMSS Resource configuration:
-  Pool: $pool
-  VMSS resource group: $vmssResourceGroup
-  VMSS name: $vmssName
-  System-assigned identity: $systemAssignedIdentity
-  "
-}
-
-
-addResourceGroupNameTagToVMSS(){
-    vmssResourceGroup=$1
-    vmssName=$2
-    
-    az resource update --set tags.ResourceGroupName="$resourceGroupName" -g "$vmssResourceGroup" -n "$vmssName" --resource-type "Microsoft.Compute/virtualMachineScaleSets"
-
-    echo "Tag ResourceGroupName=$resourceGroupName was added to $vmssName vmss under $vmssResourceGroup resource group"
-}
+echo "Invoked command to run all vmss for pools with args:
+resource group:$resourceGroupName
+batch:$batchAccountName
+pool:$pool
+keyVault: $keyVault
+commandName: $commandName
+"
 
 # Read script arguments
-while getopts ":r:a:p:" option; do
+while getopts ":r:p:c:n:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    a) batchAccountName=${OPTARG} ;;
     p) pool=${OPTARG} ;;
+    c) command=${OPTARG} ;;
+    n) commandName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $keyVault ]] ||  [[ -z $command ]] ||  [[ -z $commandName ]]; then
     exitWithUsageInfo
 fi
 
@@ -157,5 +150,5 @@ getPoolNodeCount
 # Get Batch pool Azure VMSS resource group and name
 getVmssInfo
 
-# Enable system-assigned managed identity and add resource group name as a tag on VMSS resources
+# Invoke command on each vmss
 setupVmss

@@ -114,7 +114,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] || [[ -z $environment ]] || [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $releaseVersion ]]; then
     exitWithUsageInfo
 fi
 
@@ -128,11 +128,7 @@ az account set --subscription "$subscription"
 . "${0%/*}/create-resource-group.sh"
 . "${0%/*}/create-storage-account.sh"
 
-resourceGroupSuffix=${storageAccountName:11}
-cosmosAccountName="allycosmos$resourceGroupSuffix"
-apiManagementName="apim-a11y$resourceGroupSuffix"
-webApiFuncAppName="web-api-allyfuncapp$resourceGroupSuffix"
-appInsightsName="allyinsights$resourceGroupSuffix"
+. "${0%/*}/get-resource-names.sh"
 
 echo "Starting parallel processes.."
 
@@ -153,7 +149,6 @@ runInParallel parallelProcesses
 # Additionally, these should run sequentially because of interdependence.
 
 . "${0%/*}/batch-account-create.sh"
-. "${0%/*}/push-secrets-to-key-vault.sh"
 
 parallelProcesses=(
     "${0%/*}/function-app-create.sh"
@@ -166,5 +161,7 @@ waitForProcesses apiManagmentProcess
 parallelProcesses=(
     "${0%/*}/deploy-rest-api.sh"
     "${0%/*}/create-dashboard.sh"
+    "${0%/*}/recreate-vmss-for-pools.sh"
 )
 runInParallel parallelProcesses
+echo "Installation completed."

@@ -18,7 +18,7 @@ export tenantId
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -c <cosmos account name> -r <resource group> -s <storage account name> -k <key vault name> -a <webApiAdClientId> -p <webApiAdClientSecret> -i <appInsightsName>
+Usage: $0 -r <resource group> -c <webApiAdClientId> -p <webApiAdClientSecret>
 "
     exit 1
 }
@@ -59,10 +59,10 @@ revokePermissionsToKeyVault() {
 
     if [[ $loggedInUserType == "user" ]]; then
         echo "Revoking keyvault permission for user account"
-        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null
+        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null || true
     else
         echo "Revoking keyvault permission for service principal"
-        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null
+        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null || true
     fi
 }
 
@@ -118,25 +118,26 @@ createAppInsightsApiKey() {
 }
 
 # Read script arguments
-while getopts ":c:r:s:k:a:p:i:" option; do
+while getopts ":r:c:p:" option; do
     case $option in
-    c) cosmosAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
-    s) storageAccountName=${OPTARG} ;;
-    k) keyVault=${OPTARG} ;;
-    a) webApiAdClientId=${OPTARG} ;;
+    c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
-    i) appInsightsName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-# Print script usage help
-if [[ -z $cosmosAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $storageAccountName ]] || [[ -z $keyVault ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]] || [[ -z $appInsightsName ]]; then
-    echo "$cosmosAccountName $resourceGroupName $storageAccountName $keyVault $appInsightsName"
 
+# Print script usage help
+if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
+    echo "
+    resourceGroupName: $resourceGroupName 
+    webApiAdClientId: $webApiAdClientId
+    "
     exitWithUsageInfo
 fi
+
+. "${0%/*}/get-resource-names.sh"
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
 

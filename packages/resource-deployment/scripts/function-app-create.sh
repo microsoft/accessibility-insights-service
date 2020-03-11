@@ -52,10 +52,10 @@ installAzureFunctionsCoreToolsOnLinux() {
 
     # Verify your Ubuntu server is running one of the appropriate versions from the table below. To add the apt source, run
     sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" > /etc/apt/sources.list.d/dotnetdev.list'
-    sudo apt-get update
+    sudo apt-get update -y
 
     # Install the Core Tools package
-    sudo apt-get install azure-functions-core-tools=2.7.1948-1
+    sudo apt-get install azure-functions-core-tools=2.7.1948-1 -y
     echo "Azure Functions Core Tools installed successfully"
 }
 
