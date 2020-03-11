@@ -13,21 +13,14 @@ export class A11yServiceCredential {
         private readonly resourceId: string,
         authorityUrl: string,
         context?: AuthenticationContext,
+        private readonly maxTokenRetries: number = 4,
     ) {
         // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
         this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
     }
 
     public async getToken(): Promise<TokenResponse> {
-        return new Promise((resolve, reject) => {
-            this.authContext.acquireTokenWithClientCredentials(this.resourceId, this.clientId, this.clientSecret, (err, tokenResponse) => {
-                if (!isNullOrUndefined(err)) {
-                    reject(err);
-                } else {
-                    resolve(tokenResponse as TokenResponse);
-                }
-            });
-        });
+        return this.getTokenWithRetries(this.maxTokenRetries);
     }
 
     public async signRequest(request: typeof requestPromise): Promise<typeof requestPromise> {
@@ -39,5 +32,29 @@ export class A11yServiceCredential {
         };
 
         return request.defaults(authOptions);
+    }
+
+    private async getTokenWithRetries(numRetries: number): Promise<TokenResponse> {
+        try {
+            return await this.tryGetToken();
+        } catch (err) {
+            if (numRetries > 0) {
+                return this.getTokenWithRetries(numRetries - 1);
+            } else {
+                throw err;
+            }
+        }
+    }
+
+    private async tryGetToken(): Promise<TokenResponse> {
+        return new Promise((resolve, reject) => {
+            this.authContext.acquireTokenWithClientCredentials(this.resourceId, this.clientId, this.clientSecret, (err, tokenResponse) => {
+                if (!isNullOrUndefined(err)) {
+                    reject(err);
+                } else {
+                    resolve(tokenResponse as TokenResponse);
+                }
+            });
+        });
     }
 }

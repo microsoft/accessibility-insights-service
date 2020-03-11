@@ -21,6 +21,7 @@ describe(A11yServiceCredential, () => {
         tokenType: 'type',
         accessToken: 'at',
     } as any;
+    const numTokenRetries = 4;
 
     let error: Error;
 
@@ -29,11 +30,18 @@ describe(A11yServiceCredential, () => {
         requestMock = Mock.ofType<typeof requestPromise>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
 
-        testSubject = new A11yServiceCredential(clientId, clientMockSec, resource, authorityUrl, authenticationContextMock.object);
+        testSubject = new A11yServiceCredential(
+            clientId,
+            clientMockSec,
+            resource,
+            authorityUrl,
+            authenticationContextMock.object,
+            numTokenRetries
+        );
 
         authenticationContextMock
             .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
-            .returns((resourceUrl, cid, sec, callback) => {
+            .callback((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
             });
     });
@@ -61,6 +69,31 @@ describe(A11yServiceCredential, () => {
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
+        await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
+    });
+
+    it('getTokenWithRetries fails after maxRetries', async () => {
+        error = new Error('err');
+        authenticationContextMock.reset();
+        authenticationContextMock
+            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
+            .callback((resourceUrl, cid, sec, callback) => {
+                callback(error, tokenResponse);
+            }).verifiable(Times.exactly(numTokenRetries + 1));
+
+        await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
+    });
+
+    it('getTokenWithRetries succeeds before maxRetries', async () => {
+        error = new Error('err');
+        authenticationContextMock.reset();
+        authenticationContextMock
+            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
+            .callback((resourceUrl, cid, sec, callback) => {
+                callback(error, tokenResponse);
+                error = undefined;
+            }).verifiable(Times.exactly(2));
+
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
 });
