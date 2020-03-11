@@ -36,7 +36,7 @@ describe(A11yServiceCredential, () => {
             resource,
             authorityUrl,
             authenticationContextMock.object,
-            numTokenRetries
+            numTokenRetries,
         );
 
         authenticationContextMock
@@ -79,7 +79,8 @@ describe(A11yServiceCredential, () => {
             .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
             .callback((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
-            }).verifiable(Times.exactly(numTokenRetries + 1));
+            })
+            .verifiable(Times.exactly(numTokenRetries + 1));
 
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
@@ -92,7 +93,8 @@ describe(A11yServiceCredential, () => {
             .callback((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
                 error = undefined;
-            }).verifiable(Times.exactly(2));
+            })
+            .verifiable(Times.exactly(2));
 
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
