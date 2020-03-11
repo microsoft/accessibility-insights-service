@@ -51,7 +51,7 @@ function disableJobSchedule {
 }
 
 function enableJobSchedule {
-    setJobScheduleStatus "disable"
+    setJobScheduleStatus "enable"
 }
 
 waitForNodesToGoIdleByNodeType() {
