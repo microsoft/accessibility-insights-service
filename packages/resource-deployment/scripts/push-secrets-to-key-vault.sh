@@ -59,10 +59,10 @@ revokePermissionsToKeyVault() {
 
     if [[ $loggedInUserType == "user" ]]; then
         echo "Revoking keyvault permission for user account"
-        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null
+        az keyvault delete-policy --name "$keyVault" --upn "$loggedInServicePrincipalName" 1>/dev/null || true
     else
         echo "Revoking keyvault permission for service principal"
-        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null
+        az keyvault delete-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" 1>/dev/null || true
     fi
 }
 
