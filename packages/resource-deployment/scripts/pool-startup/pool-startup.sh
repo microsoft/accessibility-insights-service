@@ -12,9 +12,6 @@ runWithRetry() {
     local retryCount=0
     local maxRetryCount=5
 
-    echo "restoring dpkg configuration"
-    dpkg --configure -a
-
     until "${0%/*}/pool-startup-internal.sh"; do
         ((retryCount++))
 

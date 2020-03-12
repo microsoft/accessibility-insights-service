@@ -15,6 +15,9 @@ waitForAptUpdates() {
     done
 }
 
+echo "restoring dpkg configuration"
+dpkg --configure -a
+
 echo "running - apt-get update"
 apt-get update
 
