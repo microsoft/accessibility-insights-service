@@ -120,8 +120,9 @@ getFunctionAppPrincipalId() {
 }
 
 deployWebFunctionApp() {
-    functionAppNamePrefix=$1
-    templateFilePath=$2
+    local functionAppNamePrefix=$1
+    local templateFilePath=$2
+    local webFunctionAppName=$3
 
     echo "Deploying Azure Function App using ARM template..."
     resources=$(az group deployment create \
@@ -132,7 +133,7 @@ deployWebFunctionApp() {
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    local webFunctionAppName="$resourceName"
+    local myWebFunctionAppName="$resourceName"
 
     waitForFunctionAppServiceDeploymentCompletion $webFunctionAppName
     echo "Successfully deployed Azure Function App '$webFunctionAppName'"
@@ -140,7 +141,7 @@ deployWebFunctionApp() {
     getFunctionAppPrincipalId $webFunctionAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    return $webFunctionAppName
+    eval $webFunctionAppName="'$myWebFunctionAppName'"
 }
 
 # Read script arguments
@@ -162,10 +163,10 @@ fi
 
 installAzureFunctionsCoreTools
 
-webWorkersFunctionAppName = $(deployWebFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json")
+deployWebFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
 publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
 
-webApiFunctionAppName = $(deployWebFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json")
+deployWebFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName
 publishFunctionAppScripts "web-api" $webApiFunctionAppName
 
 # Export the last created web-api function app service name to be used by the API Management install script
