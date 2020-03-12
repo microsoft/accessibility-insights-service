@@ -7,15 +7,15 @@
 
 set -eo pipefail
 
-waitForAptUpdates() {
-    echo "waiting for other apt updates"
+waitForApplicationUpdates() {
+    echo "waiting for other application updates"
     while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock* >/dev/null 2>&1; do
         echo "waiting ..."
         sleep 5
     done
 }
 
-waitForAptUpdates
+waitForApplicationUpdates
 
 echo "restoring dpkg configuration"
 dpkg --configure -a
@@ -23,7 +23,7 @@ dpkg --configure -a
 echo "running - apt-get update"
 apt-get update
 
-waitForAptUpdates
+waitForApplicationUpdates
 
 echo "Installing curl"
 apt-get install -y curl
