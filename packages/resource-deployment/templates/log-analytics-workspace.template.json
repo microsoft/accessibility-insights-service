@@ -21,16 +21,18 @@
                 {
                     "apiVersion": "2015-11-01-preview",
                     "location": "[parameters('WorkspaceLocation')]",
-                    "name": "[concat('ServiceMap', '(', parameters('WorkspaceName'),')')]",
+                    "name": "[concat('VMInsights', '(', parameters('WorkspaceName'),')')]",
                     "type": "Microsoft.OperationsManagement/solutions",
-                    "dependsOn": ["[concat('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"],
+                    "dependsOn": [
+                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"
+                    ],
                     "properties": {
                         "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"
                     },
                     "plan": {
-                        "name": "[concat('ServiceMap', '(', parameters('WorkspaceName'),')')]",
+                        "name": "[concat('VMInsights', '(', parameters('WorkspaceName'),')')]",
                         "publisher": "Microsoft",
-                        "product": "[Concat('OMSGallery/', 'ServiceMap')]",
+                        "product": "OMSGallery/VMInsights",
                         "promotionCode": ""
                     }
                 }
