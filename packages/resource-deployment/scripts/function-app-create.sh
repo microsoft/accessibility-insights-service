@@ -87,6 +87,7 @@ publishFunctionAppScripts() {
     end=$((SECONDS + 120))
     while [ $SECONDS -le $end ] && [ "$isPublished" = false ]; do
         {
+            isPublished=true
             func azure functionapp publish $functionAppName --node
         } || {
             echo "failed to publish, retrying..."
