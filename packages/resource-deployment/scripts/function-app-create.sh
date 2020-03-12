@@ -83,16 +83,23 @@ publishFunctionAppScripts() {
     echo "Publishing '$packageName' scripts to '$functionAppName' Function App..."
 
     # Run function tool with retries due to app service warm up time delay
+    local isPublished=false
     end=$((SECONDS + 120))
-    while [ $SECONDS -le $end ]; do
-         func azure functionapp publish $functionAppName --node || true
-        if [ $? -eq 0 ]; then
-            break
+    while [ $SECONDS -le $end ] && [ "$isPublished" = false ]; do
+        {
+            isPublished=true
+            func azure functionapp publish $functionAppName --node
+        } || {
+            echo "Failed to publish, retrying..."
+            isPublished=false
+        }
+
+        if [ "$isPublished" = false ]; then
+            sleep 5
         fi
-        sleep 5
     done
 
-    if [ $? -ne 0 ]; then
+    if [ "$isPublished" = false ]; then
         echo "Publishing '$packageName' scripts to '$functionAppName' Function App was unsuccessful."
         exit 1
     fi
