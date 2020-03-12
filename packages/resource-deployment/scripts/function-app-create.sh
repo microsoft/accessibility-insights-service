@@ -90,7 +90,9 @@ publishFunctionAppScripts() {
 
         (func azure functionapp publish $functionAppName --node) || (isPublished=false)
 
-        sleep 5
+        if [ "$isPublished" = false ]; then
+            sleep 5
+        fi
     done
 
     if [ "$isPublished" = false ]; then
