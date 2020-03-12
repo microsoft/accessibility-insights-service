@@ -127,14 +127,14 @@ deployWebFunctionApp() {
     local functionAppNamePrefix=$1
     local templateFilePath=$2
     local webFunctionAppName=$3
-    local extraParameter=$4
+    local extraParameters=$4
 
     echo "Deploying Azure Function App $webFunctionAppName using ARM template..."
     echo "--parameters namePrefix=\"$functionAppNamePrefix\" releaseVersion=\"$releaseVersion\" $extraParamete"
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
-        --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" $extraParameter \
+        --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" $extraParameters \
         --query "properties.outputResources[].id" \
         -o tsv)
 
