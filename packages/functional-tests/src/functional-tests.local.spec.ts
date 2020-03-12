@@ -136,7 +136,13 @@ describe('functional tests', () => {
         registerAzureServicesToContainer(container, CredentialType.AppService);
 
         container.bind(A11yServiceClient).toDynamicValue(_ => {
-            const cred = new A11yServiceCredential(clientId, clientSecret, clientId, `https://login.microsoftonline.com/${tenantId}`);
+            const cred = new A11yServiceCredential(
+                clientId,
+                clientSecret,
+                clientId,
+                `https://login.microsoftonline.com/${tenantId}`,
+                container.get(Logger),
+            );
 
             return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
         });

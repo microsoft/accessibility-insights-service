@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AuthenticationContext, TokenResponse } from 'adal-node';
+import { Logger } from 'logger';
 import * as requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
 
@@ -12,6 +13,7 @@ export class A11yServiceCredential {
         private readonly clientSecret: string,
         private readonly resourceId: string,
         authorityUrl: string,
+        private readonly logger: Logger,
         context?: AuthenticationContext,
         private readonly maxTokenRetries: number = 4,
     ) {
@@ -20,6 +22,8 @@ export class A11yServiceCredential {
     }
 
     public async getToken(): Promise<TokenResponse> {
+        await this.logger.setup();
+
         return this.getTokenWithRetries(this.maxTokenRetries);
     }
 
@@ -38,9 +42,11 @@ export class A11yServiceCredential {
         try {
             return await this.tryGetToken();
         } catch (err) {
+            this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
             if (numRetries > 0) {
                 return this.getTokenWithRetries(numRetries - 1);
             } else {
+                this.logger.logError(`Could not get auth token after ${this.maxTokenRetries} retries.`);
                 throw err;
             }
         }

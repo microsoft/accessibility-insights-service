@@ -6,6 +6,7 @@ import 'reflect-metadata';
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import * as requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -22,6 +23,7 @@ describe(A11yServiceCredential, () => {
         accessToken: 'at',
     } as any;
     const numTokenRetries = 4;
+    let loggerMock: IMock<MockableLogger>;
 
     let error: Error;
 
@@ -29,12 +31,14 @@ describe(A11yServiceCredential, () => {
         error = null;
         requestMock = Mock.ofType<typeof requestPromise>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
+        loggerMock = Mock.ofType<MockableLogger>();
 
         testSubject = new A11yServiceCredential(
             clientId,
             clientMockSec,
             resource,
             authorityUrl,
+            loggerMock.object,
             authenticationContextMock.object,
             numTokenRetries,
         );
@@ -48,6 +52,7 @@ describe(A11yServiceCredential, () => {
 
     afterEach(() => {
         authenticationContextMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('getToken', async () => {
@@ -69,11 +74,13 @@ describe(A11yServiceCredential, () => {
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
+        setupAuthFailureLogs(numTokenRetries + 1, true);
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
 
     it('getTokenWithRetries fails after maxRetries', async () => {
         error = new Error('err');
+        setupAuthFailureLogs(numTokenRetries + 1, true);
         authenticationContextMock.reset();
         authenticationContextMock
             .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
@@ -87,6 +94,7 @@ describe(A11yServiceCredential, () => {
 
     it('getTokenWithRetries succeeds before maxRetries', async () => {
         error = new Error('err');
+        setupAuthFailureLogs(1, false);
         authenticationContextMock.reset();
         authenticationContextMock
             .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
@@ -98,4 +106,13 @@ describe(A11yServiceCredential, () => {
 
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
+
+    function setupAuthFailureLogs(numFailures: number, allRetriesFail: boolean): void {
+        loggerMock
+            .setup(l => l.logError(`Auth getToken call failed with error: ${JSON.stringify(error)}`))
+            .verifiable(Times.exactly(numFailures));
+        if (allRetriesFail) {
+            loggerMock.setup(l => l.logError(`Could not get auth token after ${numFailures - 1} retries.`)).verifiable();
+        }
+    }
 });

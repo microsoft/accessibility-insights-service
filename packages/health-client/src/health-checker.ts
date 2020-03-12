@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { System } from 'common';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { TestRunResult } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
@@ -19,7 +20,8 @@ type Argv = {
 };
 
 const argv: Argv = yargs.argv as any;
-const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl);
+const logger = new GlobalLogger([new ConsoleLoggerClient(undefined, console)], process);
+const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
 const client = new A11yServiceClient(cred, argv.baseUrl);
 const testTimeoutInMinutes = 20;
 const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
