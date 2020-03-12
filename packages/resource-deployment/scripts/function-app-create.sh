@@ -162,10 +162,10 @@ fi
 
 installAzureFunctionsCoreTools
 
-webWorkersFunctionAppName = $(deployWebAFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json")
+webWorkersFunctionAppName = $(deployWebFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json")
 publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
 
-webApiFunctionAppName = $(deployWebAFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json")
+webApiFunctionAppName = $(deployWebFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json")
 publishFunctionAppScripts "web-api" $webApiFunctionAppName
 
 # Export the last created web-api function app service name to be used by the API Management install script
