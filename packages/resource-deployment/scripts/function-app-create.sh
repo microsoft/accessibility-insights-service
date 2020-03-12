@@ -124,10 +124,10 @@ getFunctionAppPrincipalId() {
 }
 
 deployWebFunctionApp() {
-    local functionAppNamePrefix=$1
-    local templateFilePath=$2
-    local webFunctionAppName=$3
-    local extraParameters=$4
+    functionAppNamePrefix=$1
+    templateFilePath=$2
+    webFunctionAppName=$3
+    extraParameters=$4
 
     echo "Deploying Azure Function App $webFunctionAppName using ARM template..."
     resources=$(az group deployment create \
@@ -138,7 +138,7 @@ deployWebFunctionApp() {
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    local myWebFunctionAppName="$resourceName"
+    myWebFunctionAppName="$resourceName"
 
     waitForFunctionAppServiceDeploymentCompletion $myWebFunctionAppName
     echo "Successfully deployed Azure Function App '$myWebFunctionAppName'"
@@ -170,9 +170,12 @@ installAzureFunctionsCoreTools
 
 deployWebFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
 publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
+echo "webWorkersFunctionAppName $webWorkersFunctionAppName"
 
 deployWebFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName "clientId='$webApiAdClientId'"
 publishFunctionAppScripts "web-api" $webApiFunctionAppName
+echo "webApiFunctionAppName $webApiFunctionAppName"
 
 # Export the last created web-api function app service name to be used by the API Management install script
 functionAppName="$webApiFunctionAppName"
+echo "functionAppName $functionAppName"
