@@ -57,9 +57,7 @@
                     "apiVersion": "2018-10-01",
                     "name": "[variables('MmaExtensionName')]",
                     "location": "[parameters('VmssLocation')]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"
-                    ],
+                    "dependsOn": ["[concat('Microsoft.Compute/virtualMachineScaleSets/', parameters('VmssName'))]"],
                     "properties": {
                         "publisher": "Microsoft.EnterpriseCloud.Monitoring",
                         "type": "[variables('MmaExtensionType')]",
