@@ -14,12 +14,7 @@ Usage: $0 -r <resource group>
     exit 1
 }
 
-
-restartBatchPools() {
-    # Login into Azure Batch account
-    echo "Logging into '$batchAccountName' Azure Batch account"
-    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
-
+function rebootNodes() {
     echo "Querying pools for $batchAccountName"
     local batchPoolIds=$(az batch pool list --account-name "$batchAccountName" --query "[*].id" -o tsv)
 
@@ -34,6 +29,12 @@ restartBatchPools() {
             az batch node reboot --node-id $nodeId --pool-id $poolId --account-name $batchAccountName --node-reboot-option taskcompletion 1>/dev/null
         done
     done
+}
+
+restartBatchPools() {
+    command="rebootNodes"
+    commandName="Reboot all nodes"
+    . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
 
 # Read script arguments

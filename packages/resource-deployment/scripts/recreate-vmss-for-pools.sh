@@ -24,72 +24,7 @@ Usage: $0 -r <resource group> -k <enable soft delete on keyvault>
     exit 1
 }
 
-function waitForProcesses() {
-    local processesToWaitFor=$1
-
-    list="$processesToWaitFor[@]"
-    for pid in "${!list}"; do
-        echo "Waiting for process with pid $pid"
-        wait $pid
-        echo "Process with pid $pid exited"
-    done
-}
-
-function setJobScheduleStatus {
-    local status=$1
-
-    local schedules=$(az batch job-schedule list --query "[].id" -o tsv)
-
-    for schedule in $schedules; do
-        echo "Setting job schedule $schedule status to $status"
-        az batch job-schedule $status --job-schedule-id "$schedule"
-    done
-}
-
-function disableJobSchedule {
-    setJobScheduleStatus "disable"
-}
-
-function enableJobSchedule {
-    setJobScheduleStatus "enable"
-}
-
-waitForNodesToGoIdleByNodeType() {
-    local isIdle=false
-    local pool=$1
-    local nodeType=$2
-    local waitTime=1800
-    local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
-
-    echo "Waiting for $nodeType nodes under $pool to go idle"
-
-    local endTime=$((SECONDS + waitTime))
-    printf " - Running .."
-    while [ $SECONDS -le $endTime ]; do
-
-        local runningCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.running" \
-                                -o tsv
-                            ) 
-        
-        if [[ $runningCount == 0 ]]; then
-            echo "$nodeType nodes under pool: $pool are idle."
-            isIdle=true
-            break;
-        else
-            printf "."
-            sleep 5
-        fi
-    done
-
-    echo "Currrent Pool Status $pool for $nodeType:"
-    az batch pool node-counts list --query "$nodeTypeContentSelector"
-    
-    if [[ $isIdle == false ]]; then
-        echo "Pool $pool & $nodeType is not in the expected state."
-        exit 1
-    fi
-}
+. "${0%/*}/process-utilities.sh"
 
 function checkIfVmssAreOld {
     areVmssOld=false
@@ -177,23 +112,9 @@ function recreatePoolVmss() {
         return
     fi
 
-    # Login into Azure Batch account
-    echo "Logging into '$batchAccountName' Azure Batch account"
-    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
-
-    pools=$(az batch pool list --query "[].id" -o tsv)
-
-    disableJobSchedule
-
-    echo "sleeping 10 seconds to wait for any jobs that got kicked off
-     before disabling schedule to start using the nodes"
-    sleep 10
-
-    waitForPoolsToBeIdle
-    scaleDownPools
-    scaleUpPools
-    . "${0%/*}/setup-all-pools-for-batch.sh"
-    enableJobSchedule
+    command="scaleDownPools ; scaleUpPools ; . \"${0%/*}/setup-all-pools-for-batch.sh\""
+    commandName="Recreate pool vmss"
+    . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
 
 # Read script arguments

@@ -28,16 +28,7 @@ Usage: $0 -r <resource group> [-t <batch template file (optional)>] -k <enable s
     exit 1
 }
 
-function waitForProcesses() {
-    local processesToWaitFor=$1
-
-    list="$processesToWaitFor[@]"
-    for pid in "${!list}"; do
-        echo "Waiting for process with pid $pid"
-        wait $pid
-        echo "Process with pid $pid exited"
-    done
-}
+. "${0%/*}/process-utilities.sh"
 
 function deployBatch() {
     # Deploy Azure Batch account using resource manager template

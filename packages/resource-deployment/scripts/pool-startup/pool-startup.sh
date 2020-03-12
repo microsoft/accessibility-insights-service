@@ -18,9 +18,8 @@ runWithRetry() {
         if ((retryCount == maxRetryCount)); then
             echo "Maximum retry count reached. Pool startup script failed"
             exit 1
-        else
-            echo "Retry count - $retryCount. Pool startup script failed"
         fi
+        echo "Retry count - $retryCount. Pool startup script failed"
     done
 
     echo "Successfully completed pool startup script execution after retry count - $retryCount"
