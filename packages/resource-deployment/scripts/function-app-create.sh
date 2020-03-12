@@ -130,7 +130,7 @@ deployWebFunctionApp() {
     local extraParameters=$4
 
     echo "Deploying Azure Function App $webFunctionAppName using ARM template..."
-    echo "--parameters namePrefix=\"$functionAppNamePrefix\" releaseVersion=\"$releaseVersion\" $extraParamete"
+    echo "--parameters namePrefix=\"$functionAppNamePrefix\" releaseVersion=\"$releaseVersion\" $extraParameters"
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
@@ -141,10 +141,10 @@ deployWebFunctionApp() {
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
     local myWebFunctionAppName="$resourceName"
 
-    waitForFunctionAppServiceDeploymentCompletion $webFunctionAppName
-    echo "Successfully deployed Azure Function App '$webFunctionAppName'"
+    waitForFunctionAppServiceDeploymentCompletion $myWebFunctionAppName
+    echo "Successfully deployed Azure Function App '$myWebFunctionAppName'"
 
-    getFunctionAppPrincipalId $webFunctionAppName
+    getFunctionAppPrincipalId $myWebFunctionAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
     eval $webFunctionAppName="'$myWebFunctionAppName'"
