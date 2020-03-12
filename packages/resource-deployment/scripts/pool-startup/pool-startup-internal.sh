@@ -15,6 +15,8 @@ waitForAptUpdates() {
     done
 }
 
+waitForAptUpdates
+
 echo "restoring dpkg configuration"
 dpkg --configure -a
 
