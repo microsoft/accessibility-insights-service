@@ -23,9 +23,7 @@
                     "location": "[parameters('WorkspaceLocation')]",
                     "name": "[concat('VMInsights', '(', parameters('WorkspaceName'),')')]",
                     "type": "Microsoft.OperationsManagement/solutions",
-                    "dependsOn": [
-                        "[concat('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"
-                    ],
+                    "dependsOn": ["[concat('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"],
                     "properties": {
                         "workspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces/', parameters('WorkspaceName'))]"
                     },
