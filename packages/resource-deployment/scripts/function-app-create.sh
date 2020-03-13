@@ -31,7 +31,7 @@ Usage: $0 \
 }
 
 copyConfigFileToScriptFolder() {
-    packageName=$1
+    local packageName=$1
 
     echo "Copying config file to '$packageName' script folder..."
     for folderName in $dropFolder/$packageName/dist/*-func; do
@@ -60,7 +60,7 @@ installAzureFunctionsCoreToolsOnLinux() {
 }
 
 installAzureFunctionsCoreTools() {
-    kernelName=$(uname -s 2>/dev/null) || true
+    local kernelName=$(uname -s 2>/dev/null) || true
     echo "OS kernel name: $kernelName"
     case "${kernelName}" in
     Linux*) installAzureFunctionsCoreToolsOnLinux ;;
@@ -69,8 +69,8 @@ installAzureFunctionsCoreTools() {
 }
 
 publishFunctionAppScripts() {
-    packageName=$1
-    functionAppName=$2
+    local packageName=$1
+    local functionAppName=$2
 
     currentDir=$(pwd)
     # Copy config file to function app deployment folder
@@ -109,27 +109,27 @@ publishFunctionAppScripts() {
 }
 
 waitForFunctionAppServiceDeploymentCompletion() {
-    functionAppName=$1
+    local functionAppName=$1
 
     functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
     . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
 
 getFunctionAppPrincipalId() {
-    functionAppName=$1
+    local functionAppName=$1
 
     echo "Fetching principal ID of the Azure Function App..."
     principalId=$(az functionapp identity show --name $functionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
     echo "  Successfully fetched principal ID $principalId."
 }
 
-deployWebFunctionApp() {
-    functionAppNamePrefix=$1
-    templateFilePath=$2
-    webFunctionAppName=$3
-    extraParameters=$4
+deployFunctionApp() {
+    local functionAppNamePrefix=$1
+    local templateFilePath=$2
+    local functionAppName=$3
+    local extraParameters=$4
 
-    echo "Deploying Azure Function App $webFunctionAppName using ARM template..."
+    echo "Deploying Azure Function App $functionAppName using ARM template..."
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
@@ -138,15 +138,15 @@ deployWebFunctionApp() {
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    myWebFunctionAppName="$resourceName"
+    local myFunctionAppName="$resourceName"
 
-    waitForFunctionAppServiceDeploymentCompletion $myWebFunctionAppName
-    echo "Successfully deployed Azure Function App '$myWebFunctionAppName'"
+    waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
+    echo "Successfully deployed Azure Function App '$myFunctionAppName'"
 
-    getFunctionAppPrincipalId $myWebFunctionAppName
+    getFunctionAppPrincipalId $myFunctionAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    eval $webFunctionAppName="'$myWebFunctionAppName'"
+    eval $functionAppName="'$myFunctionAppName'"
 }
 
 # Read script arguments
@@ -168,14 +168,8 @@ fi
 
 installAzureFunctionsCoreTools
 
-deployWebFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
+deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
 publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
-echo "webWorkersFunctionAppName $webWorkersFunctionAppName"
 
-deployWebFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName "clientId='$webApiAdClientId'"
+deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName "clientId=$webApiAdClientId"
 publishFunctionAppScripts "web-api" $webApiFunctionAppName
-echo "webApiFunctionAppName $webApiFunctionAppName"
-
-# Export the last created web-api function app service name to be used by the API Management install script
-functionAppName="$webApiFunctionAppName"
-echo "functionAppName $functionAppName"
