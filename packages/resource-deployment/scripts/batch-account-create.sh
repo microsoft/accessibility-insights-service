@@ -50,7 +50,7 @@ done
 
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || || [[ -z $batchTemplateFile ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
@@ -60,6 +60,8 @@ if ! az account show 1>/dev/null; then
 fi
 
 . "${0%/*}/get-resource-names.sh"
+
+echo "Setting up batch account $batchAccountName"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"
