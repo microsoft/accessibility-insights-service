@@ -167,7 +167,7 @@ function install() {
     . "${0%/*}/recreate-vmss-for-pools.sh" &
     asyncProcessIds+=("$!")
 
-    echo "Waiting for apai management creation process"
+    echo "Waiting for api management creation process"
     waitForProcesses apiManagmentProcessId
 
     echo "Deploying rest api to apim"
