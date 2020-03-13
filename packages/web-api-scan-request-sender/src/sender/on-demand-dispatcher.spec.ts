@@ -202,7 +202,7 @@ describe('Dispatcher', () => {
         let previousProviderCount = 0;
         dataProviders.forEach(dataProvider => {
             let previousContinuationToken;
-            let expectedItemsCount = maxQueueSize - currentQueueSize - previousProviderCount;
+            const expectedItemsCount = maxQueueSize - currentQueueSize - previousProviderCount;
             do {
                 const response = dataProvider.getNextDataChunk();
 
