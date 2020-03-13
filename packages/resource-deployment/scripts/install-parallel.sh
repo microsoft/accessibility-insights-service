@@ -21,6 +21,7 @@ export subscription
 export storageAccountName
 export webApiAdClientId
 export webApiAdClientSecret
+export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export enableSoftDeleteOnKeyVault=true

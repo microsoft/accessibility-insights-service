@@ -17,25 +17,22 @@ steps:
       displayName: 'install dependencies'
 
     - script: |
-          ls -l packages/resource-deployment/scripts
-      displayName: check permisisons
+          yarn format:check
+      displayName: check code formatting
 
-    # - script: |
-    #       yarn copyright:check
-    #   displayName: check for copyright headers
+    - script: |
+          yarn copyright:check
+      displayName: check for copyright headers
 
-    # - script: |
-    #       yarn clean
-    #   displayName: clean
+    - script: |
+          yarn clean
+      displayName: clean
 
     - script: |
           # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
           yarn build -- -- --env.version=$(Build.BuildId)
       displayName: build
 
-    - script: |
-          ls -l packages/resource-deployment/dist/scripts
-      displayName: check permisisons after build
     - script: |
           yarn lint:check
       displayName: run linter

@@ -160,9 +160,18 @@ while getopts ":r:c:e:d:v:" option; do
     esac
 done
 
+echo "Setting up function apps with arguments passed:
+    resourceGroupName: $resourceGroupName
+    webApiAdClientId: $webApiAdClientId
+    environment: $environment
+    dropFolder: $dropFolder
+    releaseVersion: $releaseVersion
+"
+
 . "${0%/*}/get-resource-names.sh"
 
-if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $webApiAdClientId ]]; then
+
+if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion ]] || [[ -z $webApiAdClientId ]]; then
     exitWithUsageInfo
 fi
 
