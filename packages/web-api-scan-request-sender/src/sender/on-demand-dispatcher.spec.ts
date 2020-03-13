@@ -166,7 +166,7 @@ describe('Dispatcher', () => {
         setupVerifiableQueueSizeCall();
 
         pageScanRequestProvider
-            .setup(async p => p.getRequests(It.isAny()))
+            .setup(async p => p.getRequests(It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
@@ -199,16 +199,23 @@ describe('Dispatcher', () => {
     }
 
     function setupReadyToScanPageForAllPages(dataProviders: QueryDataProviderStub<OnDemandPageScanRequest>[]): void {
+        let previousProviderCount = 0;
         dataProviders.forEach(dataProvider => {
             let previousContinuationToken;
-
+            let expectedItemsCount = maxQueueSize - currentQueueSize - previousProviderCount;
             do {
                 const response = dataProvider.getNextDataChunk();
 
-                setupGetReadyToScanPagesCallForChunk(response.data, previousContinuationToken, response.continuationToken);
+                setupGetReadyToScanPagesCallForChunk(
+                    response.data,
+                    previousContinuationToken,
+                    response.continuationToken,
+                    expectedItemsCount,
+                );
 
                 if (response.data.length > 0) {
                     setupVerifiableScanRequestCallForChunk(response.data);
+                    previousProviderCount += response.data.length;
                 }
 
                 previousContinuationToken = response.continuationToken;
@@ -229,14 +236,15 @@ describe('Dispatcher', () => {
         onDemandPageScanRequests: OnDemandPageScanRequest[],
         previousContinuationToken: string,
         continuationToken: string,
+        expectedItemsCount: number,
     ): void {
         pageScanRequestProvider
-            .setup(async p => p.getRequests(previousContinuationToken))
+            .setup(async p => p.getRequests(previousContinuationToken, expectedItemsCount))
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
     function setupPageDocumentProviderNotCalled(): void {
-        pageScanRequestProvider.setup(async p => p.getRequests(It.isAny())).verifiable(Times.never());
+        pageScanRequestProvider.setup(async p => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
     }
     function setupVerifiableQueueSizeCall(): void {
         scanRequestSenderMock
