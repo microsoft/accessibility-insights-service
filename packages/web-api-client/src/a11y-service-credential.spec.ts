@@ -41,6 +41,7 @@ describe(A11yServiceCredential, () => {
             loggerMock.object,
             authenticationContextMock.object,
             numTokenAttempts,
+            false,
         );
 
         authenticationContextMock

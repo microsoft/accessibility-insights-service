@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AuthenticationContext, TokenResponse } from 'adal-node';
+import { AuthenticationContext, ErrorResponse, TokenResponse } from 'adal-node';
 import { Logger } from 'logger';
 import * as requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
@@ -16,6 +16,7 @@ export class A11yServiceCredential {
         private readonly logger: Logger,
         context?: AuthenticationContext,
         private readonly maxTokenAttempts: number = 5,
+        private readonly sleepBetweenRetries: boolean = true,
     ) {
         // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
         this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
@@ -31,6 +32,10 @@ export class A11yServiceCredential {
             } catch (err) {
                 lastError = err as Error;
                 this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
+
+                if (this.sleepBetweenRetries) {
+                    await this.sleep(1000);
+                }
             }
         }
         this.logger.logError(`Could not get auth token after ${this.maxTokenAttempts} attempts.`);
@@ -48,20 +53,6 @@ export class A11yServiceCredential {
         return request.defaults(authOptions);
     }
 
-    private async getTokenWithRetries(numRetries: number): Promise<TokenResponse> {
-        try {
-            return await this.tryGetToken();
-        } catch (err) {
-            this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
-            if (numRetries > 0) {
-                return this.getTokenWithRetries(numRetries - 1);
-            } else {
-                this.logger.logError(`Could not get auth token after ${this.maxTokenAttempts} retries.`);
-                throw err;
-            }
-        }
-    }
-
     private async tryGetToken(): Promise<TokenResponse> {
         return new Promise((resolve, reject) => {
             this.authContext.acquireTokenWithClientCredentials(this.resourceId, this.clientId, this.clientSecret, (err, tokenResponse) => {
@@ -72,5 +63,10 @@ export class A11yServiceCredential {
                 }
             });
         });
+    }
+
+    private async sleep(milliseconds: number): Promise<void> {
+        // tslint:disable-next-line: no-string-based-set-timeout
+        return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 }
