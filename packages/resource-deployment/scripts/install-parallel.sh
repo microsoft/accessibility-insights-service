@@ -74,6 +74,28 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 
 . "${0%/*}/process-utilities.sh"
 
+function onError() {
+    echo "insiden on error"
+    exit 1
+}
+
+function onExit {
+    local exitCode=$?
+
+    if [[ $exitCode != 0 ]]; then
+        echo "Installation failed with exit code $exitCode" 
+        echo "Killing all descendent processes"
+        killDescendentProcesses $$
+        echo "Killed all descendent processes"
+    else
+        echo "Installation completed with exit code $exitCode"
+    fi
+
+    exit $exitCode
+}
+
+trap "onExit" EXIT
+
 # Read script arguments
 while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     case $option in
@@ -95,56 +117,65 @@ if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] |
     exitWithUsageInfo
 fi
 
-# Login to Azure if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
+function install() {
+    
+    # Login to Azure if required
+    if ! az account show 1>/dev/null; then
+        az login
+    fi
 
-az account set --subscription "$subscription"
+    az account set --subscription "$subscription"
 
-. "${0%/*}/create-resource-group.sh"
-. "${0%/*}/create-storage-account.sh"
+    . "${0%/*}/create-resource-group.sh"
+    . "${0%/*}/create-storage-account.sh"
 
-. "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/get-resource-names.sh"
 
-echo "Starting parallel processes.."
+    echo "Starting parallel processes.."
 
-. "${0%/*}/create-api-management.sh" &
-apiManagmentProcessId="$!"
+    . "${0%/*}/create-api-management.sh" &
+    apiManagmentProcessId="$!"
 
-parallelProcesses=(
-    # "${0%/*}/create-datalake-storage-account.sh"
-    "${0%/*}/upload-files.sh"
-    "${0%/*}/create-queues.sh"
-    "${0%/*}/setup-cosmos-db.sh"
-    "${0%/*}/create-vnet.sh"
-    "${0%/*}/app-insights-create.sh"
-)
-runInParallel parallelProcesses
+    parallelProcesses=(
+        # "${0%/*}/create-datalake-storage-account.sh"
+        "${0%/*}/upload-files.sh"
+        "${0%/*}/create-queues.sh"
+        "${0%/*}/setup-cosmos-db.sh"
+        "${0%/*}/create-vnet.sh"
+        "${0%/*}/app-insights-create.sh"
+    )
+    runCommandsInParallel parallelProcesses
+    echo "still continuing"
 
-# The following scripts all depend on the result from the above scripts.
-# Additionally, these should run sequentially because of interdependence.
+    # The following scripts all depend on the result from the above scripts.
+    # Additionally, these should run sequentially because of interdependence.
 
-. "${0%/*}/setup-key-vault.sh"
+    . "${0%/*}/setup-key-vault.sh"
 
-parallelProcesses=(
-    "\"${0%/*}/batch-account-create.sh\" ; \"${0%/*}/job-schedule-create.sh\""
-    "${0%/*}/function-app-create.sh"
-)
-runInParallel parallelProcesses
+    parallelProcesses=(
+        "\"${0%/*}/batch-account-create.sh\" ; \"${0%/*}/job-schedule-create.sh\""
+        "${0%/*}/function-app-create.sh"
+    )
+    echo "Waiting for batch & function app setup processes"
+    runCommandsInParallel parallelProcesses
 
-asyncProcessIds=()
+    asyncProcessIds=()
 
-. "${0%/*}/create-dashboard.sh" &
-asyncProcessIds+=("$!")
+    . "${0%/*}/create-dashboard.sh" &
+    asyncProcessIds+=("$!")
 
-. "${0%/*}/recreate-vmss-for-pools.sh" &
-asyncProcessIds+=("$!")
+    . "${0%/*}/recreate-vmss-for-pools.sh" &
+    asyncProcessIds+=("$!")
 
-waitForProcesses apiManagmentProcessId
+    echo "Waiting for apai management creation process"
+    waitForProcesses apiManagmentProcessId
 
-. "${0%/*}/deploy-rest-api.sh"
+    echo "Deploying rest api to apim"
+    . "${0%/*}/deploy-rest-api.sh"
 
-waitForProcesses asyncProcessIds
+    echo "Waiting for create dashboard & recreating pools processes"
+    waitForProcesses asyncProcessIds
+}
 
+install || onError
 echo "Installation completed."

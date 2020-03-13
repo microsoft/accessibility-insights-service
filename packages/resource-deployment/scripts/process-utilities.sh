@@ -12,20 +12,69 @@ function waitForProcesses() {
     for pid in "${!list}"; do
         echo "Waiting for process with pid $pid"
         wait $pid
-        echo "Process with pid $pid exited"
+        local pExitCode=$?
+        echo "Process with pid $pid exited with exit code $?"
+
+        if [[ $pExitCode != 0 ]]; then
+            echo "Process - $pid failed with exit code $pExitCode. Killing current proccess."
+            exit $pExitCode
+        fi
+
     done
 }
 
-function runInParallel() {
-    local processPaths=$1
+function runCommandsInParallel {
+    local commands=$1
     local -a parallelizableProcesses
 
-    list="$processPaths[@]"
-    for processPath in "${!list}"; do
-        . "${processPath}" &
+    local list="$commands[@]"
+    for command in "${!list}"; do
+        eval "$command" &
         echo "Created process with pid $! for process path - $processPath"
         parallelizableProcesses+=("$!")
     done
 
     waitForProcesses parallelizableProcesses
+} 
+
+function sendSignalToProcessIfExists {
+    local currentPid=$1	
+    local signal=$2
+
+    if [[ -z $currentPid ]]; then	
+        return	
+    fi	
+
+    if kill -0 $currentPid > /dev/null 2>&1; then	
+        kill $signal $currentPid
+    fi
+}
+
+function killWithDecendentsIfProcessExists ()	
+{	
+    local currentPid=$1	
+
+    if [[ -z $currentPid ]]; then	
+        return	
+    fi	
+
+    if kill -0 $currentPid > /dev/null 2>&1; then	
+        echo "stopping process $currentPid"	
+        sendSignalToProcessIfExists $currentPid	-STOP
+       
+        killDescendentProcesses  $currentPid
+       
+        sendSignalToProcessIfExists $currentPid	-9
+        echo "killed process $currentPid"	
+    fi	
+}	
+
+function killDescendentProcesses() {
+    local processId=$1
+    
+    local children=$(pgrep -P $processId)	
+    
+    for childPid in $children; do	
+        killWithDecendentsIfProcessExists "$childPid"	
+    done	
 }

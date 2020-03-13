@@ -34,7 +34,7 @@ function createKeyvaultIfNotExists() {
     if [[ -z $existingResourceId ]]; then
         echo "Key vault does not exist. Creating using ARM template."
         resources=$(
-        az group deployment create \
+        az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$createKeyVaultTemplateFile" \
             --query "properties.outputResources[].id" \
@@ -53,7 +53,7 @@ function createKeyvaultIfNotExists() {
 function setupKeyVaultResources() {
      echo "Setting up key vault resources using ARM template."
         resources=$(
-        az group deployment create \
+        az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$setupKeyVaultResourcesTemplateFile" \
             --query "properties.outputResources[].id" \
