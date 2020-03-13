@@ -22,7 +22,7 @@ describe(A11yServiceCredential, () => {
         tokenType: 'type',
         accessToken: 'at',
     } as any;
-    const numTokenRetries = 4;
+    const numTokenAttempts = 5;
     let loggerMock: IMock<MockableLogger>;
 
     let error: Error;
@@ -40,7 +40,7 @@ describe(A11yServiceCredential, () => {
             authorityUrl,
             loggerMock.object,
             authenticationContextMock.object,
-            numTokenRetries,
+            numTokenAttempts,
         );
 
         authenticationContextMock
@@ -74,20 +74,20 @@ describe(A11yServiceCredential, () => {
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
-        setupAuthFailureLogs(numTokenRetries + 1, true);
+        setupAuthFailureLogs(numTokenAttempts, true);
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
 
     it('getTokenWithRetries fails after maxRetries', async () => {
         error = new Error('err');
-        setupAuthFailureLogs(numTokenRetries + 1, true);
+        setupAuthFailureLogs(numTokenAttempts, true);
         authenticationContextMock.reset();
         authenticationContextMock
             .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
             .callback((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
             })
-            .verifiable(Times.exactly(numTokenRetries + 1));
+            .verifiable(Times.exactly(numTokenAttempts));
 
         await testSubject.getToken().catch(reason => expect(reason).not.toBeUndefined());
     });
@@ -112,7 +112,7 @@ describe(A11yServiceCredential, () => {
             .setup(l => l.logError(`Auth getToken call failed with error: ${JSON.stringify(error)}`))
             .verifiable(Times.exactly(numFailures));
         if (allRetriesFail) {
-            loggerMock.setup(l => l.logError(`Could not get auth token after ${numFailures - 1} retries.`)).verifiable();
+            loggerMock.setup(l => l.logError(`Could not get auth token after ${numFailures} attempts.`)).verifiable();
         }
     }
 });

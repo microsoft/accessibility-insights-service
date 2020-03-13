@@ -15,7 +15,7 @@ export class A11yServiceCredential {
         authorityUrl: string,
         private readonly logger: Logger,
         context?: AuthenticationContext,
-        private readonly maxTokenRetries: number = 4,
+        private readonly maxTokenAttempts: number = 5,
     ) {
         // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
         this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
@@ -24,7 +24,17 @@ export class A11yServiceCredential {
     public async getToken(): Promise<TokenResponse> {
         await this.logger.setup();
 
-        return this.getTokenWithRetries(this.maxTokenRetries);
+        let lastError: Error;
+        for (let i = 0; i < this.maxTokenAttempts; i += 1) {
+            try {
+                return await this.tryGetToken();
+            } catch (err) {
+                lastError = err as Error;
+                this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
+            }
+        }
+        this.logger.logError(`Could not get auth token after ${this.maxTokenAttempts} attempts.`);
+        throw lastError;
     }
 
     public async signRequest(request: typeof requestPromise): Promise<typeof requestPromise> {
@@ -46,7 +56,7 @@ export class A11yServiceCredential {
             if (numRetries > 0) {
                 return this.getTokenWithRetries(numRetries - 1);
             } else {
-                this.logger.logError(`Could not get auth token after ${this.maxTokenRetries} retries.`);
+                this.logger.logError(`Could not get auth token after ${this.maxTokenAttempts} retries.`);
                 throw err;
             }
         }
