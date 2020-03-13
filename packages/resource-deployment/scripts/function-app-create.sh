@@ -162,7 +162,7 @@ done
 
 . "${0%/*}/get-resource-names.sh"
 
-if [[ -z $resourceGroupName ] || [[ -z $environment ]] || [[ -z $webApiAdClientId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $webApiAdClientId ]]; then
     exitWithUsageInfo
 fi
 

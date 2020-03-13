@@ -144,7 +144,7 @@ function install() {
         "${0%/*}/create-vnet.sh"
         "${0%/*}/app-insights-create.sh"
     )
-    runCommandsInParallel parallelProcesses
+    runCommandsWithoutSecretsInParallel parallelProcesses
     echo "still continuing"
 
     # The following scripts all depend on the result from the above scripts.
@@ -157,7 +157,7 @@ function install() {
         "${0%/*}/function-app-create.sh"
     )
     echo "Waiting for batch & function app setup processes"
-    runCommandsInParallel parallelProcesses
+    runCommandsWithoutSecretsInParallel parallelProcesses
 
     asyncProcessIds=()
 

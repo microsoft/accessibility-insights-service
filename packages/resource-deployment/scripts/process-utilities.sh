@@ -13,7 +13,7 @@ function waitForProcesses() {
         echo "Waiting for process with pid $pid"
         wait $pid
         local pExitCode=$?
-        echo "Process with pid $pid exited with exit code $?"
+        echo "Process with pid $pid exited with exit code $pExitCode"
 
         if [[ $pExitCode != 0 ]]; then
             echo "Process - $pid failed with exit code $pExitCode. Killing current proccess."
@@ -23,14 +23,14 @@ function waitForProcesses() {
     done
 }
 
-function runCommandsInParallel {
+function runCommandsWithoutSecretsInParallel {
     local commands=$1
     local -a parallelizableProcesses
 
     local list="$commands[@]"
     for command in "${!list}"; do
         eval "$command" &
-        echo "Created process with pid $! for process path - $processPath"
+        echo "Created process with pid $! for command - $command"
         parallelizableProcesses+=("$!")
     done
 
