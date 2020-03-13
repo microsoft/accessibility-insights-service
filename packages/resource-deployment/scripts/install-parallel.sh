@@ -110,7 +110,7 @@ az account set --subscription "$subscription"
 echo "Starting parallel processes.."
 
 . "${0%/*}/create-api-management.sh" &
-apiManagmentProcess="$!"
+apiManagmentProcessId="$!"
 
 parallelProcesses=(
     # "${0%/*}/create-datalake-storage-account.sh"
@@ -125,20 +125,26 @@ runInParallel parallelProcesses
 # The following scripts all depend on the result from the above scripts.
 # Additionally, these should run sequentially because of interdependence.
 
-. "${0%/*}/batch-account-create.sh"
+. "${0%/*}/setup-key-vault.sh"
 
 parallelProcesses=(
+    "\"${0%/*}/batch-account-create.sh\" ; \"${0%/*}/job-schedule-create.sh\""
     "${0%/*}/function-app-create.sh"
-    "${0%/*}/job-schedule-create.sh"
 )
 runInParallel parallelProcesses
 
-waitForProcesses apiManagmentProcess
+asyncProcessIds=()
 
-parallelProcesses=(
-    "${0%/*}/deploy-rest-api.sh"
-    "${0%/*}/create-dashboard.sh"
-    "${0%/*}/recreate-vmss-for-pools.sh"
-)
-runInParallel parallelProcesses
+. "${0%/*}/create-dashboard.sh" &
+asyncProcessIds+=("$!")
+
+. "${0%/*}/recreate-vmss-for-pools.sh" &
+asyncProcessIds+=("$!")
+
+waitForProcesses apiManagmentProcessId
+
+. "${0%/*}/deploy-rest-api.sh"
+
+waitForProcesses asyncProcessIds
+
 echo "Installation completed."

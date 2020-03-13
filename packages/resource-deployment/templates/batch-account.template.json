@@ -30,27 +30,11 @@
                 "description": "Storage account name."
             }
         },
-        "logsRetentionInDays": {
-            "type": "int",
-            "defaultValue": 0,
-            "minValue": 0,
-            "maxValue": 365,
-            "metadata": {
-                "description": "Specifies the number of days that logs are gonna be kept. If you do not want to apply any retention policy and retain data forever, set value to 0."
-            }
-        },
         "vnetName": {
             "defaultValue": "[concat('vnet-a11y',toLower(uniqueString(resourceGroup().id)))]",
             "type": "string",
             "metadata": {
                 "description": "Name of the virtual network to be used for the batch pool nodes"
-            }
-        },
-        "enableSoftDeleteOnKeyVault": {
-            "defaultValue": true,
-            "type": "bool",
-            "metadata": {
-                "description": "Enables/Disables the soft delete option in key vault"
             }
         }
     },
@@ -59,54 +43,6 @@
         "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
     },
     "resources": [
-        {
-            "type": "Microsoft.KeyVault/vaults",
-            "apiVersion": "2016-10-01",
-            "name": "[parameters('keyVault')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "sku": {
-                    "family": "A",
-                    "name": "standard"
-                },
-                "tenantId": "[subscription().tenantId]",
-                "accessPolicies": [
-                    {
-                        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                        "objectId": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
-                        "permissions": {
-                            "secrets": ["delete", "get", "list", "set"]
-                        }
-                    }
-                ],
-                "enabledForDeployment": true,
-                "enabledForDiskEncryption": false,
-                "enabledForTemplateDeployment": false,
-                "enableSoftDelete": "[parameters('enableSoftDeleteOnKeyVault')]"
-            },
-            "resources": [
-                {
-                    "type": "Microsoft.KeyVault/vaults/providers/diagnosticsettings",
-                    "name": "[concat(parameters('keyVault'), '/Microsoft.Insights/service')]",
-                    "apiVersion": "2016-09-01",
-                    "Location": "[resourceGroup().location]",
-                    "dependsOn": ["[concat('Microsoft.KeyVault/vaults/', parameters('keyVault'))]"],
-                    "properties": {
-                        "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
-                        "logs": [
-                            {
-                                "category": "AuditEvent",
-                                "enabled": true,
-                                "retentionPolicy": {
-                                    "enabled": true,
-                                    "days": "[parameters('logsRetentionInDays')]"
-                                }
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
         {
             "type": "Microsoft.Batch/batchAccounts",
             "apiVersion": "2018-12-01",
