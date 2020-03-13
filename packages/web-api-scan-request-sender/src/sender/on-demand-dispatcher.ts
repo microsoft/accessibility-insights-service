@@ -32,9 +32,11 @@ export class OnDemandDispatcher {
         let continuationToken;
 
         do {
+            const totalItemsToAdd = configQueueSize - currentQueueSize;
             do {
                 const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
                     continuationToken,
+                    totalItemsToAdd,
                 );
                 client.ensureSuccessStatusCode(response);
                 continuationToken = response.continuationToken;
