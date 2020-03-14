@@ -53,14 +53,14 @@ module.exports = {
                 outputPath: './test-results/unit/html-reporter/report.html',
             },
         ],
-        [
-            'jest-slow-test-reporter',
-            {
-                numTests: 20,
-                warnOnSlowerThan: 100,
-                color: true,
-            },
-        ],
+        // [
+        //     'jest-slow-test-reporter',
+        //     {
+        //         numTests: 20,
+        //         warnOnSlowerThan: 100,
+        //         color: true,
+        //     },
+        // ],
     ],
     testEnvironment: 'node',
     setupFilesAfterEnv: ['jest-extended'],
