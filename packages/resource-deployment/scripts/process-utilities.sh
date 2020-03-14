@@ -16,7 +16,7 @@ function waitForProcesses() {
         echo "Process with pid $pid exited with exit code $pExitCode"
 
         if [[ $pExitCode != 0 ]]; then
-            echo "Process - $pid failed with exit code $pExitCode. Killing current proccess."
+            echo "Process - $pid failed with exit code $pExitCode. Killing current process."
             exit $pExitCode
         fi
 
@@ -50,7 +50,7 @@ function sendSignalToProcessIfExists {
     fi
 }
 
-function killWithDecendentsIfProcessExists ()	
+function killWithDescendantsIfProcessExists ()	
 {	
     local currentPid=$1	
 
@@ -62,20 +62,20 @@ function killWithDecendentsIfProcessExists ()
         echo "stopping process $currentPid"	
         sendSignalToProcessIfExists $currentPid -SIGSTOP
        
-        killDescendentProcesses  $currentPid
-        echo "Killed descendent processes of $currentPid"
+        killDescendantProcesses  $currentPid
+        echo "Killed descendant processes of $currentPid"
 
         sendSignalToProcessIfExists $currentPid -SIGKILL
         echo "killed process $currentPid"	
     fi	
 }	
 
-function killDescendentProcesses() {
+function killDescendantProcesses() {
     local processId=$1
     
     local children=$(pgrep -P $processId)	
     
     for childPid in $children; do	
-        killWithDecendentsIfProcessExists "$childPid"	
+        killWithDescendantsIfProcessExists "$childPid"	
     done	
 }

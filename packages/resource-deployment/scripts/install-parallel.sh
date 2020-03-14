@@ -80,9 +80,9 @@ function onExit {
 
     if [[ $exitCode != 0 ]]; then
         echo "Installation failed with exit code $exitCode" 
-        echo "Killing all descendent processes"
-        killDescendentProcesses $$
-        echo "Killed all descendent processes"
+        echo "Killing all descendant processes"
+        killDescendantProcesses $$
+        echo "Killed all descendant processes"
         echo "WARN: ARM deployments already triggered could still still be running. To kill them, you may need to goto the azure portal & cancel them."
     else
         echo "Installation completed with exit code $exitCode"
