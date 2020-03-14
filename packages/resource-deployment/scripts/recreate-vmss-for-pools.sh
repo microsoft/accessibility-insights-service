@@ -19,7 +19,7 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -k <enable soft delete on keyvault>
+Usage: $0 -r <resource group>
 "
     exit 1
 }
@@ -94,15 +94,8 @@ function scaleDownPools() {
 }
 
 function scaleUpPools {
-    echo "Scaling up pools: Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
-    resources=$(
-        az group deployment create \
-            --resource-group "$resourceGroupName" \
-            --template-file "$batchTemplateFile" \
-            --query "properties.outputResources[].id" \
-            --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
-            -o tsv
-    )
+    echo "Scaling up pools by running batch account setup again."
+    . "${0%/*}/batch-account-create.sh"
 }
 
 function recreatePoolVmss() {
@@ -112,7 +105,7 @@ function recreatePoolVmss() {
         return
     fi
 
-    command="scaleDownPools ; scaleUpPools ; . \"${0%/*}/setup-all-pools-for-batch.sh\""
+    command="scaleDownPools ; scaleUpPools"
     commandName="Recreate pool vmss"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
@@ -121,13 +114,12 @@ function recreatePoolVmss() {
 while getopts ":r:k:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
