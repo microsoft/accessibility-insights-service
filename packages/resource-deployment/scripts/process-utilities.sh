@@ -60,11 +60,12 @@ function killWithDecendentsIfProcessExists ()
 
     if kill -0 $currentPid > /dev/null 2>&1; then	
         echo "stopping process $currentPid"	
-        sendSignalToProcessIfExists $currentPid	-STOP
+        sendSignalToProcessIfExists $currentPid -SIGSTOP
        
         killDescendentProcesses  $currentPid
-       
-        sendSignalToProcessIfExists $currentPid	-9
+        echo "Killed descendent processes of $currentPid"
+
+        sendSignalToProcessIfExists $currentPid -SIGKILL
         echo "killed process $currentPid"	
     fi	
 }	
