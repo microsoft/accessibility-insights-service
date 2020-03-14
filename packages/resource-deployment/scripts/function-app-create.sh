@@ -31,7 +31,7 @@ Usage: $0 \
 }
 
 copyConfigFileToScriptFolder() {
-    packageName=$1
+    local packageName=$1
 
     echo "Copying config file to '$packageName' script folder..."
     for folderName in $dropFolder/$packageName/dist/*-func; do
@@ -60,7 +60,7 @@ installAzureFunctionsCoreToolsOnLinux() {
 }
 
 installAzureFunctionsCoreTools() {
-    kernelName=$(uname -s 2>/dev/null) || true
+    local kernelName=$(uname -s 2>/dev/null) || true
     echo "OS kernel name: $kernelName"
     case "${kernelName}" in
     Linux*) installAzureFunctionsCoreToolsOnLinux ;;
@@ -69,8 +69,8 @@ installAzureFunctionsCoreTools() {
 }
 
 publishFunctionAppScripts() {
-    packageName=$1
-    functionAppName=$2
+    local packageName=$1
+    local functionAppName=$2
 
     currentDir=$(pwd)
     # Copy config file to function app deployment folder
@@ -90,7 +90,7 @@ publishFunctionAppScripts() {
             isPublished=true
             func azure functionapp publish $functionAppName --node
         } || {
-            echo "failed to publish, retrying..."
+            echo "Failed to publish, retrying..."
             isPublished=false
         }
 
@@ -109,72 +109,44 @@ publishFunctionAppScripts() {
 }
 
 waitForFunctionAppServiceDeploymentCompletion() {
-    functionAppName=$1
+    local functionAppName=$1
 
     functionAppRunningQuery="az functionapp list -g $resourceGroupName --query \"[?name=='$functionAppName' && state=='Running'].name\" -o tsv"
     . "${0%/*}/wait-for-deployment.sh" -n "$functionAppName" -t "300" -q "$functionAppRunningQuery"
 }
 
 getFunctionAppPrincipalId() {
-    functionAppName=$1
+    local functionAppName=$1
 
     echo "Fetching principal ID of the Azure Function App..."
     principalId=$(az functionapp identity show --name $functionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
     echo "  Successfully fetched principal ID $principalId."
 }
 
-deployWebApiArmTemplate() {
-    functionAppNamePrefix="web-api-allyfuncapp"
-    templateFilePath="${0%/*}/../templates/function-web-api-app-template.json"
+deployFunctionApp() {
+    local functionAppNamePrefix=$1
+    local templateFilePath=$2
+    local functionAppName=$3
+    local extraParameters=$4
 
-    echo "Deploying Azure Function App using ARM template..."
+    echo "Deploying Azure Function App $functionAppName using ARM template..."
     resources=$(az group deployment create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
-        --parameters clientId="$webApiAdClientId" namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" \
+        --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" $extraParameters \
         --query "properties.outputResources[].id" \
         -o tsv)
 
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    webApiFunctionAppName="$resourceName"
+    local myFunctionAppName="$resourceName"
 
-    waitForFunctionAppServiceDeploymentCompletion $webApiFunctionAppName
-    echo "Successfully deployed Azure Function App '$webApiFunctionAppName'"
-}
+    waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
+    echo "Successfully deployed Azure Function App '$myFunctionAppName'"
 
-deployWebWorkersArmTemplate() {
-    functionAppNamePrefix="web-workers-allyfuncapp"
-    templateFilePath="${0%/*}/../templates/function-web-workers-app-template.json"
-
-    echo "Deploying Azure Function App using ARM template..."
-    resources=$(az group deployment create \
-        --resource-group "$resourceGroupName" \
-        --template-file "$templateFilePath" \
-        --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" \
-        --query "properties.outputResources[].id" \
-        -o tsv)
-
-    . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Web/sites" -r "$resources"
-    webWorkersFunctionAppName="$resourceName"
-
-    waitForFunctionAppServiceDeploymentCompletion $webWorkersFunctionAppName
-    echo "Successfully deployed Azure Function App '$webWorkersFunctionAppName'"
-}
-
-deployWebApiFunctionApp() {
-    deployWebApiArmTemplate $webApiPackageName
-
-    # Keep child script call only one function level deep to preserve exports
-    getFunctionAppPrincipalId $webApiFunctionAppName
+    getFunctionAppPrincipalId $myFunctionAppName
     . "${0%/*}/key-vault-enable-msi.sh"
-}
 
-deployWebWorkersFunctionApp() {
-    deployWebWorkersArmTemplate $webWorkersPackageName
-
-    # Keep child script call only one level deep to preserve exports
-    getFunctionAppPrincipalId $webWorkersFunctionAppName
-    . "${0%/*}/key-vault-enable-msi.sh"
+    eval $functionAppName="'$myFunctionAppName'"
 }
 
 # Read script arguments
@@ -196,14 +168,8 @@ fi
 
 installAzureFunctionsCoreTools
 
-webWorkersPackageName="web-workers"
-webApiPackageName="web-api"
+deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
+publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
 
-deployWebWorkersFunctionApp
-deployWebApiFunctionApp
-
-publishFunctionAppScripts $webApiPackageName $webApiFunctionAppName
-publishFunctionAppScripts $webWorkersPackageName $webWorkersFunctionAppName
-
-# Export the last created web-api function app service name to be used by the API Management install script
-functionAppName="$webApiFunctionAppName"
+deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName "clientId=$webApiAdClientId"
+publishFunctionAppScripts "web-api" $webApiFunctionAppName
