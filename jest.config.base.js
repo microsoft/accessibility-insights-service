@@ -21,7 +21,7 @@ module.exports = {
     testPathIgnorePatterns: ['/dist/', '/out/'],
     verbose: true,
     coverageDirectory: '<rootDir>/test-results/unit/coverage',
-    coverageReporters: ['json', 'lcov', 'text', 'cobertura'],
+    coverageReporters: ['text', 'lcov', 'cobertura'],
     collectCoverageFrom: [
         '<rootDir>/**/*.js',
         '<rootDir>/**/*.ts',
@@ -37,7 +37,31 @@ module.exports = {
         '!<rootDir>/**/jump-consistent-hash.*',
         '!<rootDir>/**/guid-generator.*',
     ],
-    reporters: ['default', ['jest-junit', { outputDirectory: '<rootDir>/test-results/unit', outputName: 'junit.xml' }]],
+    reporters: [
+        'default',
+        [
+            'jest-junit',
+            {
+                outputDirectory: '<rootDir>/test-results/unit',
+                outputName: 'junit.xml',
+            },
+        ],
+        [
+            'jest-html-reporter',
+            {
+                pageTitle: 'html report',
+                outputPath: './test-results/unit/html-reporter/report.html',
+            },
+        ],
+        [
+            'jest-slow-test-reporter',
+            {
+                numTests: 20,
+                warnOnSlowerThan: 100,
+                color: true,
+            },
+        ],
+    ],
     testEnvironment: 'node',
     setupFilesAfterEnv: ['jest-extended'],
 };

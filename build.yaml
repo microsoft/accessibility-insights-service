@@ -42,6 +42,13 @@ steps:
           yarn test --ci --coverage
       displayName: run unit tests
 
+    - task: PublishTestResults@2
+      inputs:
+          testResultsFiles: $(System.DefaultWorkingDirectory)/test-results/unit/junit.xml
+          testRunTitle: $(Agent.JobName)
+      condition: always()
+      displayName: publish test results
+
     - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
       displayName: Publish code coverage to codecov
 
