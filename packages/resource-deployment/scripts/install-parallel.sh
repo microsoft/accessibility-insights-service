@@ -75,11 +75,6 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 
 . "${0%/*}/process-utilities.sh"
 
-function onError() {
-    echo "insiden on error"
-    exit 1
-}
-
 function onExit {
     local exitCode=$?
 
@@ -120,7 +115,6 @@ if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] |
 fi
 
 function install() {
-    
     # Login to Azure if required
     if ! az account show 1>/dev/null; then
         az login
@@ -179,5 +173,5 @@ function install() {
     waitForProcesses asyncProcessIds
 }
 
-install || onError
+install
 echo "Installation completed."
