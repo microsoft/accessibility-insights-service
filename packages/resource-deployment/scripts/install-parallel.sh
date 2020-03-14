@@ -88,6 +88,7 @@ function onExit {
         echo "Killing all descendent processes"
         killDescendentProcesses $$
         echo "Killed all descendent processes"
+        echo "WARN: ARM deployments already triggered could still still be running. To kill them, you may need to goto the azure portal & cancel them."
     else
         echo "Installation completed with exit code $exitCode"
     fi
