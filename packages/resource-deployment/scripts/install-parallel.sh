@@ -141,7 +141,6 @@ function install() {
         "${0%/*}/app-insights-create.sh"
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
-    echo "still continuing"
 
     # The following scripts all depend on the result from the above scripts.
     # Additionally, these should run sequentially because of interdependence.
