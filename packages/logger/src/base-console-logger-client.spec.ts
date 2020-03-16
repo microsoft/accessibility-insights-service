@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
 
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
@@ -39,6 +39,17 @@ describe(BaseConsoleLoggerClient, () => {
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
         testSubject = new TestableBaseConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);
+    });
+
+    describe('create without ServiceConfiguration', () => {
+        it('console log enabled by default', async () => {
+            testSubject = new TestableBaseConsoleLoggerClient(undefined, consoleMock.object);
+
+            await testSubject.setup();
+            testSubject.log('log message', LogLevel.info);
+
+            consoleMock.verify(c => c.log(It.isAny()), Times.once());
+        });
     });
 
     describe('console not enabled', () => {
