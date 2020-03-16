@@ -1,0 +1,59 @@
+{
+    "id": "on-demand-send-notification-schedule",
+    "schedule": {
+        "recurrenceInterval": "PT1M"
+    },
+    "jobSpecification": {
+        "priority": 0,
+        "constraints": {
+            "maxWallClockTime": "PT1H",
+            "maxTaskRetryCount": 0
+        },
+        "jobManagerTask": {
+            "id": "on-demand-send-notification-job-manager-task",
+            "commandLine": "/bin/bash -c run-on-demand-send-notification-job-manager.sh",
+            "resourceFiles": [
+                {
+                    "autoStorageContainerName": "batch-on-demand-send-notification-job-manager-script"
+                },
+                {
+                    "autoStorageContainerName": "runtime-configuration"
+                }
+            ],
+            "constraints": {
+                "maxWallClockTime": "PT1H",
+                "retentionTime": "P7D",
+                "maxTaskRetryCount": 0
+            },
+            "killJobOnCompletion": true,
+            "userIdentity": {
+                "autoUser": {
+                    "scope": "task",
+                    "elevationLevel": "nonadmin"
+                }
+            },
+            "runExclusive": true
+        },
+        "commonEnvironmentSettings": [
+            {
+                "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                "value": "%APP_INSIGHTS_TOKEN%"
+            },
+            {
+                "name": "AZURE_STORAGE_SCAN_QUEUE",
+                "value": "ondemand-send-notification"
+            },
+            {
+                "name": "KEY_VAULT_URL",
+                "value": "%KEY_VAULT_TOKEN%"
+            },
+            {
+                "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
+                "value": "batch-send-notification-runner-script"
+            }
+        ],
+        "poolInfo": {
+            "poolId": "on-demand-scan-request-pool"
+        }
+    }
+}

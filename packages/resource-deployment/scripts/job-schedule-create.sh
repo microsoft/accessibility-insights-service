@@ -19,8 +19,12 @@ parsedScanReqScheduleFileName="scan-req-schedule.generated.template.json"
 onDemandScanReqScheduleJobName="on-demand-scan-req-schedule"
 parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.template.json"
 
+onDemandSendNotificationJobName="on-demand-send-notification-schedule"
+parsedOnDemandSendNotificationFileName="on-demand-send-notification.generated.template.json"
+
 urlScanScheduleJobName="url-scan-schedule"
 parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
+
 onDemandScanScheduleJobName="on-demand-url-scan-schedule"
 parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
 
@@ -82,6 +86,7 @@ sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVau
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
@@ -93,5 +98,6 @@ adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsSc
 adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanScheduleJobName" "$parsedOnDemandScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
+adjustJob "$onDemandSendNotificationJobName" "$parsedOnDemandSendNotificationFileName" "$allJobsScheduleList"
 
 echo "Job schedules were created successfully."
