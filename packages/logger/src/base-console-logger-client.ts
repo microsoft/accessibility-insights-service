@@ -27,7 +27,12 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
 
-        this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
+        if (this.serviceConfig !== undefined) {
+            this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
+        } else {
+            console.log('No service configuration was found. Enabling console logging by default.');
+            this.isConsoleLogEnabled = true;
+        }
     }
 
     public trackMetric(name: string, value: number): void {
