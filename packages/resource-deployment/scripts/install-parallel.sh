@@ -123,6 +123,7 @@ function install() {
     az account set --subscription "$subscription"
 
     . "${0%/*}/create-resource-group.sh"
+    . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
 
     . "${0%/*}/get-resource-names.sh"
