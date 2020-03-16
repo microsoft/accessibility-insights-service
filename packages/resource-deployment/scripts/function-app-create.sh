@@ -141,11 +141,50 @@ deployFunctionApp() {
 
     waitForFunctionAppServiceDeploymentCompletion $myFunctionAppName
     echo "Successfully deployed Azure Function App '$myFunctionAppName'"
+}
 
-    getFunctionAppPrincipalId $myFunctionAppName
+function deployWebApiFunction {
+    deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" "$webApiFuncAppName" "clientId=$webApiAdClientId"
+}
+
+function deployWebWorkersFunction {
+    deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
+}
+
+function enableManagedIdentityOnFunctions {
+    getFunctionAppPrincipalId $webApiFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    eval $functionAppName="'$myFunctionAppName'"
+    getFunctionAppPrincipalId $webWorkersFuncAppName
+    . "${0%/*}/key-vault-enable-msi.sh"
+}
+
+function publishWebApiScripts {
+    publishFunctionAppScripts "web-api" $webApiFuncAppName
+}
+
+function publishWebWorkerScripts {
+    publishFunctionAppScripts "web-workers" $webWorkersFuncAppName
+}
+
+function setupAzureFunctions {
+    installAzureFunctionsCoreTools
+
+    local functionSetupProcesses=(
+        "deployWebApiFunction"
+        "deployWebWorkersFunction"
+    )
+    runCommandsWithoutSecretsInParallel functionSetupProcesses
+
+    enableManagedIdentityOnFunctions
+
+    functionSetupProcesses=(
+        "publishWebApiScripts"
+        "publishWebWorkerScripts"
+    )
+    runCommandsWithoutSecretsInParallel functionSetupProcesses
+
+    echo "Successfully published setup all Azure Functions."
 }
 
 # Read script arguments
@@ -168,6 +207,7 @@ echo "Setting up function apps with arguments passed:
     releaseVersion: $releaseVersion
 "
 
+. "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
 
@@ -180,10 +220,4 @@ if ! az account show 1>/dev/null; then
     az login
 fi
 
-installAzureFunctionsCoreTools
-
-deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" webWorkersFunctionAppName
-publishFunctionAppScripts  "web-workers" $webWorkersFunctionAppName
-
-deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" webApiFunctionAppName "clientId=$webApiAdClientId"
-publishFunctionAppScripts "web-api" $webApiFunctionAppName
+setupAzureFunctions

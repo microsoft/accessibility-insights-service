@@ -24,10 +24,8 @@ exitWithUsageInfo() {
     echo "
 Usage: $0 -t <Template Location> -r <resource group>
     where 
-    API management name - The target API Managment instance name.
     Template location - The location for the templates.
     Resource group - The resource group that the REST API needs to be deployed to.
-    Function app name - The backed for the apis.
 "
     exit 1
 }
