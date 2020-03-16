@@ -21,11 +21,11 @@ export function getProcessLifeCycleContainer(): inversify.Container {
             a11yServiceClientTypeNames.A11yServiceClientProvider,
             processLifeCycleContainer,
             async context => {
-                const secretProvider = processLifeCycleContainer.get(SecretProvider);
+                const secretProvider = context.container.get(SecretProvider);
                 const restApiSpAppId = await secretProvider.getSecret('restApiSpAppId');
                 const restApiSpSecret = await secretProvider.getSecret('restApiSpSecret');
                 const authorityUrl = await secretProvider.getSecret('authorityUrl');
-                const logger = processLifeCycleContainer.get(Logger);
+                const logger = context.container.get(Logger);
 
                 const a11yServiceCredential = new A11yServiceCredential(
                     restApiSpAppId,

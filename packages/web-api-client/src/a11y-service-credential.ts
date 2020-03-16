@@ -25,8 +25,6 @@ export class A11yServiceCredential {
     }
 
     public async getToken(): Promise<TokenResponse> {
-        await this.logger.setup();
-
         try {
             return await this.retryHelper.executeWithRetries(
                 () => this.tryGetToken(),

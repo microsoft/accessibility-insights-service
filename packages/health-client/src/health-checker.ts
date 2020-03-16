@@ -32,6 +32,7 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
 };
 
 (async () => {
+    await logger.setup();
     console.log('[health-client] Start evaluation of functional tests result.');
     console.log(`[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`);
     await System.wait(waitTimeBeforeEvaluation);
