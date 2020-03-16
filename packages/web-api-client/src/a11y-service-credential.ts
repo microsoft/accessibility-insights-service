@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AuthenticationContext, ErrorResponse, TokenResponse } from 'adal-node';
+import { RetryHelper } from 'common';
 import { Logger } from 'logger';
 import * as requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
@@ -17,6 +18,7 @@ export class A11yServiceCredential {
         context?: AuthenticationContext,
         private readonly maxTokenAttempts: number = 5,
         private readonly sleepBetweenRetries: boolean = true,
+        private readonly retryHelper: RetryHelper<TokenResponse> = new RetryHelper(),
     ) {
         // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
         this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
@@ -25,21 +27,15 @@ export class A11yServiceCredential {
     public async getToken(): Promise<TokenResponse> {
         await this.logger.setup();
 
-        let lastError: Error;
-        for (let i = 0; i < this.maxTokenAttempts; i += 1) {
-            try {
-                return await this.tryGetToken();
-            } catch (err) {
-                lastError = err as Error;
-                this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
-
-                if (this.sleepBetweenRetries) {
-                    await this.sleep(1000);
-                }
-            }
+        try {
+            return await this.retryHelper.executeWithRetries(
+                () => this.tryGetToken(),
+                (err: Error) => this.handleGetTokenError(err),
+                this.maxTokenAttempts,
+            );
+        } catch (err) {
+            throw new Error(`Auth getToken failed with error: ${JSON.stringify(err)}`);
         }
-        this.logger.logError(`Could not get auth token after ${this.maxTokenAttempts} attempts.`);
-        throw lastError;
     }
 
     public async signRequest(request: typeof requestPromise): Promise<typeof requestPromise> {
@@ -63,6 +59,14 @@ export class A11yServiceCredential {
                 }
             });
         });
+    }
+
+    private async handleGetTokenError(err: Error): Promise<void> {
+        this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
+
+        if (this.sleepBetweenRetries) {
+            await this.sleep(1000);
+        }
     }
 
     private async sleep(milliseconds: number): Promise<void> {
