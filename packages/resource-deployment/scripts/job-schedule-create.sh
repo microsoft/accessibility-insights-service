@@ -54,16 +54,16 @@ exitWithUsageInfo() {
 }
 
 # Read script arguments
-while getopts ":b:r:k:a:t:" option; do
+while getopts ":r:k:t:" option; do
     case $option in
-    b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
-    a) appInsightsName=${OPTARG} ;;
     t) templatesFolder=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
+
+. "${0%/*}/get-resource-names.sh"
 
 if [[ -z $keyVaultUrl ]]; then
     echo "Resolving Key Vault URL for Key Vault $keyVault..."
@@ -72,7 +72,7 @@ if [[ -z $keyVaultUrl ]]; then
 fi
 
 # Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]] || [[ -z $appInsightsName ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
     exitWithUsageInfo
 fi
 

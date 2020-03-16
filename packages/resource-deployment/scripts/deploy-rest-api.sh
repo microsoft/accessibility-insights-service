@@ -22,7 +22,7 @@ deployResourceWithFunctionName() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -a <API management name> -t <Template Location> -r <resource group> -f <function app name>
+Usage: $0 -t <Template Location> -r <resource group>
     where 
     API management name - The target API Managment instance name.
     Template location - The location for the templates.
@@ -33,17 +33,17 @@ Usage: $0 -a <API management name> -t <Template Location> -r <resource group> -f
 }
 
 # Read script arguments
-while getopts ":a:f:r:t:" option; do
+while getopts ":r:t:" option; do
     case $option in
-    a) apiManagementName=${OPTARG} ;;
-    f) webApiFuncAppName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     t) apiTemplates=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $apiManagementName ]] || [[ -z $apiTemplates ]] || [[ -z $resourceGroupName ]] || [[ -z $webApiFuncAppName ]]; then
+. "${0%/*}/get-resource-names.sh"
+
+if [[ -z $apiTemplates ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 

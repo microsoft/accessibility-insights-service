@@ -7,13 +7,6 @@ set -eo pipefail
 
 
 export resourceGroupName
-export batchAccountName
-export pool
-export keyVault
-export resourceName
-export systemAssignedIdentities
-export principalId
-export enableSoftDeleteOnKeyVault
 
 exitWithUsageInfo() {
     echo "

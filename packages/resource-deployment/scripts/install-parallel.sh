@@ -21,6 +21,7 @@ export subscription
 export storageAccountName
 export webApiAdClientId
 export webApiAdClientSecret
+export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export enableSoftDeleteOnKeyVault=true
@@ -74,6 +75,24 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 
 . "${0%/*}/process-utilities.sh"
 
+function onExit {
+    local exitCode=$?
+
+    if [[ $exitCode != 0 ]]; then
+        echo "Installation failed with exit code $exitCode" 
+        echo "Killing all descendant processes"
+        killDescendantProcesses $$
+        echo "Killed all descendant processes"
+        echo "WARN: ARM deployments already triggered could still still be running. To kill them, you may need to goto the azure portal & cancel them."
+    else
+        echo "Installation completed with exit code $exitCode"
+    fi
+
+    exit $exitCode
+}
+
+trap "onExit" EXIT
+
 # Read script arguments
 while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     case $option in
@@ -95,50 +114,64 @@ if [[ -z $resourceGroupName ]] || [[ -z $subscription ]] || [[ -z $location ]] |
     exitWithUsageInfo
 fi
 
-# Login to Azure if required
-if ! az account show 1>/dev/null; then
-    az login
-fi
+function install() {
+    # Login to Azure if required
+    if ! az account show 1>/dev/null; then
+        az login
+    fi
 
-az account set --subscription "$subscription"
+    az account set --subscription "$subscription"
 
-. "${0%/*}/create-resource-group.sh"
-. "${0%/*}/create-storage-account.sh"
+    . "${0%/*}/create-resource-group.sh"
+    . "${0%/*}/wait-for-pending-deployments.sh"
+    . "${0%/*}/create-storage-account.sh"
 
-. "${0%/*}/get-resource-names.sh"
+    . "${0%/*}/get-resource-names.sh"
 
-echo "Starting parallel processes.."
+    echo "Starting parallel processes.."
 
-. "${0%/*}/create-api-management.sh" &
-apiManagmentProcess="$!"
+    . "${0%/*}/create-api-management.sh" &
+    apiManagmentProcessId="$!"
 
-parallelProcesses=(
-    # "${0%/*}/create-datalake-storage-account.sh"
-    "${0%/*}/upload-files.sh"
-    "${0%/*}/create-queues.sh"
-    "${0%/*}/setup-cosmos-db.sh"
-    "${0%/*}/create-vnet.sh"
-    "${0%/*}/app-insights-create.sh"
-)
-runInParallel parallelProcesses
+    parallelProcesses=(
+        # "${0%/*}/create-datalake-storage-account.sh"
+        "${0%/*}/upload-files.sh"
+        "${0%/*}/create-queues.sh"
+        "${0%/*}/setup-cosmos-db.sh"
+        "${0%/*}/create-vnet.sh"
+        "${0%/*}/app-insights-create.sh"
+    )
+    runCommandsWithoutSecretsInParallel parallelProcesses
 
-# The following scripts all depend on the result from the above scripts.
-# Additionally, these should run sequentially because of interdependence.
+    # The following scripts all depend on the result from the above scripts.
+    # Additionally, these should run sequentially because of interdependence.
 
-. "${0%/*}/batch-account-create.sh"
+    . "${0%/*}/setup-key-vault.sh"
 
-parallelProcesses=(
-    "${0%/*}/function-app-create.sh"
-    "${0%/*}/job-schedule-create.sh"
-)
-runInParallel parallelProcesses
+    parallelProcesses=(
+        "\"${0%/*}/batch-account-create.sh\" ; \"${0%/*}/job-schedule-create.sh\""
+        "${0%/*}/function-app-create.sh"
+    )
+    echo "Waiting for batch & function app setup processes"
+    runCommandsWithoutSecretsInParallel parallelProcesses
 
-waitForProcesses apiManagmentProcess
+    asyncProcessIds=()
 
-parallelProcesses=(
-    "${0%/*}/deploy-rest-api.sh"
-    "${0%/*}/create-dashboard.sh"
-    "${0%/*}/recreate-vmss-for-pools.sh"
-)
-runInParallel parallelProcesses
+    . "${0%/*}/create-dashboard.sh" &
+    asyncProcessIds+=("$!")
+
+    . "${0%/*}/recreate-vmss-for-pools.sh" &
+    asyncProcessIds+=("$!")
+
+    echo "Waiting for api management creation process"
+    waitForProcesses apiManagmentProcessId
+
+    echo "Deploying rest api to apim"
+    . "${0%/*}/deploy-rest-api.sh"
+
+    echo "Waiting for create dashboard & recreating pools processes"
+    waitForProcesses asyncProcessIds
+}
+
+install
 echo "Installation completed."
