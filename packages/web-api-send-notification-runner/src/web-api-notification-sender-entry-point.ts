@@ -6,9 +6,9 @@ import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { NotificationSender } from './sender/notification-sender';
 
-export class WebApiSendNotificationRunnerEntryPoint extends ProcessEntryPointBase {
+export class WebApiNotificationSenderEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
-        return { source: 'webApiSendNotificationRunner' };
+        return { source: 'webApiNotificationSender' };
     }
 
     protected async runCustomAction(container: Container): Promise<void> {

@@ -4,13 +4,13 @@ import 'reflect-metadata';
 
 import { WhyNodeRunningLogger } from 'common';
 
-import { setupWebApiSendNotificationContainer } from './setup-web-api-send-notification-runner-container';
-import { WebApiSendNotificationRunnerEntryPoint } from './web-api-send-notification-runner-entry-point';
+import { setupWebApiNotificationSenderContainer } from './setup-web-api-notification-sender-container';
+import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
 
 const whyNodeRunLogger = new WhyNodeRunningLogger();
 
 (async () => {
-    await new WebApiSendNotificationRunnerEntryPoint(setupWebApiSendNotificationContainer()).start();
+    await new WebApiNotificationSenderEntryPoint(setupWebApiNotificationSenderContainer()).start();
     await whyNodeRunLogger.logAfterSeconds(10);
 })().catch(() => {
     process.exit(1);

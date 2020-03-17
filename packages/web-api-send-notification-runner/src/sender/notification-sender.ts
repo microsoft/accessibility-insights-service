@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
-import { SendNotificationConfig } from '../send-notification-config';
+import { NotificationSenderConfig } from '../notification-sender-config';
 
 // tslint:disable: no-null-keyword no-any
 
 @injectable()
 export class NotificationSender {
     constructor(
-        @inject(SendNotificationConfig) private readonly sendNotificationConfig: SendNotificationConfig,
+        @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
     public async sendNotification(): Promise<void> {
-        const sendNotificationConfigData = this.sendNotificationConfig.getConfig();
-        this.logger.logInfo(`Id: ${sendNotificationConfigData.id}`);
-        this.logger.logInfo(`Reply URL: ${sendNotificationConfigData.replyUrl}`);
+        const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
+        this.logger.logInfo(`Id: ${notificationSenderConfigData.id}`);
+        this.logger.logInfo(`Reply URL: ${notificationSenderConfigData.replyUrl}`);
     }
 }

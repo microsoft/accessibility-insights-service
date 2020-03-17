@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
-import { SendNotificationConfig } from '../send-notification-config';
-import { ScanMetadata } from '../types/scan-metadata';
+import { NotificationSenderConfig } from '../notification-sender-config';
+import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 import { NotificationSender } from './notification-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
@@ -14,30 +14,30 @@ class MockableLogger extends Logger {}
 
 describe(NotificationSender, () => {
     let sender: NotificationSender;
-    let scanMetadataConfigMock: IMock<SendNotificationConfig>;
+    let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
-    const scanMetadata: ScanMetadata = {
+    const notificationSenderMetadata: NotificationSenderMetadata = {
         id: 'id',
         replyUrl: 'replyUrl',
     };
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
-        scanMetadataConfigMock = Mock.ofType(SendNotificationConfig);
-        scanMetadataConfigMock.setup(s => s.getConfig()).returns(() => scanMetadata);
+        notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
+        notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
-        sender = new NotificationSender(scanMetadataConfigMock.object, loggerMock.object);
+        sender = new NotificationSender(notificationSenderMetadataMock.object, loggerMock.object);
     });
 
     it('Send Notification', async () => {
-        loggerMock.setup(lm => lm.logInfo(`Id: ${scanMetadata.id}`)).verifiable(Times.once());
-        loggerMock.setup(lm => lm.logInfo(`Reply URL: ${scanMetadata.replyUrl}`)).verifiable(Times.once());
+        loggerMock.setup(lm => lm.logInfo(`Id: ${notificationSenderMetadata.id}`)).verifiable(Times.once());
+        loggerMock.setup(lm => lm.logInfo(`Reply URL: ${notificationSenderMetadata.replyUrl}`)).verifiable(Times.once());
 
         await sender.sendNotification();
     });
 
     afterEach(() => {
-        scanMetadataConfigMock.verifyAll();
+        notificationSenderMetadataMock.verifyAll();
         loggerMock.verifyAll();
     });
 });

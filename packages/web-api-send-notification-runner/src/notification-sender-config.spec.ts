@@ -4,18 +4,18 @@ import 'reflect-metadata';
 
 import { IMock, Mock, Times } from 'typemoq';
 import { Argv } from 'yargs';
-import { SendNotificationConfig } from './send-notification-config';
+import { NotificationSenderConfig } from './notification-sender-config';
 // tslint:disable: no-any
 
-describe(SendNotificationConfig, () => {
-    let testSubject: SendNotificationConfig;
+describe(NotificationSenderConfig, () => {
+    let testSubject: NotificationSenderConfig;
     let argvMock: IMock<Argv>;
     const argvVal = { foo: 'test' };
 
     beforeEach(() => {
         // tslint:disable-next-line: no-empty
         argvMock = Mock.ofInstance<Argv>(({ argv: undefined, demandOption: () => {} } as unknown) as Argv);
-        testSubject = new SendNotificationConfig(argvMock.object);
+        testSubject = new NotificationSenderConfig(argvMock.object);
         argvMock.setup(a => a.argv).returns(() => argvVal as any);
     });
 

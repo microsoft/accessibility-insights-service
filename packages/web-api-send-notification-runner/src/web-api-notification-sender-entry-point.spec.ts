@@ -6,12 +6,12 @@ import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { NotificationSender } from './sender/notification-sender';
-import { WebApiSendNotificationRunnerEntryPoint } from './web-api-send-notification-runner-entry-point';
+import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
 
 // tslint:disable: no-object-literal-type-assertion
 
-describe(WebApiSendNotificationRunnerEntryPoint, () => {
-    class TestWebApiSendNotificationRunnerEntryPoint extends WebApiSendNotificationRunnerEntryPoint {
+describe(WebApiNotificationSenderEntryPoint, () => {
+    class TestWebApiSendNotificationRunnerEntryPoint extends WebApiNotificationSenderEntryPoint {
         public async invokeRunCustomAction(container: Container): Promise<void> {
             await this.runCustomAction(container);
         }
@@ -48,7 +48,7 @@ describe(WebApiSendNotificationRunnerEntryPoint, () => {
     describe('getTelemetryBaseProperties', () => {
         it('returns data with source property', () => {
             expect(testSubject.invokeGetTelemetryBaseProperties()).toEqual({
-                source: 'webApiSendNotificationRunner',
+                source: 'webApiNotificationSender',
             } as BaseTelemetryProperties);
         });
     });

@@ -3,15 +3,15 @@
 import { inject, injectable } from 'inversify';
 import { loggerTypes } from 'logger';
 import { Arguments, Argv } from 'yargs';
-import { ScanMetadata } from './types/scan-metadata';
+import { NotificationSenderMetadata } from './types/notification-sender-metadata';
 
 @injectable()
-export class SendNotificationConfig {
+export class NotificationSenderConfig {
     constructor(@inject(loggerTypes.Argv) private readonly argvObj: Argv) {}
 
-    public getConfig(): ScanMetadata {
+    public getConfig(): NotificationSenderMetadata {
         this.argvObj.demandOption(['id', 'replyUrl']);
 
-        return this.argvObj.argv as Arguments<ScanMetadata>;
+        return this.argvObj.argv as Arguments<NotificationSenderMetadata>;
     }
 }
