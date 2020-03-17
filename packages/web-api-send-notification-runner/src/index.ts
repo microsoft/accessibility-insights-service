@@ -2,9 +2,16 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { WhyNodeRunningLogger } from 'common';
+
+import { setupWebApiNotificationSenderContainer } from './setup-web-api-notification-sender-container';
+import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
+
+const whyNodeRunLogger = new WhyNodeRunningLogger();
+
 (async () => {
-    console.log('not implemented');
-})().catch(error => {
-    console.log('Exception thrown in send notification runner: ', error);
+    await new WebApiNotificationSenderEntryPoint(setupWebApiNotificationSenderContainer()).start();
+    await whyNodeRunLogger.logAfterSeconds(10);
+})().catch(() => {
     process.exit(1);
 });
