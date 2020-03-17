@@ -44,7 +44,7 @@ describe(A11yServiceCredential, () => {
             loggerMock.object,
             authenticationContextMock.object,
             numTokenAttempts,
-            false,
+            0,
             retryHelperMock.object,
         );
 
@@ -94,7 +94,7 @@ describe(A11yServiceCredential, () => {
 
     function setupRetryHelperMock(shouldFail: boolean): void {
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts))
+            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts, 0))
             .returns(async (action: () => Promise<TokenResponse>, errorHandler: (err: Error) => Promise<void>, maxAttempts: number) => {
                 if (shouldFail) {
                     await errorHandler(error);

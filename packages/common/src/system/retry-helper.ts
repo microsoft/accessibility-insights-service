@@ -3,8 +3,20 @@
 
 export type ErrorHandler = (err: Error) => Promise<void>;
 
+async function defaultSleepFunction(milliseconds: number): Promise<void> {
+    // tslint:disable-next-line: no-string-based-set-timeout
+    return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 export class RetryHelper<T> {
-    public async executeWithRetries(action: () => Promise<T>, onRetry: ErrorHandler, maxAttempts: number): Promise<T> {
+    public constructor(private readonly sleepFunction: (millis: number) => Promise<void> = defaultSleepFunction) {}
+
+    public async executeWithRetries(
+        action: () => Promise<T>,
+        onRetry: ErrorHandler,
+        maxAttempts: number,
+        millisBetweenRetries: number = 0,
+    ): Promise<T> {
         let lastError: Error;
         for (let i = 0; i < maxAttempts; i += 1) {
             try {
@@ -13,6 +25,9 @@ export class RetryHelper<T> {
                 lastError = err as Error;
                 if (i < maxAttempts - 1) {
                     await onRetry(lastError);
+                    if (millisBetweenRetries > 0) {
+                        await this.sleepFunction(millisBetweenRetries);
+                    }
                 }
             }
         }

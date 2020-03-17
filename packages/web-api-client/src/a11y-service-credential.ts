@@ -17,7 +17,7 @@ export class A11yServiceCredential {
         private readonly logger: Logger,
         context?: AuthenticationContext,
         private readonly maxTokenAttempts: number = 5,
-        private readonly sleepBetweenRetries: boolean = true,
+        private readonly millisBetweenRetries: number = 1000,
         private readonly retryHelper: RetryHelper<TokenResponse> = new RetryHelper(),
     ) {
         // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
@@ -30,6 +30,7 @@ export class A11yServiceCredential {
                 () => this.tryGetToken(),
                 (err: Error) => this.handleGetTokenError(err),
                 this.maxTokenAttempts,
+                this.millisBetweenRetries,
             );
         } catch (err) {
             throw new Error(`Auth getToken failed with error: ${JSON.stringify(err)}`);
@@ -61,14 +62,5 @@ export class A11yServiceCredential {
 
     private async handleGetTokenError(err: Error): Promise<void> {
         this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
-
-        if (this.sleepBetweenRetries) {
-            await this.sleep(1000);
-        }
-    }
-
-    private async sleep(milliseconds: number): Promise<void> {
-        // tslint:disable-next-line: no-string-based-set-timeout
-        return new Promise(resolve => setTimeout(resolve, milliseconds));
     }
 }
