@@ -4,7 +4,7 @@
 import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
-import { Runner } from './runner/runner';
+import { NotificationSender } from './sender/notification-sender';
 
 export class WebApiSendNotificationRunnerEntryPoint extends ProcessEntryPointBase {
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {
@@ -12,7 +12,7 @@ export class WebApiSendNotificationRunnerEntryPoint extends ProcessEntryPointBas
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
-        const runner = container.get<Runner>(Runner);
-        await runner.run();
+        const sender = container.get<NotificationSender>(NotificationSender);
+        await sender.sendNotification();
     }
 }

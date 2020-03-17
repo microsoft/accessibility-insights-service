@@ -4,17 +4,17 @@ import 'reflect-metadata';
 
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
-import { ScanMetadataConfig } from '../scan-metadata-config';
+import { SendNotificationConfig } from '../send-notification-config';
 import { ScanMetadata } from '../types/scan-metadata';
-import { Runner } from './runner';
+import { NotificationSender } from './notification-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
 class MockableLogger extends Logger {}
 
-describe(Runner, () => {
-    let runner: Runner;
-    let scanMetadataConfigMock: IMock<ScanMetadataConfig>;
+describe(NotificationSender, () => {
+    let sender: NotificationSender;
+    let scanMetadataConfigMock: IMock<SendNotificationConfig>;
     let loggerMock: IMock<MockableLogger>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
@@ -23,17 +23,17 @@ describe(Runner, () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
-        scanMetadataConfigMock = Mock.ofType(ScanMetadataConfig);
+        scanMetadataConfigMock = Mock.ofType(SendNotificationConfig);
         scanMetadataConfigMock.setup(s => s.getConfig()).returns(() => scanMetadata);
 
-        runner = new Runner(scanMetadataConfigMock.object, loggerMock.object);
+        sender = new NotificationSender(scanMetadataConfigMock.object, loggerMock.object);
     });
 
-    it('Run', async () => {
+    it('Send Notification', async () => {
         loggerMock.setup(lm => lm.logInfo(`Id: ${scanMetadata.id}`)).verifiable(Times.once());
         loggerMock.setup(lm => lm.logInfo(`Reply URL: ${scanMetadata.replyUrl}`)).verifiable(Times.once());
 
-        await runner.run();
+        await sender.sendNotification();
     });
 
     afterEach(() => {

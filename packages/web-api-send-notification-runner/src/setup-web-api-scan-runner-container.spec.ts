@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
-import { Runner } from './runner/runner';
+import { NotificationSender } from './sender/notification-sender';
 import { setupWebApiSendNotificationContainer } from './setup-web-api-send-notification-runner-container';
 // tslint:disable: no-any
 
@@ -11,7 +11,7 @@ describe(setupWebApiSendNotificationContainer, () => {
     it('resolves runner dependencies', () => {
         const container = setupWebApiSendNotificationContainer();
 
-        expect(container.get(Runner)).toBeDefined();
+        expect(container.get(NotificationSender)).toBeDefined();
     });
 
     it('resolves singleton dependencies', () => {

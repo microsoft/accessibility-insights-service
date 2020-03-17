@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties } from 'logger';
 import { IMock, Mock } from 'typemoq';
-import { Runner } from './runner/runner';
+import { NotificationSender } from './sender/notification-sender';
 import { WebApiSendNotificationRunnerEntryPoint } from './web-api-send-notification-runner-entry-point';
 
 // tslint:disable: no-object-literal-type-assertion
@@ -23,26 +23,26 @@ describe(WebApiSendNotificationRunnerEntryPoint, () => {
 
     let testSubject: TestWebApiSendNotificationRunnerEntryPoint;
     let containerMock: IMock<Container>;
-    let runnerMock: IMock<Runner>;
+    let senderMock: IMock<NotificationSender>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
-        runnerMock = Mock.ofType(Runner);
+        senderMock = Mock.ofType(NotificationSender);
 
         testSubject = new TestWebApiSendNotificationRunnerEntryPoint(containerMock.object);
 
-        containerMock.setup(c => c.get(Runner)).returns(() => runnerMock.object);
+        containerMock.setup(c => c.get(NotificationSender)).returns(() => senderMock.object);
     });
 
-    it('invokes runner.run', async () => {
-        runnerMock
-            .setup(async r => r.run())
+    it('invokes sender.sendNotification', async () => {
+        senderMock
+            .setup(async r => r.sendNotification())
             .returns(async () => Promise.resolve())
             .verifiable();
 
         await expect(testSubject.invokeRunCustomAction(containerMock.object)).resolves.toBeUndefined();
 
-        runnerMock.verifyAll();
+        senderMock.verifyAll();
     });
 
     describe('getTelemetryBaseProperties', () => {
