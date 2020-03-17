@@ -74,13 +74,22 @@ describe(ScanRequestController, () => {
     }
 
     describe(ScanRequestController, () => {
-        it('rejects request with large payload', async () => {
-            context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }, { url: '' }]);
+        // it('rejects request with large payload', async () => {
+        //     context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }, { url: '' }]);
+        //     scanRequestController = createScanRequestController(context);
+
+        //     await scanRequestController.handleRequest();
+
+        //     expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
+        // });
+
+        it('rejects request invalid reply url', async () => {
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', replyUrl: 'invalid-url' }]);
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
 
-            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
+            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidReplyURL.error);
         });
 
         it('accepts valid request only', async () => {

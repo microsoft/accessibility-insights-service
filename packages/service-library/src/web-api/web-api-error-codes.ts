@@ -16,7 +16,8 @@ export declare type WebApiErrorCodeName =
     | 'UnsupportedApiVersion'
     | 'OutOfRangePriority'
     | 'MalformedBody'
-    | 'MissingReleaseVersion';
+    | 'MissingReleaseVersion'
+    | 'InvalidReplyURL';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -57,6 +58,15 @@ export class WebApiErrorCodes {
             code: 'InvalidURL',
             codeId: 4003,
             message: 'The URL is not valid.',
+        },
+    };
+
+    public static invalidReplyURL: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'InvalidReplyURL',
+            codeId: 4003,
+            message: 'The reply URL is not valid.',
         },
     };
 
