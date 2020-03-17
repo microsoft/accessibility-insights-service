@@ -29,9 +29,7 @@ Usage: $0 -r <resource group name>
 }
 
 function setupQueues() {
-
     echo "Creating Queues in parallel"
-
     local createQueueProcesses=(
         "createQueue \"scanrequest\""
         "createQueue \"scanrequest-dead\""
@@ -40,7 +38,6 @@ function setupQueues() {
         "createQueue \"ondemand-send-notification\""
         "createQueue \"ondemand-send-notification-dead\""
     )
-
     runCommandsWithoutSecretsInParallel createQueueProcesses
 
     echo "Successfully created all queues."

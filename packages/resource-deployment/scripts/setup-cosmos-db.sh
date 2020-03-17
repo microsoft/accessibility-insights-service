@@ -67,7 +67,7 @@ function setupCosmos() {
         "createCosmosDatabase \"$scannerDbName\""
         "createCosmosDatabase \"$onDemandScannerDbName\""
     )
-    echo "Creating cosmos databases in parallel"
+    echo "Creating Cosmos databases in parallel"
     runCommandsWithoutSecretsInParallel cosmosSetupProcesses
 
     # Increase throughput for below collection only in case of prod
@@ -90,10 +90,10 @@ function setupCosmos() {
         )
     fi
 
-    echo "Creating cosmos collections in parallel"
+    echo "Creating Cosmos collections in parallel"
     runCommandsWithoutSecretsInParallel cosmosSetupProcesses
 
-    echo "Successfully setup cosmos account."
+    echo "Successfully setup Cosmos account."
 }
 
 exitWithUsageInfo() {
