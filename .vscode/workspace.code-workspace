@@ -29,6 +29,14 @@
             "path": "../packages/web-api-scan-job-manager"
         },
         {
+            "name": "web-api-send-notification-job-manager",
+            "path": "../packages/web-api-send-notification-job-manager"
+        },
+        {
+            "name": "web-api-send-notification-runner",
+            "path": "../packages/web-api-send-notification-runner"
+        },
+        {
             "name": "service-library",
             "path": "../packages/service-library"
         },
@@ -94,7 +102,9 @@
         "editor.codeActionsOnSave": {
             "source.fixAll.tslint": true
         },
-        "shellformat.effectLanguages": ["shellscript"],
+        "shellformat.effectLanguages": [
+            "shellscript"
+        ],
         "files.exclude": {
             "**/node_modules/": true,
             "**/packages/": true,
@@ -144,7 +154,11 @@
                 "name": "Debug current unit test file",
                 "program": "${workspaceFolder:root}/node_modules/jest/bin/jest",
                 // ${relativeFile} returns path with back slash. jest can't find the file if we use back slash. So, just passing file name instead
-                "args": ["${fileBasename}", "--runInBand", "--coverage=false"],
+                "args": [
+                    "${fileBasename}",
+                    "--runInBand",
+                    "--coverage=false"
+                ],
                 "console": "integratedTerminal",
                 "internalConsoleOptions": "neverOpen",
                 "cwd": "${fileDirname}"

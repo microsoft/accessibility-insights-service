@@ -47,6 +47,13 @@
                 "description": "The name of the blob container for web api scan job manager script."
             }
         },
+        "webApiSendNotificationJobManagerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-send-notification-job-manager-script",
+            "metadata": {
+                "description": "The name of the blob container for web api send notification job manager script."
+            }
+        },
         "poolScriptContainerName": {
             "type": "string",
             "defaultValue": "batch-pool-startup-script",
@@ -80,6 +87,13 @@
             "defaultValue": "batch-web-api-scan-runner-script",
             "metadata": {
                 "description": "The name of the blob container for runner script."
+            }
+        },
+        "webApiSendNotificationRunnerContainerName": {
+            "type": "string",
+            "defaultValue": "batch-web-api-send-notification-runner-script",
+            "metadata": {
+                "description": "The name of the blob container for send notification runner script."
             }
         },
         "scanRequestContainerName": {
@@ -157,6 +171,12 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
+                    "name": "[concat('default/', parameters('webApiSendNotificationJobManagerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
                     "name": "[concat('default/', parameters('poolScriptContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
@@ -176,6 +196,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('webApiScanRunnerContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('webApiSendNotificationRunnerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]
