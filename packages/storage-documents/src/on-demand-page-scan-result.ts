@@ -6,6 +6,7 @@ import { ItemType } from './item-type';
 export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type NotificationState = 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
 
 export type ScanErrorTypes =
     | 'UrlNavigationTimeout'
@@ -55,4 +56,5 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
+    notificationState?: NotificationState;
 }
