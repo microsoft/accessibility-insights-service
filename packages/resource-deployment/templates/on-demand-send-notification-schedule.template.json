@@ -14,7 +14,7 @@
             "commandLine": "/bin/bash -c run-on-demand-send-notification-job-manager.sh",
             "resourceFiles": [
                 {
-                    "autoStorageContainerName": "batch-on-demand-send-notification-job-manager-script"
+                    "autoStorageContainerName": "batch-web-api-send-notification-job-manager-script"
                 },
                 {
                     "autoStorageContainerName": "runtime-configuration"
