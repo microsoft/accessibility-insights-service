@@ -47,7 +47,7 @@ export interface ScanCompletedNotification {
 }
 
 export interface NotificationError {
-    errorCode: number;
+    errorType: string;
     message: string;
 }
 
