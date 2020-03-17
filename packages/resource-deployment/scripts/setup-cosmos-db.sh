@@ -57,6 +57,45 @@ createCosmosDatabase() {
     fi
 }
 
+function setupCosmos() {
+    createCosmosAccount
+
+    local scannerDbName="scanner"
+    local onDemandScannerDbName="onDemandScanner"
+
+    local cosmosSetupProcesses=(
+        "createCosmosDatabase \"$scannerDbName\""
+        "createCosmosDatabase \"$onDemandScannerDbName\""
+    )
+    echo "Creating Cosmos databases in parallel"
+    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+
+    # Increase throughput for below collection only in case of prod
+    # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
+    if [ $environment = "prod" ]; then
+        cosmosSetupProcesses=(
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"25000\""
+            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
+            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"2000\""
+        )
+    else
+        cosmosSetupProcesses=(
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"2000\""
+            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"2000\""         # 30 days
+            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\""      # 7 days
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"2000\""
+        )
+    fi
+
+    echo "Creating Cosmos collections in parallel"
+    runCommandsWithoutSecretsInParallel cosmosSetupProcesses
+
+    echo "Successfully setup Cosmos account."
+}
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 \
@@ -80,26 +119,6 @@ if [ -z $resourceGroupName ] || [ -z $environment ]; then
     exitWithUsageInfo
 fi
 
-createCosmosAccount
+. "${0%/*}/process-utilities.sh"
 
-scannerDbName="scanner"
-onDemandScannerDbName="onDemandScanner"
-
-createCosmosDatabase "$scannerDbName"
-createCosmosDatabase "$onDemandScannerDbName"
-
-# Increase throughput for below collection only in case of prod
-# Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
-if [ $environment = "prod" ]; then
-    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "25000"
-    createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "20000"        # 30 days
-    createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "2000" # 7 days
-    createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "20000"     # 7 days
-    createCosmosCollection "systemData" "$onDemandScannerDbName" "-1" "2000"
-else
-    createCosmosCollection "a11yIssues" "$scannerDbName" "-1" "2000"
-    createCosmosCollection "scanRuns" "$onDemandScannerDbName" "2592000" "2000"         # 30 days
-    createCosmosCollection "scanBatchRequests" "$onDemandScannerDbName" "604800" "2000" # 7 days
-    createCosmosCollection "scanRequests" "$onDemandScannerDbName" "604800" "2000"      # 7 days
-    createCosmosCollection "systemData" "$onDemandScannerDbName" "-1" "2000"
-fi
+setupCosmos

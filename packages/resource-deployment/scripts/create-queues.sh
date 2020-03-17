@@ -23,27 +23,40 @@ createQueue() {
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -s <storage account name>
+Usage: $0 -r <resource group name>
 "
     exit 1
 }
 
+function setupQueues() {
+    echo "Creating Queues in parallel"
+    local createQueueProcesses=(
+        "createQueue \"scanrequest\""
+        "createQueue \"scanrequest-dead\""
+        "createQueue \"ondemand-scanrequest\""
+        "createQueue \"ondemand-scanrequest-dead\""
+        "createQueue \"ondemand-send-notification\""
+        "createQueue \"ondemand-send-notification-dead\""
+    )
+    runCommandsWithoutSecretsInParallel createQueueProcesses
+
+    echo "Successfully created all queues."
+}
+
 # Read script arguments
-while getopts ":s:" option; do
+while getopts ":r:" option; do
     case $option in
-    s) storageAccountName=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $storageAccountName ]]; then
+if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-createQueue "scanrequest"
-createQueue "scanrequest-dead"
-createQueue "ondemand-scanrequest"
-createQueue "ondemand-scanrequest-dead"
-createQueue "ondemand-send-notification"
-createQueue "ondemand-send-notification-dead"
+. "${0%/*}/process-utilities.sh"
+. "${0%/*}/get-resource-names.sh"
+
+setupQueues

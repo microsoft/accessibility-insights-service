@@ -5,16 +5,9 @@
 
 set -eo pipefail
 
-export jobManagerContainerName="batch-job-manager-script"
-export webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
-export webApiSendNotificationJobManagerContainerName="batch-web-api-send-notification-job-manager-script"
-export runnerContainerName="batch-runner-script"
-export webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
-export webApiSendNotificationRunnerContainerName="batch-web-api-send-notification-runner-script"
-export scanRequestSenderContainerName="batch-scan-request-sender-script"
-export onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
-export poolStartupContainerName="batch-pool-startup-script"
-export includePattern="*[!*.map]"
+export resourceGroupName
+export dropFolder
+export environment
 
 if [[ -z $dropFolder ]]; then
     dropFolder="${0%/*}/../../../"
@@ -28,7 +21,7 @@ uploadFolderContents() {
     destinationContainer=$1
     pathToSource=$2
     storageAccountName=$3
-    includePattern=$4
+    local includePattern="*[!*.map]"
 
     az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
 }
@@ -36,15 +29,15 @@ uploadFolderContents() {
 exitWithUsageInfo() {
     echo \
         "
-Usage: $0 -s <storage account name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> -e <deploy environment>
+Usage: $0 -r <resource group name> -d <path to drop folder. Will use '$dropFolder' folder relative to current working directory> -e <deploy environment>
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":s:d:e:" option; do
+while getopts ":r:d:e:" option; do
     case $option in
-    s) storageAccountName=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
@@ -52,19 +45,44 @@ while getopts ":s:d:e:" option; do
 done
 
 # Print script usage help
-if [[ -z $storageAccountName ]] || [[ -z $dropFolder ]] || [[ -z $environment ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $dropFolder ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
-echo "Uploading files to blobs"
+. "${0%/*}/get-resource-names.sh"
+. "${0%/*}/process-utilities.sh"
 
-uploadFolderContents $jobManagerContainerName "$dropFolder/job-manager/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webApiScanJobManagerContainerName "$dropFolder/web-api-scan-job-manager/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webApiSendNotificationJobManagerContainerName "$dropFolder/web-api-send-notification-job-manager/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $runnerContainerName "$dropFolder/runner/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webApiScanrunnerContainerName "$dropFolder/web-api-scan-runner/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $webApiSendNotificationRunnerContainerName "$dropFolder/web-api-send-notification-runner/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $scanRequestSenderContainerName "$dropFolder/scan-request-sender/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $onDemandScanRequestSenderContainerName "$dropFolder/web-api-scan-request-sender/dist" "$storageAccountName" "$includePattern"
-uploadFolderContents $poolStartupContainerName "$dropFolder/resource-deployment/dist/scripts/pool-startup" "$storageAccountName" "$includePattern"
-. "${0%/*}/upload-config-files.sh"
+function uploadFiles() {
+    echo "Uploading files to blobs"
+    
+    local jobManagerContainerName="batch-job-manager-script"
+    local webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
+    local webApiSendNotificationJobManagerContainerName="batch-web-api-send-notification-job-manager-script"
+    local runnerContainerName="batch-runner-script"
+    local webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
+    local webApiSendNotificationRunnerContainerName="batch-web-api-send-notification-runner-script"
+    local scanRequestSenderContainerName="batch-scan-request-sender-script"
+    local onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
+    local poolStartupContainerName="batch-pool-startup-script"
+
+
+    uploadProcesses=(
+        "uploadFolderContents $jobManagerContainerName \"$dropFolder/job-manager/dist\" \"$storageAccountName\""
+        "uploadFolderContents $webApiScanJobManagerContainerName \"$dropFolder/web-api-scan-job-manager/dist\" \"$storageAccountName\""
+        "uploadFolderContents $webApiSendNotificationJobManagerContainerName \"$dropFolder/web-api-send-notification-job-manager/dist\" \"$storageAccountName\""
+        "uploadFolderContents $runnerContainerName \"$dropFolder/runner/dist\" \"$storageAccountName\""
+        "uploadFolderContents $webApiScanrunnerContainerName \"$dropFolder/web-api-scan-runner/dist\" \"$storageAccountName\""
+        "uploadFolderContents $webApiSendNotificationRunnerContainerName \"$dropFolder/web-api-send-notification-runner/dist\" \"$storageAccountName\""
+        "uploadFolderContents $scanRequestSenderContainerName \"$dropFolder/scan-request-sender/dist\" \"$storageAccountName\""
+        "uploadFolderContents $onDemandScanRequestSenderContainerName \"$dropFolder/web-api-scan-request-sender/dist\" \"$storageAccountName\""
+        "uploadFolderContents $poolStartupContainerName \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
+        "${0%/*}/upload-config-files.sh"
+    )
+    runCommandsWithoutSecretsInParallel uploadProcesses
+
+    echo "Upload files completed successfully."
+}
+
+uploadFiles
+
+
