@@ -11,4 +11,8 @@ export declare type LoggerEvent =
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'
     | 'ScanTaskFailed'
-    | 'FunctionalTest';
+    | 'FunctionalTest'
+    | 'SendNotificationTaskStarted'
+    | 'SendNotificationTaskCompleted'
+    | 'SendNotificationTaskFailed'
+    | 'SendNotificationTaskSucceeded';
