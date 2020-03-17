@@ -61,15 +61,6 @@ export class WebApiErrorCodes {
         },
     };
 
-    public static invalidReplyURL: WebApiErrorCode = {
-        statusCode: 400,
-        error: {
-            code: 'InvalidReplyURL',
-            codeId: 4003,
-            message: 'The reply URL is not valid.',
-        },
-    };
-
     public static invalidJsonDocument: WebApiErrorCode = {
         statusCode: 400,
         error: {
@@ -139,6 +130,15 @@ export class WebApiErrorCodes {
             code: 'MalformedBody',
             codeId: 4011,
             message: 'The request body does not match the API schema for the given API version.',
+        },
+    };
+
+    public static invalidReplyURL: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'InvalidReplyURL',
+            codeId: 4012,
+            message: 'The reply URL is not valid.',
         },
     };
 
