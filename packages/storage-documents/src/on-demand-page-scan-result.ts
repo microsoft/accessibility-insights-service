@@ -6,6 +6,7 @@ import { ItemType } from './item-type';
 export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type NotificationState = 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
 
 export type ScanErrorTypes =
     | 'UrlNavigationTimeout'
@@ -24,6 +25,8 @@ export interface ScanError {
     message: string;
 }
 
+export type NotificationErrorTypes = 'HttpErrorCode';
+
 /**
  * The web page scan run result document.
  */
@@ -36,6 +39,18 @@ export interface OnDemandPageScanResult extends StorageDocument {
     priority: number;
     itemType: ItemType.onDemandPageScanRunResult;
     batchRequestId: string;
+    notification?: ScanCompletedNotification;
+}
+
+export interface ScanCompletedNotification {
+    notificationUrl: string;
+    state?: NotificationState;
+    error?: NotificationError;
+}
+
+export interface NotificationError {
+    errorType: NotificationErrorTypes;
+    message: string;
 }
 
 export interface OnDemandScanResult {
