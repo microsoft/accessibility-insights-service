@@ -26,10 +26,7 @@ describe(Runner, () => {
         scanMetadataConfigMock = Mock.ofType(ScanMetadataConfig);
         scanMetadataConfigMock.setup(s => s.getConfig()).returns(() => scanMetadata);
 
-        runner = new Runner(
-            scanMetadataConfigMock.object,
-            loggerMock.object,
-        );
+        runner = new Runner(scanMetadataConfigMock.object, loggerMock.object);
     });
 
     it('Run', async () => {
@@ -43,5 +40,4 @@ describe(Runner, () => {
         scanMetadataConfigMock.verifyAll();
         loggerMock.verifyAll();
     });
-
 });
