@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, Message, PoolLoadGenerator, Queue } from 'azure-services';
+import { Batch, BatchConfig, Queue } from 'azure-services';
 import { IMock, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SendNotificationTaskCreator } from './send-notification-task-creator';

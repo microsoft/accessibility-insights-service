@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AzureServicesIocTypes, BatchTaskParameterProvider, registerAzureServicesToContainer } from 'azure-services';
+import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import { Container } from 'inversify';
 import { registerGlobalLoggerToContainer } from 'logger';
