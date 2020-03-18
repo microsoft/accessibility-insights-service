@@ -85,8 +85,7 @@ export class ScanRequestController extends ApiController {
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
     }
 
-    // tslint:disable-next-line: no-any
-    private getResponse(processedData: ProcessedBatchRequestData): any {
+    private getResponse(processedData: ProcessedBatchRequestData): ScanRunResponse | ScanRunResponse[] {
         const isV2 = this.context.req.query['api-version'] === '2.0' ? true : false;
         let response;
         if (isV2) {
