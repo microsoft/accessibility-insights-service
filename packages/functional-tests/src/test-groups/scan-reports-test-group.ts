@@ -34,7 +34,7 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
 
     @test(TestEnvironment.all)
     public async testGetScanReportWithInvalidGuid(): Promise<void> {
-        const invalidGuid = '00000000-0000-0000-0000-000000000000';
+        const invalidGuid = 'invalid guid';
         const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);
 
         this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
