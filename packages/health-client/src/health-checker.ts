@@ -2,7 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { System } from 'common';
+import { ServiceConfiguration, System } from 'common';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { TestRunResult } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
@@ -19,26 +20,32 @@ type Argv = {
 };
 
 const argv: Argv = yargs.argv as any;
-const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl);
-const client = new A11yServiceClient(cred, argv.baseUrl);
-const testTimeoutInMinutes = 20;
-const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
-const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
 
 const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boolean => {
     return currentTime.getTime() - startTime.getTime() > timeout;
 };
 
 (async () => {
-    console.log('[health-client] Start evaluation of functional tests result.');
-    console.log(`[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`);
+    const serviceConfig = new ServiceConfiguration();
+    const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
+    await logger.setup();
+    const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
+    const client = new A11yServiceClient(cred, argv.baseUrl);
+    const testTimeoutInMinutes = 20;
+    const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
+    const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
+
+    logger.logInfo('[health-client] Start evaluation of functional tests result.');
+    logger.logInfo(
+        `[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`,
+    );
     await System.wait(waitTimeBeforeEvaluation);
 
     let healthStatus: TestRunResult;
     const startTime = new Date();
     while (healthStatus !== 'pass') {
         try {
-            console.log('[health-client] Retrieving functional tests result.');
+            logger.logInfo('[health-client] Retrieving functional tests result.');
 
             const response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
@@ -47,21 +54,21 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
                 );
             }
 
-            console.log(`[health-client] Functional tests result: ${JSON.stringify(response.body)}`);
+            logger.logInfo(`[health-client] Functional tests result: ${JSON.stringify(response.body)}`);
 
             healthStatus = response.body.healthStatus;
         } catch (error) {
-            console.log(`[health-client] Failed to retrieve functional tests result. ${error}`);
+            logger.logInfo(`[health-client] Failed to retrieve functional tests result. ${error}`);
         }
 
         if (healthStatus !== 'pass') {
             if (isTestTimeout(startTime, new Date(), testTimeoutInMinutes * 60000)) {
-                console.log('[health-client] Functional tests result validation timed out.');
+                logger.logInfo('[health-client] Functional tests result validation timed out.');
 
                 throw new Error('[health-client] Functional tests result validation timed out.');
             }
 
-            console.log(
+            logger.logInfo(
                 `[health-client] Functional tests health status: ${
                     healthStatus ? healthStatus : 'unknown'
                 } . Waiting for next evaluation result.`,
@@ -69,7 +76,7 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
 
             await System.wait(evaluationInterval);
         } else {
-            console.log('[health-client] Functional tests succeeded.');
+            logger.logInfo('[health-client] Functional tests succeeded.');
         }
     }
 })().catch(error => {
