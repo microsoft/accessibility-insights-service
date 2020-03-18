@@ -83,6 +83,15 @@ describe(ScanRequestController, () => {
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
         });
 
+        it('rejects request invalid reply url', async () => {
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', replyUrl: 'invalid-url' }]);
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidReplyURL.error);
+        });
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { BatchScanRequestMeasurements, Logger } from 'logger';
 import {
     ApiController,
@@ -14,9 +14,6 @@ import {
     WebApiErrorCodes,
 } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
-
-// tslint:disable: no-any
-type DictionaryStringToNumber = { [name: string]: number };
 
 interface ProcessedBatchRequestData {
     scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
@@ -88,7 +85,7 @@ export class ScanRequestController extends ApiController {
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
     }
 
-    private getResponse(processedData: ProcessedBatchRequestData): any {
+    private getResponse(processedData: ProcessedBatchRequestData): ScanRunResponse | ScanRunResponse[] {
         const isV2 = this.context.req.query['api-version'] === '2.0' ? true : false;
         let response;
         if (isV2) {
@@ -129,6 +126,7 @@ export class ScanRequestController extends ApiController {
                     scanId: scanId,
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
+                    ...(isEmpty(scanRunRequest.replyUrl) ? {} : { replyUrl: scanRunRequest.replyUrl }),
                 });
 
                 scanResponses.push({
@@ -152,6 +150,10 @@ export class ScanRequestController extends ApiController {
     private validateRunRequest(scanRunRequest: ScanRunRequest): RunRequestValidationResult {
         if (Url.tryParseUrlString(scanRunRequest.url) === undefined) {
             return { valid: false, error: WebApiErrorCodes.invalidURL.error };
+        }
+
+        if (!isEmpty(scanRunRequest.replyUrl) && Url.tryParseUrlString(scanRunRequest.replyUrl) === undefined) {
+            return { valid: false, error: WebApiErrorCodes.invalidReplyURL.error };
         }
 
         if (scanRunRequest.priority < this.config.minScanPriorityValue || scanRunRequest.priority > this.config.maxScanPriorityValue) {

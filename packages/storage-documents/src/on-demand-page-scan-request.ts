@@ -8,4 +8,5 @@ export interface OnDemandPageScanRequest extends StorageDocument {
     url: string;
     priority: number;
     itemType: ItemType.onDemandPageScanRequest;
+    replyUrl?: string;
 }
