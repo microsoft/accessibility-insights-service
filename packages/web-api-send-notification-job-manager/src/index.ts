@@ -8,3 +8,19 @@ import 'reflect-metadata';
     console.log('Exception thrown in send notification job manager: ', error);
     process.exit(1);
 });
+
+import { WhyNodeRunningLogger } from 'common';
+
+import { SendNotificationJobManagerEntryPoint } from './send-notification-job-manager-entry-point';
+import { setupSendNotificationJobManagerContainer } from './setup-send-notification-job-manager-container';
+
+const whyNodeRunLogger = new WhyNodeRunningLogger();
+
+(async () => {
+    const sendNotificationJobManagerEntryPoint = new SendNotificationJobManagerEntryPoint(setupSendNotificationJobManagerContainer());
+    await sendNotificationJobManagerEntryPoint.start();
+    await whyNodeRunLogger.logAfterSeconds(10);
+})().catch(error => {
+    console.log('Exception thrown in send notification job manager: ', error);
+    process.exit(1);
+});
