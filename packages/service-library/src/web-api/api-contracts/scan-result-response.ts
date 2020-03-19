@@ -7,7 +7,7 @@ export declare type LinkType = 'self';
 export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
-export declare type NotificationState = 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
+export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
 export type NotificationErrorTypes = 'HttpErrorCode';
 
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;

@@ -89,6 +89,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-1',
                         url: 'url-1',
                         priority: 1,
+                        replyUrl: 'reply-url-1',
                     },
                     {
                         scanId: 'scan-2',
@@ -140,7 +141,7 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
         const dbDocuments = document.scanRunBatchRequest
             .filter(request => request.scanId !== undefined)
             .map<OnDemandPageScanResult>(request => {
-                return {
+                const res: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
@@ -152,6 +153,14 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                     },
                     batchRequestId: document.id,
                 };
+                if (request.replyUrl !== undefined) {
+                    res.notification = {
+                        state: 'pending',
+                        replyUrl: request.replyUrl,
+                    };
+                }
+
+                return res;
             });
         onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
     });
@@ -162,13 +171,19 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
         const dbDocuments = document.scanRunBatchRequest
             .filter(request => request.scanId !== undefined)
             .map<OnDemandPageScanRequest>(request => {
-                return {
+                const res: OnDemandPageScanRequest = {
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
+
+                if (request.replyUrl !== undefined) {
+                    res.replyUrl = request.replyUrl;
+                }
+
+                return res;
             });
         pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments)).verifiable(Times.once());
         scanDataProviderMock.setup(async o => o.deleteBatchRequest(document)).verifiable(Times.once());
