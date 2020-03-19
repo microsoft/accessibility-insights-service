@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import * as MockDate from 'mockdate';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
@@ -16,11 +17,16 @@ type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any
 const dbName = 'dbName';
 const collectionName = 'collectionName';
 const partitionKey = 'default-partitionKey';
+const startTime = new Date();
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let cosmosContainerClient: CosmosContainerClient;
 let operationCallbackMock: IMock<OperationCallback>;
 let loggerMock: IMock<MockableLogger>;
+
+const sleepFunctionStub = async (millis: number) => {
+    MockDate.set(Date.now() + millis);
+};
 
 const retryOptions = {
     timeoutMilliseconds: 1000,
@@ -32,7 +38,14 @@ beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
     operationCallbackMock = Mock.ofType<OperationCallback>();
     loggerMock = Mock.ofType(MockableLogger);
-    cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
+    cosmosContainerClient = new CosmosContainerClient(
+        cosmosClientWrapperMock.object,
+        dbName,
+        collectionName,
+        loggerMock.object,
+        sleepFunctionStub
+    );
+    MockDate.set(startTime);
 });
 
 describe('mergeOrWriteDocument()', () => {
