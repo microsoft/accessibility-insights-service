@@ -17,5 +17,6 @@ export class NotificationSender {
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
         this.logger.logInfo(`Id: ${notificationSenderConfigData.id}`);
         this.logger.logInfo(`Reply URL: ${notificationSenderConfigData.replyUrl}`);
+        this.logger.logInfo(`Scan Status: ${notificationSenderConfigData.scanStatus}`);
     }
 }

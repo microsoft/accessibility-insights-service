@@ -19,6 +19,7 @@ describe(NotificationSender, () => {
     const notificationSenderMetadata: NotificationSenderMetadata = {
         id: 'id',
         replyUrl: 'replyUrl',
+        scanStatus: 'pass',
     };
 
     beforeEach(() => {
@@ -32,6 +33,7 @@ describe(NotificationSender, () => {
     it('Send Notification', async () => {
         loggerMock.setup(lm => lm.logInfo(`Id: ${notificationSenderMetadata.id}`)).verifiable(Times.once());
         loggerMock.setup(lm => lm.logInfo(`Reply URL: ${notificationSenderMetadata.replyUrl}`)).verifiable(Times.once());
+        loggerMock.setup(lm => lm.logInfo(`Scan Status: ${notificationSenderMetadata.scanStatus}`)).verifiable(Times.once());
 
         await sender.sendNotification();
     });
