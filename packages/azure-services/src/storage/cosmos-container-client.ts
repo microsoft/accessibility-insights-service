@@ -25,7 +25,7 @@ export class CosmosContainerClient {
         private readonly collectionName: string,
         private readonly logger: Logger,
         private readonly sleepFunction: (millis: number) => Promise<void> = defaultSleepFunction,
-    ) { }
+    ) {}
 
     public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
         return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);

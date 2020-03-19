@@ -43,7 +43,7 @@ beforeEach(() => {
         dbName,
         collectionName,
         loggerMock.object,
-        sleepFunctionStub
+        sleepFunctionStub,
     );
     MockDate.set(startTime);
 });

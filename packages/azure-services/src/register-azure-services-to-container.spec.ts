@@ -3,7 +3,7 @@
 // tslint:disable: no-any no-unsafe-any
 import 'reflect-metadata';
 
-import { CosmosClient } from '@azure/cosmos';
+import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
@@ -30,6 +30,10 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+
+const cosmosClientFactoryStub = (options: CosmosClientOptions) => {
+    return ({ test: 'cosmosClient', options: options } as unknown) as CosmosClient;
+};
 
 describe('BatchServiceClient', () => {
     let secretProviderMock: IMock<SecretProvider>;
@@ -255,24 +259,38 @@ describe(registerAzureServicesToContainer, () => {
         let secretProviderMock: IMock<SecretProvider>;
         const cosmosDbUrl = 'db url';
         const cosmosDbKey = 'db key';
+        const expectedOptions = { endpoint: cosmosDbUrl, key: cosmosDbKey };
+
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
-            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbUrl)).returns(async () => Promise.resolve(cosmosDbUrl));
-            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).returns(async () => Promise.resolve(cosmosDbKey));
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.cosmosDbUrl))
+                .returns(async () => Promise.resolve(cosmosDbUrl))
+                .verifiable();
+            secretProviderMock
+                .setup(async s => s.getSecret(secretNames.cosmosDbKey))
+                .returns(async () => Promise.resolve(cosmosDbKey))
+                .verifiable();
+        });
 
-            registerAzureServicesToContainer(container);
-            stubBinding(container, SecretProvider, secretProviderMock.object);
+        afterEach(() => {
+            secretProviderMock.verifyAll();
         });
 
         it('verify CosmosClientProvider resolution', async () => {
+            runCosmosClientTest(container, secretProviderMock);
+
+            const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
             const cosmosClient = await cosmosClientProvider();
 
-            expect(cosmosClient).toBeInstanceOf(CosmosClient);
+            expect(cosmosClient).toEqual(expectedCosmosClient);
         });
 
         it('creates singleton queueService instance', async () => {
+            runCosmosClientTest(container, secretProviderMock);
+
             const cosmosClientProvider1 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
             const cosmosClientProvider2 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
 
@@ -280,6 +298,22 @@ describe(registerAzureServicesToContainer, () => {
             const cosmosClient2Promise = cosmosClientProvider2();
 
             expect(await cosmosClient1Promise).toBe(await cosmosClient2Promise);
+        });
+
+        it('use env variables if available', async () => {
+            secretProviderMock.reset();
+            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
+            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).verifiable(Times.never());
+            process.env.COSMOS_DB_URL = cosmosDbUrl;
+            process.env.COSMOS_DB_KEY = cosmosDbKey;
+
+            runCosmosClientTest(container, secretProviderMock);
+
+            const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
+            const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
+            const cosmosClient = await cosmosClientProvider();
+
+            expect(cosmosClient).toEqual(expectedCosmosClient);
         });
     });
 });
@@ -308,4 +342,9 @@ function verifyCosmosContainerClient(container: Container, cosmosContainerType: 
     const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
     expect((cosmosContainerClient as any).dbName).toBe(dbName);
     expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
+}
+
+function runCosmosClientTest(container: Container, secretProviderMock: IMock<SecretProvider>): void {
+    registerAzureServicesToContainer(container, CredentialType.VM, cosmosClientFactoryStub);
+    stubBinding(container, SecretProvider, secretProviderMock.object);
 }
