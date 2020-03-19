@@ -66,6 +66,7 @@ describe(Batch, () => {
     let batchTaskParameterProvider: IMock<BatchTaskParameterProvider>;
     let maxTaskDurationInMinutes: number;
     let taskParameter: BatchServiceModels.TaskAddParameter;
+    const maxTasks = 10;
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
@@ -113,6 +114,7 @@ describe(Batch, () => {
             storageContainerSASUrlProviderMock.object,
             config,
             loggerMock.object,
+            maxTasks,
         );
     });
 
@@ -341,8 +343,8 @@ describe(Batch, () => {
             expect(tasksActual.length).toBe(0);
         });
 
-        it('should add no more than 100 tasks in a single Batch API call', async () => {
-            const messagesCount = 103;
+        it('should add no more than maxTasks tasks in a single Batch API call', async () => {
+            const messagesCount = maxTasks + 3;
             const messages = [];
             const tasksAddedBatchCount: number[] = [];
             const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
@@ -391,7 +393,7 @@ describe(Batch, () => {
 
             expect(tasksActual.length).toEqual(messagesCount);
             expect(tasksAddedBatchCount.length).toEqual(2);
-            expect(tasksAddedBatchCount[0]).toEqual(100);
+            expect(tasksAddedBatchCount[0]).toEqual(maxTasks);
             expect(tasksAddedBatchCount[1]).toEqual(3);
             taskMock.verifyAll();
             batchTaskParameterProvider.verifyAll();
