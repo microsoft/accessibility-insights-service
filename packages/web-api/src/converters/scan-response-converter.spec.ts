@@ -3,7 +3,13 @@
 import 'reflect-metadata';
 
 import { RunState as RunStateRestApi, ScanResultResponse, ScanRunErrorCodes } from 'service-library';
-import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb } from 'storage-documents';
+import {
+    ItemType,
+    NotificationState,
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState as RunStateDb,
+    ScanCompletedNotification,
+} from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { ScanResponseConverter } from './scan-response-converter';
@@ -18,6 +24,7 @@ let scanResponseConverter: ScanResponseConverter;
 let scanRunErrorConverterMock: IMock<ScanRunErrorConverter>;
 const pageTitle = 'sample page title';
 const pageResponseCode = 101;
+let notification: ScanCompletedNotification;
 
 beforeEach(() => {
     scanRunErrorConverterMock = Mock.ofType(ScanRunErrorConverter);
@@ -27,9 +34,13 @@ beforeEach(() => {
         .verifiable(Times.once());
 
     scanResponseConverter = new ScanResponseConverter(scanRunErrorConverterMock.object);
+    notification = {
+        replyUrl: 'reply-url',
+        state: 'queued',
+    };
 });
 
-function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
+function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): OnDemandPageScanResult {
     return {
         id: 'id',
         itemType: ItemType.onDemandPageScanRunResult,
@@ -54,10 +65,11 @@ function getPageScanResult(state: RunStateDb): OnDemandPageScanResult {
             pageResponseCode: pageResponseCode,
         },
         batchRequestId: 'batch-id',
+        ...(isNotificationEnabled ? { notification } : {}),
     };
 }
 
-function getScanResultClientResponseFull(state: RunStateRestApi): ScanResultResponse {
+function getScanResultClientResponseFull(state: RunStateRestApi, isNotificationEnabled = false): ScanResultResponse {
     return {
         scanId: 'id',
         url: 'url',
@@ -80,10 +92,11 @@ function getScanResultClientResponseFull(state: RunStateRestApi): ScanResultResp
             pageResponseCode: pageResponseCode,
             pageTitle: pageTitle,
         },
+        ...(isNotificationEnabled ? { notification } : {}),
     };
 }
 
-function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultResponse {
+function getScanResultClientResponseShort(state: RunStateRestApi, isNotificationEnabled = false): ScanResultResponse {
     const response: ScanResultResponse = {
         scanId: 'id',
         url: 'url',
@@ -91,6 +104,7 @@ function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultRes
             state: state,
             error: state === 'failed' ? ScanRunErrorCodes.internalError : undefined,
         },
+        ...(isNotificationEnabled ? { notification } : {}),
     };
 
     if (state === 'completed' || state === 'failed') {
@@ -101,9 +115,9 @@ function getScanResultClientResponseShort(state: RunStateRestApi): ScanResultRes
     return response;
 }
 
-function validateConverterShortResult(dbState: RunStateDb, clientState: RunStateRestApi): void {
-    const pageScanDbResult = getPageScanResult(dbState);
-    const responseExpected = getScanResultClientResponseShort(clientState);
+function validateConverterShortResult(dbState: RunStateDb, clientState: RunStateRestApi, isNotificationEnabled = false): void {
+    const pageScanDbResult = getPageScanResult(dbState, isNotificationEnabled);
+    const responseExpected = getScanResultClientResponseShort(clientState, isNotificationEnabled);
 
     const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
 
@@ -117,6 +131,15 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('queued', 'queued');
         validateConverterShortResult('running', 'running');
         validateConverterShortResult('failed', 'failed');
+        scanRunErrorConverterMock.verifyAll();
+    });
+
+    it('return scan run with notification state if it exists', () => {
+        validateConverterShortResult('pending', 'pending', true);
+        validateConverterShortResult('accepted', 'accepted', true);
+        validateConverterShortResult('queued', 'queued', true);
+        validateConverterShortResult('running', 'running', true);
+        validateConverterShortResult('failed', 'failed', true);
         scanRunErrorConverterMock.verifyAll();
     });
 

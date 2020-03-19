@@ -3,7 +3,8 @@
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanReport, ScanResultResponse } from 'service-library';
-import { OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
+import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
+import { isNullOrUndefined } from 'util';
 import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 @injectable()
@@ -12,6 +13,9 @@ export class ScanResponseConverter {
 
     public getScanResultResponse(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
         const runState: OnDemandPageScanRunState = pageScanResultDocument.run.state;
+        const notificationResponse = isNullOrUndefined(pageScanResultDocument.notification)
+            ? {}
+            : { notification: pageScanResultDocument.notification };
         switch (runState) {
             case 'pending':
             case 'accepted':
@@ -24,6 +28,7 @@ export class ScanResponseConverter {
                     run: {
                         state: pageScanResultDocument.run.state,
                     },
+                    ...notificationResponse,
                 };
             case 'failed':
                 return {
@@ -36,6 +41,7 @@ export class ScanResponseConverter {
                         pageResponseCode: pageScanResultDocument.run.pageResponseCode,
                         pageTitle: pageScanResultDocument.run.pageTitle,
                     },
+                    ...notificationResponse,
                 };
             case 'completed':
                 const scanResultResponse: ScanResultResponse = {
@@ -52,6 +58,7 @@ export class ScanResponseConverter {
                         pageResponseCode: pageScanResultDocument.run.pageResponseCode,
                         pageTitle: pageScanResultDocument.run.pageTitle,
                     },
+                    ...notificationResponse,
                 };
                 if (pageScanResultDocument.scannedUrl !== undefined) {
                     scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
