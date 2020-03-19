@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { injectable } from 'inversify';
+
 export type ErrorHandler = (err: Error) => Promise<void>;
 
 async function defaultSleepFunction(milliseconds: number): Promise<void> {
@@ -8,6 +10,7 @@ async function defaultSleepFunction(milliseconds: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
 }
 
+@injectable()
 export class RetryHelper<T> {
     public constructor(private readonly sleepFunction: (millis: number) => Promise<void> = defaultSleepFunction) {}
 

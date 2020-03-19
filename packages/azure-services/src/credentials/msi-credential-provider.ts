@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
+import { RetryHelper } from 'common';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 
@@ -23,21 +24,38 @@ export class MSICredentialsProvider {
         @inject(iocTypeNames.msRestAzure) private readonly msrestAzureObj: typeof msRestNodeAuth,
         @inject(iocTypeNames.AuthenticationMethod) private readonly authenticationMethod: AuthenticationMethod,
         @inject(iocTypeNames.CredentialType) private readonly credentialType: CredentialType,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<Credentials>,
+        private readonly maxAttempts: number = 3,
+        private readonly millisBetweenRetries: number = 1000,
     ) {}
 
     public async getCredentials(resource: string): Promise<Credentials> {
+        let getCredentialsFunction: () => Promise<Credentials>;
+
         if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
             const clientId = process.env.SP_CLIENT_ID;
             const password = process.env.SP_PASSWORD;
             const tenant = process.env.SP_TENANT;
 
-            return this.msrestAzureObj.loginWithServicePrincipalSecret(clientId, password, tenant, { tokenAudience: resource });
+            getCredentialsFunction = async () =>
+                this.msrestAzureObj.loginWithServicePrincipalSecret(clientId, password, tenant, { tokenAudience: resource });
+        } else if (this.credentialType === CredentialType.VM) {
+            getCredentialsFunction = async () => this.msrestAzureObj.loginWithVmMSI({ resource });
+        } else {
+            getCredentialsFunction = async () => this.msrestAzureObj.loginWithAppServiceMSI({ resource });
         }
 
-        if (this.credentialType === CredentialType.VM) {
-            return this.msrestAzureObj.loginWithVmMSI({ resource });
-        } else {
-            return this.msrestAzureObj.loginWithAppServiceMSI({ resource });
+        try {
+            return this.retryHelper.executeWithRetries(
+                getCredentialsFunction,
+                async (err: Error) => {
+                    return;
+                },
+                this.maxAttempts,
+                this.millisBetweenRetries,
+            );
+        } catch (err) {
+            throw new Error(`MSI getToken failed ${this.maxAttempts} times with error: ${JSON.stringify(err)}`);
         }
     }
 }
