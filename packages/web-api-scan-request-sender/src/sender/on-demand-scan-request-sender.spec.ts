@@ -148,10 +148,6 @@ describe('Scan request sender', () => {
     }
 
     function createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest): OnDemandScanRequestMessage {
-        return {
-            id: scanRequest.id,
-            url: scanRequest.url,
-            priority: scanRequest.priority,
-        };
+        return { id: scanRequest.id };
     }
 });

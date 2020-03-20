@@ -3,6 +3,4 @@
 
 export interface OnDemandScanRequestMessage {
     id: string;
-    url: string;
-    priority: number;
 }

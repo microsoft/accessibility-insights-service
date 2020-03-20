@@ -12,7 +12,7 @@ export class OnDemandScanRequestSender {
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(Queue) private readonly queue: Queue,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-    ) {}
+    ) { }
 
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
         await Promise.all(
@@ -42,10 +42,6 @@ export class OnDemandScanRequestSender {
     }
 
     private createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest): OnDemandScanRequestMessage {
-        return {
-            id: scanRequest.id,
-            url: scanRequest.url,
-            priority: scanRequest.priority,
-        };
+        return { id: scanRequest.id };
     }
 }
