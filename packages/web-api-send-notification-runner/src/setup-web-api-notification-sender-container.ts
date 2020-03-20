@@ -10,7 +10,6 @@ export function setupWebApiNotificationSenderContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);
     registerGlobalLoggerToContainer(container);
-    // tslint:disable-next-line: no-unsafe-any
     registerAzureServicesToContainer(container);
     registerServiceLibraryToContainer(container);
 

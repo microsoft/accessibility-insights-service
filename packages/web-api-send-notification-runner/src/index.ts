@@ -11,7 +11,7 @@ const whyNodeRunLogger = new WhyNodeRunningLogger();
 
 (async () => {
     await new WebApiNotificationSenderEntryPoint(setupWebApiNotificationSenderContainer()).start();
-    await whyNodeRunLogger.logAfterSeconds(10);
+    // await whyNodeRunLogger.logAfterSeconds(10);
 })().catch(() => {
     process.exit(1);
 });

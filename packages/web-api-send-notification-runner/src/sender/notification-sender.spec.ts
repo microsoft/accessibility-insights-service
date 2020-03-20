@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSenderConfig } from '../notification-sender-config';
+import { NotificationSenderWebAPIClient } from '../tasks/notification-sender-web-api-client';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 import { NotificationSender } from './notification-sender';
 
@@ -14,6 +15,7 @@ class MockableLogger extends Logger {}
 
 describe(NotificationSender, () => {
     let sender: NotificationSender;
+    let webAPIMock: IMock<NotificationSenderWebAPIClient>;
     let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
     const notificationSenderMetadata: NotificationSenderMetadata = {
@@ -23,11 +25,12 @@ describe(NotificationSender, () => {
     };
 
     beforeEach(() => {
+        webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
         loggerMock = Mock.ofType(MockableLogger);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
-        sender = new NotificationSender(notificationSenderMetadataMock.object, loggerMock.object);
+        sender = new NotificationSender(webAPIMock.object, notificationSenderMetadataMock.object, loggerMock.object);
     });
 
     it('Send Notification', async () => {
