@@ -14,17 +14,13 @@ import { RetryOptions } from './retry-options';
 
 // tslint:disable: no-any no-unsafe-any
 
-async function defaultSleepFunction(millis: number): Promise<void> {
-    await System.wait(millis);
-}
-
 export class CosmosContainerClient {
     constructor(
         private readonly cosmosClientWrapper: CosmosClientWrapper,
         private readonly dbName: string,
         private readonly collectionName: string,
         private readonly logger: Logger,
-        private readonly sleepFunction: (millis: number) => Promise<void> = defaultSleepFunction,
+        private readonly systemUtils: typeof System = System,
     ) {}
 
     public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
@@ -175,7 +171,7 @@ export class CosmosContainerClient {
                     break;
                 }
 
-                await this.sleepFunction(retryOptions.intervalMilliseconds);
+                await this.systemUtils.wait(retryOptions.intervalMilliseconds);
             }
         });
     }
