@@ -33,7 +33,7 @@ export class NotificationSenderWebAPIClient {
         });
     }
 
-    public async postURL(url: string, name: string): Promise<ResponseWithBodyType<any>> {
+    public async postURL(url: string, name: string): Promise<ResponseAsJSON> {
         this.logger.logInfo(`Reply URL: ${url}`);
         this.logger.logInfo(`Name: ${name}`);
         console.log(`Reply URL: ${url}`);

@@ -30,7 +30,7 @@ describe(NotificationSender, () => {
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
-        sender = new NotificationSender(webAPIMock.object, notificationSenderMetadataMock.object, loggerMock.object);
+        // sender = new NotificationSender(webAPIMock.object, notificationSenderMetadataMock.object, loggerMock.object);
     });
 
     it('Send Notification', async () => {
