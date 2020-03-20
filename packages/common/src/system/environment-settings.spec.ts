@@ -3,10 +3,7 @@
 
 import 'reflect-metadata';
 
-import { inject } from 'inversify';
-import { commonIocTypes } from '../common-ioc-types';
 import { EnvironmentSettings } from './environment-settings';
-import { System } from './system';
 
 // tslint:disable: no-any
 
