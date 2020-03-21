@@ -22,10 +22,7 @@ export class NotificationSenderWebAPIClient {
         json: true,
     };
 
-    constructor(
-        private readonly throwOnRequestFailure: boolean = false,
-        httpRequest: any = requestPromise,
-    ) {
+    constructor(private readonly throwOnRequestFailure: boolean = false, httpRequest: any = requestPromise) {
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
             simple: this.throwOnRequestFailure,
@@ -35,7 +32,7 @@ export class NotificationSenderWebAPIClient {
     public async postNotificationUrl(notificationSenderConfigData: NotificationSenderMetadata): Promise<ResponseAsJSON> {
         const requestBody = {
             scanId: notificationSenderConfigData.scanId,
-            runState: notificationSenderConfigData.runStatus,
+            runStatus: notificationSenderConfigData.runStatus,
             scanStatus: notificationSenderConfigData.scanStatus,
         };
         const options: requestPromise.RequestPromiseOptions = { body: requestBody };

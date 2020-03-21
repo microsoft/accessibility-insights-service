@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { PromiseUtils } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -17,19 +18,18 @@ export class NotificationSender {
         @inject(NotificationSenderWebAPIClient) private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(Logger) private readonly logger: Logger,
+        @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
     ) {}
 
     public async sendNotification(): Promise<void> {
         let pageScanResult: OnDemandPageScanResult;
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
-        console.log(`notificationSenderConfigData: ${notificationSenderConfigData}`);
 
-        console.log(notificationSenderConfigData.scanId);
         this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(notificationSenderConfigData.scanId);
         this.logger.setCustomProperties({ scanId: notificationSenderConfigData.scanId, batchRequestId: pageScanResult.batchRequestId });
 
-        await this.startSendingNotification(notificationSenderConfigData, pageScanResult);
+        pageScanResult = await this.startSendingNotification(notificationSenderConfigData, pageScanResult);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -40,10 +40,9 @@ export class NotificationSender {
     private async startSendingNotification(
         notificationSenderConfigData: NotificationSenderMetadata,
         pageScanResult: OnDemandPageScanResult,
-    ): Promise<void> {
+    ): Promise<OnDemandPageScanResult> {
         let numberOfTries = 1;
         let isNotificationSent = false;
-        // tslint:disable-next-line: prefer-const
         let errors: NotificationError[] = [];
 
         this.logger.trackEvent('SendNotificationTaskStarted');
@@ -69,18 +68,28 @@ export class NotificationSender {
                 errors.push({ errorType: 'HttpErrorCode', message: (e as Error).message });
             }
             numberOfTries = numberOfTries + 1;
+            if (numberOfTries <= 3) {
+                // tslint:disable-next-line: no-unsafe-any
+                await this.promiseUtils.delay(5000);
+            }
         }
 
         const notificationState: NotificationState = isNotificationSent ? 'sent' : 'sendFailed';
 
         pageScanResult.notification = this.generateNotification(notificationSenderConfigData.replyUrl, notificationState, errors);
+
+        return pageScanResult;
     }
 
-    private generateNotification(notificationUrl: string, state: NotificationState, error: NotificationError[]): ScanCompletedNotification {
+    private generateNotification(
+        notificationUrl: string,
+        state: NotificationState,
+        errors: NotificationError[],
+    ): ScanCompletedNotification {
         return {
             notificationUrl: notificationUrl,
             state: state,
-            error: error,
+            errors: errors,
         };
     }
 }

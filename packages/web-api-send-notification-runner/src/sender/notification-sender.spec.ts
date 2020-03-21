@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { PromiseUtils } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     ItemType,
+    NotificationError,
+    NotificationState,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanCompletedNotification,
-    NotificationState,
-    NotificationError,
 } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { NotificationSenderConfig } from '../notification-sender-config';
@@ -30,6 +31,7 @@ describe(NotificationSender, () => {
     let webAPIMock: IMock<NotificationSenderWebAPIClient>;
     let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
+    let promiseUtilsMock: IMock<PromiseUtils>;
     const notificationSenderMetadata: NotificationSenderMetadata = {
         scanId: 'id',
         replyUrl: 'replyUrl',
@@ -56,6 +58,7 @@ describe(NotificationSender, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
         loggerMock = Mock.ofType(MockableLogger);
+        promiseUtilsMock = Mock.ofType(PromiseUtils);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
@@ -64,6 +67,7 @@ describe(NotificationSender, () => {
             webAPIMock.object,
             notificationSenderMetadataMock.object,
             loggerMock.object,
+            promiseUtilsMock.object,
         );
     });
 
@@ -94,6 +98,11 @@ describe(NotificationSender, () => {
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
+        promiseUtilsMock
+            .setup(pum => pum.delay(5000))
+            .returns(async () => Promise.resolve(5000))
+            .verifiable(Times.exactly(3));
+
         const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
 
         webAPIMock
@@ -115,7 +124,10 @@ describe(NotificationSender, () => {
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
-        const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
+        promiseUtilsMock
+            .setup(pum => pum.delay(5000))
+            .returns(async () => Promise.resolve(5000))
+            .verifiable(Times.exactly(3));
 
         webAPIMock
             .setup(wam => wam.postNotificationUrl(notificationSenderMetadata))
@@ -148,12 +160,12 @@ describe(NotificationSender, () => {
     function generateNotification(
         notificationUrl: string,
         state: NotificationState,
-        error: NotificationError[],
+        errors: NotificationError[],
     ): ScanCompletedNotification {
         return {
             notificationUrl: notificationUrl,
             state: state,
-            error: error,
+            errors: errors,
         };
     }
 });
