@@ -21,7 +21,7 @@ export class ScanStatusTestGroup extends FunctionalTestGroup {
 
     @test(TestEnvironment.all)
     public async testGetScanStatusWithInvalidGuid(): Promise<void> {
-        const invalidGuid = '00000000-0000-0000-0000-000000000000';
+        const invalidGuid = 'invalid guid';
         const response = await this.a11yServiceClient.getScanStatus(invalidGuid);
 
         this.expectWebApiErrorResponse(WebApiErrorCodes.invalidResourceId, response);
