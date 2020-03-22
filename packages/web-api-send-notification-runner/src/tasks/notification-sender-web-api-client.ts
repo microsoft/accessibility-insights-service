@@ -23,6 +23,7 @@ export class NotificationSenderWebAPIClient {
     };
 
     constructor(private readonly throwOnRequestFailure: boolean = false, httpRequest: any = requestPromise) {
+        // tslint:disable-next-line: no-unsafe-any
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
             simple: this.throwOnRequestFailure,

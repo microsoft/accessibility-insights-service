@@ -37,6 +37,7 @@ describe(NotificationSenderWebAPIClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
+            // tslint:disable-next-line: no-empty
             const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
             requestStub.defaults = defaultsMock.object;
 
@@ -81,6 +82,4 @@ describe(NotificationSenderWebAPIClient, () => {
         expect(actualResponse).toEqual(response);
         postMock.verifyAll();
     });
-
-    afterEach(() => {});
 });

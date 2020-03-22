@@ -59,6 +59,7 @@ export class NotificationSender {
                     this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(`Notification sent failed!, statusCode: ${response.statusCode}, body: ${response.body}`);
                     isNotificationSent = false;
+                    // tslint:disable-next-line: no-unsafe-any
                     errors.push({ errorType: 'HttpErrorCode', message: response.body });
                 }
             } catch (e) {
