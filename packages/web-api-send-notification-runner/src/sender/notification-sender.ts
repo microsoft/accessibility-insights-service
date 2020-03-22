@@ -43,7 +43,7 @@ export class NotificationSender {
     ): Promise<OnDemandPageScanResult> {
         let numberOfTries = 1;
         let isNotificationSent = false;
-        let errors: NotificationError[] = [];
+        const errors: NotificationError[] = [];
 
         this.logger.trackEvent('SendNotificationTaskStarted');
         while (!isNotificationSent && numberOfTries <= 3) {
