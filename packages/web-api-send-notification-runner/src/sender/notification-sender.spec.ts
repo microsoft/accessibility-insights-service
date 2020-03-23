@@ -18,7 +18,7 @@ describe(NotificationSender, () => {
     let loggerMock: IMock<MockableLogger>;
     const notificationSenderMetadata: NotificationSenderMetadata = {
         id: 'id',
-        runCompleteNotifyUrl: 'runCompleteNotifyUrl',
+        scanNotifyUrl: 'scanNotifyUrl',
     };
 
     beforeEach(() => {
@@ -32,7 +32,7 @@ describe(NotificationSender, () => {
     it('Send Notification', async () => {
         loggerMock.setup(lm => lm.logInfo(`Id: ${notificationSenderMetadata.id}`)).verifiable(Times.once());
         loggerMock
-            .setup(lm => lm.logInfo(`Run Complete Notify Url: ${notificationSenderMetadata.runCompleteNotifyUrl}`))
+            .setup(lm => lm.logInfo(`Run Complete Notify Url: ${notificationSenderMetadata.scanNotifyUrl}`))
             .verifiable(Times.once());
 
         await sender.sendNotification();

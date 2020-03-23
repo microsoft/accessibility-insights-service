@@ -43,7 +43,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
 }
 
 export interface ScanCompletedNotification {
-    runCompleteNotifyUrl: string;
+    scanNotifyUrl: string;
     state?: NotificationState;
     error?: NotificationError;
 }

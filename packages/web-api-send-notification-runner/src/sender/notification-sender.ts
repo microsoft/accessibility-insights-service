@@ -16,6 +16,6 @@ export class NotificationSender {
     public async sendNotification(): Promise<void> {
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
         this.logger.logInfo(`Id: ${notificationSenderConfigData.id}`);
-        this.logger.logInfo(`Run Complete Notify Url: ${notificationSenderConfigData.runCompleteNotifyUrl}`);
+        this.logger.logInfo(`Run Complete Notify Url: ${notificationSenderConfigData.scanNotifyUrl}`);
     }
 }

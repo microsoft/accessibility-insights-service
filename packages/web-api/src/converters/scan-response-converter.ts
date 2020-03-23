@@ -94,7 +94,7 @@ export class ScanResponseConverter {
         }
 
         return {
-            runCompleteNotifyUrl: notification.runCompleteNotifyUrl,
+            scanNotifyUrl: notification.scanNotifyUrl,
             state: notification.state,
             error: {
                 errorType: notification.error.errorType,

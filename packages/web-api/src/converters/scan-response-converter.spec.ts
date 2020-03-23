@@ -29,7 +29,7 @@ beforeEach(() => {
 
     scanResponseConverter = new ScanResponseConverter(scanRunErrorConverterMock.object);
     notification = {
-        runCompleteNotifyUrl: 'reply-url',
+        scanNotifyUrl: 'reply-url',
         state: 'queued',
         error: {
             errorType: 'HttpErrorCode',

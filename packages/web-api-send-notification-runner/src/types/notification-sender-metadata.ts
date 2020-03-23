@@ -2,5 +2,5 @@
 // Licensed under the MIT License.
 export interface NotificationSenderMetadata {
     id: string;
-    runCompleteNotifyUrl: string;
+    scanNotifyUrl: string;
 }

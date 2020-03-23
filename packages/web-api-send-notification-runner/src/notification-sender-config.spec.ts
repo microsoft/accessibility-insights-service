@@ -22,6 +22,6 @@ describe(NotificationSenderConfig, () => {
     it('getConfig', () => {
         expect(testSubject.getConfig()).toBe(argvVal);
 
-        argvMock.verify(a => a.demandOption(['id', 'runCompleteNotifyUrl']), Times.once());
+        argvMock.verify(a => a.demandOption(['id', 'scanNotifyUrl']), Times.once());
     });
 });

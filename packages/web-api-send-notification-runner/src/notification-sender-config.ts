@@ -10,7 +10,7 @@ export class NotificationSenderConfig {
     constructor(@inject(loggerTypes.Argv) private readonly argvObj: Argv) {}
 
     public getConfig(): NotificationSenderMetadata {
-        this.argvObj.demandOption(['id', 'runCompleteNotifyUrl']);
+        this.argvObj.demandOption(['id', 'scanNotifyUrl']);
 
         return this.argvObj.argv as Arguments<NotificationSenderMetadata>;
     }
