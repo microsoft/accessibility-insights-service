@@ -46,7 +46,7 @@ beforeEach(() => {
     );
     MockDate.set(startTime);
     systemUtilsMock
-        .setup(s => s.wait(It.isAny()))
+        .setup(s => s.wait(retryOptions.intervalMilliseconds))
         .callback((millis: number) => {
             MockDate.set(Date.now() + millis);
         });
