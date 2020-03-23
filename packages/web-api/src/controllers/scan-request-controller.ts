@@ -126,7 +126,7 @@ export class ScanRequestController extends ApiController {
                     scanId: scanId,
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
-                    ...(isEmpty(scanRunRequest.replyUrl) ? {} : { replyUrl: scanRunRequest.replyUrl }),
+                    ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                 });
 
                 scanResponses.push({
@@ -152,8 +152,8 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.invalidURL.error };
         }
 
-        if (!isEmpty(scanRunRequest.replyUrl) && Url.tryParseUrlString(scanRunRequest.replyUrl) === undefined) {
-            return { valid: false, error: WebApiErrorCodes.invalidReplyURL.error };
+        if (!isEmpty(scanRunRequest.scanNotifyUrl) && Url.tryParseUrlString(scanRunRequest.scanNotifyUrl) === undefined) {
+            return { valid: false, error: WebApiErrorCodes.invalidScanNotifyUrl.error };
         }
 
         if (scanRunRequest.priority < this.config.minScanPriorityValue || scanRunRequest.priority > this.config.maxScanPriorityValue) {

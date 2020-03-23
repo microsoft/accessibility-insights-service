@@ -7,6 +7,8 @@ export declare type LinkType = 'self';
 export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
+export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
+export type NotificationErrorTypes = 'HttpErrorCode';
 
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 
@@ -17,11 +19,23 @@ export interface ScanRunResultResponse {
     scanResult?: ScanResult;
     reports?: ScanReport[];
     run: ScanRun;
+    notification?: ScanCompletedNotification;
 }
 
 export interface ScanRunErrorResponse {
     scanId: string;
     error: WebApiError;
+}
+
+export interface ScanCompletedNotification {
+    scanNotifyUrl: string;
+    state?: NotificationState;
+    error?: NotificationError;
+}
+
+export interface NotificationError {
+    errorType: NotificationErrorTypes;
+    message: string;
 }
 
 export interface ScanResult {
