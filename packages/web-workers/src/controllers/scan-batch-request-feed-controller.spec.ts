@@ -4,12 +4,13 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
+import { isNil } from 'lodash';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
 import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
 
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
 // tslint:disable: no-any no-unsafe-any
@@ -179,7 +180,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
 
-                if (request.scanNotifyUrl !== undefined) {
+                if (!isNil(request.scanNotifyUrl)) {
                     res.scanNotifyUrl = request.scanNotifyUrl;
                 }
 

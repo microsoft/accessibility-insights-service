@@ -123,21 +123,12 @@ function validateConverterShortResult(dbState: RunStateDb, clientState: RunState
 }
 
 describe(ScanResponseConverter, () => {
-    it('return scan run short form of client result', () => {
-        validateConverterShortResult('pending', 'pending');
-        validateConverterShortResult('accepted', 'accepted');
-        validateConverterShortResult('queued', 'queued');
-        validateConverterShortResult('running', 'running');
-        validateConverterShortResult('failed', 'failed');
-        scanRunErrorConverterMock.verifyAll();
-    });
-
-    it('return scan run with notification state if it exists', () => {
-        validateConverterShortResult('pending', 'pending', true);
-        validateConverterShortResult('accepted', 'accepted', true);
-        validateConverterShortResult('queued', 'queued', true);
-        validateConverterShortResult('running', 'running', true);
-        validateConverterShortResult('failed', 'failed', true);
+    test.each([true, false])('return scan run short form of client result, when notification enabled = %s', notificationEnabled => {
+        validateConverterShortResult('pending', 'pending', notificationEnabled);
+        validateConverterShortResult('accepted', 'accepted', notificationEnabled);
+        validateConverterShortResult('queued', 'queued', notificationEnabled);
+        validateConverterShortResult('running', 'running', notificationEnabled);
+        validateConverterShortResult('failed', 'failed', notificationEnabled);
         scanRunErrorConverterMock.verifyAll();
     });
 
