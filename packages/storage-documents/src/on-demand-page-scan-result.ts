@@ -72,3 +72,7 @@ export interface OnDemandPageScanRunResult {
     pageTitle?: string;
     pageResponseCode?: number;
 }
+
+export interface PartialOnDemandPageScanResult extends Partial<OnDemandPageScanResult> {
+    id: string;
+}

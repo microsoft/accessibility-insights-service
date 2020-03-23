@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, PartialOnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
@@ -56,7 +56,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
     it('updates scan run document', async () => {
         const partition1Result1 = {
             id: 'partition1id1',
-        } as OnDemandPageScanResult;
+        } as PartialOnDemandPageScanResult;
         const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
         const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
         partition1Result1Saved._etag = 'etag-1';

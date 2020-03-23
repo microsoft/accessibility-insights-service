@@ -12,7 +12,7 @@ export class OnDemandScanRequestSender {
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(Queue) private readonly queue: Queue,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-    ) { }
+    ) {}
 
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
         await Promise.all(
@@ -20,7 +20,7 @@ export class OnDemandScanRequestSender {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
-                    const message = this.createOnDemandScanRequestMessage(page);
+                    const message = this.createOnDemandScanRequestMessage(page, resultDoc.batchRequestId);
                     await this.queue.createMessage(this.storageConfig.scanQueue, message);
                     await this.updateOnDemandPageResultDoc(resultDoc);
                 }
@@ -41,7 +41,11 @@ export class OnDemandScanRequestSender {
         await this.onDemandPageScanRunResultProvider.writeScanRuns([resultDoc]);
     }
 
-    private createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest): OnDemandScanRequestMessage {
-        return { id: scanRequest.id };
+    private createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest, batchRequestId: string): OnDemandScanRequestMessage {
+        return {
+            id: scanRequest.id,
+            url: scanRequest.url,
+            batchRequestId: batchRequestId,
+        };
     }
 }

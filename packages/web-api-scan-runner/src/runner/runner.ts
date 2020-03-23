@@ -9,10 +9,10 @@ import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     OnDemandPageScanReport,
-    OnDemandPageScanResult,
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
+    PartialOnDemandPageScanResult,
     ScanError,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -37,25 +37,31 @@ export class Runner {
 
     public async run(): Promise<void> {
         let browser: Browser;
-        let pageScanResult: OnDemandPageScanResult;
         const scanMetadata = this.scanMetadataConfig.getConfig();
 
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
         this.logger.logInfo(`Reading page scan run result.`);
-        pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(scanMetadata.id);
-        this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: pageScanResult.batchRequestId });
+        this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: scanMetadata.batchRequestId });
 
         this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
-        pageScanResult = this.resetPageScanResultState(pageScanResult);
-        pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        const pageScanResult: PartialOnDemandPageScanResult = {
+            id: scanMetadata.id,
+            run: {
+                state: 'running',
+                timestamp: new Date().toJSON(),
+                error: null,
+            },
+        };
+
+        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
         try {
             browser = await this.webDriverTask.launch();
-            await this.scan(pageScanResult);
+            await this.scan(pageScanResult, scanMetadata.url);
         } catch (error) {
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
@@ -79,10 +85,10 @@ export class Runner {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
     }
 
-    private async scan(pageScanResult: OnDemandPageScanResult): Promise<void> {
+    private async scan(pageScanResult: PartialOnDemandPageScanResult, url: string): Promise<void> {
         this.logger.logInfo(`Running page scan.`);
 
-        const axeScanResults = await this.scannerTask.scan(pageScanResult.url);
+        const axeScanResults = await this.scannerTask.scan(url);
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Updating page scan run result state to failed`);
@@ -101,18 +107,6 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
-    }
-
-    private resetPageScanResultState(originPageScanResult: OnDemandPageScanResult): OnDemandPageScanResult {
-        originPageScanResult.scanResult = null;
-        originPageScanResult.reports = null;
-        originPageScanResult.run = {
-            state: 'running',
-            timestamp: new Date().toJSON(),
-            error: null,
-        };
-
-        return originPageScanResult;
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {

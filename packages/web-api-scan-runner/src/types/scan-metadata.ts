@@ -3,5 +3,5 @@
 export interface ScanMetadata {
     id: string;
     url: string;
-    priority: number;
+    batchRequestId: string;
 }

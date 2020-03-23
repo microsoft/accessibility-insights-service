@@ -22,6 +22,7 @@ describe('Scan request sender', () => {
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let onDemandPageScanRunResultProvider: IMock<OnDemandPageScanRunResultProvider>;
     let dateNow: Date;
+    const batchRequestId: string = 'batch request id';
 
     beforeEach(() => {
         dateNow = new Date();
@@ -143,11 +144,15 @@ describe('Scan request sender', () => {
                 timestamp: dateNow.toJSON(),
             },
             itemType: ItemType.onDemandPageScanRunResult,
-            batchRequestId: scanRequest.id,
+            batchRequestId: batchRequestId,
         };
     }
 
     function createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest): OnDemandScanRequestMessage {
-        return { id: scanRequest.id };
+        return {
+            id: scanRequest.id,
+            url: scanRequest.url,
+            batchRequestId: batchRequestId,
+        };
     }
 });

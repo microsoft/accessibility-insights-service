@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
-import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, PartialOnDemandPageScanResult } from 'storage-documents';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 
 @injectable()
@@ -45,10 +45,11 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanResult> {
-        this.setSystemProperties(pageScanResult);
+    public async updateScanRun(pageScanResult: PartialOnDemandPageScanResult): Promise<OnDemandPageScanResult> {
+        const storableResult = pageScanResult as OnDemandPageScanResult;
+        this.setSystemProperties(storableResult);
 
-        return (await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult)).item;
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(storableResult)).item;
     }
 
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {

@@ -22,6 +22,6 @@ describe(ScanMetadataConfig, () => {
     it('getConfig', () => {
         expect(testSubject.getConfig()).toBe(argvVal);
 
-        argvMock.verify(a => a.demandOption(['id', 'url', 'priority']), Times.once());
+        argvMock.verify(a => a.demandOption(['id', 'url', 'batchRequestId']), Times.once());
     });
 });

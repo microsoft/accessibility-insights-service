@@ -10,7 +10,7 @@ export class ScanMetadataConfig {
     constructor(@inject(loggerTypes.Argv) private readonly argvObj: Argv) {}
 
     public getConfig(): ScanMetadata {
-        this.argvObj.demandOption(['id', 'url', 'priority']);
+        this.argvObj.demandOption(['id', 'url', 'batchRequestId']);
 
         return this.argvObj.argv as Arguments<ScanMetadata>;
     }
