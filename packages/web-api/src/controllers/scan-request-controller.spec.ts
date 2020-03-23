@@ -83,7 +83,7 @@ describe(ScanRequestController, () => {
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
         });
 
-        it('rejects request invalid reply url', async () => {
+        it('rejects request invalid scan notify url', async () => {
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', scanNotifyUrl: 'invalid-url' }]);
             scanRequestController = createScanRequestController(context);
 
@@ -99,7 +99,7 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: 1 }, // valid request
+                { url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
             ]);
@@ -108,7 +108,9 @@ describe(ScanRequestController, () => {
                 { url: '/invalid/url', error: WebApiErrorCodes.invalidURL.error },
                 { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
             ];
-            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: 1 }];
+            const expectedSavedRequest: ScanRunBatchRequest[] = [
+                { scanId: guid2, url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' },
+            ];
             scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
