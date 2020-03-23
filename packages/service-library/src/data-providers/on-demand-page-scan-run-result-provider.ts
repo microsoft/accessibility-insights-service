@@ -46,10 +46,10 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     public async updateScanRun(pageScanResult: PartialOnDemandPageScanResult): Promise<OnDemandPageScanResult> {
-        const storableResult = pageScanResult as OnDemandPageScanResult;
-        this.setSystemProperties(storableResult);
+        const persistedResult = pageScanResult as OnDemandPageScanResult;
+        this.setSystemProperties(persistedResult);
 
-        return (await this.cosmosContainerClient.mergeOrWriteDocument(storableResult)).item;
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(persistedResult)).item;
     }
 
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
