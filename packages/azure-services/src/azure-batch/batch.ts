@@ -29,6 +29,8 @@ export class Batch {
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
+        // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
+        private readonly maxTasks = 100,
     ) {}
 
     public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
@@ -118,8 +120,7 @@ export class Batch {
     public async createTasks(jobId: string, queueMessages: Message[]): Promise<JobTask[]> {
         const tasks: JobTask[] = [];
 
-        // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
-        const chunks = System.chunkArray(queueMessages, 100);
+        const chunks = System.chunkArray(queueMessages, this.maxTasks);
         await Promise.all(
             chunks.map(async chunk => {
                 const taskCollection = await this.addTaskCollection(jobId, chunk);

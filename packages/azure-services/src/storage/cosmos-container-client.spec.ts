@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { System } from 'common';
+import * as MockDate from 'mockdate';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
@@ -16,11 +18,13 @@ type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any
 const dbName = 'dbName';
 const collectionName = 'collectionName';
 const partitionKey = 'default-partitionKey';
+const startTime = new Date(2019, 2, 3);
 
 let cosmosClientWrapperMock: IMock<CosmosClientWrapper>;
 let cosmosContainerClient: CosmosContainerClient;
 let operationCallbackMock: IMock<OperationCallback>;
 let loggerMock: IMock<MockableLogger>;
+let systemUtilsMock: IMock<typeof System>;
 
 const retryOptions = {
     timeoutMilliseconds: 1000,
@@ -32,7 +36,24 @@ beforeEach(() => {
     cosmosClientWrapperMock = Mock.ofType<CosmosClientWrapper>();
     operationCallbackMock = Mock.ofType<OperationCallback>();
     loggerMock = Mock.ofType(MockableLogger);
-    cosmosContainerClient = new CosmosContainerClient(cosmosClientWrapperMock.object, dbName, collectionName, loggerMock.object);
+    systemUtilsMock = Mock.ofType<typeof System>();
+    cosmosContainerClient = new CosmosContainerClient(
+        cosmosClientWrapperMock.object,
+        dbName,
+        collectionName,
+        loggerMock.object,
+        systemUtilsMock.object,
+    );
+    MockDate.set(startTime);
+    systemUtilsMock
+        .setup(s => s.wait(retryOptions.intervalMilliseconds))
+        .callback((millis: number) => {
+            MockDate.set(Date.now() + millis);
+        });
+});
+
+afterEach(() => {
+    MockDate.reset();
 });
 
 describe('mergeOrWriteDocument()', () => {
