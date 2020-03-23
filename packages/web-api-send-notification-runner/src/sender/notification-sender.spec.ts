@@ -31,9 +31,7 @@ describe(NotificationSender, () => {
 
     it('Send Notification', async () => {
         loggerMock.setup(lm => lm.logInfo(`Id: ${notificationSenderMetadata.id}`)).verifiable(Times.once());
-        loggerMock
-            .setup(lm => lm.logInfo(`Run Complete Notify Url: ${notificationSenderMetadata.scanNotifyUrl}`))
-            .verifiable(Times.once());
+        loggerMock.setup(lm => lm.logInfo(`Run Complete Notify Url: ${notificationSenderMetadata.scanNotifyUrl}`)).verifiable(Times.once());
 
         await sender.sendNotification();
     });

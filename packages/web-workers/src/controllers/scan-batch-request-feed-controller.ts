@@ -124,9 +124,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>(request => {
-            const scanNotifyUrl = isEmpty(request.scanNotifyUrl)
-                ? {}
-                : { scanNotifyUrl: request.scanNotifyUrl };
+            const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
 
             return {
                 id: request.scanId,
