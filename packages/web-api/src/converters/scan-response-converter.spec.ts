@@ -3,13 +3,7 @@
 import 'reflect-metadata';
 
 import { RunState as RunStateRestApi, ScanResultResponse, ScanRunErrorCodes } from 'service-library';
-import {
-    ItemType,
-    NotificationState,
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState as RunStateDb,
-    ScanCompletedNotification,
-} from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb, ScanCompletedNotification } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { ScanResponseConverter } from './scan-response-converter';
@@ -35,8 +29,12 @@ beforeEach(() => {
 
     scanResponseConverter = new ScanResponseConverter(scanRunErrorConverterMock.object);
     notification = {
-        replyUrl: 'reply-url',
+        runCompleteNotifyUrl: 'reply-url',
         state: 'queued',
+        error: {
+            errorType: 'HttpErrorCode',
+            message: 'Failed to send notification.',
+        },
     };
 });
 

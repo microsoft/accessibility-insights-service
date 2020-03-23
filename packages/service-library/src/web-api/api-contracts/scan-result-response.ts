@@ -28,7 +28,7 @@ export interface ScanRunErrorResponse {
 }
 
 export interface ScanCompletedNotification {
-    replyUrl: string;
+    runCompleteNotifyUrl: string;
     state?: NotificationState;
     error?: NotificationError;
 }

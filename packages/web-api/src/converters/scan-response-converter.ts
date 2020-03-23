@@ -5,6 +5,7 @@ import { isEmpty } from 'lodash';
 import { ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
 import { isNullOrUndefined } from 'util';
+
 import { ScanRunErrorConverter } from './scan-run-error-converter';
 
 @injectable()
@@ -13,7 +14,7 @@ export class ScanResponseConverter {
 
     public getScanResultResponse(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
         const runState: OnDemandPageScanRunState = pageScanResultDocument.run.state;
-        const notificationResponse = isNullOrUndefined(pageScanResultDocument.notification)
+        const notificationResponse = isNullOrUndefined(this.getRunCompleteNotificationResponse(pageScanResultDocument.notification))
             ? {}
             : { notification: pageScanResultDocument.notification };
         switch (runState) {
@@ -85,5 +86,20 @@ export class ScanResponseConverter {
                 },
             };
         });
+    }
+
+    private getRunCompleteNotificationResponse(notification: ScanCompletedNotification): ScanCompletedNotification {
+        if (isNullOrUndefined(notification)) {
+            return undefined;
+        }
+
+        return {
+            runCompleteNotifyUrl: notification.runCompleteNotifyUrl,
+            state: notification.state,
+            error: {
+                errorType: notification.error.errorType,
+                message: 'Failed to send notification.',
+            },
+        };
     }
 }

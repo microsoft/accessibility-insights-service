@@ -14,5 +14,5 @@ export interface ScanRunBatchRequest {
     scanId: string;
     priority: number;
     url: string;
-    replyUrl?: string;
+    runCompleteNotifyUrl?: string;
 }

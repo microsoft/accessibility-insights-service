@@ -89,7 +89,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-1',
                         url: 'url-1',
                         priority: 1,
-                        replyUrl: 'reply-url-1',
+                        runCompleteNotifyUrl: 'reply-url-1',
                     },
                     {
                         scanId: 'scan-2',
@@ -153,10 +153,10 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                     },
                     batchRequestId: document.id,
                 };
-                if (request.replyUrl !== undefined) {
+                if (request.runCompleteNotifyUrl !== undefined) {
                     res.notification = {
                         state: 'pending',
-                        replyUrl: request.replyUrl,
+                        runCompleteNotifyUrl: request.runCompleteNotifyUrl,
                     };
                 }
 
@@ -179,8 +179,8 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
 
-                if (request.replyUrl !== undefined) {
-                    res.replyUrl = request.replyUrl;
+                if (request.runCompleteNotifyUrl !== undefined) {
+                    res.runCompleteNotifyUrl = request.runCompleteNotifyUrl;
                 }
 
                 return res;

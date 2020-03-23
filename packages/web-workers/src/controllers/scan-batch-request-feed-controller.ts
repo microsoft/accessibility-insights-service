@@ -104,12 +104,12 @@ export class ScanBatchRequestFeedController extends WebController {
                     timestamp: new Date().toJSON(),
                 },
                 batchRequestId: batchRequestId,
-                ...(isEmpty(request.replyUrl)
+                ...(isEmpty(request.runCompleteNotifyUrl)
                     ? {}
                     : {
                           notification: {
                               state: 'pending',
-                              replyUrl: request.replyUrl,
+                              runCompleteNotifyUrl: request.runCompleteNotifyUrl,
                           },
                       }),
             };
@@ -124,7 +124,9 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>(request => {
-            const replyUrl = isEmpty(request.replyUrl) ? {} : { replyUrl: request.replyUrl };
+            const runCompleteNotifyUrl = isEmpty(request.runCompleteNotifyUrl)
+                ? {}
+                : { runCompleteNotifyUrl: request.runCompleteNotifyUrl };
 
             return {
                 id: request.scanId,
@@ -132,7 +134,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 priority: request.priority,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
-                ...replyUrl,
+                ...runCompleteNotifyUrl,
             };
         });
 

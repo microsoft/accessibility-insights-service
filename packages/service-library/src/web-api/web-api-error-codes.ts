@@ -17,7 +17,7 @@ export declare type WebApiErrorCodeName =
     | 'OutOfRangePriority'
     | 'MalformedBody'
     | 'MissingReleaseVersion'
-    | 'InvalidReplyURL';
+    | 'InvalidRunCompleteNotifyUrl';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -133,10 +133,10 @@ export class WebApiErrorCodes {
         },
     };
 
-    public static invalidReplyURL: WebApiErrorCode = {
+    public static invalidRunCompleteNotifyUrl: WebApiErrorCode = {
         statusCode: 400,
         error: {
-            code: 'InvalidReplyURL',
+            code: 'InvalidRunCompleteNotifyUrl',
             codeId: 4012,
             message: 'The reply URL is not valid.',
         },

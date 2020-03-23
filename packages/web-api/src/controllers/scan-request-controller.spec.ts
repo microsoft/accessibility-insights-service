@@ -84,12 +84,12 @@ describe(ScanRequestController, () => {
         });
 
         it('rejects request invalid reply url', async () => {
-            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', replyUrl: 'invalid-url' }]);
+            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', runCompleteNotifyUrl: 'invalid-url' }]);
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
 
-            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidReplyURL.error);
+            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidRunCompleteNotifyUrl.error);
         });
 
         it('accepts valid request only', async () => {
