@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Batch, Queue } from 'azure-services';
+import { Batch, BatchTaskConfigGenerator, BatchTaskPropertyProvider, Queue } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { Container } from 'inversify';
 import { setupSendNotificationJobManagerContainer } from './setup-send-notification-job-manager-container';
@@ -20,12 +20,16 @@ describe(setupSendNotificationJobManagerContainer, () => {
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
     });
 
-    it('resolves service config to singleton value', () => {
+    test.each([BatchTaskPropertyProvider, ServiceConfiguration])('resolves %p to singleton value', key => {
         const container = setupSendNotificationJobManagerContainer();
-        const serviceConfig = container.get(ServiceConfiguration);
 
-        expect(serviceConfig).toBeInstanceOf(ServiceConfiguration);
-        expect(serviceConfig).toBe(container.get(ServiceConfiguration));
+        verifySingletonDependencyResolution(container, key);
+    });
+
+    it('resolves batch task config generator to non singleton value', () => {
+        const container = setupSendNotificationJobManagerContainer();
+
+        verifyNonSingletonDependencyResolution(container, BatchTaskConfigGenerator);
     });
 
     it('verify JobManager dependencies resolution', () => {

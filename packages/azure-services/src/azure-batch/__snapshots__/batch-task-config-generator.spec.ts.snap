@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BatchTaskConfigGenerator generates task config 1`] = `
+Object {
+  "commandLine": "command line1",
+  "constraints": Object {
+    "maxWallClockTime": "PT2M",
+  },
+  "environmentSettings": "environment settings1",
+  "id": "task id1",
+  "resourceFiles": "resource files1",
+}
+`;

@@ -1,11 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AzureServicesIocTypes, BatchTaskParameterProvider, registerAzureServicesToContainer } from 'azure-services';
+import {
+    AzureServicesIocTypes,
+    BatchTaskConfigGenerator,
+    BatchTaskPropertyProvider,
+    registerAzureServicesToContainer,
+} from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import { Container } from 'inversify';
 import { registerGlobalLoggerToContainer } from 'logger';
-import { ScanTaskParameterProvider } from './batch/scan-task-parameter-provider';
-import { ScannerBatchTaskConfig } from './batch/scanner-batch-task-config';
+import { ScannerBatchTaskPropertyProvider } from './batch/scanner-batch-task-property-provider';
 
 export function setupWebApiScanJobManagerContainer(): Container {
     const container = new Container({ autoBindInjectable: true });
@@ -14,13 +18,8 @@ export function setupWebApiScanJobManagerContainer(): Container {
     registerAzureServicesToContainer(container);
 
     container
-        .bind(ScannerBatchTaskConfig)
-        .toSelf()
-        .inSingletonScope();
-
-    container
-        .bind<BatchTaskParameterProvider>(AzureServicesIocTypes.BatchTaskParameterProvider)
-        .to(ScanTaskParameterProvider)
+        .bind(BatchTaskPropertyProvider)
+        .to(ScannerBatchTaskPropertyProvider)
         .inSingletonScope();
 
     return container;
