@@ -30,7 +30,7 @@
         "@types/cli-spinner": "^0.2.0",
         "@types/jest": "^25.1.4",
         "@types/lodash": "^4.14.136",
-        "@types/node": "^13.9.2",
+        "@types/node": "^13.9.3",
         "@types/request-promise": "^4.1.44",
         "copy-webpack-plugin": "^5.1.1",
         "fork-ts-checker-webpack-plugin": "^4.1.0",
