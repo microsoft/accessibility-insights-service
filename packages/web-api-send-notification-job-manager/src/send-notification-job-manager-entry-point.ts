@@ -13,6 +13,7 @@ export class SendNotificationJobManagerEntryPoint extends ProcessEntryPointBase 
 
     protected async runCustomAction(container: Container): Promise<void> {
         const taskCreator = container.get<SendNotificationTaskCreator>(SendNotificationTaskCreator);
+        await taskCreator.init();
         await taskCreator.run();
     }
 }

@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration } from 'common';
 import * as moment from 'moment';
 import { IMock, Mock } from 'typemoq';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 
-// tslint:disable: no-unsafe-any
+// tslint:disable: no-unsafe-any no-object-literal-type-assertion
 
 let poolMetricsInfo: PoolMetricsInfo;
 let poolLoadGenerator: PoolLoadGenerator;
@@ -26,7 +26,7 @@ describe(PoolLoadGenerator, () => {
                     activeToRunningTasksRatio: activeToRunningTasksRatio,
                     addTasksIntervalInSeconds: 15,
                     maxWallClockTimeInHours: 1,
-                };
+                } as JobManagerConfig;
             });
 
         jest.spyOn(process, 'hrtime').mockImplementation((time?: [number, number]) => [5, 0]);

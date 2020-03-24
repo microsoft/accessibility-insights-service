@@ -13,6 +13,7 @@ export class WebApiScanJobManagerEntryPoint extends ProcessEntryPointBase {
 
     protected async runCustomAction(container: Container): Promise<void> {
         const worker = container.get<Worker>(Worker);
+        await worker.init();
         await worker.run();
     }
 }

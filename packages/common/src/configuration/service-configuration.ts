@@ -23,6 +23,7 @@ export interface JobManagerConfig {
     activeToRunningTasksRatio: number;
     addTasksIntervalInSeconds: number;
     maxWallClockTimeInHours: number;
+    sendNotificationTasksCount: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -150,6 +151,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 2,
                     doc: 'The amount of time the job manager instance will run.',
+                },
+                sendNotificationTasksCount: {
+                    format: 'int',
+                    default: 100,
+                    doc: 'Number of scan notification tasks that can be in active/running state',
                 },
             },
             scanConfig: {
