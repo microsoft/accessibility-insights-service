@@ -96,9 +96,9 @@ describe(NotificationSender, () => {
 
     it('Send Notification Succeeded', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null);
 
-        setupUpdateScanRunResultCall(onDemandPageScanResult);
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         const response = { statusCode: 200 } as ResponseAsJSON;
 
@@ -116,14 +116,13 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Failed', async () => {
-        onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
+
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
             errorType: 'HttpErrorCode',
             message: 'Bad Request',
         });
-
-        setupUpdateScanRunResultCall(onDemandPageScanResult);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
             .setup(sm => sm.wait(5000))
@@ -141,14 +140,13 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Failed Error', async () => {
-        onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
+
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
             errorType: 'HttpErrorCode',
             message: 'Unexpected Error',
         });
-
-        setupUpdateScanRunResultCall(onDemandPageScanResult);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
             .setup(sm => sm.wait(5000))
@@ -176,6 +174,13 @@ describe(NotificationSender, () => {
             .setup(async d => d.readScanRun(notificationSenderMetadata.scanId))
             .returns(async () => Promise.resolve(cloneDeep(scanResult)))
             .verifiable(Times.once());
+    }
+
+    function getRunningJobStateScanResult(notification: ScanCompletedNotification): OnDemandPageScanResult {
+        const result = cloneDeep(onDemandPageScanResult);
+        result.notification = notification;
+
+        return result;
     }
 
     function setupUpdateScanRunResultCall(result: OnDemandPageScanResult): void {
