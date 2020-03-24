@@ -35,6 +35,12 @@ createCosmosCollection() {
 
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "[setup-cosmos-db] Collection '$collectionName' already exists"
+        echo "[setup-cosmos-db] Updating throughput for collection '$collectionName'"
+        az cosmosdb sql container throughput update --account-name $cosmosAccountName \
+                                                    --database-name $dbName \
+                                                    --name "$collectionName" \
+                                                    --resource-group $resourceGroupName \
+                                                    --throughput $throughput
     else
         echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
         az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
