@@ -154,9 +154,9 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('failed', 'failed', notificationEnabled);
     });
 
-    it('return scan run full form of client result', () => {
-        const pageScanDbResult = getPageScanResult('completed');
-        const responseExpected = getScanResultClientResponseFull('completed');
+    test.each([true, false])('return scan run full form of client result', notificationEnabled => {
+        const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
+        const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect(response).toEqual(responseExpected);
     });

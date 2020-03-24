@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
-import { isNullOrUndefined } from 'util';
 
 import { ScanErrorConverter } from './scan-error-converter';
 
@@ -88,7 +87,7 @@ export class ScanResponseConverter {
     private getRunCompleteNotificationResponse(
         notification: ScanCompletedNotification,
     ): { [notification: string]: ScanCompletedNotification } | {} {
-        if (isNullOrUndefined(notification)) {
+        if (isNil(notification)) {
             return {};
         }
 
