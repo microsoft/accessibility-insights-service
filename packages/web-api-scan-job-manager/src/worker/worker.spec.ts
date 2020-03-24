@@ -265,7 +265,7 @@ describe(Worker, () => {
                 {
                     taskArguments: JSON.stringify(taskArgs),
                     exitCode: 123,
-                    timestamp: new Date(2020, 1, 1),
+                    timestamp: new Date('2020-01-01T12:00:00.000Z'),
                     failureInfo: testCase.failureInfo,
                 } as BatchTask,
             ];
@@ -301,12 +301,12 @@ describe(Worker, () => {
                 {
                     taskArguments: JSON.stringify(taskArgs1),
                     exitCode: 123,
-                    timestamp: new Date(2020, 1, 1),
+                    timestamp: new Date('2020-01-01T12:00:00.000Z'),
                 } as BatchTask,
                 {
                     taskArguments: JSON.stringify(taskArgs2),
                     exitCode: 456,
-                    timestamp: new Date(2020, 1, 2),
+                    timestamp: new Date('2020-01-02T12:00:00.000Z'),
                 } as BatchTask,
             ];
             const pageDocument1 = {
