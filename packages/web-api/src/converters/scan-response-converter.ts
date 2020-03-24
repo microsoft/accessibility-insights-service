@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { ScanReport, ScanResultResponse } from 'service-library';
+import { notificationErrorNameToErrorMap, ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
 
 import { ScanErrorConverter } from './scan-error-converter';
@@ -96,6 +96,7 @@ export class ScanResponseConverter {
                 scanNotifyUrl: notification.scanNotifyUrl,
                 state: notification.state,
                 error: this.scanErrorConverter.getScanNotificationErrorCode(notification.error),
+                responseCode: notification.responseCode,
             },
         };
     }

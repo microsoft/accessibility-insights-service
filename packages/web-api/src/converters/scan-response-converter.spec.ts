@@ -50,6 +50,7 @@ beforeEach(() => {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
         error: ScanNotificationErrorCodes.NotificationError,
+        responseCode: 200,
     };
     notification = {
         scanNotifyUrl: 'reply-url',
@@ -58,6 +59,7 @@ beforeEach(() => {
             errorType: 'NotificationError',
             message: 'Failed to send notification.',
         },
+        responseCode: 200,
     };
 });
 
