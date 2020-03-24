@@ -10,12 +10,7 @@ import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
-import {
-    ItemType,
-    OnDemandPageScanReport,
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState,
-} from 'storage-documents';
+import { ItemType, OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -26,7 +21,7 @@ import { Runner } from './runner';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
-class MockableLogger extends Logger { }
+class MockableLogger extends Logger {}
 
 describe(Runner, () => {
     let runner: Runner;

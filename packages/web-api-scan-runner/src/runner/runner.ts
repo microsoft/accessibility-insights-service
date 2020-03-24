@@ -33,7 +33,7 @@ export class Runner {
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-    ) { }
+    ) {}
 
     public async run(): Promise<void> {
         let browser: Browser;

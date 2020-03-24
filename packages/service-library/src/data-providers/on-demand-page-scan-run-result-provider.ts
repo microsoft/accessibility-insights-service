@@ -13,7 +13,7 @@ export class OnDemandPageScanRunResultProvider {
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
-    ) { }
+    ) {}
 
     public async readScanRun(scanId: string): Promise<OnDemandPageScanResult> {
         return (await this.cosmosContainerClient.readDocument<OnDemandPageScanResult>(scanId, this.getPartitionKey(scanId))).item;
