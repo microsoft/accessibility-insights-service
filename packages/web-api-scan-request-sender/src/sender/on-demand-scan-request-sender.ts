@@ -20,7 +20,7 @@ export class OnDemandScanRequestSender {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
-                    const message = this.createOnDemandScanRequestMessage(page, resultDoc.batchRequestId);
+                    const message = this.createOnDemandScanRequestMessage(page);
                     await this.queue.createMessage(this.storageConfig.scanQueue, message);
                     await this.updateOnDemandPageResultDoc(resultDoc);
                 }
@@ -41,11 +41,10 @@ export class OnDemandScanRequestSender {
         await this.onDemandPageScanRunResultProvider.writeScanRuns([resultDoc]);
     }
 
-    private createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest, batchRequestId: string): OnDemandScanRequestMessage {
+    private createOnDemandScanRequestMessage(scanRequest: OnDemandPageScanRequest): OnDemandScanRequestMessage {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
-            batchRequestId: batchRequestId,
         };
     }
 }

@@ -43,7 +43,6 @@ describe(Runner, () => {
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
-        batchRequestId: 'batch request id',
     };
 
     const onDemandPageScanResult: OnDemandPageScanResult = {

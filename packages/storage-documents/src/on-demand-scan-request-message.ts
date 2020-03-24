@@ -3,6 +3,5 @@
 
 export interface OnDemandScanRequestMessage {
     id: string;
-    batchRequestId: string;
     url: string;
 }

@@ -43,7 +43,7 @@ export class Runner {
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
         this.logger.logInfo(`Reading page scan run result.`);
-        this.logger.setCustomProperties({ scanId: scanMetadata.id, batchRequestId: scanMetadata.batchRequestId });
+        this.logger.setCustomProperties({ scanId: scanMetadata.id });
 
         this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 

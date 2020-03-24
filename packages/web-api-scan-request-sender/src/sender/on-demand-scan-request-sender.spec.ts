@@ -152,7 +152,6 @@ describe('Scan request sender', () => {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
-            batchRequestId: batchRequestId,
         };
     }
 });
