@@ -177,7 +177,7 @@ describe(Worker, () => {
                     id: undefined,
                 },
             },
-        ])('logs error if unable to get required task arguments - %o', async testCase => {
+        ])('logs error if unable to get required task arguments - %j', async testCase => {
             const failedTasks = [
                 {
                     taskArguments: JSON.stringify(testCase.taskArguments),
@@ -257,7 +257,7 @@ describe(Worker, () => {
                     message: 'some server error occurred',
                 } as BatchTaskFailureInfo,
             },
-        ])('complete failed tasks - %o', async testCase => {
+        ])('complete failed tasks - %j', async testCase => {
             const taskArgs: TaskArguments = {
                 id: 'task id1',
             };

@@ -1,12 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Worker onExit complete failed tasks - {
-  failureInfo: {
-    category: 'serverError',
-    code: '3456',
-    message: 'some server error occurred'
-  }
-} 1`] = `
+exports[`Worker onExit complete failed tasks - {"failureInfo":{"category":"serverError","code":"3456","message":"some server error occurred"}} 1`] = `
 Object {
   "id": "task id1",
   "run": Object {
@@ -17,7 +11,7 @@ Object {
 }
 `;
 
-exports[`Worker onExit complete failed tasks - { failureInfo: undefined } 1`] = `
+exports[`Worker onExit complete failed tasks - {} 1`] = `
 Object {
   "id": "task id1",
   "run": Object {
