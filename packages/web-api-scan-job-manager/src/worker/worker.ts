@@ -43,7 +43,7 @@ export class Worker extends BatchTaskCreator {
         let scanMessages: Message[] = [];
 
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            scanMessages = await this.queue.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
+            scanMessages = await this.queue.getMessagesWithTotalCount(poolLoadSnapshot.tasksIncrementCountPerInterval);
 
             if (scanMessages.length > 0) {
                 scanMessages = await this.dropCompletedScans(scanMessages);
