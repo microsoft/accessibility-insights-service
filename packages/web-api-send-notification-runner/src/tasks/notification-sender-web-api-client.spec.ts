@@ -77,7 +77,7 @@ describe(NotificationSenderWebAPIClient, () => {
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        const actualResponse = await testSubject.postNotificationUrl(notificationSenderConfigData);
+        const actualResponse = await testSubject.sendNotification(notificationSenderConfigData);
 
         expect(actualResponse).toEqual(response);
         postMock.verifyAll();

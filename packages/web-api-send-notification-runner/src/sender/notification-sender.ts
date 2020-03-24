@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { PromiseUtils } from 'common';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -18,7 +18,7 @@ export class NotificationSender {
         @inject(NotificationSenderWebAPIClient) private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(Logger) private readonly logger: Logger,
-        @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
+        private readonly system: typeof System = System,
     ) {}
 
     public async sendNotification(): Promise<void> {
@@ -26,10 +26,11 @@ export class NotificationSender {
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
 
         this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
+        this.logger.setCustomProperties({ scanId: notificationSenderConfigData.scanId });
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(notificationSenderConfigData.scanId);
-        this.logger.setCustomProperties({ scanId: notificationSenderConfigData.scanId, batchRequestId: pageScanResult.batchRequestId });
+        this.logger.setCustomProperties({ batchRequestId: pageScanResult.batchRequestId });
 
-        pageScanResult = await this.startSendingNotification(notificationSenderConfigData, pageScanResult);
+        pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData, pageScanResult);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -37,7 +38,7 @@ export class NotificationSender {
         this.logger.trackEvent('SendNotificationTaskCompleted');
     }
 
-    private async startSendingNotification(
+    private async sendNotificationWithRetry(
         notificationSenderConfigData: NotificationSenderMetadata,
         pageScanResult: OnDemandPageScanResult,
     ): Promise<OnDemandPageScanResult> {
@@ -50,7 +51,7 @@ export class NotificationSender {
             this.logger.logInfo(`Sending notification, try #${numberOfTries}`);
             let response;
             try {
-                response = await this.notificationSenderWebAPIClient.postNotificationUrl(notificationSenderConfigData);
+                response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
                 if (response.statusCode === 200) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
                     this.logger.logInfo(`Notification sent Successfully!`);
@@ -58,7 +59,6 @@ export class NotificationSender {
                 } else {
                     this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(`Notification sent failed!, statusCode: ${response.statusCode}, body: ${response.body}`);
-                    isNotificationSent = false;
                     // tslint:disable-next-line: no-unsafe-any
                     errors.push({ errorType: 'HttpErrorCode', message: response.body });
                 }
@@ -69,9 +69,8 @@ export class NotificationSender {
                 errors.push({ errorType: 'HttpErrorCode', message: (e as Error).message });
             }
             numberOfTries = numberOfTries + 1;
-            if (numberOfTries <= 3) {
-                // tslint:disable-next-line: no-unsafe-any
-                await this.promiseUtils.delay(5000);
+            if (!isNotificationSent && numberOfTries <= 3) {
+                await this.system.wait(5000);
             }
         }
 

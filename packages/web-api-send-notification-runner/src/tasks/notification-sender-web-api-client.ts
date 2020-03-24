@@ -30,7 +30,7 @@ export class NotificationSenderWebAPIClient {
         });
     }
 
-    public async postNotificationUrl(notificationSenderConfigData: NotificationSenderMetadata): Promise<ResponseAsJSON> {
+    public async sendNotification(notificationSenderConfigData: NotificationSenderMetadata): Promise<ResponseAsJSON> {
         const requestBody = {
             scanId: notificationSenderConfigData.scanId,
             runStatus: notificationSenderConfigData.runStatus,

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PromiseUtils } from 'common';
+import { PromiseUtils, System } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
@@ -31,7 +31,7 @@ describe(NotificationSender, () => {
     let webAPIMock: IMock<NotificationSenderWebAPIClient>;
     let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
-    let promiseUtilsMock: IMock<PromiseUtils>;
+    let systemMock: IMock<typeof System>;
     const notificationSenderMetadata: NotificationSenderMetadata = {
         scanId: 'id',
         replyUrl: 'replyUrl',
@@ -58,7 +58,7 @@ describe(NotificationSender, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
         loggerMock = Mock.ofType(MockableLogger);
-        promiseUtilsMock = Mock.ofType(PromiseUtils);
+        systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
@@ -67,7 +67,7 @@ describe(NotificationSender, () => {
             webAPIMock.object,
             notificationSenderMetadataMock.object,
             loggerMock.object,
-            promiseUtilsMock.object,
+            systemMock.object,
         );
     });
 
@@ -79,8 +79,13 @@ describe(NotificationSender, () => {
 
         const response = { statusCode: 200 } as ResponseAsJSON;
 
+        systemMock
+            .setup(sm => sm.wait(5000))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.never());
+
         webAPIMock
-            .setup(wam => wam.postNotificationUrl(notificationSenderMetadata))
+            .setup(wam => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -98,15 +103,15 @@ describe(NotificationSender, () => {
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
-        promiseUtilsMock
-            .setup(pum => pum.delay(5000))
-            .returns(async () => Promise.resolve(5000))
-            .verifiable(Times.exactly(3));
+        systemMock
+            .setup(sm => sm.wait(5000))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.exactly(2));
 
         const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
 
         webAPIMock
-            .setup(wam => wam.postNotificationUrl(notificationSenderMetadata))
+            .setup(wam => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.exactly(3));
 
@@ -124,13 +129,13 @@ describe(NotificationSender, () => {
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
-        promiseUtilsMock
-            .setup(pum => pum.delay(5000))
-            .returns(async () => Promise.resolve(5000))
-            .verifiable(Times.exactly(3));
+        systemMock
+            .setup(sm => sm.wait(5000))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.exactly(2));
 
         webAPIMock
-            .setup(wam => wam.postNotificationUrl(notificationSenderMetadata))
+            .setup(wam => wam.sendNotification(notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
             .verifiable(Times.exactly(3));
 
@@ -141,6 +146,7 @@ describe(NotificationSender, () => {
         notificationSenderMetadataMock.verifyAll();
         webAPIMock.verifyAll();
         loggerMock.verifyAll();
+        systemMock.verifyAll();
     });
 
     function setupReadScanResultCall(scanResult: any): void {
