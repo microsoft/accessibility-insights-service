@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 
 import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
-import { ItemType, OnDemandPageScanResult, PartialOnDemandPageScanResult } from 'storage-documents';
+import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 
 @injectable()
@@ -13,7 +13,7 @@ export class OnDemandPageScanRunResultProvider {
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
-    ) {}
+    ) { }
 
     public async readScanRun(scanId: string): Promise<OnDemandPageScanResult> {
         return (await this.cosmosContainerClient.readDocument<OnDemandPageScanResult>(scanId, this.getPartitionKey(scanId))).item;
@@ -45,7 +45,10 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: PartialOnDemandPageScanResult): Promise<OnDemandPageScanResult> {
+    public async updateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OnDemandPageScanResult> {
+        if (pageScanResult.id === undefined) {
+            throw new Error(`Cannot update scan run using partial scan run without id: ${JSON.stringify(pageScanResult)}`);
+        }
         const persistedResult = pageScanResult as OnDemandPageScanResult;
         this.setSystemProperties(persistedResult);
 

@@ -15,7 +15,6 @@ import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
-    PartialOnDemandPageScanResult,
 } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -27,7 +26,7 @@ import { Runner } from './runner';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
-class MockableLogger extends Logger {}
+class MockableLogger extends Logger { }
 
 describe(Runner, () => {
     let runner: Runner;
@@ -350,7 +349,7 @@ describe(Runner, () => {
         reportGeneratorMock.setup(r => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
-    function getRunningJobStateScanResult(): PartialOnDemandPageScanResult {
+    function getRunningJobStateScanResult(): Partial<OnDemandPageScanResult> {
         return {
             id: onDemandPageScanResult.id,
             run: {
@@ -373,8 +372,8 @@ describe(Runner, () => {
             .verifiable();
     }
 
-    function getFailingJobStateScanResult(error: any, withPageInfo: boolean = true): PartialOnDemandPageScanResult {
-        const result: PartialOnDemandPageScanResult = {
+    function getFailingJobStateScanResult(error: any, withPageInfo: boolean = true): Partial<OnDemandPageScanResult> {
+        const result: Partial<OnDemandPageScanResult> = {
             id: onDemandPageScanResult.id,
             run: {
                 state: 'failed',
@@ -391,7 +390,7 @@ describe(Runner, () => {
         return result;
     }
 
-    function setupUpdateScanRunResultCall(result: PartialOnDemandPageScanResult): void {
+    function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         const clonedResult = cloneDeep(result);
 
         onDemandPageScanRunResultProviderMock
@@ -400,7 +399,7 @@ describe(Runner, () => {
             .verifiable();
     }
 
-    function getScanResultWithNoViolations(): PartialOnDemandPageScanResult {
+    function getScanResultWithNoViolations(): Partial<OnDemandPageScanResult> {
         return {
             id: onDemandPageScanResult.id,
             run: {
@@ -417,7 +416,7 @@ describe(Runner, () => {
         };
     }
 
-    function getScanResultWithViolations(): PartialOnDemandPageScanResult {
+    function getScanResultWithViolations(): Partial<OnDemandPageScanResult> {
         return {
             id: onDemandPageScanResult.id,
             run: {

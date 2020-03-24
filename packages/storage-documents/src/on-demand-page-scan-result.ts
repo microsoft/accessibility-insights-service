@@ -38,7 +38,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     run: OnDemandPageScanRunResult;
     priority: number;
     itemType: ItemType.onDemandPageScanRunResult;
-    batchRequestId: string;
+    batchRequestId?: string;
     notification?: ScanCompletedNotification;
 }
 
@@ -71,8 +71,4 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
-}
-
-export interface PartialOnDemandPageScanResult extends Partial<OnDemandPageScanResult> {
-    id: string;
 }

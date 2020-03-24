@@ -9,10 +9,10 @@ import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     OnDemandPageScanReport,
+    OnDemandPageScanResult,
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
-    PartialOnDemandPageScanResult,
     ScanError,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -33,7 +33,7 @@ export class Runner {
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-    ) {}
+    ) { }
 
     public async run(): Promise<void> {
         let browser: Browser;
@@ -48,7 +48,7 @@ export class Runner {
         this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
-        const pageScanResult: PartialOnDemandPageScanResult = {
+        const pageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanMetadata.id,
             run: {
                 state: 'running',
@@ -85,7 +85,7 @@ export class Runner {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
     }
 
-    private async scan(pageScanResult: PartialOnDemandPageScanResult, url: string): Promise<void> {
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
         this.logger.logInfo(`Running page scan.`);
 
         const axeScanResults = await this.scannerTask.scan(url);
