@@ -26,7 +26,7 @@ export class ScanErrorConverter {
 
     public getScanNotificationErrorCode(scanNotificationError: string | NotificationError): ScanNotificationErrorCode {
         if (isString(scanNotificationError)) {
-            return ScanNotificationErrorCodes.internalError;
+            return ScanNotificationErrorCodes.InternalError;
         }
 
         return notificationErrorNameToErrorMap[scanNotificationError.errorType];

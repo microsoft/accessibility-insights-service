@@ -35,16 +35,16 @@ describe(ScanErrorConverter, () => {
     describe('getScanNotificationErrorCode', () => {
         it('should return internal error for string input', () => {
             const errorCode = testSubject.getScanNotificationErrorCode('hello');
-            expect(errorCode).toEqual(ScanRunErrorCodes.internalError);
+            expect(errorCode).toEqual(ScanNotificationErrorCodes.InternalError);
         });
 
         it('should resolve scanError to scanErrorCode', () => {
             const errorCode = testSubject.getScanNotificationErrorCode({
-                errorType: 'HttpErrorCode',
+                errorType: 'NotificationError',
                 message: 'some message',
             });
 
-            expect(errorCode).toEqual(ScanNotificationErrorCodes.HttpErrorCode);
+            expect(errorCode).toEqual(ScanNotificationErrorCodes.NotificationError);
         });
     });
 });

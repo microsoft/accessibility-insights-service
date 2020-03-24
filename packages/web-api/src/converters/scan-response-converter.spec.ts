@@ -32,7 +32,6 @@ const pageTitle = 'sample page title';
 const pageResponseCode = 101;
 let notification: Notification;
 let notificationResponse: ScanCompletedNotification;
-const httpErrorCode = ScanNotificationErrorCodes.HttpErrorCode;
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
@@ -43,20 +42,20 @@ beforeEach(() => {
 
     scanErrorConverterMock
         .setup(o => o.getScanNotificationErrorCode(It.isAny()))
-        .returns(() => ScanNotificationErrorCodes.HttpErrorCode)
+        .returns(() => ScanNotificationErrorCodes.NotificationError)
         .verifiable();
 
     scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object);
     notificationResponse = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
-        error: httpErrorCode,
+        error: ScanNotificationErrorCodes.NotificationError,
     };
     notification = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
         error: {
-            errorType: 'HttpErrorCode',
+            errorType: 'NotificationError',
             message: 'Failed to send notification.',
         },
     };

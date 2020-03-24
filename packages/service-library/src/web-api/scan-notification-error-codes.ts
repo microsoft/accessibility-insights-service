@@ -3,7 +3,7 @@
 
 // tslint:disable: no-unnecessary-class variable-name
 
-export declare type ScanNotificationErrorCodeName = 'InternalError' | 'HttpErrorCode';
+export declare type ScanNotificationErrorCodeName = 'InternalError' | 'NotificationError';
 
 export interface ScanNotificationErrorCode {
     // This type is part of the REST API client response.
@@ -14,20 +14,20 @@ export interface ScanNotificationErrorCode {
 }
 
 export class ScanNotificationErrorCodes {
-    public static internalError: ScanNotificationErrorCode = {
-        code: 'InternalError',
-        codeId: 9001,
-        message: 'The scan engine encountered an internal error.',
-    };
-
-    public static HttpErrorCode: ScanNotificationErrorCode = {
-        code: 'HttpErrorCode',
+    public static NotificationError: ScanNotificationErrorCode = {
+        code: 'NotificationError',
         codeId: 9012,
         message: 'Failed to send scan notification.',
+    };
+
+    public static InternalError: ScanNotificationErrorCode = {
+        code: 'InternalError',
+        codeId: 9013,
+        message: 'The notification sender encountered an internal error.',
     };
 }
 
 export const notificationErrorNameToErrorMap: { [key in ScanNotificationErrorCodeName]: ScanNotificationErrorCode } = {
-    InternalError: ScanNotificationErrorCodes.internalError,
-    HttpErrorCode: ScanNotificationErrorCodes.HttpErrorCode,
+    InternalError: ScanNotificationErrorCodes.InternalError,
+    NotificationError: ScanNotificationErrorCodes.NotificationError,
 };
