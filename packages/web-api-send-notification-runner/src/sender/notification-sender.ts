@@ -21,21 +21,19 @@ export class NotificationSender {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
-    ) {}
+    ) { }
 
     public async sendNotification(): Promise<void> {
-        let pageScanResult: OnDemandPageScanResult;
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
+        const scanId = notificationSenderConfigData.scanId;
 
-        this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
-        this.logger.setCustomProperties({ scanId: notificationSenderConfigData.scanId });
-        pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(notificationSenderConfigData.scanId);
+        this.logger.logInfo(`Reading page scan run result ${scanId}`);
         this.logger.setCustomProperties({
-            batchRequestId: pageScanResult.batchRequestId,
+            scanId: scanId,
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
         });
 
-        pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData, pageScanResult);
+        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData, scanId);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -45,8 +43,8 @@ export class NotificationSender {
 
     private async sendNotificationWithRetry(
         notificationSenderConfigData: NotificationSenderMetadata,
-        pageScanResult: OnDemandPageScanResult,
-    ): Promise<OnDemandPageScanResult> {
+        scanId: string,
+    ): Promise<Partial<OnDemandPageScanResult>> {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'sendFailed';
         let error: NotificationError = null;
@@ -86,14 +84,15 @@ export class NotificationSender {
             }
         }
 
-        pageScanResult.notification = this.generateNotification(
-            notificationSenderConfigData.scanNotifyUrl,
-            notificationState,
-            error,
-            statusCode,
-        );
-
-        return pageScanResult;
+        return {
+            id: scanId,
+            notification: this.generateNotification(
+                notificationSenderConfigData.scanNotifyUrl,
+                notificationState,
+                error,
+                statusCode,
+            ),
+        };
     }
 
     private async getScanConfig(): Promise<ScanRunTimeConfig> {

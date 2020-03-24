@@ -23,7 +23,7 @@ import { NotificationSender } from './notification-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
-class MockableLogger extends Logger {}
+class MockableLogger extends Logger { }
 
 describe(NotificationSender, () => {
     let sender: NotificationSender;
@@ -95,8 +95,6 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Succeeded', async () => {
-        setupReadScanResultCall(onDemandPageScanResult);
-
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null, 200);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
@@ -116,8 +114,6 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Failed', async () => {
-        setupReadScanResultCall(onDemandPageScanResult);
-
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -145,8 +141,6 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Failed Error', async () => {
-        setupReadScanResultCall(onDemandPageScanResult);
-
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -179,24 +173,17 @@ describe(NotificationSender, () => {
         systemMock.verifyAll();
     });
 
-    function setupReadScanResultCall(scanResult: any): void {
-        onDemandPageScanRunResultProviderMock
-            .setup(async d => d.readScanRun(notificationSenderMetadata.scanId))
-            .returns(async () => Promise.resolve(cloneDeep(scanResult)))
-            .verifiable(Times.once());
+    function getRunningJobStateScanResult(notification: ScanCompletedNotification): Partial<OnDemandPageScanResult> {
+        return {
+            id: onDemandPageScanResult.id,
+            notification: notification,
+        };
     }
 
-    function getRunningJobStateScanResult(notification: ScanCompletedNotification): OnDemandPageScanResult {
-        const result = cloneDeep(onDemandPageScanResult);
-        result.notification = notification;
-
-        return result;
-    }
-
-    function setupUpdateScanRunResultCall(result: OnDemandPageScanResult): void {
+    function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         onDemandPageScanRunResultProviderMock
             .setup(async d => d.updateScanRun(result))
-            .returns(async () => Promise.resolve(result))
+            .returns(async () => Promise.resolve(result as OnDemandPageScanResult))
             .verifiable(Times.once());
     }
 
