@@ -45,6 +45,11 @@ Object {
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
+    "sendNotificationTasksCount": Object {
+      "default": 100,
+      "doc": "Number of scan notification tasks that can be in active/running state",
+      "format": "int",
+    },
   },
   "logConfig": Object {
     "logInConsole": Object {
@@ -217,6 +222,11 @@ Object {
     "maxWallClockTimeInHours": Object {
       "default": 2,
       "doc": "The amount of time the job manager instance will run.",
+      "format": "int",
+    },
+    "sendNotificationTasksCount": Object {
+      "default": 100,
+      "doc": "Number of scan notification tasks that can be in active/running state",
       "format": "int",
     },
   },

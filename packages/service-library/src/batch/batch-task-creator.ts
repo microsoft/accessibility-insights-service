@@ -85,7 +85,13 @@ export abstract class BatchTaskCreator {
 
     protected hasChildTasksRunning(poolMetricsInfo: PoolMetricsInfo): boolean {
         // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
-        return poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks > 1;
+        return this.getChildTasksCount(poolMetricsInfo) > 0;
+    }
+
+    protected getChildTasksCount(poolMetricsInfo: PoolMetricsInfo): number {
+        const taskCount = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks - 1;
+
+        return taskCount < 0 ? 0 : taskCount;
     }
 
     protected async addTasksToJob(messages: Message[]): Promise<JobTask[]> {

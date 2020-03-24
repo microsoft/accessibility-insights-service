@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Worker onExit complete failed tasks - {
+  failureInfo: {
+    category: 'serverError',
+    code: '3456',
+    message: 'some server error occurred'
+  }
+} 1`] = `
+Object {
+  "id": "task id1",
+  "run": Object {
+    "error": "Task was terminated unexpectedly. Exit code: 123, Error category: serverError, Error details: some server error occurred",
+    "state": "failed",
+    "timestamp": "2020-02-01T08:00:00.000Z",
+  },
+}
+`;
+
+exports[`Worker onExit complete failed tasks - { failureInfo: undefined } 1`] = `
+Object {
+  "id": "task id1",
+  "run": Object {
+    "error": "Task was terminated unexpectedly. Exit code: 123",
+    "state": "failed",
+    "timestamp": "2020-02-01T08:00:00.000Z",
+  },
+}
+`;
+
+exports[`Worker onExit handles multiple failed tasks 1`] = `
+Object {
+  "id": "task id1",
+  "run": Object {
+    "error": "Task was terminated unexpectedly. Exit code: 123",
+    "state": "failed",
+    "timestamp": "2020-02-01T08:00:00.000Z",
+  },
+}
+`;
+
+exports[`Worker onExit handles multiple failed tasks 2`] = `
+Object {
+  "id": "task id2",
+  "run": Object {
+    "error": "Task was terminated unexpectedly. Exit code: 456",
+    "state": "failed",
+    "timestamp": "2020-02-02T08:00:00.000Z",
+  },
+}
+`;

@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTaskState, Message, PoolLoadGenerator, PoolLoadSnapshot, PoolMetricsInfo, Queue } from 'azure-services';
-import { JobManagerConfig, ServiceConfiguration, System } from 'common';
+import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue } from 'azure-services';
+import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { mergeWith } from 'lodash';
+import { isNil, mergeWith } from 'lodash';
 import { Logger } from 'logger';
-import * as moment from 'moment';
-import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
+import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 
 // tslint:disable: no-unsafe-any no-any
@@ -21,82 +20,58 @@ export interface ScanMessage {
 }
 
 @injectable()
-export class Worker {
-    public runOnce: boolean = false;
-
-    private jobId: string;
-    private jobManagerConfig: JobManagerConfig;
-    private restartAfterTime: Date;
-
+export class Worker extends BatchTaskCreator {
     public constructor(
-        @inject(Batch) private readonly batch: Batch,
-        @inject(Queue) private readonly queue: Queue,
+        @inject(Batch) batch: Batch,
+        @inject(Queue) queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(BatchPoolLoadSnapshotProvider) private readonly batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(BatchConfig) private readonly batchConfig: BatchConfig,
-        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) private readonly logger: Logger,
-        private readonly system: typeof System = System,
-    ) {}
+        @inject(BatchConfig) batchConfig: BatchConfig,
+        @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
+        @inject(Logger) logger: Logger,
+        system: typeof System = System,
+    ) {
+        super(batch, queue, batchConfig, serviceConfig, logger, system);
+    }
 
-    public async run(): Promise<void> {
-        await this.init();
+    protected async getMessagesForTaskCreation(): Promise<Message[]> {
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
+        await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
-        // tslint:disable-next-line: no-constant-condition
-        while (true) {
-            const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-            const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
-            await this.writePoolLoadSnapshot(poolLoadSnapshot);
+        let scanMessages: Message[] = [];
 
-            let tasksQueuedCount = 0;
-            if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-                const scanMessages = await this.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
-                if (scanMessages.length === 0) {
-                    this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
-                    if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
-                        this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
-                        break;
-                    }
-                }
+        if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
+            scanMessages = await this.queue.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
 
-                if (scanMessages.length > 0) {
-                    const acceptedScanMessages = await this.dropCompletedScans(scanMessages);
-                    tasksQueuedCount = await this.addTasksToJob(acceptedScanMessages);
-                }
+            if (scanMessages.length > 0) {
+                scanMessages = await this.dropCompletedScans(scanMessages);
             }
-
-            // set the actual number of tasks added to the batch pool to process
-            this.poolLoadGenerator.setLastTasksIncrementCount(tasksQueuedCount);
-
-            this.logger.logInfo(
-                'Pool load statistics',
-                mergeWith({}, poolLoadSnapshot, (t, s, k) =>
-                    s !== undefined ? (s.constructor.name !== 'Date' ? s.toString() : s.toJSON()) : 'undefined',
-                ) as any,
-            );
-
-            // tslint:disable-next-line: no-null-keyword
-            this.logger.trackEvent('BatchPoolStats', null, {
-                runningTasks: poolMetricsInfo.load.runningTasks,
-                samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
-                maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
-            });
-
-            if (this.runOnce) {
-                break;
-            }
-
-            if (moment().toDate() >= this.restartAfterTime) {
-                this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
-                await this.waitForChildTasks();
-
-                break;
-            }
-
-            await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
         }
 
+        this.logger.logInfo(
+            'Pool load statistics',
+            mergeWith({}, poolLoadSnapshot, (t, s) =>
+                s !== undefined ? (s.constructor.name !== 'Date' ? s.toString() : s.toJSON()) : 'undefined',
+            ) as any,
+        );
+
+        // tslint:disable-next-line: no-null-keyword
+        this.logger.trackEvent('BatchPoolStats', null, {
+            runningTasks: poolMetricsInfo.load.runningTasks,
+            samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
+            maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
+        });
+
+        return scanMessages;
+    }
+
+    protected async onTasksAdded(tasks: JobTask[]): Promise<void> {
+        this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
+    }
+
+    protected async onExit(): Promise<void> {
         await this.completeTerminatedTasks();
     }
 
@@ -109,7 +84,7 @@ export class Worker {
         await Promise.all(
             failedTasks.map(async failedTask => {
                 const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
-                if (taskArguments !== undefined && taskArguments.id !== undefined) {
+                if (!isNil(taskArguments?.id)) {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
                     error =
                         failedTask.failureInfo !== undefined
@@ -141,52 +116,6 @@ export class Worker {
         );
     }
 
-    private async waitForChildTasks(): Promise<void> {
-        this.logger.logInfo('Waiting for child tasks to complete');
-
-        let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
-        while (this.hasChildTasksRunning(poolMetricsInfo)) {
-            await this.system.wait(5000);
-            poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-        }
-    }
-
-    private hasChildTasksRunning(poolMetricsInfo: PoolMetricsInfo): boolean {
-        // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
-        return poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks > 1;
-    }
-
-    private async getMessages(messagesCount: number): Promise<Message[]> {
-        const messages: Message[] = [];
-        do {
-            const batch = await this.queue.getMessages();
-            if (batch.length === 0) {
-                break;
-            }
-            messages.push(...batch);
-        } while (messages.length < messagesCount);
-
-        return messages;
-    }
-
-    private async addTasksToJob(scanMessages: Message[]): Promise<number> {
-        const jobTasks = await this.batch.createTasks(this.jobId, scanMessages);
-
-        await Promise.all(
-            jobTasks.map(async jobTask => {
-                if (jobTask.state === JobTaskState.queued) {
-                    const message = scanMessages.find(value => value.messageId === jobTask.correlationId);
-                    await this.queue.deleteMessage(message);
-                }
-            }),
-        );
-
-        const jobQueuedTasks = jobTasks.filter(jobTask => jobTask.state === JobTaskState.queued);
-        this.logger.logInfo(`Added ${jobQueuedTasks.length} new tasks`);
-
-        return jobQueuedTasks.length;
-    }
-
     private async dropCompletedScans(messages: Message[]): Promise<Message[]> {
         const scanMessages: ScanMessage[] = messages.map(message => ({
             scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
@@ -194,7 +123,7 @@ export class Worker {
         }));
 
         const scanRuns: OnDemandPageScanResult[] = [];
-        const chunks = System.chunkArray(scanMessages, 100);
+        const chunks = this.system.chunkArray(scanMessages, 100);
         await Promise.all(
             chunks.map(async chunk => {
                 const scanIds = chunk.map(m => m.scanId);
@@ -229,13 +158,5 @@ export class Worker {
             batchAccountName: this.batchConfig.accountName,
             ...poolLoadSnapshot,
         });
-    }
-
-    private async init(): Promise<void> {
-        this.jobManagerConfig = await this.serviceConfig.getConfigValue('jobManagerConfig');
-        this.jobId = await this.batch.createJobIfNotExists(this.batchConfig.jobId, true);
-        this.restartAfterTime = moment()
-            .add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour')
-            .toDate();
     }
 }

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Message, Queue } from 'azure-services';
-import { ServiceConfiguration, System } from 'common';
+import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import * as _ from 'lodash';
 import * as moment from 'moment';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
@@ -63,7 +63,7 @@ describe(Worker, () => {
                     activeToRunningTasksRatio: activeToRunningTasksRatioDefault,
                     addTasksIntervalInSeconds: addTasksIntervalInSecondsDefault,
                     maxWallClockTimeInHours: maxWallClockTimeInHours,
-                };
+                } as JobManagerConfig;
             })
             .verifiable(Times.atLeastOnce());
 
