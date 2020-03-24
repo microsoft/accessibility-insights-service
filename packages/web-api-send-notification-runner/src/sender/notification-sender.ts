@@ -43,11 +43,11 @@ export class NotificationSender {
         pageScanResult: OnDemandPageScanResult,
     ): Promise<OnDemandPageScanResult> {
         let numberOfTries = 1;
-        let isNotificationSent = false;
+        let notificationState: NotificationState = 'sendFailed';
         const errors: NotificationError[] = [];
 
         this.logger.trackEvent('SendNotificationTaskStarted');
-        while (!isNotificationSent && numberOfTries <= 3) {
+        while (numberOfTries <= 3) {
             this.logger.logInfo(`Sending notification, try #${numberOfTries}`);
             let response;
             try {
@@ -55,7 +55,8 @@ export class NotificationSender {
                 if (response.statusCode === 200) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
                     this.logger.logInfo(`Notification sent Successfully!`);
-                    isNotificationSent = true;
+                    notificationState = 'sent';
+                    break;
                 } else {
                     this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(`Notification sent failed!, statusCode: ${response.statusCode}, body: ${response.body}`);
@@ -65,16 +66,13 @@ export class NotificationSender {
             } catch (e) {
                 this.logger.trackEvent('SendNotificationTaskFailed');
                 this.logger.logError(`Notification sent failed!, error message: ${(e as Error).message}`);
-                isNotificationSent = false;
                 errors.push({ errorType: 'HttpErrorCode', message: (e as Error).message });
             }
             numberOfTries = numberOfTries + 1;
-            if (!isNotificationSent && numberOfTries <= 3) {
+            if (numberOfTries <= 3) {
                 await this.system.wait(5000);
             }
         }
-
-        const notificationState: NotificationState = isNotificationSent ? 'sent' : 'sendFailed';
 
         pageScanResult.notification = this.generateNotification(notificationSenderConfigData.replyUrl, notificationState, errors);
 

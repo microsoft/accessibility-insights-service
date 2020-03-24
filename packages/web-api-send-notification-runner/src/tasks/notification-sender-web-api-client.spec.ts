@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { ResponseAsJSON } from 'request';
 import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
@@ -64,7 +65,7 @@ describe(NotificationSenderWebAPIClient, () => {
             scanStatus: scanStatus,
             runStatus: runStatus,
         };
-        const response = { statusCode: 200 };
+        const response = { statusCode: 200 } as ResponseAsJSON;
         const requestBody = [{ scanId: scanId, runStatus: runStatus, scanStatus: scanStatus }];
         const options = {
             ...sharedOption,
