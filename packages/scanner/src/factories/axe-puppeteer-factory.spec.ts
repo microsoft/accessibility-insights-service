@@ -16,6 +16,7 @@ describe('AxePuppeteerFactory', () => {
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
+            maxSendNotificationRetryCount: 3,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],

@@ -30,6 +30,7 @@ export interface ScanRunTimeConfig {
     pageRescanIntervalInDays: number;
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
+    maxSendNotificationRetryCount: number;
     accessibilityRuleExclusionList: string[];
     scanTimeoutInMin: number;
 }
@@ -171,6 +172,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'Maximum number of retries allowed for a page scan',
+                },
+                maxSendNotificationRetryCount: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Maximum number of retries allowed for a scan notification sending',
                 },
                 accessibilityRuleExclusionList: {
                     format: Array,
