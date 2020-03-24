@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SendNotificationTaskPropertyProvider builds command line 1`] = `"/bin/bash -c 'start-web-api-send-notification-runner.sh \\"id1\\" \\"url1\\"'"`;
+exports[`SendNotificationTaskPropertyProvider builds command line 1`] = `"/bin/bash -c 'start-web-api-send-notification-runner.sh \\"id1\\" \\"url1\\" \\"completed\\" \\"failed\\"'"`;
 
 exports[`SendNotificationTaskPropertyProvider environment settings builds environment settings 1`] = `
 Array [
@@ -11,6 +11,10 @@ Array [
   Object {
     "name": "KEY_VAULT_URL",
     "value": "key vault url1",
+  },
+  Object {
+    "name": "AZURE_STORAGE_SCAN_QUEUE",
+    "value": "notification-queue-name",
   },
 ]
 `;

@@ -23,12 +23,13 @@ describe(SendNotificationTaskPropertyProvider, () => {
         environmentSettingsMock.setup(s => s.getValue('APPINSIGHTS_INSTRUMENTATIONKEY')).returns(() => appInsightsKey);
         environmentSettingsMock.setup(s => s.getValue('KEY_VAULT_URL')).returns(() => keyVaultUrl);
         environmentSettingsMock.setup(s => s.getValue('RUNNER_SCRIPTS_CONTAINER_NAME')).returns(() => runnerScriptContainerName);
+        environmentSettingsMock.setup(s => s.getValue('AZURE_STORAGE_SCAN_QUEUE')).returns(() => 'notification-queue-name');
 
         testSubject = new SendNotificationTaskPropertyProvider(environmentSettingsMock.object, serviceConfigMock.object);
     });
 
     it('builds command line', () => {
-        const data = { id: 'id1', url: 'url1', priority: 1 };
+        const data = { scanId: 'id1', scanNotifyUrl: 'url1', runStatus: 'completed', scanStatus: 'failed', somOtherArg: 'some value' };
 
         expect(testSubject.getCommandLine(JSON.stringify(data))).toMatchSnapshot();
     });
