@@ -40,11 +40,11 @@ describe(ScanErrorConverter, () => {
 
         it('should resolve scanError to scanErrorCode', () => {
             const errorCode = testSubject.getScanNotificationErrorCode({
-                errorType: 'NotificationError',
+                errorType: 'InternalError',
                 message: 'some message',
             });
 
-            expect(errorCode).toEqual(ScanNotificationErrorCodes.NotificationError);
+            expect(errorCode).toEqual(ScanNotificationErrorCodes.InternalError);
         });
     });
 });

@@ -59,19 +59,19 @@ export class NotificationSender {
             let response;
             try {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
+                statusCode = response.statusCode;
+
                 if (response.statusCode === 200) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
                     this.logger.logInfo(`Notification sent Successfully!, try #${numberOfTries}`);
                     notificationState = 'sent';
                     error = null;
-                    statusCode = 200;
                     break;
                 } else {
                     this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(
                         `Notification sent failed!, try #${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
-                    statusCode = response.statusCode;
                     // tslint:disable-next-line: no-unsafe-any
                     error = { errorType: 'HttpErrorCode', message: response.body };
                 }

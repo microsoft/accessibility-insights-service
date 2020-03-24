@@ -42,21 +42,21 @@ beforeEach(() => {
 
     scanErrorConverterMock
         .setup(o => o.getScanNotificationErrorCode(It.isAny()))
-        .returns(() => ScanNotificationErrorCodes.NotificationError)
+        .returns(() => ScanNotificationErrorCodes.InternalError)
         .verifiable();
 
     scanResponseConverter = new ScanResponseConverter(scanErrorConverterMock.object);
     notificationResponse = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
-        error: ScanNotificationErrorCodes.NotificationError,
+        error: ScanNotificationErrorCodes.InternalError,
         responseCode: 200,
     };
     notification = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
         error: {
-            errorType: 'NotificationError',
+            errorType: 'InternalError',
             message: 'Failed to send notification.',
         },
         responseCode: 200,

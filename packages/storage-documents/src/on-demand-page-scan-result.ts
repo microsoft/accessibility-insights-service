@@ -25,7 +25,7 @@ export interface ScanError {
     message: string;
 }
 
-export type NotificationErrorTypes = 'NotificationError' | 'InternalError' | 'HttpErrorCode';
+export type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 
 /**
  * The web page scan run result document.
