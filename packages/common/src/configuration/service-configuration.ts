@@ -113,7 +113,7 @@ export class ServiceConfiguration {
                 sendNotification: {
                     format: 'Boolean',
                     default: false,
-                    doc: 'Property to decide if send notification after scan is complete is enabled',
+                    doc: 'Property to decide if we should notify after scan completed.',
                 },
             },
             logConfig: {
