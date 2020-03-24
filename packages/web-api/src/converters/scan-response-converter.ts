@@ -6,17 +6,14 @@ import { ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
 import { isNullOrUndefined } from 'util';
 
-import { ScanRunErrorConverter } from './scan-run-error-converter';
+import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
 export class ScanResponseConverter {
-    constructor(@inject(ScanRunErrorConverter) private readonly scanRunErrorConverter: ScanRunErrorConverter) {}
+    constructor(@inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter) {}
 
     public getScanResultResponse(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
         const runState: OnDemandPageScanRunState = pageScanResultDocument.run.state;
-        const notificationResponse = isNullOrUndefined(this.getRunCompleteNotificationResponse(pageScanResultDocument.notification))
-            ? {}
-            : { notification: pageScanResultDocument.notification };
         switch (runState) {
             case 'pending':
             case 'accepted':
@@ -29,7 +26,7 @@ export class ScanResponseConverter {
                     run: {
                         state: pageScanResultDocument.run.state,
                     },
-                    ...notificationResponse,
+                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
                 };
             case 'failed':
                 return {
@@ -38,11 +35,11 @@ export class ScanResponseConverter {
                     run: {
                         state: pageScanResultDocument.run.state,
                         timestamp: pageScanResultDocument.run.timestamp,
-                        error: this.scanRunErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
+                        error: this.scanErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
                         pageResponseCode: pageScanResultDocument.run.pageResponseCode,
                         pageTitle: pageScanResultDocument.run.pageTitle,
                     },
-                    ...notificationResponse,
+                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
                 };
             case 'completed':
                 const scanResultResponse: ScanResultResponse = {
@@ -59,7 +56,7 @@ export class ScanResponseConverter {
                         pageResponseCode: pageScanResultDocument.run.pageResponseCode,
                         pageTitle: pageScanResultDocument.run.pageTitle,
                     },
-                    ...notificationResponse,
+                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
                 };
                 if (pageScanResultDocument.scannedUrl !== undefined) {
                     scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
@@ -88,17 +85,18 @@ export class ScanResponseConverter {
         });
     }
 
-    private getRunCompleteNotificationResponse(notification: ScanCompletedNotification): ScanCompletedNotification {
+    private getRunCompleteNotificationResponse(
+        notification: ScanCompletedNotification,
+    ): { [notification: string]: ScanCompletedNotification } | {} {
         if (isNullOrUndefined(notification)) {
-            return undefined;
+            return {};
         }
 
         return {
-            scanNotifyUrl: notification.scanNotifyUrl,
-            state: notification.state,
-            error: {
-                errorType: notification.error.errorType,
-                message: 'Failed to send notification.',
+            notification: {
+                scanNotifyUrl: notification.scanNotifyUrl,
+                state: notification.state,
+                error: this.scanErrorConverter.getScanNotificationErrorCode(notification.error),
             },
         };
     }
