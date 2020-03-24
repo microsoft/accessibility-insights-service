@@ -169,6 +169,11 @@ describe(BatchTaskCreator, () => {
                 .verifiable(Times.atLeastOnce());
         });
 
+        afterEach(() => {
+            onTaskAddedCallback.verifyAll();
+            getMessagesForTaskCreationMock.verifyAll();
+        });
+
         it('should throw if not initialized', async () => {
             batchMock.reset();
 
@@ -197,7 +202,7 @@ describe(BatchTaskCreator, () => {
             getMessagesForTaskCreationMock
                 .setup(g => g())
                 .returns(() => [])
-                .verifiable(Times.exactly(2));
+                .verifiable(Times.exactly(3));
 
             systemMock
                 .setup(s => s.wait(jobManagerConfig.addTasksIntervalInSeconds * 1000))
@@ -312,7 +317,7 @@ describe(BatchTaskCreator, () => {
             setupVerifiableBatchCreateTasksCall(messagesBatch1, jobTasksBatch1);
 
             setupVerifiableDeleteQueueMessagesCall(expectedDeletedMessages);
-            setupVerifiableOnTaskAddedCall(jobTasksBatch1);
+            setupVerifiableOnTaskAddedCall(generateJobTasks(expectedDeletedMessages));
 
             getMessagesForTaskCreationMock
                 .setup(g => g())
@@ -324,7 +329,7 @@ describe(BatchTaskCreator, () => {
 
                     return messagesBatch1;
                 })
-                .verifiable(Times.exactly(2));
+                .verifiable(Times.once());
 
             await testSubject.run();
 
