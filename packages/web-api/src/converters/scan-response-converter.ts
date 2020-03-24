@@ -3,7 +3,12 @@
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanReport, ScanResultResponse } from 'service-library';
-import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification, ScanCompletedNotificationResponse } from 'storage-documents';
+import {
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState,
+    ScanCompletedNotification,
+    ScanCompletedNotificationResponse,
+} from 'storage-documents';
 import { isNullOrUndefined } from 'util';
 
 import { ScanRunErrorConverter } from './scan-run-error-converter';

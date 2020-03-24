@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { System } from 'common';
+import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -18,6 +18,7 @@ export class NotificationSender {
         @inject(NotificationSenderWebAPIClient) private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(Logger) private readonly logger: Logger,
+        @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         private readonly system: typeof System = System,
     ) {}
 
@@ -45,9 +46,10 @@ export class NotificationSender {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'sendFailed';
         const errors: NotificationError[] = [];
+        const scanConfig = await this.getScanConfig();
 
         this.logger.trackEvent('SendNotificationTaskStarted');
-        while (numberOfTries <= 3) {
+        while (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
             this.logger.logInfo(`Sending notification, try #${numberOfTries}`);
             let response;
             try {
@@ -69,7 +71,7 @@ export class NotificationSender {
                 errors.push({ errorType: 'HttpErrorCode', message: (e as Error).message });
             }
             numberOfTries = numberOfTries + 1;
-            if (numberOfTries <= 3) {
+            if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
                 await this.system.wait(5000);
             }
         }
@@ -79,11 +81,11 @@ export class NotificationSender {
         return pageScanResult;
     }
 
-    private generateNotification(
-        scanNotifyUrl: string,
-        state: NotificationState,
-        errors: NotificationError[],
-    ): ScanCompletedNotification {
+    private async getScanConfig(): Promise<ScanRunTimeConfig> {
+        return this.serviceConfig.getConfigValue('scanConfig');
+    }
+
+    private generateNotification(scanNotifyUrl: string, state: NotificationState, errors: NotificationError[]): ScanCompletedNotification {
         return {
             scanNotifyUrl: scanNotifyUrl,
             state: state,

@@ -143,6 +143,11 @@ Object {
       "doc": "Maximum number of retries allowed for a page scan",
       "format": "int",
     },
+    "maxSendNotificationRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a scan notification sending",
+      "format": "int",
+    },
     "minLastReferenceSeenInDays": Object {
       "default": 3,
       "doc": "Minimum days since we last saw a page. Pages older than this time will not be scanned.",
@@ -315,6 +320,11 @@ Object {
     "maxScanRetryCount": Object {
       "default": 3,
       "doc": "Maximum number of retries allowed for a page scan",
+      "format": "int",
+    },
+    "maxSendNotificationRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
     "minLastReferenceSeenInDays": Object {

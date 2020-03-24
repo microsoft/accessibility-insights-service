@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PromiseUtils, System } from 'common';
+import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
@@ -31,7 +31,10 @@ describe(NotificationSender, () => {
     let webAPIMock: IMock<NotificationSenderWebAPIClient>;
     let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
     let systemMock: IMock<typeof System>;
+    let scanConfig: ScanRunTimeConfig;
+
     const notificationSenderMetadata: NotificationSenderMetadata = {
         scanId: 'id',
         scanNotifyUrl: 'scanNotifyUrl',
@@ -55,9 +58,23 @@ describe(NotificationSender, () => {
     };
 
     beforeEach(() => {
+        scanConfig = {
+            failedPageRescanIntervalInHours: 3,
+            maxScanRetryCount: 4,
+            maxSendNotificationRetryCount: 3,
+            minLastReferenceSeenInDays: 5,
+            pageRescanIntervalInDays: 6,
+            accessibilityRuleExclusionList: [],
+            scanTimeoutInMin: 1,
+        };
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
         loggerMock = Mock.ofType(MockableLogger);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async s => s.getConfigValue('scanConfig'))
+            .returns(async () => scanConfig)
+            .verifiable(Times.once());
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
@@ -67,6 +84,7 @@ describe(NotificationSender, () => {
             webAPIMock.object,
             notificationSenderMetadataMock.object,
             loggerMock.object,
+            serviceConfigMock.object,
             systemMock.object,
         );
     });
@@ -146,6 +164,7 @@ describe(NotificationSender, () => {
         notificationSenderMetadataMock.verifyAll();
         webAPIMock.verifyAll();
         loggerMock.verifyAll();
+        serviceConfigMock.verifyAll();
         systemMock.verifyAll();
     });
 
