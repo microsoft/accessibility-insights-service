@@ -23,6 +23,7 @@ export interface JobManagerConfig {
     activeToRunningTasksRatio: number;
     addTasksIntervalInSeconds: number;
     maxWallClockTimeInHours: number;
+    sendNotificationTasksCount: number;
 }
 
 export interface ScanRunTimeConfig {
@@ -30,6 +31,7 @@ export interface ScanRunTimeConfig {
     pageRescanIntervalInDays: number;
     failedPageRescanIntervalInHours: number;
     maxScanRetryCount: number;
+    maxSendNotificationRetryCount: number;
     accessibilityRuleExclusionList: string[];
     scanTimeoutInMin: number;
 }
@@ -150,6 +152,11 @@ export class ServiceConfiguration {
                     default: 2,
                     doc: 'The amount of time the job manager instance will run.',
                 },
+                sendNotificationTasksCount: {
+                    format: 'int',
+                    default: 100,
+                    doc: 'Number of scan notification tasks that can be in active/running state',
+                },
             },
             scanConfig: {
                 minLastReferenceSeenInDays: {
@@ -171,6 +178,11 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 3,
                     doc: 'Maximum number of retries allowed for a page scan',
+                },
+                maxSendNotificationRetryCount: {
+                    format: 'int',
+                    default: 3,
+                    doc: 'Maximum number of retries allowed for a scan notification sending',
                 },
                 accessibilityRuleExclusionList: {
                     format: Array,

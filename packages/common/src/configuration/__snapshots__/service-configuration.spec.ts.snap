@@ -45,6 +45,11 @@ Object {
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
+    "sendNotificationTasksCount": Object {
+      "default": 100,
+      "doc": "Number of scan notification tasks that can be in active/running state",
+      "format": "int",
+    },
   },
   "logConfig": Object {
     "logInConsole": Object {
@@ -141,6 +146,11 @@ Object {
     "maxScanRetryCount": Object {
       "default": 3,
       "doc": "Maximum number of retries allowed for a page scan",
+      "format": "int",
+    },
+    "maxSendNotificationRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
     "minLastReferenceSeenInDays": Object {
@@ -219,6 +229,11 @@ Object {
       "doc": "The amount of time the job manager instance will run.",
       "format": "int",
     },
+    "sendNotificationTasksCount": Object {
+      "default": 100,
+      "doc": "Number of scan notification tasks that can be in active/running state",
+      "format": "int",
+    },
   },
   "logConfig": Object {
     "logInConsole": Object {
@@ -315,6 +330,11 @@ Object {
     "maxScanRetryCount": Object {
       "default": 3,
       "doc": "Maximum number of retries allowed for a page scan",
+      "format": "int",
+    },
+    "maxSendNotificationRetryCount": Object {
+      "default": 3,
+      "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
     "minLastReferenceSeenInDays": Object {

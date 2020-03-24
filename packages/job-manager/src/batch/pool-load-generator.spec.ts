@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ServiceConfiguration } from 'common';
+import { JobManagerConfig, ServiceConfiguration } from 'common';
 import { IMock, Mock } from 'typemoq';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 
@@ -10,6 +10,8 @@ let poolMetricsInfo: PoolMetricsInfo;
 let poolLoadGenerator: PoolLoadGenerator;
 let serviceConfigMock: IMock<ServiceConfiguration>;
 let activeToRunningTasksRatio: number;
+
+// tslint:disable: no-object-literal-type-assertion
 
 describe(PoolLoadGenerator, () => {
     beforeEach(() => {
@@ -22,7 +24,7 @@ describe(PoolLoadGenerator, () => {
                     activeToRunningTasksRatio: activeToRunningTasksRatio,
                     addTasksIntervalInSeconds: 15,
                     maxWallClockTimeInHours: 1,
-                };
+                } as JobManagerConfig;
             });
 
         poolLoadGenerator = new PoolLoadGenerator(serviceConfigMock.object);
