@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { Logger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
@@ -16,8 +17,10 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
+    ScanCompletedNotification,
     ScanRunBatchRequest,
 } from 'storage-documents';
+import { isNullOrUndefined } from 'util';
 
 interface ScanRequestTelemetryProperties {
     scanUrl: string;
@@ -101,6 +104,14 @@ export class ScanBatchRequestFeedController extends WebController {
                     timestamp: new Date().toJSON(),
                 },
                 batchRequestId: batchRequestId,
+                ...(isEmpty(request.scanNotifyUrl)
+                    ? {}
+                    : {
+                          notification: {
+                              state: 'pending',
+                              scanNotifyUrl: request.scanNotifyUrl,
+                          },
+                      }),
             };
         });
 
@@ -113,12 +124,15 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>(request => {
+            const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
+
             return {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
+                ...scanNotifyUrl,
             };
         });
 

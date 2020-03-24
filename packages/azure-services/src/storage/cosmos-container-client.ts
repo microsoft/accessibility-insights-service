@@ -20,6 +20,7 @@ export class CosmosContainerClient {
         private readonly dbName: string,
         private readonly collectionName: string,
         private readonly logger: Logger,
+        private readonly systemUtils: typeof System = System,
     ) {}
 
     public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
@@ -170,7 +171,7 @@ export class CosmosContainerClient {
                     break;
                 }
 
-                await System.wait(retryOptions.intervalMilliseconds);
+                await this.systemUtils.wait(retryOptions.intervalMilliseconds);
             }
         });
     }

@@ -1691,10 +1691,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node@*", "@types/node@>= 8", "@types/node@^13.9.2":
-  version "13.9.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.9.2.tgz#ace1880c03594cc3e80206d96847157d8e7fa349"
-  integrity sha512-bnoqK579sAYrQbp73wwglccjJ4sfRdKU7WNEZ5FW4K2U6Kc0/eZ5kvXG0JKsEKFB50zrFmfFt52/cvBbZa7eXg==
+"@types/node@*", "@types/node@>= 8", "@types/node@^13.9.3":
+  version "13.9.3"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-13.9.3.tgz#6356df2647de9eac569f9a52eda3480fa9e70b4d"
+  integrity sha512-01s+ac4qerwd6RHD+mVbOEsraDHSgUaefQlEdBbUolnQFjKwCr7luvAlEwW1RFojh67u0z4OUTjPn9LEl4zIkA==
 
 "@types/node@^8.0.47":
   version "8.10.59"
@@ -4503,10 +4503,10 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-fork-ts-checker-webpack-plugin@^4.1.0:
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-4.1.0.tgz#62bffe704426770fee33f15f0c0d56c86297fefd"
-  integrity sha512-2DLwUVUR/AdNmMD2utfmSR8r4qHRFhnfL6QQDQS5q4g5uBZzXYDgg8MXPIbu0HzyLjyvbogqjBNKILG5fufwzg==
+fork-ts-checker-webpack-plugin@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-4.1.1.tgz#138ad4551665a6569a479a496728983ce7069751"
+  integrity sha512-d6nPiFBeyvh1IcFcDK5wnmcZqdbNIEWDiUmS+/rB3bYzp7fJCZk5xmI+aCymYLImg870cEofy+wm1sIK3mnFsg==
   dependencies:
     babel-code-frame "^6.22.0"
     chalk "^2.4.1"
@@ -5841,10 +5841,10 @@ jest-haste-map@^25.1.0:
   optionalDependencies:
     fsevents "^2.1.2"
 
-jest-html-reporter@^2.8.1:
-  version "2.8.1"
-  resolved "https://registry.yarnpkg.com/jest-html-reporter/-/jest-html-reporter-2.8.1.tgz#48a7f9ab71e355e9f95a10ed6009ff3315b72fd8"
-  integrity sha512-YGXkb+uC0jXxHZn/rt+yq9D3Q493dZ3R80MxW1kKpd9YIzBHRlCnKYPft6ZjgkQcSJKDB6RdiJKRACWoBwfjtw==
+jest-html-reporter@^2.8.2:
+  version "2.8.2"
+  resolved "https://registry.yarnpkg.com/jest-html-reporter/-/jest-html-reporter-2.8.2.tgz#6b6b1f5f927211a0e5699cf9bcc76837a19952f5"
+  integrity sha512-zepJsVjqplRFrNRtRZsD3yYVRJOrNiUPOoOJA1oSL7ypYxr4YHlvVz1CPmc762BkSd3fp+kRd6mGCZz29xXFEQ==
   dependencies:
     dateformat "3.0.2"
     mkdirp "0.5.3"
@@ -9479,10 +9479,10 @@ ts-jest@^25.2.1:
     semver "^5.5"
     yargs-parser "^16.1.0"
 
-ts-loader@^6.2.1:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-6.2.1.tgz#67939d5772e8a8c6bdaf6277ca023a4812da02ef"
-  integrity sha512-Dd9FekWuABGgjE1g0TlQJ+4dFUfYGbYcs52/HQObE0ZmUNjQlmLAS7xXsSzy23AMaMwipsx5sNHvoEpT2CZq1g==
+ts-loader@^6.2.2:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/ts-loader/-/ts-loader-6.2.2.tgz#dffa3879b01a1a1e0a4b85e2b8421dc0dfff1c58"
+  integrity sha512-HDo5kXZCBml3EUPcc7RlZOV/JGlLHwppTLEHb3SHnr5V7NXD4klMEkrhJe5wgRbaWsSXi+Y1SIBN/K9B6zWGWQ==
   dependencies:
     chalk "^2.3.0"
     enhanced-resolve "^4.0.0"

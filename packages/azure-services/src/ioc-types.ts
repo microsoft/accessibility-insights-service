@@ -18,7 +18,6 @@ export const iocTypeNames = {
     AuthenticationMethod: 'AuthenticationMethod',
     CredentialType: 'CredentialType',
     BatchServiceClientProvider: 'BatchServiceClientProvider',
-    BatchTaskParameterProvider: 'BatchTaskParameterProvider',
 };
 
 export type AzureKeyVaultClientProvider = () => Promise<KeyVaultClient>;

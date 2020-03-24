@@ -72,21 +72,21 @@ function setupCosmos() {
 
     # Increase throughput for below collection only in case of prod
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
-    if [ $environment = "prod" ]; then
+    if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"25000\""
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
             "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
-            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"2000\""
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"400\""
         )
     else
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"2000\""
-            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"2000\""         # 30 days
-            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
-            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\""      # 7 days
-            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"2000\""
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
+            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"400\""         # 30 days
+            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\"" # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\""      # 7 days
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"400\""
         )
     fi
 

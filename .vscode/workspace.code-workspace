@@ -133,7 +133,7 @@
     "extensions": {
         "recommendations": [
             "ms-vscode.vscode-typescript-tslint-plugin",
-            "ms-vscode.csharp",
+            "ms-dotnettools.csharp",
             "esbenp.prettier-vscode",
             "rbbit.typescript-hero",
             "foxundermoon.shell-format",

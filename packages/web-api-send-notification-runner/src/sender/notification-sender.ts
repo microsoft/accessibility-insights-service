@@ -74,18 +74,18 @@ export class NotificationSender {
             }
         }
 
-        pageScanResult.notification = this.generateNotification(notificationSenderConfigData.replyUrl, notificationState, errors);
+        pageScanResult.notification = this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, errors);
 
         return pageScanResult;
     }
 
     private generateNotification(
-        notificationUrl: string,
+        scanNotifyUrl: string,
         state: NotificationState,
         errors: NotificationError[],
     ): ScanCompletedNotification {
         return {
-            notificationUrl: notificationUrl,
+            scanNotifyUrl: scanNotifyUrl,
             state: state,
             errors: errors,
         };

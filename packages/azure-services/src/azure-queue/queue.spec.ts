@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
 import { ServiceConfiguration } from 'common';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
@@ -129,6 +129,73 @@ describe(Queue, () => {
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
             verifyAll();
+        });
+    });
+
+    describe('getMessagesWithTotalCount', async () => {
+        let getMessagesMock: IMock<(totalMessagesCount: number) => Promise<Message[]>>;
+        let messageIdCounter = 0;
+
+        beforeEach(() => {
+            getMessagesMock = Mock.ofInstance(async () => Promise.resolve([]), MockBehavior.Strict);
+            messageIdCounter = 0;
+
+            (testSubject as any).getMessages = getMessagesMock.object;
+        });
+
+        afterEach(() => {
+            getMessagesMock.verifyAll();
+        });
+
+        function generateMessages(totalCount: number): Message[] {
+            const messages: Message[] = [];
+            for (let count = 1; count <= totalCount; count += 1) {
+                messageIdCounter += 1;
+                messages.push({
+                    messageId: `id-${messageIdCounter}`,
+                    messageText: `message text for ${messageIdCounter}`,
+                });
+            }
+
+            return messages;
+        }
+
+        it('makes multiple calls to get all results', async () => {
+            getMessagesMock
+                .setup(s => s(32))
+                .returns(async () => generateMessages(32))
+                .verifiable(Times.once());
+
+            getMessagesMock
+                .setup(s => s(3))
+                .returns(async () => generateMessages(3))
+                .verifiable(Times.once());
+
+            const messages = await testSubject.getMessagesWithTotalCount(35);
+
+            expect(messages).toHaveLength(35);
+        });
+
+        it('makes single call if count is within limits of single call', async () => {
+            getMessagesMock
+                .setup(s => s(31))
+                .returns(async () => generateMessages(31))
+                .verifiable(Times.once());
+
+            const messages = await testSubject.getMessagesWithTotalCount(31);
+
+            expect(messages).toHaveLength(31);
+        });
+
+        it('returns empty array if no messages found', async () => {
+            getMessagesMock
+                .setup(s => s(32))
+                .returns(async () => [])
+                .verifiable(Times.once());
+
+            const messages = await testSubject.getMessagesWithTotalCount(100);
+
+            expect(messages).toHaveLength(0);
         });
     });
 

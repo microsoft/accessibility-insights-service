@@ -22,7 +22,7 @@ import { BatchServiceClientProvider } from '../ioc-types';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Batch } from './batch';
 import { BatchConfig } from './batch-config';
-import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
+import { BatchTaskConfigGenerator } from './batch-task-config-generator';
 import { BatchTask, JobTaskState } from './job-task';
 
 export interface JobListItemStub {
@@ -63,9 +63,10 @@ describe(Batch, () => {
     let batchServiceClientProviderStub: BatchServiceClientProvider;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    let batchTaskParameterProvider: IMock<BatchTaskParameterProvider>;
+    let batchTaskConfigGenerator: IMock<BatchTaskConfigGenerator>;
     let maxTaskDurationInMinutes: number;
     let taskParameter: BatchServiceModels.TaskAddParameter;
+    const maxTasks = 10;
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
@@ -90,7 +91,7 @@ describe(Batch, () => {
                     taskTimeoutInMinutes: maxTaskDurationInMinutes,
                 } as TaskRuntimeConfig;
             });
-        batchTaskParameterProvider = Mock.ofType<BatchTaskParameterProvider>();
+        batchTaskConfigGenerator = Mock.ofType<BatchTaskConfigGenerator>();
         jobMock = Mock.ofType();
         taskMock = Mock.ofType();
         poolMock = Mock.ofType();
@@ -109,10 +110,11 @@ describe(Batch, () => {
             });
         batch = new Batch(
             batchServiceClientProviderStub,
-            batchTaskParameterProvider.object,
+            batchTaskConfigGenerator.object,
             storageContainerSASUrlProviderMock.object,
             config,
             loggerMock.object,
+            maxTasks,
         );
     });
 
@@ -341,8 +343,8 @@ describe(Batch, () => {
             expect(tasksActual.length).toBe(0);
         });
 
-        it('should add no more than 100 tasks in a single Batch API call', async () => {
-            const messagesCount = 103;
+        it('should add no more than maxTasks tasks in a single Batch API call', async () => {
+            const messagesCount = maxTasks + 3;
             const messages = [];
             const tasksAddedBatchCount: number[] = [];
             const taskAddParameters: BatchServiceModels.TaskAddParameter[] = [];
@@ -363,9 +365,9 @@ describe(Batch, () => {
                     constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
                 });
 
-                batchTaskParameterProvider
+                batchTaskConfigGenerator
                     .setup(async o =>
-                        o.getTaskParameter(
+                        o.getTaskConfig(
                             It.is(actualId => isExpectedId(actualId, message.messageId)),
                             message.messageText,
                         ),
@@ -391,10 +393,10 @@ describe(Batch, () => {
 
             expect(tasksActual.length).toEqual(messagesCount);
             expect(tasksAddedBatchCount.length).toEqual(2);
-            expect(tasksAddedBatchCount[0]).toEqual(100);
+            expect(tasksAddedBatchCount[0]).toEqual(maxTasks);
             expect(tasksAddedBatchCount[1]).toEqual(3);
             taskMock.verifyAll();
-            batchTaskParameterProvider.verifyAll();
+            batchTaskConfigGenerator.verifyAll();
         });
 
         it('create new job tasks in batch request with success and failure ', async () => {
@@ -469,9 +471,9 @@ describe(Batch, () => {
                 .verifiable();
 
             for (let k = 0; k < messages.length; k++) {
-                batchTaskParameterProvider
+                batchTaskConfigGenerator
                     .setup(async o =>
-                        o.getTaskParameter(
+                        o.getTaskConfig(
                             It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),
@@ -485,7 +487,7 @@ describe(Batch, () => {
 
             expect(tasksActual).toEqual(jobTasksExpected);
             taskMock.verifyAll();
-            batchTaskParameterProvider.verifyAll();
+            batchTaskConfigGenerator.verifyAll();
         });
 
         it('verifies tasks parameters on creation', async () => {
@@ -517,9 +519,9 @@ describe(Batch, () => {
             ];
 
             for (let k = 0; k < messages.length; k++) {
-                batchTaskParameterProvider
+                batchTaskConfigGenerator
                     .setup(async o =>
-                        o.getTaskParameter(
+                        o.getTaskConfig(
                             It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),
@@ -541,7 +543,7 @@ describe(Batch, () => {
             expect(actualTaskAddParameters[0]).toEqual(expectedTaskAddParameters[0]);
             expect(actualTaskAddParameters[1]).toEqual(expectedTaskAddParameters[1]);
             taskMock.verifyAll();
-            batchTaskParameterProvider.verifyAll();
+            batchTaskConfigGenerator.verifyAll();
         });
     });
 

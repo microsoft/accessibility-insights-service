@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SendNotificationTaskPropertyProvider builds command line 1`] = `"/bin/bash -c 'start-web-api-send-notification-runner.sh \\"id1\\" \\"url1\\"'"`;
+
+exports[`SendNotificationTaskPropertyProvider environment settings builds environment settings 1`] = `
+Array [
+  Object {
+    "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+    "value": "app insights key1",
+  },
+  Object {
+    "name": "KEY_VAULT_URL",
+    "value": "key vault url1",
+  },
+]
+`;
+
+exports[`SendNotificationTaskPropertyProvider returns resourceFiles 1`] = `
+Array [
+  Object {
+    "autoStorageContainerName": "runner script container",
+  },
+  Object {
+    "autoStorageContainerName": "runtime-configuration",
+  },
+]
+`;

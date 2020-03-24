@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
-import { CosmosClient } from '@azure/cosmos';
+import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient, StorageSharedKeyCredential as SharedKeyCredentialBlob } from '@azure/storage-blob';
@@ -27,7 +27,15 @@ export interface StorageKey {
     accountKey: string;
 }
 
-export function registerAzureServicesToContainer(container: Container, credentialType: CredentialType = CredentialType.VM): void {
+function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): CosmosClient {
+    return new CosmosClient(cosmosClientOptions);
+}
+
+export function registerAzureServicesToContainer(
+    container: Container,
+    credentialType: CredentialType = CredentialType.VM,
+    cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient = defaultCosmosClientFactory,
+): void {
     setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
@@ -48,7 +56,7 @@ export function registerAzureServicesToContainer(container: Container, credentia
         .toSelf()
         .inSingletonScope();
 
-    setupSingletonCosmosClientProvider(container);
+    setupSingletonCosmosClientProvider(container, cosmosClientFactory);
 
     container.bind(CosmosClientWrapper).toSelf();
     container
@@ -157,16 +165,19 @@ function setupSingletonQueueServiceURLProvider(container: interfaces.Container):
     });
 }
 
-function setupSingletonCosmosClientProvider(container: interfaces.Container): void {
+function setupSingletonCosmosClientProvider(
+    container: interfaces.Container,
+    cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient,
+): void {
     IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async context => {
         if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
-            return new CosmosClient({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
+            return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
         } else {
             const secretProvider = context.container.get(SecretProvider);
             const cosmosDbUrl = await secretProvider.getSecret(secretNames.cosmosDbUrl);
             const cosmosDbKey = await secretProvider.getSecret(secretNames.cosmosDbKey);
 
-            return new CosmosClient({ endpoint: cosmosDbUrl, key: cosmosDbKey });
+            return cosmosClientFactory({ endpoint: cosmosDbUrl, key: cosmosDbKey });
         }
     });
 }

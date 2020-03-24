@@ -20,5 +20,7 @@ export {
 } from './configuration/service-configuration';
 export { setupRuntimeConfigContainer } from './setup-runtime-config-container';
 
+export { EnvironmentSettings } from './system/environment-settings';
+export { commonIocTypes } from './common-ioc-types';
 export { PromiseUtils } from './system/promise-utils';
 export { RetryHelper } from './system/retry-helper';

@@ -34,7 +34,7 @@ describe(NotificationSender, () => {
     let systemMock: IMock<typeof System>;
     const notificationSenderMetadata: NotificationSenderMetadata = {
         scanId: 'id',
-        replyUrl: 'replyUrl',
+        scanNotifyUrl: 'scanNotifyUrl',
         runStatus: 'completed',
         scanStatus: 'pass',
     };
@@ -73,7 +73,7 @@ describe(NotificationSender, () => {
 
     it('Send Notification Succeeded', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.replyUrl, 'sent', []);
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', []);
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
@@ -95,7 +95,7 @@ describe(NotificationSender, () => {
     it('Send Notification Failed', async () => {
         onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.replyUrl, 'sendFailed', [
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', [
             { errorType: 'HttpErrorCode', message: 'Bad Request' },
             { errorType: 'HttpErrorCode', message: 'Bad Request' },
             { errorType: 'HttpErrorCode', message: 'Bad Request' },
@@ -121,7 +121,7 @@ describe(NotificationSender, () => {
     it('Send Notification Failed Error', async () => {
         onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.replyUrl, 'sendFailed', [
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', [
             { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
             { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
             { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
@@ -169,7 +169,7 @@ describe(NotificationSender, () => {
         errors: NotificationError[],
     ): ScanCompletedNotification {
         return {
-            notificationUrl: notificationUrl,
+            scanNotifyUrl: notificationUrl,
             state: state,
             errors: errors,
         };

@@ -4,12 +4,13 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
+import { isNil } from 'lodash';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
 import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
 
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
 // tslint:disable: no-any no-unsafe-any
@@ -89,6 +90,7 @@ describe(ScanBatchRequestFeedController, () => {
                         scanId: 'scan-1',
                         url: 'url-1',
                         priority: 1,
+                        scanNotifyUrl: 'reply-url-1',
                     },
                     {
                         scanId: 'scan-2',
@@ -140,7 +142,7 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
         const dbDocuments = document.scanRunBatchRequest
             .filter(request => request.scanId !== undefined)
             .map<OnDemandPageScanResult>(request => {
-                return {
+                const res: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
@@ -152,6 +154,14 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                     },
                     batchRequestId: document.id,
                 };
+                if (request.scanNotifyUrl !== undefined) {
+                    res.notification = {
+                        state: 'pending',
+                        scanNotifyUrl: request.scanNotifyUrl,
+                    };
+                }
+
+                return res;
             });
         onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
     });
@@ -162,13 +172,19 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
         const dbDocuments = document.scanRunBatchRequest
             .filter(request => request.scanId !== undefined)
             .map<OnDemandPageScanRequest>(request => {
-                return {
+                const res: OnDemandPageScanRequest = {
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
+
+                if (!isNil(request.scanNotifyUrl)) {
+                    res.scanNotifyUrl = request.scanNotifyUrl;
+                }
+
+                return res;
             });
         pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments)).verifiable(Times.once());
         scanDataProviderMock.setup(async o => o.deleteBatchRequest(document)).verifiable(Times.once());

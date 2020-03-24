@@ -4,7 +4,7 @@ import { OnDemandPageScanRunState, ScanState } from 'storage-documents';
 // Licensed under the MIT License.
 export interface NotificationSenderMetadata {
     scanId: string;
-    replyUrl: string;
+    scanNotifyUrl: string;
     runStatus: OnDemandPageScanRunState;
     scanStatus: ScanState;
 }

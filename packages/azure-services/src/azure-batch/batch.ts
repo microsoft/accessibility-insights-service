@@ -13,7 +13,7 @@ import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-
 import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
-import { BatchTaskParameterProvider } from './batch-task-parameter-provider';
+import { BatchTaskConfigGenerator } from './batch-task-config-generator';
 import { BatchTask, BatchTaskErrorCategory, BatchTaskFailureInfo, JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 
@@ -24,11 +24,13 @@ export class Batch {
     public constructor(
         @inject(iocTypeNames.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
         @optional()
-        @inject(iocTypeNames.BatchTaskParameterProvider)
-        private readonly batchTaskParameterProvider: BatchTaskParameterProvider,
+        @inject(BatchTaskConfigGenerator)
+        private readonly batchTaskConfigGenerator: BatchTaskConfigGenerator,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(Logger) private readonly logger: Logger,
+        // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
+        private readonly maxTasks = 100,
     ) {}
 
     public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
@@ -118,8 +120,7 @@ export class Batch {
     public async createTasks(jobId: string, queueMessages: Message[]): Promise<JobTask[]> {
         const tasks: JobTask[] = [];
 
-        // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
-        const chunks = System.chunkArray(queueMessages, 100);
+        const chunks = System.chunkArray(queueMessages, this.maxTasks);
         await Promise.all(
             chunks.map(async chunk => {
                 const taskCollection = await this.addTaskCollection(jobId, chunk);
@@ -258,7 +259,7 @@ export class Batch {
         messageText: string,
         sasUrl: string,
     ): Promise<BatchServiceModels.TaskAddParameter> {
-        const taskParameter = await this.batchTaskParameterProvider.getTaskParameter(taskId, messageText);
+        const taskParameter = await this.batchTaskConfigGenerator.getTaskConfig(taskId, messageText);
         if (taskParameter === undefined) {
             return taskParameter;
         }

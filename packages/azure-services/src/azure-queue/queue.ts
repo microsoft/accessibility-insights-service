@@ -25,17 +25,20 @@ export class Queue {
         return this.config.scanQueue;
     }
 
-    public async getMessages(queue: string = this.scanQueue): Promise<Message[]> {
+    /**
+     * @param numberOfMessages - number of messages to dequeue. Maximum supported is 32 per call (limited by Azure storage service)
+     */
+    public async getMessages(numberOfMessages: number = 32): Promise<Message[]> {
         const maxDequeueCount = 2;
         const messages: Message[] = [];
-
+        const queue = this.scanQueue;
         const queueURL = await this.getQueueURL(queue);
         const deadQueueURL = await this.getQueueURL(`${queue}-dead`);
 
         await this.ensureQueueExists(queueURL);
         await this.ensureQueueExists(deadQueueURL);
 
-        const serverMessages = await this.getQueueMessages(queueURL);
+        const serverMessages = await this.getQueueMessages(queueURL, numberOfMessages);
         for (const serverMessage of serverMessages) {
             if (serverMessage.dequeueCount > maxDequeueCount) {
                 await this.moveToDeadQueue(queueURL, deadQueueURL, serverMessage);
@@ -48,6 +51,22 @@ export class Queue {
                 messages.push(new Message(serverMessage.messageText, serverMessage.messageId, serverMessage.popReceipt));
             }
         }
+
+        return messages;
+    }
+
+    public async getMessagesWithTotalCount(totalMessagesCount: number): Promise<Message[]> {
+        const messages: Message[] = [];
+        do {
+            const remainingMessagesCount = totalMessagesCount - messages.length;
+            const currentBatchCount = remainingMessagesCount > 32 ? 32 : remainingMessagesCount;
+            const batch = await this.getMessages(currentBatchCount);
+
+            if (batch.length === 0) {
+                break;
+            }
+            messages.push(...batch);
+        } while (messages.length < totalMessagesCount);
 
         return messages;
     }
@@ -87,11 +106,11 @@ export class Queue {
         await messageIdURL.delete(Aborter.none, popReceipt);
     }
 
-    private async getQueueMessages(queueURL: QueueURL): Promise<Models.DequeuedMessageItem[]> {
+    private async getQueueMessages(queueURL: QueueURL, numberOfMessages: number): Promise<Models.DequeuedMessageItem[]> {
         const messageVisibilityTimeoutInSeconds = (await this.serviceConfig.getConfigValue('queueConfig'))
             .messageVisibilityTimeoutInSeconds;
         const requestOptions: Models.MessagesDequeueOptionalParams = {
-            numberOfMessages: 32, // Maximum number of messages to retrieve from queue (limited by Azure storage service) is 32
+            numberOfMessages,
             visibilitytimeout: messageVisibilityTimeoutInSeconds,
         };
 
