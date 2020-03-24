@@ -38,6 +38,6 @@ export class NotificationSenderWebAPIClient {
         };
         const options: requestPromise.RequestPromiseOptions = { body: requestBody };
 
-        return this.defaultRequestObject.post(notificationSenderConfigData.replyUrl, options);
+        return this.defaultRequestObject.post(notificationSenderConfigData.scanNotifyUrl, options);
     }
 }

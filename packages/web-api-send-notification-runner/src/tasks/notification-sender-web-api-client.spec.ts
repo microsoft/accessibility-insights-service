@@ -54,13 +54,13 @@ describe(NotificationSenderWebAPIClient, () => {
     });
 
     describe('postReplyUrl', async () => {
-        const replyUrl = 'replyUrl';
+        const scanNotifyUrl = 'scanNotifyUrl';
         const scanId = 'scanId';
         const scanStatus = 'pass';
         const runStatus = 'completed';
 
         const notificationSenderConfigData: NotificationSenderMetadata = {
-            replyUrl: replyUrl,
+            scanNotifyUrl: scanNotifyUrl,
             scanId: scanId,
             scanStatus: scanStatus,
             runStatus: runStatus,
@@ -74,7 +74,7 @@ describe(NotificationSenderWebAPIClient, () => {
         };
 
         postMock
-            .setup(req => req(replyUrl, options))
+            .setup(req => req(scanNotifyUrl, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 

@@ -48,6 +48,12 @@ export interface ScanCompletedNotification {
     errors?: NotificationError[];
 }
 
+export interface ScanCompletedNotificationResponse {
+    scanNotifyUrl: string;
+    state?: NotificationState;
+    error?: NotificationError;
+}
+
 export interface NotificationError {
     errorType: NotificationErrorTypes;
     message: string;
