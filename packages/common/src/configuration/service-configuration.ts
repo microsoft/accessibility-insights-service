@@ -44,6 +44,7 @@ export interface RestApiConfig {
 }
 
 export interface RuntimeConfig {
+    featureFlags: FeatureFlags;
     logConfig: LogRuntimeConfig;
     taskConfig: TaskRuntimeConfig;
     queueConfig: QueueRuntimeConfig;
@@ -51,6 +52,10 @@ export interface RuntimeConfig {
     jobManagerConfig: JobManagerConfig;
     restApiConfig: RestApiConfig;
     availabilityTestConfig: AvailabilityTestConfig;
+}
+
+export interface FeatureFlags {
+    sendNotification: boolean;
 }
 
 export interface AvailabilityTestConfig {
@@ -104,6 +109,13 @@ export class ServiceConfiguration {
     // tslint:disable-next-line: max-func-body-length
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
+            featureFlags: {
+                sendNotification: {
+                    format: 'Boolean',
+                    default: false,
+                    doc: 'Property to decide if send notification after scan is complete is enabled',
+                },
+            },
             logConfig: {
                 logInConsole: {
                     format: 'Boolean',
