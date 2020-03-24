@@ -4,7 +4,6 @@ import * as convict from 'convict';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
-import { format } from 'url';
 
 export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
