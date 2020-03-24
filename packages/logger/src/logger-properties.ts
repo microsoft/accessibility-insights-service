@@ -4,4 +4,5 @@
 export interface LoggerProperties {
     scanId?: string;
     batchRequestId?: string;
+    batchJobId?: string;
 }
