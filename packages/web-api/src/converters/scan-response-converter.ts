@@ -3,12 +3,7 @@
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ScanReport, ScanResultResponse } from 'service-library';
-import {
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState,
-    ScanCompletedNotification,
-    ScanCompletedNotificationResponse,
-} from 'storage-documents';
+import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
 import { isNullOrUndefined } from 'util';
 
 import { ScanRunErrorConverter } from './scan-run-error-converter';
@@ -93,7 +88,7 @@ export class ScanResponseConverter {
         });
     }
 
-    private getRunCompleteNotificationResponse(notification: ScanCompletedNotification): ScanCompletedNotificationResponse {
+    private getRunCompleteNotificationResponse(notification: ScanCompletedNotification): ScanCompletedNotification {
         if (isNullOrUndefined(notification)) {
             return undefined;
         }
@@ -102,7 +97,7 @@ export class ScanResponseConverter {
             scanNotifyUrl: notification.scanNotifyUrl,
             state: notification.state,
             error: {
-                errorType: 'HttpErrorCode',
+                errorType: notification.error.errorType,
                 message: 'Failed to send notification.',
             },
         };

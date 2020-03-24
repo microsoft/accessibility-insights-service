@@ -3,13 +3,7 @@
 import 'reflect-metadata';
 
 import { RunState as RunStateRestApi, ScanResultResponse, ScanRunErrorCodes } from 'service-library';
-import {
-    ItemType,
-    OnDemandPageScanResult,
-    OnDemandPageScanRunState as RunStateDb,
-    ScanCompletedNotification,
-    ScanCompletedNotificationResponse,
-} from 'storage-documents';
+import { ItemType, OnDemandPageScanResult, OnDemandPageScanRunState as RunStateDb, ScanCompletedNotification } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 
 import { ScanResponseConverter } from './scan-response-converter';
@@ -24,7 +18,7 @@ let scanResponseConverter: ScanResponseConverter;
 let scanRunErrorConverterMock: IMock<ScanRunErrorConverter>;
 const pageTitle = 'sample page title';
 const pageResponseCode = 101;
-let notification: ScanCompletedNotificationResponse;
+let notification: ScanCompletedNotification;
 
 beforeEach(() => {
     scanRunErrorConverterMock = Mock.ofType(ScanRunErrorConverter);

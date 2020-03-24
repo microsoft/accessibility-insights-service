@@ -49,7 +49,7 @@ export class NotificationSender {
     ): Promise<OnDemandPageScanResult> {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'sendFailed';
-        const errors: NotificationError[] = [];
+        let error: NotificationError = null;
         const scanConfig = await this.getScanConfig();
 
         this.logger.trackEvent('SendNotificationTaskStarted');
@@ -60,19 +60,22 @@ export class NotificationSender {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
                 if (response.statusCode === 200) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
-                    this.logger.logInfo(`Notification sent Successfully!`);
+                    this.logger.logInfo(`Notification sent Successfully!, try #${numberOfTries}`);
                     notificationState = 'sent';
+                    error = null;
                     break;
                 } else {
                     this.logger.trackEvent('SendNotificationTaskFailed');
-                    this.logger.logInfo(`Notification sent failed!, statusCode: ${response.statusCode}, body: ${response.body}`);
+                    this.logger.logInfo(
+                        `Notification sent failed!, try #${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
+                    );
                     // tslint:disable-next-line: no-unsafe-any
-                    errors.push({ errorType: 'HttpErrorCode', message: response.body });
+                    error = { errorType: 'HttpErrorCode', message: response.body };
                 }
             } catch (e) {
                 this.logger.trackEvent('SendNotificationTaskFailed');
                 this.logger.logError(`Notification sent failed!, error message: ${(e as Error).message}`);
-                errors.push({ errorType: 'HttpErrorCode', message: (e as Error).message });
+                error = { errorType: 'HttpErrorCode', message: (e as Error).message };
             }
             numberOfTries = numberOfTries + 1;
             if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
@@ -80,7 +83,7 @@ export class NotificationSender {
             }
         }
 
-        pageScanResult.notification = this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, errors);
+        pageScanResult.notification = this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error);
 
         return pageScanResult;
     }
@@ -89,11 +92,11 @@ export class NotificationSender {
         return this.serviceConfig.getConfigValue('scanConfig');
     }
 
-    private generateNotification(scanNotifyUrl: string, state: NotificationState, errors: NotificationError[]): ScanCompletedNotification {
+    private generateNotification(scanNotifyUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
         return {
             scanNotifyUrl: scanNotifyUrl,
             state: state,
-            errors: errors,
+            error: error,
         };
     }
 }

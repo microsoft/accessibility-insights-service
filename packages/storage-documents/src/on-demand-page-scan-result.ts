@@ -45,12 +45,6 @@ export interface OnDemandPageScanResult extends StorageDocument {
 export interface ScanCompletedNotification {
     scanNotifyUrl: string;
     state?: NotificationState;
-    errors?: NotificationError[];
-}
-
-export interface ScanCompletedNotificationResponse {
-    scanNotifyUrl: string;
-    state?: NotificationState;
     error?: NotificationError;
 }
 

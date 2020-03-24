@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
@@ -96,7 +96,7 @@ describe(NotificationSender, () => {
 
     it('Send Notification Succeeded', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', []);
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null);
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
@@ -118,11 +118,10 @@ describe(NotificationSender, () => {
     it('Send Notification Failed', async () => {
         onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', [
-            { errorType: 'HttpErrorCode', message: 'Bad Request' },
-            { errorType: 'HttpErrorCode', message: 'Bad Request' },
-            { errorType: 'HttpErrorCode', message: 'Bad Request' },
-        ]);
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
+            errorType: 'HttpErrorCode',
+            message: 'Bad Request',
+        });
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
@@ -144,11 +143,10 @@ describe(NotificationSender, () => {
     it('Send Notification Failed Error', async () => {
         onDemandPageScanResult.notification = undefined;
         setupReadScanResultCall(onDemandPageScanResult);
-        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', [
-            { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
-            { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
-            { errorType: 'HttpErrorCode', message: 'Unexpected Error' },
-        ]);
+        onDemandPageScanResult.notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
+            errorType: 'HttpErrorCode',
+            message: 'Unexpected Error',
+        });
 
         setupUpdateScanRunResultCall(onDemandPageScanResult);
 
@@ -187,15 +185,11 @@ describe(NotificationSender, () => {
             .verifiable(Times.once());
     }
 
-    function generateNotification(
-        notificationUrl: string,
-        state: NotificationState,
-        errors: NotificationError[],
-    ): ScanCompletedNotification {
+    function generateNotification(notificationUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
         return {
             scanNotifyUrl: notificationUrl,
             state: state,
-            errors: errors,
+            error: error,
         };
     }
 });
