@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { Logger, loggerTypes } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { NotificationError, NotificationState, OnDemandPageScanResult, ScanCompletedNotification } from 'storage-documents';
 import { NotificationSenderConfig } from '../notification-sender-config';
@@ -19,6 +19,7 @@ export class NotificationSender {
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(Logger) private readonly logger: Logger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
     ) {}
 
@@ -29,7 +30,10 @@ export class NotificationSender {
         this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
         this.logger.setCustomProperties({ scanId: notificationSenderConfigData.scanId });
         pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(notificationSenderConfigData.scanId);
-        this.logger.setCustomProperties({ batchRequestId: pageScanResult.batchRequestId });
+        this.logger.setCustomProperties({
+            batchRequestId: pageScanResult.batchRequestId,
+            batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
+        });
 
         pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData, pageScanResult);
 

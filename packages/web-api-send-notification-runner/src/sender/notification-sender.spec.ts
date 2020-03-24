@@ -33,6 +33,7 @@ describe(NotificationSender, () => {
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let systemMock: IMock<typeof System>;
+    let processStub: typeof process;
     let scanConfig: ScanRunTimeConfig;
 
     const notificationSenderMetadata: NotificationSenderMetadata = {
@@ -79,12 +80,16 @@ describe(NotificationSender, () => {
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
+        processStub = {} as typeof process;
+        processStub.env = { batchJobId: 'job 1' };
+
         sender = new NotificationSender(
             onDemandPageScanRunResultProviderMock.object,
             webAPIMock.object,
             notificationSenderMetadataMock.object,
             loggerMock.object,
             serviceConfigMock.object,
+            processStub,
             systemMock.object,
         );
     });
