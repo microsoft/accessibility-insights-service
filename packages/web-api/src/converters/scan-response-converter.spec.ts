@@ -156,7 +156,7 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('failed', 'failed', notificationEnabled);
     });
 
-    test.each([true, false])('return scan run full form of client result', notificationEnabled => {
+    test.each([true, false])('return scan run full form of client result, when notification enabled = %s', notificationEnabled => {
         const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
