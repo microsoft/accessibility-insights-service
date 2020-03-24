@@ -70,12 +70,12 @@ export class NotificationSender {
                         `Notification sent failed!, try #${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
                     // tslint:disable-next-line: no-unsafe-any
-                    error = { errorType: 'HttpErrorCode', message: response.body };
+                    error = { errorType: 'NotificationError', message: response.body };
                 }
             } catch (e) {
                 this.logger.trackEvent('SendNotificationTaskFailed');
                 this.logger.logError(`Notification sent failed!, error message: ${(e as Error).message}`);
-                error = { errorType: 'HttpErrorCode', message: (e as Error).message };
+                error = { errorType: 'NotificationError', message: (e as Error).message };
             }
             numberOfTries = numberOfTries + 1;
             if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {

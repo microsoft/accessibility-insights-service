@@ -119,7 +119,7 @@ describe(NotificationSender, () => {
         setupReadScanResultCall(onDemandPageScanResult);
 
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
-            errorType: 'HttpErrorCode',
+            errorType: 'NotificationError',
             message: 'Bad Request',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
@@ -143,7 +143,7 @@ describe(NotificationSender, () => {
         setupReadScanResultCall(onDemandPageScanResult);
 
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
-            errorType: 'HttpErrorCode',
+            errorType: 'NotificationError',
             message: 'Unexpected Error',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
