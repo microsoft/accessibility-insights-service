@@ -186,6 +186,17 @@ describe(Queue, () => {
 
             expect(messages).toHaveLength(31);
         });
+
+        it('returns empty array if no messages found', async () => {
+            getMessagesMock
+                .setup(s => s(32))
+                .returns(async () => [])
+                .verifiable(Times.once());
+
+            const messages = await testSubject.getMessagesWithTotalCount(100);
+
+            expect(messages).toHaveLength(0);
+        });
     });
 
     describe('createMessage', () => {
