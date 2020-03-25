@@ -23,7 +23,7 @@ import { NotificationSender } from './notification-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
-class MockableLogger extends Logger { }
+class MockableLogger extends Logger {}
 
 describe(NotificationSender, () => {
     let sender: NotificationSender;

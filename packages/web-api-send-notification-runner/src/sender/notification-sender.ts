@@ -21,7 +21,7 @@ export class NotificationSender {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
-    ) { }
+    ) {}
 
     public async sendNotification(): Promise<void> {
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
@@ -86,12 +86,7 @@ export class NotificationSender {
 
         return {
             id: scanId,
-            notification: this.generateNotification(
-                notificationSenderConfigData.scanNotifyUrl,
-                notificationState,
-                error,
-                statusCode,
-            ),
+            notification: this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error, statusCode),
         };
     }
 
