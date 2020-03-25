@@ -12,10 +12,6 @@ Array [
     "name": "KEY_VAULT_URL",
     "value": "key vault url1",
   },
-  Object {
-    "name": "AZURE_STORAGE_SCAN_QUEUE",
-    "value": "notification-queue-name",
-  },
 ]
 `;
 

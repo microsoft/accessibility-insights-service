@@ -24,10 +24,6 @@ export class SendNotificationTaskPropertyProvider extends BatchTaskPropertyProvi
                 name: 'KEY_VAULT_URL',
                 value: this.environmentSettings.getValue('KEY_VAULT_URL'),
             },
-            {
-                name: 'AZURE_STORAGE_SCAN_QUEUE',
-                value: this.environmentSettings.getValue('AZURE_STORAGE_SCAN_QUEUE'),
-            },
         ];
     }
 
