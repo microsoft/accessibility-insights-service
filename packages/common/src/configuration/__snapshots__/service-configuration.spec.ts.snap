@@ -29,6 +29,13 @@ Object {
       "format": "url",
     },
   },
+  "featureFlags": Object {
+    "sendNotification": Object {
+      "default": false,
+      "doc": "Property to decide if we should notify after scan completed.",
+      "format": "Boolean",
+    },
+  },
   "jobManagerConfig": Object {
     "activeToRunningTasksRatio": Object {
       "default": 3,
@@ -211,6 +218,13 @@ Object {
       "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
       "format": "url",
+    },
+  },
+  "featureFlags": Object {
+    "sendNotification": Object {
+      "default": false,
+      "doc": "Property to decide if we should notify after scan completed.",
+      "format": "Boolean",
     },
   },
   "jobManagerConfig": Object {
