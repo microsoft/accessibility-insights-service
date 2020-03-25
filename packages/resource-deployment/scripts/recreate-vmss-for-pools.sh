@@ -14,9 +14,6 @@ export pools
 areVmssOld=false
 recycleVmssIntervalDays=15
 
-# Set default ARM Batch account template files
-batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
-
 exitWithUsageInfo() {
     echo "
 Usage: $0 -r <resource group>
