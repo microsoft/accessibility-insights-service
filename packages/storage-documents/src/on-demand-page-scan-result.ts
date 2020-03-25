@@ -38,7 +38,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     run: OnDemandPageScanRunResult;
     priority: number;
     itemType: ItemType.onDemandPageScanRunResult;
-    batchRequestId: string;
+    batchRequestId?: string;
     notification?: ScanCompletedNotification;
 }
 

@@ -160,36 +160,45 @@ describe(ScanResultController, () => {
             expect(context.res.body).toEqual(tooSoonRequestResponse);
         });
 
-        it('should return a default response for requests made too early', async () => {
-            scanResultController = createScanResultController(context);
-            const timeStamp = moment()
-                .subtract(1)
-                .toDate();
-            setupGetGuidTimestamp(timeStamp);
+        describe('return proper response if scan is not found', () => {
+            it('should return tooSoonRequestResponse error code if the request is made too soon', async () => {
+                scanResultController = createScanResultController(context);
+                const timeStamp = moment()
+                    .subtract(1)
+                    .toDate();
+                setupGetGuidTimestamp(timeStamp);
 
-            await scanResultController.handleRequest();
+                onDemandPageScanRunResultProviderMock
+                    .setup(async om => om.readScanRuns([scanId]))
+                    .returns(async () => {
+                        return Promise.resolve([]);
+                    })
+                    .verifiable(Times.once());
 
-            guidGeneratorMock.verifyAll();
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(tooSoonRequestResponse);
-        });
+                await scanResultController.handleRequest();
 
-        it('should return pending if the scan cannot be found', async () => {
-            scanResultController = createScanResultController(context);
-            setupGetGuidTimestamp(new Date(0));
-            onDemandPageScanRunResultProviderMock
-                .setup(async om => om.readScanRuns([scanId]))
-                .returns(async () => {
-                    return Promise.resolve([]);
-                })
-                .verifiable(Times.once());
+                guidGeneratorMock.verifyAll();
+                onDemandPageScanRunResultProviderMock.verifyAll();
+                expect(context.res.status).toEqual(200);
+                expect(context.res.body).toEqual(tooSoonRequestResponse);
+            });
 
-            await scanResultController.handleRequest();
+            it('should return resourceNotFound error code if the request is made after threshold', async () => {
+                scanResultController = createScanResultController(context);
+                setupGetGuidTimestamp(new Date(0));
+                onDemandPageScanRunResultProviderMock
+                    .setup(async om => om.readScanRuns([scanId]))
+                    .returns(async () => {
+                        return Promise.resolve([]);
+                    })
+                    .verifiable(Times.once());
 
-            guidGeneratorMock.verifyAll();
-            onDemandPageScanRunResultProviderMock.verifyAll();
-            expect(context.res.status).toEqual(200);
-            expect(context.res.body).toEqual(tooSoonRequestResponse);
+                await scanResultController.handleRequest();
+
+                guidGeneratorMock.verifyAll();
+                onDemandPageScanRunResultProviderMock.verifyAll();
+                expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound));
+            });
         });
 
         it('should return 200 if successfully fetched result', async () => {

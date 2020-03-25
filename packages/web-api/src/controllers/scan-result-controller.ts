@@ -31,28 +31,22 @@ export class ScanResultController extends BaseScanResultController {
             return;
         }
 
-        const isRequestMadeTooSoon = await this.isRequestMadeTooSoon(scanId);
-        if (isRequestMadeTooSoon === true) {
-            // user made the scan result query too soon after the scan request, will return a default response.
-            this.context.res = {
-                status: 200, // OK
-                body: this.getTooSoonRequestResponse(scanId),
-            };
-            this.logger.logInfo('The client requested scan result early than it was processed.', { scanId });
-
-            return;
-        }
-
         const scanResultItemMap = await this.getScanResultMapKeyByScanId([scanId]);
         const scanResult = scanResultItemMap[scanId];
 
         if (isEmpty(scanResult)) {
             // scan result not found in result storage
-            this.context.res = {
-                status: 200,
-                body: this.getTooSoonRequestResponse(scanId),
-            };
-            this.logger.logInfo('Scan result not found in result storage.', { scanId });
+            if (await this.isRequestMadeTooSoon(scanId)) {
+                // user made the scan result query too soon after the scan request, will return a default pending response.
+                this.context.res = {
+                    status: 200,
+                    body: this.getTooSoonRequestResponse(scanId),
+                };
+                this.logger.logInfo('Scan result not found in result storage.', { scanId });
+            } else {
+                // return scan not found response
+                this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            }
         } else {
             this.context.res = {
                 status: 200,
