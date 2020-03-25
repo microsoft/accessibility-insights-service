@@ -40,10 +40,6 @@
                 "value": "%APP_INSIGHTS_TOKEN%"
             },
             {
-                "name": "AZURE_STORAGE_SCAN_QUEUE",
-                "value": "ondemand-send-notification"
-            },
-            {
                 "name": "AZURE_STORAGE_NOTIFICATION_QUEUE",
                 "value": "ondemand-send-notification"
             },
