@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Message, Queue } from 'azure-services';
+import { Message, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -42,6 +42,7 @@ describe(Worker, () => {
     const addTasksIntervalInSecondsDefault = 1;
     let systemMock: IMock<typeof System>;
     let maxWallClockTimeInHours: number;
+    let storageConfigStub: StorageConfig;
 
     beforeEach(() => {
         currentTime = '2019-01-01';
@@ -54,7 +55,9 @@ describe(Worker, () => {
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         maxWallClockTimeInHours = 1;
 
-        queueMock.setup(o => o.scanQueue).returns(() => 'scan-queue');
+        storageConfigStub = {
+            scanQueue: 'scan-queue',
+        } as StorageConfig;
 
         serviceConfigMock
             .setup(async s => s.getConfigValue('jobManagerConfig'))
@@ -80,6 +83,7 @@ describe(Worker, () => {
             queueMock.object,
             poolLoadGeneratorMock.object,
             serviceConfigMock.object,
+            storageConfigStub,
             loggerMock.object,
             systemMock.object,
         );
@@ -135,7 +139,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .callback(q => {
                 scanMessagesCount += 1;
             })
@@ -146,7 +150,7 @@ describe(Worker, () => {
             })
             .verifiable(Times.exactly(taskCount + 1));
         queueMock
-            .setup(async o => o.deleteMessage(It.isAny()))
+            .setup(async o => o.deleteMessage(storageConfigStub.scanQueue, It.isAny()))
             .callback(message => {
                 const i = queueMessages.indexOf(queueMessages.find(m => m.messageId === message.messageId));
                 queueMessages.splice(i, 1);
@@ -183,10 +187,10 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.never());
-        queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
+        queueMock.setup(async o => o.deleteMessage(storageConfigStub.scanQueue, It.isAny())).verifiable(Times.never());
 
         await worker.run();
     });
@@ -215,10 +219,10 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
-        queueMock.setup(async o => o.deleteMessage(It.isAny())).verifiable(Times.never());
+        queueMock.setup(async o => o.deleteMessage(storageConfigStub.scanQueue, It.isAny())).verifiable(Times.never());
 
         await worker.run();
     });
@@ -265,7 +269,7 @@ describe(Worker, () => {
             .verifiable(Times.exactly(2));
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.exactly(2));
 
@@ -317,7 +321,7 @@ describe(Worker, () => {
             });
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
 
@@ -358,7 +362,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
         await worker.run();
@@ -388,7 +392,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
         await worker.run();
@@ -418,7 +422,7 @@ describe(Worker, () => {
             .verifiable(Times.once());
 
         queueMock
-            .setup(async o => o.getMessages())
+            .setup(async o => o.getMessages(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve([]))
             .verifiable(Times.once());
         await worker.run();

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
@@ -29,10 +29,15 @@ export class Worker extends BatchTaskCreator {
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
+        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(Logger) logger: Logger,
         system: typeof System = System,
     ) {
         super(batch, queue, batchConfig, serviceConfig, logger, system);
+    }
+
+    public getQueueName(): string {
+        return this.storageConfig.scanQueue;
     }
 
     protected async getMessagesForTaskCreation(): Promise<Message[]> {
@@ -43,7 +48,7 @@ export class Worker extends BatchTaskCreator {
         let scanMessages: Message[] = [];
 
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            scanMessages = await this.queue.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval);
+            scanMessages = await this.queue.getMessages(this.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval);
 
             if (scanMessages.length > 0) {
                 scanMessages = await this.dropCompletedScans(scanMessages);
@@ -139,7 +144,7 @@ export class Worker extends BatchTaskCreator {
                 if (scanRun.run.state === 'queued') {
                     acceptedScanMessages.push(scanMessage.queueMessage);
                 } else {
-                    await this.queue.deleteMessage(scanMessage.queueMessage);
+                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
                     this.logger.logWarn(
                         // tslint:disable-next-line:max-line-length
                         `The scan request with ID ${scanMessage.scanId} has been cancelled since run state has been changed to '${scanRun.run.state}'`,

@@ -13,6 +13,7 @@ import {
     PoolLoadSnapshot,
     PoolMetricsInfo,
     Queue,
+    StorageConfig,
 } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { isEqual, isNil } from 'lodash';
@@ -68,6 +69,7 @@ describe(Worker, () => {
     let batchPoolLoadSnapshotProviderMock: IMock<BatchPoolLoadSnapshotProvider>;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let systemMock: IMock<typeof System>;
+    let storageConfigStub: StorageConfig;
 
     let maxWallClockTimeInHours: number;
     const batchConfig: BatchConfig = {
@@ -89,6 +91,9 @@ describe(Worker, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         maxWallClockTimeInHours = 1;
+        storageConfigStub = {
+            scanQueue: 'scan-queue',
+        } as StorageConfig;
 
         worker = new TestableWorker(
             batchMock.object,
@@ -98,6 +103,7 @@ describe(Worker, () => {
             onDemandPageScanRunResultProviderMock.object,
             batchConfig,
             serviceConfigMock.object,
+            storageConfigStub,
             loggerMock.object,
             systemMock.object,
         );
@@ -477,7 +483,7 @@ describe(Worker, () => {
 
         function setupVerifiableGetQueueMessagesCall(messages: Message[]): void {
             queueMock
-                .setup(q => q.getMessages(poolLoadSnapshot.tasksIncrementCountPerInterval))
+                .setup(q => q.getMessages(storageConfigStub.scanQueue, poolLoadSnapshot.tasksIncrementCountPerInterval))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
         }
@@ -485,7 +491,7 @@ describe(Worker, () => {
 
     function setupVerifiableDeleteQueueMessageCall(message: Message): void {
         queueMock
-            .setup(q => q.deleteMessage(It.isValue(message)))
+            .setup(q => q.deleteMessage(storageConfigStub.scanQueue, It.isValue(message)))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
     }

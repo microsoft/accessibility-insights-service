@@ -37,6 +37,10 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     public onExitCallCount: number = 0;
     public taskAddedCallback: (tasks: JobTask[]) => void;
 
+    public getQueueName(): string {
+        return 'queue-1';
+    }
+
     protected async getMessagesForTaskCreation(): Promise<Message[]> {
         if (isNil(this.getMessagesForTaskCreationCallback)) {
             return [];
@@ -357,7 +361,7 @@ describe(BatchTaskCreator, () => {
 
         function setupVerifiableDeleteQueueMessageCall(message: Message): void {
             queueMock
-                .setup(async q => q.deleteMessage(message))
+                .setup(async q => q.deleteMessage(testSubject.getQueueName(), message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }

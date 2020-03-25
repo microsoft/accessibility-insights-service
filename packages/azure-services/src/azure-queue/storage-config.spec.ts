@@ -14,4 +14,12 @@ describe(StorageConfig, () => {
 
         expect(storageConfig.scanQueue).toEqual(value);
     });
+
+    it('return value of AZURE_STORAGE_NOTIFICATION_QUEUE environment variable', () => {
+        const value: string = `value-${new Date().valueOf()}`;
+        process.env.AZURE_STORAGE_NOTIFICATION_QUEUE = value;
+        storageConfig = new StorageConfig();
+
+        expect(storageConfig.notificationQueue).toEqual(value);
+    });
 });

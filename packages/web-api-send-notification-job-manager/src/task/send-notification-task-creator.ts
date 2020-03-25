@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Batch, BatchConfig, JobTask, Message, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTask, Message, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
@@ -14,10 +14,15 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         @inject(Queue) queue: Queue,
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
+        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(Logger) logger: Logger,
         system: typeof System = System,
     ) {
         super(batch, queue, batchConfig, serviceConfig, logger, system);
+    }
+
+    public getQueueName(): string {
+        return this.storageConfig.notificationQueue;
     }
 
     protected async getMessagesForTaskCreation(): Promise<Message[]> {
@@ -25,7 +30,7 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
 
         const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - this.getChildTasksCount(poolMetricsInfo);
         if (messagesCount > 0) {
-            return this.queue.getMessages(messagesCount);
+            return this.queue.getMessages(this.getQueueName(), messagesCount);
         }
 
         return [];

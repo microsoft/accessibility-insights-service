@@ -7,12 +7,10 @@ import * as _ from 'lodash';
 import { Logger } from 'logger';
 import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
-import { StorageConfig } from './storage-config';
 
 @injectable()
 export class Queue {
     constructor(
-        @inject(StorageConfig) private readonly config: StorageConfig,
         @inject(iocTypeNames.QueueServiceURLProvider) private readonly queueServiceURLProvider: QueueServiceURLProvider,
         @inject(iocTypeNames.QueueURLProvider) private readonly queueURLProvider: QueueURLProvider,
         @inject(iocTypeNames.MessagesURLProvider) private readonly messagesURLProvider: MessagesURLProvider,
@@ -21,17 +19,12 @@ export class Queue {
         @inject(Logger) private readonly logger: Logger,
     ) {}
 
-    public get scanQueue(): string {
-        return this.config.scanQueue;
-    }
-
     /**
      * @param numberOfMessages - number of messages to dequeue. Maximum supported is 32 per call (limited by Azure storage service)
      */
-    public async getMessages(numberOfMessages: number = 32): Promise<Message[]> {
+    public async getMessages(queue: string, numberOfMessages: number = 32): Promise<Message[]> {
         const maxDequeueCount = 2;
         const messages: Message[] = [];
-        const queue = this.scanQueue;
         const queueURL = await this.getQueueURL(queue);
         const deadQueueURL = await this.getQueueURL(`${queue}-dead`);
 
@@ -55,12 +48,12 @@ export class Queue {
         return messages;
     }
 
-    public async getMessagesWithTotalCount(totalMessagesCount: number): Promise<Message[]> {
+    public async getMessagesWithTotalCount(queue: string, totalMessagesCount: number): Promise<Message[]> {
         const messages: Message[] = [];
         do {
             const remainingMessagesCount = totalMessagesCount - messages.length;
             const currentBatchCount = remainingMessagesCount > 32 ? 32 : remainingMessagesCount;
-            const batch = await this.getMessages(currentBatchCount);
+            const batch = await this.getMessages(queue, currentBatchCount);
 
             if (batch.length === 0) {
                 break;
@@ -71,7 +64,7 @@ export class Queue {
         return messages;
     }
 
-    public async deleteMessage(message: Message, queue: string = this.scanQueue): Promise<void> {
+    public async deleteMessage(queue: string, message: Message): Promise<void> {
         const queueURL = await this.getQueueURL(queue);
 
         return this.deleteQueueMessage(queueURL, message.messageId, message.popReceipt);
@@ -84,7 +77,7 @@ export class Queue {
         await this.createQueueMessage(queueURL, message);
     }
 
-    public async getMessageCount(queue: string = this.scanQueue): Promise<number> {
+    public async getMessageCount(queue: string): Promise<number> {
         const queueURL = await this.getQueueURL(queue);
         const queueProperties = await queueURL.getProperties(Aborter.none);
 

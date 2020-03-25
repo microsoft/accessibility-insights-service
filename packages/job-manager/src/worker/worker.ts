@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Message, PoolMetricsInfo, Queue } from 'azure-services';
+import { Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
@@ -22,6 +22,7 @@ export class Worker {
         @inject(Queue) private readonly queue: Queue,
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(Logger) private readonly logger: Logger,
         private readonly system: typeof System = System,
     ) {}
@@ -38,7 +39,7 @@ export class Worker {
             if (tasksIncrementCount > 0) {
                 const scanMessages = await this.getMessages(tasksIncrementCount);
                 if (scanMessages.length === 0) {
-                    this.logger.logInfo(`The storage queue '${this.queue.scanQueue}' has no message to process.`);
+                    this.logger.logInfo(`The storage queue '${this.storageConfig.scanQueue}' has no message to process.`);
                     if (this.hasChildTasksRunning(poolMetricsInfo) === false) {
                         this.logger.logInfo(`Exiting the ${this.jobId} job since there are no active/running tasks.`);
                         break;
@@ -95,7 +96,7 @@ export class Worker {
     private async getMessages(messagesCount: number): Promise<Message[]> {
         const messages: Message[] = [];
         do {
-            const batch = await this.queue.getMessages();
+            const batch = await this.queue.getMessages(this.storageConfig.scanQueue);
             if (batch.length === 0) {
                 break;
             }
@@ -112,7 +113,7 @@ export class Worker {
             jobTasks.map(async jobTask => {
                 if (jobTask.state === JobTaskState.queued) {
                     const message = scanMessages.find(value => value.messageId === jobTask.correlationId);
-                    await this.queue.deleteMessage(message);
+                    await this.queue.deleteMessage(this.storageConfig.scanQueue, message);
                 }
             }),
         );

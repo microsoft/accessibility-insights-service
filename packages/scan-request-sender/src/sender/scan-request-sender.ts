@@ -25,7 +25,7 @@ export class ScanRequestSender {
     }
 
     public async getCurrentQueueSize(): Promise<number> {
-        return this.queue.getMessageCount();
+        return this.queue.getMessageCount(this.storageConfig.scanQueue);
     }
 
     private createScanRequestMessage(page: WebsitePage): ScanRequestMessage {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { Batch, BatchConfig, Message, PoolMetricsInfo, Queue } from 'azure-services';
+import { Batch, BatchConfig, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -26,6 +26,7 @@ describe(SendNotificationTaskCreator, () => {
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let systemMock: IMock<typeof System>;
+    let storageConfigStub: StorageConfig;
 
     const batchConfig: BatchConfig = {
         accountName: 'batch-account-name',
@@ -40,12 +41,16 @@ describe(SendNotificationTaskCreator, () => {
         loggerMock = Mock.ofType(MockableLogger);
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         serviceConfigMock = Mock.ofType(ServiceConfiguration, MockBehavior.Strict);
+        storageConfigStub = {
+            notificationQueue: 'test-notification-queue',
+        } as StorageConfig;
 
         taskCreator = new TestableSendNotificationTaskCreator(
             batchMock.object,
             queueMock.object,
             batchConfig,
             serviceConfigMock.object,
+            storageConfigStub,
             loggerMock.object,
             systemMock.object,
         );
@@ -76,7 +81,7 @@ describe(SendNotificationTaskCreator, () => {
             poolMetricsInfo.load.activeTasks = 1;
             poolMetricsInfo.load.runningTasks = 1;
             queueMock
-                .setup(async q => q.getMessages(9))
+                .setup(async q => q.getMessages(storageConfigStub.notificationQueue, 9))
                 .returns(async () => Promise.resolve([]))
                 .verifiable(Times.once());
 
@@ -126,7 +131,7 @@ describe(SendNotificationTaskCreator, () => {
             poolMetricsInfo.load = poolLoad;
 
             queueMock
-                .setup(async q => q.getMessages(expectedMessageCount))
+                .setup(async q => q.getMessages(storageConfigStub.notificationQueue, expectedMessageCount))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
 
