@@ -36,6 +36,62 @@
             "metadata": {
                 "description": "Name of the virtual network to be used for the batch pool nodes"
             }
+        },
+        "scanRequestPoolVmSize": {
+            "defaultValue": "standard_d1_v2",
+            "type": "string",
+            "metadata": {
+                "description": "Value for the vmSize setting of scan-request-pool"
+            }
+        },
+        "scanRequestPoolNodes": {
+            "defaultValue": "2",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for scan-request-pool"
+            }
+        },
+        "urlScanPoolVmSize": {
+            "defaultValue": "standard_d11_v2",
+            "type": "string",
+            "metadata": {
+                "description": "Value for the vmSize setting of scan-request-pool"
+            }
+        },
+        "urlScanPoolNodes": {
+            "defaultValue": "3",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for scan-request-pool"
+            }
+        },
+        "onDemandScanRequestPoolVmSize": {
+            "defaultValue": "standard_d1_v2",
+            "type": "string",
+            "metadata": {
+                "description": "Value for the vmSize setting of scan-request-pool"
+            }
+        },
+        "onDemandScanRequestPoolNodes": {
+            "defaultValue": "2",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for scan-request-pool"
+            }
+        },
+        "onDemandUrlScanPoolVmSize": {
+            "defaultValue": "standard_d11_v2",
+            "type": "string",
+            "metadata": {
+                "description": "Value for the vmSize setting of scan-request-pool"
+            }
+        },
+        "onDemandUrlScanPoolNodes": {
+            "defaultValue": "3",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for scan-request-pool"
+            }
         }
     },
     "variables": {
@@ -63,9 +119,11 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/scan-request-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "dependsOn": [
+                "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"
+            ],
             "properties": {
-                "vmSize": "standard_d1_v2",
+                "vmSize": "[parameters('scanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
                 "taskSchedulingPolicy": {
@@ -87,7 +145,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 2,
+                        "targetDedicatedNodes": "[parameters('scanRequestPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -120,9 +178,11 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/url-scan-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "dependsOn": [
+                "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"
+            ],
             "properties": {
-                "vmSize": "standard_d11_v2",
+                "vmSize": "[parameters('urlScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 2,
                 "taskSchedulingPolicy": {
@@ -144,7 +204,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 3,
+                        "targetDedicatedNodes": "[parameters('urlScanPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -177,9 +237,11 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "dependsOn": [
+                "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"
+            ],
             "properties": {
-                "vmSize": "standard_d11_v2",
+                "vmSize": "[parameters('onDemandUrlScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 2,
                 "taskSchedulingPolicy": {
@@ -201,7 +263,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 3,
+                        "targetDedicatedNodes": "[parameters('onDemandUrlScanPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -234,9 +296,11 @@
             "type": "Microsoft.Batch/batchAccounts/pools",
             "apiVersion": "2018-12-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
-            "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
+            "dependsOn": [
+                "[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"
+            ],
             "properties": {
-                "vmSize": "standard_d1_v2",
+                "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
                 "maxTasksPerNode": 1,
                 "taskSchedulingPolicy": {
@@ -258,7 +322,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 2,
+                        "targetDedicatedNodes": "[parameters('onDemandScanRequestPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
