@@ -81,7 +81,7 @@ describe(SendNotificationTaskCreator, () => {
             poolMetricsInfo.load.activeTasks = 1;
             poolMetricsInfo.load.runningTasks = 1;
             queueMock
-                .setup(async q => q.getMessages(storageConfigStub.notificationQueue, 9))
+                .setup(async q => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, 9))
                 .returns(async () => Promise.resolve([]))
                 .verifiable(Times.once());
 
@@ -131,7 +131,7 @@ describe(SendNotificationTaskCreator, () => {
             poolMetricsInfo.load = poolLoad;
 
             queueMock
-                .setup(async q => q.getMessages(storageConfigStub.notificationQueue, expectedMessageCount))
+                .setup(async q => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, expectedMessageCount))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
 

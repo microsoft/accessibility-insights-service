@@ -483,7 +483,7 @@ describe(Worker, () => {
 
         function setupVerifiableGetQueueMessagesCall(messages: Message[]): void {
             queueMock
-                .setup(q => q.getMessages(storageConfigStub.scanQueue, poolLoadSnapshot.tasksIncrementCountPerInterval))
+                .setup(q => q.getMessagesWithTotalCount(storageConfigStub.scanQueue, poolLoadSnapshot.tasksIncrementCountPerInterval))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
         }

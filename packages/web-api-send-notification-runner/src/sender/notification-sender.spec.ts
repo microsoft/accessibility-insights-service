@@ -97,7 +97,7 @@ describe(NotificationSender, () => {
     it('Send Notification Succeeded', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
 
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null);
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null, 200);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         const response = { statusCode: 200 } as ResponseAsJSON;
@@ -118,10 +118,15 @@ describe(NotificationSender, () => {
     it('Send Notification Failed', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
 
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
-            errorType: 'HttpErrorCode',
-            message: 'Bad Request',
-        });
+        const notification = generateNotification(
+            notificationSenderMetadata.scanNotifyUrl,
+            'sendFailed',
+            {
+                errorType: 'HttpErrorCode',
+                message: 'Bad Request',
+            },
+            400,
+        );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
@@ -142,10 +147,15 @@ describe(NotificationSender, () => {
     it('Send Notification Failed Error', async () => {
         setupReadScanResultCall(onDemandPageScanResult);
 
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sendFailed', {
-            errorType: 'HttpErrorCode',
-            message: 'Unexpected Error',
-        });
+        const notification = generateNotification(
+            notificationSenderMetadata.scanNotifyUrl,
+            'sendFailed',
+            {
+                errorType: 'InternalError',
+                message: 'Unexpected Error',
+            },
+            undefined,
+        );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
@@ -190,11 +200,17 @@ describe(NotificationSender, () => {
             .verifiable(Times.once());
     }
 
-    function generateNotification(notificationUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
+    function generateNotification(
+        notificationUrl: string,
+        state: NotificationState,
+        error: NotificationError,
+        statusCode: number,
+    ): ScanCompletedNotification {
         return {
             scanNotifyUrl: notificationUrl,
             state: state,
             error: error,
+            responseCode: statusCode,
         };
     }
 });

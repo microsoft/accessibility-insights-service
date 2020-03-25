@@ -30,7 +30,7 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
 
         const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - this.getChildTasksCount(poolMetricsInfo);
         if (messagesCount > 0) {
-            return this.queue.getMessages(this.getQueueName(), messagesCount);
+            return this.queue.getMessagesWithTotalCount(this.getQueueName(), messagesCount);
         }
 
         return [];

@@ -1,4 +1,7 @@
 {
+    "featureFlags": {
+        "sendNotification": false
+    },
     "logConfig": {
         "logInConsole": true
     },
