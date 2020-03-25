@@ -70,11 +70,11 @@ export class Queue {
         return this.deleteQueueMessage(queueURL, message.messageId, message.popReceipt);
     }
 
-    public async createMessage(queue: string, message: unknown): Promise<void> {
+    public async createMessage(queue: string, message: unknown): Promise<boolean> {
         const queueURL = await this.getQueueURL(queue);
         await this.ensureQueueExists(queueURL);
 
-        await this.createQueueMessage(queueURL, message);
+        return this.createQueueMessage(queueURL, message);
     }
 
     public async getMessageCount(queue: string): Promise<number> {
@@ -125,10 +125,15 @@ export class Queue {
         await this.deleteQueueMessage(originQueueURL, queueMessage.messageId, queueMessage.popReceipt);
     }
 
-    private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<void> {
+    private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<boolean> {
         const messagesURL = this.getMessagesURL(queueURL);
 
-        await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
+        const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
+        if (_.isNil(response) || _.isNil(response.messageId)) {
+            return false;
+        }
+
+        return true;
     }
 
     private getMessagesURL(queueURL: QueueURL): MessagesURL {

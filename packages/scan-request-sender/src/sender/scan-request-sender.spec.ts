@@ -39,7 +39,7 @@ describe('Scan request Sender', () => {
             const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
                 .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
-                .returns(async () => Promise.resolve())
+                .returns(async () => Promise.resolve(true))
                 .verifiable(Times.once());
 
             pageDocumentProviderMock
@@ -65,7 +65,7 @@ describe('Scan request Sender', () => {
             const message: ScanRequestMessage = getScanRequestMessage(page);
             queueMock
                 .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
-                .returns(async () => Promise.resolve())
+                .returns(async () => Promise.resolve(true))
                 .verifiable(Times.once());
 
             pageDocumentProviderMock
