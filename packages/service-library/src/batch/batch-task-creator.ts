@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { Logger } from 'logger';
@@ -67,6 +67,8 @@ export abstract class BatchTaskCreator {
         this.hasInitialized = true;
     }
 
+    public abstract getQueueName(): string;
+
     protected abstract getMessagesForTaskCreation(): Promise<Message[]>;
 
     protected abstract onTasksAdded(tasks: JobTask[]): Promise<void>;
@@ -101,7 +103,7 @@ export abstract class BatchTaskCreator {
             jobTasks.map(async jobTask => {
                 if (jobTask.state === JobTaskState.queued) {
                     const message = messages.find(value => value.messageId === jobTask.correlationId);
-                    await this.queue.deleteMessage(message);
+                    await this.queue.deleteMessage(this.getQueueName(), message);
                 }
             }),
         );

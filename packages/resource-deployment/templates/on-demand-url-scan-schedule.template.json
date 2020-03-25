@@ -44,6 +44,10 @@
                 "value": "ondemand-scanrequest"
             },
             {
+                "name": "AZURE_STORAGE_NOTIFICATION_QUEUE",
+                "value": "ondemand-send-notification"
+            },
+            {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
             },

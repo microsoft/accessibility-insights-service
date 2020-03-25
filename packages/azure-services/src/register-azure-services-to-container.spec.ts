@@ -45,6 +45,7 @@ describe('BatchServiceClient', () => {
 
     beforeEach(() => {
         process.env.AZURE_STORAGE_SCAN_QUEUE = 'test-scan-queue';
+        process.env.AZURE_STORAGE_NOTIFICATION_QUEUE = 'test-notification-queue';
         process.env.AZ_BATCH_ACCOUNT_NAME = batchAccountName;
         process.env.AZ_BATCH_ACCOUNT_URL = batchAccountUrl;
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';

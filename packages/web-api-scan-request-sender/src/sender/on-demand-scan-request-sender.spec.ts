@@ -27,9 +27,10 @@ describe('Scan request sender', () => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
+        // tslint:disable-next-line:no-object-literal-type-assertion
         storageConfigStub = {
             scanQueue: 'test-scan-queue',
-        };
+        } as StorageConfig;
 
         queueMock = Mock.ofType<Queue>();
         pageScanRequestProvider = Mock.ofType<PageScanRequestProvider>();
@@ -113,7 +114,7 @@ describe('Scan request sender', () => {
 
     it('returns the correct queue size', async () => {
         queueMock
-            .setup(async q => q.getMessageCount())
+            .setup(async q => q.getMessageCount(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve(3))
             .verifiable(Times.once());
         const resp = await testSubject.getCurrentQueueSize();

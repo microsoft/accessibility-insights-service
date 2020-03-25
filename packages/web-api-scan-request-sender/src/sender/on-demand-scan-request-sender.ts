@@ -31,7 +31,7 @@ export class OnDemandScanRequestSender {
     }
 
     public async getCurrentQueueSize(): Promise<number> {
-        return this.queue.getMessageCount();
+        return this.queue.getMessageCount(this.storageConfig.scanQueue);
     }
 
     private async updateOnDemandPageResultDoc(resultDoc: OnDemandPageScanResult): Promise<void> {

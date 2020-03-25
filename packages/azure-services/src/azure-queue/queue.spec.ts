@@ -15,7 +15,7 @@ import { StorageConfig } from './storage-config';
 
 describe(Queue, () => {
     const messageVisibilityTimeout = 30;
-    let config: StorageConfig;
+    let queue: string;
     let testSubject: Queue;
     let queueServiceURLProviderMock: IMock<QueueServiceURLProvider>;
     let queueURLProviderMock: IMock<QueueURLProvider>;
@@ -31,9 +31,7 @@ describe(Queue, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
-        config = {
-            scanQueue: 'queue-1',
-        };
+        queue = 'queue-1';
         queueServiceURLProviderMock = Mock.ofInstance((() => {}) as any);
         queueURLProviderMock = Mock.ofInstance((() => {}) as any);
         messagesURLProviderMock = Mock.ofInstance((() => {}) as any);
@@ -64,13 +62,12 @@ describe(Queue, () => {
         getPromisableDynamicMock(messageIdUrlMock);
 
         queueServiceURLProviderMock.setup(async q => q()).returns(async () => serviceURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, config.scanQueue)).returns(() => queueURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${config.scanQueue}-dead`)).returns(() => deadQueueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, queue)).returns(() => queueURLMock.object);
+        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${queue}-dead`)).returns(() => deadQueueURLMock.object);
         messagesURLProviderMock.setup(m => m(queueURLMock.object)).returns(() => messagesURLMock.object);
         messagesURLProviderMock.setup(m => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
 
         testSubject = new Queue(
-            config,
             queueServiceURLProviderMock.object,
             queueURLProviderMock.object,
             messagesURLProviderMock.object,
@@ -103,7 +100,7 @@ describe(Queue, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages();
+            const queueMessageResultActual = await testSubject.getMessages(queue);
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -124,7 +121,7 @@ describe(Queue, () => {
 
             setupVerifyCallForDequeueMessage(queueMessageResults);
 
-            const queueMessageResultActual = await testSubject.getMessages();
+            const queueMessageResultActual = await testSubject.getMessages(queue);
 
             expect(queueMessageResultActual).toEqual(actualQueueMessageResult);
 
@@ -133,7 +130,7 @@ describe(Queue, () => {
     });
 
     describe('getMessagesWithTotalCount', async () => {
-        let getMessagesMock: IMock<(totalMessagesCount: number) => Promise<Message[]>>;
+        let getMessagesMock: IMock<(queue: string, totalMessagesCount: number) => Promise<Message[]>>;
         let messageIdCounter = 0;
 
         beforeEach(() => {
@@ -162,38 +159,38 @@ describe(Queue, () => {
 
         it('makes multiple calls to get all results', async () => {
             getMessagesMock
-                .setup(s => s(32))
+                .setup(s => s(queue, 32))
                 .returns(async () => generateMessages(32))
                 .verifiable(Times.once());
 
             getMessagesMock
-                .setup(s => s(3))
+                .setup(s => s(queue, 3))
                 .returns(async () => generateMessages(3))
                 .verifiable(Times.once());
 
-            const messages = await testSubject.getMessagesWithTotalCount(35);
+            const messages = await testSubject.getMessagesWithTotalCount(queue, 35);
 
             expect(messages).toHaveLength(35);
         });
 
         it('makes single call if count is within limits of single call', async () => {
             getMessagesMock
-                .setup(s => s(31))
+                .setup(s => s(queue, 31))
                 .returns(async () => generateMessages(31))
                 .verifiable(Times.once());
 
-            const messages = await testSubject.getMessagesWithTotalCount(31);
+            const messages = await testSubject.getMessagesWithTotalCount(queue, 31);
 
             expect(messages).toHaveLength(31);
         });
 
         it('returns empty array if no messages found', async () => {
             getMessagesMock
-                .setup(s => s(32))
+                .setup(s => s(queue, 32))
                 .returns(async () => [])
                 .verifiable(Times.once());
 
-            const messages = await testSubject.getMessagesWithTotalCount(100);
+            const messages = await testSubject.getMessagesWithTotalCount(queue, 100);
 
             expect(messages).toHaveLength(0);
         });
@@ -206,7 +203,7 @@ describe(Queue, () => {
             setupQueueCreationCallWhenQueueDoesNotExist();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage(config.scanQueue, messageText);
+            await testSubject.createMessage(queue, messageText);
 
             verifyAll();
         });
@@ -217,7 +214,7 @@ describe(Queue, () => {
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
 
-            await testSubject.createMessage(config.scanQueue, messageText);
+            await testSubject.createMessage(queue, messageText);
 
             verifyAll();
         });
@@ -232,7 +229,7 @@ describe(Queue, () => {
             } as Models.DequeuedMessageItem;
 
             setupVerifyCallToDeleteMessage(message);
-            await testSubject.deleteMessage(message);
+            await testSubject.deleteMessage(queue, message);
 
             verifyAll();
         });

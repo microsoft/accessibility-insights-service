@@ -16,9 +16,10 @@ describe('Scan request Sender', () => {
     let pageDocumentProviderMock: IMock<PageDocumentProvider>;
 
     beforeEach(() => {
+        // tslint:disable-next-line:no-object-literal-type-assertion
         storageConfigStub = {
             scanQueue: 'test-scan-queue',
-        };
+        } as StorageConfig;
 
         queueMock = Mock.ofType<Queue>();
         pageDocumentProviderMock = Mock.ofType<PageDocumentProvider>();
