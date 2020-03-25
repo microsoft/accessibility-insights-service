@@ -352,6 +352,8 @@ describe(Runner, () => {
                 timestamp: dateNow.toJSON(),
                 error: null,
             },
+            scanResult: null,
+            reports: null,
         };
     }
 
@@ -375,6 +377,8 @@ describe(Runner, () => {
                 timestamp: dateNow.toJSON(),
                 error,
             },
+            scanResult: null,
+            reports: null,
         };
 
         if (withPageInfo) {

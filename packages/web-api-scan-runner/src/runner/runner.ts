@@ -55,6 +55,8 @@ export class Runner {
                 timestamp: new Date().toJSON(),
                 error: null,
             },
+            scanResult: null,
+            reports: null,
         };
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
