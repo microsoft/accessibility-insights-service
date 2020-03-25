@@ -45,10 +45,14 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: OnDemandPageScanResult): Promise<OnDemandPageScanResult> {
-        this.setSystemProperties(pageScanResult);
+    public async updateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OnDemandPageScanResult> {
+        if (pageScanResult.id === undefined) {
+            throw new Error(`Cannot update scan run using partial scan run without id: ${JSON.stringify(pageScanResult)}`);
+        }
+        const persistedResult = pageScanResult as OnDemandPageScanResult;
+        this.setSystemProperties(persistedResult);
 
-        return (await this.cosmosContainerClient.mergeOrWriteDocument(pageScanResult)).item;
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(persistedResult)).item;
     }
 
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {

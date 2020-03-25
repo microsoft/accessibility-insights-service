@@ -45,7 +45,6 @@ export class OnDemandScanRequestSender {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
-            priority: scanRequest.priority,
         };
     }
 }

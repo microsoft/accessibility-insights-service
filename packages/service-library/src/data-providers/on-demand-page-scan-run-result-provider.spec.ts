@@ -56,7 +56,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
     it('updates scan run document', async () => {
         const partition1Result1 = {
             id: 'partition1id1',
-        } as OnDemandPageScanResult;
+        } as Partial<OnDemandPageScanResult>;
         const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
         const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
         partition1Result1Saved._etag = 'etag-1';
@@ -70,6 +70,21 @@ describe(OnDemandPageScanRunResultProvider, () => {
         const savedDocument = await testSubject.updateScanRun(partition1Result1);
         expect(savedDocument).toEqual(partition1Result1Saved);
         verifyAll();
+    });
+
+    it('update throws error if document has no id', async () => {
+        const partialDocument = {
+            url: 'url',
+        } as Partial<OnDemandPageScanResult>;
+        const expectedErrorMessage = `Cannot update scan run using partial scan run without id: ${JSON.stringify(partialDocument)}`;
+
+        let caughtError: Error;
+        await testSubject.updateScanRun(partialDocument).catch(err => {
+            caughtError = err as Error;
+        });
+
+        expect(caughtError).not.toBeUndefined();
+        expect(caughtError.message).toEqual(expectedErrorMessage);
     });
 
     describe('readScanRuns', () => {

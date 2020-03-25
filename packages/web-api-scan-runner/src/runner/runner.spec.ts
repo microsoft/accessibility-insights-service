@@ -37,7 +37,6 @@ describe(Runner, () => {
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
-        priority: 1,
     };
 
     const onDemandPageScanResult: OnDemandPageScanResult = {
@@ -173,7 +172,6 @@ describe(Runner, () => {
             .returns(async () => Promise.reject(failureMessage))
             .verifiable(Times.once());
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
 
@@ -191,7 +189,6 @@ describe(Runner, () => {
             .returns(async () => Promise.reject('failed to close'))
             .verifiable(Times.once());
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
@@ -209,7 +206,6 @@ describe(Runner, () => {
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
         setupWebDriverCalls();
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
@@ -226,7 +222,6 @@ describe(Runner, () => {
         const failureMessage = 'scanner task failed message';
         setupWebDriverCalls();
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
@@ -242,7 +237,6 @@ describe(Runner, () => {
     it('sets scan status to pass if violation length = 0', async () => {
         setupWebDriverCalls();
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
@@ -260,7 +254,6 @@ describe(Runner, () => {
     it('sets scan status to fail if violation length > 0', async () => {
         setupWebDriverCalls();
 
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
@@ -292,7 +285,6 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
 
         setupWebDriverCalls();
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
@@ -329,7 +321,6 @@ describe(Runner, () => {
         loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
 
         setupWebDriverCalls();
-        setupReadScanResultCall(onDemandPageScanResult);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
         scannerTaskMock
             .setup(async s => s.scan(scanMetadata.url))
@@ -353,22 +344,17 @@ describe(Runner, () => {
         reportGeneratorMock.setup(r => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
-    function setupReadScanResultCall(scanResult: any): void {
-        onDemandPageScanRunResultProviderMock
-            .setup(async d => d.readScanRun(scanMetadata.id))
-            .returns(async () => Promise.resolve(cloneDeep(scanResult)))
-            .verifiable(Times.exactly(1));
-    }
-
-    function getRunningJobStateScanResult(): OnDemandPageScanResult {
-        const result = cloneDeep(onDemandPageScanResult);
-        result.run = {
-            state: 'running',
-            timestamp: dateNow.toJSON(),
-            error: null,
+    function getRunningJobStateScanResult(): Partial<OnDemandPageScanResult> {
+        return {
+            id: onDemandPageScanResult.id,
+            run: {
+                state: 'running',
+                timestamp: dateNow.toJSON(),
+                error: null,
+            },
+            scanResult: null,
+            reports: null,
         };
-
-        return result;
     }
 
     function setupSaveAllReportsCall(): void {
@@ -383,12 +369,16 @@ describe(Runner, () => {
             .verifiable();
     }
 
-    function getFailingJobStateScanResult(error: any, withPageInfo: boolean = true): OnDemandPageScanResult {
-        const result = cloneDeep(onDemandPageScanResult);
-        result.run = {
-            state: 'failed',
-            timestamp: dateNow.toJSON(),
-            error,
+    function getFailingJobStateScanResult(error: any, withPageInfo: boolean = true): Partial<OnDemandPageScanResult> {
+        const result: Partial<OnDemandPageScanResult> = {
+            id: onDemandPageScanResult.id,
+            run: {
+                state: 'failed',
+                timestamp: dateNow.toJSON(),
+                error,
+            },
+            scanResult: null,
+            reports: null,
         };
 
         if (withPageInfo) {
@@ -399,50 +389,48 @@ describe(Runner, () => {
         return result;
     }
 
-    function setupUpdateScanRunResultCall(result: OnDemandPageScanResult): void {
+    function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         const clonedResult = cloneDeep(result);
 
         onDemandPageScanRunResultProviderMock
             .setup(async d => d.updateScanRun(clonedResult))
-            .returns(async () => Promise.resolve(clonedResult))
+            .returns(async () => Promise.resolve(clonedResult as OnDemandPageScanResult))
             .verifiable();
     }
 
-    function getScanResultWithNoViolations(): OnDemandPageScanResult {
-        const result = cloneDeep(onDemandPageScanResult);
-        result.run = {
-            state: 'completed',
-            timestamp: dateNow.toJSON(),
-            error: undefined,
-            pageResponseCode: pageResponseCode,
-            pageTitle: pageTitle,
+    function getScanResultWithNoViolations(): Partial<OnDemandPageScanResult> {
+        return {
+            id: onDemandPageScanResult.id,
+            run: {
+                state: 'completed',
+                timestamp: dateNow.toJSON(),
+                error: undefined,
+                pageResponseCode: pageResponseCode,
+                pageTitle: pageTitle,
+            },
+            scanResult: {
+                state: 'pass',
+            },
+            reports: [onDemandReport1, onDemandReport2],
         };
-        result.scanResult = {
-            state: 'pass',
-        };
-
-        result.reports = [onDemandReport1, onDemandReport2];
-
-        return result;
     }
 
-    function getScanResultWithViolations(): OnDemandPageScanResult {
-        const result = cloneDeep(onDemandPageScanResult);
-        result.run = {
-            state: 'completed',
-            timestamp: dateNow.toJSON(),
-            error: undefined,
-            pageResponseCode: pageResponseCode,
-            pageTitle: pageTitle,
+    function getScanResultWithViolations(): Partial<OnDemandPageScanResult> {
+        return {
+            id: onDemandPageScanResult.id,
+            run: {
+                state: 'completed',
+                timestamp: dateNow.toJSON(),
+                error: undefined,
+                pageResponseCode: pageResponseCode,
+                pageTitle: pageTitle,
+            },
+            scanResult: {
+                issueCount: 3,
+                state: 'fail',
+            },
+            reports: [onDemandReport1, onDemandReport2],
         };
-        result.scanResult = {
-            issueCount: 3,
-            state: 'fail',
-        };
-
-        result.reports = [onDemandReport1, onDemandReport2];
-
-        return result;
     }
 
     function setupWebDriverCalls(): void {
