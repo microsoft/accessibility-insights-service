@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ScanNotificationErrorCodeName } from '../scan-notification-error-codes';
 import { ScanRunErrorCodeName } from '../scan-run-error-codes';
 import { WebApiError } from '../web-api-error-codes';
 
@@ -8,7 +9,7 @@ export declare type ReportFormat = 'sarif' | 'html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type RunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sent' | 'sendFailed';
-export type NotificationErrorTypes = 'HttpErrorCode';
+export type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
 
 export declare type ScanResultResponse = ScanRunResultResponse | ScanRunErrorResponse;
 
@@ -31,10 +32,11 @@ export interface ScanCompletedNotification {
     scanNotifyUrl: string;
     state?: NotificationState;
     error?: NotificationError;
+    responseCode?: number;
 }
 
 export interface NotificationError {
-    errorType: NotificationErrorTypes;
+    code: ScanNotificationErrorCodeName;
     message: string;
 }
 

@@ -50,6 +50,7 @@ export class NotificationSender {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'sendFailed';
         let error: NotificationError = null;
+        let statusCode: number;
         const scanConfig = await this.getScanConfig();
 
         this.logger.trackEvent('SendNotificationTaskStarted');
@@ -58,6 +59,8 @@ export class NotificationSender {
             let response;
             try {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
+                statusCode = response.statusCode;
+
                 if (response.statusCode === 200) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
                     this.logger.logInfo(`Notification sent Successfully!, try #${numberOfTries}`);
@@ -75,7 +78,7 @@ export class NotificationSender {
             } catch (e) {
                 this.logger.trackEvent('SendNotificationTaskFailed');
                 this.logger.logError(`Notification sent failed!, error message: ${(e as Error).message}`);
-                error = { errorType: 'HttpErrorCode', message: (e as Error).message };
+                error = { errorType: 'InternalError', message: (e as Error).message };
             }
             numberOfTries = numberOfTries + 1;
             if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
@@ -83,7 +86,12 @@ export class NotificationSender {
             }
         }
 
-        pageScanResult.notification = this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error);
+        pageScanResult.notification = this.generateNotification(
+            notificationSenderConfigData.scanNotifyUrl,
+            notificationState,
+            error,
+            statusCode,
+        );
 
         return pageScanResult;
     }
@@ -92,11 +100,17 @@ export class NotificationSender {
         return this.serviceConfig.getConfigValue('scanConfig');
     }
 
-    private generateNotification(scanNotifyUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
+    private generateNotification(
+        scanNotifyUrl: string,
+        state: NotificationState,
+        error: NotificationError,
+        statusCode: number,
+    ): ScanCompletedNotification {
         return {
             scanNotifyUrl: scanNotifyUrl,
             state: state,
             error: error,
+            responseCode: statusCode,
         };
     }
 }
