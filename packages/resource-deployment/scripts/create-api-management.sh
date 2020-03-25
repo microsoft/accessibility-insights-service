@@ -11,7 +11,7 @@ export resourceName
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -o <organisation name> -p <publisher email> -r <resource group> 
+Usage: $0 -o <organisation name> -p <publisher email> -r <resource group> -e <environment>
     where 
     Organisation Name - This name will be used in customer interactions
     Publisher email - The email for notifications
@@ -24,17 +24,24 @@ Usage: $0 -o <organisation name> -p <publisher email> -r <resource group>
 templateFilePath="${0%/*}/../templates/api-management.template.json"
 
 # Read script arguments
-while getopts ":o:p:r:" option; do
+while getopts ":o:p:r:e:" option; do
     case $option in
     o) orgName=${OPTARG} ;;
     p) publisherEmail=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $orgName ]] || [[ -z $publisherEmail ]] || [[ -z $resourceGroupName ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
+fi
+
+if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+    tier="Standard"
+else
+    tier="Developer"
 fi
 
 # Start deployment
@@ -43,7 +50,7 @@ echo "[create-api-management] Deploying API management instance. This might take
 resources=$(az group deployment create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
-    --parameters adminEmail="$publisherEmail" orgName="$orgName" \
+    --parameters adminEmail="$publisherEmail" orgName="$orgName" tier="$tier" \
     --query "properties.outputResources[].id" \
     -o tsv)
 
