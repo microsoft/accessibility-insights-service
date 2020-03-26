@@ -13,17 +13,11 @@ export appInsightsName
 
 templatesFolder="${0%/*}/../templates/"
 
-scanReqScheduleJobName="scan-req-schedule"
-parsedScanReqScheduleFileName="scan-req-schedule.generated.template.json"
-
 onDemandScanReqScheduleJobName="on-demand-scan-req-schedule"
 parsedOnDemandScanReqScheduleFileName="on-demand-scan-req-schedule.generated.template.json"
 
 onDemandSendNotificationJobName="on-demand-send-notification-schedule"
 parsedOnDemandSendNotificationFileName="on-demand-send-notification.generated.template.json"
-
-urlScanScheduleJobName="url-scan-schedule"
-parsedUrlScanScheduleFileName="url-scan-schedule.generated.template.json"
 
 onDemandScanScheduleJobName="on-demand-url-scan-schedule"
 parsedOnDemandScanScheduleFileName="on-demand-url-scan-schedule.generated.template.json"
@@ -82,8 +76,6 @@ fi
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/scan-req-schedule.template.json" >"$parsedScanReqScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/url-scan-schedule.template.json" >"$parsedUrlScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
@@ -94,8 +86,6 @@ az batch account login --name "$batchAccountName" --resource-group "$resourceGro
 echo "Fetching existing job schedule list..."
 allJobsScheduleList=$(az batch job-schedule list --query "[*].id" -o tsv)
 
-adjustJob "$scanReqScheduleJobName" "$parsedScanReqScheduleFileName" "$allJobsScheduleList"
-adjustJob "$urlScanScheduleJobName" "$parsedUrlScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanScheduleJobName" "$parsedOnDemandScanScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandScanReqScheduleJobName" "$parsedOnDemandScanReqScheduleFileName" "$allJobsScheduleList"
 adjustJob "$onDemandSendNotificationJobName" "$parsedOnDemandSendNotificationFileName" "$allJobsScheduleList"
