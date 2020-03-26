@@ -36,6 +36,20 @@
             "metadata": {
                 "description": "Name of the virtual network to be used for the batch pool nodes"
             }
+        },
+        "onDemandScanRequestPoolNodes": {
+            "defaultValue": "2",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for on-demand-scan-request-pool"
+            }
+        },
+        "onDemandUrlScanPoolNodes": {
+            "defaultValue": "3",
+            "type": "string",
+            "metadata": {
+                "description": "Number of dedicated nodes for on-demand-url-scan-pool"
+            }
         }
     },
     "variables": {
@@ -87,7 +101,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 2,
+                        "targetDedicatedNodes": 1,
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -144,7 +158,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 3,
+                        "targetDedicatedNodes": 1,
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -201,7 +215,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 3,
+                        "targetDedicatedNodes": "[parameters('onDemandUrlScanPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }
@@ -258,7 +272,7 @@
                 },
                 "scaleSettings": {
                     "fixedScale": {
-                        "targetDedicatedNodes": 2,
+                        "targetDedicatedNodes": "[parameters('onDemandScanRequestPoolNodes')]",
                         "targetLowPriorityNodes": 0,
                         "resizeTimeout": "PT15M"
                     }

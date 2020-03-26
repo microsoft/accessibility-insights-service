@@ -16,7 +16,7 @@ batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <batch template file (optional)>]
+Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>]
 "
     exit 1
 }
@@ -24,6 +24,12 @@ Usage: $0 -r <resource group> [-t <batch template file (optional)>]
 . "${0%/*}/process-utilities.sh"
 
 function deployBatch() {
+    if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+        parameters="${0%/*}/../templates/batch-account-prod.parameters.json"
+    else
+        parameters="${0%/*}/../templates/batch-account-dev.parameters.json"
+    fi
+
     # Deploy Azure Batch account using resource manager template
     echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
     resources=$(
@@ -31,6 +37,7 @@ function deployBatch() {
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
             --query "properties.outputResources[].id" \
+            --parameters "$parameters" \
             -o tsv
     )
 
@@ -40,17 +47,18 @@ function deployBatch() {
 }
 
 # Read script arguments
-while getopts ":r:t:" option; do
+while getopts ":r:t:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
 fi
 
