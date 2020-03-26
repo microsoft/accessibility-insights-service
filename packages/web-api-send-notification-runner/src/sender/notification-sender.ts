@@ -25,15 +25,14 @@ export class NotificationSender {
 
     public async sendNotification(): Promise<void> {
         const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
-        const scanId = notificationSenderConfigData.scanId;
 
-        this.logger.logInfo(`Reading page scan run result ${scanId}`);
+        this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
         this.logger.setCustomProperties({
-            scanId: scanId,
+            scanId: notificationSenderConfigData.scanId,
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
         });
 
-        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData, scanId);
+        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -43,7 +42,6 @@ export class NotificationSender {
 
     private async sendNotificationWithRetry(
         notificationSenderConfigData: NotificationSenderMetadata,
-        scanId: string,
     ): Promise<Partial<OnDemandPageScanResult>> {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'sendFailed';
@@ -85,7 +83,7 @@ export class NotificationSender {
         }
 
         return {
-            id: scanId,
+            id: notificationSenderConfigData.scanId,
             notification: this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error, statusCode),
         };
     }

@@ -1,22 +1,25 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { GuidGenerator } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
+    OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
+    ScanCompletedNotification,
     ScanError,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
+import { NotificationDispatcher } from '../tasks/notification-dispatcher';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 
@@ -33,6 +36,8 @@ export class Runner {
         @inject(Logger) private readonly logger: Logger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
+        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
+        @inject(NotificationDispatcher) protected readonly notificationDispatcher: NotificationDispatcher,
     ) {}
 
     public async run(): Promise<void> {
@@ -84,7 +89,18 @@ export class Runner {
         }
 
         this.logger.logInfo(`Writing page scan run result to a storage.`);
-        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+
+        const featureFlags = await this.getDefaultFeatureFlags();
+        if (featureFlags.sendNotification && !this.scanNotifyUrlEmpty(fullPageScanResult.notification)) {
+            await this.notificationDispatcher.dispatchOnDemandScanRequests(
+                this.createOnDemandNotificationRequestMessage(fullPageScanResult),
+            );
+        }
+    }
+
+    private scanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
+        return isEmpty(notification) || isEmpty(notification.scanNotifyUrl);
     }
 
     private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
@@ -153,5 +169,18 @@ export class Runner {
 
     private getErrorMessage(error: any): string {
         return error instanceof Error ? error.message : JSON.stringify(error);
+    }
+
+    private createOnDemandNotificationRequestMessage(scanResult: OnDemandPageScanResult): OnDemandNotificationRequestMessage {
+        return {
+            scanId: scanResult.id,
+            scanNotifyUrl: scanResult.notification.scanNotifyUrl,
+            runStatus: scanResult.run.state,
+            scanStatus: scanResult.scanResult.state,
+        };
+    }
+
+    private async getDefaultFeatureFlags(): Promise<FeatureFlags> {
+        return this.serviceConfig.getConfigValue('featureFlags');
     }
 }

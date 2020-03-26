@@ -11,7 +11,6 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { Message } from './message';
 import { Queue } from './queue';
-import { StorageConfig } from './storage-config';
 
 describe(Queue, () => {
     const messageVisibilityTimeout = 30;
