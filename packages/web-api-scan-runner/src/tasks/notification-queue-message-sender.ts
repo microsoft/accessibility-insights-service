@@ -16,7 +16,7 @@ import {
 // tslint:disable: no-null-keyword no-any
 
 @injectable()
-export class NotificationDispatcher {
+export class NotificationQueueMessageSender {
     constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -27,7 +27,7 @@ export class NotificationDispatcher {
         private readonly system: typeof System = System,
     ) {}
 
-    public async dispatchOnDemandScanRequests(onDemandNotificationRequestMessage: OnDemandNotificationRequestMessage): Promise<void> {
+    public async sendNotificationMessage(onDemandNotificationRequestMessage: OnDemandNotificationRequestMessage): Promise<void> {
         this.logger.logInfo(`Reading page scan run result ${onDemandNotificationRequestMessage.scanId}`);
         this.logger.setCustomProperties({
             scanId: onDemandNotificationRequestMessage.scanId,
@@ -49,20 +49,27 @@ export class NotificationDispatcher {
         let statusCode = 500;
         const scanConfig = await this.getScanConfig();
 
+        this.logger.logInfo(`Retry count: ${scanConfig.maxSendNotificationRetryCount}`);
         while (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-            this.logger.logInfo(`Enqueuing the scan notification, try #${numberOfTries}`);
+            this.logger.logInfo(
+                `Enqueuing the scan notification, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
+            );
             let response;
             try {
                 response = await this.queue.createMessage(this.storageConfig.notificationQueue, notificationSenderConfigData);
 
                 if (response) {
-                    this.logger.logInfo(`Notification enqueued successfully!, try #${numberOfTries}`);
+                    this.logger.logInfo(
+                        `Notification enqueued successfully!, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
+                    );
                     notificationState = 'queued';
                     error = null;
                     statusCode = 200;
                     break;
                 } else {
-                    this.logger.logInfo(`Failed to enqueue the notification!, try #${numberOfTries}`);
+                    this.logger.logInfo(
+                        `Failed to enqueue the notification!, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
+                    );
                     error = { errorType: 'InternalError', message: `Failed to enqueue the notification!` };
                 }
             } catch (e) {

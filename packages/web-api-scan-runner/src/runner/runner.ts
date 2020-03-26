@@ -19,7 +19,7 @@ import {
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { NotificationDispatcher } from '../tasks/notification-dispatcher';
+import { NotificationQueueMessageSender } from '../tasks/notification-queue-message-sender';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 
@@ -37,7 +37,7 @@ export class Runner {
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(NotificationDispatcher) protected readonly notificationDispatcher: NotificationDispatcher,
+        @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
     ) {}
 
     public async run(): Promise<void> {
@@ -95,14 +95,13 @@ export class Runner {
         this.logger.logInfo(`sendNotification feature flag ${featureFlags.sendNotification}`);
         if (featureFlags.sendNotification && !this.scanNotifyUrlEmpty(fullPageScanResult.notification)) {
             this.logger.logInfo(`Sending notification to ${fullPageScanResult.notification.scanNotifyUrl}`);
-            await this.notificationDispatcher.dispatchOnDemandScanRequests(
-                this.createOnDemandNotificationRequestMessage(fullPageScanResult),
-            );
+            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
         }
     }
 
     private scanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
-        return isEmpty(notification) || isEmpty(notification.scanNotifyUrl);
+        // tslint:disable-next-line: strict-boolean-expressions whitespace
+        return isEmpty(notification?.scanNotifyUrl);
     }
 
     private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {

@@ -17,14 +17,14 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
-import { NotificationDispatcher } from './notification-dispatcher';
+import { NotificationQueueMessageSender } from './notification-queue-message-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
 class MockableLogger extends Logger {}
 
-describe(NotificationDispatcher, () => {
-    let dispatcher: NotificationDispatcher;
+describe(NotificationQueueMessageSender, () => {
+    let dispatcher: NotificationQueueMessageSender;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
@@ -84,7 +84,7 @@ describe(NotificationDispatcher, () => {
         processStub = {} as typeof process;
         processStub.env = { batchJobId: 'job 1' };
 
-        dispatcher = new NotificationDispatcher(
+        dispatcher = new NotificationQueueMessageSender(
             onDemandPageScanRunResultProviderMock.object,
             serviceConfigMock.object,
             storageConfigStub,
@@ -109,7 +109,7 @@ describe(NotificationDispatcher, () => {
             .returns(async () => Promise.resolve(true))
             .verifiable(Times.once());
 
-        await dispatcher.dispatchOnDemandScanRequests(notificationSenderMetadata);
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     it('Send Notification Failed', async () => {
@@ -134,7 +134,7 @@ describe(NotificationDispatcher, () => {
             .returns(async () => Promise.resolve(false))
             .verifiable(Times.exactly(3));
 
-        await dispatcher.dispatchOnDemandScanRequests(notificationSenderMetadata);
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     it('Send Notification Failed Error', async () => {
@@ -159,7 +159,7 @@ describe(NotificationDispatcher, () => {
             .throws(new Error('Unexpected Error'))
             .verifiable(Times.exactly(3));
 
-        await dispatcher.dispatchOnDemandScanRequests(notificationSenderMetadata);
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     afterEach(() => {

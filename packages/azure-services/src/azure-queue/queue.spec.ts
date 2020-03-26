@@ -249,7 +249,6 @@ describe(Queue, () => {
     function setupQueueGetCount(count: number): void {
         const getProperties = { approximateMessagesCount: count } as Models.QueueGetPropertiesResponse;
         queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
-        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
     }
 
     function setupQueueCreationCallWhenQueueExists(): void {
