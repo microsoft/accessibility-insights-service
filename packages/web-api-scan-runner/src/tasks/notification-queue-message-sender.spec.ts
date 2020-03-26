@@ -2,41 +2,39 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Queue, StorageConfig } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
-import { ResponseAsJSON } from 'request';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     ItemType,
     NotificationError,
     NotificationState,
+    OnDemandNotificationRequestMessage,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanCompletedNotification,
 } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
-import { NotificationSenderConfig } from '../notification-sender-config';
-import { NotificationSenderWebAPIClient } from '../tasks/notification-sender-web-api-client';
-import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
-import { NotificationSender } from './notification-sender';
+import { NotificationQueueMessageSender } from './notification-queue-message-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
 
 class MockableLogger extends Logger {}
 
-describe(NotificationSender, () => {
-    let sender: NotificationSender;
+describe(NotificationQueueMessageSender, () => {
+    let dispatcher: NotificationQueueMessageSender;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let webAPIMock: IMock<NotificationSenderWebAPIClient>;
-    let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
+    let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let systemMock: IMock<typeof System>;
     let processStub: typeof process;
     let scanConfig: ScanRunTimeConfig;
+    let storageConfigStub: StorageConfig;
 
-    const notificationSenderMetadata: NotificationSenderMetadata = {
+    const notificationSenderMetadata: OnDemandNotificationRequestMessage = {
         scanId: 'id',
         scanNotifyUrl: 'scanNotifyUrl',
         runStatus: 'completed',
@@ -62,14 +60,19 @@ describe(NotificationSender, () => {
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
-            maxSendNotificationRetryCount: 5,
+            maxSendNotificationRetryCount: 4,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
             scanTimeoutInMin: 1,
         };
+
+        storageConfigStub = {
+            notificationQueue: 'test-notification-queue',
+        } as StorageConfig;
+
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
-        webAPIMock = Mock.ofType(NotificationSenderWebAPIClient);
+        queueMock = Mock.ofType(Queue);
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
@@ -77,97 +80,95 @@ describe(NotificationSender, () => {
             .returns(async () => scanConfig)
             .verifiable(Times.once());
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
-        notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
-        notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
 
         processStub = {} as typeof process;
         processStub.env = { batchJobId: 'job 1' };
 
-        sender = new NotificationSender(
+        dispatcher = new NotificationQueueMessageSender(
             onDemandPageScanRunResultProviderMock.object,
-            webAPIMock.object,
-            notificationSenderMetadataMock.object,
-            loggerMock.object,
             serviceConfigMock.object,
+            storageConfigStub,
+            queueMock.object,
+            loggerMock.object,
             processStub,
             systemMock.object,
         );
     });
 
-    it('Send Notification Succeeded', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null, 200);
+    it('Enqueue Notification Succeeded', async () => {
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null, 200);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-
-        const response = { statusCode: 200 } as ResponseAsJSON;
 
         systemMock
             .setup(sm => sm.wait(5000))
             .returns(async () => Promise.resolve())
             .verifiable(Times.never());
 
-        webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
-            .returns(async () => Promise.resolve(response))
+        queueMock
+            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+            .returns(async () => Promise.resolve(true))
             .verifiable(Times.once());
 
-        await sender.sendNotification();
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     it('Send Notification Failed', async () => {
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
-            'sendFailed',
+            'queueFailed',
             {
-                errorType: 'HttpErrorCode',
-                message: 'Bad Request',
+                errorType: 'InternalError',
+                message: 'Failed to enqueue the notification!',
             },
-            400,
+            500,
         );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
-        systemMock
-            .setup(sm => sm.wait(5000))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
+        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
+            systemMock
+                .setup(sm => sm.wait(tryNumber * 1000))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+        }
 
-        const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
-
-        webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
-            .returns(async () => Promise.resolve(response))
+        queueMock
+            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+            .returns(async () => Promise.resolve(false))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
-        await sender.sendNotification();
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     it('Send Notification Failed Error', async () => {
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
-            'sendFailed',
+            'queueFailed',
             {
                 errorType: 'InternalError',
                 message: 'Unexpected Error',
             },
-            undefined,
+            500,
         );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
-        systemMock
-            .setup(sm => sm.wait(5000))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
+        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
+            systemMock
+                .setup(sm => sm.wait(tryNumber * 1000))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+        }
 
-        webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
+        queueMock
+            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
-        await sender.sendNotification();
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
 
     afterEach(() => {
-        notificationSenderMetadataMock.verifyAll();
-        webAPIMock.verifyAll();
+        onDemandPageScanRunResultProviderMock.verifyAll();
+        queueMock.verifyAll();
         loggerMock.verifyAll();
         serviceConfigMock.verifyAll();
         systemMock.verifyAll();
@@ -181,9 +182,10 @@ describe(NotificationSender, () => {
     }
 
     function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
+        const clonedResult = cloneDeep(result);
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(result))
-            .returns(async () => Promise.resolve(result as OnDemandPageScanResult))
+            .setup(async d => d.updateScanRun(clonedResult))
+            .returns(async () => Promise.resolve(clonedResult as OnDemandPageScanResult))
             .verifiable(Times.once());
     }
 

@@ -3,17 +3,24 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { GuidGenerator } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
-import { ItemType, OnDemandPageScanReport, OnDemandPageScanResult, OnDemandPageScanRunState } from 'storage-documents';
+import {
+    ItemType,
+    OnDemandNotificationRequestMessage,
+    OnDemandPageScanReport,
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState,
+} from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
+import { NotificationQueueMessageSender } from '../tasks/notification-queue-message-sender';
 import { ScannerTask } from '../tasks/scanner-task';
 import { WebDriverTask } from '../tasks/web-driver-task';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -34,6 +41,8 @@ describe(Runner, () => {
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let reportGeneratorMock: IMock<ReportGenerator>;
+    let serviceConfigurationMock: IMock<ServiceConfiguration>;
+    let notificationQueueMessageSenderMock: IMock<NotificationQueueMessageSender>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -145,6 +154,14 @@ describe(Runner, () => {
         MockDate.set(dateNow);
 
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
+        serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
+        notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender, MockBehavior.Strict);
+
+        const featureFlags: FeatureFlags = { sendNotification: false };
+        serviceConfigurationMock
+            .setup(async scm => scm.getConfigValue('featureFlags'))
+            .returns(async () => Promise.resolve(featureFlags))
+            .verifiable(Times.once());
 
         runner = new Runner(
             guidGeneratorMock.object,
@@ -155,6 +172,8 @@ describe(Runner, () => {
             loggerMock.object,
             pageScanRunReportServiceMock.object,
             reportGeneratorMock.object,
+            serviceConfigurationMock.object,
+            notificationQueueMessageSenderMock.object,
         );
     });
 
@@ -163,6 +182,8 @@ describe(Runner, () => {
         scannerTaskMock.verifyAll();
         webDriverTaskMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
+        serviceConfigurationMock.verifyAll();
+        notificationQueueMessageSenderMock.verifyAll();
     });
 
     it('sets state to failed if web driver launch crashes', async () => {
@@ -247,6 +268,27 @@ describe(Runner, () => {
         setupGenerateReportsCall(passedAxeScanResults);
         setupSaveAllReportsCall();
         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
+
+        await runner.run();
+    });
+
+    it('return redirected url', async () => {
+        setupWebDriverCalls();
+
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+
+        const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
+        clonedPassedAxeScanResults.scannedUrl = 'redirect url';
+        scannerTaskMock
+            .setup(async s => s.scan(scanMetadata.url))
+            .returns(async () => Promise.resolve(clonedPassedAxeScanResults))
+            .verifiable();
+
+        setupGenerateReportsCall(clonedPassedAxeScanResults);
+        setupSaveAllReportsCall();
+        const scanResultWithNoViolations = getScanResultWithNoViolations();
+        scanResultWithNoViolations.scannedUrl = clonedPassedAxeScanResults.scannedUrl;
+        setupUpdateScanRunResultCall(scanResultWithNoViolations);
 
         await runner.run();
     });
@@ -340,6 +382,64 @@ describe(Runner, () => {
         loggerMock.verifyAll();
     });
 
+    describe('enqueue notification, send notification feature flag is enabled', () => {
+        const scanNotifyUrl = 'notify-url';
+        const notificationMessage: OnDemandNotificationRequestMessage = {
+            scanId: onDemandPageScanResult.id,
+            scanNotifyUrl: scanNotifyUrl,
+            runStatus: 'completed',
+            scanStatus: 'pass',
+        };
+
+        beforeEach(() => {
+            setupWebDriverCalls();
+
+            scannerTaskMock
+                .setup(async s => s.scan(scanMetadata.url))
+                .returns(async () => Promise.resolve(passedAxeScanResults))
+                .verifiable();
+
+            setupGenerateReportsCall(passedAxeScanResults);
+            setupSaveAllReportsCall();
+
+            serviceConfigurationMock.reset();
+            const featureFlags1: FeatureFlags = { sendNotification: true };
+            serviceConfigurationMock
+                .setup(async scm => scm.getConfigValue('featureFlags'))
+                .returns(async () => Promise.resolve(featureFlags1))
+                .verifiable(Times.once());
+        });
+
+        test.each([undefined, { scanNotifyUrl: undefined }])(
+            'Do not send notification when url not present, notification = %o',
+            async notification => {
+                const fullResult = cloneDeep(onDemandPageScanResult);
+                fullResult.notification = notification;
+                setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
+                setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+                notificationQueueMessageSenderMock
+                    .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
+                    .returns(async () => Promise.resolve())
+                    .verifiable(Times.never());
+
+                await runner.run();
+            },
+        );
+
+        it('Notification URL is not null', async () => {
+            const fullResult = cloneDeep(onDemandPageScanResult);
+            fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
+            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+            notificationQueueMessageSenderMock
+                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
+            await runner.run();
+        });
+    });
+
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
         reportGeneratorMock.setup(r => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
@@ -389,12 +489,19 @@ describe(Runner, () => {
         return result;
     }
 
-    function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
+    function setupUpdateScanRunResultCall(
+        result: Partial<OnDemandPageScanResult>,
+        fullResult: OnDemandPageScanResult = onDemandPageScanResult,
+    ): void {
         const clonedResult = cloneDeep(result);
+        const fullClonedResult = cloneDeep(fullResult);
+        fullClonedResult.run = cloneDeep(clonedResult.run);
+        fullClonedResult.scanResult = cloneDeep(clonedResult.scanResult);
+        fullClonedResult.reports = cloneDeep(clonedResult.reports);
 
         onDemandPageScanRunResultProviderMock
             .setup(async d => d.updateScanRun(clonedResult))
-            .returns(async () => Promise.resolve(clonedResult as OnDemandPageScanResult))
+            .returns(async () => Promise.resolve(fullClonedResult))
             .verifiable();
     }
 
@@ -473,5 +580,14 @@ describe(Runner, () => {
             .verifiable();
 
         return { scanRequestTime: scanRequestTime, scanCompleteTime: scanCompleteTime };
+    }
+
+    function createOnDemandNotificationRequestMessage(scanResult: OnDemandPageScanResult): OnDemandNotificationRequestMessage {
+        return {
+            scanId: scanResult.id,
+            scanNotifyUrl: scanResult.notification.scanNotifyUrl,
+            runStatus: scanResult.run.state,
+            scanStatus: scanResult.scanResult.state,
+        };
     }
 });

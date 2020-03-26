@@ -11,7 +11,6 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { Message } from './message';
 import { Queue } from './queue';
-import { StorageConfig } from './storage-config';
 
 describe(Queue, () => {
     const messageVisibilityTimeout = 30;
@@ -196,6 +195,18 @@ describe(Queue, () => {
         });
     });
 
+    describe('getMessageCount', async () => {
+        it('getCountQueue', async () => {
+            const count = 30;
+            setupQueueGetCount(30);
+
+            const actualCount = await testSubject.getMessageCount(queue);
+            expect(actualCount).toBe(count);
+
+            verifyAll();
+        });
+    });
+
     describe('createMessage', () => {
         it('creates message & queue', async () => {
             const messageText = 'some message';
@@ -208,13 +219,26 @@ describe(Queue, () => {
             verifyAll();
         });
 
-        it('creates message when queue exists', async () => {
+        it('creates message succeeded when queue exists', async () => {
             const messageText = 'some message';
 
             setupQueueCreationCallWhenQueueExists();
-            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, { messageId: 'id' });
 
-            await testSubject.createMessage(queue, messageText);
+            const isCreated = await testSubject.createMessage(queue, messageText);
+            expect(isCreated).toBe(true);
+
+            verifyAll();
+        });
+
+        test.each([null, { messageId: null }])('creates message failed - response = %o', async response => {
+            const messageText = 'some message';
+
+            setupQueueCreationCallWhenQueueExists();
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, response);
+
+            const isCreated = await testSubject.createMessage(queue, messageText);
+            expect(isCreated).toBe(false);
 
             verifyAll();
         });
@@ -235,6 +259,11 @@ describe(Queue, () => {
         });
     });
 
+    function setupQueueGetCount(count: number): void {
+        const getProperties = { approximateMessagesCount: count } as Models.QueueGetPropertiesResponse;
+        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
+    }
+
     function setupQueueCreationCallWhenQueueExists(): void {
         queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
         deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
@@ -253,10 +282,10 @@ describe(Queue, () => {
         setupVerifyCallToDeleteMessage(message);
     }
 
-    function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string): void {
+    function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string, response: any = null): void {
         currentMessagesURLMock
             .setup(async d => d.enqueue(Aborter.none, JSON.stringify(messageText)))
-            .returns(async () => null)
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
     }
 
