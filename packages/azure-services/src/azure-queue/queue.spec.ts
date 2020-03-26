@@ -219,13 +219,26 @@ describe(Queue, () => {
             verifyAll();
         });
 
-        it('creates message when queue exists', async () => {
+        it('creates message succeeded when queue exists', async () => {
             const messageText = 'some message';
 
             setupQueueCreationCallWhenQueueExists();
-            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, { messageId: 'id' });
 
-            await testSubject.createMessage(queue, messageText);
+            const isCreated = await testSubject.createMessage(queue, messageText);
+            expect(isCreated).toBe(true);
+
+            verifyAll();
+        });
+
+        test.each([null, { messageId: null }])('creates message failed - response = %o', async response => {
+            const messageText = 'some message';
+
+            setupQueueCreationCallWhenQueueExists();
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, response);
+
+            const isCreated = await testSubject.createMessage(queue, messageText);
+            expect(isCreated).toBe(false);
 
             verifyAll();
         });
@@ -269,10 +282,10 @@ describe(Queue, () => {
         setupVerifyCallToDeleteMessage(message);
     }
 
-    function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string): void {
+    function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string, response: any = null): void {
         currentMessagesURLMock
             .setup(async d => d.enqueue(Aborter.none, JSON.stringify(messageText)))
-            .returns(async () => null)
+            .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
     }
 
