@@ -49,7 +49,7 @@
             },
             {
                 "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
-                "value": "batch-send-notification-runner-script"
+                "value": "batch-web-api-send-notification-runner-script"
             }
         ],
         "poolInfo": {

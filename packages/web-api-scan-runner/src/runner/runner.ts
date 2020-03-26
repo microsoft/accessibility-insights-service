@@ -92,7 +92,9 @@ export class Runner {
         const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
         const featureFlags = await this.getDefaultFeatureFlags();
+        this.logger.logInfo(`sendNotification feature flag ${featureFlags.sendNotification}`);
         if (featureFlags.sendNotification && !this.scanNotifyUrlEmpty(fullPageScanResult.notification)) {
+            this.logger.logInfo(`Sending notification to ${fullPageScanResult.notification.scanNotifyUrl}`);
             await this.notificationDispatcher.dispatchOnDemandScanRequests(
                 this.createOnDemandNotificationRequestMessage(fullPageScanResult),
             );
