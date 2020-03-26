@@ -13,6 +13,8 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 
+// tslint:disable: no-null-keyword no-any
+
 @injectable()
 export class NotificationDispatcher {
     constructor(
