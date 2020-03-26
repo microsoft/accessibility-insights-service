@@ -410,18 +410,21 @@ describe(Runner, () => {
                 .verifiable(Times.once());
         });
 
-        test.each([undefined, { scanNotifyUrl: undefined }])('Notification = %o', async notification => {
-            const fullResult = cloneDeep(onDemandPageScanResult);
-            fullResult.notification = notification;
-            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
-            notificationQueueMessageSenderMock
-                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.never());
+        test.each([undefined, { scanNotifyUrl: undefined }])(
+            'Do not send notification when url not present, notification = %o',
+            async notification => {
+                const fullResult = cloneDeep(onDemandPageScanResult);
+                fullResult.notification = notification;
+                setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
+                setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+                notificationQueueMessageSenderMock
+                    .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
+                    .returns(async () => Promise.resolve())
+                    .verifiable(Times.never());
 
-            await runner.run();
-        });
+                await runner.run();
+            },
+        );
 
         it('Notification URL is not null', async () => {
             const fullResult = cloneDeep(onDemandPageScanResult);

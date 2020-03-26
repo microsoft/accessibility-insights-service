@@ -60,7 +60,7 @@ describe(NotificationQueueMessageSender, () => {
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
-            maxSendNotificationRetryCount: 2,
+            maxSendNotificationRetryCount: 4,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
@@ -124,10 +124,12 @@ describe(NotificationQueueMessageSender, () => {
         );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
-        systemMock
-            .setup(sm => sm.wait(1000))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
+        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
+            systemMock
+                .setup(sm => sm.wait(tryNumber * 1000))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+        }
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
@@ -149,10 +151,12 @@ describe(NotificationQueueMessageSender, () => {
         );
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
-        systemMock
-            .setup(sm => sm.wait(1000))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
+        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
+            systemMock
+                .setup(sm => sm.wait(tryNumber * 1000))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+        }
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
