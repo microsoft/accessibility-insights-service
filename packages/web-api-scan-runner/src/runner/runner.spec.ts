@@ -275,6 +275,27 @@ describe(Runner, () => {
         await runner.run();
     });
 
+    it('return redirected url', async () => {
+        setupWebDriverCalls();
+
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+
+        const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
+        clonedPassedAxeScanResults.scannedUrl = 'redirect url';
+        scannerTaskMock
+            .setup(async s => s.scan(scanMetadata.url))
+            .returns(async () => Promise.resolve(clonedPassedAxeScanResults))
+            .verifiable();
+
+        setupGenerateReportsCall(clonedPassedAxeScanResults);
+        setupSaveAllReportsCall();
+        const scanResultWithNoViolations = getScanResultWithNoViolations();
+        scanResultWithNoViolations.scannedUrl = clonedPassedAxeScanResults.scannedUrl;
+        setupUpdateScanRunResultCall(scanResultWithNoViolations);
+
+        await runner.run();
+    });
+
     it('sets scan status to fail if violation length > 0', async () => {
         setupWebDriverCalls();
 

@@ -195,6 +195,18 @@ describe(Queue, () => {
         });
     });
 
+    describe('getMessageCount', async () => {
+        it('getCountQueue', async () => {
+            const count = 30;
+            setupQueueGetCount(30);
+
+            const actualCount = await testSubject.getMessageCount(queue);
+            expect(actualCount).toBe(count);
+
+            verifyAll();
+        });
+    });
+
     describe('createMessage', () => {
         it('creates message & queue', async () => {
             const messageText = 'some message';
@@ -233,6 +245,12 @@ describe(Queue, () => {
             verifyAll();
         });
     });
+
+    function setupQueueGetCount(count: number): void {
+        const getProperties = { approximateMessagesCount: count } as Models.QueueGetPropertiesResponse;
+        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
+        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
+    }
 
     function setupQueueCreationCallWhenQueueExists(): void {
         queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
