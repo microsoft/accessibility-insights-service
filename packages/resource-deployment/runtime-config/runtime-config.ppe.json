@@ -16,8 +16,7 @@
         "minLastReferenceSeenInDays": 3,
         "pageRescanIntervalInDays": 3,
         "failedPageRescanIntervalInHours": 3,
-        "maxScanRetryCount": 3,
-        "maxSendNotificationRetryCount": 3
+        "maxScanRetryCount": 3
     },
     "restApiConfig": {
         "scanRequestProcessingDelayInSeconds": 300

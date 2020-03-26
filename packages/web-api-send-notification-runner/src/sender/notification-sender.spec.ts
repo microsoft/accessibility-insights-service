@@ -62,7 +62,7 @@ describe(NotificationSender, () => {
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
-            maxSendNotificationRetryCount: 3,
+            maxSendNotificationRetryCount: 5,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
@@ -128,14 +128,14 @@ describe(NotificationSender, () => {
         systemMock
             .setup(sm => sm.wait(5000))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
 
         webAPIMock
             .setup(wam => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         await sender.sendNotification();
     });
@@ -155,12 +155,12 @@ describe(NotificationSender, () => {
         systemMock
             .setup(sm => sm.wait(5000))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         webAPIMock
             .setup(wam => wam.sendNotification(notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         await sender.sendNotification();
     });

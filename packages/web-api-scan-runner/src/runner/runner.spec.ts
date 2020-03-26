@@ -155,7 +155,7 @@ describe(Runner, () => {
 
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
-        notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender);
+        notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender, MockBehavior.Strict);
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -410,6 +410,19 @@ describe(Runner, () => {
                 .verifiable(Times.once());
         });
 
+        test.each([undefined, { scanNotifyUrl: undefined }])('Notification = %o', async notification => {
+            const fullResult = cloneDeep(onDemandPageScanResult);
+            fullResult.notification = notification;
+            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+            notificationQueueMessageSenderMock
+                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.never());
+
+            await runner.run();
+        });
+
         it('Notification URL is not null', async () => {
             const fullResult = cloneDeep(onDemandPageScanResult);
             fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
@@ -419,32 +432,6 @@ describe(Runner, () => {
                 .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
-
-            await runner.run();
-        });
-
-        it('Notification URL is null', async () => {
-            const fullResult = cloneDeep(onDemandPageScanResult);
-            fullResult.notification = { scanNotifyUrl: undefined };
-            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
-            notificationQueueMessageSenderMock
-                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.never());
-
-            await runner.run();
-        });
-
-        it('Notification Object is null', async () => {
-            const fullResult = cloneDeep(onDemandPageScanResult);
-            fullResult.notification = undefined;
-            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
-            notificationQueueMessageSenderMock
-                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.never());
 
             await runner.run();
         });

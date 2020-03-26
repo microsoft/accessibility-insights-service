@@ -78,7 +78,8 @@ export class NotificationQueueMessageSender {
             }
             numberOfTries = numberOfTries + 1;
             if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-                await this.system.wait(5000);
+                // tslint:disable-next-line:binary-expression-operand-order
+                await this.system.wait(1000 * (numberOfTries - 1));
             }
         }
 

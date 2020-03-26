@@ -156,7 +156,7 @@ Object {
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
-      "default": 3,
+      "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },
@@ -347,7 +347,7 @@ Object {
       "format": "int",
     },
     "maxSendNotificationRetryCount": Object {
-      "default": 3,
+      "default": 5,
       "doc": "Maximum number of retries allowed for a scan notification sending",
       "format": "int",
     },

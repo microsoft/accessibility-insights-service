@@ -193,7 +193,7 @@ export class ServiceConfiguration {
                 },
                 maxSendNotificationRetryCount: {
                     format: 'int',
-                    default: 3,
+                    default: 5,
                     doc: 'Maximum number of retries allowed for a scan notification sending',
                 },
                 accessibilityRuleExclusionList: {

@@ -60,7 +60,7 @@ describe(NotificationQueueMessageSender, () => {
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
-            maxSendNotificationRetryCount: 3,
+            maxSendNotificationRetryCount: 2,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
             accessibilityRuleExclusionList: [],
@@ -125,14 +125,14 @@ describe(NotificationQueueMessageSender, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
-            .setup(sm => sm.wait(5000))
+            .setup(sm => sm.wait(1000))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .returns(async () => Promise.resolve(false))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
@@ -150,14 +150,14 @@ describe(NotificationQueueMessageSender, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
-            .setup(sm => sm.wait(5000))
+            .setup(sm => sm.wait(1000))
             .returns(async () => Promise.resolve())
-            .verifiable(Times.exactly(2));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
-            .verifiable(Times.exactly(3));
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
