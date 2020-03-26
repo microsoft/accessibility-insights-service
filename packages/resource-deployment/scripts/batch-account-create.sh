@@ -33,7 +33,7 @@ function deployBatch() {
     # Deploy Azure Batch account using resource manager template
     echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
     resources=$(
-        az group deployment create \
+        az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
             --query "properties.outputResources[].id" \
