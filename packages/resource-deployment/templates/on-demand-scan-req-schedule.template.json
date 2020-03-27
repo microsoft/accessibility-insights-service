@@ -4,7 +4,7 @@
         "recurrenceInterval": "PT2M"
     },
     "jobSpecification": {
-        "priority": 0,
+        "priority": 1000,
         "constraints": {
             "maxWallClockTime": "PT1H",
             "maxTaskRetryCount": 0
