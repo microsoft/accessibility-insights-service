@@ -163,14 +163,17 @@ describe(ScanResponseConverter, () => {
         expect(response).toEqual(responseExpected);
     });
 
-    it('notification response object does not have error field if there is error in the db document', () => {
-        // verify that the response should have error object when db document has error
+    it('adds error to notification if db has error info', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
         const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
 
         expect(scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult)).toEqual(responseExpected);
+    });
 
-        // the response should not have error object when db document does not have error
+    it('does not add error to notification is db doc has no error', () => {
+        const pageScanDbResult = getPageScanResult('completed', true);
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+
         // tslint:disable-next-line: no-null-keyword
         pageScanDbResult.notification.error = null;
         const expectedNotificationResponse = responseExpected.notification;
