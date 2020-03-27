@@ -25,10 +25,6 @@ export class ScanErrorConverter {
     }
 
     public getScanNotificationErrorCode(scanNotificationError: string | NotificationError): ScanNotificationErrorCode {
-        if (isNil(scanNotificationError)) {
-            return undefined;
-        }
-
         if (isString(scanNotificationError)) {
             return ScanNotificationErrorCodes.InternalError;
         }
