@@ -2,8 +2,13 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { notificationErrorNameToErrorMap, ScanReport, ScanResultResponse } from 'service-library';
-import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification } from 'storage-documents';
+import {
+    notificationErrorNameToErrorMap,
+    ScanCompletedNotification as NotificationResponse,
+    ScanReport,
+    ScanResultResponse,
+} from 'service-library';
+import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification as NotificationDb } from 'storage-documents';
 
 import { ScanErrorConverter } from './scan-error-converter';
 
@@ -84,20 +89,20 @@ export class ScanResponseConverter {
         });
     }
 
-    private getRunCompleteNotificationResponse(
-        notification: ScanCompletedNotification,
-    ): { [notification: string]: ScanCompletedNotification } | {} {
+    private getRunCompleteNotificationResponse(notification: NotificationDb): { [notification: string]: NotificationResponse } | {} {
         if (isNil(notification)) {
             return {};
         }
-
-        return {
-            notification: {
-                scanNotifyUrl: notification.scanNotifyUrl,
-                state: notification.state,
-                error: this.scanErrorConverter.getScanNotificationErrorCode(notification.error),
-                responseCode: notification.responseCode,
-            },
+        const notificationResponse: NotificationResponse = {
+            scanNotifyUrl: notification.scanNotifyUrl,
+            state: notification.state,
+            responseCode: notification.responseCode,
         };
+
+        if (!isNil(notification.error)) {
+            notificationResponse.error = this.scanErrorConverter.getScanNotificationErrorCode(notification.error);
+        }
+
+        return { notification: notificationResponse };
     }
 }

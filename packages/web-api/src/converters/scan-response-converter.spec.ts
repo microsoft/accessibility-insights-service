@@ -30,7 +30,7 @@ let scanResponseConverter: ScanResponseConverter;
 let scanErrorConverterMock: IMock<ScanErrorConverter>;
 const pageTitle = 'sample page title';
 const pageResponseCode = 101;
-let notification: Notification;
+let notificationDb: Notification;
 let notificationResponse: ScanCompletedNotification;
 
 beforeEach(() => {
@@ -52,7 +52,7 @@ beforeEach(() => {
         error: ScanNotificationErrorCodes.InternalError,
         responseCode: 200,
     };
-    notification = {
+    notificationDb = {
         scanNotifyUrl: 'reply-url',
         state: 'queued',
         error: {
@@ -88,7 +88,7 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): On
             pageResponseCode: pageResponseCode,
         },
         batchRequestId: 'batch-id',
-        ...(isNotificationEnabled ? { notification } : {}),
+        ...(isNotificationEnabled ? { notification: notificationDb } : {}),
     };
 }
 
@@ -161,6 +161,21 @@ describe(ScanResponseConverter, () => {
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect(response).toEqual(responseExpected);
+    });
+
+    it('notification response object does not have error field if there is error in the db document', () => {
+        // verify that the response should have error object when db document has error
+        const pageScanDbResult = getPageScanResult('completed', true);
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+
+        expect(scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult)).toEqual(responseExpected);
+
+        // the response should not have error object when db document does not have error
+        // tslint:disable-next-line: no-null-keyword
+        pageScanDbResult.notification.error = null;
+        const expectedNotificationResponse = responseExpected.notification;
+        delete expectedNotificationResponse.error;
+        expect(scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult)).toEqual(responseExpected);
     });
 
     it('create full canonical REST Get Report URL', () => {
