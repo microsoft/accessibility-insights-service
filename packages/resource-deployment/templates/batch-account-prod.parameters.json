@@ -7,6 +7,12 @@
         },
         "onDemandUrlScanPoolNodes": {
             "value": "6"
+        },
+        "onDemandScanRequestPoolVmSize": {
+            "value": "standard_d11_v2"
+        },
+        "onDemandScanRequestPoolMaxTasksPerNode": {
+            "value": "4"
         }
     }
 }

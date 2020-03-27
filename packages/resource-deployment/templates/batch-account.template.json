@@ -50,6 +50,20 @@
             "metadata": {
                 "description": "Number of dedicated nodes for on-demand-url-scan-pool"
             }
+        },
+        "onDemandScanRequestPoolVmSize": {
+            "defaultValue": "standard_d1_v2",
+            "type": "string",
+            "metadata": {
+                "description": "vmSize for on-demand-scan-request-pool"
+            }
+        },
+        "onDemandScanRequestPoolMaxTasksPerNode": {
+            "defaultValue": "2",
+            "type": "string",
+            "metadata": {
+                "description": "maxTasksPerNode for on-demand-scan-request-pool"
+            }
         }
     },
     "variables": {
@@ -136,9 +150,9 @@
             "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
-                "vmSize": "standard_d1_v2",
+                "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
-                "maxTasksPerNode": 1,
+                "maxTasksPerNode": "[parameters('onDemandScanRequestPoolMaxTasksPerNode')]",
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"
                 },
