@@ -36,7 +36,7 @@ az extension add -n application-insights
 
 echo "Creating Application Insights resource using ARM template"
 export resourceName
-resources=$(az group deployment create \
+resources=$(az deployment group create \
     --subscription "$subscription" \
     --resource-group "$resourceGroupName" \
     --template-file "${0%/*}/../templates/app-insights.template.json" \

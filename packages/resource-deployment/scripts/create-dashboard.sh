@@ -33,7 +33,7 @@ fi
 # Deploy Azure dashboard using resource manager template
 echo "Deploying dashboard in resource group $resourceGroupName with template $dashboardTemplateFile"
 resources=$(
-    az group deployment create \
+    az deployment group create \
         --resource-group "$resourceGroupName" \
         --template-file "$dashboardTemplateFile" \
         --query "properties.outputResources[].id" \

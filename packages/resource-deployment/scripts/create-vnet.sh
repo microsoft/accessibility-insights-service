@@ -34,7 +34,7 @@ subnetAddressPrefix=${subnetAddressPrefix:-"10.2.0.0/24"}
 
 echo "[create-vnet] Starting Virtual Network creation"
 
-vnetResource=$(az group deployment create \
+vnetResource=$(az deployment group create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
     --parameters addressPrefix="$addressPrefix" subnetAddressPrefix="$subnetAddressPrefix" \

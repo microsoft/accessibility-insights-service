@@ -129,7 +129,7 @@ deployFunctionApp() {
     local extraParameters=$4
 
     echo "Deploying Azure Function App $functionAppName using ARM template..."
-    resources=$(az group deployment create \
+    resources=$(az deployment group create \
         --resource-group "$resourceGroupName" \
         --template-file "$templateFilePath" \
         --parameters namePrefix="$functionAppNamePrefix" releaseVersion="$releaseVersion" $extraParameters \

@@ -9,14 +9,14 @@ set -eo pipefail
 deployResource() {
     local templateName=$1
     echo "Deploying with resource parameters: Resource = $resourceGroupName, Template = $templateName, API Instance = $apiManagementName"
-    az group deployment create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters apimServiceName="$apiManagementName" 1>/dev/null
+    az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters apimServiceName="$apiManagementName" 1>/dev/null
     echo "  Completed"
 }
 
 deployResourceWithFunctionName() {
     local templateName=$1
     echo "Deploying with resource parameters: Resource = $resourceGroupName, Template = $templateName, API Instance = $apiManagementName"
-    az group deployment create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
+    az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
     echo "  Completed"
 }
 

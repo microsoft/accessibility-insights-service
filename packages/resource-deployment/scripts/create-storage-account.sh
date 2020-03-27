@@ -29,7 +29,7 @@ templateFile="${0%/*}/../templates/blob-storage.template.json"
 parameters="${0%/*}/../templates/blob-storage.parameters.json"
 
 echo "Creating storage account under resource group '$resourceGroupName' using ARM template $templateFile"
-resources=$(az group deployment create --resource-group "$resourceGroupName" --template-file "$templateFile" --parameters "$parameters" --query "properties.outputResources[].id" -o tsv)
+resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "$templateFile" --parameters "$parameters" --query "properties.outputResources[].id" -o tsv)
 
 export resourceName
 . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.Storage/storageAccounts" -r "$resources"

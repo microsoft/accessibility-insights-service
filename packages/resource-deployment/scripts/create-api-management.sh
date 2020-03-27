@@ -47,7 +47,7 @@ fi
 # Start deployment
 echo "[create-api-management] Deploying API management instance. This might take up to 45 mins"
 
-resources=$(az group deployment create \
+resources=$(az deployment group create \
     --resource-group "$resourceGroupName" \
     --template-file "$templateFilePath" \
     --parameters adminEmail="$publisherEmail" orgName="$orgName" tier="$tier" \
