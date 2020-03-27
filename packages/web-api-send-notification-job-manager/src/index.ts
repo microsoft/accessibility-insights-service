@@ -2,13 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-(async () => {
-    console.log('not implemented');
-})().catch(error => {
-    console.log('Exception thrown in send notification job manager: ', error);
-    process.exit(1);
-});
-
 import { WhyNodeRunningLogger } from 'common';
 
 import { SendNotificationJobManagerEntryPoint } from './send-notification-job-manager-entry-point';
