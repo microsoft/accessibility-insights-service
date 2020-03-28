@@ -96,7 +96,7 @@ describe(NotificationQueueMessageSender, () => {
     });
 
     it('Enqueue Notification Succeeded', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null, 200);
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
@@ -113,15 +113,10 @@ describe(NotificationQueueMessageSender, () => {
     });
 
     it('Send Notification Failed', async () => {
-        const notification = generateNotification(
-            notificationSenderMetadata.scanNotifyUrl,
-            'queueFailed',
-            {
-                errorType: 'InternalError',
-                message: 'Failed to enqueue the notification!',
-            },
-            500,
-        );
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
+            errorType: 'InternalError',
+            message: 'Failed to enqueue the notification!',
+        });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
@@ -140,15 +135,10 @@ describe(NotificationQueueMessageSender, () => {
     });
 
     it('Send Notification Failed Error', async () => {
-        const notification = generateNotification(
-            notificationSenderMetadata.scanNotifyUrl,
-            'queueFailed',
-            {
-                errorType: 'InternalError',
-                message: 'Unexpected Error',
-            },
-            500,
-        );
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
+            errorType: 'InternalError',
+            message: 'Unexpected Error',
+        });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
@@ -189,17 +179,11 @@ describe(NotificationQueueMessageSender, () => {
             .verifiable(Times.once());
     }
 
-    function generateNotification(
-        notificationUrl: string,
-        state: NotificationState,
-        error: NotificationError,
-        statusCode: number,
-    ): ScanCompletedNotification {
+    function generateNotification(notificationUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
         return {
             scanNotifyUrl: notificationUrl,
             state: state,
             error: error,
-            responseCode: statusCode,
         };
     }
 });
