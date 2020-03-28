@@ -46,7 +46,6 @@ export class NotificationQueueMessageSender {
         let numberOfTries = 1;
         let notificationState: NotificationState = 'queueFailed';
         let error: NotificationError = null;
-        let statusCode = 500;
         const scanConfig = await this.getScanConfig();
 
         this.logger.logInfo(`Retry count: ${scanConfig.maxSendNotificationRetryCount}`);
@@ -64,7 +63,6 @@ export class NotificationQueueMessageSender {
                     );
                     notificationState = 'queued';
                     error = null;
-                    statusCode = 200;
                     break;
                 } else {
                     this.logger.logInfo(
@@ -85,7 +83,7 @@ export class NotificationQueueMessageSender {
 
         return {
             id: notificationSenderConfigData.scanId,
-            notification: this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error, statusCode),
+            notification: this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error),
         };
     }
 
@@ -93,17 +91,11 @@ export class NotificationQueueMessageSender {
         return this.serviceConfig.getConfigValue('scanConfig');
     }
 
-    private generateNotification(
-        scanNotifyUrl: string,
-        state: NotificationState,
-        error: NotificationError,
-        statusCode: number,
-    ): ScanCompletedNotification {
+    private generateNotification(scanNotifyUrl: string, state: NotificationState, error: NotificationError): ScanCompletedNotification {
         return {
             scanNotifyUrl: scanNotifyUrl,
             state: state,
             error: error,
-            responseCode: statusCode,
         };
     }
 }
