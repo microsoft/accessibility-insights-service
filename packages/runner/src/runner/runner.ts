@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { Browser } from 'puppeteer';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { CrawlerTask } from '../tasks/crawler-task';
@@ -23,7 +23,7 @@ export class Runner {
         @inject(StorageTask) private readonly storageTask: StorageTask,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
         @inject(PageStateUpdaterTask) private readonly pageStateUpdaterTask: PageStateUpdaterTask,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(): Promise<void> {

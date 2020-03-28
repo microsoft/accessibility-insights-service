@@ -3,7 +3,7 @@
 import { ApplicationInsightsQueryResponse, Column, ResponseWithBodyType } from 'azure-services';
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
@@ -18,7 +18,7 @@ export class HealthCheckController extends ApiController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
         @inject(webApiTypeNames.ApplicationInsightsClientProvider)
         protected readonly appInsightsClientProvider: ApplicationInsightsClientProvider,
     ) {

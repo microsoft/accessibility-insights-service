@@ -3,7 +3,7 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { Logger, ScanUrlsAddedMeasurements } from 'logger';
+import { ContextAwareLogger, Logger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -20,7 +20,6 @@ import {
     ScanCompletedNotification,
     ScanRunBatchRequest,
 } from 'storage-documents';
-import { isNullOrUndefined } from 'util';
 
 interface ScanRequestTelemetryProperties {
     scanUrl: string;
@@ -44,7 +43,7 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
     ) {
         super(logger);
     }

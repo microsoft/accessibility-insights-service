@@ -6,7 +6,7 @@ import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { GlobalLogger, Logger } from 'logger';
 import * as moment from 'moment';
 import { VError } from 'verror';
 import { BatchConfig } from './batch-config';
@@ -21,7 +21,7 @@ export class Batch {
         @inject(BatchConfig) private readonly config: BatchConfig,
         @inject(RunnerTaskConfig) private readonly runnerTaskConfig: RunnerTaskConfig,
         @inject(AzureServicesIocTypes.BatchServiceClientProvider) private readonly batchClientProvider: BatchServiceClientProvider,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async getPoolMetricsInfo(): Promise<PoolMetricsInfo> {

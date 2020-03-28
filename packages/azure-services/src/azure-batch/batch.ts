@@ -7,7 +7,7 @@ import { System } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { VError } from 'verror';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';
@@ -28,7 +28,7 @@ export class Batch {
         private readonly batchTaskConfigGenerator: BatchTaskConfigGenerator,
         @inject(StorageContainerSASUrlProvider) private readonly containerSASUrlProvider: StorageContainerSASUrlProvider,
         @inject(BatchConfig) private readonly config: BatchConfig,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         // Azure Batch supports the maximum 100 tasks to be added in a single addTaskCollection() API call
         private readonly maxTasks = 100,
     ) {}

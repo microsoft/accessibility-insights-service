@@ -3,7 +3,7 @@
 import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { Logger, ScanTaskCompletedMeasurements } from 'logger';
+import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
@@ -33,7 +33,7 @@ export class Runner {
         @inject(ScannerTask) private readonly scannerTask: ScannerTask,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,

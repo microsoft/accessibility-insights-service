@@ -10,7 +10,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
-import { registerGlobalLoggerToContainer } from 'logger';
+import { ContextAwareLogger, registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -84,6 +84,7 @@ describe(registerAzureServicesToContainer, () => {
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
         registerGlobalLoggerToContainer(container);
+        registerContextAwareLoggerToContainer(container);
     });
 
     it('verify singleton resolution', async () => {
@@ -343,6 +344,7 @@ function verifyCosmosContainerClient(container: Container, cosmosContainerType: 
     const cosmosContainerClient = container.get<CosmosContainerClient>(cosmosContainerType);
     expect((cosmosContainerClient as any).dbName).toBe(dbName);
     expect((cosmosContainerClient as any).collectionName).toBe(collectionName);
+    expect((cosmosContainerClient as any).logger).toBe(container.get(ContextAwareLogger));
 }
 
 function runCosmosClientTest(container: Container, secretProviderMock: IMock<SecretProvider>): void {

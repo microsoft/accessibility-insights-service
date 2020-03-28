@@ -3,14 +3,14 @@
 // tslint:disable: no-unsafe-any
 import { client, CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { ScanRequest, WebSite } from '../request-type/website';
 
 @injectable()
 export class SeedSource {
     constructor(
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async getWebSites(): Promise<WebSite[]> {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger, loggerTypes } from 'logger';
+import { GlobalLogger, loggerTypes } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { NotificationError, NotificationState, OnDemandPageScanResult, ScanCompletedNotification } from 'storage-documents';
 import { NotificationSenderConfig } from '../notification-sender-config';
@@ -17,7 +17,7 @@ export class NotificationSender {
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(NotificationSenderWebAPIClient) private readonly notificationSenderWebAPIClient: NotificationSenderWebAPIClient,
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,

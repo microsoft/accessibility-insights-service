@@ -8,7 +8,7 @@ import { BlobServiceClient, StorageSharedKeyCredential as SharedKeyCredentialBlo
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { Logger } from 'logger';
+import { Logger, ContextAwareLogger } from 'logger';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
@@ -136,7 +136,7 @@ function setupBlobServiceClientProvider(container: interfaces.Container): void {
 }
 
 function createCosmosContainerClient(container: interfaces.Container, dbName: string, collectionName: string): CosmosContainerClient {
-    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(Logger));
+    return new CosmosContainerClient(container.get(CosmosClientWrapper), dbName, collectionName, container.get(ContextAwareLogger));
 }
 
 function setupAuthenticationMethod(container: interfaces.Container): void {

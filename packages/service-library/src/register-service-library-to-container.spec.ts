@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Container } from 'inversify';
 
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { registerServiceLibraryToContainer } from './register-service-library-to-container';
 import { MockableLogger } from './test-utilities/mockable-logger';
@@ -20,7 +20,7 @@ describe(registerServiceLibraryToContainer, () => {
         container = new Container({ autoBindInjectable: true });
         loggerMock = Mock.ofType(MockableLogger);
 
-        container.bind(Logger).toConstantValue(loggerMock.object);
+        container.bind(GlobalLogger).toConstantValue(loggerMock.object);
     });
 
     it('should verify singleton resolution', () => {

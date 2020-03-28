@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { FunctionTimer } from '../contracts/function-timer';
 
@@ -16,7 +16,7 @@ export class HealthMonitorTimerController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
     ) {
         super(logger);

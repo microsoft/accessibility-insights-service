@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { CosmosContainerClient, cosmosContainerClientTypes, RetryOptions } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { PageScanResult, Website } from 'storage-documents';
 import { VError } from 'verror';
 import { WebsiteFactory } from '../factories/website-factory';
@@ -14,7 +14,7 @@ export class WebsiteStateUpdaterTask {
     constructor(
         @inject(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient) private readonly cosmosContainerClient: CosmosContainerClient,
         @inject(WebsiteFactory) private readonly websiteFactory: WebsiteFactory,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly retryOptions: RetryOptions = {
             timeoutMilliseconds: 15000,
             intervalMilliseconds: 500,

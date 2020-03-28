@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { PromiseUtils, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
@@ -11,7 +11,7 @@ import { Page } from './page';
 export class Scanner {
     constructor(
         @inject(Page) private readonly page: Page,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PromiseUtils)
         private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration)

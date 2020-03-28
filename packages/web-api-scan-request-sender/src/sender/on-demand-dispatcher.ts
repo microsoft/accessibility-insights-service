@@ -3,7 +3,7 @@
 import { client, CosmosOperationResponse } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger, Logger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
@@ -12,7 +12,7 @@ import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 export class OnDemandDispatcher {
     constructor(
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
         @inject(OnDemandScanRequestSender) private readonly sender: OnDemandScanRequestSender,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}

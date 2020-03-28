@@ -3,7 +3,7 @@
 import { Queue, StorageConfig } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger, loggerTypes } from 'logger';
+import { GlobalLogger, Logger, loggerTypes } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     NotificationError,
@@ -22,7 +22,7 @@ export class NotificationQueueMessageSender {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
         @inject(Queue) private readonly queue: Queue,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
     ) {}

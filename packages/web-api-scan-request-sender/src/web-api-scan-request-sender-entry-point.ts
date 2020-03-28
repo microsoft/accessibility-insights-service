@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, Logger } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { OnDemandDispatcher } from './sender/on-demand-dispatcher';
 
@@ -13,7 +13,7 @@ export class WebApiScanRequestSenderEntryPoint extends ProcessEntryPointBase {
 
     protected async runCustomAction(container: Container): Promise<void> {
         const dispatcher = container.get(OnDemandDispatcher);
-        const logger = container.get(Logger);
+        const logger = container.get(ContextAwareLogger);
         await dispatcher.dispatchOnDemandScanRequests();
         logger.logInfo(`[Sender] Scan requests sent successfully`);
     }

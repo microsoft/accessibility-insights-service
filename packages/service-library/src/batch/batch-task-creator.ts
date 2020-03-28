@@ -4,7 +4,7 @@
 import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
 
 @injectable()
@@ -18,7 +18,7 @@ export abstract class BatchTaskCreator {
         @inject(Queue) protected readonly queue: Queue,
         @inject(BatchConfig) protected readonly batchConfig: BatchConfig,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) protected readonly logger: Logger,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly system: typeof System = System,
     ) {}
 

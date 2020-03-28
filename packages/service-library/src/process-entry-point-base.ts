@@ -4,7 +4,7 @@ import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import { isNil } from 'lodash';
-import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, Logger, loggerTypes } from 'logger';
 
 // tslint:disable: no-any
 
@@ -13,7 +13,7 @@ export abstract class ProcessEntryPointBase {
 
     public async start(...args: any[]): Promise<void> {
         let loggerInitialized = false;
-        let logger: Logger;
+        let logger: GlobalLogger;
         let processExitCode = 0;
         const processObj = this.container.get<typeof process>(loggerTypes.Process);
         let taskConfig: TaskRuntimeConfig;
@@ -22,7 +22,7 @@ export abstract class ProcessEntryPointBase {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
             const serviceConfig: ServiceConfiguration = this.container.get(ServiceConfiguration);
             taskConfig = await serviceConfig.getConfigValue('taskConfig');
-            logger = this.container.get(Logger);
+            logger = this.container.get(GlobalLogger);
 
             await logger.setup(this.getTelemetryBaseProperties());
             loggerInitialized = true;

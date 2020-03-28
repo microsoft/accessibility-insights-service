@@ -112,6 +112,10 @@ export abstract class Logger {
             return;
         }
 
-        throw new Error('The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation.');
+        throw new Error(
+            `The logger instance is not initialized. Ensure the setup() method is invoked by derived class implementation. - ${
+                new Error().stack
+            }`,
+        );
     }
 }

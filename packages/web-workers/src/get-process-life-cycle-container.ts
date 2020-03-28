@@ -5,7 +5,7 @@ import { CredentialType, registerAzureServicesToContainer, SecretProvider } from
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
-import { Logger, loggerTypes, registerContextAwareLoggerToContainer } from 'logger';
+import { GlobalLogger, Logger, loggerTypes, registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
 import { A11yServiceClient, a11yServiceClientTypeNames, A11yServiceCredential } from 'web-api-client';
 
 let processLifeCycleContainer: inversify.Container;
@@ -14,7 +14,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
     if (isNil(processLifeCycleContainer)) {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(processLifeCycleContainer);
-        registerContextAwareLoggerToContainer(processLifeCycleContainer);
+        registerGlobalLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
 
         IoC.setupSingletonProvider<A11yServiceClient>(
@@ -25,7 +25,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
                 const restApiSpAppId = await secretProvider.getSecret('restApiSpAppId');
                 const restApiSpSecret = await secretProvider.getSecret('restApiSpSecret');
                 const authorityUrl = await secretProvider.getSecret('authorityUrl');
-                const logger = context.container.get(Logger);
+                const logger = context.container.get(GlobalLogger);
 
                 const a11yServiceCredential = new A11yServiceCredential(
                     restApiSpAppId,

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as inversify from 'inversify';
+import { GlobalLogger, Logger } from 'logger';
 import { Browser } from 'puppeteer';
 import { WebDriver } from 'service-library';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';

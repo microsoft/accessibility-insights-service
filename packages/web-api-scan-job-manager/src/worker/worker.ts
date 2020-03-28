@@ -4,7 +4,7 @@ import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapsh
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
-import { Logger } from 'logger';
+import { GlobalLogger, Logger } from 'logger';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 
@@ -30,7 +30,7 @@ export class Worker extends BatchTaskCreator {
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-        @inject(Logger) logger: Logger,
+        @inject(GlobalLogger) logger: GlobalLogger,
         system: typeof System = System,
     ) {
         super(batch, queue, batchConfig, serviceConfig, logger, system);
