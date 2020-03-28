@@ -32,12 +32,15 @@ export function registerContextAwareLoggerToContainer(container: Container): voi
         registerLoggerDependenciesToContainer(container);
     }
 
-    container.bind(Logger).toDynamicValue(context => {
-        const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
-        const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
+    container
+        .bind(Logger)
+        .toDynamicValue(context => {
+            const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
+            const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
 
-        return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
-    });
+            return new ContextAwareLogger([appInsightsLoggerClient, consoleLoggerClient], context.container.get(loggerTypes.Process));
+        })
+        .inSingletonScope();
 }
 
 function registerLoggerDependenciesToContainer(container: Container): void {

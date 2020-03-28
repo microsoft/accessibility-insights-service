@@ -76,15 +76,23 @@ describe(registerContextAwareLoggerToContainer, () => {
         verifyNonSingletonDependencyResolution(ContextAwareConsoleLoggerClient);
     });
 
-    it('verify context logger resolution', () => {
-        registerContextAwareLoggerToContainer(container);
+    describe('context logger', () => {
+        beforeEach(() => {
+            registerContextAwareLoggerToContainer(container);
+        });
 
-        const logger = container.get(Logger);
-        expect(logger instanceof ContextAwareLogger).toBeTruthy();
+        it('verify context logger resolution', () => {
+            const logger = container.get(Logger);
+            expect(logger instanceof ContextAwareLogger).toBeTruthy();
 
-        const telemetryClients = (logger as any).loggerClients as LoggerClient[];
-        expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
-        expect(telemetryClients.filter(c => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
+            const telemetryClients = (logger as any).loggerClients as LoggerClient[];
+            expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
+            expect(telemetryClients.filter(c => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
+        });
+
+        it('verify singleton resolution', () => {
+            verifySingletonDependencyResolution(Logger);
+        });
     });
 });
 
