@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
-import { IMock, Mock } from 'typemoq';
+import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSender } from './sender/notification-sender';
 import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
 
@@ -24,25 +24,31 @@ describe(WebApiNotificationSenderEntryPoint, () => {
     let testSubject: TestWebApiSendNotificationRunnerEntryPoint;
     let containerMock: IMock<Container>;
     let senderMock: IMock<NotificationSender>;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         senderMock = Mock.ofType(NotificationSender);
+        loggerMock = Mock.ofType(ContextAwareLogger);
 
         testSubject = new TestWebApiSendNotificationRunnerEntryPoint(containerMock.object);
 
         containerMock.setup(c => c.get(NotificationSender)).returns(() => senderMock.object);
+        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes sender.sendNotification', async () => {
+        loggerMock
+            .setup(async l => l.setup())
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
+
         senderMock
             .setup(async r => r.sendNotification())
             .returns(async () => Promise.resolve())
             .verifiable();
 
         await expect(testSubject.invokeRunCustomAction(containerMock.object)).resolves.toBeUndefined();
-
-        senderMock.verifyAll();
     });
 
     describe('getTelemetryBaseProperties', () => {
@@ -51,5 +57,11 @@ describe(WebApiNotificationSenderEntryPoint, () => {
                 source: 'webApiNotificationSender',
             } as BaseTelemetryProperties);
         });
+    });
+
+    afterEach(() => {
+        containerMock.verifyAll();
+        loggerMock.verifyAll();
+        senderMock.verifyAll();
     });
 });

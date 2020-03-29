@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
-import { Logger, loggerTypes, ContextAwareLogger } from 'logger';
+import { ContextAwareLogger, Logger, loggerTypes } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';

@@ -3,8 +3,9 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
-import { IMock, Mock } from 'typemoq';
+import { BaseTelemetryProperties, ContextAwareLogger, GlobalLogger, Logger } from 'logger';
+import { IMock, Mock, Times } from 'typemoq';
+import { OnDemandDispatcher } from './sender/on-demand-dispatcher';
 import { WebApiScanRequestSenderEntryPoint } from './web-api-scan-request-sender-entry-point';
 
 // tslint:disable: no-object-literal-type-assertion
@@ -13,14 +14,26 @@ class TestableWebApiScanRequestSenderEntryPoint extends WebApiScanRequestSenderE
     public invokeGetTelemetryBaseProperties(): BaseTelemetryProperties {
         return this.getTelemetryBaseProperties();
     }
+
+    // tslint:disable-next-line: no-unnecessary-override
+    public async runCustomAction(container: Container): Promise<void> {
+        return super.runCustomAction(container);
+    }
 }
 
 describe(WebApiScanRequestSenderEntryPoint, () => {
     let testSubject: TestableWebApiScanRequestSenderEntryPoint;
     let containerMock: IMock<Container>;
+    let loggerMock: IMock<Logger>;
+    let onDispatcherMock: IMock<OnDemandDispatcher>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
+        loggerMock = Mock.ofType(ContextAwareLogger);
+        onDispatcherMock = Mock.ofType(OnDemandDispatcher);
+
+        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup(c => c.get(OnDemandDispatcher)).returns(() => onDispatcherMock.object);
 
         testSubject = new TestableWebApiScanRequestSenderEntryPoint(containerMock.object);
     });
@@ -31,5 +44,27 @@ describe(WebApiScanRequestSenderEntryPoint, () => {
                 source: 'webApiScanRequestSender',
             } as BaseTelemetryProperties);
         });
+    });
+
+    describe('runCustomAction', () => {
+        it('dispatches scan requests', async () => {
+            loggerMock
+                .setup(async l => l.setup())
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
+            onDispatcherMock
+                .setup(async d => d.dispatchOnDemandScanRequests())
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
+            await testSubject.runCustomAction(containerMock.object);
+        });
+    });
+
+    afterEach(() => {
+        loggerMock.verifyAll();
+        containerMock.verifyAll();
+        onDispatcherMock.verifyAll();
     });
 });

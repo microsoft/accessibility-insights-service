@@ -12,9 +12,12 @@ export class WebApiScanRequestSenderEntryPoint extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
-        const dispatcher = container.get(OnDemandDispatcher);
         const logger = container.get(ContextAwareLogger);
+        await logger.setup();
+
+        const dispatcher = container.get(OnDemandDispatcher);
         await dispatcher.dispatchOnDemandScanRequests();
+
         logger.logInfo(`[Sender] Scan requests sent successfully`);
     }
 }

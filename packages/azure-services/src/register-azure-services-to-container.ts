@@ -8,7 +8,7 @@ import { BlobServiceClient, StorageSharedKeyCredential as SharedKeyCredentialBlo
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
-import { Logger, ContextAwareLogger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';

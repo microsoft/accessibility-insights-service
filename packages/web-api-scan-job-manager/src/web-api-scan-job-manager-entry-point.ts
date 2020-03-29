@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { Worker } from './worker/worker';
 
@@ -12,6 +12,9 @@ export class WebApiScanJobManagerEntryPoint extends ProcessEntryPointBase {
     }
 
     protected async runCustomAction(container: Container): Promise<void> {
+        const logger = container.get(ContextAwareLogger);
+        await logger.setup();
+
         const worker = container.get<Worker>(Worker);
         await worker.init();
         await worker.run();

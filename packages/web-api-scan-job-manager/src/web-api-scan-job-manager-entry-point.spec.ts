@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry-point';
 import { Worker } from './worker/worker';
@@ -24,10 +24,12 @@ describe(WebApiScanJobManagerEntryPoint, () => {
     let testSubject: TestableWebApiScanJobManagerEntryPoint;
     let containerMock: IMock<Container>;
     let workerMock: IMock<Worker>;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         workerMock = Mock.ofType(Worker);
+        loggerMock = Mock.ofType(ContextAwareLogger);
 
         testSubject = new TestableWebApiScanJobManagerEntryPoint(containerMock.object);
     });
@@ -43,9 +45,15 @@ describe(WebApiScanJobManagerEntryPoint, () => {
     describe('runCustomAction', () => {
         beforeEach(() => {
             containerMock.setup(c => c.get(Worker)).returns(() => workerMock.object);
+            containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
         });
 
         it('invokes worker', async () => {
+            loggerMock
+                .setup(async l => l.setup())
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
             workerMock
                 .setup(async w => w.init())
                 .returns(async () => Promise.resolve())
@@ -63,5 +71,6 @@ describe(WebApiScanJobManagerEntryPoint, () => {
     afterEach(() => {
         containerMock.verifyAll();
         workerMock.verifyAll();
+        loggerMock.verifyAll();
     });
 });
