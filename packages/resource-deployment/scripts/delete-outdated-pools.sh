@@ -49,7 +49,7 @@ checkIfPoolExists() {
     poolId=$1
 
     poolExists=$(az batch pool list --account-name "$batchAccountName" --query "[?id=='$poolId']" -o tsv)
-    if [ -z $poolExists ]; then
+    if [[ -z $poolExists ]]; then
         poolExists=false
     else
         poolExists=true
@@ -72,29 +72,31 @@ compareConfigFileToDeployedConfig() {
     fi
 }
 
-deleteOnDemandScanRequestPoolIfOutdated() {
+deletePoolIfOutdated() {
+    poolId=$1
+    poolPropertyNamePrefix=$2
+
     shouldDeletePool=false
-    onDemandScanRequestPoolId="on-demand-scan-request-pool"
 
-    checkIfPoolExists $onDemandScanRequestPoolId
+    checkIfPoolExists $poolId
     if [ "$poolExists" == "false" ]; then
-        echo "Pool $onDemandScanRequestPoolId not yet created."
+        echo "Pool $poolId not yet created."
         return
     fi
 
-    compareConfigFileToDeployedConfig $onDemandScanRequestPoolId "vmSize" "onDemandScanRequestPoolVmSize"
+    compareConfigFileToDeployedConfig $poolId "vmSize" "${poolPropertyNamePrefix}VmSize"
     if [ $shouldDeletePool == "true" ]; then
         deletePool $poolId
         return
     fi
 
-    compareConfigFileToDeployedConfig $onDemandScanRequestPoolId "maxTasksPerNode" "onDemandScanRequestPoolMaxTasksPerNode"
+    compareConfigFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
     if [ $shouldDeletePool == "true" ]; then
         deletePool $poolId
         return
     fi
 
-    echo "$onDemandScanRequestPoolId does not need to be recreated."
+    echo "$poolId does not need to be recreated."
 }
 
 # Read script arguments
@@ -116,4 +118,5 @@ if [[ -z $deleteTimeout ]]; then
     deleteTimeout=600
 fi
 
-deleteOnDemandScanRequestPoolIfOutdated
+deletePoolIfOutdated "on-demand-scan-request-pool" "onDemandScanRequestPool"
+deletePoolIfOutdated "on-demand-url-scan-pool" "onDemandUrlScanPool"
