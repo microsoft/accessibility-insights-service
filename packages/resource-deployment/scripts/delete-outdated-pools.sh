@@ -11,7 +11,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -b <batch account name> -p <parameter file path> [-t <delete timeout>]
+Usage: $0 -b <batch account name> -r <resource group name> -p <parameter file path> [-t <delete timeout>]
 "
     exit 1
 }
@@ -100,17 +100,18 @@ deletePoolIfOutdated() {
 }
 
 # Read script arguments
-while getopts ":b:p:t:" option; do
+while getopts ":b:p:t:r:" option; do
     case $option in
     b) batchAccountName=${OPTARG} ;;
     p) parameterFilePath=${OPTARG} ;;
     t) deleteTimeout=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $parameterFilePath ]]; then
+if [[ -z $batchAccountName ]] || [[ -z $parameterFilePath ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
@@ -122,6 +123,8 @@ batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
 if [[ -z "$batchAccountExists" ]]; then
     echo "batch account $batchAccountName has not yet been created."
 else
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+
     . "${0%/*}/process-utilities.sh"
 
     deletePoolsIfOutdatedProcesses=(
