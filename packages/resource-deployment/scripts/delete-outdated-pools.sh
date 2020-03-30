@@ -23,7 +23,7 @@ deletePool() {
     az batch pool delete --account-name $batchAccountName --pool-id $poolId --yes
     echo "done"
 
-    waitForDelete
+    waitForDelete $poolId
 }
 
 waitForDelete() {
@@ -54,6 +54,14 @@ checkIfPoolExists() {
     else
         poolExists=true
     fi
+}
+
+deletePoolWhenNodesAreIdle() {
+    poolId=$1
+
+    command="deletePool $poolId"
+    commandName="Delete pool $poolId"
+    . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
 
 compareConfigFileToDeployedConfig() {
@@ -92,7 +100,7 @@ deletePoolIfOutdated() {
 
     compareConfigFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
     if [ $shouldDeletePool == "true" ]; then
-        deletePool $poolId
+        deletePoolWhenNodesAreIdle $poolId
         return
     fi
 
