@@ -40,13 +40,10 @@ describe(registerGlobalLoggerToContainer, () => {
         verifySingletonDependencyResolution(loggerTypes.DotEnvConfig);
     });
 
-    it('verify logger resolution', () => {
+    it('verify GlobalLogger resolution', () => {
         registerGlobalLoggerToContainer(container);
 
-        const logger = container.get(Logger);
-
-        verifySingletonDependencyResolution(Logger);
-        expect(logger instanceof GlobalLogger).toBeTruthy();
+        const logger = container.get(GlobalLogger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter(c => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
@@ -60,27 +57,24 @@ describe(registerContextAwareLoggerToContainer, () => {
     });
 
     it('verify logger dependency resolution', () => {
+        registerGlobalLoggerToContainer(container);
         registerContextAwareLoggerToContainer(container);
 
-        expect(container.get(loggerTypes.AppInsights)).toBe(appInsights);
-        expect(container.get(loggerTypes.Process)).toBe(process);
-        expect(container.get(loggerTypes.Console)).toBe(console);
-        expect(container.get(loggerTypes.Argv)).toBe(argv);
-        expect(container.get(loggerTypes.DotEnvConfig)).toEqual(dotenv.config());
+        verifySingletonDependencyResolution(ContextAwareAppInsightsLoggerClient);
+        verifySingletonDependencyResolution(ContextAwareConsoleLoggerClient);
+    });
 
-        verifySingletonDependencyResolution(AppInsightsLoggerClient);
-        verifySingletonDependencyResolution(ConsoleLoggerClient);
-        verifySingletonDependencyResolution(loggerTypes.DotEnvConfig);
+    it('throws without global logger setup', () => {
+        registerContextAwareLoggerToContainer(container);
 
-        verifyNonSingletonDependencyResolution(ContextAwareAppInsightsLoggerClient);
-        verifyNonSingletonDependencyResolution(ContextAwareConsoleLoggerClient);
+        expect(() => container.get(ContextAwareLogger)).toThrowError();
     });
 
     it('verify context logger resolution', () => {
+        registerGlobalLoggerToContainer(container);
         registerContextAwareLoggerToContainer(container);
 
-        const logger = container.get(Logger);
-        expect(logger instanceof ContextAwareLogger).toBeTruthy();
+        const logger = container.get(ContextAwareLogger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
         expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);

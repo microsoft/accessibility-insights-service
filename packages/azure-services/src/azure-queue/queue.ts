@@ -4,7 +4,7 @@ import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/sto
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { Logger } from 'logger';
+import { ContextAwareLogger, Logger } from 'logger';
 import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
 
@@ -16,7 +16,7 @@ export class Queue {
         @inject(iocTypeNames.MessagesURLProvider) private readonly messagesURLProvider: MessagesURLProvider,
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
     ) {}
 
     /**

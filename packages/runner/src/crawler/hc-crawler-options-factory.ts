@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { Logger, loggerTypes } from 'logger';
+import { GlobalLogger, Logger, loggerTypes } from 'logger';
 import * as node_url from 'url';
 import { JSONLineExporter } from './hc-crawler';
 import {
@@ -16,7 +16,7 @@ import {
 @injectable()
 export class HCCrawlerOptionsFactory {
     constructor(
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
     ) {}
 

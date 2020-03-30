@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
 import { Readable } from 'stream';
 import { BodyParser } from './../utils/body-parser';
@@ -16,7 +16,7 @@ export class ScanReportController extends ApiController {
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
         private readonly bodyParser: BodyParser = new BodyParser(),
     ) {
         super(logger);

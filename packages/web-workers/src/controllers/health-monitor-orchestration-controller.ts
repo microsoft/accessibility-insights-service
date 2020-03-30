@@ -6,7 +6,7 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { e2eTestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
@@ -18,7 +18,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
         private readonly df = durableFunctions,
     ) {
         super(logger);

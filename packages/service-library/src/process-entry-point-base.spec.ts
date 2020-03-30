@@ -6,7 +6,7 @@ import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import * as _ from 'lodash';
-import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ProcessEntryPointBase } from './process-entry-point-base';
 import { MockableLogger } from './test-utilities/mockable-logger';
@@ -256,7 +256,7 @@ describe(ProcessEntryPointBase, () => {
 
     function setupContainerForLogger(): void {
         containerMock
-            .setup(c => c.get(Logger))
+            .setup(c => c.get(GlobalLogger))
             .returns(() => loggerMock.object)
             .verifiable();
     }

@@ -7,7 +7,7 @@ import { GuidGenerator, ServiceConfiguration, setupRuntimeConfigContainer, Syste
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ConsoleLoggerClient, GlobalLogger, Logger } from 'logger';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider, RunState, ScanResultResponse, ScanRunResultResponse } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 
@@ -42,7 +42,7 @@ describe('functional tests', () => {
             const container = getContainer();
             onDemandPageScanRunResultProvider = container.get(OnDemandPageScanRunResultProvider);
             guidGenerator = container.get(GuidGenerator);
-            logger = container.get(Logger);
+            logger = container.get(GlobalLogger);
             testRunner = container.get(TestRunner);
             a11yServiceClient = container.get(A11yServiceClient);
             await logger.setup({
@@ -130,7 +130,7 @@ describe('functional tests', () => {
     function getContainer(): Container {
         const container = new Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(container);
-        container.bind(Logger).toDynamicValue(_ => {
+        container.bind(GlobalLogger).toDynamicValue(_ => {
             return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
         });
         registerAzureServicesToContainer(container, CredentialType.AppService);
@@ -141,7 +141,7 @@ describe('functional tests', () => {
                 clientSecret,
                 clientId,
                 `https://login.microsoftonline.com/${tenantId}`,
-                container.get(Logger),
+                container.get(GlobalLogger),
             );
 
             return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);

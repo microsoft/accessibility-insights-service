@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Container } from 'inversify';
 
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { registerScannerToContainer } from './register-scanner-to-container';
@@ -21,7 +21,7 @@ describe(registerScannerToContainer, () => {
         container = new Container({ autoBindInjectable: true });
         loggerMock = Mock.ofType(MockableLogger);
 
-        container.bind(Logger).toConstantValue(loggerMock.object);
+        container.bind(GlobalLogger).toConstantValue(loggerMock.object);
     });
 
     it('should verify scanner resolution', () => {

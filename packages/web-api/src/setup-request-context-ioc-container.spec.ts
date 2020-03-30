@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import * as inversify from 'inversify';
+import { ContextAwareLogger, registerGlobalLoggerToContainer } from 'logger';
 import { setupRequestContextIocContainer } from './setup-request-context-ioc-container';
 
 @inversify.injectable()
@@ -23,5 +24,17 @@ describe(setupRequestContextIocContainer, () => {
         expect(testSubject.get(TestAutoInjectable)).toBeInstanceOf(TestAutoInjectable);
         // tslint:disable-next-line: no-backbone-get-set-outside-model
         expect(testSubject.get('parentBind1')).toBe('parentBind1Instance');
+    });
+
+    describe('Logger resolution', () => {
+        it('throws error if global logger not setup', () => {
+            expect(() => testSubject.get(ContextAwareLogger)).toThrowError();
+        });
+
+        it('resolves context aware logger', () => {
+            registerGlobalLoggerToContainer(parentContainer);
+
+            expect(testSubject.get(ContextAwareLogger)).toBeDefined();
+        });
     });
 });

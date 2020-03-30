@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { AzureServicesIocTypes, cosmosContainerClientTypes, CredentialType, SecretProvider } from 'azure-services';
+import { AzureServicesIocTypes, cosmosContainerClientTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
-import { Logger } from 'logger';
+import { ContextAwareLogger, GlobalLogger, Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
@@ -24,8 +24,15 @@ describe(getProcessLifeCycleContainer, () => {
 
     it('verifies dependencies resolution', () => {
         expect(testSubject.get(ServiceConfiguration)).toBeDefined();
-        expect(testSubject.get(Logger)).toBeDefined();
-        expect(testSubject.get(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient)).toBeDefined();
+        expect(testSubject.get(GlobalLogger)).toBeDefined();
+
+        expect(testSubject.get(CredentialsProvider)).toBeDefined();
+        expect(testSubject.get(SecretProvider)).toBeDefined();
+        expect(testSubject.get(CredentialsProvider)).toBeDefined();
+    });
+
+    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', testCase => {
+        expect(() => testSubject.get(testCase)).toThrowError();
     });
 
     it('verifies A11yServiceClient registration', async () => {

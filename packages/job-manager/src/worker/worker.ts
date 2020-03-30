@@ -3,7 +3,7 @@
 import { Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
 import { Batch } from '../batch/batch';
 import { JobTaskState } from '../batch/job-task';
@@ -23,7 +23,7 @@ export class Worker {
         @inject(PoolLoadGenerator) private readonly poolLoadGenerator: PoolLoadGenerator,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly system: typeof System = System,
     ) {}
 

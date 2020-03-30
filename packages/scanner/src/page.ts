@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
-import { Logger, LogLevel } from 'logger';
+import { GlobalLogger, LogLevel } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
@@ -17,7 +17,7 @@ export class Page {
     constructor(
         @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async create(): Promise<void> {

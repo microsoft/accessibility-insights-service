@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, Logger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger, Logger, loggerTypes } from 'logger';
 import { ProcessEntryPointBase } from '../process-entry-point-base';
 import { Newable } from './web-api-ioc-types';
 import { WebController } from './web-controller';
@@ -18,7 +18,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
         context: Context,
         ...args: unknown[]
     ): Promise<unknown> {
-        const logger = container.get(Logger);
+        const logger = container.get(ContextAwareLogger);
         await logger.setup();
 
         const controller = container.get(controllerType) as WebController;

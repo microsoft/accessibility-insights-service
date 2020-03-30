@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { Browser } from 'puppeteer';
 import { CrawlerScanResults } from '../crawler/crawler-scan-results';
 import { HCCrawler, HCCrawlerTyped } from '../crawler/hc-crawler';
@@ -9,16 +9,16 @@ import { HCCrawlerOptionsFactory } from '../crawler/hc-crawler-options-factory';
 import { CrawlerConnectOptions } from '../crawler/hc-crawler-types';
 import { LinkExplorer } from '../crawler/link-explorer';
 
-export type LinkExplorerFactory = (crawler: HCCrawlerTyped, connectOptions: CrawlerConnectOptions, logger: Logger) => LinkExplorer;
+export type LinkExplorerFactory = (crawler: HCCrawlerTyped, connectOptions: CrawlerConnectOptions, logger: GlobalLogger) => LinkExplorer;
 
-const linkExplorerFactoryImpl = (crawler: HCCrawlerTyped, connectOptions: CrawlerConnectOptions, logger: Logger): LinkExplorer =>
+const linkExplorerFactoryImpl = (crawler: HCCrawlerTyped, connectOptions: CrawlerConnectOptions, logger: GlobalLogger): LinkExplorer =>
     new LinkExplorer(crawler, connectOptions, logger);
 
 @injectable()
 export class CrawlerTask {
     constructor(
         @inject(HCCrawlerOptionsFactory) private readonly hcCrawlerOptionsFactory: HCCrawlerOptionsFactory,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly linkExplorerFactory: LinkExplorerFactory = linkExplorerFactoryImpl,
     ) {}
 

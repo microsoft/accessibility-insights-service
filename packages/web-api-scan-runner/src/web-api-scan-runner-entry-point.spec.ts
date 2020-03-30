@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties } from 'logger';
-import { IMock, Mock } from 'typemoq';
+import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
+import { IMock, Mock, Times } from 'typemoq';
 import { Runner } from './runner/runner';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
 
@@ -24,30 +24,42 @@ describe(WebApiScanRunnerEntryPoint, () => {
     let testSubject: TestWebApiScanRunnerEntryPoint;
     let containerMock: IMock<Container>;
     let runnerMock: IMock<Runner>;
+    let loggerMock: IMock<Logger>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         runnerMock = Mock.ofType(Runner);
+        loggerMock = Mock.ofType(ContextAwareLogger);
 
         testSubject = new TestWebApiScanRunnerEntryPoint(containerMock.object);
 
         containerMock.setup(c => c.get(Runner)).returns(() => runnerMock.object);
+        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes runner.run', async () => {
+        loggerMock
+            .setup(async l => l.setup())
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
+
         runnerMock
             .setup(async r => r.run())
             .returns(async () => Promise.resolve())
             .verifiable();
 
         await expect(testSubject.invokeRunCustomAction(containerMock.object)).resolves.toBeUndefined();
-
-        runnerMock.verifyAll();
     });
 
     describe('getTelemetryBaseProperties', () => {
         it('returns data with source property', () => {
             expect(testSubject.invokeGetTelemetryBaseProperties()).toEqual({ source: 'webApiScanRunner' } as BaseTelemetryProperties);
         });
+    });
+
+    afterEach(() => {
+        loggerMock.verifyAll();
+        runnerMock.verifyAll();
+        containerMock.verifyAll();
     });
 });

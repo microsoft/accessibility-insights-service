@@ -3,7 +3,7 @@
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { BatchScanRequestMeasurements, Logger } from 'logger';
+import { BatchScanRequestMeasurements, ContextAwareLogger } from 'logger';
 import {
     ApiController,
     HttpResponse,
@@ -35,7 +35,7 @@ export class ScanRequestController extends ApiController {
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(Logger) logger: Logger,
+        @inject(ContextAwareLogger) logger: ContextAwareLogger,
     ) {
         super(logger);
     }

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { inject, injectable, optional } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { TestContainerLogProperties, TestDefinition, TestEnvironment, TestRunLogProperties } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
 
@@ -11,9 +11,9 @@ import { getDefinedTestsMetadata } from '../test-decorator';
 
 @injectable()
 export class TestRunner {
-    public constructor(@optional() @inject(Logger) private logger: Logger) {}
+    public constructor(@optional() @inject(GlobalLogger) private logger: GlobalLogger) {}
 
-    public setLogger(logger: Logger): void {
+    public setLogger(logger: GlobalLogger): void {
         this.logger = logger;
     }
 

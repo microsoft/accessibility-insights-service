@@ -4,7 +4,7 @@ import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';
@@ -22,7 +22,7 @@ export class CosmosClientWrapper {
 
     constructor(
         @inject(iocTypeNames.CosmosClientProvider) private readonly cosmosClientProvider: CosmosClientProvider,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
     ) {}
 
     public async upsertItems<T extends CosmosDocument>(

@@ -3,7 +3,7 @@
 import { client, CosmosOperationResponse } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { PageDocumentProvider } from 'service-library';
 import { WebsitePage } from 'storage-documents';
 import { ScanRequestSender } from './scan-request-sender';
@@ -12,7 +12,7 @@ import { ScanRequestSender } from './scan-request-sender';
 export class Dispatcher {
     constructor(
         @inject(PageDocumentProvider) private readonly pageDocumentProvider: PageDocumentProvider,
-        @inject(Logger) private readonly logger: Logger,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ScanRequestSender) private readonly sender: ScanRequestSender,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
