@@ -111,7 +111,6 @@ describe(registerAzureServicesToContainer, () => {
     it('resolves CosmosContainerClient', () => {
         registerAzureServicesToContainer(container);
 
-        verifyCosmosContainerClient(container, cosmosContainerClientTypes.A11yIssuesCosmosContainerClient, 'scanner', 'a11yIssues');
         verifyCosmosContainerClient(
             container,
             cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient,

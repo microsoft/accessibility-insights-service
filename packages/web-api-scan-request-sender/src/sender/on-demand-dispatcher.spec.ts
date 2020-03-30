@@ -80,7 +80,7 @@ describe('Dispatcher', () => {
         async (queueSize: number) => {
             currentQueueSize = queueSize;
             setupVerifiableQueueSizeCall();
-            setupPageDocumentProviderNotCalled();
+            setupPageScanRequestProviderNotCalled();
             setupVerifiableScanRequestNotCalled();
             loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
 
@@ -243,7 +243,7 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
-    function setupPageDocumentProviderNotCalled(): void {
+    function setupPageScanRequestProviderNotCalled(): void {
         pageScanRequestProvider.setup(async p => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
     }
     function setupVerifiableQueueSizeCall(): void {

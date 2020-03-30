@@ -36,11 +36,12 @@ createCosmosCollection() {
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
         echo "[setup-cosmos-db] Collection '$collectionName' already exists"
         echo "[setup-cosmos-db] Updating throughput for collection '$collectionName'"
-        az cosmosdb sql container throughput update --account-name $cosmosAccountName \
-                                                    --database-name $dbName \
-                                                    --name "$collectionName" \
-                                                    --resource-group $resourceGroupName \
-                                                    --throughput $throughput
+        az cosmosdb sql container throughput update \
+            --account-name $cosmosAccountName \
+            --database-name $dbName \
+            --name "$collectionName" \
+            --resource-group $resourceGroupName \
+            --throughput $throughput
     else
         echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
         az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
@@ -66,11 +67,9 @@ createCosmosDatabase() {
 function setupCosmos() {
     createCosmosAccount
 
-    local scannerDbName="scanner"
     local onDemandScannerDbName="onDemandScanner"
 
     local cosmosSetupProcesses=(
-        "createCosmosDatabase \"$scannerDbName\""
         "createCosmosDatabase \"$onDemandScannerDbName\""
     )
     echo "Creating Cosmos databases in parallel"
@@ -80,7 +79,6 @@ function setupCosmos() {
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
             "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
@@ -88,7 +86,6 @@ function setupCosmos() {
         )
     else
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"400\""         # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\"" # 7 days
             "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\""      # 7 days

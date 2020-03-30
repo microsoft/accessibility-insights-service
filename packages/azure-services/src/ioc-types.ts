@@ -30,7 +30,6 @@ export type QueueServiceURLProvider = () => Promise<ServiceURL>;
 export type BatchServiceClientProvider = () => Promise<BatchServiceClient>;
 
 export const cosmosContainerClientTypes = {
-    A11yIssuesCosmosContainerClient: 'a11yIssuesCosmosContainerClient',
     OnDemandScanBatchRequestsCosmosContainerClient: 'onDemandScanBatchRequestsCosmosContainerClient',
     OnDemandScanRunsCosmosContainerClient: 'onDemandScanRunsCosmosContainerClient',
     OnDemandScanRequestsCosmosContainerClient: 'onDemandScanRequestsCosmosContainerClient',
