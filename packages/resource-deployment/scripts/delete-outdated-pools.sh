@@ -11,7 +11,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -b <batch account name> -r <resource group name> -p <parameter file path> [-t <delete timeout>]
+Usage: $0 -r <resource group name> -p <parameter file path> [-t <delete timeout>]
 "
     exit 1
 }
@@ -44,7 +44,7 @@ waitForDelete() {
         checkIfPoolExists
     done
 
-    if [ "$poolExists" == "true"]; then
+    if [ "$poolExists" == "true" ]; then
         echo "Pool did not finish deleting within $deleteTimeout seconds"
     fi
 }
@@ -78,7 +78,9 @@ compareConfigFileToDeployedConfig() {
     expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value")
     actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
-    if [ "$expectedValue" != "$actualValue" ]; then
+    if [ -z "$expectedValue" ] || [ "$expectedValue" == "null" ]; then
+        echo "No value for $templateFileParameterName found in deployment template."
+    elif [ "$expectedValue" != "$actualValue" ]; then
         echo "$batchConfigPropertyName for $poolId must be updated from $actualValue to $expectedValue."
         shouldDeletePool=true
     fi
@@ -112,9 +114,8 @@ deletePoolIfOutdated() {
 }
 
 # Read script arguments
-while getopts ":b:p:t:r:" option; do
+while getopts ":p:t:r:" option; do
     case $option in
-    b) batchAccountName=${OPTARG} ;;
     p) parameterFilePath=${OPTARG} ;;
     t) deleteTimeout=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
@@ -123,13 +124,15 @@ while getopts ":b:p:t:r:" option; do
 done
 
 # Print script usage help
-if [[ -z $batchAccountName ]] || [[ -z $parameterFilePath ]] || [[ -z $resourceGroupName ]]; then
+if [[ -z $parameterFilePath ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
 if [[ -z $deleteTimeout ]]; then
     deleteTimeout=1200
 fi
+
+. "${0%/*}/get-resource-names.sh"
 
 batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
 if [[ -z "$batchAccountExists" ]]; then
@@ -139,10 +142,12 @@ else
 
     . "${0%/*}/process-utilities.sh"
 
-    deletePoolsIfOutdatedProcesses=(
-        "deletePoolIfOutdated \"on-demand-scan-request-pool\" \"onDemandScanRequestPool\""
-        "deletePoolIfOutdated \"on-demand-url-scan-pool\" \"onDemandUrlScanPool\""
-    )
+    pools=$(az batch pool list --query "[].id" -o tsv)
+    deletePoolsIfOutdatedProcesses=()
+    for pool in $pools; do
+        camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+        deletePoolsIfOutdatedProcesses+=("deletePoolIfOutdated \"$pool\" \"$camelCasePoolId\"")
+    done
 
     runCommandsWithoutSecretsInParallel deletePoolsIfOutdatedProcesses
 fi
