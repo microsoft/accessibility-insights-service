@@ -21,9 +21,9 @@ deletePool() {
 
     echo "deleting pool $poolId"
     az batch pool delete --account-name $batchAccountName --pool-id $poolId --yes
-    echo "done"
 
     waitForDelete $poolId
+    echo "done"
 }
 
 waitForDelete() {
@@ -43,6 +43,10 @@ waitForDelete() {
         printf "."
         checkIfPoolExists
     done
+
+    if [ "$poolExists" == "true"]; then
+        echo "Pool did not finish deleting within $deleteTimeout seconds"
+    fi
 }
 
 checkIfPoolExists() {
@@ -124,7 +128,7 @@ if [[ -z $batchAccountName ]] || [[ -z $parameterFilePath ]] || [[ -z $resourceG
 fi
 
 if [[ -z $deleteTimeout ]]; then
-    deleteTimeout=600
+    deleteTimeout=1200
 fi
 
 batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
