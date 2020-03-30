@@ -118,5 +118,17 @@ if [[ -z $deleteTimeout ]]; then
     deleteTimeout=600
 fi
 
-deletePoolIfOutdated "on-demand-scan-request-pool" "onDemandScanRequestPool"
-deletePoolIfOutdated "on-demand-url-scan-pool" "onDemandUrlScanPool"
+batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
+if [[ -z "$batchAccountExists" ]]; then
+    echo "batch account $batchAccountName has not yet been created."
+else
+    . "${0%/*}/process-utilities.sh"
+
+    deletePoolsIfOutdatedProcesses=(
+        "deletePoolIfOutdated \"on-demand-scan-request-pool\" \"onDemandScanRequestPool\""
+        "deletePoolIfOutdated \"on-demand-url-scan-pool\" \"onDemandUrlScanPool\""
+    )
+
+    runCommandsWithoutSecretsInParallel deletePoolsIfOutdatedProcesses
+fi
+
