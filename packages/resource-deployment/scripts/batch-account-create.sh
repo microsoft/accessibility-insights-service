@@ -10,8 +10,6 @@ set -eo pipefail
 # and enable managed identity for Azure on Batch pools
 
 export resourceGroupName
-export batchAccountName
-export parameterFilePath
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
@@ -25,15 +23,13 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 
 . "${0%/*}/process-utilities.sh"
 
-function setParameterFilePath() {
-    if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
-        parameterFilePath="${0%/*}/../templates/batch-account-prod.parameters.json"
-    else
-        parameterFilePath="${0%/*}/../templates/batch-account-dev.parameters.json"
-    fi
-}
-
 function deployBatch() {
+    if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+        parameters="${0%/*}/../templates/batch-account-prod.parameters.json"
+    else
+        parameters="${0%/*}/../templates/batch-account-dev.parameters.json"
+    fi
+
     # Deploy Azure Batch account using resource manager template
     echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
     resources=$(
@@ -41,7 +37,7 @@ function deployBatch() {
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
             --query "properties.outputResources[].id" \
-            --parameters "$parameterFilePath" \
+            --parameters "$parameters" \
             -o tsv
     )
 
@@ -77,10 +73,6 @@ echo "Setting up batch account $batchAccountName"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"
-
-setParameterFilePath
-
-. "${0%/*}/delete-outdated-pools.sh"
 
 deployBatch
 
