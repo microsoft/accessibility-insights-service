@@ -46,7 +46,7 @@ adjustJob() {
 
 exitWithUsageInfo() {
     echo "
-        Usage: $0 -b <batch account name> -r <resource group name> -a <app insights name> -k <key vault url> -t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>
+        Usage: $0 -b <batch account name> -r <resource group name> [-k <key vault url>] [-t <path to template folder (optional), defaults to '$templatesFolder' folder relative to the current working directory>]
     "
     exit 1
 }
@@ -61,17 +61,21 @@ while getopts ":r:k:t:" option; do
     esac
 done
 
+# Print script usage help
+if [[ -z $resourceGroupName ]]; then
+    exitWithUsageInfo
+fi
+
 . "${0%/*}/get-resource-names.sh"
 
 if [[ -z $keyVaultUrl ]]; then
     echo "Resolving Key Vault URL for Key Vault $keyVault..."
     keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
+    if [[ -z "$keyVaultUrl" ]]; then
+        echo "could not find keyvault in resource group $resourceGroupName"
+        exitWithUsageInfo
+    fi
     echo "  Key Vault URL $keyVaultUrl"
-fi
-
-# Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $keyVaultUrl ]] || [[ -z $templatesFolder ]]; then
-    exitWithUsageInfo
 fi
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
