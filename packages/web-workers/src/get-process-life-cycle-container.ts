@@ -5,7 +5,7 @@ import { CredentialType, registerAzureServicesToContainer, SecretProvider } from
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
-import { GlobalLogger, Logger, loggerTypes, registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
+import { GlobalLogger, registerGlobalLoggerToContainer } from 'logger';
 import { A11yServiceClient, a11yServiceClientTypeNames, A11yServiceCredential } from 'web-api-client';
 
 let processLifeCycleContainer: inversify.Container;

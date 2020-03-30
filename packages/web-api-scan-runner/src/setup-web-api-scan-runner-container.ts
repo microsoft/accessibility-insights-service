@@ -3,7 +3,7 @@
 import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
-import { GlobalLogger, Logger, registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
+import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
 import { registerScannerToContainer } from 'scanner';
 import { registerServiceLibraryToContainer } from 'service-library';
 import { registerReportGeneratorToContainer } from './report-generator/register-report-generator-to-container';

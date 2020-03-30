@@ -4,7 +4,7 @@ import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ContextAwareLogger, Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 
 import { CosmosClientProvider, iocTypeNames } from '../ioc-types';
 import { client } from '../storage/client';

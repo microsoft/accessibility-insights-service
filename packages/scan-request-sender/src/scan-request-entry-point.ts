@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, GlobalLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger, GlobalLogger } from 'logger';
 import { ProcessEntryPointBase } from 'service-library';
 import { Dispatcher } from './sender/dispatcher';
 

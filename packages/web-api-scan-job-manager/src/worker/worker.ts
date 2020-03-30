@@ -4,7 +4,7 @@ import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapsh
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
-import { GlobalLogger, Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 

@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger, Logger } from 'logger';
-import { ResultLevel } from 'storage-documents';
+import { ContextAwareLogger } from 'logger';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -13,7 +12,7 @@ export abstract class WebController {
     public abstract readonly apiName: string;
     public context: Context;
 
-    constructor(@inject(ContextAwareLogger) protected readonly logger: Logger) {}
+    constructor(@inject(ContextAwareLogger) protected readonly logger: ContextAwareLogger) {}
 
     public async invoke(requestContext: Context, ...args: any[]): Promise<unknown> {
         this.context = requestContext;

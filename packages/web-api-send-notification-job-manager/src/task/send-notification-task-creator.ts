@@ -4,7 +4,7 @@
 import { Batch, BatchConfig, JobTask, Message, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger, Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { BatchTaskCreator } from 'service-library';
 
 @injectable()
@@ -15,7 +15,7 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         @inject(BatchConfig) batchConfig: BatchConfig,
         @inject(ServiceConfiguration) serviceConfig: ServiceConfiguration,
         @inject(StorageConfig) private readonly storageConfig: StorageConfig,
-        @inject(GlobalLogger) logger: Logger,
+        @inject(GlobalLogger) logger: GlobalLogger,
         system: typeof System = System,
     ) {
         super(batch, queue, batchConfig, serviceConfig, logger, system);

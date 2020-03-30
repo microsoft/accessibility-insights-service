@@ -3,7 +3,7 @@
 import { client, CosmosOperationResponse } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { ContextAwareLogger, Logger } from 'logger';
+import { ContextAwareLogger } from 'logger';
 import { PageScanRequestProvider } from 'service-library';
 import { OnDemandPageScanRequest } from 'storage-documents';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';

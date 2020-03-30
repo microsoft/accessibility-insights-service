@@ -4,7 +4,7 @@ import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import { isNil } from 'lodash';
-import { BaseTelemetryProperties, GlobalLogger, Logger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
 
 // tslint:disable: no-any
 
@@ -63,7 +63,7 @@ export abstract class ProcessEntryPointBase {
 
     protected abstract async runCustomAction(container: Container, ...args: any[]): Promise<void>;
 
-    private async invokeCustomActionWithLogging(container: Container, logger: Logger, ...args: any[]): Promise<void> {
+    private async invokeCustomActionWithLogging(container: Container, logger: GlobalLogger, ...args: any[]): Promise<void> {
         try {
             await this.runCustomAction(container, ...args);
         } catch (error) {
@@ -72,7 +72,7 @@ export abstract class ProcessEntryPointBase {
         }
     }
 
-    private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: Logger): void {
+    private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: GlobalLogger): void {
         if (dotEnvConfig.parsed !== undefined) {
             logger.logInfo('[ProcessEntryPointBase] Config based environment variables:');
             logger.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfig.parsed, undefined, 2)}`);
