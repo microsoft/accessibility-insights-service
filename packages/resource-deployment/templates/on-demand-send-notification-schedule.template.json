@@ -32,7 +32,7 @@
                     "elevationLevel": "nonadmin"
                 }
             },
-            "runExclusive": true
+            "runExclusive": false
         },
         "commonEnvironmentSettings": [
             {
