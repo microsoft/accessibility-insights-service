@@ -46,13 +46,10 @@ describe(PromiseUtils, () => {
         });
 
         it('returns resolved timed out promise', async () => {
-            let resolvePromise: Function;
             const timeoutValue = 'timed out value';
 
-            // tslint:disable-next-line: promise-must-complete
-            const promise = new Promise<string>(resolve => {
-                resolvePromise = resolve;
-            });
+            // tslint:disable-next-line: promise-must-complete no-empty
+            const promise = new Promise<string>(() => {});
 
             const result = await testSubject.waitFor(promise, 10, () => Promise.resolve(timeoutValue));
 

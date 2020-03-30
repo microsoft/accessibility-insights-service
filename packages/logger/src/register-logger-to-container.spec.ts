@@ -12,7 +12,6 @@ import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insight
 import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
 import { ContextAwareLogger } from './context-aware-logger';
 import { GlobalLogger } from './global-logger';
-import { Logger } from './logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
 import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from './register-logger-to-container';
@@ -85,9 +84,4 @@ describe(registerContextAwareLoggerToContainer, () => {
 function verifySingletonDependencyResolution(key: any): void {
     expect(container.get(key)).toBeDefined();
     expect(container.get(key)).toBe(container.get(key));
-}
-
-function verifyNonSingletonDependencyResolution(key: any): void {
-    expect(container.get(key)).toBeDefined();
-    expect(container.get(key)).not.toBe(container.get(key));
 }

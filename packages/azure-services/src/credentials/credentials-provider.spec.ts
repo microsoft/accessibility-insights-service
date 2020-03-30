@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider } from './msi-credential-provider';
 

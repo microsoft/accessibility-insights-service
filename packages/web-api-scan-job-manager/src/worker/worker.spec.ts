@@ -71,7 +71,6 @@ describe(Worker, () => {
     let systemMock: IMock<typeof System>;
     let storageConfigStub: StorageConfig;
 
-    let maxWallClockTimeInHours: number;
     const batchConfig: BatchConfig = {
         accountName: 'batch-account-name',
         accountUrl: '',
@@ -90,7 +89,6 @@ describe(Worker, () => {
         batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider, MockBehavior.Strict);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
-        maxWallClockTimeInHours = 1;
         storageConfigStub = {
             scanQueue: 'scan-queue',
         } as StorageConfig;

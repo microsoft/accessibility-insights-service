@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, GlobalLogger, Logger } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { OnDemandDispatcher } from './sender/on-demand-dispatcher';
 import { WebApiScanRequestSenderEntryPoint } from './web-api-scan-request-sender-entry-point';
@@ -24,7 +24,7 @@ class TestableWebApiScanRequestSenderEntryPoint extends WebApiScanRequestSenderE
 describe(WebApiScanRequestSenderEntryPoint, () => {
     let testSubject: TestableWebApiScanRequestSenderEntryPoint;
     let containerMock: IMock<Container>;
-    let loggerMock: IMock<Logger>;
+    let loggerMock: IMock<ContextAwareLogger>;
     let onDispatcherMock: IMock<OnDemandDispatcher>;
 
     beforeEach(() => {

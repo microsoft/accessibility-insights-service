@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as inversify from 'inversify';
-import { ContextAwareLogger, Logger, registerGlobalLoggerToContainer } from 'logger';
+import { ContextAwareLogger, registerGlobalLoggerToContainer } from 'logger';
 import { setupRequestContextIocContainer } from './setup-request-context-ioc-container';
 
 @inversify.injectable()

@@ -2,10 +2,8 @@
 // Licensed under the MIT License.
 import { BatchServiceModels } from '@azure/batch';
 import { BatchTaskPropertyProvider } from 'azure-services';
-import { EnvironmentSettings, ServiceConfiguration, System } from 'common';
+import { EnvironmentSettings, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty } from 'lodash';
-import { loggerTypes } from 'logger';
 
 @injectable()
 export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider {

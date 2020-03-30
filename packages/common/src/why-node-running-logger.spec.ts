@@ -50,7 +50,6 @@ describe(WhyNodeRunningLogger, () => {
         });
 
         it('invoke log after timeout', async () => {
-            const intervalId = 'interval id' as any;
             const timeoutInSeconds = 5;
             let timeoutCallback: Function;
 

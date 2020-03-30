@@ -9,8 +9,6 @@ import { Logger } from 'logger';
 import { ApiController } from 'service-library';
 import { processWebRequest } from './process-request';
 
-let requestHandled: boolean;
-
 type TestRequestResponse = {
     message: string;
     controller: TestableController;
@@ -24,8 +22,6 @@ class TestableController extends ApiController {
 
     // tslint:disable-next-line:no-any
     protected async handleRequest(...args: any[]): Promise<TestRequestResponse> {
-        requestHandled = true;
-
         return {
             message: `request handled with args ${args.toString()}`,
             controller: this,
@@ -37,7 +33,6 @@ describe(processWebRequest, () => {
     let context: Context;
 
     beforeEach(() => {
-        requestHandled = false;
         context = ({
             req: {
                 query: { 'api-version': '1.0' },

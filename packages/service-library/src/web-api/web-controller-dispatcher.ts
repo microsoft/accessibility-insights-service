@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
 import { Container } from 'inversify';
-import { BaseTelemetryProperties, ContextAwareLogger, Logger, loggerTypes } from 'logger';
+import { BaseTelemetryProperties, ContextAwareLogger, loggerTypes } from 'logger';
 import { ProcessEntryPointBase } from '../process-entry-point-base';
 import { Newable } from './web-api-ioc-types';
 import { WebController } from './web-controller';
