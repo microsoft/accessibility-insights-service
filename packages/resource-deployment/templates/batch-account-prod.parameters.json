@@ -5,14 +5,20 @@
         "onDemandScanRequestPoolNodes": {
             "value": "2"
         },
-        "onDemandUrlScanPoolNodes": {
-            "value": "6"
-        },
         "onDemandScanRequestPoolVmSize": {
             "value": "standard_d11_v2"
         },
         "onDemandScanRequestPoolMaxTasksPerNode": {
             "value": "4"
+        },
+        "onDemandUrlScanPoolNodes": {
+            "value": "6"
+        },
+        "onDemandUrlScanPoolVmSize": {
+            "value": "standard_d11_v2"
+        },
+        "onDemandUrlScanPoolMaxTasksPerNode": {
+            "value": "2"
         }
     }
 }
