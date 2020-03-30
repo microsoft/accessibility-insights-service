@@ -3,7 +3,7 @@
 import { Queue, StorageConfig } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger, Logger, loggerTypes } from 'logger';
+import { GlobalLogger, loggerTypes } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     NotificationError,

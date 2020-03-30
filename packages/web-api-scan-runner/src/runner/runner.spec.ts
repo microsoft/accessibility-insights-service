@@ -581,13 +581,4 @@ describe(Runner, () => {
 
         return { scanRequestTime: scanRequestTime, scanCompleteTime: scanCompleteTime };
     }
-
-    function createOnDemandNotificationRequestMessage(scanResult: OnDemandPageScanResult): OnDemandNotificationRequestMessage {
-        return {
-            scanId: scanResult.id,
-            scanNotifyUrl: scanResult.notification.scanNotifyUrl,
-            runStatus: scanResult.run.state,
-            scanStatus: scanResult.scanResult.state,
-        };
-    }
 });

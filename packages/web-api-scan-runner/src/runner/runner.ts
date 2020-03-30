@@ -4,7 +4,6 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
-import { Browser } from 'puppeteer';
 import { AxeScanResults } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
@@ -41,7 +40,6 @@ export class Runner {
     ) {}
 
     public async run(): Promise<void> {
-        let browser: Browser;
         const scanMetadata = this.scanMetadataConfig.getConfig();
 
         const scanStartedTimestamp: number = Date.now();
@@ -67,7 +65,7 @@ export class Runner {
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
         try {
-            browser = await this.webDriverTask.launch();
+            await this.webDriverTask.launch();
             await this.scan(pageScanResult, scanMetadata.url);
         } catch (error) {
             const errorMessage = this.getErrorMessage(error);

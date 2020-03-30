@@ -4,7 +4,7 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger, LogLevel } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import { AxeScanResults, ScanError, ScanErrorTypes } from './axe-scan-results';
+import { AxeScanResults, ScanError } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 
 export type PuppeteerBrowserFactory = () => Puppeteer.Browser;

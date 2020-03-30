@@ -5,12 +5,14 @@ import { injectable } from 'inversify';
 
 @injectable()
 export class PromiseUtils {
+    constructor(private readonly globalObj = global) {}
+
     public async waitFor<T, Y>(promise: Promise<T>, timeoutInMilliSec: number, onTimeoutCallback: () => Promise<Y>): Promise<T | Y> {
         let timeoutHandle: NodeJS.Timeout;
         let hasTimedOut = false;
 
         const timeoutPromise = new Promise<Y>((resolve, reject) => {
-            timeoutHandle = setTimeout(() => {
+            timeoutHandle = this.globalObj.setTimeout(() => {
                 hasTimedOut = true;
                 resolve();
             }, timeoutInMilliSec);
@@ -21,7 +23,7 @@ export class PromiseUtils {
         try {
             await racePromise;
         } finally {
-            clearTimeout(timeoutHandle);
+            this.globalObj.clearTimeout(timeoutHandle);
         }
 
         if (hasTimedOut) {

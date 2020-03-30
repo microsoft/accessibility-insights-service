@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
-import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
 import { OnDemandPageScanRunResultProvider } from 'service-library';

@@ -6,7 +6,7 @@ import { ServiceConfiguration, System, TaskRuntimeConfig } from 'common';
 import * as crypto from 'crypto';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import { GlobalLogger, Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
 import { VError } from 'verror';
 import { BatchConfig } from './batch-config';

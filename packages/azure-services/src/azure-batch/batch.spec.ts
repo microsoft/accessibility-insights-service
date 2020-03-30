@@ -65,7 +65,6 @@ describe(Batch, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let batchTaskConfigGenerator: IMock<BatchTaskConfigGenerator>;
     let maxTaskDurationInMinutes: number;
-    let taskParameter: BatchServiceModels.TaskAddParameter;
     const maxTasks = 10;
 
     beforeEach(() => {
@@ -75,13 +74,6 @@ describe(Batch, () => {
             accountUrl: '',
             poolId: 'poolId',
             jobId: 'jobId',
-        };
-        taskParameter = {
-            id: 'taskId',
-            commandLine: 'commandLine',
-            resourceFiles: 'resourceFiles' as any,
-            environmentSettings: 'environmentSettings' as any,
-            constraints: { maxWallClockTime: moment.duration({ minute: maxTaskDurationInMinutes }).toISOString() },
         };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock

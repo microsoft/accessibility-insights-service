@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
+import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';

@@ -6,6 +6,7 @@
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
         "noImplicitAny": true,
+        "noUnusedLocals": true,
         "noImplicitReturns": true,
         "resolveJsonModule": true,
         "sourceMap": true,

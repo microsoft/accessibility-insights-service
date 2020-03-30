@@ -294,7 +294,6 @@ describe(Worker, () => {
                 runningTasks: 6,
             },
         };
-        let poolMetricsInfoCallbackCount = 0;
         poolLoadGeneratorMock
             .setup(async o =>
                 o.getTasksIncrementCount(
@@ -308,7 +307,6 @@ describe(Worker, () => {
         batchMock
             .setup(async o => o.getPoolMetricsInfo())
             .callback(q => {
-                poolMetricsInfoCallbackCount += 1;
                 currentTime = moment(startTime)
                     .add(maxWallClockTimeInHours, 'hour')
                     .toDate()

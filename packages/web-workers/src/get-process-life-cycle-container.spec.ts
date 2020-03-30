@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { AzureServicesIocTypes, cosmosContainerClientTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
+import { AzureServicesIocTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { ContextAwareLogger, GlobalLogger, Logger } from 'logger';

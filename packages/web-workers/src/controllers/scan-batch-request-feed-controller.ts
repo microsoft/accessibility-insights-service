@@ -3,7 +3,7 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ContextAwareLogger, Logger, ScanUrlsAddedMeasurements } from 'logger';
+import { ContextAwareLogger, ScanUrlsAddedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -17,7 +17,6 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
-    ScanCompletedNotification,
     ScanRunBatchRequest,
 } from 'storage-documents';
 

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AuthenticationContext, ErrorResponse, TokenResponse } from 'adal-node';
+import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper } from 'common';
 import { Logger } from 'logger';
 import * as requestPromise from 'request-promise';
