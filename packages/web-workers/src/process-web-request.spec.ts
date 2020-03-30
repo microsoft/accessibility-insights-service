@@ -51,7 +51,7 @@ describe(processWebRequest, () => {
         const response = (await processWebRequest(context, TestableController, args)) as TestRequestResponse;
 
         expect(response.message).toBe(`request handled with args ${args.toString()}`);
-    });
+    }, 10000);
 
     it('new loggers are created for each request', async () => {
         const args = ['arg1', 'arg2'];
@@ -65,5 +65,5 @@ describe(processWebRequest, () => {
         expect(logger1).toBeDefined();
         expect(logger2).toBeDefined();
         expect(logger1).not.toBe(logger2);
-    });
+    }, 10000);
 });
