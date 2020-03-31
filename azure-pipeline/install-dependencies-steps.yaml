@@ -1,0 +1,11 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+steps:
+    - task: NodeTool@0
+      inputs:
+          versionSpec: '12.x'
+      displayName: Use node 12.x
+
+    - script: |
+          yarn install --frozen-lockfile
+      displayName: 'install dependencies'

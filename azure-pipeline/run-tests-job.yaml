@@ -1,0 +1,7 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+steps:
+    - template: ./install-dependencies-steps.yaml
+    - template: ./build-steps.yaml
+    - template: ./test-steps.yaml
+      parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }

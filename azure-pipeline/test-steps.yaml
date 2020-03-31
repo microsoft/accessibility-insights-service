@@ -1,0 +1,17 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+steps:
+    - script: |
+          export NODE_OPTIONS=--max_old_space_size=4096
+          yarn test --ci --coverage --config jest.ci.js --totalTestSlices=${{ parameters.totalTestSlices }} --testSlicesToRun=${{ parameters.testSlicesToRun }}
+      displayName: run unit tests
+
+    - task: PublishTestResults@2
+      inputs:
+          testResultsFiles: $(System.DefaultWorkingDirectory)/test-results/unit/junit.xml
+          testRunTitle: $(Agent.JobName)
+      condition: always()
+      displayName: publish test results
+
+    - script: yarn publish-code-coverage -t $(CODECOV_TOKEN)
+      displayName: Publish code coverage to codecov
