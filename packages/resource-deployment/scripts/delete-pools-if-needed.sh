@@ -85,12 +85,12 @@ function checkIfPoolConfigOutdated {
 
     poolConfigOutdated=false
 
-    compareConfigFileToDeployedConfig $poolId "vmSize" "${poolPropertyNamePrefix}VmSize"
+    compareParameterFileToDeployedConfig $poolId "vmSize" "${poolPropertyNamePrefix}VmSize"
     if [ $poolConfigOutdated == "true" ]; then
         return
     fi
 
-    compareConfigFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
+    compareParameterFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
     if [ $poolConfigOutdated == "true" ]; then
         return
     fi
@@ -105,13 +105,6 @@ function checkPoolConfigs {
         if [ $poolConfigOutdated ]; then
             return
         fi
-    done
-}
-
-function waitForPoolsToBeIdle() {
-    for pool in $pools; do
-        waitForNodesToGoIdleByNodeType "$pool" "dedicated"
-        waitForNodesToGoIdleByNodeType "$pool" "lowPriority"
     done
 }
 
@@ -132,6 +125,7 @@ waitForDelete() {
 
     checkIfPoolExists $poolId
     waiting=false
+    deleteTimeout=1200
     end=$((SECONDS + $deleteTimeout))
     while [ "$poolExists" == "true" ] && [ $SECONDS -le $end ]; do
         if [ "$waiting" != true ]; then
@@ -161,34 +155,38 @@ checkIfPoolExists() {
     fi
 }
 
-function recreatePoolsWhenNodesAreIdle() {
+function deletePoolsWhenNodesAreIdle() {
     command="deletePools"
     commandName="Delete pool vmss"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
+
+    echo "Successfully deleted pools"
 }
 
-function recreatePoolVmss() {
+function deletePoolsIfNeeded() {
     pools=$(az batch pool list --query "[].id" -o tsv)
     if [[ -z "$pools" ]]; then
         return
     fi
 
     if [[ "$dropPools" == true ]]; then
-        recreatePoolsWhenNodesAreIdle
+        deletePoolsWhenNodesAreIdle
         return
     fi
 
     checkIfVmssAreOld
     if [[ $areVmssOld == true ]]; then
-        recreatePoolsWhenNodesAreIdle
+        deletePoolsWhenNodesAreIdle
         return
     fi
     
     checkPoolConfigs
     if [[ $poolConfigOutdated == true ]]; then
-        recreatePoolsWhenNodesAreIdle
+        deletePoolsWhenNodesAreIdle
         return
     fi
+
+    echo "Pools no do not need to be recreated."
 }
 
 # Read script arguments
@@ -217,7 +215,5 @@ batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
 if [[ -z "$batchAccountExists" ]]; then
     echo "batch account $batchAccountName has not yet been created."
 else
-    recreatePoolVmss
+    deletePoolsIfNeeded
 fi
-
-echo "Successfully recreated vmss for pools"
