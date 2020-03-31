@@ -2,9 +2,6 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "jobManagerContainerName": {
-            "value": "batch-job-manager-script"
-        },
         "webApiScanJobManagerContainerName": {
             "value": "batch-web-api-scan-job-manager-script"
         },
@@ -14,14 +11,8 @@
         "runtimeConfigurationContainerName": {
             "value": "runtime-configuration"
         },
-        "runnerContainerName": {
-            "value": "batch-runner-script"
-        },
         "webApiScanRunnerContainerName": {
             "value": "batch-web-api-scan-runner-script"
-        },
-        "scanRequestContainerName": {
-            "value": "batch-scan-request-sender-script"
         },
         "onDemandScanRequestContainerName": {
             "value": "batch-on-demand-scan-request-sender-script"

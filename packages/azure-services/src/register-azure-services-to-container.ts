@@ -70,10 +70,6 @@ export function registerAzureServicesToContainer(
 
     setupSingletonQueueServiceURLProvider(container);
 
-    container.bind(cosmosContainerClientTypes.A11yIssuesCosmosContainerClient).toDynamicValue(context => {
-        return createCosmosContainerClient(context.container, 'scanner', 'a11yIssues');
-    });
-
     container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue(context => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
     });

@@ -33,13 +33,6 @@
                 "description": "Storage Account Tier"
             }
         },
-        "jobManagerContainerName": {
-            "type": "string",
-            "defaultValue": "batch-job-manager-script",
-            "metadata": {
-                "description": "The name of the blob container for job manager script."
-            }
-        },
         "webApiScanJobManagerContainerName": {
             "type": "string",
             "defaultValue": "batch-web-api-scan-job-manager-script",
@@ -75,13 +68,6 @@
                 "description": "The name of the blob container for runtime configuration."
             }
         },
-        "runnerContainerName": {
-            "type": "string",
-            "defaultValue": "batch-runner-script",
-            "metadata": {
-                "description": "The name of the blob container for web api scan runner script."
-            }
-        },
         "webApiScanRunnerContainerName": {
             "type": "string",
             "defaultValue": "batch-web-api-scan-runner-script",
@@ -94,13 +80,6 @@
             "defaultValue": "batch-web-api-send-notification-runner-script",
             "metadata": {
                 "description": "The name of the blob container for send notification runner script."
-            }
-        },
-        "scanRequestContainerName": {
-            "type": "string",
-            "defaultValue": "batch-scan-request-sender-script",
-            "metadata": {
-                "description": "The name of the blob container for scan request sender script."
             }
         },
         "onDemandScanRequestContainerName": {
@@ -159,12 +138,6 @@
             },
             "resources": [
                 {
-                    "name": "[concat('default/', parameters('jobManagerContainerName'))]",
-                    "type": "blobServices/containers",
-                    "apiVersion": "2018-07-01",
-                    "dependsOn": ["[parameters('storageAccountName')]"]
-                },
-                {
                     "name": "[concat('default/', parameters('webApiScanJobManagerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
@@ -189,12 +162,6 @@
                     "dependsOn": ["[parameters('storageAccountName')]"]
                 },
                 {
-                    "name": "[concat('default/', parameters('runnerContainerName'))]",
-                    "type": "blobServices/containers",
-                    "apiVersion": "2018-07-01",
-                    "dependsOn": ["[parameters('storageAccountName')]"]
-                },
-                {
                     "name": "[concat('default/', parameters('webApiScanRunnerContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
@@ -202,12 +169,6 @@
                 },
                 {
                     "name": "[concat('default/', parameters('webApiSendNotificationRunnerContainerName'))]",
-                    "type": "blobServices/containers",
-                    "apiVersion": "2018-07-01",
-                    "dependsOn": ["[parameters('storageAccountName')]"]
-                },
-                {
-                    "name": "[concat('default/', parameters('scanRequestContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

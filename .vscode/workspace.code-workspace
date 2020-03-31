@@ -1,20 +1,8 @@
 {
     "folders": [
         {
-            "name": "job-manager",
-            "path": "../packages/job-manager"
-        },
-        {
-            "name": "runner",
-            "path": "../packages/runner"
-        },
-        {
             "name": "scanner",
             "path": "../packages/scanner"
-        },
-        {
-            "name": "scan-request-sender",
-            "path": "../packages/scan-request-sender"
         },
         {
             "name": "web-api-scan-request-sender",

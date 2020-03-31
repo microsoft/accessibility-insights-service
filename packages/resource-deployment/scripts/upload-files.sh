@@ -54,26 +54,19 @@ fi
 
 function uploadFiles() {
     echo "Uploading files to blobs"
-    
-    local jobManagerContainerName="batch-job-manager-script"
+
     local webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
     local webApiSendNotificationJobManagerContainerName="batch-web-api-send-notification-job-manager-script"
-    local runnerContainerName="batch-runner-script"
     local webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
     local webApiSendNotificationRunnerContainerName="batch-web-api-send-notification-runner-script"
-    local scanRequestSenderContainerName="batch-scan-request-sender-script"
     local onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
     local poolStartupContainerName="batch-pool-startup-script"
 
-
     uploadProcesses=(
-        "uploadFolderContents $jobManagerContainerName \"$dropFolder/job-manager/dist\" \"$storageAccountName\""
         "uploadFolderContents $webApiScanJobManagerContainerName \"$dropFolder/web-api-scan-job-manager/dist\" \"$storageAccountName\""
         "uploadFolderContents $webApiSendNotificationJobManagerContainerName \"$dropFolder/web-api-send-notification-job-manager/dist\" \"$storageAccountName\""
-        "uploadFolderContents $runnerContainerName \"$dropFolder/runner/dist\" \"$storageAccountName\""
         "uploadFolderContents $webApiScanrunnerContainerName \"$dropFolder/web-api-scan-runner/dist\" \"$storageAccountName\""
         "uploadFolderContents $webApiSendNotificationRunnerContainerName \"$dropFolder/web-api-send-notification-runner/dist\" \"$storageAccountName\""
-        "uploadFolderContents $scanRequestSenderContainerName \"$dropFolder/scan-request-sender/dist\" \"$storageAccountName\""
         "uploadFolderContents $onDemandScanRequestSenderContainerName \"$dropFolder/web-api-scan-request-sender/dist\" \"$storageAccountName\""
         "uploadFolderContents $poolStartupContainerName \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
         "${0%/*}/upload-config-files.sh"
@@ -84,5 +77,3 @@ function uploadFiles() {
 }
 
 uploadFiles
-
-
