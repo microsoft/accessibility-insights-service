@@ -16,7 +16,7 @@ recycleVmssIntervalDays=15
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 -r <resource group> -p <parameter template file path> -d <flag to force pools to drop>
 "
     exit 1
 }
@@ -60,6 +60,55 @@ function checkIfVmssAreOld {
     echo "Are vmss old? - $areVmssOld"
 }
 
+function compareConfigFileToDeployedConfig() {
+    poolId=$1
+    batchConfigPropertyName=$2
+    templateFileParameterName=$3
+
+    query="[?id=='$poolId'].$batchConfigPropertyName"
+
+    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value")
+    actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
+
+    if [ -z "$expectedValue" ] || [ "$expectedValue" == "null" ]; then
+        echo "No value for $templateFileParameterName found in deployment template."
+    elif [ "$expectedValue" != "$actualValue" ]; then
+        echo "$batchConfigPropertyName for $poolId must be updated from $actualValue to $expectedValue."
+        echo "Pool must be deleted to perform update."
+        poolConfigOutdated=true
+    fi
+}
+
+function checkIfPoolConfigOutdated {
+    poolId=$1
+    poolPropertyNamePrefix=$2
+
+    poolConfigOutdated=false
+
+    compareConfigFileToDeployedConfig $poolId "vmSize" "${poolPropertyNamePrefix}VmSize"
+    if [ $poolConfigOutdated == "true" ]; then
+        return
+    fi
+
+    compareConfigFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
+    if [ $poolConfigOutdated == "true" ]; then
+        return
+    fi
+}
+
+function checkPoolConfigs {
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
+
+    pools=$(az batch pool list --query "[].id" -o tsv)
+    for pool in $pools; do
+        camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+        checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
+        if [ $poolConfigOutdated ]; then
+            return
+        fi
+    done
+}
+
 function waitForPoolsToBeIdle() {
     for pool in $pools; do
         waitForNodesToGoIdleByNodeType "$pool" "dedicated"
@@ -95,28 +144,43 @@ function scaleUpPools {
     . "${0%/*}/batch-account-create.sh"
 }
 
-function recreatePoolVmss() {
-    checkIfVmssAreOld
-
-    if [[ $areVmssOld == false ]]; then
-        return
-    fi
-
+function recreatePoolsWhenNodesAreIdle() {
     command="scaleDownPools ; scaleUpPools"
     commandName="Recreate pool vmss"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
 
+function recreatePoolVmss() {
+    if [[ "$dropPools" == true ]]; then
+        recreatePoolsWhenNodesAreIdle
+        return
+    fi
+
+    checkIfVmssAreOld
+    if [[ $areVmssOld == true ]]; then
+        recreatePoolsWhenNodesAreIdle
+        return
+    fi
+    
+    checkPoolConfigs
+    if [[ $poolConfigOutdated == true ]]; then
+        recreatePoolsWhenNodesAreIdle
+        return
+    fi
+}
+
 # Read script arguments
-while getopts ":r:k:" option; do
+while getopts ":r:p:d" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    p) parameterFilePath=${OPTARG} ;;
+    d) dropPools=true ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $parameterFilePath ]]; then
     exitWithUsageInfo
 fi
 
