@@ -81,7 +81,7 @@ function setupCosmos() {
         cosmosSetupProcesses=(
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
-            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"10000\""     # 7 days
             "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"400\""
         )
     else
