@@ -4,4 +4,4 @@ steps:
     - template: ./install-dependencies-steps.yaml
     - template: ./build-steps.yaml
     - template: ./test-steps.yaml
-      parameters: { totalSlices: '${{ parameters.totalSlices }}', slicesToRun: '${{ parameters.slicesToRun }}' }
+      parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }

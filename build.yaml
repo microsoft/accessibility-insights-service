@@ -8,13 +8,13 @@ jobs:
           vmImage: 'ubuntu-16.04'
           demands: npm
       steps:
-          - template: ./azure-pipeline/build-artifacts-and-some-tests-job-steps.yaml
-            parameters: { totalSlices: 4, slicesToRun: '[0]' }
+          - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
+            parameters: { totalTestSlices: 4, testSlicesToRun: '[0]' }
 
     - job: 'RunRemainingTests'
       pool:
           vmImage: 'ubuntu-16.04'
           demands: npm
       steps:
-          - template: ./azure-pipeline/remaining-tests-job.yaml
-            parameters: { totalSlices: 4, slicesToRun: '[1,2,3]' }
+          - template: ./azure-pipeline/run-tests-job.yaml
+            parameters: { totalTestSlices: 4, testSlicesToRun: '[1,2,3]' }

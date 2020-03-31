@@ -18,7 +18,7 @@ steps:
       displayName: run linter
 
     - template: ./test-steps.yaml
-      parameters: { totalSlices: '${{ parameters.totalSlices }}', slicesToRun: '${{ parameters.slicesToRun }}' }
+      parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
 
     - script: |
           yarn run pack
@@ -43,7 +43,7 @@ steps:
               !**/.vscode/**/*
               !**/*.md
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
-      displayName: 'Copy Files to staging directory'
+      displayName: 'Copy files to staging directory'
 
     - task: PublishBuildArtifacts@1
       inputs:

@@ -6,19 +6,19 @@ const yargs = require('yargs');
 let projects = [];
 
 function getTestProjects() {
-    yargs.demandOption(['totalSlices', 'slicesToRun']);
+    yargs.demandOption(['totalTestSlices', 'testSlicesToRun']);
 
     let allProjects = glob.sync('packages/*/jest.config.js');
-    const totalSlices = yargs.argv.totalSlices;
-    const slicesToRun = JSON.parse(yargs.argv.slicesToRun);
+    const totalTestSlices = yargs.argv.totalTestSlices;
+    const testSlicesToRun = JSON.parse(yargs.argv.testSlicesToRun);
 
-    console.log('totalSlices = ', totalSlices);
-    console.log('slicesToRun = ', slicesToRun);
+    console.log('totalTestSlices = ', totalTestSlices);
+    console.log('testSlicesToRun = ', testSlicesToRun);
 
     allProjects = allProjects.sort();
     allProjects.forEach((value, index) => {
-        const slice = index % totalSlices;
-        if (slicesToRun.includes(slice)) {
+        const slice = index % totalTestSlices;
+        if (testSlicesToRun.includes(slice)) {
             projects.push(value);
         }
     });
