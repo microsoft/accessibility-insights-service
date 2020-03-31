@@ -18,7 +18,7 @@ export abstract class WebController {
         this.context = requestContext;
 
         try {
-            await this.logger.setup(this.getBaseTelemetryProperties());
+            this.logger.setCustomProperties(this.getBaseTelemetryProperties());
 
             this.logger.logInfo('[WebController] request started');
 
