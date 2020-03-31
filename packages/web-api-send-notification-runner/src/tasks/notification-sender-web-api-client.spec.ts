@@ -53,7 +53,7 @@ describe(NotificationSenderWebAPIClient, () => {
         });
     });
 
-    describe('postReplyUrl', async () => {
+    it('postReplyUrl', async () => {
         const scanNotifyUrl = 'scanNotifyUrl';
         const scanId = 'scanId';
         const scanStatus = 'pass';
@@ -66,11 +66,9 @@ describe(NotificationSenderWebAPIClient, () => {
             runStatus: runStatus,
         };
         const response = { statusCode: 200 } as ResponseAsJSON;
-        const requestBody = [{ scanId: scanId, runStatus: runStatus, scanStatus: scanStatus }];
+        const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: scanStatus };
         const options = {
-            ...sharedOption,
             body: requestBody,
-            simple: false,
         };
 
         postMock

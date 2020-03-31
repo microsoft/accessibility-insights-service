@@ -128,7 +128,7 @@ describe(Queue, () => {
         });
     });
 
-    describe('getMessagesWithTotalCount', async () => {
+    describe('getMessagesWithTotalCount', () => {
         let getMessagesMock: IMock<(queue: string, totalMessagesCount: number) => Promise<Message[]>>;
         let messageIdCounter = 0;
 
@@ -195,7 +195,7 @@ describe(Queue, () => {
         });
     });
 
-    describe('getMessageCount', async () => {
+    describe('getMessageCount', () => {
         it('getCountQueue', async () => {
             const count = 30;
             setupQueueGetCount(30);
