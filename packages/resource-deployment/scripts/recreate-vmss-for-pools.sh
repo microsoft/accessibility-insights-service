@@ -16,7 +16,7 @@ recycleVmssIntervalDays=15
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <parameter template file path> -d <flag to force pools to drop>
+Usage: $0 -r <resource group> -p <parameter template file path> [-d <flag to force pools to drop>]
 "
     exit 1
 }
@@ -60,7 +60,7 @@ function checkIfVmssAreOld {
     echo "Are vmss old? - $areVmssOld"
 }
 
-function compareConfigFileToDeployedConfig() {
+function compareParameterFileToDeployedConfig() {
     poolId=$1
     batchConfigPropertyName=$2
     templateFileParameterName=$3
@@ -99,7 +99,6 @@ function checkIfPoolConfigOutdated {
 function checkPoolConfigs {
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-    pools=$(az batch pool list --query "[].id" -o tsv)
     for pool in $pools; do
         camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
         checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
@@ -116,41 +115,64 @@ function waitForPoolsToBeIdle() {
     done
 }
 
-function scaleDownPools() {
-    parallelProcesses=()
-    echo "Resizing all pools size to 0"
+deletePools() {
     for pool in $pools; do
-        az batch pool resize \
-            --pool-id $pool \
-            --target-dedicated-nodes 0 \
-            --target-low-priority-nodes 0 \
-            --node-deallocation-option requeue &
-        
-        parallelProcesses+=("$!")
-
+        echo "deleting pool $pool"
+        az batch pool delete --account-name $batchAccountName --pool-id $pool --yes
     done
-    waitForProcesses parallelProcesses
 
-    echo "Waiting for pool to be stable"
     for pool in $pools; do
-        local query="az batch pool show --pool-id \"$pool\" --query \"allocationState=='steady'\""
-
-        . "${0%/*}/wait-for-deployment.sh" -n "$pool in Steady state" -q "$query" -t 900
+        waitForDelete $pool
+        echo "Finished deleting $pool"
     done
 }
 
-function scaleUpPools {
-    echo "Scaling up pools by running batch account setup again."
-    . "${0%/*}/batch-account-create.sh"
+waitForDelete() {
+    poolId=$1
+
+    checkIfPoolExists $poolId
+    waiting=false
+    end=$((SECONDS + $deleteTimeout))
+    while [ "$poolExists" == "true" ] && [ $SECONDS -le $end ]; do
+        if [ "$waiting" != true ]; then
+            waiting=true
+            echo "Waiting for $poolId to delete"
+            printf " - Running .."
+        fi
+
+        sleep 5
+        printf "."
+        checkIfPoolExists
+    done
+
+    if [ "$poolExists" == "true" ]; then
+        echo "Pool did not finish deleting within $deleteTimeout seconds"
+    fi
+}
+
+checkIfPoolExists() {
+    poolId=$1
+
+    poolExists=$(az batch pool list --account-name "$batchAccountName" --query "[?id=='$poolId']" -o tsv)
+    if [[ -z $poolExists ]]; then
+        poolExists=false
+    else
+        poolExists=true
+    fi
 }
 
 function recreatePoolsWhenNodesAreIdle() {
-    command="scaleDownPools ; scaleUpPools"
-    commandName="Recreate pool vmss"
+    command="deletePools"
+    commandName="Delete pool vmss"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 }
 
 function recreatePoolVmss() {
+    pools=$(az batch pool list --query "[].id" -o tsv)
+    if [[ -z "$pools" ]]; then
+        return
+    fi
+
     if [[ "$dropPools" == true ]]; then
         recreatePoolsWhenNodesAreIdle
         return
@@ -191,6 +213,11 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-recreatePoolVmss
+batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
+if [[ -z "$batchAccountExists" ]]; then
+    echo "batch account $batchAccountName has not yet been created."
+else
+    recreatePoolVmss
+fi
 
 echo "Successfully recreated vmss for pools"

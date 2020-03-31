@@ -80,7 +80,7 @@ echo "Setting up batch account $batchAccountName"
 
 setParameterFilePath
 
-. "${0%/*}/delete-outdated-pools.sh"
+. "${0%/*}/recreate-vmss-for-pools.sh"
 
 deployBatch
 

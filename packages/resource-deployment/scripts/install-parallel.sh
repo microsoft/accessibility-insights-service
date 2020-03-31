@@ -160,16 +160,13 @@ function install() {
     . "${0%/*}/create-dashboard.sh" &
     asyncProcessIds+=("$!")
 
-    . "${0%/*}/recreate-vmss-for-pools.sh" &
-    asyncProcessIds+=("$!")
-
     echo "Waiting for api management creation process"
     waitForProcesses apiManagmentProcessId
 
     echo "Deploying rest api to apim"
     . "${0%/*}/deploy-rest-api.sh"
 
-    echo "Waiting for create dashboard & recreating pools processes"
+    echo "Waiting for create dashboard process"
     waitForProcesses asyncProcessIds
 }
 
