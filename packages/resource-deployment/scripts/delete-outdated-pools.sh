@@ -106,7 +106,7 @@ deletePoolIfOutdated() {
 
     compareConfigFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
     if [ $shouldDeletePool == "true" ]; then
-        deletePoolWhenNodesAreIdle $poolId
+        deletePoolWhenNodesAreIdle "$poolId"
         return
     fi
 
