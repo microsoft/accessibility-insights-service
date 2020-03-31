@@ -22,7 +22,7 @@
                 "apiRevision": "1",
                 "isCurrent": true,
                 "subscriptionRequired": false,
-                "displayName": "Accessibility Insight Service – Scan API",
+                "displayName": "Accessibility Insight Service - Scan API",
                 "path": "",
                 "protocols": ["https"]
             },
