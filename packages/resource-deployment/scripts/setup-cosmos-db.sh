@@ -80,7 +80,7 @@ function setupCosmos() {
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"500\""
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
             "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
@@ -88,7 +88,7 @@ function setupCosmos() {
         )
     else
         cosmosSetupProcesses=(
-            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"400\""
+            "createCosmosCollection \"a11yIssues\" \"$scannerDbName\" \"-1\" \"500\""
             "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"400\""         # 30 days
             "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\"" # 7 days
             "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"400\""      # 7 days
