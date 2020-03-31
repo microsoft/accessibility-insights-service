@@ -3,16 +3,18 @@
 name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 
 jobs:
-    - job: 'BuildArtifacts'
+    - job: 'BuildArtifactsAndRunOneThirdTests'
       pool:
           vmImage: 'ubuntu-16.04'
           demands: npm
       steps:
-          - template: ./azure-pipeline/build-artifacts-job-steps.yaml
+          - template: ./azure-pipeline/build-artifacts-and-some-tests-job-steps.yaml
+            parameters: { totalSlices: 3, slicesToRun: '[0]' }
 
-    - job: 'Test'
+    - job: 'RunRemainingTests'
       pool:
           vmImage: 'ubuntu-16.04'
           demands: npm
       steps:
-          - template: ./azure-pipeline/test-job-steps.yaml
+          - template: ./azure-pipeline/remaining-tests-job.yaml
+            parameters: { totalSlices: 3, slicesToRun: '[1,2]' }

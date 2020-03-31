@@ -17,6 +17,9 @@ steps:
           yarn lint:check
       displayName: run linter
 
+    - template: ./test-steps.yaml
+      parameters: { totalSlices: '${{ parameters.totalSlices }}', slicesToRun: '${{ parameters.slicesToRun }}' }
+
     - script: |
           yarn run pack
       displayName: create npm package zips

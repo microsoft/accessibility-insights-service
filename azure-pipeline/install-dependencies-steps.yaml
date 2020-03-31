@@ -9,7 +9,3 @@ steps:
     - script: |
           yarn install --frozen-lockfile
       displayName: 'install dependencies'
-
-    - script: |
-          yarn clean
-      displayName: clean

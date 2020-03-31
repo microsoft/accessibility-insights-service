@@ -1,12 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 steps:
-    - template: ./install-dependencies-steps.yaml
-    - template: ./build-steps.yaml
-
     - script: |
           export NODE_OPTIONS=--max_old_space_size=4096
-          yarn test --ci --coverage
+          yarn test --ci --coverage --config jest.ci.js --totalSlices=${{ parameters.totalSlices }} --slicesToRun=${{ parameters.slicesToRun }}
       displayName: run unit tests
 
     - task: PublishTestResults@2
