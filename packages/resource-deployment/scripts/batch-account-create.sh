@@ -12,13 +12,14 @@ set -eo pipefail
 export resourceGroupName
 export batchAccountName
 export parameterFilePath
+export dropPools
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>]
+Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <flag to force pools to drop>]
 "
     exit 1
 }
@@ -51,11 +52,12 @@ function deployBatch() {
 }
 
 # Read script arguments
-while getopts ":r:t:e:" option; do
+while getopts ":r:t:e:d" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
     e) environment=${OPTARG} ;;
+    d) dropPools=true ;;
     *) exitWithUsageInfo ;;
     esac
 done

@@ -25,10 +25,11 @@ export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export enableSoftDeleteOnKeyVault=true
+export dropPools
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret> -v <release version> -k <enable soft delete for Azure Key Vault>
+Usage: $0 -e <environment> -l <Azure region> -o <organisation name> -p <publisher email> -r <resource group> -s <subscription name or id> -c <client id> -t <client secret> -v <release version> -k <enable soft delete for Azure Key Vault> [-d <flag to force pools to drop>]
 where:
 
 Resource group - The name of the resource group that everything will be deployed in.
@@ -94,7 +95,7 @@ function onExit {
 trap "onExit" EXIT
 
 # Read script arguments
-while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
+while getopts ":r:s:l:e:o:p:c:t:v:k:d" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     s) subscription=${OPTARG} ;;
@@ -106,6 +107,7 @@ while getopts ":r:s:l:e:o:p:c:t:v:k:" option; do
     t) webApiAdClientSecret=${OPTARG} ;;
     v) releaseVersion=${OPTARG} ;;
     k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
+    d) dropPools=true ;;
     *) exitWithUsageInfo ;;
     esac
 done
