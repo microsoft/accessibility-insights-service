@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
-import { ServiceConfiguration } from 'common';
+import { RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
@@ -17,6 +17,9 @@ export class Queue {
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<boolean>,
+        private readonly maxAttempts: number = 3,
+        private readonly millisBetweenRetries: number = 1000,
     ) {}
 
     /**
@@ -71,10 +74,14 @@ export class Queue {
     }
 
     public async createMessage(queue: string, message: unknown): Promise<boolean> {
-        const queueURL = await this.getQueueURL(queue);
-        await this.ensureQueueExists(queueURL);
-
-        return this.createQueueMessage(queueURL, message);
+        return this.retryHelper.executeWithRetries(
+            () => this.tryCreateMessage(queue, message),
+            async (error: Error) => {
+                return;
+            },
+            this.maxAttempts,
+            this.millisBetweenRetries,
+        );
     }
 
     public async getMessageCount(queue: string): Promise<number> {
@@ -82,6 +89,18 @@ export class Queue {
         const queueProperties = await queueURL.getProperties(Aborter.none);
 
         return queueProperties.approximateMessagesCount;
+    }
+
+    private async tryCreateMessage(queue: string, message: unknown): Promise<boolean> {
+        const queueURL = await this.getQueueURL(queue);
+        await this.ensureQueueExists(queueURL);
+        const enqueued = await this.createQueueMessage(queueURL, message);
+
+        if (enqueued) {
+            return true;
+        } else {
+            throw new Error(`Failed to enqueue the message`);
+        }
     }
 
     private async ensureQueueExists(queueURL: QueueURL): Promise<void> {
