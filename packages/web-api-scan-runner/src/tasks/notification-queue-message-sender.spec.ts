@@ -95,18 +95,18 @@ describe(NotificationQueueMessageSender, () => {
         );
     });
 
-    // it('Enqueue Notification Succeeded', async () => {
-    //     const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
-    //     setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-    //     setupRetryHelperMock();
+    it('Enqueue Notification Succeeded', async () => {
+        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock();
 
-    //     queueMock
-    //         .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
-    //         .returns(async () => Promise.resolve(true))
-    //         .verifiable(Times.once());
+        queueMock
+            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+            .returns(async () => Promise.resolve(true))
+            .verifiable(Times.once());
 
-    //     await dispatcher.sendNotificationMessage(notificationSenderMetadata);
-    // });
+        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
+    });
 
     it('Send Notification Failed', async () => {
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
@@ -114,7 +114,7 @@ describe(NotificationQueueMessageSender, () => {
             message: 'Failed to enqueue the notification',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-        setupRetryHelperMock(true);
+        setupRetryHelperMock();
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
@@ -130,7 +130,7 @@ describe(NotificationQueueMessageSender, () => {
             message: 'Failed to enqueue the notification',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-        setupRetryHelperMock(true);
+        setupRetryHelperMock();
 
         queueMock.setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata)).verifiable(Times.once());
 
@@ -167,16 +167,14 @@ describe(NotificationQueueMessageSender, () => {
         };
     }
 
-    function setupRetryHelperMock(shouldFail = false): void {
+    function setupRetryHelperMock(): void {
         retryHelperMock
             .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), scanConfig.maxSendNotificationRetryCount, 1000))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 try {
                     await action();
                 } catch (error) {
-                    if (shouldFail) {
-                        await errorHandler(new Error(`Failed to enqueue the notification`));
-                    }
+                    await errorHandler(new Error(`Failed to enqueue the notification`));
                 }
             })
             .verifiable();
