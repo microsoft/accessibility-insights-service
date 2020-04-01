@@ -15,7 +15,7 @@ describe(RetryHelper, () => {
     let sleepFunctionMock: IMock<(millis: number) => Promise<void>>;
     const maxAttempts = 3;
     const returnValue = 42;
-    const milliSecondsBetweenRetries = 10;
+    const retryIntervalMilliseconds = 10;
 
     beforeEach(() => {
         errorHandlerMock = Mock.ofType<ErrorHandler>();
@@ -43,7 +43,7 @@ describe(RetryHelper, () => {
             actionMock.object,
             errorHandlerMock.object,
             maxAttempts,
-            milliSecondsBetweenRetries,
+            retryIntervalMilliseconds,
         );
         expect(result).toBe(returnValue);
     });
@@ -62,14 +62,14 @@ describe(RetryHelper, () => {
             })
             .verifiable(Times.exactly(3));
         errorHandlerMock.setup(e => e(testError)).verifiable(Times.exactly(2));
-        sleepFunctionMock.setup(s => s(milliSecondsBetweenRetries)).verifiable(Times.once());
-        sleepFunctionMock.setup(s => s(milliSecondsBetweenRetries * 2)).verifiable(Times.once());
+        sleepFunctionMock.setup(s => s(retryIntervalMilliseconds)).verifiable(Times.once());
+        sleepFunctionMock.setup(s => s(retryIntervalMilliseconds * 2)).verifiable(Times.once());
 
         const result = await testSubject.executeWithRetries(
             actionMock.object,
             errorHandlerMock.object,
             maxAttempts,
-            milliSecondsBetweenRetries,
+            retryIntervalMilliseconds,
         );
         expect(result).toBe(returnValue);
     });
@@ -84,7 +84,7 @@ describe(RetryHelper, () => {
 
         let thrownError: Error;
         await testSubject
-            .executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, milliSecondsBetweenRetries)
+            .executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, retryIntervalMilliseconds)
             .catch(err => {
                 thrownError = err;
             });

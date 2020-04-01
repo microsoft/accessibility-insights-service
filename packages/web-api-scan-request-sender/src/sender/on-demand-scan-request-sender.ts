@@ -30,7 +30,6 @@ export class OnDemandScanRequestSender {
                 }
 
                 if (isEnqueueSuccessful !== false) {
-                    // only when message queue failed we keep the request
                     await this.pageScanRequestProvider.deleteRequests([page.id]);
                 }
             }),
