@@ -16,7 +16,7 @@ recycleVmssIntervalDays=15
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <parameter template file path> [-d <flag to force pools to drop>]
+Usage: $0 -r <resource group> -p <parameter template file path> [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }
@@ -182,11 +182,11 @@ function deletePoolsIfNeeded() {
 }
 
 # Read script arguments
-while getopts ":r:p:d" option; do
+while getopts ":r:p:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     p) parameterFilePath=${OPTARG} ;;
-    d) dropPools=true ;;
+    d) dropPools=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
