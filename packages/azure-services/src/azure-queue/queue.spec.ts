@@ -326,6 +326,8 @@ describe(Queue, () => {
         retryHelperMock
             .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
+                await errorHandler(null);
+
                 return action();
             })
             .verifiable();
