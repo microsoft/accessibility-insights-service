@@ -2,8 +2,15 @@
 // Licensed under the MIT License.
 import { Queue, StorageConfig } from 'azure-services';
 import { inject, injectable } from 'inversify';
+import { isNil } from 'lodash';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider } from 'service-library';
-import { OnDemandPageScanRequest, OnDemandPageScanResult, OnDemandScanRequestMessage } from 'storage-documents';
+import {
+    OnDemandPageScanRequest,
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState,
+    OnDemandScanRequestMessage,
+    ScanError,
+} from 'storage-documents';
 
 @injectable()
 export class OnDemandScanRequestSender {
@@ -19,19 +26,21 @@ export class OnDemandScanRequestSender {
             onDemandPageScanRequests.map(async page => {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
-                let isEnqueueSuccessful: boolean;
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
                     const message = this.createOnDemandScanRequestMessage(page);
-                    isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                    const isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                    if (isEnqueueSuccessful === true) {
+                        await this.updateOnDemandPageResultDoc(resultDoc, 'queued');
+                    } else {
+                        const error: ScanError = {
+                            errorType: 'InternalError',
+                            message: 'Failed to create scan message in queue.',
+                        };
+                        await this.updateOnDemandPageResultDoc(resultDoc, 'failed', error);
+                    }
                 }
 
-                if (isEnqueueSuccessful === true) {
-                    await this.updateOnDemandPageResultDoc(resultDoc);
-                }
-
-                if (isEnqueueSuccessful !== false) {
-                    await this.pageScanRequestProvider.deleteRequests([page.id]);
-                }
+                await this.pageScanRequestProvider.deleteRequests([page.id]);
             }),
         );
     }
@@ -40,9 +49,16 @@ export class OnDemandScanRequestSender {
         return this.queue.getMessageCount(this.storageConfig.scanQueue);
     }
 
-    private async updateOnDemandPageResultDoc(resultDoc: OnDemandPageScanResult): Promise<void> {
-        resultDoc.run.state = 'queued';
+    private async updateOnDemandPageResultDoc(
+        resultDoc: OnDemandPageScanResult,
+        state: OnDemandPageScanRunState,
+        error?: ScanError,
+    ): Promise<void> {
+        resultDoc.run.state = state;
         resultDoc.run.timestamp = new Date().toJSON();
+        if (!isNil(error)) {
+            resultDoc.run.error = error;
+        }
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns([resultDoc]);
     }
