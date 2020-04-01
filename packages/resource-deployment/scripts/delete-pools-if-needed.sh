@@ -185,7 +185,7 @@ function deletePoolsIfNeeded() {
         return
     fi
 
-    echo "Pools no do not need to be recreated."
+    echo "Pools do not need to be recreated."
 }
 
 # Read script arguments
