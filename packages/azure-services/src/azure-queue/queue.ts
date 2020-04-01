@@ -18,7 +18,7 @@ export class Queue {
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
-        @inject(RetryHelper) private readonly retryHelper: RetryHelper<boolean>,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         private readonly maxAttempts: number = 3,
         private readonly retryIntervalMilliseconds: number = 1000,
     ) {}
@@ -76,14 +76,9 @@ export class Queue {
 
     public async createMessage(queue: string, message: unknown): Promise<boolean> {
         try {
-            return await this.retryHelper.executeWithRetries(
-                () => this.tryCreateMessage(queue, message),
-                async (error: Error) => {
-                    return;
-                },
-                this.maxAttempts,
-                this.retryIntervalMilliseconds,
-            );
+            await this.tryCreateMessage(queue, message);
+
+            return true;
         } catch (error) {
             this.logger.logError(`[Queue] Failed to create message: ${util.inspect(error)}`);
 
@@ -98,16 +93,30 @@ export class Queue {
         return queueProperties.approximateMessagesCount;
     }
 
-    private async tryCreateMessage(queue: string, message: unknown): Promise<boolean> {
-        const queueURL = await this.getQueueURL(queue);
-        await this.ensureQueueExists(queueURL);
-        const enqueued = await this.createQueueMessage(queueURL, message);
+    public async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<unknown> {
+        const messagesURL = this.getMessagesURL(queueURL);
 
-        if (enqueued) {
-            return true;
-        } else {
-            throw new Error(`Failed to enqueue the message.`);
+        const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
+        if (_.isNil(response) || _.isNil(response.messageId)) {
+            throw new Error(`Enqueue Failed with response: ${util.inspect(response)}`);
         }
+
+        return message;
+    }
+
+    private async tryCreateMessage(queue: string, message: unknown): Promise<void> {
+        return this.retryHelper.executeWithRetries(
+            async () => {
+                const queueURL = await this.getQueueURL(queue);
+                await this.ensureQueueExists(queueURL);
+                await this.createQueueMessage(queueURL, message);
+            },
+            async (error: Error) => {
+                return;
+            },
+            this.maxAttempts,
+            this.retryIntervalMilliseconds,
+        );
     }
 
     private async ensureQueueExists(queueURL: QueueURL): Promise<void> {
@@ -149,17 +158,6 @@ export class Queue {
     ): Promise<void> {
         await this.createQueueMessage(deadQueueURL, queueMessage.messageText);
         await this.deleteQueueMessage(originQueueURL, queueMessage.messageId, queueMessage.popReceipt);
-    }
-
-    private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<boolean> {
-        const messagesURL = this.getMessagesURL(queueURL);
-
-        const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
-        if (_.isNil(response) || _.isNil(response.messageId)) {
-            return false;
-        }
-
-        return true;
     }
 
     private getMessagesURL(queueURL: QueueURL): MessagesURL {

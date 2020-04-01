@@ -28,7 +28,7 @@ describe(Queue, () => {
     let deadMessagesURLMock: IMock<MessagesURL>;
     let messageIdUrlMock: IMock<MessageIdURL>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    let retryHelperMock: IMock<RetryHelper<boolean>>;
+    let retryHelperMock: IMock<RetryHelper<void>>;
     const maxAttempts = 3;
 
     beforeEach(() => {
@@ -37,7 +37,7 @@ describe(Queue, () => {
         queueURLProviderMock = Mock.ofInstance((() => {}) as any);
         messagesURLProviderMock = Mock.ofInstance((() => {}) as any);
         messageIdURLProviderMock = Mock.ofInstance((() => {}) as any);
-        retryHelperMock = Mock.ofType<RetryHelper<boolean>>();
+        retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
         serviceURLMock = Mock.ofType<ServiceURL>();
         queueURLMock = Mock.ofType<QueueURL>();
@@ -286,7 +286,7 @@ describe(Queue, () => {
     }
 
     function setupVerifyCallToMoveMessageToDeadQueue(message: Models.DequeuedMessageItem): void {
-        setupVerifyCallToEnqueueMessage(deadMessagesURLMock, message.messageText);
+        setupVerifyCallToEnqueueMessage(deadMessagesURLMock, message.messageText, { messageId: 1 });
         setupVerifyCallToDeleteMessage(message);
     }
 
@@ -325,7 +325,7 @@ describe(Queue, () => {
     function setupRetryHelperMock(): void {
         retryHelperMock
             .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
-            .returns(async (action: () => Promise<boolean>, errorHandler: (err: Error) => Promise<void>, _: number) => {
+            .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 return action();
             })
             .verifiable();
