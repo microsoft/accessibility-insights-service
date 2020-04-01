@@ -168,24 +168,18 @@ function deletePoolsIfNeeded() {
         return
     fi
 
-    if [[ "$dropPools" == true ]]; then
-        deletePoolsWhenNodesAreIdle
-        return
+    if [[ "$dropPools" != true ]]; then
+        checkIfVmssAreOld
+        if [[ $areVmssOld != true ]]; then
+            checkPoolConfigs
+            if [[ $poolConfigOutdated != true ]]; then
+                echo "Pools do not need to be recreated."
+                return
+            fi
+        fi
     fi
 
-    checkIfVmssAreOld
-    if [[ $areVmssOld == true ]]; then
-        deletePoolsWhenNodesAreIdle
-        return
-    fi
-    
-    checkPoolConfigs
-    if [[ $poolConfigOutdated == true ]]; then
-        deletePoolsWhenNodesAreIdle
-        return
-    fi
-
-    echo "Pools do not need to be recreated."
+    deletePoolsWhenNodesAreIdle
 }
 
 # Read script arguments
