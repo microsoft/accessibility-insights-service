@@ -11,6 +11,7 @@ import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     OnDemandScanRequestMessage,
+    ScanError,
 } from 'storage-documents';
 import { IMock, Mock, Times } from 'typemoq';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
@@ -83,11 +84,14 @@ describe('Scan request sender', () => {
         await testSubject.sendRequestToScan(onDemandPageScanRequests);
     });
 
-    it('does not delete request/update scan if failed to queue', async () => {
+    it('mark scan result as failure if failed to queue', async () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
         onDemandPageScanRequests.forEach(request => {
             const pageScanRunResultDoc = createResultDoc(request, 'accepted');
-            const acceptedPageScanRunResultDoc = createResultDoc(request, 'queued');
+            const failedPageScanRunResultDoc = createResultDoc(request, 'failed', {
+                errorType: 'InternalError',
+                message: 'Failed to create scan message in queue.',
+            });
 
             onDemandPageScanRunResultProvider
                 .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
@@ -95,9 +99,9 @@ describe('Scan request sender', () => {
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc]))
+                .setup(async resultProvider => resultProvider.writeScanRuns([failedPageScanRunResultDoc]))
                 .returns(async () => Promise.resolve())
-                .verifiable(Times.never());
+                .verifiable(Times.once());
 
             const message = createOnDemandScanRequestMessage(request);
 
@@ -109,7 +113,7 @@ describe('Scan request sender', () => {
             pageScanRequestProvider
                 .setup(async doc => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
-                .verifiable(Times.never());
+                .verifiable(Times.once());
         });
 
         await testSubject.sendRequestToScan(onDemandPageScanRequests);
@@ -166,7 +170,7 @@ describe('Scan request sender', () => {
         ];
     }
 
-    function createResultDoc(scanRequest: OnDemandPageScanRequest, state: string): OnDemandPageScanResult {
+    function createResultDoc(scanRequest: OnDemandPageScanRequest, state: string, error?: ScanError): OnDemandPageScanResult {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
@@ -175,6 +179,7 @@ describe('Scan request sender', () => {
             run: {
                 state: state as OnDemandPageScanRunState,
                 timestamp: dateNow.toJSON(),
+                error,
             },
             itemType: ItemType.onDemandPageScanRunResult,
             batchRequestId: batchRequestId,
