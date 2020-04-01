@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
-import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -16,7 +16,7 @@ import {
     OnDemandPageScanRunState,
     ScanCompletedNotification,
 } from 'storage-documents';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { NotificationQueueMessageSender } from './notification-queue-message-sender';
 
 // tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
@@ -29,10 +29,10 @@ describe(NotificationQueueMessageSender, () => {
     let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    let systemMock: IMock<typeof System>;
     let processStub: typeof process;
     let scanConfig: ScanRunTimeConfig;
     let storageConfigStub: StorageConfig;
+    let retryHelperMock: IMock<RetryHelper<void>>;
 
     const notificationSenderMetadata: OnDemandNotificationRequestMessage = {
         scanId: 'id',
@@ -79,7 +79,7 @@ describe(NotificationQueueMessageSender, () => {
             .setup(async s => s.getConfigValue('scanConfig'))
             .returns(async () => scanConfig)
             .verifiable(Times.once());
-        systemMock = Mock.ofInstance(System, MockBehavior.Strict);
+        retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
         processStub = {} as typeof process;
         processStub.env = { batchJobId: 'job 1' };
@@ -91,45 +91,35 @@ describe(NotificationQueueMessageSender, () => {
             queueMock.object,
             loggerMock.object,
             processStub,
-            systemMock.object,
+            retryHelperMock.object,
         );
     });
 
-    it('Enqueue Notification Succeeded', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
-        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+    // it('Enqueue Notification Succeeded', async () => {
+    //     const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
+    //     setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+    //     setupRetryHelperMock();
 
-        systemMock
-            .setup(sm => sm.wait(5000))
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.never());
+    //     queueMock
+    //         .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+    //         .returns(async () => Promise.resolve(true))
+    //         .verifiable(Times.once());
 
-        queueMock
-            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
-            .returns(async () => Promise.resolve(true))
-            .verifiable(Times.once());
-
-        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
-    });
+    //     await dispatcher.sendNotificationMessage(notificationSenderMetadata);
+    // });
 
     it('Send Notification Failed', async () => {
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
             errorType: 'InternalError',
-            message: 'Failed to enqueue the notification!',
+            message: 'Failed to enqueue the notification',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-
-        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
-            systemMock
-                .setup(sm => sm.wait(tryNumber * 1000))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.once());
-        }
+        setupRetryHelperMock(true);
 
         queueMock
             .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .returns(async () => Promise.resolve(false))
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
+            .verifiable(Times.once());
 
         await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
@@ -137,21 +127,12 @@ describe(NotificationQueueMessageSender, () => {
     it('Send Notification Failed Error', async () => {
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
             errorType: 'InternalError',
-            message: 'Unexpected Error',
+            message: 'Failed to enqueue the notification',
         });
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock(true);
 
-        for (let tryNumber = 1; tryNumber < scanConfig.maxSendNotificationRetryCount; tryNumber = tryNumber + 1) {
-            systemMock
-                .setup(sm => sm.wait(tryNumber * 1000))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.once());
-        }
-
-        queueMock
-            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
-            .throws(new Error('Unexpected Error'))
-            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
+        queueMock.setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata)).verifiable(Times.once());
 
         await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
@@ -161,7 +142,6 @@ describe(NotificationQueueMessageSender, () => {
         queueMock.verifyAll();
         loggerMock.verifyAll();
         serviceConfigMock.verifyAll();
-        systemMock.verifyAll();
     });
 
     function getRunningJobStateScanResult(notification: ScanCompletedNotification): Partial<OnDemandPageScanResult> {
@@ -185,5 +165,20 @@ describe(NotificationQueueMessageSender, () => {
             state: state,
             error: error,
         };
+    }
+
+    function setupRetryHelperMock(shouldFail = false): void {
+        retryHelperMock
+            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), scanConfig.maxSendNotificationRetryCount, 1000))
+            .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
+                try {
+                    await action();
+                } catch (error) {
+                    if (shouldFail) {
+                        await errorHandler(new Error(`Failed to enqueue the notification`));
+                    }
+                }
+            })
+            .verifiable();
     }
 });

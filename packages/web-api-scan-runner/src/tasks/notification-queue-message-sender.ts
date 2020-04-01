@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Queue, StorageConfig } from 'azure-services';
-import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger, loggerTypes } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -12,7 +12,6 @@ import {
     OnDemandPageScanResult,
     ScanCompletedNotification,
 } from 'storage-documents';
-
 // tslint:disable: no-null-keyword no-any
 
 @injectable()
@@ -24,7 +23,7 @@ export class NotificationQueueMessageSender {
         @inject(Queue) private readonly queue: Queue,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
-        private readonly system: typeof System = System,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
     ) {}
 
     public async sendNotificationMessage(onDemandNotificationRequestMessage: OnDemandNotificationRequestMessage): Promise<void> {
@@ -43,43 +42,29 @@ export class NotificationQueueMessageSender {
     private async enqueueNotificationWithRetry(
         notificationSenderConfigData: OnDemandNotificationRequestMessage,
     ): Promise<Partial<OnDemandPageScanResult>> {
-        let numberOfTries = 1;
         let notificationState: NotificationState = 'queueFailed';
         let error: NotificationError = null;
         const scanConfig = await this.getScanConfig();
 
         this.logger.logInfo(`Retry count: ${scanConfig.maxSendNotificationRetryCount}`);
-        while (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-            this.logger.logInfo(
-                `Enqueuing the scan notification, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
-            );
-            let response;
-            try {
-                response = await this.queue.createMessage(this.storageConfig.notificationQueue, notificationSenderConfigData);
-
-                if (response) {
-                    this.logger.logInfo(
-                        `Notification enqueued successfully!, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
-                    );
+        await this.retryHelper.executeWithRetries(
+            async () => {
+                const response = await this.queue.createMessage(this.storageConfig.notificationQueue, notificationSenderConfigData);
+                if (response === true) {
+                    this.logger.logInfo(`Notification enqueued successfully.`);
                     notificationState = 'queued';
                     error = null;
-                    break;
                 } else {
-                    this.logger.logInfo(
-                        `Failed to enqueue the notification!, try #${numberOfTries} -> retry count ${scanConfig.maxSendNotificationRetryCount}`,
-                    );
-                    error = { errorType: 'InternalError', message: `Failed to enqueue the notification!` };
+                    throw new Error(`Failed to enqueue the notification`);
                 }
-            } catch (e) {
-                this.logger.logError(`Failed to enqueue the notification!, error message: ${(e as Error).message}`);
-                error = { errorType: 'InternalError', message: (e as Error).message };
-            }
-            numberOfTries = numberOfTries + 1;
-            if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-                // tslint:disable-next-line:binary-expression-operand-order
-                await this.system.wait(1000 * (numberOfTries - 1));
-            }
-        }
+            },
+            async (e: Error) => {
+                this.logger.logError(`[Notification Queue Message Sender] error message: ${e.message}`);
+                error = { errorType: 'InternalError', message: e.message };
+            },
+            scanConfig.maxSendNotificationRetryCount,
+            1000,
+        );
 
         return {
             id: notificationSenderConfigData.scanId,
