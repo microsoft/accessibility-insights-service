@@ -241,17 +241,12 @@ describe(Queue, () => {
 
         test.each([null, { messageId: null }])('creates message failed - response = %o', async response => {
             const messageText = 'some message';
-            let caughtError: Error;
-
             setupRetryHelperMock();
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, response);
+            loggerMock.setup(lm => lm.logError(It.isAnyString())).verifiable();
 
-            await testSubject.createMessage(queue, messageText).catch(reason => {
-                caughtError = reason;
-            });
-
-            expect(caughtError.message).toBe(`Failed to enqueue the message`);
+            expect(await testSubject.createMessage(queue, messageText)).toEqual(false);
 
             verifyAll();
         });

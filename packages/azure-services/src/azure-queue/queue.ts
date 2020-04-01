@@ -5,6 +5,7 @@ import { RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
+import * as util from 'util';
 import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
 
@@ -19,7 +20,7 @@ export class Queue {
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<boolean>,
         private readonly maxAttempts: number = 3,
-        private readonly millisBetweenRetries: number = 1000,
+        private readonly retryIntervalMilliseconds: number = 1000,
     ) {}
 
     /**
@@ -74,14 +75,20 @@ export class Queue {
     }
 
     public async createMessage(queue: string, message: unknown): Promise<boolean> {
-        return this.retryHelper.executeWithRetries(
-            () => this.tryCreateMessage(queue, message),
-            async (error: Error) => {
-                return;
-            },
-            this.maxAttempts,
-            this.millisBetweenRetries,
-        );
+        try {
+            return await this.retryHelper.executeWithRetries(
+                () => this.tryCreateMessage(queue, message),
+                async (error: Error) => {
+                    return;
+                },
+                this.maxAttempts,
+                this.retryIntervalMilliseconds,
+            );
+        } catch (error) {
+            this.logger.logError(`[Queue] Failed to create message: ${util.inspect(error)}`);
+
+            return false;
+        }
     }
 
     public async getMessageCount(queue: string): Promise<number> {
@@ -99,7 +106,7 @@ export class Queue {
         if (enqueued) {
             return true;
         } else {
-            throw new Error(`Failed to enqueue the message`);
+            throw new Error(`Failed to enqueue the message.`);
         }
     }
 
