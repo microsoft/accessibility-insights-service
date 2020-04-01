@@ -26,20 +26,18 @@ export class OnDemandScanRequestSender {
             onDemandPageScanRequests.map(async page => {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
-                let isEnqueueSuccessful: boolean;
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
                     const message = this.createOnDemandScanRequestMessage(page);
-                    isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
-                }
-
-                if (isEnqueueSuccessful === true) {
-                    await this.updateOnDemandPageResultDoc(resultDoc, 'queued');
-                } else {
-                    const error: ScanError = {
-                        errorType: 'InternalError',
-                        message: 'Failed to create scan message in queue.',
-                    };
-                    await this.updateOnDemandPageResultDoc(resultDoc, 'failed', error);
+                    const isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                    if (isEnqueueSuccessful === true) {
+                        await this.updateOnDemandPageResultDoc(resultDoc, 'queued');
+                    } else {
+                        const error: ScanError = {
+                            errorType: 'InternalError',
+                            message: 'Failed to create scan message in queue.',
+                        };
+                        await this.updateOnDemandPageResultDoc(resultDoc, 'failed', error);
+                    }
                 }
 
                 await this.pageScanRequestProvider.deleteRequests([page.id]);
