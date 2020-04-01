@@ -29,7 +29,7 @@ export class RetryHelper<T> {
                 if (i < maxAttempts - 1) {
                     await onRetry(lastError);
                     if (millisBetweenRetries > 0) {
-                        await this.sleepFunction(millisBetweenRetries);
+                        await this.sleepFunction(millisBetweenRetries * (i + 1));
                     }
                 }
             }

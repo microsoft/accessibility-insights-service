@@ -44,20 +44,21 @@ describe(RetryHelper, () => {
     });
 
     it('success on retry', async () => {
-        let retried = false;
+        let retryCount = 0;
         actionMock
             .setup(a => a())
             .returns(async () => {
-                if (!retried) {
-                    retried = true;
+                if (retryCount < 2) {
+                    retryCount += 1;
                     throw testError;
                 }
 
                 return returnValue;
             })
-            .verifiable(Times.exactly(2));
-        errorHandlerMock.setup(e => e(testError)).verifiable(Times.once());
-        sleepFunctionMock.setup(s => s(It.isAny())).verifiable(Times.once());
+            .verifiable(Times.exactly(3));
+        errorHandlerMock.setup(e => e(testError)).verifiable(Times.exactly(2));
+        sleepFunctionMock.setup(s => s(millisBetweenRetries)).verifiable();
+        sleepFunctionMock.setup(s => s(millisBetweenRetries * 2)).verifiable();
 
         const result = await testSubject.executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, millisBetweenRetries);
         expect(result).toBe(returnValue);
@@ -78,7 +79,7 @@ describe(RetryHelper, () => {
         expect(thrownError).toBe(testError);
     });
 
-    it('does not call sleepFunction if millisBetweenRetries is zero', async () => {
+    it('does not call sleepFunction if millisBetweenRetries is 0', async () => {
         actionMock
             .setup(a => a())
             .throws(testError)
