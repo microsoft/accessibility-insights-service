@@ -214,7 +214,7 @@ describe(Queue, () => {
     });
 
     describe('createMessage', () => {
-        it('creates message & queue', async () => {
+        it('creates message & queue message', async () => {
             const messageText = 'some message';
 
             setupRetryHelperMock();

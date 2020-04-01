@@ -80,7 +80,7 @@ export class Queue {
 
             return true;
         } catch (error) {
-            this.logger.logError(`[Queue] Failed to create message: ${util.inspect(error)}`);
+            this.logger.logError(`[Queue] Failed to create message: ${util.inspect(message)}. Error: ${util.inspect(error)}`);
 
             return false;
         }
