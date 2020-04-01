@@ -57,8 +57,8 @@ describe(RetryHelper, () => {
             })
             .verifiable(Times.exactly(3));
         errorHandlerMock.setup(e => e(testError)).verifiable(Times.exactly(2));
-        sleepFunctionMock.setup(s => s(millisBetweenRetries)).verifiable();
-        sleepFunctionMock.setup(s => s(millisBetweenRetries * 2)).verifiable();
+        sleepFunctionMock.setup(s => s(millisBetweenRetries)).verifiable(Times.once());
+        sleepFunctionMock.setup(s => s(millisBetweenRetries * 2)).verifiable(Times.once());
 
         const result = await testSubject.executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, millisBetweenRetries);
         expect(result).toBe(returnValue);
