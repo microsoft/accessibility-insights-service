@@ -31,11 +31,10 @@ function checkIfVmssAreOld {
         --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
         -o tsv
     )
-    
-    echo "VMSS created dates: $createdDates"
 
     for createdDate in $createdDates; do
         hasCreatedDateTags=true
+        echo "VMSS created date: $createdDate"
         local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
         local currentDate=$(date "+%Y-%m-%d")
         
