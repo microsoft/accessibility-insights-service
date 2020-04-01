@@ -175,7 +175,7 @@ export class Runner {
             scanId: scanResult.id,
             scanNotifyUrl: scanResult.notification.scanNotifyUrl,
             runStatus: scanResult.run.state,
-            scanStatus: scanResult.scanResult.state,
+            scanStatus: scanResult.scanResult?.state,
         };
     }
 
