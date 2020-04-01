@@ -19,13 +19,19 @@ export class OnDemandScanRequestSender {
             onDemandPageScanRequests.map(async page => {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
+                let isEnqueueSuccessful: boolean;
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
                     const message = this.createOnDemandScanRequestMessage(page);
-                    await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                    isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
+                }
+
+                if (isEnqueueSuccessful === true) {
                     await this.updateOnDemandPageResultDoc(resultDoc);
                 }
 
-                await this.pageScanRequestProvider.deleteRequests([page.id]);
+                if (isEnqueueSuccessful !== false) {
+                    await this.pageScanRequestProvider.deleteRequests([page.id]);
+                }
             }),
         );
     }
