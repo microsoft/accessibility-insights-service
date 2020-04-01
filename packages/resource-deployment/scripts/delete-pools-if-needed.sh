@@ -97,8 +97,6 @@ function checkIfPoolConfigOutdated {
 }
 
 function checkPoolConfigs {
-    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
-
     for pool in $pools; do
         camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
         checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
@@ -136,7 +134,7 @@ waitForDelete() {
 
         sleep 5
         printf "."
-        checkIfPoolExists
+        checkIfPoolExists $poolId
     done
 
     if [ "$poolExists" == "true" ]; then
@@ -164,6 +162,7 @@ function deletePoolsWhenNodesAreIdle() {
 }
 
 function deletePoolsIfNeeded() {
+    az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
     pools=$(az batch pool list --query "[].id" -o tsv)
     if [[ -z "$pools" ]]; then
         return
