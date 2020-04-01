@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
-import { ServiceConfiguration } from 'common';
+import { RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
+import * as util from 'util';
 import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
 
@@ -17,6 +18,9 @@ export class Queue {
         @inject(iocTypeNames.MessageIdURLProvider) private readonly messageIdURLProvider: MessageIdURLProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
+        private readonly maxAttempts: number = 3,
+        private readonly retryIntervalMilliseconds: number = 1000,
     ) {}
 
     /**
@@ -71,10 +75,15 @@ export class Queue {
     }
 
     public async createMessage(queue: string, message: unknown): Promise<boolean> {
-        const queueURL = await this.getQueueURL(queue);
-        await this.ensureQueueExists(queueURL);
+        try {
+            await this.tryCreateMessage(queue, message);
 
-        return this.createQueueMessage(queueURL, message);
+            return true;
+        } catch (error) {
+            this.logger.logError(`[Queue] Failed to create message: ${util.inspect(message)}. Error: ${util.inspect(error)}`);
+
+            return false;
+        }
     }
 
     public async getMessageCount(queue: string): Promise<number> {
@@ -82,6 +91,32 @@ export class Queue {
         const queueProperties = await queueURL.getProperties(Aborter.none);
 
         return queueProperties.approximateMessagesCount;
+    }
+
+    public async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<unknown> {
+        const messagesURL = this.getMessagesURL(queueURL);
+
+        const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
+        if (_.isNil(response) || _.isNil(response.messageId)) {
+            throw new Error(`Enqueue Failed with response: ${util.inspect(response)}`);
+        }
+
+        return message;
+    }
+
+    private async tryCreateMessage(queue: string, message: unknown): Promise<void> {
+        return this.retryHelper.executeWithRetries(
+            async () => {
+                const queueURL = await this.getQueueURL(queue);
+                await this.ensureQueueExists(queueURL);
+                await this.createQueueMessage(queueURL, message);
+            },
+            async (error: Error) => {
+                return;
+            },
+            this.maxAttempts,
+            this.retryIntervalMilliseconds,
+        );
     }
 
     private async ensureQueueExists(queueURL: QueueURL): Promise<void> {
@@ -123,17 +158,6 @@ export class Queue {
     ): Promise<void> {
         await this.createQueueMessage(deadQueueURL, queueMessage.messageText);
         await this.deleteQueueMessage(originQueueURL, queueMessage.messageId, queueMessage.popReceipt);
-    }
-
-    private async createQueueMessage(queueURL: QueueURL, message: unknown): Promise<boolean> {
-        const messagesURL = this.getMessagesURL(queueURL);
-
-        const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
-        if (_.isNil(response) || _.isNil(response.messageId)) {
-            return false;
-        }
-
-        return true;
     }
 
     private getMessagesURL(queueURL: QueueURL): MessagesURL {

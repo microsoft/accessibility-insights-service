@@ -4,8 +4,8 @@
 import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
-import { ServiceConfiguration } from 'common';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { RetryHelper, ServiceConfiguration } from 'common';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
@@ -28,6 +28,8 @@ describe(Queue, () => {
     let deadMessagesURLMock: IMock<MessagesURL>;
     let messageIdUrlMock: IMock<MessageIdURL>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
+    let retryHelperMock: IMock<RetryHelper<void>>;
+    const maxAttempts = 3;
 
     beforeEach(() => {
         queue = 'queue-1';
@@ -35,6 +37,7 @@ describe(Queue, () => {
         queueURLProviderMock = Mock.ofInstance((() => {}) as any);
         messagesURLProviderMock = Mock.ofInstance((() => {}) as any);
         messageIdURLProviderMock = Mock.ofInstance((() => {}) as any);
+        retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
         serviceURLMock = Mock.ofType<ServiceURL>();
         queueURLMock = Mock.ofType<QueueURL>();
@@ -73,6 +76,9 @@ describe(Queue, () => {
             messageIdURLProviderMock.object,
             serviceConfigMock.object,
             loggerMock.object,
+            retryHelperMock.object,
+            maxAttempts,
+            0,
         );
     });
 
@@ -208,11 +214,12 @@ describe(Queue, () => {
     });
 
     describe('createMessage', () => {
-        it('creates message & queue', async () => {
+        it('creates message & queue message', async () => {
             const messageText = 'some message';
 
+            setupRetryHelperMock();
             setupQueueCreationCallWhenQueueDoesNotExist();
-            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText);
+            setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, { messageId: 'id' });
 
             await testSubject.createMessage(queue, messageText);
 
@@ -222,6 +229,7 @@ describe(Queue, () => {
         it('creates message succeeded when queue exists', async () => {
             const messageText = 'some message';
 
+            setupRetryHelperMock();
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, { messageId: 'id' });
 
@@ -233,12 +241,12 @@ describe(Queue, () => {
 
         test.each([null, { messageId: null }])('creates message failed - response = %o', async response => {
             const messageText = 'some message';
-
+            setupRetryHelperMock();
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, response);
+            loggerMock.setup(lm => lm.logError(It.isAnyString())).verifiable();
 
-            const isCreated = await testSubject.createMessage(queue, messageText);
-            expect(isCreated).toBe(false);
+            expect(await testSubject.createMessage(queue, messageText)).toEqual(false);
 
             verifyAll();
         });
@@ -278,7 +286,7 @@ describe(Queue, () => {
     }
 
     function setupVerifyCallToMoveMessageToDeadQueue(message: Models.DequeuedMessageItem): void {
-        setupVerifyCallToEnqueueMessage(deadMessagesURLMock, message.messageText);
+        setupVerifyCallToEnqueueMessage(deadMessagesURLMock, message.messageText, { messageId: 1 });
         setupVerifyCallToDeleteMessage(message);
     }
 
@@ -312,6 +320,17 @@ describe(Queue, () => {
         return serverMessages.map(m => {
             return new Message(m.messageText, m.messageId, m.popReceipt);
         });
+    }
+
+    function setupRetryHelperMock(): void {
+        retryHelperMock
+            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
+            .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
+                await errorHandler(null);
+
+                return action();
+            })
+            .verifiable();
     }
 
     function verifyAll(): void {

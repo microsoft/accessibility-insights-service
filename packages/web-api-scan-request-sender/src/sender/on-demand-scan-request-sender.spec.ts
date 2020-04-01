@@ -83,6 +83,38 @@ describe('Scan request sender', () => {
         await testSubject.sendRequestToScan(onDemandPageScanRequests);
     });
 
+    it('does not delete request/update scan if failed to queue', async () => {
+        const onDemandPageScanRequests = getValidPageScanRequests();
+        onDemandPageScanRequests.forEach(request => {
+            const pageScanRunResultDoc = createResultDoc(request, 'accepted');
+            const acceptedPageScanRunResultDoc = createResultDoc(request, 'queued');
+
+            onDemandPageScanRunResultProvider
+                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .returns(async () => Promise.resolve([pageScanRunResultDoc]))
+                .verifiable(Times.once());
+
+            onDemandPageScanRunResultProvider
+                .setup(async resultProvider => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc]))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.never());
+
+            const message = createOnDemandScanRequestMessage(request);
+
+            queueMock
+                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .returns(async () => Promise.resolve(false))
+                .verifiable(Times.once());
+
+            pageScanRequestProvider
+                .setup(async doc => doc.deleteRequests([request.id]))
+                .returns(async () => Promise.resolve())
+                .verifiable(Times.never());
+        });
+
+        await testSubject.sendRequestToScan(onDemandPageScanRequests);
+    });
+
     it('does not queue a scan with queued or any other state', async () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
         onDemandPageScanRequests.forEach(request => {

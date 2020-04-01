@@ -18,7 +18,7 @@ export class RetryHelper<T> {
         action: () => Promise<T>,
         onRetry: ErrorHandler,
         maxAttempts: number,
-        millisBetweenRetries: number = 0,
+        retryIntervalMilliseconds: number = 0,
     ): Promise<T> {
         let lastError: Error;
         for (let i = 0; i < maxAttempts; i += 1) {
@@ -28,8 +28,8 @@ export class RetryHelper<T> {
                 lastError = err as Error;
                 if (i < maxAttempts - 1) {
                     await onRetry(lastError);
-                    if (millisBetweenRetries > 0) {
-                        await this.sleepFunction(millisBetweenRetries);
+                    if (retryIntervalMilliseconds > 0) {
+                        await this.sleepFunction(retryIntervalMilliseconds * (i + 1));
                     }
                 }
             }
