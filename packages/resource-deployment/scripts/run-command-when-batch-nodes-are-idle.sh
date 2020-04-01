@@ -7,17 +7,18 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -c <command to run> -n <command name>
+Usage: $0 -r <resource group> -c <command to run> -n <command name> [-p <pool ids (if not specified, will wait for all pools to become idle)>]
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:c:n:" option; do
+while getopts ":r:c:n:p:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     c) command=${OPTARG} ;;
     n) commandName=${OPTARG} ;;
+    p) pools=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -38,7 +39,8 @@ commandName: $commandName
 function setJobScheduleStatus {
     local status=$1
 
-    local schedules=$(az batch job-schedule list --query "[].id" -o tsv)
+    query="[?contains('$pools', jobSpecification.poolInfo.poolId)].id"
+    schedules=$(az batch job-schedule list --query "$query" -o tsv)
 
     for schedule in $schedules; do
         echo "Setting job schedule $schedule status to $status"
@@ -117,7 +119,9 @@ function runCommand() {
     echo "Logging into '$batchAccountName' Azure Batch account"
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
 
-    pools=$(az batch pool list --query "[].id" -o tsv)
+    if [[ -z "$pools" ]]; then
+        pools=$(az batch pool list --query "[].id" -o tsv)
+    fi
 
     disableJobSchedule
 

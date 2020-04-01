@@ -10,26 +10,31 @@ set -eo pipefail
 # and enable managed identity for Azure on Batch pools
 
 export resourceGroupName
+export batchAccountName
+export parameterFilePath
+export dropPools=false
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>]
+Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optional)>] [-d <pass \"true\" to force pools to drop>]
 "
     exit 1
 }
 
 . "${0%/*}/process-utilities.sh"
 
-function deployBatch() {
+function setParameterFilePath() {
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
-        parameters="${0%/*}/../templates/batch-account-prod.parameters.json"
+        parameterFilePath="${0%/*}/../templates/batch-account-prod.parameters.json"
     else
-        parameters="${0%/*}/../templates/batch-account-dev.parameters.json"
+        parameterFilePath="${0%/*}/../templates/batch-account-dev.parameters.json"
     fi
+}
 
+function deployBatch() {
     # Deploy Azure Batch account using resource manager template
     echo "Deploying Azure Batch account in resource group $resourceGroupName with template $batchTemplateFile"
     resources=$(
@@ -37,7 +42,7 @@ function deployBatch() {
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
             --query "properties.outputResources[].id" \
-            --parameters "$parameters" \
+            --parameters "$parameterFilePath" \
             -o tsv
     )
 
@@ -47,11 +52,12 @@ function deployBatch() {
 }
 
 # Read script arguments
-while getopts ":r:t:e:" option; do
+while getopts ":r:t:e:d:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     t) batchTemplateFile=${OPTARG} ;;
     e) environment=${OPTARG} ;;
+    d) dropPools=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -73,6 +79,10 @@ echo "Setting up batch account $batchAccountName"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
 . "${0%/*}/account-set-batch-app.sh"
+
+setParameterFilePath
+
+. "${0%/*}/delete-pools-if-needed.sh"
 
 deployBatch
 
