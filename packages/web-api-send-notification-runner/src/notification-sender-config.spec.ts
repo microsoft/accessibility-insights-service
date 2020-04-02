@@ -16,12 +16,12 @@ describe(NotificationSenderConfig, () => {
         // tslint:disable-next-line: no-empty
         argvMock = Mock.ofInstance<Argv>(({ argv: undefined, demandOption: () => {} } as unknown) as Argv);
         testSubject = new NotificationSenderConfig(argvMock.object);
-        argvMock.setup(a => a.argv).returns(() => argvVal as any);
+        argvMock.setup((a) => a.argv).returns(() => argvVal as any);
     });
 
     it('getConfig', () => {
         expect(testSubject.getConfig()).toBe(argvVal);
 
-        argvMock.verify(a => a.demandOption(['scanId', 'scanNotifyUrl', 'runStatus', 'scanStatus']), Times.once());
+        argvMock.verify((a) => a.demandOption(['scanId', 'scanNotifyUrl', 'runStatus', 'scanStatus']), Times.once());
     });
 });

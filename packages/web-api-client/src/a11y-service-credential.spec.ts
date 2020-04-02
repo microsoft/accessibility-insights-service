@@ -49,7 +49,7 @@ describe(A11yServiceCredential, () => {
         );
 
         authenticationContextMock
-            .setup(am => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
+            .setup((am) => am.acquireTokenWithClientCredentials(resource, clientId, clientMockSec, It.isAny()))
             .callback((resourceUrl, cid, sec, callback) => {
                 callback(error, tokenResponse);
             });
@@ -77,16 +77,16 @@ describe(A11yServiceCredential, () => {
 
         await testSubject.signRequest(requestMock.object);
 
-        requestMock.verify(rm => rm.defaults(It.isValue(expectedHeaders)), Times.once());
+        requestMock.verify((rm) => rm.defaults(It.isValue(expectedHeaders)), Times.once());
     });
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
         setupRetryHelperMock(true);
-        loggerMock.setup(l => l.logError(`Auth getToken call failed with error: ${JSON.stringify(error)}`)).verifiable();
+        loggerMock.setup((l) => l.logError(`Auth getToken call failed with error: ${JSON.stringify(error)}`)).verifiable();
 
         let caughtError: Error;
-        await testSubject.getToken().catch(reason => {
+        await testSubject.getToken().catch((reason) => {
             caughtError = reason;
         });
         expect(caughtError).not.toBeUndefined();
@@ -94,7 +94,7 @@ describe(A11yServiceCredential, () => {
 
     function setupRetryHelperMock(shouldFail: boolean): void {
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts, 0))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), numTokenAttempts, 0))
             .returns(async (action: () => Promise<TokenResponse>, errorHandler: (err: Error) => Promise<void>, maxAttempts: number) => {
                 if (shouldFail) {
                     await errorHandler(error);

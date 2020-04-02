@@ -184,7 +184,7 @@ describe('HealthMonitorOrchestrationController', () => {
 
         orchestratorGeneratorMock = Mock.ofInstance<(contextObj: IOrchestrationFunctionContext) => void>(() => {});
 
-        df.setup(d => d.orchestrator(It.isAny()))
+        df.setup((d) => d.orchestrator(It.isAny()))
             .callback((fn: (context: IOrchestrationFunctionContext) => IterableIterator<unknown>) => {
                 orchestratorIterator = new GeneratorExecutor(fn(contextStub));
             })
@@ -221,7 +221,7 @@ describe('HealthMonitorOrchestrationController', () => {
             } as unknown) as IOrchestrationFunctionContext;
 
             df.reset();
-            df.setup(d => d.orchestrator(It.isAny()))
+            df.setup((d) => d.orchestrator(It.isAny()))
                 .callback((fn: (context: IOrchestrationFunctionContext) => IterableIterator<unknown>) => {
                     orchestratorIterator = new GeneratorExecutor(fn(orchestrationFuncContext));
                 })
@@ -247,7 +247,7 @@ describe('HealthMonitorOrchestrationController', () => {
             await testSubject.invoke(contextStub);
 
             expect(orchestratorIterator).toBeDefined();
-            orchestratorGeneratorMock.verify(g => g(contextStub), Times.once());
+            orchestratorGeneratorMock.verify((g) => g(contextStub), Times.once());
         });
 
         it('executes activities in sequence', async () => {
@@ -315,7 +315,7 @@ describe('HealthMonitorOrchestrationController', () => {
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
         });
 
-        test.each([0, 1, 2, 3, 4, 5, 6, 7])('activities throw exception on step %o', async failedStep => {
+        test.each([0, 1, 2, 3, 4, 5, 6, 7])('activities throw exception on step %o', async (failedStep) => {
             await testSubject.invoke(contextStub);
 
             for (let stepNum = 0; stepNum < failedStep; stepNum += 1) {
@@ -333,6 +333,8 @@ describe('HealthMonitorOrchestrationController', () => {
     });
 
     function setupServiceConfig(): void {
-        serviceConfigurationMock.setup(async sc => sc.getConfigValue('availabilityTestConfig')).returns(async () => availabilityTestConfig);
+        serviceConfigurationMock
+            .setup(async (sc) => sc.getConfigValue('availabilityTestConfig'))
+            .returns(async () => availabilityTestConfig);
     }
 });

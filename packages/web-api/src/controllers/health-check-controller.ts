@@ -106,7 +106,7 @@ export class HealthCheckController extends ApiController {
         let testsPassed = 0;
         let testsFailed = 0;
         const testRuns: TestRun[] = [];
-        table.rows.forEach(row => {
+        table.rows.forEach((row) => {
             const result = this.getColumnValue(columns, row, 'result') as TestRunResult;
             if (result === 'pass') {
                 testsPassed += 1;
@@ -156,9 +156,9 @@ export class HealthCheckController extends ApiController {
     }
 
     private getColumnValue(columns: Column[], row: string[], columnName: string): string {
-        const index = columns.findIndex(c => c.name === columnName);
+        const index = columns.findIndex((c) => c.name === columnName);
 
-        return index > -1 && row !== undefined && row.length > index ? row[columns.findIndex(c => c.name === columnName)] : undefined;
+        return index > -1 && row !== undefined && row.length > index ? row[columns.findIndex((c) => c.name === columnName)] : undefined;
     }
 
     private async getAvailabilityTestConfig(): Promise<AvailabilityTestConfig> {

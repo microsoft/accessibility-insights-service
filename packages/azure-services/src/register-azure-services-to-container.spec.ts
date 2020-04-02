@@ -56,7 +56,7 @@ describe('BatchServiceClient', () => {
         registerAzureServicesToContainer(container, CredentialType.AppService);
         credentialsProviderMock = Mock.ofType(CredentialsProvider);
         credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
-        credentialsProviderMock.setup(async c => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
+        credentialsProviderMock.setup(async (c) => c.getCredentialsForBatch()).returns(async () => Promise.resolve(credentialsStub));
 
         stubBinding(container, SecretProvider, secretProviderMock.object);
         stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
@@ -146,16 +146,16 @@ describe(registerAzureServicesToContainer, () => {
             const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
 
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.storageAccountName))
+                .setup(async (s) => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
                 .verifiable(Times.once());
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
                 .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
                 .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
@@ -184,11 +184,11 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.storageAccountName))
+                .setup(async (s) => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
                 .verifiable(Times.once());
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.storageAccountKey))
+                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
                 .returns(async () => storageAccountKey)
                 .verifiable(Times.once());
 
@@ -229,7 +229,7 @@ describe(registerAzureServicesToContainer, () => {
             stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
 
             credentialsProviderMock
-                .setup(async c => c.getCredentialsForKeyVault())
+                .setup(async (c) => c.getCredentialsForKeyVault())
                 .returns(async () => Promise.resolve(credentialsStub))
                 .verifiable(Times.once());
         });
@@ -266,11 +266,11 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock = Mock.ofType(SecretProvider);
 
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.cosmosDbUrl))
+                .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
                 .returns(async () => Promise.resolve(cosmosDbUrl))
                 .verifiable();
             secretProviderMock
-                .setup(async s => s.getSecret(secretNames.cosmosDbKey))
+                .setup(async (s) => s.getSecret(secretNames.cosmosDbKey))
                 .returns(async () => Promise.resolve(cosmosDbKey))
                 .verifiable();
         });
@@ -303,8 +303,8 @@ describe(registerAzureServicesToContainer, () => {
 
         it('use env variables if available', async () => {
             secretProviderMock.reset();
-            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
-            secretProviderMock.setup(async s => s.getSecret(secretNames.cosmosDbKey)).verifiable(Times.never());
+            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
+            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbKey)).verifiable(Times.never());
             process.env.COSMOS_DB_URL = cosmosDbUrl;
             process.env.COSMOS_DB_KEY = cosmosDbKey;
 

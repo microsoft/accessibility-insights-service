@@ -42,20 +42,20 @@ describe('Command Runner', () => {
     describe('scan with output parameter specified', () => {
         it('output directory exists', async () => {
             fsMock
-                .setup(fsm => fsm.existsSync(testInput.output))
+                .setup((fsm) => fsm.existsSync(testInput.output))
                 .returns(() => true)
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.writeFileSync(reportFileName, htmlReportString))
+                .setup((fsm) => fsm.writeFileSync(reportFileName, htmlReportString))
                 .returns(() => {})
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.mkdirSync(testInput.output))
+                .setup((fsm) => fsm.mkdirSync(testInput.output))
                 .returns(() => {})
                 .verifiable(Times.never());
 
-            scannerMock.setup(sm => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
-            reportGeneratorMock.setup(rg => rg.generateReport(scanResults)).returns(() => htmlReportString);
+            scannerMock.setup((sm) => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
+            reportGeneratorMock.setup((rg) => rg.generateReport(scanResults)).returns(() => htmlReportString);
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInput);
 
@@ -64,20 +64,20 @@ describe('Command Runner', () => {
 
         it('output directory does not exists', async () => {
             fsMock
-                .setup(fsm => fsm.existsSync(testInput.output))
+                .setup((fsm) => fsm.existsSync(testInput.output))
                 .returns(() => false)
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.writeFileSync(reportFileName, htmlReportString))
+                .setup((fsm) => fsm.writeFileSync(reportFileName, htmlReportString))
                 .returns(() => {})
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.mkdirSync(testInput.output))
+                .setup((fsm) => fsm.mkdirSync(testInput.output))
                 .returns(() => {})
                 .verifiable(Times.once());
 
-            scannerMock.setup(sm => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
-            reportGeneratorMock.setup(rg => rg.generateReport(scanResults)).returns(() => htmlReportString);
+            scannerMock.setup((sm) => sm.scan(testInput.url)).returns(async () => Promise.resolve(scanResults));
+            reportGeneratorMock.setup((rg) => rg.generateReport(scanResults)).returns(() => htmlReportString);
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInput);
 
@@ -90,20 +90,20 @@ describe('Command Runner', () => {
                 replacement: '_',
             })}.html`;
             fsMock
-                .setup(fsm => fsm.existsSync('.'))
+                .setup((fsm) => fsm.existsSync('.'))
                 .returns(() => true)
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.writeFileSync(reportFileNameWithoutOutput, htmlReportString))
+                .setup((fsm) => fsm.writeFileSync(reportFileNameWithoutOutput, htmlReportString))
                 .returns(() => {})
                 .verifiable(Times.once());
             fsMock
-                .setup(fsm => fsm.mkdirSync(testInputWithoutOutput.output))
+                .setup((fsm) => fsm.mkdirSync(testInputWithoutOutput.output))
                 .returns(() => {})
                 .verifiable(Times.never());
 
-            scannerMock.setup(sm => sm.scan(testInputWithoutOutput.url)).returns(async () => Promise.resolve(scanResults));
-            reportGeneratorMock.setup(rg => rg.generateReport(scanResults)).returns(() => htmlReportString);
+            scannerMock.setup((sm) => sm.scan(testInputWithoutOutput.url)).returns(async () => Promise.resolve(scanResults));
+            reportGeneratorMock.setup((rg) => rg.generateReport(scanResults)).returns(() => htmlReportString);
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runCommand(testInputWithoutOutput);
             expect(testInputWithoutOutput.output).toEqual('.');

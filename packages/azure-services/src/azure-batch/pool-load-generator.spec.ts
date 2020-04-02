@@ -20,7 +20,7 @@ describe(PoolLoadGenerator, () => {
         activeToRunningTasksRatio = 2;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('jobManagerConfig'))
+            .setup(async (s) => s.getConfigValue('jobManagerConfig'))
             .returns(async () => {
                 return {
                     activeToRunningTasksRatio: activeToRunningTasksRatio,

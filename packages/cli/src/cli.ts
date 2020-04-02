@@ -20,7 +20,7 @@ import { setupCliContainer } from './setup-cli-container';
 
     const cliEntryPoint = new CliEntryPoint(setupCliContainer());
     await cliEntryPoint.runScan(scanArguments);
-})().catch(error => {
+})().catch((error) => {
     console.log('Exception thrown in scanner: ', error);
     process.exit(1);
 });

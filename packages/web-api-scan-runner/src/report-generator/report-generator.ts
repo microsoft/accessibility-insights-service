@@ -27,7 +27,7 @@ export class ReportGenerator {
             browserSpec: axeResults.browserSpec,
         };
 
-        return this.axeResultConverters.map<GeneratedReport>(axeResultConverter => {
+        return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
             return {
                 content: axeResultConverter.convert(axeResults.results, params),
                 id: this.guidGenerator.createGuid(),

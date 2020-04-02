@@ -75,16 +75,16 @@ describe(ScanResultController, () => {
         context.req.headers['content-type'] = 'application/json';
 
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
-        onDemandPageScanRunResultProviderMock.setup(async o => o.readScanRuns(It.isAny()));
+        onDemandPageScanRunResultProviderMock.setup(async (o) => o.readScanRuns(It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock
-            .setup(gm => gm.isValidV6Guid(scanId))
+            .setup((gm) => gm.isValidV6Guid(scanId))
             .returns(() => true)
             .verifiable(Times.once());
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
-            .setup(async s => s.getConfigValue('restApiConfig'))
+            .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
@@ -113,7 +113,7 @@ describe(ScanResultController, () => {
 
     function setupGetGuidTimestamp(time: Date): void {
         guidGeneratorMock
-            .setup(gm => gm.getGuidTimestamp(scanId))
+            .setup((gm) => gm.getGuidTimestamp(scanId))
             .returns(() => time)
             .verifiable(Times.atLeast(1));
     }
@@ -123,7 +123,7 @@ describe(ScanResultController, () => {
             scanResultController = createScanResultController(context);
             guidGeneratorMock.reset();
             guidGeneratorMock
-                .setup(gm => gm.isValidV6Guid(scanId))
+                .setup((gm) => gm.isValidV6Guid(scanId))
                 .returns(() => false)
                 .verifiable(Times.once());
 
@@ -135,9 +135,7 @@ describe(ScanResultController, () => {
 
         it('should return 400 for invalid scan Id that has a future timestamp', async () => {
             scanResultController = createScanResultController(context);
-            const timeStamp = moment()
-                .add(1, 'year')
-                .toDate();
+            const timeStamp = moment().add(1, 'year').toDate();
             setupGetGuidTimestamp(timeStamp);
 
             await scanResultController.handleRequest();
@@ -148,9 +146,7 @@ describe(ScanResultController, () => {
 
         it('should return a default response for requests made within 10 sec buffer', async () => {
             scanResultController = createScanResultController(context);
-            const timeStamp = moment()
-                .add(1, 'second')
-                .toDate();
+            const timeStamp = moment().add(1, 'second').toDate();
             setupGetGuidTimestamp(timeStamp);
 
             await scanResultController.handleRequest();
@@ -163,13 +159,11 @@ describe(ScanResultController, () => {
         describe('return proper response if scan is not found', () => {
             it('should return tooSoonRequestResponse error code if the request is made too soon', async () => {
                 scanResultController = createScanResultController(context);
-                const timeStamp = moment()
-                    .subtract(1)
-                    .toDate();
+                const timeStamp = moment().subtract(1).toDate();
                 setupGetGuidTimestamp(timeStamp);
 
                 onDemandPageScanRunResultProviderMock
-                    .setup(async om => om.readScanRuns([scanId]))
+                    .setup(async (om) => om.readScanRuns([scanId]))
                     .returns(async () => {
                         return Promise.resolve([]);
                     })
@@ -187,7 +181,7 @@ describe(ScanResultController, () => {
                 scanResultController = createScanResultController(context);
                 setupGetGuidTimestamp(new Date(0));
                 onDemandPageScanRunResultProviderMock
-                    .setup(async om => om.readScanRuns([scanId]))
+                    .setup(async (om) => om.readScanRuns([scanId]))
                     .returns(async () => {
                         return Promise.resolve([]);
                     })
@@ -207,14 +201,14 @@ describe(ScanResultController, () => {
             onDemandPageScanRunResultProviderMock.reset();
 
             onDemandPageScanRunResultProviderMock
-                .setup(async om => om.readScanRuns([scanId]))
+                .setup(async (om) => om.readScanRuns([scanId]))
                 .returns(async () => {
                     return Promise.resolve([dbResponse]);
                 })
                 .verifiable(Times.once());
 
             scanResponseConverterMock
-                .setup(o => o.getScanResultResponse(baseUrl, apiVersion, dbResponse))
+                .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, dbResponse))
                 .returns(() => scanClientResponseForDbResponse);
 
             await scanResultController.handleRequest();

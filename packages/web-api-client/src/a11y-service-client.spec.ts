@@ -42,7 +42,7 @@ describe(A11yServiceClient, () => {
 
     function setupVerifiableSignRequestCall(): void {
         credMock
-            .setup(cm => cm.signRequest(requestStub))
+            .setup((cm) => cm.signRequest(requestStub))
             .returns(async () => Promise.resolve(requestStub))
             .verifiable();
     }
@@ -53,7 +53,7 @@ describe(A11yServiceClient, () => {
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock
-                .setup(d =>
+                .setup((d) =>
                     d({
                         forever: true,
                         qs: {
@@ -84,7 +84,7 @@ describe(A11yServiceClient, () => {
         const options = { body: requestBody };
         setupVerifiableSignRequestCall();
         postMock
-            .setup(req => req(`${baseUrl}/scans`, options))
+            .setup((req) => req(`${baseUrl}/scans`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -100,7 +100,7 @@ describe(A11yServiceClient, () => {
         const options = { body: requestBody };
         setupVerifiableSignRequestCall();
         postMock
-            .setup(req => req(`${baseUrl}/scans`, options))
+            .setup((req) => req(`${baseUrl}/scans`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -114,7 +114,7 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
         getMock
-            .setup(req => req(`${baseUrl}/scans/${scanId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -129,7 +129,7 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
         getMock
-            .setup(req => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -143,7 +143,7 @@ describe(A11yServiceClient, () => {
         const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
         getMock
-            .setup(req => req(`${baseUrl}/health${suffix}`))
+            .setup((req) => req(`${baseUrl}/health${suffix}`))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -159,13 +159,13 @@ describe(A11yServiceClient, () => {
         };
         setupVerifiableSignRequestCall();
         getMock
-            .setup(req => req(`${baseUrl}/health`))
+            .setup((req) => req(`${baseUrl}/health`))
             .returns(async () => Promise.reject(errRes))
             .verifiable(Times.once());
 
         let errResponse;
 
-        await testSubject.checkHealth().catch(err => {
+        await testSubject.checkHealth().catch((err) => {
             errResponse = err;
         });
 

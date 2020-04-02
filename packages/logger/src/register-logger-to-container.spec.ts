@@ -45,8 +45,8 @@ describe(registerGlobalLoggerToContainer, () => {
         const logger = container.get(GlobalLogger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
-        expect(telemetryClients.filter(c => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
-        expect(telemetryClients.filter(c => c instanceof ConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof AppInsightsLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof ConsoleLoggerClient)).toHaveLength(1);
     });
 });
 
@@ -76,8 +76,8 @@ describe(registerContextAwareLoggerToContainer, () => {
         const logger = container.get(ContextAwareLogger);
 
         const telemetryClients = (logger as any).loggerClients as LoggerClient[];
-        expect(telemetryClients.filter(c => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
-        expect(telemetryClients.filter(c => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof ContextAwareAppInsightsLoggerClient)).toHaveLength(1);
+        expect(telemetryClients.filter((c) => c instanceof ContextAwareConsoleLoggerClient)).toHaveLength(1);
     });
 });
 

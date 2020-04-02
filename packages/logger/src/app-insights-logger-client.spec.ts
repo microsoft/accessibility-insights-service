@@ -56,7 +56,7 @@ describe(AppInsightsLoggerClient, () => {
         processStub.env = envVariables;
 
         appInsightsMock
-            .setup(a => a.defaultClient)
+            .setup((a) => a.defaultClient)
             .returns(() => appInsightsTelemetryClientMock.object)
             .verifiable(Times.atLeastOnce());
 
@@ -115,38 +115,38 @@ describe(AppInsightsLoggerClient, () => {
 
     function verifyCommonProperties(additionalProps?: { [key: string]: string }): void {
         appInsightsTelemetryClientMock.verify(
-            t => (t.commonProperties = It.isValue({ ...commonProperties, ...additionalProps })),
+            (t) => (t.commonProperties = It.isValue({ ...commonProperties, ...additionalProps })),
             Times.atLeastOnce(),
         );
     }
     function setupAppInsightsCall(): void {
-        appInsightsMock.setup(a => a.setup()).returns(() => appInsightsConfigMock.object);
-        appInsightsMock.setup(a => a.start()).verifiable(Times.once());
+        appInsightsMock.setup((a) => a.setup()).returns(() => appInsightsConfigMock.object);
+        appInsightsMock.setup((a) => a.start()).verifiable(Times.once());
     }
 
     function setupAppInsightsConfigurationCall(): void {
         appInsightsConfigMock
-            .setup(c => c.setAutoCollectConsole(true))
+            .setup((c) => c.setAutoCollectConsole(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
 
         appInsightsConfigMock
-            .setup(c => c.setAutoCollectExceptions(true))
+            .setup((c) => c.setAutoCollectExceptions(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
 
         appInsightsConfigMock
-            .setup(c => c.setAutoCollectDependencies(true))
+            .setup((c) => c.setAutoCollectDependencies(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
 
         appInsightsConfigMock
-            .setup(c => c.setAutoDependencyCorrelation(true))
+            .setup((c) => c.setAutoDependencyCorrelation(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
 
         appInsightsConfigMock
-            .setup(c => c.setAutoCollectRequests(true))
+            .setup((c) => c.setAutoCollectRequests(true))
             .returns(() => appInsightsConfigMock.object)
             .verifiable(Times.once());
     }

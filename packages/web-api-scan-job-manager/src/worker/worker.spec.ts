@@ -111,7 +111,7 @@ describe(Worker, () => {
         it('sets pool load generator last increment count', async () => {
             const tasks: any[] = ['task1', 'task2'];
 
-            poolLoadGeneratorMock.setup(p => p.setLastTasksIncrementCount(2)).verifiable(Times.once());
+            poolLoadGeneratorMock.setup((p) => p.setLastTasksIncrementCount(2)).verifiable(Times.once());
 
             await worker.onTasksAdded(tasks);
         });
@@ -119,21 +119,21 @@ describe(Worker, () => {
 
     function setVerifiableFailedTasksCall(tasks: BatchTask[]): void {
         batchMock
-            .setup(async b => b.getFailedTasks(batchConfig.jobId))
+            .setup(async (b) => b.getFailedTasks(batchConfig.jobId))
             .returns(async () => Promise.resolve(tasks))
             .verifiable(Times.once());
     }
 
     function setupVerifiableReadScanRunCall(scanId: string, document: OnDemandPageScanResult): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async s => s.readScanRun(scanId))
+            .setup(async (s) => s.readScanRun(scanId))
             .returns(async () => Promise.resolve(document))
             .verifiable(Times.once());
     }
 
     function setupVerifiableReadScanRunsCall(scanIds: string[], documents: OnDemandPageScanResult[]): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async s => s.readScanRuns(scanIds))
+            .setup(async (s) => s.readScanRuns(scanIds))
             .returns(async () => Promise.resolve(documents))
             .verifiable(Times.once());
     }
@@ -143,8 +143,8 @@ describe(Worker, () => {
         callback?: (toUpdateDoc: OnDemandPageScanResult) => void,
     ): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async s => s.updateScanRun(It.is(doc => doc.id === document.id)))
-            .callback(toUpdateDoc => {
+            .setup(async (s) => s.updateScanRun(It.is((doc) => doc.id === document.id)))
+            .callback((toUpdateDoc) => {
                 if (!isNil(callback)) {
                     callback(toUpdateDoc);
                 }
@@ -161,7 +161,7 @@ describe(Worker, () => {
             {
                 jobTasks: [],
             },
-        ])('does nothing if there are no failed tasks', async testCase => {
+        ])('does nothing if there are no failed tasks', async (testCase) => {
             setVerifiableFailedTasksCall(testCase.jobTasks);
 
             await worker.onExit();
@@ -181,7 +181,7 @@ describe(Worker, () => {
                     id: undefined,
                 },
             },
-        ])('logs error if unable to get required task arguments - %j', async testCase => {
+        ])('logs error if unable to get required task arguments - %j', async (testCase) => {
             const failedTasks = [
                 {
                     taskArguments: JSON.stringify(testCase.taskArguments),
@@ -191,7 +191,7 @@ describe(Worker, () => {
             setVerifiableFailedTasksCall(failedTasks);
 
             loggerMock
-                .setup(l =>
+                .setup((l) =>
                     l.logError(
                         'Task has no run arguments defined',
                         It.isValue({
@@ -218,7 +218,7 @@ describe(Worker, () => {
             setVerifiableFailedTasksCall(failedTasks);
 
             loggerMock
-                .setup(l =>
+                .setup((l) =>
                     l.logError('Task has no corresponding state in a service storage', {
                         taskProperties: JSON.stringify(failedTasks[0]),
                     }),
@@ -261,7 +261,7 @@ describe(Worker, () => {
                     message: 'some server error occurred',
                 } as BatchTaskFailureInfo,
             },
-        ])('complete failed tasks - %j', async testCase => {
+        ])('complete failed tasks - %j', async (testCase) => {
             const taskArgs: TaskArguments = {
                 id: 'task id1',
             };
@@ -283,7 +283,7 @@ describe(Worker, () => {
             let expectedUpdatedDocument: OnDemandPageScanResult;
 
             setupVerifiableReadScanRunCall(taskArgs.id, document);
-            setupVerifiableUpdateScanRunCall(document, actualDocument => {
+            setupVerifiableUpdateScanRunCall(document, (actualDocument) => {
                 expectedUpdatedDocument = actualDocument;
             });
 
@@ -333,10 +333,10 @@ describe(Worker, () => {
             setupVerifiableReadScanRunCall(taskArgs1.id, pageDocument1);
             setupVerifiableReadScanRunCall(taskArgs2.id, pageDocument2);
 
-            setupVerifiableUpdateScanRunCall(pageDocument1, actualDocument => {
+            setupVerifiableUpdateScanRunCall(pageDocument1, (actualDocument) => {
                 expectedUpdatedDocument1 = actualDocument;
             });
-            setupVerifiableUpdateScanRunCall(pageDocument2, actualDocument => {
+            setupVerifiableUpdateScanRunCall(pageDocument2, (actualDocument) => {
                 expectedUpdatedDocument2 = actualDocument;
             });
 
@@ -376,12 +376,12 @@ describe(Worker, () => {
             };
 
             batchMock
-                .setup(async o => o.getPoolMetricsInfo())
+                .setup(async (o) => o.getPoolMetricsInfo())
                 .returns(async () => Promise.resolve(poolMetricsInfo))
                 .verifiable(Times.once());
 
             poolLoadGeneratorMock
-                .setup(async p => p.getPoolLoadSnapshot(poolMetricsInfo))
+                .setup(async (p) => p.getPoolLoadSnapshot(poolMetricsInfo))
                 .returns(async () => Promise.resolve(poolLoadSnapshot))
                 .verifiable(Times.once());
 
@@ -435,9 +435,9 @@ describe(Worker, () => {
 
             setupVerifiableGetQueueMessagesCall(queueMessages);
             systemMock
-                .setup(s =>
+                .setup((s) =>
                     s.chunkArray(
-                        It.is(arr => arr.length === 2),
+                        It.is((arr) => arr.length === 2),
                         100,
                     ),
                 )
@@ -462,9 +462,9 @@ describe(Worker, () => {
 
         function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): void {
             batchPoolLoadSnapshotProviderMock
-                .setup(async o =>
+                .setup(async (o) =>
                     o.writeBatchPoolLoadSnapshot(
-                        It.is(d => {
+                        It.is((d) => {
                             const document = {
                                 // tslint:disable-next-line: no-object-literal-type-assertion
                                 ...({} as StorageDocument),
@@ -481,7 +481,7 @@ describe(Worker, () => {
 
         function setupVerifiableGetQueueMessagesCall(messages: Message[]): void {
             queueMock
-                .setup(q => q.getMessagesWithTotalCount(storageConfigStub.scanQueue, poolLoadSnapshot.tasksIncrementCountPerInterval))
+                .setup((q) => q.getMessagesWithTotalCount(storageConfigStub.scanQueue, poolLoadSnapshot.tasksIncrementCountPerInterval))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
         }
@@ -489,7 +489,7 @@ describe(Worker, () => {
 
     function setupVerifiableDeleteQueueMessageCall(message: Message): void {
         queueMock
-            .setup(q => q.deleteMessage(storageConfigStub.scanQueue, It.isValue(message)))
+            .setup((q) => q.deleteMessage(storageConfigStub.scanQueue, It.isValue(message)))
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
     }

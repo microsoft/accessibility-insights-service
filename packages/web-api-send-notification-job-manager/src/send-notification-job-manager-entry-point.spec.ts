@@ -43,17 +43,17 @@ describe(SendNotificationJobManagerEntryPoint, () => {
 
     describe('runCustomAction', () => {
         beforeEach(() => {
-            containerMock.setup(c => c.get(SendNotificationTaskCreator)).returns(() => sendNotificationTaskCreatorMock.object);
+            containerMock.setup((c) => c.get(SendNotificationTaskCreator)).returns(() => sendNotificationTaskCreatorMock.object);
         });
 
         it('invokes worker', async () => {
             sendNotificationTaskCreatorMock
-                .setup(async w => w.init())
+                .setup(async (w) => w.init())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             sendNotificationTaskCreatorMock
-                .setup(async w => w.run())
+                .setup(async (w) => w.run())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 

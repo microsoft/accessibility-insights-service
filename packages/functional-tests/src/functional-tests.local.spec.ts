@@ -83,7 +83,7 @@ describe('functional tests', () => {
     function testIf(name: string, condition: () => boolean | Promise<boolean>, callback: any): void {
         test(
             name,
-            async done => {
+            async (done) => {
                 if (await condition()) {
                     callback(done);
                 } else {
@@ -96,7 +96,7 @@ describe('functional tests', () => {
     }
 
     function testEach(names: TestGroupName[], condition: () => boolean | Promise<boolean>): void {
-        names.forEach(name => {
+        names.forEach((name) => {
             testIf(name, condition, async (done: jest.DoneCallback) => {
                 const testContainer = getTests(name);
                 await testRunner.run(testContainer, TestEnvironment.all, releaseIdStub, runIdStub);
@@ -130,12 +130,12 @@ describe('functional tests', () => {
     function getContainer(): Container {
         const container = new Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(container);
-        container.bind(GlobalLogger).toDynamicValue(_ => {
+        container.bind(GlobalLogger).toDynamicValue((_) => {
             return new GlobalLogger([new ConsoleLoggerClient(container.get(ServiceConfiguration), console)], process);
         });
         registerAzureServicesToContainer(container, CredentialType.AppService);
 
-        container.bind(A11yServiceClient).toDynamicValue(_ => {
+        container.bind(A11yServiceClient).toDynamicValue((_) => {
             const cred = new A11yServiceCredential(
                 clientId,
                 clientSecret,

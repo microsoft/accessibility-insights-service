@@ -40,12 +40,12 @@ describe(OnDemandPageScanRunResultProvider, () => {
         setupVerifiableGetNodeCall('bucket2', 'partition2id1');
 
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments([partition1Result1ToBeSaved, partition1Result2ToBeSaved], 'bucket1'))
+            .setup((c) => c.writeDocuments([partition1Result1ToBeSaved, partition1Result2ToBeSaved], 'bucket1'))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
         cosmosContainerClientMock
-            .setup(c => c.writeDocuments([partition2Result1ToBeSaved], 'bucket2'))
+            .setup((c) => c.writeDocuments([partition2Result1ToBeSaved], 'bucket2'))
             .returns(() => Promise.resolve(undefined))
             .verifiable();
 
@@ -63,7 +63,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
 
         setupVerifiableGetNodeCall('bucket1', 'partition1id1');
         cosmosContainerClientMock
-            .setup(c => c.mergeOrWriteDocument(partition1Result1ToBeSaved))
+            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved))
             .returns(() => Promise.resolve({ item: partition1Result1Saved } as CosmosOperationResponse<OnDemandPageScanResult>))
             .verifiable();
 
@@ -79,7 +79,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
         const expectedErrorMessage = `Cannot update scan run using partial scan run without id: ${JSON.stringify(partialDocument)}`;
 
         let caughtError: Error;
-        await testSubject.updateScanRun(partialDocument).catch(err => {
+        await testSubject.updateScanRun(partialDocument).catch((err) => {
             caughtError = err as Error;
         });
 
@@ -107,7 +107,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
             setupVerifiableGetNodeCall('bucket2', 'partition2id1');
 
             cosmosContainerClientMock
-                .setup(c => c.executeQueryWithContinuationToken(It.isAny()))
+                .setup((c) => c.executeQueryWithContinuationToken(It.isAny()))
                 .returns(async (cb: (token: string) => Promise<CosmosOperationResponse<any[]>>) => {
                     const resultsFromCallback = await cb('token1');
 
@@ -116,7 +116,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c =>
+                .setup((c) =>
                     c.queryDocuments(
                         'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
                         'token1',
@@ -126,7 +126,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
+                .setup((c) => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
                 .returns(() => Promise.reject('sample test error'))
                 .verifiable();
 
@@ -144,7 +144,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
             setupVerifiableGetNodeCall('bucket2', 'partition2id1');
 
             cosmosContainerClientMock
-                .setup(c => c.executeQueryWithContinuationToken(It.isAny()))
+                .setup((c) => c.executeQueryWithContinuationToken(It.isAny()))
                 .returns(async (cb: (token: string) => Promise<CosmosOperationResponse<any[]>>) => {
                     const resultsFromCallback = await cb('token1');
 
@@ -153,7 +153,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup(c =>
+                .setup((c) =>
                     c.queryDocuments(
                         'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
                         'token1',
@@ -163,7 +163,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup(c => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
+                .setup((c) => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
                 .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
@@ -179,7 +179,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
             const scanRunDocument = getDocumentWithSysProps('id1', 'bucket1');
             setupVerifiableGetNodeCall('bucket1', 'id1');
             cosmosContainerClientMock
-                .setup(o => o.readDocument('id1', 'bucket1'))
+                .setup((o) => o.readDocument('id1', 'bucket1'))
                 .returns(() => Promise.resolve({ item: scanRunDocument } as CosmosOperationResponse<OnDemandPageScanResult>))
                 .verifiable();
 
@@ -202,9 +202,9 @@ describe(OnDemandPageScanRunResultProvider, () => {
     }
 
     function setupVerifiableGetNodeCall(bucket: string, ...scanIds: string[]): void {
-        scanIds.forEach(scanId => {
+        scanIds.forEach((scanId) => {
             partitionKeyFactoryMock
-                .setup(o => o.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, scanId))
+                .setup((o) => o.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, scanId))
                 .returns(() => bucket)
                 .verifiable();
         });

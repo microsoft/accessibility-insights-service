@@ -27,13 +27,13 @@ export class OnDemandPageScanRunResultProvider {
             throw new Error(`Can't read more than ${maxItemsPerQuery} scan documents per query.`);
         }
 
-        const scanIdsByPartition = groupBy(scanIds, scanId => {
+        const scanIdsByPartition = groupBy(scanIds, (scanId) => {
             return this.getPartitionKey(scanId);
         });
 
         const response = await Promise.all(
-            Object.keys(scanIdsByPartition).map(async pKey => {
-                return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async token => {
+            Object.keys(scanIdsByPartition).map(async (pKey) => {
+                return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async (token) => {
                     return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
                         this.getReadScanQueryForScanIds(scanIdsByPartition[pKey], pKey),
                         token,
@@ -56,14 +56,14 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
-        const scanRunsByPartition = groupBy(scanRuns, scanRun => {
+        const scanRunsByPartition = groupBy(scanRuns, (scanRun) => {
             this.setSystemProperties(scanRun);
 
             return scanRun.partitionKey;
         });
 
         await Promise.all(
-            Object.keys(scanRunsByPartition).map(async pKey => {
+            Object.keys(scanRunsByPartition).map(async (pKey) => {
                 return this.cosmosContainerClient.writeDocuments(scanRunsByPartition[pKey], pKey);
             }),
         );

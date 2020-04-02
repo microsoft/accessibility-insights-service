@@ -52,7 +52,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
-            batchDocuments.map(async document => {
+            batchDocuments.map(async (document) => {
                 const addedRequests = await this.processDocument(document);
                 const scanUrlsAddedMeasurements: ScanUrlsAddedMeasurements = {
                     addedUrls: addedRequests,
@@ -75,7 +75,7 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async processDocument(batchDocument: OnDemandPageScanBatchRequest): Promise<number> {
-        const requests = batchDocument.scanRunBatchRequest.filter(request => request.scanId !== undefined);
+        const requests = batchDocument.scanRunBatchRequest.filter((request) => request.scanId !== undefined);
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
@@ -90,7 +90,7 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const requestDocuments = requests.map<OnDemandPageScanResult>(request => {
+        const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
             return {
                 id: request.scanId,
                 url: request.url,
@@ -121,7 +121,7 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const requestDocuments = requests.map<OnDemandPageScanRequest>(request => {
+        const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
             const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
 
             return {
@@ -147,7 +147,7 @@ export class ScanBatchRequestFeedController extends WebController {
     ): BatchRequestFeedProcessTelemetryProperties {
         return {
             scanRequests: JSON.stringify(
-                requests.map(r => {
+                requests.map((r) => {
                     // tslint:disable-next-line: no-object-literal-type-assertion
                     return {
                         scanId: r.scanId,
@@ -160,7 +160,7 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
-        if (documents === undefined || documents.length === 0 || !documents.some(d => d.itemType === ItemType.scanRunBatchRequest)) {
+        if (documents === undefined || documents.length === 0 || !documents.some((d) => d.itemType === ItemType.scanRunBatchRequest)) {
             this.logger.logInfo(`[ScanBatchRequestFeedController] passed documents were not valid - ${JSON.stringify(documents)}`);
 
             return false;

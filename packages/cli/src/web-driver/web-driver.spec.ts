@@ -28,7 +28,7 @@ beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerLaunchMock
-        .setup(async o => o(It.isAny()))
+        .setup(async (o) => o(It.isAny()))
         .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
         .verifiable(Times.once());
 

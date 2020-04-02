@@ -51,7 +51,7 @@ describe('AxeResultToHtmlConverter', () => {
         };
 
         reporterMock
-            .setup(rm => rm.fromAxeResult(reportParameters))
+            .setup((rm) => rm.fromAxeResult(reportParameters))
             .returns(() => htmlReport)
             .verifiable(Times.once());
 

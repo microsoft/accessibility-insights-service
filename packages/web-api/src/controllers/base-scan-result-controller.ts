@@ -24,7 +24,7 @@ export abstract class BaseScanResultController extends ApiController {
     protected async getScanResultMapKeyByScanId(scanIds: string[]): Promise<Dictionary<OnDemandPageScanResult>> {
         const scanResultItems = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
 
-        return keyBy(scanResultItems, item => item.id);
+        return keyBy(scanResultItems, (item) => item.id);
     }
 
     protected getTooSoonRequestResponse(scanId: string): ScanResultResponse {

@@ -93,7 +93,7 @@ describe(BatchTaskCreator, () => {
         loggerMock = Mock.ofType(MockableLogger);
         systemMock = Mock.ofInstance(
             {
-                wait: async milliSec => {
+                wait: async (milliSec) => {
                     return;
                 },
             } as typeof System,
@@ -127,17 +127,17 @@ describe(BatchTaskCreator, () => {
     describe('init', () => {
         it('should initialize', async () => {
             serviceConfigMock
-                .setup(async s => s.getConfigValue('jobManagerConfig'))
+                .setup(async (s) => s.getConfigValue('jobManagerConfig'))
                 .returns(async () => Promise.resolve(jobManagerConfig))
                 .verifiable(Times.once());
 
             batchMock
-                .setup(async o => o.createJobIfNotExists(batchConfig.jobId, true))
+                .setup(async (o) => o.createJobIfNotExists(batchConfig.jobId, true))
                 .returns(async () => Promise.resolve(batchConfig.jobId))
                 .verifiable(Times.once());
 
             loggerMock
-                .setup(async l =>
+                .setup(async (l) =>
                     l.setCustomProperties({
                         batchJobId: batchConfig.jobId,
                     }),
@@ -168,7 +168,7 @@ describe(BatchTaskCreator, () => {
             (testSubject as any).hasInitialized = true;
 
             batchMock
-                .setup(async o => o.getPoolMetricsInfo())
+                .setup(async (o) => o.getPoolMetricsInfo())
                 .returns(async () => Promise.resolve(poolMetricsInfo))
                 .verifiable(Times.atLeastOnce());
         });
@@ -199,17 +199,17 @@ describe(BatchTaskCreator, () => {
                 activeTasks: 1,
                 runningTasks: 1,
             },
-        ] as PoolLoad[])('exits after pending tasks - %o, if no tasks to add', async initialPoolLoad => {
+        ] as PoolLoad[])('exits after pending tasks - %o, if no tasks to add', async (initialPoolLoad) => {
             let waitCount = 0;
             setPoolLoad(initialPoolLoad);
 
             getMessagesForTaskCreationMock
-                .setup(g => g())
+                .setup((g) => g())
                 .returns(() => [])
                 .verifiable(Times.exactly(3));
 
             systemMock
-                .setup(s => s.wait(jobManagerConfig.addTasksIntervalInSeconds * 1000))
+                .setup((s) => s.wait(jobManagerConfig.addTasksIntervalInSeconds * 1000))
                 .callback(() => {
                     waitCount += 1;
 
@@ -237,11 +237,11 @@ describe(BatchTaskCreator, () => {
                 activeTasks: 0,
                 runningTasks: 0,
             },
-        ] as PoolLoad[])('exits immediately if no tasks to add & no pending tasks - %o', async initialPoolLoad => {
+        ] as PoolLoad[])('exits immediately if no tasks to add & no pending tasks - %o', async (initialPoolLoad) => {
             setPoolLoad(initialPoolLoad);
 
             getMessagesForTaskCreationMock
-                .setup(g => g())
+                .setup((g) => g())
                 .returns(() => [])
                 .verifiable(Times.exactly(1));
 
@@ -271,29 +271,26 @@ describe(BatchTaskCreator, () => {
             setupVerifiableOnTaskAddedCall(jobTasksBatch2);
 
             getMessagesForTaskCreationMock
-                .setup(g => g())
+                .setup((g) => g())
                 .returns(() => {
                     callCount += 1;
                     if (callCount === 1) {
                         return messagesBatch1;
                     }
 
-                    currentTime = moment(startTime)
-                        .add(maxWallClockTimeInHours, 'hour')
-                        .toDate()
-                        .toJSON();
+                    currentTime = moment(startTime).add(maxWallClockTimeInHours, 'hour').toDate().toJSON();
 
                     return messagesBatch2;
                 })
                 .verifiable(Times.exactly(2));
 
             systemMock
-                .setup(s => s.wait(jobManagerConfig.addTasksIntervalInSeconds * 1000))
+                .setup((s) => s.wait(jobManagerConfig.addTasksIntervalInSeconds * 1000))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.exactly(1));
 
             systemMock
-                .setup(s => s.wait(5000))
+                .setup((s) => s.wait(5000))
                 .callback(() => {
                     waitCount += 1;
 
@@ -324,12 +321,9 @@ describe(BatchTaskCreator, () => {
             setupVerifiableOnTaskAddedCall(generateJobTasks(expectedDeletedMessages));
 
             getMessagesForTaskCreationMock
-                .setup(g => g())
+                .setup((g) => g())
                 .returns(() => {
-                    currentTime = moment(startTime)
-                        .add(maxWallClockTimeInHours, 'hour')
-                        .toDate()
-                        .toJSON();
+                    currentTime = moment(startTime).add(maxWallClockTimeInHours, 'hour').toDate().toJSON();
 
                     return messagesBatch1;
                 })
@@ -348,7 +342,7 @@ describe(BatchTaskCreator, () => {
 
         function setupVerifiableBatchCreateTasksCall(messages: Message[], jobTasks: JobTask[]): void {
             batchMock
-                .setup(async b => b.createTasks(batchConfig.jobId, It.isValue(messages)))
+                .setup(async (b) => b.createTasks(batchConfig.jobId, It.isValue(messages)))
                 .returns(async () => Promise.resolve(jobTasks))
                 .verifiable(Times.once());
         }
@@ -361,14 +355,14 @@ describe(BatchTaskCreator, () => {
 
         function setupVerifiableDeleteQueueMessageCall(message: Message): void {
             queueMock
-                .setup(async q => q.deleteMessage(testSubject.getQueueName(), message))
+                .setup(async (q) => q.deleteMessage(testSubject.getQueueName(), message))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }
 
         function setupVerifiableOnTaskAddedCall(jobTasks: JobTask[]): void {
             onTaskAddedCallback
-                .setup(t => t(jobTasks))
+                .setup((t) => t(jobTasks))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }

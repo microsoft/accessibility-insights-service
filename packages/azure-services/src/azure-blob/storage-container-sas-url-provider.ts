@@ -21,9 +21,7 @@ export class StorageContainerSASUrlProvider {
         const accountKey = await this.secretProvider.getSecret(secretNames.storageAccountKey);
         const containerSAS = generateBlobSASQueryParameters(
             {
-                expiresOn: moment()
-                    .add(1, 'days')
-                    .toDate(),
+                expiresOn: moment().add(1, 'days').toDate(),
                 containerName: containerName,
                 permissions: ContainerSASPermissions.parse('w'),
                 protocol: SASProtocol.HttpsAndHttp,

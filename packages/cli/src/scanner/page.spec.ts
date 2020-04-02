@@ -109,11 +109,11 @@ describe('Page', () => {
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
         webDriverMock
-            .setup(wd => wd.launch(undefined))
+            .setup((wd) => wd.launch(undefined))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
         puppeteerBrowserFactory
-            .setup(o => o())
+            .setup((o) => o())
             .returns(() => <Puppeteer.Browser>(<unknown>puppeteerBrowserMock))
             .verifiable(Times.once());
         page = new Page(axePuppeteerFactoryMock.object, webDriverMock.object);
@@ -134,15 +134,15 @@ describe('Page', () => {
         const response: Puppeteer.Response = makeResponse({ contentType: contentType });
 
         gotoMock
-            .setup(async goto => goto(scanUrl, gotoOptions))
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
 
-        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+        axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
             .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
@@ -162,12 +162,12 @@ describe('Page', () => {
         };
         const response: Puppeteer.Response = makeResponse({});
         gotoMock
-            .setup(async goto => goto(scanUrl, gotoOptions))
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
         waitForNavigationMock
-            .setup(async wait => wait(waitOptions))
+            .setup(async (wait) => wait(waitOptions))
             .returns(async () => {
                 throw new Error('network timed out');
             })
@@ -175,7 +175,7 @@ describe('Page', () => {
 
         axePuppeteerFactoryMock
             // tslint:disable-next-line: no-unsafe-any
-            .setup(async o => o.createAxePuppeteer(It.isAny(), undefined))
+            .setup(async (o) => o.createAxePuppeteer(It.isAny(), undefined))
             // tslint:disable-next-line: no-any
             .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
             .verifiable(Times.once());
@@ -195,7 +195,7 @@ describe('Page', () => {
     });
 
     it('should call setBypassCSP', async () => {
-        setBypassCSPMock.setup(async setBypassCSP => setBypassCSP(true)).verifiable(Times.once());
+        setBypassCSPMock.setup(async (setBypassCSP) => setBypassCSP(true)).verifiable(Times.once());
 
         await page.create();
         await page.enableBypassCSP();
@@ -211,15 +211,15 @@ describe('Page', () => {
         const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
 
         gotoMock
-            .setup(async goto => goto(scanUrl, gotoOptions))
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
 
-        axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+        axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
             .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
@@ -277,16 +277,16 @@ describe('Page', () => {
             };
 
             gotoMock
-                .setup(async goto => goto(scanUrl, gotoOptions))
+                .setup(async (goto) => goto(scanUrl, gotoOptions))
                 .returns(async () => {
                     throw new Error(testCase.errorMessage);
                 })
                 .verifiable(Times.once());
 
-            waitForNavigationMock.setup(async wait => wait(waitOptions)).verifiable(Times.once());
-            axePuppeteerMock.setup(async o => o.analyze()).verifiable(Times.never());
+            waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
+            axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
             axePuppeteerFactoryMock
-                .setup(async apfm => apfm.createAxePuppeteer(page.puppeteerPage))
+                .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
                 .returns(async () => Promise.resolve(axePuppeteerMock.object))
                 .verifiable(Times.once());
 

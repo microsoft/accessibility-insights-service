@@ -20,7 +20,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
         IoC.setupSingletonProvider<A11yServiceClient>(
             a11yServiceClientTypeNames.A11yServiceClientProvider,
             processLifeCycleContainer,
-            async context => {
+            async (context) => {
                 const secretProvider = context.container.get(SecretProvider);
                 const restApiSpAppId = await secretProvider.getSecret('restApiSpAppId');
                 const restApiSpSecret = await secretProvider.getSecret('restApiSpSecret');

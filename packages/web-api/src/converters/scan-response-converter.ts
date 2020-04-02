@@ -72,7 +72,7 @@ export class ScanResponseConverter {
 
         const baseUrlFixed = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-        return pageScanResultDocument.reports.map(report => {
+        return pageScanResultDocument.reports.map((report) => {
             return {
                 reportId: report.reportId,
                 format: report.format,

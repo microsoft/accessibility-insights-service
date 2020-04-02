@@ -50,13 +50,13 @@ describe(WebController, () => {
 
         testSubject = new TestableWebController(loggerMock.object);
 
-        loggerMock.setup(l => l.setCustomProperties(It.isAny())).returns(() => Promise.resolve(undefined));
+        loggerMock.setup((l) => l.setCustomProperties(It.isAny())).returns(() => Promise.resolve(undefined));
     });
 
     it('should setup context aware logger', async () => {
         loggerMock.reset();
         loggerMock
-            .setup(l =>
+            .setup((l) =>
                 l.setCustomProperties(
                     It.isValue({
                         apiName: testSubject.apiName,

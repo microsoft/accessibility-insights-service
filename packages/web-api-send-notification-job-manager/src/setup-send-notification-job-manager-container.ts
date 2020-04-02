@@ -13,10 +13,7 @@ export function setupSendNotificationJobManagerContainer(): Container {
     registerContextAwareLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 
-    container
-        .bind(BatchTaskPropertyProvider)
-        .to(SendNotificationTaskPropertyProvider)
-        .inSingletonScope();
+    container.bind(BatchTaskPropertyProvider).to(SendNotificationTaskPropertyProvider).inSingletonScope();
 
     return container;
 }

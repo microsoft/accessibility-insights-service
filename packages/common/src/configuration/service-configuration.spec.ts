@@ -35,7 +35,7 @@ describe(ServiceConfiguration, () => {
 
         setupVerifiableSchemaSetupCall();
         setupLoadCustomFileConfigCallsNotCalled();
-        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
 
         const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
@@ -51,7 +51,7 @@ describe(ServiceConfiguration, () => {
         const expectedConfigValue = 'config value';
 
         setupVerifiableSchemaSetupCall();
-        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
 
         let actualConfigValue = await testSubject.getConfigValue(keyToFetch);
         expect(actualConfigValue).toBe(expectedConfigValue);
@@ -70,7 +70,7 @@ describe(ServiceConfiguration, () => {
         setupVerifiableSchemaSetupCall();
         setupVerifiableLoadCustomFileConfigCalls();
 
-        configMock.setup(c => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
+        configMock.setup((c) => c.get(keyToFetch)).returns(() => expectedConfigValue as any);
 
         const actualConfigValue = await testSubject.getConfigValue(keyToFetch);
 
@@ -88,7 +88,7 @@ describe(ServiceConfiguration, () => {
         setupVerifiableSchemaSetupCall();
         setupVerifiableCustomConfigLoadCall();
         configMock
-            .setup(c => c.validate(It.isValue({ allowed: 'strict' })))
+            .setup((c) => c.validate(It.isValue({ allowed: 'strict' })))
             .returns(() => {
                 throw expectedError;
             });
@@ -106,20 +106,20 @@ describe(ServiceConfiguration, () => {
 
     function setupVerifiableLoadCustomFileConfigCalls(): void {
         setupVerifiableCustomConfigLoadCall();
-        configMock.setup(c => c.validate(It.isValue({ allowed: 'strict' }))).verifiable(Times.once());
+        configMock.setup((c) => c.validate(It.isValue({ allowed: 'strict' }))).verifiable(Times.once());
     }
 
     function setupVerifiableCustomConfigLoadCall(): void {
-        configMock.setup(c => c.loadFile(ServiceConfiguration.profilePath)).verifiable(Times.once());
+        configMock.setup((c) => c.loadFile(ServiceConfiguration.profilePath)).verifiable(Times.once());
     }
     function setupLoadCustomFileConfigCallsNotCalled(): void {
-        configMock.setup(c => c.loadFile(It.isAny())).verifiable(Times.never());
-        configMock.setup(c => c.validate(It.isAny())).verifiable(Times.never());
+        configMock.setup((c) => c.loadFile(It.isAny())).verifiable(Times.never());
+        configMock.setup((c) => c.validate(It.isAny())).verifiable(Times.never());
     }
 
     function setupVerifiableSchemaSetupCall(): void {
         convictMock
-            .setup(c => c<RuntimeConfig>(It.isAny()))
+            .setup((c) => c<RuntimeConfig>(It.isAny()))
             .callback((s: convict.Schema<RuntimeConfig>) => {
                 actualSchema = s;
             })
@@ -128,7 +128,7 @@ describe(ServiceConfiguration, () => {
     }
     function setupVerifiableFileExistsCall(profilePath: string, fileExistsValue: boolean): void {
         fsMock
-            .setup(f => f.exists(profilePath, It.isAny()))
+            .setup((f) => f.exists(profilePath, It.isAny()))
             .callback((filePath: string, cb: (exists: boolean) => void) => {
                 cb(fileExistsValue);
             })

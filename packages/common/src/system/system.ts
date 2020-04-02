@@ -27,15 +27,12 @@ export namespace System {
 
     export async function wait(timeoutMillisecond: number): Promise<void> {
         // tslint:disable-next-line: no-string-based-set-timeout
-        await new Promise(resolve => setTimeout(resolve, timeoutMillisecond));
+        await new Promise((resolve) => setTimeout(resolve, timeoutMillisecond));
     }
 
     export function createRandomString(length: number = 32): string {
         const bytes = length % 2 === 0 ? length / 2 : (length + 1) / 2;
 
-        return crypto
-            .randomBytes(bytes)
-            .toString('hex')
-            .substr(0, length);
+        return crypto.randomBytes(bytes).toString('hex').substr(0, length);
     }
 }

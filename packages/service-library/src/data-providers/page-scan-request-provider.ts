@@ -27,7 +27,7 @@ export class PageScanRequestProvider {
 
     public async deleteRequests(ids: string[]): Promise<void> {
         await Promise.all(
-            ids.map(async id => {
+            ids.map(async (id) => {
                 await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);
             }),
         );

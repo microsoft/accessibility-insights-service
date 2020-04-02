@@ -36,8 +36,8 @@ describe(BatchPoolLoadSnapshotProvider, () => {
 
         let document: BatchPoolLoadSnapshot;
         cosmosContainerClientMock
-            .setup(async o => o.writeDocument(batchPoolLoadSnapshotDocument))
-            .callback(async d => (document = d))
+            .setup(async (o) => o.writeDocument(batchPoolLoadSnapshotDocument))
+            .callback(async (d) => (document = d))
             .verifiable(Times.once());
 
         await batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot(<BatchPoolLoadSnapshot>(<unknown>batchPoolLoadSnapshot));
@@ -56,7 +56,7 @@ describe(BatchPoolLoadSnapshotProvider, () => {
         };
 
         cosmosContainerClientMock
-            .setup(async o => o.readDocument(id, PartitionKey.batchPoolLoadSnapshots))
+            .setup(async (o) => o.readDocument(id, PartitionKey.batchPoolLoadSnapshots))
             .returns(async () =>
                 Promise.resolve(<CosmosOperationResponse<BatchPoolLoadSnapshot>>(<unknown>{ item: batchPoolLoadSnapshot })),
             )

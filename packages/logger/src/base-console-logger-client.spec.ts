@@ -33,7 +33,7 @@ describe(BaseConsoleLoggerClient, () => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
         serviceConfigMock
-            .setup(async s => s.getConfigValue('logConfig'))
+            .setup(async (s) => s.getConfigValue('logConfig'))
             .returns(async () => Promise.resolve({ logInConsole: logInConsole }));
 
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
@@ -63,7 +63,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify(c => c.log('[Metric] === metric1 - 1'), Times.once());
+            consoleMock.verify((c) => c.log('[Metric] === metric1 - 1'), Times.once());
         });
 
         it('log data with base properties with circular reference', async () => {
@@ -73,7 +73,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify(c => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === metric1 - 1`), Times.once());
         });
 
         it('log data with custom runtime properties', async () => {
@@ -85,7 +85,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify(c => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
         });
 
         it('log data with propertiestoAddToEvent', async () => {
@@ -99,7 +99,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify(c => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
         });
     });
 
@@ -109,7 +109,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log('[Event] === HealthCheck'), Times.once());
+            consoleMock.verify((c) => c.log('[Event] === HealthCheck'), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -118,7 +118,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(baseProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(baseProps)}] === HealthCheck`), Times.once());
         });
 
         it('log data with custom runtime properties', async () => {
@@ -131,7 +131,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
         });
 
         it('log data with propertiestoAddToEvent', async () => {
@@ -145,7 +145,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify(c => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
         });
 
         it('log data with event properties and measurements', async () => {
@@ -159,7 +159,7 @@ describe(BaseConsoleLoggerClient, () => {
             const measurements = `[measurements - ${util.inspect(eventMeasurements)}]`;
             const expectedLogMessage = `[Event]${properties}${measurements} === HealthCheck`;
 
-            consoleMock.verify(c => c.log(expectedLogMessage), Times.once());
+            consoleMock.verify((c) => c.log(expectedLogMessage), Times.once());
         });
     });
 
@@ -169,7 +169,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.verbose);
 
-            consoleMock.verify(c => c.log('[Trace][verbose] === trace1'), Times.once());
+            consoleMock.verify((c) => c.log('[Trace][verbose] === trace1'), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -178,7 +178,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(baseProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(baseProps)}] === trace1`), Times.once());
         });
 
         it('log data with custom runtime properties', async () => {
@@ -190,7 +190,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
         });
 
         it('log data with custom runtime properties', async () => {
@@ -208,7 +208,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify(c => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -219,7 +219,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.log('trace1', LogLevel.warn, traceProps);
 
             consoleMock.verify(
-                c => c.log(`[Trace][warn][properties - ${util.inspect({ ...baseProps, ...traceProps })}] === trace1`),
+                (c) => c.log(`[Trace][warn][properties - ${util.inspect({ ...baseProps, ...traceProps })}] === trace1`),
                 Times.once(),
             );
         });
@@ -232,7 +232,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackException(error);
 
-            consoleMock.verify(c => c.log(`[Exception] === ${util.inspect(error, { depth: null })}`), Times.once());
+            consoleMock.verify((c) => c.log(`[Exception] === ${util.inspect(error, { depth: null })}`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -243,7 +243,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                c => c.log(`[Exception][properties - ${util.inspect(baseProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[Exception][properties - ${util.inspect(baseProps)}] === ${util.inspect(error, { depth: null })}`),
                 Times.once(),
             );
         });
@@ -259,7 +259,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                c => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
                 Times.once(),
             );
         });
@@ -277,7 +277,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                c => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
                 Times.once(),
             );
         });

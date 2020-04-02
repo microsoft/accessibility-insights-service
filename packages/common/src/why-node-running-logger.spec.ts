@@ -36,7 +36,7 @@ describe(WhyNodeRunningLogger, () => {
 
     describe('log', () => {
         it('invokes wtfnode.dump', () => {
-            wtfDumpMock.setup(s => s()).verifiable(Times.once());
+            wtfDumpMock.setup((s) => s()).verifiable(Times.once());
             testSubject.log();
         });
     });
@@ -44,7 +44,7 @@ describe(WhyNodeRunningLogger, () => {
     describe('logAfterSeconds', () => {
         it('should setup timeout', () => {
             const timeoutInSeconds = 5;
-            setTimeoutMock.setup(s => s(It.isAny(), timeoutInSeconds * 1000)).verifiable(Times.once());
+            setTimeoutMock.setup((s) => s(It.isAny(), timeoutInSeconds * 1000)).verifiable(Times.once());
 
             expect(testSubject.logAfterSeconds(timeoutInSeconds).then).toBeDefined();
         });
@@ -54,14 +54,14 @@ describe(WhyNodeRunningLogger, () => {
             let timeoutCallback: Function;
 
             setTimeoutMock
-                .setup(s => s(It.isAny(), timeoutInSeconds * 1000))
-                .callback(callback => {
+                .setup((s) => s(It.isAny(), timeoutInSeconds * 1000))
+                .callback((callback) => {
                     timeoutCallback = callback;
                 });
 
             const logPromise = testSubject.logAfterSeconds(timeoutInSeconds);
 
-            wtfDumpMock.setup(s => s()).verifiable(Times.once());
+            wtfDumpMock.setup((s) => s()).verifiable(Times.once());
 
             timeoutCallback();
 

@@ -29,8 +29,8 @@ describe(ScanDataProvider, () => {
 
         let document: OnDemandPageScanBatchRequest;
         cosmosContainerClientMock
-            .setup(async o => o.writeDocument(It.isAny()))
-            .callback(async d => (document = d))
+            .setup(async (o) => o.writeDocument(It.isAny()))
+            .callback(async (d) => (document = d))
             .verifiable(Times.once());
 
         const batchId = 'batchId-1';

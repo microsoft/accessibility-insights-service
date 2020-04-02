@@ -23,7 +23,7 @@ export class OnDemandScanRequestSender {
 
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
         await Promise.all(
-            onDemandPageScanRequests.map(async page => {
+            onDemandPageScanRequests.map(async (page) => {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {

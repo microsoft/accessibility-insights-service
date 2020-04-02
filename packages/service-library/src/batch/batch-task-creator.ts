@@ -27,9 +27,7 @@ export abstract class BatchTaskCreator {
             throw new Error('[BatchTaskCreator] not initialized');
         }
 
-        const restartAfterTime = moment()
-            .add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour')
-            .toDate();
+        const restartAfterTime = moment().add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour').toDate();
 
         // tslint:disable-next-line: no-constant-condition
         while (true) {
@@ -100,15 +98,15 @@ export abstract class BatchTaskCreator {
         const jobTasks = await this.batch.createTasks(this.jobId, messages);
 
         await Promise.all(
-            jobTasks.map(async jobTask => {
+            jobTasks.map(async (jobTask) => {
                 if (jobTask.state === JobTaskState.queued) {
-                    const message = messages.find(value => value.messageId === jobTask.correlationId);
+                    const message = messages.find((value) => value.messageId === jobTask.correlationId);
                     await this.queue.deleteMessage(this.getQueueName(), message);
                 }
             }),
         );
 
-        const jobQueuedTasks = jobTasks.filter(jobTask => jobTask.state === JobTaskState.queued);
+        const jobQueuedTasks = jobTasks.filter((jobTask) => jobTask.state === JobTaskState.queued);
         this.logger.logInfo(`Added ${jobQueuedTasks.length} new tasks`);
 
         return jobQueuedTasks;

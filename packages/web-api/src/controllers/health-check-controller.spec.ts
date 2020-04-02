@@ -44,7 +44,7 @@ describe(HealthCheckController, () => {
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
-            .setup(async s => s.getConfigValue('availabilityTestConfig'))
+            .setup(async (s) => s.getConfigValue('availabilityTestConfig'))
             .returns(async () => Promise.resolve(availabilityTestConfig));
 
         loggerMock = Mock.ofType<MockableLogger>();
@@ -277,7 +277,7 @@ describe(HealthCheckController, () => {
 
     function setupAppInsightsResponse(response: ResponseWithBodyType<ApplicationInsightsQueryResponse>, query = It.isAny()): void {
         appInsightsClientMock
-            .setup(async a => a.executeQuery(query, It.isAny()))
+            .setup(async (a) => a.executeQuery(query, It.isAny()))
             .returns(async () => response)
             .verifiable();
     }

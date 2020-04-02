@@ -18,7 +18,7 @@ export class TestRunner {
     }
 
     public async runAll(testContainers: object[], env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
-        await Promise.all(testContainers.map(async testContainer => this.run(testContainer, env, releaseId, runId)));
+        await Promise.all(testContainers.map(async (testContainer) => this.run(testContainer, env, releaseId, runId)));
     }
 
     public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
@@ -28,10 +28,10 @@ export class TestRunner {
 
         const definedTests = getDefinedTestsMetadata(testContainer);
         // tslint:disable-next-line: no-bitwise
-        const targetedTests = definedTests.filter(definedTest => definedTest.environments & env);
+        const targetedTests = definedTests.filter((definedTest) => definedTest.environments & env);
         let containerPass = true;
         await Promise.all(
-            targetedTests.map(async targetedTest => {
+            targetedTests.map(async (targetedTest) => {
                 const testPass = await this.runTest(targetedTest, env, testContainer, releaseId, runId);
 
                 containerPass = containerPass && testPass;

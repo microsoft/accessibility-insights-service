@@ -52,7 +52,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     private getOrchestrationExecutor(): (context: IOrchestrationFunctionContext) => void {
-        return this.df.orchestrator(function*(context: IOrchestrationFunctionContext): IterableIterator<unknown> {
+        return this.df.orchestrator(function* (context: IOrchestrationFunctionContext): IterableIterator<unknown> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);

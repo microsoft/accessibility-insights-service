@@ -55,8 +55,8 @@ describe(WebControllerDispatcher, () => {
         containerMock = Mock.ofType(Container);
         processLifeCycleContainerMock = Mock.ofType(Container);
 
-        containerMock.setup(c => c.get(TestableWebController)).returns(() => testableWebController);
-        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(TestableWebController)).returns(() => testableWebController);
+        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
     });
 
     afterEach(() => {
@@ -69,7 +69,7 @@ describe(WebControllerDispatcher, () => {
         webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
 
         loggerMock
-            .setup(l => l.setup())
+            .setup((l) => l.setup())
             .returns(() => Promise.resolve())
             .verifiable(Times.once());
 
@@ -87,7 +87,7 @@ describe(WebControllerDispatcher, () => {
             },
         } as any;
 
-        processLifeCycleContainerMock.setup(c => c.get(loggerTypes.Process)).returns(() => processStub);
+        processLifeCycleContainerMock.setup((c) => c.get(loggerTypes.Process)).returns(() => processStub);
 
         webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
 
@@ -105,7 +105,7 @@ describe(WebControllerDispatcher, () => {
 
     it('return result of invoke', async () => {
         loggerMock
-            .setup(l => l.setup())
+            .setup((l) => l.setup())
             .returns(() => Promise.resolve())
             .verifiable(Times.once());
 

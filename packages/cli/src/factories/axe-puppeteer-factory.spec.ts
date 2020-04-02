@@ -31,7 +31,7 @@ describe('AxePuppeteerFactory', () => {
         // tslint:disable-next-line:no-shadowed-variable
         const content = 'content';
         fsMock
-            .setup(fsm => fsm.readFileSync(path))
+            .setup((fsm) => fsm.readFileSync(path))
             // tslint:disable-next-line: no-any
             .returns(() => content as any)
             .verifiable(Times.once());

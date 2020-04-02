@@ -48,9 +48,9 @@ describe(OrchestrationStepsImpl, () => {
     beforeEach(() => {
         currentUtcDateTime = new Date(2019, 2, 1);
         orchestrationContext = Mock.ofType(MockableDurableOrchestrationContext);
-        orchestrationContext.setup(oc => oc.instanceId).returns(() => orchestrationInstanceId);
-        orchestrationContext.setup(oc => oc.isReplaying).returns(() => true);
-        orchestrationContext.setup(oc => oc.currentUtcDateTime).returns(() => currentUtcDateTime);
+        orchestrationContext.setup((oc) => oc.instanceId).returns(() => orchestrationInstanceId);
+        orchestrationContext.setup((oc) => oc.isReplaying).returns(() => true);
+        orchestrationContext.setup((oc) => oc.currentUtcDateTime).returns(() => currentUtcDateTime);
 
         availabilityTestConfig = {
             scanWaitIntervalInSeconds: 10,
@@ -93,11 +93,11 @@ describe(OrchestrationStepsImpl, () => {
             };
         });
 
-        test.each([200, 299])('triggers healthCheckActivity with status code %o', async statusCode => {
+        test.each([200, 299])('triggers healthCheckActivity with status code %o', async (statusCode) => {
             const response: SerializableResponse = createSerializableResponse(statusCode);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
             setupTrackActivityNeverCalled();
@@ -105,11 +105,11 @@ describe(OrchestrationStepsImpl, () => {
             generatorExecutor.runTillEnd();
         });
 
-        test.each([199, 300])('healthCheckActivity throws error on status code %o', async statusCode => {
+        test.each([199, 300])('healthCheckActivity throws error on status code %o', async (statusCode) => {
             const response: SerializableResponse = createSerializableResponse(statusCode);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -137,13 +137,13 @@ describe(OrchestrationStepsImpl, () => {
             };
         });
 
-        test.each([200, 299])('triggers submitScanRequest with status code %o', async statusCode => {
+        test.each([200, 299])('triggers submitScanRequest with status code %o', async (statusCode) => {
             const response: SerializableResponse<ScanRunResponse[]> = createSerializableResponse<ScanRunResponse[]>(statusCode, [
                 { scanId: scanId } as ScanRunResponse,
             ]);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => {
                     return response as any;
                 })
@@ -154,11 +154,11 @@ describe(OrchestrationStepsImpl, () => {
             expect(scanIdResult).toEqual(scanId);
         });
 
-        test.each([199, 300])('submitScanRequest throws error on status code %o', async statusCode => {
+        test.each([199, 300])('submitScanRequest throws error on status code %o', async (statusCode) => {
             const response: SerializableResponse<ScanRunResponse[]> = createSerializableResponse<ScanRunResponse[]>(statusCode);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -182,7 +182,7 @@ describe(OrchestrationStepsImpl, () => {
             ]);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -211,11 +211,11 @@ describe(OrchestrationStepsImpl, () => {
             };
         });
 
-        test.each([200, 299])('triggers getScanReport with status code %o', async statusCode => {
+        test.each([200, 299])('triggers getScanReport with status code %o', async (statusCode) => {
             const response: SerializableResponse = createSerializableResponse(statusCode);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => {
                     return response as any;
                 })
@@ -225,11 +225,11 @@ describe(OrchestrationStepsImpl, () => {
             generatorExecutor.runTillEnd();
         });
 
-        test.each([199, 300])('getScanReport throws error on status code %o', async statusCode => {
+        test.each([199, 300])('getScanReport throws error on status code %o', async (statusCode) => {
             const response: SerializableResponse = createSerializableResponse(statusCode);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -256,7 +256,7 @@ describe(OrchestrationStepsImpl, () => {
             };
         });
 
-        test.each([200, 299])('triggers verifyScanSubmitted with status code %o', async statusCode => {
+        test.each([200, 299])('triggers verifyScanSubmitted with status code %o', async (statusCode) => {
             const scanResultResponse: ScanRunResultResponse = {
                 url: scanUrl,
                 scanId: scanId,
@@ -270,7 +270,7 @@ describe(OrchestrationStepsImpl, () => {
             );
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => {
                     return response as any;
                 })
@@ -280,10 +280,10 @@ describe(OrchestrationStepsImpl, () => {
             generatorExecutor.runTillEnd();
         });
 
-        test.each([199, 300])('verifyScanSubmitted throws error on status code %o', async statusCode => {
+        test.each([199, 300])('verifyScanSubmitted throws error on status code %o', async (statusCode) => {
             const response: SerializableResponse<ScanRunResponse> = createSerializableResponse<ScanRunResultResponse>(statusCode);
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -308,7 +308,7 @@ describe(OrchestrationStepsImpl, () => {
             } as ScanRunErrorResponse);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.once());
 
@@ -358,7 +358,7 @@ describe(OrchestrationStepsImpl, () => {
             } as ScanRunResultResponse);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.atLeast(2));
 
@@ -386,7 +386,7 @@ describe(OrchestrationStepsImpl, () => {
             setupCreateTimerNeverCalled(nextTime3);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.atLeast(2));
 
@@ -416,7 +416,7 @@ describe(OrchestrationStepsImpl, () => {
             setupCreateTimerNeverCalled(nextTime3);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.atLeast(2));
 
@@ -436,7 +436,7 @@ describe(OrchestrationStepsImpl, () => {
             setupCreateTimerNeverCalled(nextTime2);
 
             orchestrationContext
-                .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
+                .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, activityRequestData))
                 .returns(() => response as any)
                 .verifiable(Times.atLeast(1));
 
@@ -473,7 +473,7 @@ describe(OrchestrationStepsImpl, () => {
                 };
             });
             taskMethodsMock = Mock.ofType<ITaskMethods>();
-            orchestrationContext.setup(oc => oc.Task).returns(() => taskMethodsMock.object);
+            orchestrationContext.setup((oc) => oc.Task).returns(() => taskMethodsMock.object);
         });
 
         it('triggers all test groups', () => {
@@ -485,14 +485,14 @@ describe(OrchestrationStepsImpl, () => {
 
             activityRequestData.forEach((data: ActivityRequestData) => {
                 orchestrationContext
-                    .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, data))
+                    .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, data))
                     .returns(() => task)
                     .verifiable(Times.once());
             });
 
             let taskList: Task[];
             taskMethodsMock
-                .setup(t => t.all(It.isAny()))
+                .setup((t) => t.all(It.isAny()))
                 .callback((tasks: Task[]) => (taskList = tasks))
                 .verifiable(Times.once());
 
@@ -526,7 +526,7 @@ describe(OrchestrationStepsImpl, () => {
         });
 
         it('logTestRunStart', async () => {
-            loggerMock.setup(l => l.trackEvent('FunctionalTest', expectedLogProperties));
+            loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties));
 
             testSubject.logTestRunStart(getTestGroupNamesFunc);
 
@@ -536,7 +536,7 @@ describe(OrchestrationStepsImpl, () => {
 
     function setupCreateTimer(fireTime: moment.Moment, callback?: Function): void {
         orchestrationContext
-            .setup(oc => oc.createTimer(fireTime.toDate()))
+            .setup((oc) => oc.createTimer(fireTime.toDate()))
             .returns(() => {
                 currentUtcDateTime = fireTime.toDate();
                 if (!isNil(callback)) {
@@ -548,7 +548,7 @@ describe(OrchestrationStepsImpl, () => {
             .verifiable(Times.once());
     }
     function setupCreateTimerNeverCalled(fireTime: moment.Moment): void {
-        orchestrationContext.setup(oc => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
+        orchestrationContext.setup((oc) => oc.createTimer(fireTime.toDate())).verifiable(Times.never());
     }
 
     function createSerializableResponse<T>(statusCode: number, data?: T): SerializableResponse<T> {
@@ -560,7 +560,7 @@ describe(OrchestrationStepsImpl, () => {
 
     function setupTrackActivityNeverCalled(): void {
         orchestrationContext
-            .setup(oc =>
+            .setup((oc) =>
                 oc.callActivity(
                     OrchestrationStepsImpl.activityTriggerFuncName,
                     It.is((val: ActivityRequestData) => val.activityName === ActivityAction.trackAvailability),
@@ -581,7 +581,7 @@ describe(OrchestrationStepsImpl, () => {
         const trackAvailabilityRequestData = getTrackAvailabilityRequestData(success, properties);
 
         orchestrationContext
-            .setup(oc => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, trackAvailabilityRequestData))
+            .setup((oc) => oc.callActivity(OrchestrationStepsImpl.activityTriggerFuncName, trackAvailabilityRequestData))
             .returns(() => undefined)
             .verifiable(Times.once());
     }

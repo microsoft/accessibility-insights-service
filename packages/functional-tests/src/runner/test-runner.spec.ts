@@ -80,7 +80,7 @@ describe(TestRunner, () => {
     });
 
     it('run all tests', async () => {
-        loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(5));
+        loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(5));
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
@@ -130,7 +130,7 @@ describe(TestRunner, () => {
     });
 
     it('run tests for the given environment only', async () => {
-        loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
+        loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
@@ -162,7 +162,7 @@ describe(TestRunner, () => {
     });
 
     it('handle test exception', async () => {
-        loggerMock.setup(o => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
+        loggerMock.setup((o) => o.trackEvent('FunctionalTest', It.isAny())).verifiable(Times.exactly(3));
         setupLoggerMock({
             runId: runId,
             releaseId: releaseId,
@@ -219,6 +219,6 @@ describe(TestRunner, () => {
     });
 
     function setupLoggerMock(params: TestRunLogProperties | TestContainerLogProperties): void {
-        loggerMock.setup(o => o.trackEvent('FunctionalTest', { ...params })).verifiable(Times.once());
+        loggerMock.setup((o) => o.trackEvent('FunctionalTest', { ...params })).verifiable(Times.once());
     }
 });

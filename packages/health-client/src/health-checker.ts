@@ -79,7 +79,7 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
             logger.logInfo('[health-client] Functional tests succeeded.');
         }
     }
-})().catch(error => {
+})().catch((error) => {
     console.log(`Exception: ${error}`);
     process.exit(1);
 });

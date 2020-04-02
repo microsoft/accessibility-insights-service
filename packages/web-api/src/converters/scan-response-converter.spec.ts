@@ -36,12 +36,12 @@ let notificationResponse: ScanCompletedNotification;
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
     scanErrorConverterMock
-        .setup(o => o.getScanRunErrorCode(scanRunError))
+        .setup((o) => o.getScanRunErrorCode(scanRunError))
         .returns(() => ScanRunErrorCodes.internalError)
         .verifiable(Times.once());
 
     scanErrorConverterMock
-        .setup(o => o.getScanNotificationErrorCode(It.isAny()))
+        .setup((o) => o.getScanNotificationErrorCode(It.isAny()))
         .returns(() => ScanNotificationErrorCodes.InternalError)
         .verifiable();
 
@@ -148,7 +148,7 @@ function validateConverterShortResult(dbState: RunStateDb, clientState: RunState
 }
 
 describe(ScanResponseConverter, () => {
-    test.each([true, false])('return scan run short form of client result, when notification enabled = %s', notificationEnabled => {
+    test.each([true, false])('return scan run short form of client result, when notification enabled = %s', (notificationEnabled) => {
         validateConverterShortResult('pending', 'pending', notificationEnabled);
         validateConverterShortResult('accepted', 'accepted', notificationEnabled);
         validateConverterShortResult('queued', 'queued', notificationEnabled);
@@ -156,7 +156,7 @@ describe(ScanResponseConverter, () => {
         validateConverterShortResult('failed', 'failed', notificationEnabled);
     });
 
-    test.each([true, false])('return scan run full form of client result, when notification enabled = %s', notificationEnabled => {
+    test.each([true, false])('return scan run full form of client result, when notification enabled = %s', (notificationEnabled) => {
         const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);

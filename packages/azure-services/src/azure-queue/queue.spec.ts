@@ -48,7 +48,7 @@ describe(Queue, () => {
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('queueConfig'))
+            .setup(async (s) => s.getConfigValue('queueConfig'))
             .returns(async () =>
                 Promise.resolve({
                     maxQueueSize: 10,
@@ -63,11 +63,11 @@ describe(Queue, () => {
         getPromisableDynamicMock(deadMessagesURLMock);
         getPromisableDynamicMock(messageIdUrlMock);
 
-        queueServiceURLProviderMock.setup(async q => q()).returns(async () => serviceURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, queue)).returns(() => queueURLMock.object);
-        queueURLProviderMock.setup(q => q(serviceURLMock.object, `${queue}-dead`)).returns(() => deadQueueURLMock.object);
-        messagesURLProviderMock.setup(m => m(queueURLMock.object)).returns(() => messagesURLMock.object);
-        messagesURLProviderMock.setup(m => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
+        queueServiceURLProviderMock.setup(async (q) => q()).returns(async () => serviceURLMock.object);
+        queueURLProviderMock.setup((q) => q(serviceURLMock.object, queue)).returns(() => queueURLMock.object);
+        queueURLProviderMock.setup((q) => q(serviceURLMock.object, `${queue}-dead`)).returns(() => deadQueueURLMock.object);
+        messagesURLProviderMock.setup((m) => m(queueURLMock.object)).returns(() => messagesURLMock.object);
+        messagesURLProviderMock.setup((m) => m(deadQueueURLMock.object)).returns(() => deadMessagesURLMock.object);
 
         testSubject = new Queue(
             queueServiceURLProviderMock.object,
@@ -164,12 +164,12 @@ describe(Queue, () => {
 
         it('makes multiple calls to get all results', async () => {
             getMessagesMock
-                .setup(s => s(queue, 32))
+                .setup((s) => s(queue, 32))
                 .returns(async () => generateMessages(32))
                 .verifiable(Times.once());
 
             getMessagesMock
-                .setup(s => s(queue, 3))
+                .setup((s) => s(queue, 3))
                 .returns(async () => generateMessages(3))
                 .verifiable(Times.once());
 
@@ -180,7 +180,7 @@ describe(Queue, () => {
 
         it('makes single call if count is within limits of single call', async () => {
             getMessagesMock
-                .setup(s => s(queue, 31))
+                .setup((s) => s(queue, 31))
                 .returns(async () => generateMessages(31))
                 .verifiable(Times.once());
 
@@ -191,7 +191,7 @@ describe(Queue, () => {
 
         it('returns empty array if no messages found', async () => {
             getMessagesMock
-                .setup(s => s(queue, 32))
+                .setup((s) => s(queue, 32))
                 .returns(async () => [])
                 .verifiable(Times.once());
 
@@ -239,12 +239,12 @@ describe(Queue, () => {
             verifyAll();
         });
 
-        test.each([null, { messageId: null }])('creates message failed - response = %o', async response => {
+        test.each([null, { messageId: null }])('creates message failed - response = %o', async (response) => {
             const messageText = 'some message';
             setupRetryHelperMock();
             setupQueueCreationCallWhenQueueExists();
             setupVerifyCallToEnqueueMessage(messagesURLMock, messageText, response);
-            loggerMock.setup(lm => lm.logError(It.isAnyString())).verifiable();
+            loggerMock.setup((lm) => lm.logError(It.isAnyString())).verifiable();
 
             expect(await testSubject.createMessage(queue, messageText)).toEqual(false);
 
@@ -269,20 +269,20 @@ describe(Queue, () => {
 
     function setupQueueGetCount(count: number): void {
         const getProperties = { approximateMessagesCount: count } as Models.QueueGetPropertiesResponse;
-        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
+        queueURLMock.setup(async (q) => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(getProperties));
     }
 
     function setupQueueCreationCallWhenQueueExists(): void {
-        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
-        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
+        queueURLMock.setup(async (q) => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
+        deadQueueURLMock.setup(async (q) => q.getProperties(Aborter.none)).returns(async () => Promise.resolve(null));
     }
 
     function setupQueueCreationCallWhenQueueDoesNotExist(): void {
-        queueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
-        deadQueueURLMock.setup(async q => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
+        queueURLMock.setup(async (q) => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
+        deadQueueURLMock.setup(async (q) => q.getProperties(Aborter.none)).returns(async () => Promise.reject(null));
 
-        queueURLMock.setup(async q => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
-        deadQueueURLMock.setup(async q => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
+        queueURLMock.setup(async (q) => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
+        deadQueueURLMock.setup(async (q) => q.create(Aborter.none)).returns(async () => Promise.resolve(null));
     }
 
     function setupVerifyCallToMoveMessageToDeadQueue(message: Models.DequeuedMessageItem): void {
@@ -292,14 +292,14 @@ describe(Queue, () => {
 
     function setupVerifyCallToEnqueueMessage(currentMessagesURLMock: IMock<MessagesURL>, messageText: string, response: any = null): void {
         currentMessagesURLMock
-            .setup(async d => d.enqueue(Aborter.none, JSON.stringify(messageText)))
+            .setup(async (d) => d.enqueue(Aborter.none, JSON.stringify(messageText)))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
     }
 
     function setupVerifyCallForDequeueMessage(queueMessageResults: Models.DequeuedMessageItem[]): void {
         messagesURLMock
-            .setup(async m => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: messageVisibilityTimeout }))
+            .setup(async (m) => m.dequeue(Aborter.none, { numberOfMessages: 32, visibilitytimeout: messageVisibilityTimeout }))
             .returns(async () =>
                 Promise.resolve({
                     dequeuedMessageItems: queueMessageResults,
@@ -308,23 +308,23 @@ describe(Queue, () => {
             .verifiable(Times.once());
     }
     function setupVerifyCallToDeleteMessage(message: Models.DequeuedMessageItem): void {
-        messageIdURLProviderMock.setup(m => m(messagesURLMock.object, message.messageId)).returns(() => messageIdUrlMock.object);
+        messageIdURLProviderMock.setup((m) => m(messagesURLMock.object, message.messageId)).returns(() => messageIdUrlMock.object);
 
         messageIdUrlMock
-            .setup(async m => m.delete(Aborter.none, message.popReceipt))
-            .returns(async => null)
+            .setup(async (m) => m.delete(Aborter.none, message.popReceipt))
+            .returns((async) => null)
             .verifiable(Times.once());
     }
 
     function createMessagesFromServerMessages(serverMessages: Models.DequeuedMessageItem[]): Message[] {
-        return serverMessages.map(m => {
+        return serverMessages.map((m) => {
             return new Message(m.messageText, m.messageId, m.popReceipt);
         });
     }
 
     function setupRetryHelperMock(): void {
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 await errorHandler(null);
 

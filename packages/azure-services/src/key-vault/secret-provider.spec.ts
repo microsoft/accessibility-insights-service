@@ -36,7 +36,7 @@ describe(SecretProvider, () => {
         const secretValue = 'value1';
 
         azureKeyVaultClient
-            .setup(async a => a.getSecret(keyVaultUrl, secretName, ''))
+            .setup(async (a) => a.getSecret(keyVaultUrl, secretName, ''))
             .returns(async () => Promise.resolve({ value: secretValue } as KeyVaultModels.GetSecretResponse));
 
         await expect(testSubject.getSecret(secretName)).resolves.toBe(secretValue);

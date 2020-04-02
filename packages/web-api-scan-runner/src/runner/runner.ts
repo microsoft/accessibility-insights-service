@@ -151,7 +151,7 @@ export class Runner {
         this.logger.logInfo(`Generating reports from scan results`);
         const reports = this.reportGenerator.generateReports(axeResults);
 
-        return Promise.all(reports.map(async report => this.saveScanReport(report)));
+        return Promise.all(reports.map(async (report) => this.saveScanReport(report)));
     }
 
     private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {

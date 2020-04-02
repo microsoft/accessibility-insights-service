@@ -20,9 +20,9 @@ describe(ScannerBatchTaskPropertyProvider, () => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
 
         environmentSettingsMock = Mock.ofType(EnvironmentSettings);
-        environmentSettingsMock.setup(s => s.getValue('APPINSIGHTS_INSTRUMENTATIONKEY')).returns(() => appInsightsKey);
-        environmentSettingsMock.setup(s => s.getValue('KEY_VAULT_URL')).returns(() => keyVaultUrl);
-        environmentSettingsMock.setup(s => s.getValue('RUNNER_SCRIPTS_CONTAINER_NAME')).returns(() => runnerScriptContainerName);
+        environmentSettingsMock.setup((s) => s.getValue('APPINSIGHTS_INSTRUMENTATIONKEY')).returns(() => appInsightsKey);
+        environmentSettingsMock.setup((s) => s.getValue('KEY_VAULT_URL')).returns(() => keyVaultUrl);
+        environmentSettingsMock.setup((s) => s.getValue('RUNNER_SCRIPTS_CONTAINER_NAME')).returns(() => runnerScriptContainerName);
 
         testSubject = new ScannerBatchTaskPropertyProvider(environmentSettingsMock.object, serviceConfigMock.object);
     });

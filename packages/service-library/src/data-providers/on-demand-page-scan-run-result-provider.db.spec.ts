@@ -135,10 +135,10 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
         });
 
         function maskSystemProperties(results: OnDemandPageScanResult[]): void {
-            results.forEach(result => {
-                const systemProperties = Object.keys(result).filter(key => key.startsWith('_'));
+            results.forEach((result) => {
+                const systemProperties = Object.keys(result).filter((key) => key.startsWith('_'));
 
-                systemProperties.forEach(key => {
+                systemProperties.forEach((key) => {
                     // tslint:disable-next-line: no-dynamic-delete
                     delete (result as any)[key];
                 });

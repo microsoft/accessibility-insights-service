@@ -36,15 +36,15 @@ export class Batch {
     public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
         const batchTasks: BatchTask[] = [];
         const tasks = await this.getFailedTaskList(jobId);
-        tasks.map(task => {
+        tasks.map((task) => {
             const taskArguments =
-                task.environmentSettings !== undefined ? task.environmentSettings.find(e => e.name === 'TASK_ARGUMENTS') : undefined;
+                task.environmentSettings !== undefined ? task.environmentSettings.find((e) => e.name === 'TASK_ARGUMENTS') : undefined;
 
             let failureInfo: BatchTaskFailureInfo;
             if (task.executionInfo.failureInfo !== undefined) {
                 let message = '';
                 if (task.executionInfo.failureInfo.details !== undefined) {
-                    task.executionInfo.failureInfo.details.forEach(details => {
+                    task.executionInfo.failureInfo.details.forEach((details) => {
                         message = `${message}${details.name}: ${details.value}, `;
                     });
                     message = message.slice(0, -2);
@@ -122,7 +122,7 @@ export class Batch {
 
         const chunks = System.chunkArray(queueMessages, this.maxTasks);
         await Promise.all(
-            chunks.map(async chunk => {
+            chunks.map(async (chunk) => {
                 const taskCollection = await this.addTaskCollection(jobId, chunk);
                 tasks.push(...taskCollection);
             }),
@@ -146,7 +146,7 @@ export class Batch {
 
         const client = await this.batchClientProvider();
         await Promise.all(
-            activeJobIds.map(async jobId => {
+            activeJobIds.map(async (jobId) => {
                 const jobInfo = await client.job.getTaskCounts(jobId);
                 activeTasks += jobInfo.active;
                 runningTasks += jobInfo.running;
@@ -189,7 +189,7 @@ export class Batch {
         const filterClause = `state eq 'active' and executionInfo/poolId eq '${this.config.poolId}'`;
         const jobs = await this.getJobList({ filter: filterClause });
 
-        return jobs.map(i => i.id);
+        return jobs.map((i) => i.id);
     }
 
     private async getJobList(options?: JobListOptions): Promise<CloudJob[]> {
@@ -230,7 +230,7 @@ export class Batch {
         }
 
         await Promise.all(
-            messages.map(async message => {
+            messages.map(async (message) => {
                 const jobTask = new JobTask(message.messageId);
                 jobTasks.set(jobTask.id, jobTask);
                 const taskAddParameter = await this.getTaskAddParameter(jobId, jobTask.id, message.messageText, sasUrl);
@@ -240,7 +240,7 @@ export class Batch {
 
         const client = await this.batchClientProvider();
         const taskAddCollectionResult = await client.task.addCollection(jobId, taskAddParameters);
-        taskAddCollectionResult.value.forEach(taskAddResult => {
+        taskAddCollectionResult.value.forEach((taskAddResult) => {
             if (/success/i.test(taskAddResult.status)) {
                 jobTasks.get(taskAddResult.taskId).state = JobTaskState.queued;
             } else {

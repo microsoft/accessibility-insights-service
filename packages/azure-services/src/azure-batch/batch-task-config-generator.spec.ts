@@ -39,21 +39,21 @@ describe(BatchTaskConfigGenerator, () => {
         const defaultTaskConfig: TaskRuntimeConfig = { taskTimeoutInMinutes: 2, exitOnComplete: false };
 
         batchTaskPropertyProviderMock
-            .setup(s => s.getCommandLine(message))
+            .setup((s) => s.getCommandLine(message))
             .returns(() => commandLine)
             .verifiable(Times.once());
         batchTaskPropertyProviderMock
-            .setup(s => s.getAllEnvironmentSettings(message))
+            .setup((s) => s.getAllEnvironmentSettings(message))
             .returns(() => environmentSettings)
             .verifiable(Times.once());
 
         batchTaskPropertyProviderMock
-            .setup(s => s.getResourceFiles())
+            .setup((s) => s.getResourceFiles())
             .returns(() => resourceFiles)
             .verifiable(Times.once());
 
         batchTaskPropertyProviderMock
-            .setup(async s => s.getDefaultTaskConfig())
+            .setup(async (s) => s.getDefaultTaskConfig())
             .returns(async () => defaultTaskConfig)
             .verifiable(Times.once());
 

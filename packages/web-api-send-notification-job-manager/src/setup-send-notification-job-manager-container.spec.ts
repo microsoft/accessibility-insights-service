@@ -21,7 +21,7 @@ describe(setupSendNotificationJobManagerContainer, () => {
         process.env.AZ_BATCH_POOL_ID = 'test-batch-pool-id';
     });
 
-    test.each([BatchTaskPropertyProvider, ServiceConfiguration])('resolves %p to singleton value', key => {
+    test.each([BatchTaskPropertyProvider, ServiceConfiguration])('resolves %p to singleton value', (key) => {
         const container = setupSendNotificationJobManagerContainer();
 
         verifySingletonDependencyResolution(container, key);

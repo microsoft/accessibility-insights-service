@@ -45,9 +45,9 @@ describe('CosmosClientWrapper', () => {
                 name: 'NotFound',
                 code: 404,
             };
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.readAll()).returns(() => queryIteratorMock.object);
-            queryIteratorMock.setup(async qm => qm.fetchAll()).returns(async () => Promise.reject(responseError));
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.readAll()).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async (qm) => qm.fetchAll()).returns(async () => Promise.reject(responseError));
 
             const result = await testSubject.readAllItem(dbName, collectionName);
             expect(result).toEqual(expectedResult);
@@ -74,9 +74,9 @@ describe('CosmosClientWrapper', () => {
             const response: cosmos.FeedResponse<cosmos.ItemDefinition> = {
                 resources: items,
             } as any;
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.readAll()).returns(() => queryIteratorMock.object);
-            queryIteratorMock.setup(async qm => qm.fetchAll()).returns(async () => Promise.resolve(response));
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.readAll()).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async (qm) => qm.fetchAll()).returns(async () => Promise.resolve(response));
 
             const result = await testSubject.readAllItem(dbName, collectionName);
             expect(result.item).toEqual(items);
@@ -97,8 +97,8 @@ describe('CosmosClientWrapper', () => {
                 name: 'NotFound',
                 code: 404,
             };
-            collectionMock.setup(c => c.item('id', partitionKey)).returns(() => itemMock.object);
-            itemMock.setup(async i => i.read()).returns(async () => Promise.reject(responseError));
+            collectionMock.setup((c) => c.item('id', partitionKey)).returns(() => itemMock.object);
+            itemMock.setup(async (i) => i.read()).returns(async () => Promise.reject(responseError));
 
             const result = await testSubject.readItem('id', dbName, collectionName, partitionKey);
 
@@ -118,9 +118,9 @@ describe('CosmosClientWrapper', () => {
                 item: responseItem,
                 statusCode: 200,
             };
-            collectionMock.setup(c => c.item(responseItem.id, partitionKey)).returns(() => itemMock.object);
+            collectionMock.setup((c) => c.item(responseItem.id, partitionKey)).returns(() => itemMock.object);
             itemMock
-                .setup(async i => i.read())
+                .setup(async (i) => i.read())
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, partitionKey);
@@ -141,9 +141,9 @@ describe('CosmosClientWrapper', () => {
                 item: responseItem,
                 statusCode: 200,
             };
-            collectionMock.setup(c => c.item(responseItem.id, undefined)).returns(() => itemMock.object);
+            collectionMock.setup((c) => c.item(responseItem.id, undefined)).returns(() => itemMock.object);
             itemMock
-                .setup(async i => i.read())
+                .setup(async (i) => i.read())
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.readItem(responseItem.id, dbName, collectionName, undefined);
@@ -165,9 +165,9 @@ describe('CosmosClientWrapper', () => {
                 name: 'NotFound',
                 code: 404,
             };
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.query('query', It.isAny())).returns(() => queryIteratorMock.object);
-            queryIteratorMock.setup(async qm => qm.fetchNext()).returns(async () => Promise.reject(responseError));
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.query('query', It.isAny())).returns(() => queryIteratorMock.object);
+            queryIteratorMock.setup(async (qm) => qm.fetchNext()).returns(async () => Promise.reject(responseError));
 
             const result = await testSubject.readItems(dbName, collectionName, 'query');
 
@@ -200,10 +200,10 @@ describe('CosmosClientWrapper', () => {
                 statusCode: 200,
                 continuationToken: 'abdf12345fd',
             };
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock
-                .setup(async qi => qi.fetchNext())
+                .setup(async (qi) => qi.fetchNext())
                 .returns(async () => Promise.resolve({ resources: items, statusCode: 200, continuationToken: 'abdf12345fd' } as any));
 
             const result = await testSubject.readItems(dbName, collectionName, query);
@@ -233,10 +233,10 @@ describe('CosmosClientWrapper', () => {
             };
 
             let iterationCount = 1;
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock
-                .setup(async qi => qi.fetchNext())
+                .setup(async (qi) => qi.fetchNext())
                 .returns(async () => {
                     if (iterationCount > 1) {
                         return Promise.resolve({ resources: items, statusCode: 200 } as any);
@@ -263,10 +263,10 @@ describe('CosmosClientWrapper', () => {
             };
 
             let iterationCount = 1;
-            collectionMock.setup(c => c.items).returns(() => itemsMock.object);
-            itemsMock.setup(i => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
+            collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
+            itemsMock.setup((i) => i.query(query, It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock
-                .setup(async qi => qi.fetchNext())
+                .setup(async (qi) => qi.fetchNext())
                 .returns(async () => {
                     if (iterationCount > 1) {
                         return Promise.resolve({ resources: items, statusCode: 200 } as any);
@@ -287,9 +287,9 @@ describe('CosmosClientWrapper', () => {
 
     describe('deleteItem()', () => {
         it('deletes item', async () => {
-            collectionMock.setup(c => c.item('id', partitionKey)).returns(() => itemMock.object);
+            collectionMock.setup((c) => c.item('id', partitionKey)).returns(() => itemMock.object);
             itemMock
-                .setup(async i => i.delete())
+                .setup(async (i) => i.delete())
                 .returns(async () => Promise.resolve({} as any))
                 .verifiable();
 
@@ -317,7 +317,7 @@ describe('CosmosClientWrapper', () => {
                 code: 412,
             };
 
-            itemsMock.setup(async i => i.upsert<DbItemMock>(item, undefined)).returns(async () => Promise.reject(responseError));
+            itemsMock.setup(async (i) => i.upsert<DbItemMock>(item, undefined)).returns(async () => Promise.reject(responseError));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
 
@@ -347,7 +347,7 @@ describe('CosmosClientWrapper', () => {
             };
 
             itemsMock
-                .setup(async i => i.upsert<DbItemMock>(item, options))
+                .setup(async (i) => i.upsert<DbItemMock>(item, options))
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
@@ -373,7 +373,7 @@ describe('CosmosClientWrapper', () => {
                 statusCode: 200,
             };
             itemsMock
-                .setup(async i => i.upsert<DbItemMock>(item, undefined))
+                .setup(async (i) => i.upsert<DbItemMock>(item, undefined))
                 .returns(async () => Promise.resolve({ resource: responseItem as any, item: undefined } as any));
 
             const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
@@ -408,7 +408,7 @@ describe('CosmosClientWrapper', () => {
             const options: cosmos.RequestOptions = {
                 accessCondition: { type: 'IfMatch', condition: '1' },
             };
-            items.map(item => {
+            items.map((item) => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
@@ -439,7 +439,7 @@ describe('CosmosClientWrapper', () => {
                 },
             ];
             const options: cosmos.RequestOptions = undefined;
-            items.map(item => {
+            items.map((item) => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
@@ -470,7 +470,7 @@ describe('CosmosClientWrapper', () => {
                 },
             ];
             const options: cosmos.RequestOptions = undefined;
-            items.map(item => {
+            items.map((item) => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
@@ -495,7 +495,7 @@ describe('CosmosClientWrapper', () => {
             setupVerifiableUpsertItemCall(items[0]);
             setupVerifiableRejectedUpsertItemCall(items[1]);
 
-            loggerMock.setup(o => o.logError(`[storage-client] The Cosmos DB 'upsertItem' operation failed.`, It.isAny())).verifiable();
+            loggerMock.setup((o) => o.logError(`[storage-client] The Cosmos DB 'upsertItem' operation failed.`, It.isAny())).verifiable();
 
             await expect(testSubject.upsertItems(items, dbName, collectionName, partitionKey)).rejects.toEqual(errorResponse);
 
@@ -512,7 +512,7 @@ describe('CosmosClientWrapper', () => {
         queryIteratorMock = Mock.ofType(cosmos.QueryIterator);
         cosmosClientProviderStub = async () => cosmosClientMock.object;
 
-        collectionMock.setup(c => c.items).returns(() => itemsMock.object);
+        collectionMock.setup((c) => c.items).returns(() => itemsMock.object);
 
         getPromisableDynamicMock(cosmosClientMock);
     }
@@ -527,32 +527,32 @@ describe('CosmosClientWrapper', () => {
 
     function setupVerifiableGetDbCall(): void {
         cosmosClientMock
-            .setup(c => c.database(dbName))
+            .setup((c) => c.database(dbName))
             .returns(() => dbMock.object)
             .verifiable();
     }
 
     function setupVerifiableGetCollectionCall(): void {
         dbMock
-            .setup(c => c.container(collectionName))
+            .setup((c) => c.container(collectionName))
             .returns(() => collectionMock.object)
             .verifiable();
     }
 
     function setupVerifiableUpsertItemCall(item: any): void {
         itemsMock
-            .setup(async i => i.upsert(item))
+            .setup(async (i) => i.upsert(item))
             .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined } as any));
     }
 
     function setupVerifiableUpsertItemCallWithOptions(item: any, options: cosmos.RequestOptions): void {
         itemsMock
-            .setup(async i => i.upsert(item, options))
+            .setup(async (i) => i.upsert(item, options))
             .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined } as any));
     }
 
     function setupVerifiableRejectedUpsertItemCall(item: any): void {
-        itemsMock.setup(async i => i.upsert(item, undefined)).returns(async () => Promise.reject(errorResponse));
+        itemsMock.setup(async (i) => i.upsert(item, undefined)).returns(async () => Promise.reject(errorResponse));
     }
 });
 

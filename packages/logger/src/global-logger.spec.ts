@@ -72,7 +72,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('metric1', 1)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackMetric('metric1', 1)).verifiable(Times.once()));
 
             testSubject.trackMetric('metric1');
 
@@ -83,7 +83,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackMetric('metric1', 10)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackMetric('metric1', 10)).verifiable(Times.once()));
 
             testSubject.trackMetric('metric1', 10);
 
@@ -104,7 +104,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', undefined, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackEvent('HealthCheck', undefined, undefined)).verifiable(Times.once()));
 
             testSubject.trackEvent('HealthCheck');
 
@@ -117,7 +117,9 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackEvent('HealthCheck', properties, measurements)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) =>
+                m.setup((c) => c.trackEvent('HealthCheck', properties, measurements)).verifiable(Times.once()),
+            );
 
             testSubject.trackEvent('HealthCheck', properties, measurements);
 
@@ -142,7 +144,9 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackAvailability(name, availabilityTelemetryData)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) =>
+                m.setup((c) => c.trackAvailability(name, availabilityTelemetryData)).verifiable(Times.once()),
+            );
 
             testSubject.trackAvailability(name, availabilityTelemetryData);
 
@@ -163,7 +167,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('trace1', LogLevel.error, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, undefined)).verifiable(Times.once()));
 
             testSubject.log('trace1', LogLevel.error);
 
@@ -175,7 +179,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('trace1', LogLevel.error, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, properties)).verifiable(Times.once()));
 
             testSubject.log('trace1', LogLevel.error, properties);
 
@@ -196,7 +200,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('info1', LogLevel.info, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, undefined)).verifiable(Times.once()));
 
             testSubject.logInfo('info1');
 
@@ -208,7 +212,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('info1', LogLevel.info, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, properties)).verifiable(Times.once()));
 
             testSubject.logInfo('info1', properties);
 
@@ -229,7 +233,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('warn1', LogLevel.warn, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, undefined)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1');
 
@@ -241,7 +245,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('warn1', LogLevel.warn, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, properties)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1', properties);
 
@@ -262,7 +266,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('error1', LogLevel.error, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, undefined)).verifiable(Times.once()));
 
             testSubject.logError('error1');
 
@@ -274,7 +278,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('error1', LogLevel.error, properties)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, properties)).verifiable(Times.once()));
 
             testSubject.logError('error1', properties);
 
@@ -288,7 +292,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
 
             testSubject.logVerbose('HealthCheck');
 
@@ -304,7 +308,9 @@ describe(GlobalLogger, () => {
             });
 
             it('when properties not passed', () => {
-                invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
+                invokeAllLoggerClientMocks((m) =>
+                    m.setup((c) => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()),
+                );
 
                 testSubject.logVerbose('HealthCheck');
 
@@ -314,7 +320,9 @@ describe(GlobalLogger, () => {
             it('when properties passed', () => {
                 const properties = { foo: 'bar' };
 
-                invokeAllLoggerClientMocks(m => m.setup(c => c.log('HealthCheck', LogLevel.verbose, properties)).verifiable(Times.once()));
+                invokeAllLoggerClientMocks((m) =>
+                    m.setup((c) => c.log('HealthCheck', LogLevel.verbose, properties)).verifiable(Times.once()),
+                );
 
                 testSubject.logVerbose('HealthCheck', properties);
 
@@ -352,7 +360,7 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m => m.setup(c => c.trackException(error)).verifiable(Times.once()));
+            invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackException(error)).verifiable(Times.once()));
 
             testSubject.trackException(error);
 
@@ -376,8 +384,8 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m =>
-                m.setup(c => c.trackException(new VError(underlyingError, errorMessage))).verifiable(Times.once()),
+            invokeAllLoggerClientMocks((m) =>
+                m.setup((c) => c.trackException(new VError(underlyingError, errorMessage))).verifiable(Times.once()),
             );
 
             testSubject.trackExceptionAny(underlyingError, errorMessage);
@@ -392,9 +400,9 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m =>
+            invokeAllLoggerClientMocks((m) =>
                 m
-                    .setup(c => c.trackException(new VError(new Error(JSON.stringify(underlyingError)), errorMessage)))
+                    .setup((c) => c.trackException(new VError(new Error(JSON.stringify(underlyingError)), errorMessage)))
                     .verifiable(Times.once()),
             );
 
@@ -415,9 +423,9 @@ describe(GlobalLogger, () => {
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 
-            invokeAllLoggerClientMocks(m =>
+            invokeAllLoggerClientMocks((m) =>
                 m
-                    .setup(c => c.flush())
+                    .setup((c) => c.flush())
                     .returns(() => Promise.resolve())
                     .verifiable(Times.once()),
             );
@@ -432,9 +440,9 @@ describe(GlobalLogger, () => {
     }
 
     function setupCallsForTelemetrySetup(additionalCommonProps?: BaseTelemetryProperties): void {
-        invokeAllLoggerClientMocks(loggerClient =>
+        invokeAllLoggerClientMocks((loggerClient) =>
             loggerClient
-                .setup(async c => c.setup(additionalCommonProps))
+                .setup(async (c) => c.setup(additionalCommonProps))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once()),
         );

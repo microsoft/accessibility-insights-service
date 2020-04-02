@@ -337,7 +337,7 @@ describe(ApiController, () => {
 
             const serviceConfigMock = Mock.ofType(ServiceConfiguration);
             serviceConfigMock
-                .setup(async sm => sm.getConfigValue('restApiConfig'))
+                .setup(async (sm) => sm.getConfigValue('restApiConfig'))
                 .returns(async () => {
                     return Promise.resolve(configStub);
                 })

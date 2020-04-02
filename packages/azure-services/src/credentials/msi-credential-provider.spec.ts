@@ -31,7 +31,7 @@ describe(MSICredentialsProvider, () => {
         retryHelperMock = Mock.ofType<RetryHelper<Credentials>>();
 
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, millisBetweenRetries))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, millisBetweenRetries))
             .returns(retryHelperStub)
             .verifiable();
     });
@@ -52,7 +52,7 @@ describe(MSICredentialsProvider, () => {
         );
 
         mockMsRestNodeAuth
-            .setup(async m => m.loginWithAppServiceMSI({ resource: 'r1' }))
+            .setup(async (m) => m.loginWithAppServiceMSI({ resource: 'r1' }))
             .returns(async () => Promise.resolve(expectedCreds))
             .verifiable(Times.once());
 
@@ -72,7 +72,7 @@ describe(MSICredentialsProvider, () => {
         );
 
         mockMsRestNodeAuth
-            .setup(async m => m.loginWithVmMSI({ resource: 'r1' }))
+            .setup(async (m) => m.loginWithVmMSI({ resource: 'r1' }))
             .returns(async () => Promise.resolve(expectedCreds))
             .verifiable(Times.once());
 
@@ -96,7 +96,7 @@ describe(MSICredentialsProvider, () => {
         );
 
         mockMsRestNodeAuth
-            .setup(async m =>
+            .setup(async (m) =>
                 m.loginWithServicePrincipalSecret(process.env.SP_CLIENT_ID, process.env.SP_PASSWORD, process.env.SP_TENANT, {
                     tokenAudience: 'r1',
                 }),
@@ -123,13 +123,13 @@ describe(MSICredentialsProvider, () => {
 
         retryHelperMock.reset();
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
             .throws(error)
             .verifiable();
 
         let caughtError: Error;
 
-        await testSubject.getCredentials('r1').catch(err => {
+        await testSubject.getCredentials('r1').catch((err) => {
             caughtError = err as Error;
         });
 

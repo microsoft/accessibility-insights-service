@@ -33,7 +33,7 @@ describe(ContextAwareConsoleLoggerClient, () => {
         it('returns properties from root logger', () => {
             const rootLoggerProps = { rProp: 'rVal' };
 
-            rootLoggerClient.setup(r => r.getDefaultProperties()).returns(() => rootLoggerProps);
+            rootLoggerClient.setup((r) => r.getDefaultProperties()).returns(() => rootLoggerProps);
 
             expect(testSubject.getPropertiesToAddToEvent()).toEqual(rootLoggerProps);
         });

@@ -110,14 +110,14 @@ export class CosmosContainerClient {
      */
     public async mergeOrWriteDocuments<T extends CosmosDocument>(documents: T[], partitionKey?: string): Promise<void> {
         await Promise.all(
-            documents.map(async document => {
+            documents.map(async (document) => {
                 await this.mergeOrWriteDocument(document, partitionKey);
             }),
         );
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
-        documents.forEach(async document => {
+        documents.forEach(async (document) => {
             const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
             await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
         });
@@ -191,7 +191,7 @@ export class CosmosContainerClient {
     }
 
     private getNormalizeMergedDocument(document: any): any {
-        return _.mapValues(document, value => {
+        return _.mapValues(document, (value) => {
             if (_.isPlainObject(value)) {
                 return this.getNormalizeMergedDocument(value);
             }

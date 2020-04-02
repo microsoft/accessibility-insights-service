@@ -69,7 +69,7 @@ describe(BatchTaskPropertyProvider, () => {
     describe('getTaskConfig', () => {
         it('returns task config', async () => {
             const taskConfig = 'task config' as any;
-            serviceConfig.setup(async s => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
+            serviceConfig.setup(async (s) => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
 
             await expect(testSubject.getDefaultTaskConfig()).resolves.toBe(taskConfig);
         });

@@ -58,8 +58,8 @@ describe('ReportGenerator', () => {
             pageTitle,
         };
         guidGeneratorMock = Mock.ofType<GuidGenerator>();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => report1.id);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => report2.id);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report1.id);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => report2.id);
         reportGenerator = new ReportGenerator(guidGeneratorMock.object, axeResultConverters);
     });
 

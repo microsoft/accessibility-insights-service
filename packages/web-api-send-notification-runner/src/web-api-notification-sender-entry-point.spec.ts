@@ -33,18 +33,18 @@ describe(WebApiNotificationSenderEntryPoint, () => {
 
         testSubject = new TestWebApiSendNotificationRunnerEntryPoint(containerMock.object);
 
-        containerMock.setup(c => c.get(NotificationSender)).returns(() => senderMock.object);
-        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(NotificationSender)).returns(() => senderMock.object);
+        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes sender.sendNotification', async () => {
         loggerMock
-            .setup(async l => l.setup())
+            .setup(async (l) => l.setup())
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
         senderMock
-            .setup(async r => r.sendNotification())
+            .setup(async (r) => r.sendNotification())
             .returns(async () => Promise.resolve())
             .verifiable();
 

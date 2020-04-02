@@ -54,29 +54,29 @@ describe('Scan request sender', () => {
 
     it('sends the request to scan', async () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
-        onDemandPageScanRequests.forEach(request => {
+        onDemandPageScanRequests.forEach((request) => {
             const pageScanRunResultDoc = createResultDoc(request, 'accepted');
             const acceptedPageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.writeScanRuns([acceptedPageScanRunResultDoc]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             const message = createOnDemandScanRequestMessage(request);
 
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .setup(async (q) => q.createMessage(storageConfigStub.scanQueue, message))
                 .returns(async () => Promise.resolve(true))
                 .verifiable(Times.once());
 
             pageScanRequestProvider
-                .setup(async doc => doc.deleteRequests([request.id]))
+                .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         });
@@ -86,7 +86,7 @@ describe('Scan request sender', () => {
 
     it('mark scan result as failure if failed to queue', async () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
-        onDemandPageScanRequests.forEach(request => {
+        onDemandPageScanRequests.forEach((request) => {
             const pageScanRunResultDoc = createResultDoc(request, 'accepted');
             const failedPageScanRunResultDoc = createResultDoc(request, 'failed', {
                 errorType: 'InternalError',
@@ -94,24 +94,24 @@ describe('Scan request sender', () => {
             });
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([failedPageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.writeScanRuns([failedPageScanRunResultDoc]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             const message = createOnDemandScanRequestMessage(request);
 
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .setup(async (q) => q.createMessage(storageConfigStub.scanQueue, message))
                 .returns(async () => Promise.resolve(false))
                 .verifiable(Times.once());
 
             pageScanRequestProvider
-                .setup(async doc => doc.deleteRequests([request.id]))
+                .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         });
@@ -121,28 +121,28 @@ describe('Scan request sender', () => {
 
     it('does not queue a scan with queued or any other state', async () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
-        onDemandPageScanRequests.forEach(request => {
+        onDemandPageScanRequests.forEach((request) => {
             const pageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.readScanRuns([request.id]))
+                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async resultProvider => resultProvider.writeScanRuns([pageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.writeScanRuns([pageScanRunResultDoc]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.never());
 
             const message = createOnDemandScanRequestMessage(request);
 
             queueMock
-                .setup(async q => q.createMessage(storageConfigStub.scanQueue, message))
+                .setup(async (q) => q.createMessage(storageConfigStub.scanQueue, message))
                 .returns(async () => Promise.resolve(true))
                 .verifiable(Times.never());
 
             pageScanRequestProvider
-                .setup(async doc => doc.deleteRequests([request.id]))
+                .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         });
@@ -151,7 +151,7 @@ describe('Scan request sender', () => {
 
     it('returns the correct queue size', async () => {
         queueMock
-            .setup(async q => q.getMessageCount(storageConfigStub.scanQueue))
+            .setup(async (q) => q.getMessageCount(storageConfigStub.scanQueue))
             .returns(async () => Promise.resolve(3))
             .verifiable(Times.once());
         const resp = await testSubject.getCurrentQueueSize();

@@ -12,9 +12,9 @@ export const e2eTestGroupNames: { [key: string]: TestGroupName[] } = {
 
 export function getAllTestGroupClassNames(): string[] {
     let allTestGroupClassNames: string[] = [];
-    Object.keys(e2eTestGroupNames).forEach(key => {
+    Object.keys(e2eTestGroupNames).forEach((key) => {
         const testGroupNames = e2eTestGroupNames[key];
-        const testGroupClassNames = testGroupNames.map(name => {
+        const testGroupClassNames = testGroupNames.map((name) => {
             const theClass = functionalTestGroupTypes[name];
 
             return theClass.name;

@@ -23,7 +23,7 @@ describe(CliEntryPoint, () => {
     describe('runScan', () => {
         it('returns Command Runner', async () => {
             const testInput: ScanArguments = { url: 'https://www.bing.com', output: '/users/xyz' };
-            containerMock.setup(cm => cm.get(CommandRunner)).returns(() => commandRunnerMock.object);
+            containerMock.setup((cm) => cm.get(CommandRunner)).returns(() => commandRunnerMock.object);
             const runCommand = jest.spyOn(commandRunnerMock.object, 'runCommand').mockImplementationOnce(async () => Promise.resolve());
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runScan(testInput);

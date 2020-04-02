@@ -36,7 +36,7 @@ export class CosmosClientWrapper {
 
         for (const chunk of chunks) {
             await Promise.all(
-                chunk.map(async item => {
+                chunk.map(async (item) => {
                     try {
                         this.assignPartitionKey(item, partitionKey);
                         await container.items.upsert(item, this.getOptions(item));
@@ -89,7 +89,7 @@ export class CosmosClientWrapper {
             const response = await container.items.readAll().fetchAll();
             const itemsT: T[] = [];
 
-            response.resources.forEach(document => {
+            response.resources.forEach((document) => {
                 itemsT.push(<T>(<unknown>document));
             });
 
@@ -139,7 +139,7 @@ export class CosmosClientWrapper {
 
             const continuationTokenResponse = partitionQueryResult.continuationToken;
 
-            partitionQueryResult.resources.forEach(item => {
+            partitionQueryResult.resources.forEach((item) => {
                 itemsT.push(<T>(<unknown>item));
             });
 

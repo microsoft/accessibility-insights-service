@@ -20,7 +20,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
         IoC.setupSingletonProvider<ApplicationInsightsClient>(
             webApiTypeNames.ApplicationInsightsClientProvider,
             processLifeCycleContainer,
-            async context => {
+            async (context) => {
                 const secretProvider = processLifeCycleContainer.get(SecretProvider);
                 const appInsightsApiKey = await secretProvider.getSecret(secretNames.appInsightsApiKey);
 

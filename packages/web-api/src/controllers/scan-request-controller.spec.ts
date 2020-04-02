@@ -39,13 +39,13 @@ describe(ScanRequestController, () => {
         context.req.headers['content-type'] = 'application/json';
 
         scanDataProviderMock = Mock.ofType<ScanDataProvider>();
-        scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
+        scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
-            .setup(async s => s.getConfigValue('restApiConfig'))
+            .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
                 return {
                     maxScanRequestBatchCount: 3,
@@ -95,8 +95,8 @@ describe(ScanRequestController, () => {
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([
                 { url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' }, // valid request
@@ -111,7 +111,7 @@ describe(ScanRequestController, () => {
             const expectedSavedRequest: ScanRunBatchRequest[] = [
                 { scanId: guid2, url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' },
             ];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -130,14 +130,14 @@ describe(ScanRequestController, () => {
         it('accepts request with priority', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
             const priority = 10;
 
             context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
             const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
             const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -152,8 +152,8 @@ describe(ScanRequestController, () => {
         it('sends telemetry event', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([
                 { url: 'https://abs/path/', priority: 1 }, // valid request
@@ -168,7 +168,7 @@ describe(ScanRequestController, () => {
             };
 
             // tslint:disable-next-line: no-null-keyword
-            loggerMock.setup(lm => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+            loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
 
             scanRequestController = createScanRequestController(context);
             await scanRequestController.handleRequest();
@@ -181,9 +181,9 @@ describe(ScanRequestController, () => {
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             const guid3 = '1e9cefa6-538a-6df0-dddd-ffffffffffff';
 
-            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid3);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid3);
 
             const priority = 10;
 
@@ -200,7 +200,7 @@ describe(ScanRequestController, () => {
                 { scanId: guid2, url: 'https://abs/path/', priority: priority },
                 { scanId: guid3, url: 'https://bing.com/path/', priority: priority },
             ];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 
@@ -218,8 +218,8 @@ describe(ScanRequestController, () => {
 
             context.req.query['api-version'] = '2.0';
 
-            guidGeneratorMock.setup(g => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup(g => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             const priority = 10;
 
@@ -227,7 +227,7 @@ describe(ScanRequestController, () => {
             const expectedResponse = { scanId: guid2, url: 'https://abs/path/' };
 
             const expectedSaveRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async o => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
 
             scanRequestController = createScanRequestController(context);
 

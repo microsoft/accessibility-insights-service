@@ -43,7 +43,7 @@ describe(NotificationSenderWebAPIClient, () => {
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock
-                .setup(d => d({ ...sharedOption, simple: throwOnFailure }))
+                .setup((d) => d({ ...sharedOption, simple: throwOnFailure }))
                 .returns(() => 'some object' as any)
                 .verifiable(Times.once());
 
@@ -72,7 +72,7 @@ describe(NotificationSenderWebAPIClient, () => {
         };
 
         postMock
-            .setup(req => req(scanNotifyUrl, options))
+            .setup((req) => req(scanNotifyUrl, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
