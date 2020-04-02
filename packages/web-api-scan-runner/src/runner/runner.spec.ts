@@ -16,8 +16,9 @@ import {
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
+    ScanState,
 } from 'storage-documents';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { NotificationQueueMessageSender } from '../tasks/notification-queue-message-sender';
@@ -387,57 +388,103 @@ describe(Runner, () => {
         const notificationMessage: OnDemandNotificationRequestMessage = {
             scanId: onDemandPageScanResult.id,
             scanNotifyUrl: scanNotifyUrl,
-            runStatus: 'completed',
-            scanStatus: 'pass',
-        };
+        } as OnDemandNotificationRequestMessage;
 
         beforeEach(() => {
-            setupWebDriverCalls();
-
-            scannerTaskMock
-                .setup(async s => s.scan(scanMetadata.url))
-                .returns(async () => Promise.resolve(passedAxeScanResults))
-                .verifiable();
-
-            setupGenerateReportsCall(passedAxeScanResults);
-            setupSaveAllReportsCall();
-
+            const featureFlags: FeatureFlags = { sendNotification: true };
             serviceConfigurationMock.reset();
-            const featureFlags1: FeatureFlags = { sendNotification: true };
+
             serviceConfigurationMock
                 .setup(async scm => scm.getConfigValue('featureFlags'))
-                .returns(async () => Promise.resolve(featureFlags1))
+                .returns(async () => Promise.resolve(featureFlags))
                 .verifiable(Times.once());
         });
 
-        test.each([undefined, { scanNotifyUrl: undefined }])(
-            'Do not send notification when url not present, notification = %o',
-            async notification => {
+        describe('on run completed', () => {
+            beforeEach(() => {
+                notificationMessage.runStatus = 'completed';
+                setupWebDriverCalls();
+
+                setupGenerateReportsCall(passedAxeScanResults);
+                setupSaveAllReportsCall();
+            });
+
+            test.each([undefined, { scanNotifyUrl: undefined }])(
+                'Do not send notification when url not present, notification = %o',
+                async notification => {
+                    notificationMessage.scanStatus = 'pass';
+                    scannerTaskMock
+                        .setup(async s => s.scan(scanMetadata.url))
+                        .returns(async () => Promise.resolve(passedAxeScanResults))
+                        .verifiable();
+
+                    const fullResult = cloneDeep(onDemandPageScanResult);
+                    fullResult.notification = notification;
+                    setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
+                    setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+                    setupSendNotificationMessageNeverCalled();
+
+                    await runner.run();
+                },
+            );
+
+            test.each([
+                ['fail', axeScanResultsWithViolations],
+                ['pass', passedAxeScanResults],
+            ])('Notification url is not null - scan status - %s', async (scanStatus: ScanState, scanResults) => {
+                notificationMessage.scanStatus = scanStatus;
+                scannerTaskMock
+                    .setup(async s => s.scan(scanMetadata.url))
+                    .returns(async () => Promise.resolve(scanResults))
+                    .verifiable();
+
+                setupGenerateReportsCall(scanResults);
+                setupSaveAllReportsCall();
+
                 const fullResult = cloneDeep(onDemandPageScanResult);
-                fullResult.notification = notification;
+                fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
                 setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
-                setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
-                notificationQueueMessageSenderMock
-                    .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
-                    .returns(async () => Promise.resolve())
-                    .verifiable(Times.never());
+                setupUpdateScanRunResultCall(
+                    scanStatus === 'pass' ? getScanResultWithNoViolations() : getScanResultWithViolations(),
+                    fullResult,
+                );
+                setupVerifiableSendNotificationMessageCall();
 
                 await runner.run();
-            },
-        );
+            });
+        });
 
-        it('Notification URL is not null', async () => {
-            const fullResult = cloneDeep(onDemandPageScanResult);
-            fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
-            setupUpdateScanRunResultCall(getRunningJobStateScanResult(), fullResult);
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+        describe('on run failed', () => {
+            it('sets state to failed if web driver launch crashes', async () => {
+                notificationMessage.runStatus = 'failed';
+                notificationMessage.scanStatus = undefined;
+
+                const failureMessage = 'failed to launch';
+                webDriverTaskMock
+                    .setup(async o => o.launch())
+                    .returns(async () => Promise.reject(failureMessage))
+                    .verifiable(Times.once());
+
+                const fullResult = cloneDeep(onDemandPageScanResult);
+                fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
+                setupUpdateScanRunResultCall(getRunningJobStateScanResult());
+                setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false), fullResult);
+
+                setupVerifiableSendNotificationMessageCall();
+                await runner.run();
+            });
+        });
+
+        function setupVerifiableSendNotificationMessageCall(): void {
             notificationQueueMessageSenderMock
                 .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
+        }
 
-            await runner.run();
-        });
+        function setupSendNotificationMessageNeverCalled(): void {
+            notificationQueueMessageSenderMock.setup(ndm => ndm.sendNotificationMessage(It.isAny())).verifiable(Times.never());
+        }
     });
 
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
