@@ -77,7 +77,7 @@ describe(Batch, () => {
         };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('taskConfig'))
+            .setup(async (s) => s.getConfigValue('taskConfig'))
             .returns(async () => {
                 return {
                     taskTimeoutInMinutes: maxTaskDurationInMinutes,
@@ -96,7 +96,7 @@ describe(Batch, () => {
         batchServiceClientProviderStub = async () => batchClientStub;
         storageContainerSASUrlProviderMock = Mock.ofType(StorageContainerSASUrlProvider);
         storageContainerSASUrlProviderMock
-            .setup(async c => c.generateSASUrl(It.isAny()))
+            .setup(async (c) => c.generateSASUrl(It.isAny()))
             .returns(async () => {
                 return containerSASUrl;
             });
@@ -213,11 +213,11 @@ describe(Batch, () => {
                 taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'failure'` },
             };
             taskMock
-                .setup(async o => o.list(config.jobId, options))
+                .setup(async (o) => o.list(config.jobId, options))
                 .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items1)))
                 .verifiable();
             taskMock
-                .setup(async o => o.listNext(items1.odatanextLink, options))
+                .setup(async (o) => o.listNext(items1.odatanextLink, options))
                 .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items2)))
                 .verifiable();
 
@@ -286,7 +286,7 @@ describe(Batch, () => {
                 },
             };
             poolMock
-                .setup(async o => o.get(config.poolId))
+                .setup(async (o) => o.get(config.poolId))
                 .returns(async () =>
                     Promise.resolve(<PoolGetResponse>(<unknown>{
                         maxTasksPerNode: 8,
@@ -303,19 +303,19 @@ describe(Batch, () => {
             items1.odatanextLink = 'odatanextLink-1';
             const items2 = new JobListStub([{ id: 'job-id-2' }]);
             jobMock
-                .setup(async o => o.list(options))
+                .setup(async (o) => o.list(options))
                 .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items1)))
                 .verifiable();
             jobMock
-                .setup(async o => o.listNext(items1.odatanextLink, options))
+                .setup(async (o) => o.listNext(items1.odatanextLink, options))
                 .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items2)))
                 .verifiable();
             jobMock
-                .setup(async o => o.getTaskCounts(items1.items[0].id))
+                .setup(async (o) => o.getTaskCounts(items1.items[0].id))
                 .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 1, running: 2 })))
                 .verifiable();
             jobMock
-                .setup(async o => o.getTaskCounts(items2.items[0].id))
+                .setup(async (o) => o.getTaskCounts(items2.items[0].id))
                 .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 3, running: 5 })))
                 .verifiable();
 
@@ -358,9 +358,9 @@ describe(Batch, () => {
                 });
 
                 batchTaskConfigGenerator
-                    .setup(async o =>
+                    .setup(async (o) =>
                         o.getTaskConfig(
-                            It.is(actualId => isExpectedId(actualId, message.messageId)),
+                            It.is((actualId) => isExpectedId(actualId, message.messageId)),
                             message.messageText,
                         ),
                     )
@@ -370,7 +370,7 @@ describe(Batch, () => {
             }
 
             taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .setup(async (o) => o.addCollection(jobId1, It.isAny()))
                 .callback((id, taskParameters) => {
                     tasksAddedBatchCount.push(taskParameters.length);
                     taskAddCollectionResponse = <BatchServiceModels.TaskAddCollectionResponse>(<unknown>{ value: [] });
@@ -451,7 +451,7 @@ describe(Batch, () => {
 
             let i = 0;
             taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .setup(async (o) => o.addCollection(jobId1, It.isAny()))
                 .callback((id, taskAddParameters) =>
                     taskAddParameters.forEach((taskAddParameter: BatchServiceModels.TaskAddParameter) => {
                         taskAddCollectionResult.value[i].taskId = taskAddParameter.id;
@@ -464,9 +464,9 @@ describe(Batch, () => {
 
             for (let k = 0; k < messages.length; k++) {
                 batchTaskConfigGenerator
-                    .setup(async o =>
+                    .setup(async (o) =>
                         o.getTaskConfig(
-                            It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
+                            It.is((actualId) => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),
                     )
@@ -512,9 +512,9 @@ describe(Batch, () => {
 
             for (let k = 0; k < messages.length; k++) {
                 batchTaskConfigGenerator
-                    .setup(async o =>
+                    .setup(async (o) =>
                         o.getTaskConfig(
-                            It.is(actualId => isExpectedId(actualId, messages[k].messageId)),
+                            It.is((actualId) => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),
                     )
@@ -524,7 +524,7 @@ describe(Batch, () => {
 
             let actualTaskAddParameters: BatchServiceModels.TaskAddParameter[];
             taskMock
-                .setup(async o => o.addCollection(jobId1, It.isAny()))
+                .setup(async (o) => o.addCollection(jobId1, It.isAny()))
                 .callback((id, taskParameters) => {
                     actualTaskAddParameters = taskParameters;
                 })
@@ -546,12 +546,12 @@ describe(Batch, () => {
                 code: 'JobNotFound',
             };
             jobMock
-                .setup(async o => o.get(jobId1))
+                .setup(async (o) => o.get(jobId1))
                 .returns(async () => Promise.reject(error))
                 .verifiable();
             jobMock
-                .setup(async o => o.add(It.isAny()))
-                .callback(parameter => (jobAddParameter = parameter))
+                .setup(async (o) => o.add(It.isAny()))
+                .callback((parameter) => (jobAddParameter = parameter))
                 .verifiable();
 
             const jobIdActual = await batch.createJobIfNotExists(jobId1);
@@ -566,7 +566,7 @@ describe(Batch, () => {
                 code: 'requestFailed',
             };
             jobMock
-                .setup(async o => o.get(jobId1))
+                .setup(async (o) => o.get(jobId1))
                 .returns(async () => Promise.reject(error))
                 .verifiable();
 
@@ -579,7 +579,7 @@ describe(Batch, () => {
                 state: 'active',
             } as BatchServiceModels.JobGetResponse;
             jobMock
-                .setup(async o => o.get(jobId1))
+                .setup(async (o) => o.get(jobId1))
                 .returns(async () => Promise.resolve(cloudJob))
                 .verifiable();
 
@@ -592,7 +592,7 @@ describe(Batch, () => {
                 state: 'completed',
             } as BatchServiceModels.JobGetResponse;
             jobMock
-                .setup(async o => o.get(jobId1))
+                .setup(async (o) => o.get(jobId1))
                 .returns(async () => Promise.resolve(cloudJob))
                 .verifiable();
 

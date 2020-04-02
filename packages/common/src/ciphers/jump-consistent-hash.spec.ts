@@ -44,7 +44,7 @@ describe('JumpConsistentHash', () => {
             },
         ];
 
-        testCases.forEach(testCase => {
+        testCases.forEach((testCase) => {
             const bucket = hashGenerator.getBucket(testCase.key, testCase.buckets);
             expect(bucket).toEqual(testCase.result);
         });

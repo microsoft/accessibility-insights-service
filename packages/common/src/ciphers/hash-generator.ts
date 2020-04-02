@@ -12,9 +12,7 @@ export class HashGenerator {
     public generateBase64Hash(...values: string[]): string {
         const hashSeed: string = values.join('|').toLowerCase();
 
-        return this.sha('sha256')
-            .update(hashSeed)
-            .digest('hex');
+        return this.sha('sha256').update(hashSeed).digest('hex');
     }
 
     public getPageScanResultDocumentId(baseUrl: string, url: string, runTimeValue: number): string {

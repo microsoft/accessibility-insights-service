@@ -87,7 +87,7 @@ export class Worker extends BatchTaskCreator {
         }
 
         await Promise.all(
-            failedTasks.map(async failedTask => {
+            failedTasks.map(async (failedTask) => {
                 const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
                 if (!isNil(taskArguments?.id)) {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
@@ -122,7 +122,7 @@ export class Worker extends BatchTaskCreator {
     }
 
     private async dropCompletedScans(messages: Message[]): Promise<Message[]> {
-        const scanMessages: ScanMessage[] = messages.map(message => ({
+        const scanMessages: ScanMessage[] = messages.map((message) => ({
             scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
             queueMessage: message,
         }));
@@ -130,8 +130,8 @@ export class Worker extends BatchTaskCreator {
         const scanRuns: OnDemandPageScanResult[] = [];
         const chunks = this.system.chunkArray(scanMessages, 100);
         await Promise.all(
-            chunks.map(async chunk => {
-                const scanIds = chunk.map(m => m.scanId);
+            chunks.map(async (chunk) => {
+                const scanIds = chunk.map((m) => m.scanId);
                 const runs = await this.onDemandPageScanRunResultProvider.readScanRuns(scanIds);
                 scanRuns.push(...runs);
             }),
@@ -139,8 +139,8 @@ export class Worker extends BatchTaskCreator {
 
         const acceptedScanMessages: Message[] = [];
         await Promise.all(
-            scanRuns.map(async scanRun => {
-                const scanMessage = scanMessages.find(message => message.scanId === scanRun.id);
+            scanRuns.map(async (scanRun) => {
+                const scanMessage = scanMessages.find((message) => message.scanId === scanRun.id);
                 if (scanRun.run.state === 'queued') {
                     acceptedScanMessages.push(scanMessage.queueMessage);
                 } else {

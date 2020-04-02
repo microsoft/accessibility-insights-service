@@ -96,10 +96,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
             });
 
             const timerOutput = yield this.context.df.createTimer(
-                moment
-                    .utc(this.context.df.currentUtcDateTime)
-                    .add(scanWaitIntervalInSeconds, 'seconds')
-                    .toDate(),
+                moment.utc(this.context.df.currentUtcDateTime).add(scanWaitIntervalInSeconds, 'seconds').toDate(),
             );
 
             this.logOrchestrationStep('Timer completed', LogLevel.info, {

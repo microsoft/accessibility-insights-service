@@ -37,7 +37,7 @@ describe(getProcessLifeCycleContainer, () => {
         expect(testSubject.get(CredentialsProvider)).toBeDefined();
     });
 
-    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', testCase => {
+    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', (testCase) => {
         expect(() => testSubject.get(testCase)).toThrowError();
     });
 
@@ -51,7 +51,7 @@ describe(getProcessLifeCycleContainer, () => {
 
     it('verifies A11yServiceClient registration', async () => {
         secretProviderMock
-            .setup(async s => s.getSecret('appInsightsApiKey'))
+            .setup(async (s) => s.getSecret('appInsightsApiKey'))
             .returns(async () => Promise.resolve('api key'))
             .verifiable();
 

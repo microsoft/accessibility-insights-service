@@ -35,12 +35,12 @@ describe(PartitionKeyFactory, () => {
 function setupGenerators(partitionKeyPrefix: string, documentId: string, partitionKey: string): void {
     const scanIdNode = `${documentId}-node`;
     guidGeneratorMock
-        .setup(g => g.getGuidNode(documentId))
+        .setup((g) => g.getGuidNode(documentId))
         .returns(() => scanIdNode)
         .verifiable();
 
     hashGeneratorMock
-        .setup(h => h.getDbHashBucket(partitionKeyPrefix, scanIdNode))
+        .setup((h) => h.getDbHashBucket(partitionKeyPrefix, scanIdNode))
         .returns(() => partitionKey)
         .verifiable();
 }

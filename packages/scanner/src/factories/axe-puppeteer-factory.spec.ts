@@ -23,7 +23,7 @@ describe('AxePuppeteerFactory', () => {
             scanTimeoutInMin: 1,
         };
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        serviceConfigMock.setup(async s => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
+        serviceConfigMock.setup(async (s) => s.getConfigValue('scanConfig')).returns(async () => scanConfig);
         page = Mock.ofType<Puppeteer.Page>();
         testSubject = new AxePuppeteerFactory(serviceConfigMock.object);
     });

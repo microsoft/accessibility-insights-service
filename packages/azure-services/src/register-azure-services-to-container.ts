@@ -39,30 +39,18 @@ export function registerAzureServicesToContainer(
     setupAuthenticationMethod(container);
 
     container.bind(iocTypeNames.msRestAzure).toConstantValue(msRestNodeAuth);
-    container
-        .bind(CredentialsProvider)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(CredentialsProvider).toSelf().inSingletonScope();
 
     setupSingletonAzureKeyVaultClientProvider(container);
 
-    container
-        .bind(SecretProvider)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(SecretProvider).toSelf().inSingletonScope();
 
-    container
-        .bind(StorageConfig)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(StorageConfig).toSelf().inSingletonScope();
 
     setupSingletonCosmosClientProvider(container, cosmosClientFactory);
 
     container.bind(CosmosClientWrapper).toSelf();
-    container
-        .bind(MSICredentialsProvider)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(MSICredentialsProvider).toSelf().inSingletonScope();
 
     container.bind(iocTypeNames.QueueURLProvider).toConstantValue(QueueURL.fromServiceURL);
     container.bind(iocTypeNames.MessagesURLProvider).toConstantValue(MessagesURL.fromQueueURL);
@@ -70,40 +58,31 @@ export function registerAzureServicesToContainer(
 
     setupSingletonQueueServiceURLProvider(container);
 
-    container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue(context => {
+    container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient).toDynamicValue(context => {
+    container.bind(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRuns');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue(context => {
+    container.bind(cosmosContainerClientTypes.OnDemandScanRequestsCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanRequests');
     });
 
-    container.bind(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient).toDynamicValue(context => {
+    container.bind(cosmosContainerClientTypes.OnDemandSystemDataCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'systemData');
     });
 
     container.bind(iocTypeNames.CredentialType).toConstantValue(credentialType);
 
     setupBlobServiceClientProvider(container);
-    container
-        .bind(StorageContainerSASUrlProvider)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(StorageContainerSASUrlProvider).toSelf().inSingletonScope();
     container.bind(Queue).toSelf();
 
     setupSingletonAzureBatchServiceClientProvider(container);
-    container
-        .bind(BatchConfig)
-        .toSelf()
-        .inSingletonScope();
-    container
-        .bind(Batch)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(BatchConfig).toSelf().inSingletonScope();
+    container.bind(Batch).toSelf().inSingletonScope();
 }
 
 async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
@@ -123,7 +102,7 @@ async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
 }
 
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async context => {
+    IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const storageKey = await getStorageKey(context);
         const sharedKeyCredential = new SharedKeyCredentialBlob(storageKey.accountName, storageKey.accountKey);
 
@@ -143,7 +122,7 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async context => {
+    IoC.setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
         const credentialsProvider = context.container.get(CredentialsProvider);
         const credentials = await credentialsProvider.getCredentialsForKeyVault();
 
@@ -152,7 +131,7 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 }
 
 function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async context => {
+    IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async (context) => {
         const storageKey = await getStorageKey(context);
         const sharedKeyCredential = new SharedKeyCredential(storageKey.accountName, storageKey.accountKey);
         const pipeline = StorageURL.newPipeline(sharedKeyCredential);
@@ -165,7 +144,7 @@ function setupSingletonCosmosClientProvider(
     container: interfaces.Container,
     cosmosClientFactory: (options: CosmosClientOptions) => CosmosClient,
 ): void {
-    IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async context => {
+    IoC.setupSingletonProvider<CosmosClient>(iocTypeNames.CosmosClientProvider, container, async (context) => {
         if (process.env.COSMOS_DB_URL !== undefined && process.env.COSMOS_DB_KEY !== undefined) {
             return cosmosClientFactory({ endpoint: process.env.COSMOS_DB_URL, key: process.env.COSMOS_DB_KEY });
         } else {

@@ -42,8 +42,8 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
 
         beforeEach(() => {
             rootLoggerSetup = false;
-            rootLoggerClient.setup(r => r.setup()).callback(() => (rootLoggerSetup = true));
-            rootLoggerClient.setup(r => r.isInitialized()).returns(() => rootLoggerSetup);
+            rootLoggerClient.setup((r) => r.setup()).callback(() => (rootLoggerSetup = true));
+            rootLoggerClient.setup((r) => r.isInitialized()).returns(() => rootLoggerSetup);
         });
 
         it('should create telemetry client with base properties', async () => {
@@ -64,7 +64,7 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
             const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
 
             rootLoggerClient
-                .setup(r => r.setup())
+                .setup((r) => r.setup())
                 .callback(() => (rootLoggerSetup = true))
                 .verifiable(Times.once());
 
@@ -90,7 +90,7 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
                 rootProps: 'rootPropValue',
             };
 
-            rootLoggerClient.setup(r => r.getDefaultProperties()).returns(() => rootLoggerProps);
+            rootLoggerClient.setup((r) => r.getDefaultProperties()).returns(() => rootLoggerProps);
 
             expect(testSubject.getAdditionalPropertiesToAddToEvent()).toEqual(rootLoggerProps);
         });

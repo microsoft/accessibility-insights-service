@@ -32,8 +32,8 @@ describe(WebApiScanRequestSenderEntryPoint, () => {
         loggerMock = Mock.ofType(ContextAwareLogger);
         onDispatcherMock = Mock.ofType(OnDemandDispatcher);
 
-        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
-        containerMock.setup(c => c.get(OnDemandDispatcher)).returns(() => onDispatcherMock.object);
+        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(OnDemandDispatcher)).returns(() => onDispatcherMock.object);
 
         testSubject = new TestableWebApiScanRequestSenderEntryPoint(containerMock.object);
     });
@@ -49,12 +49,12 @@ describe(WebApiScanRequestSenderEntryPoint, () => {
     describe('runCustomAction', () => {
         it('dispatches scan requests', async () => {
             loggerMock
-                .setup(async l => l.setup())
+                .setup(async (l) => l.setup())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             onDispatcherMock
-                .setup(async d => d.dispatchOnDemandScanRequests())
+                .setup(async (d) => d.dispatchOnDemandScanRequests())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 

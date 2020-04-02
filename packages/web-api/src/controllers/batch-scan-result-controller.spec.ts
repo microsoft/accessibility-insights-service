@@ -66,19 +66,19 @@ describe(BatchScanResultController, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         onDemandPageScanRunResultProviderMock
             // tslint:disable-next-line: no-unsafe-any
-            .setup(async o => o.readScanRuns(It.isAny()))
+            .setup(async (o) => o.readScanRuns(It.isAny()))
             .returns(async () => Promise.resolve([scanFetchedResponse]));
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock
-            .setup(gm => gm.isValidV6Guid(It.isAnyString()))
-            .returns(id => {
+            .setup((gm) => gm.isValidV6Guid(It.isAnyString()))
+            .returns((id) => {
                 return id !== invalidScanId;
             });
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
-            .setup(async s => s.getConfigValue('restApiConfig'))
+            .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
                 // tslint:disable-next-line: no-object-literal-type-assertion
                 return {
@@ -91,7 +91,7 @@ describe(BatchScanResultController, () => {
 
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         scanResponseConverterMock
-            .setup(o => o.getScanResultResponse(baseUrl, apiVersion, scanFetchedResponse))
+            .setup((o) => o.getScanResultResponse(baseUrl, apiVersion, scanFetchedResponse))
             .returns(() => scanClientResponseForFetchedResponse);
     });
 
@@ -110,7 +110,7 @@ describe(BatchScanResultController, () => {
 
     function setupGetGuidTimestamp(scanId: string, time: Date): void {
         guidGeneratorMock
-            .setup(gm => gm.getGuidTimestamp(scanId))
+            .setup((gm) => gm.getGuidTimestamp(scanId))
             .returns(() => time)
             .verifiable(Times.atLeast(1));
     }
@@ -119,9 +119,7 @@ describe(BatchScanResultController, () => {
         it('should return different response for different kind of scanIds', async () => {
             context.req.rawBody = JSON.stringify(batchRequestBody);
             batchScanResultController = createScanResultController(context);
-            const requestTooSoonTimeStamp = moment()
-                .subtract(1)
-                .toDate();
+            const requestTooSoonTimeStamp = moment().subtract(1).toDate();
             const validTimeStamp = new Date(0);
 
             setupGetGuidTimestamp(validScanId, validTimeStamp);

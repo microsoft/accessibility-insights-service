@@ -72,12 +72,12 @@ describe(NotificationSender, () => {
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('scanConfig'))
+            .setup(async (s) => s.getConfigValue('scanConfig'))
             .returns(async () => scanConfig)
             .verifiable(Times.once());
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
-        notificationSenderMetadataMock.setup(s => s.getConfig()).returns(() => notificationSenderMetadata);
+        notificationSenderMetadataMock.setup((s) => s.getConfig()).returns(() => notificationSenderMetadata);
 
         processStub = {} as typeof process;
         processStub.env = { batchJobId: 'job 1' };
@@ -100,12 +100,12 @@ describe(NotificationSender, () => {
         const response = { statusCode: 200 } as ResponseAsJSON;
 
         systemMock
-            .setup(sm => sm.wait(5000))
+            .setup((sm) => sm.wait(5000))
             .returns(async () => Promise.resolve())
             .verifiable(Times.never());
 
         webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
+            .setup((wam) => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -125,14 +125,14 @@ describe(NotificationSender, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
-            .setup(sm => sm.wait(5000))
+            .setup((sm) => sm.wait(5000))
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
 
         webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
+            .setup((wam) => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
@@ -152,12 +152,12 @@ describe(NotificationSender, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
         systemMock
-            .setup(sm => sm.wait(5000))
+            .setup((sm) => sm.wait(5000))
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
         webAPIMock
-            .setup(wam => wam.sendNotification(notificationSenderMetadata))
+            .setup((wam) => wam.sendNotification(notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
@@ -181,7 +181,7 @@ describe(NotificationSender, () => {
 
     function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(result))
+            .setup(async (d) => d.updateScanRun(result))
             .returns(async () => Promise.resolve(result as OnDemandPageScanResult))
             .verifiable(Times.once());
     }

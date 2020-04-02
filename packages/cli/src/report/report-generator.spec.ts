@@ -50,7 +50,7 @@ describe('ReportGenerator', () => {
             },
         };
         reporterMock
-            .setup(rm => rm.fromAxeResult(htmlReportParams))
+            .setup((rm) => rm.fromAxeResult(htmlReportParams))
             .returns(() => htmlReport)
             .verifiable(Times.once());
 

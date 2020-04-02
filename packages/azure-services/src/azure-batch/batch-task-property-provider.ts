@@ -39,7 +39,7 @@ export abstract class BatchTaskPropertyProvider {
 
         const containerNames = this.getResourceContainerNames();
 
-        containerNames.forEach(containerName => {
+        containerNames.forEach((containerName) => {
             resourceFiles.push({
                 autoStorageContainerName: containerName,
             });
@@ -59,7 +59,7 @@ export abstract class BatchTaskPropertyProvider {
     private getCommandLineTemplate(): string {
         let argsPlaceHolders = '';
 
-        this.commandLineParameters.forEach(p => {
+        this.commandLineParameters.forEach((p) => {
             argsPlaceHolders += ` "%${p}%"`;
         });
 

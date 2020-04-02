@@ -13,10 +13,7 @@ export function setupWebApiScanJobManagerContainer(): Container {
     registerContextAwareLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 
-    container
-        .bind(BatchTaskPropertyProvider)
-        .to(ScannerBatchTaskPropertyProvider)
-        .inSingletonScope();
+    container.bind(BatchTaskPropertyProvider).to(ScannerBatchTaskPropertyProvider).inSingletonScope();
 
     return container;
 }

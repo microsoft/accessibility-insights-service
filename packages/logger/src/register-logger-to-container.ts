@@ -17,7 +17,7 @@ export function registerGlobalLoggerToContainer(container: Container): void {
 
     container
         .bind(GlobalLogger)
-        .toDynamicValue(context => {
+        .toDynamicValue((context) => {
             const appInsightsLoggerClient = context.container.get(AppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ConsoleLoggerClient);
 
@@ -27,18 +27,12 @@ export function registerGlobalLoggerToContainer(container: Container): void {
 }
 
 export function registerContextAwareLoggerToContainer(container: Container): void {
-    container
-        .bind(ContextAwareAppInsightsLoggerClient)
-        .toSelf()
-        .inSingletonScope();
-    container
-        .bind(ContextAwareConsoleLoggerClient)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(ContextAwareAppInsightsLoggerClient).toSelf().inSingletonScope();
+    container.bind(ContextAwareConsoleLoggerClient).toSelf().inSingletonScope();
 
     container
         .bind(ContextAwareLogger)
-        .toDynamicValue(context => {
+        .toDynamicValue((context) => {
             const appInsightsLoggerClient = context.container.get(ContextAwareAppInsightsLoggerClient);
             const consoleLoggerClient = context.container.get(ContextAwareConsoleLoggerClient);
 
@@ -50,14 +44,8 @@ export function registerContextAwareLoggerToContainer(container: Container): voi
 function registerLoggerDependenciesToContainer(container: Container): void {
     container.bind(loggerTypes.AppInsights).toConstantValue(appInsights);
     container.bind(loggerTypes.Process).toConstantValue(process);
-    container
-        .bind(AppInsightsLoggerClient)
-        .toSelf()
-        .inSingletonScope();
-    container
-        .bind(ConsoleLoggerClient)
-        .toSelf()
-        .inSingletonScope();
+    container.bind(AppInsightsLoggerClient).toSelf().inSingletonScope();
+    container.bind(ConsoleLoggerClient).toSelf().inSingletonScope();
 
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Argv).toConstantValue(argv);

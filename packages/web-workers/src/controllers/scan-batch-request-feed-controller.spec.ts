@@ -127,10 +127,10 @@ describe(ScanBatchRequestFeedController, () => {
         setupPartitionKeyFactoryMock(documents);
         // tslint:disable-next-line: no-null-keyword
         loggerMock
-            .setup(lm => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[0].id }, { addedUrls: 2 }))
+            .setup((lm) => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[0].id }, { addedUrls: 2 }))
             .verifiable(Times.once());
         loggerMock
-            .setup(lm => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[1].id }, { addedUrls: 2 }))
+            .setup((lm) => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[1].id }, { addedUrls: 2 }))
             .verifiable(Times.once());
 
         await scanBatchRequestFeedController.invoke(context, documents);
@@ -138,10 +138,10 @@ describe(ScanBatchRequestFeedController, () => {
 });
 
 function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
-    documents.map(document => {
+    documents.map((document) => {
         const dbDocuments = document.scanRunBatchRequest
-            .filter(request => request.scanId !== undefined)
-            .map<OnDemandPageScanResult>(request => {
+            .filter((request) => request.scanId !== undefined)
+            .map<OnDemandPageScanResult>((request) => {
                 const res: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
@@ -163,15 +163,15 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
 
                 return res;
             });
-        onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
+        onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
     });
 }
 
 function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
-    documents.map(document => {
+    documents.map((document) => {
         const dbDocuments = document.scanRunBatchRequest
-            .filter(request => request.scanId !== undefined)
-            .map<OnDemandPageScanRequest>(request => {
+            .filter((request) => request.scanId !== undefined)
+            .map<OnDemandPageScanRequest>((request) => {
                 const res: OnDemandPageScanRequest = {
                     id: request.scanId,
                     url: request.url,
@@ -186,17 +186,17 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
 
                 return res;
             });
-        pageScanRequestProviderMock.setup(async o => o.insertRequests(dbDocuments)).verifiable(Times.once());
-        scanDataProviderMock.setup(async o => o.deleteBatchRequest(document)).verifiable(Times.once());
+        pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
+        scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(document)).verifiable(Times.once());
     });
 }
 
 function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[]): void {
-    documents.map(document => {
-        document.scanRunBatchRequest.map(request => {
+    documents.map((document) => {
+        document.scanRunBatchRequest.map((request) => {
             if (request.scanId !== undefined) {
                 partitionKeyFactoryMock
-                    .setup(o => o.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId))
+                    .setup((o) => o.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId))
                     .returns(() => `pk-${request.scanId}`)
                     .verifiable(Times.once());
             }
@@ -205,8 +205,8 @@ function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[])
 }
 
 function setupMocksWithTimesNever(): void {
-    onDemandPageScanRunResultProviderMock.setup(async o => o.writeScanRuns(It.isAny())).verifiable(Times.never());
-    pageScanRequestProviderMock.setup(async o => o.insertRequests(It.isAny())).verifiable(Times.never());
-    scanDataProviderMock.setup(async o => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
-    partitionKeyFactoryMock.setup(o => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
+    onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(It.isAny())).verifiable(Times.never());
+    pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isAny())).verifiable(Times.never());
+    scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
+    partitionKeyFactoryMock.setup((o) => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
 }

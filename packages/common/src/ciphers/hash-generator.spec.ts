@@ -18,7 +18,7 @@ describe('HashGenerator', () => {
         shaJsMock = Mock.ofType<typeof sha256>();
         returnedHashMock = Mock.ofType<Hash>();
 
-        shaJsMock.setup(s => s('sha256')).returns(() => sha256Mock.object);
+        shaJsMock.setup((s) => s('sha256')).returns(() => sha256Mock.object);
         hashGenerator = new HashGenerator(shaJsMock.object);
     });
 
@@ -91,12 +91,12 @@ describe('HashGenerator', () => {
 
     function setupHashFunction(expectedId: string, expectedHashSeed: string): void {
         sha256Mock
-            .setup(b => b.update(It.isValue(expectedHashSeed)))
+            .setup((b) => b.update(It.isValue(expectedHashSeed)))
             .returns(() => returnedHashMock.object)
             .verifiable(Times.once());
 
         returnedHashMock
-            .setup(b => b.digest(It.isValue('hex')))
+            .setup((b) => b.digest(It.isValue('hex')))
             .returns(() => expectedId)
             .verifiable(Times.once());
     }

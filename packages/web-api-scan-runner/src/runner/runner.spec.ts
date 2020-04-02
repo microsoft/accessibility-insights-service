@@ -145,12 +145,12 @@ describe(Runner, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
         scannerTaskMock = Mock.ofType<ScannerTask>();
-        scanMetadataConfig.setup(s => s.getConfig()).returns(() => scanMetadata);
+        scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup(g => g.getGuidTimestamp('id')).returns(() => new Date());
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
 
@@ -160,7 +160,7 @@ describe(Runner, () => {
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
-            .setup(async scm => scm.getConfigValue('featureFlags'))
+            .setup(async (scm) => scm.getConfigValue('featureFlags'))
             .returns(async () => Promise.resolve(featureFlags))
             .verifiable(Times.once());
 
@@ -190,7 +190,7 @@ describe(Runner, () => {
     it('sets state to failed if web driver launch crashes', async () => {
         const failureMessage = 'failed to launch';
         webDriverTaskMock
-            .setup(async o => o.launch())
+            .setup(async (o) => o.launch())
             .returns(async () => Promise.reject(failureMessage))
             .verifiable(Times.once());
 
@@ -202,19 +202,19 @@ describe(Runner, () => {
 
     it('do not crash if web driver close crashes', async () => {
         webDriverTaskMock
-            .setup(async o => o.launch())
+            .setup(async (o) => o.launch())
             .returns(async () => Promise.resolve(browser))
             .verifiable(Times.once());
 
         webDriverTaskMock
-            .setup(async o => o.close())
+            .setup(async (o) => o.close())
             .returns(async () => Promise.reject('failed to close'))
             .verifiable(Times.once());
 
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(passedAxeScanResults))
             .verifiable();
 
@@ -231,7 +231,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(unscannableAxeScanResults))
             .verifiable();
 
@@ -247,7 +247,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.reject(failureMessage))
             .verifiable();
 
@@ -262,7 +262,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(passedAxeScanResults))
             .verifiable();
 
@@ -281,7 +281,7 @@ describe(Runner, () => {
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(clonedPassedAxeScanResults))
             .verifiable();
 
@@ -300,7 +300,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(axeScanResultsWithViolations))
             .verifiable();
 
@@ -322,15 +322,15 @@ describe(Runner, () => {
             scanTotalTime: executionTime + queueTime,
         };
 
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded')).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
 
         setupWebDriverCalls();
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => {
                 MockDate.set(timestamps.scanCompleteTime);
 
@@ -358,15 +358,15 @@ describe(Runner, () => {
             scanTotalTime: executionTime + queueTime,
         };
 
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskFailed')).verifiable();
-        loggerMock.setup(lm => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed')).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
 
         setupWebDriverCalls();
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
         scannerTaskMock
-            .setup(async s => s.scan(scanMetadata.url))
+            .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => {
                 MockDate.set(timestamps.scanCompleteTime);
 
@@ -395,7 +395,7 @@ describe(Runner, () => {
             serviceConfigurationMock.reset();
 
             serviceConfigurationMock
-                .setup(async scm => scm.getConfigValue('featureFlags'))
+                .setup(async (scm) => scm.getConfigValue('featureFlags'))
                 .returns(async () => Promise.resolve(featureFlags))
                 .verifiable(Times.once());
         });
@@ -411,10 +411,10 @@ describe(Runner, () => {
 
             test.each([undefined, { scanNotifyUrl: undefined }])(
                 'Do not send notification when url not present, notification = %o',
-                async notification => {
+                async (notification) => {
                     notificationMessage.scanStatus = 'pass';
                     scannerTaskMock
-                        .setup(async s => s.scan(scanMetadata.url))
+                        .setup(async (s) => s.scan(scanMetadata.url))
                         .returns(async () => Promise.resolve(passedAxeScanResults))
                         .verifiable();
 
@@ -434,7 +434,7 @@ describe(Runner, () => {
             ])('Notification url is not null - scan status - %s', async (scanStatus: ScanState, scanResults) => {
                 notificationMessage.scanStatus = scanStatus;
                 scannerTaskMock
-                    .setup(async s => s.scan(scanMetadata.url))
+                    .setup(async (s) => s.scan(scanMetadata.url))
                     .returns(async () => Promise.resolve(scanResults))
                     .verifiable();
 
@@ -461,7 +461,7 @@ describe(Runner, () => {
 
                 const failureMessage = 'failed to launch';
                 webDriverTaskMock
-                    .setup(async o => o.launch())
+                    .setup(async (o) => o.launch())
                     .returns(async () => Promise.reject(failureMessage))
                     .verifiable(Times.once());
 
@@ -477,18 +477,18 @@ describe(Runner, () => {
 
         function setupVerifiableSendNotificationMessageCall(): void {
             notificationQueueMessageSenderMock
-                .setup(ndm => ndm.sendNotificationMessage(notificationMessage))
+                .setup((ndm) => ndm.sendNotificationMessage(notificationMessage))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }
 
         function setupSendNotificationMessageNeverCalled(): void {
-            notificationQueueMessageSenderMock.setup(ndm => ndm.sendNotificationMessage(It.isAny())).verifiable(Times.never());
+            notificationQueueMessageSenderMock.setup((ndm) => ndm.sendNotificationMessage(It.isAny())).verifiable(Times.never());
         }
     });
 
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
-        reportGeneratorMock.setup(r => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
+        reportGeneratorMock.setup((r) => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
     function getRunningJobStateScanResult(): Partial<OnDemandPageScanResult> {
@@ -511,7 +511,7 @@ describe(Runner, () => {
 
     function setupSaveReportCall(report: GeneratedReport, href: string): void {
         pageScanRunReportServiceMock
-            .setup(async s => s.saveReport(report.id, report.content))
+            .setup(async (s) => s.saveReport(report.id, report.content))
             .returns(async () => Promise.resolve(href))
             .verifiable();
     }
@@ -547,7 +547,7 @@ describe(Runner, () => {
         fullClonedResult.reports = cloneDeep(clonedResult.reports);
 
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(clonedResult))
+            .setup(async (d) => d.updateScanRun(clonedResult))
             .returns(async () => Promise.resolve(fullClonedResult))
             .verifiable();
     }
@@ -589,12 +589,12 @@ describe(Runner, () => {
 
     function setupWebDriverCalls(): void {
         webDriverTaskMock
-            .setup(async o => o.launch())
+            .setup(async (o) => o.launch())
             .returns(async () => Promise.resolve(browser))
             .verifiable(Times.once());
 
         webDriverTaskMock
-            .setup(async o => o.close())
+            .setup(async (o) => o.close())
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
     }
@@ -610,19 +610,19 @@ describe(Runner, () => {
         scanRequestTime.setSeconds(scanRequestTime.getSeconds() - queueTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId2);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock
-            .setup(g => g.getGuidTimestamp('id'))
+            .setup((g) => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)
             .verifiable();
         scanCompleteTime.setSeconds(scanCompleteTime.getSeconds() + executionTime);
 
         guidGeneratorMock.reset();
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => reportId2);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock
-            .setup(g => g.getGuidTimestamp('id'))
+            .setup((g) => g.getGuidTimestamp('id'))
             .returns(() => scanRequestTime)
             .verifiable();
 

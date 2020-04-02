@@ -29,7 +29,7 @@ describe('registerReportGeneratorToContainer', () => {
         const axeResultConverters: AxeResultConverter[] = container.get(iocTypeNames.AxeResultConverters);
         expect(axeResultConverters.length).toBe(2);
 
-        const axeResultConverterTypes = axeResultConverters.map(converter => converter.targetReportFormat);
+        const axeResultConverterTypes = axeResultConverters.map((converter) => converter.targetReportFormat);
         expect(axeResultConverterTypes).toContain('html');
         expect(axeResultConverterTypes).toContain('sarif');
     });

@@ -32,7 +32,7 @@ describe('AxeResultToSarifConverter', () => {
 
     it('convert', () => {
         convertAxeToSarifFuncMock
-            .setup(f => f(axeResults))
+            .setup((f) => f(axeResults))
             .returns(() => sarifReport)
             .verifiable(Times.once());
 

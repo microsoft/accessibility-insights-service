@@ -55,7 +55,7 @@ describe('Dispatcher', () => {
         currentQueueSize = 1;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('queueConfig'))
+            .setup(async (s) => s.getConfigValue('queueConfig'))
             .returns(async () => Promise.resolve({ maxQueueSize: maxQueueSize } as QueueRuntimeConfig));
 
         loggerMock = Mock.ofType(MockableLogger);
@@ -82,7 +82,7 @@ describe('Dispatcher', () => {
             setupVerifiableQueueSizeCall();
             setupPageScanRequestProviderNotCalled();
             setupVerifiableScanRequestNotCalled();
-            loggerMock.setup(o => o.logWarn(It.isAny())).verifiable(Times.once());
+            loggerMock.setup((o) => o.logWarn(It.isAny())).verifiable(Times.once());
 
             await dispatcher.dispatchOnDemandScanRequests();
 
@@ -113,7 +113,7 @@ describe('Dispatcher', () => {
         setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
         loggerMock
             // tslint:disable-next-line: no-null-keyword
-            .setup(lm => lm.trackEvent('ScanRequestQueued', null, { queuedRequests: 2 }))
+            .setup((lm) => lm.trackEvent('ScanRequestQueued', null, { queuedRequests: 2 }))
             .verifiable(Times.exactly(4));
 
         await dispatcher.dispatchOnDemandScanRequests();
@@ -166,7 +166,7 @@ describe('Dispatcher', () => {
         setupVerifiableQueueSizeCall();
 
         pageScanRequestProvider
-            .setup(async p => p.getRequests(It.isAny(), It.isAny()))
+            .setup(async (p) => p.getRequests(It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
@@ -200,7 +200,7 @@ describe('Dispatcher', () => {
 
     function setupReadyToScanPageForAllPages(dataProviders: QueryDataProviderStub<OnDemandPageScanRequest>[]): void {
         let previousProviderCount = 0;
-        dataProviders.forEach(dataProvider => {
+        dataProviders.forEach((dataProvider) => {
             let previousContinuationToken;
             const expectedItemsCount = maxQueueSize - currentQueueSize - previousProviderCount;
             do {
@@ -225,7 +225,7 @@ describe('Dispatcher', () => {
 
     function setupVerifiableScanRequestCallForChunk(onDemandPageScanRequests: OnDemandPageScanRequest[]): void {
         scanRequestSenderMock
-            .setup(async s => s.sendRequestToScan(onDemandPageScanRequests))
+            .setup(async (s) => s.sendRequestToScan(onDemandPageScanRequests))
             .returns(async () => {
                 currentQueueSize += onDemandPageScanRequests.length;
             })
@@ -239,22 +239,22 @@ describe('Dispatcher', () => {
         expectedItemsCount: number,
     ): void {
         pageScanRequestProvider
-            .setup(async p => p.getRequests(previousContinuationToken, expectedItemsCount))
+            .setup(async (p) => p.getRequests(previousContinuationToken, expectedItemsCount))
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
     function setupPageScanRequestProviderNotCalled(): void {
-        pageScanRequestProvider.setup(async p => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
+        pageScanRequestProvider.setup(async (p) => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
     }
     function setupVerifiableQueueSizeCall(): void {
         scanRequestSenderMock
-            .setup(async s => s.getCurrentQueueSize())
+            .setup(async (s) => s.getCurrentQueueSize())
             .returns(async () => Promise.resolve(currentQueueSize))
             .verifiable(Times.atLeastOnce());
     }
 
     function setupVerifiableScanRequestNotCalled(): void {
-        scanRequestSenderMock.setup(async s => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
+        scanRequestSenderMock.setup(async (s) => s.sendRequestToScan(It.isAny())).verifiable(Times.never());
     }
 
     function getErrorResponse(): CosmosOperationResponse<OnDemandPageScanRequest[]> {

@@ -22,7 +22,7 @@ describe(CredentialsProvider, () => {
         testSubject = new CredentialsProvider(msiCredProviderMock.object);
 
         msiCredProviderMock
-            .setup(async r => r.getCredentials('https://vault.azure.net'))
+            .setup(async (r) => r.getCredentials('https://vault.azure.net'))
             .returns(async () => Promise.resolve(credentialsStub))
             .verifiable(Times.once());
 

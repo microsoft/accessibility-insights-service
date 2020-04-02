@@ -44,23 +44,23 @@ describe(WebApiScanJobManagerEntryPoint, () => {
 
     describe('runCustomAction', () => {
         beforeEach(() => {
-            containerMock.setup(c => c.get(Worker)).returns(() => workerMock.object);
-            containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+            containerMock.setup((c) => c.get(Worker)).returns(() => workerMock.object);
+            containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
         });
 
         it('invokes worker', async () => {
             loggerMock
-                .setup(async l => l.setup())
+                .setup(async (l) => l.setup())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             workerMock
-                .setup(async w => w.init())
+                .setup(async (w) => w.init())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
             workerMock
-                .setup(async w => w.run())
+                .setup(async (w) => w.run())
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 

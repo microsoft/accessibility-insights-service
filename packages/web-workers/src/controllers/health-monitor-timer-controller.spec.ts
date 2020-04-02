@@ -22,7 +22,7 @@ describe('HealthMonitorTimerController', () => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        guidGeneratorMock.setup(g => g.createGuid()).returns(() => orchestrationInstanceId);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => orchestrationInstanceId);
 
         context = <Context>(<unknown>{
             bindingDefinitions: {},
@@ -52,14 +52,14 @@ describe('HealthMonitorTimerController', () => {
         it('warns if timer past due', async () => {
             const funcTimer: FunctionTimer = { IsPastDue: true };
             await testSubject.invoke(context, funcTimer);
-            loggerMock.verify(l => l.logWarn(It.isAny()), Times.once());
+            loggerMock.verify((l) => l.logWarn(It.isAny()), Times.once());
         });
 
         it('does not warns if timer not past due', async () => {
             const funcTimer: FunctionTimer = { IsPastDue: false };
             await testSubject.invoke(context, funcTimer);
 
-            loggerMock.verify(l => l.logWarn(It.isAny()), Times.never());
+            loggerMock.verify((l) => l.logWarn(It.isAny()), Times.never());
         });
     });
 });

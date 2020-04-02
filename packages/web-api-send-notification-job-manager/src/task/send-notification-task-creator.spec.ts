@@ -72,7 +72,7 @@ describe(SendNotificationTaskCreator, () => {
             } as PoolMetricsInfo;
 
             batchMock
-                .setup(b => b.getPoolMetricsInfo())
+                .setup((b) => b.getPoolMetricsInfo())
                 .returns(async () => Promise.resolve(poolMetricsInfo))
                 .verifiable(Times.once());
         });
@@ -81,7 +81,7 @@ describe(SendNotificationTaskCreator, () => {
             poolMetricsInfo.load.activeTasks = 1;
             poolMetricsInfo.load.runningTasks = 1;
             queueMock
-                .setup(async q => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, 9))
+                .setup(async (q) => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, 9))
                 .returns(async () => Promise.resolve([]))
                 .verifiable(Times.once());
 
@@ -101,7 +101,7 @@ describe(SendNotificationTaskCreator, () => {
                 activeTasks: 0,
                 runningTasks: 15,
             },
-        ])('returns empty array if max number of tasks are in active/pending state - %o', async poolLoad => {
+        ])('returns empty array if max number of tasks are in active/pending state - %o', async (poolLoad) => {
             poolMetricsInfo.load = poolLoad;
 
             await expect(taskCreator.getMessagesForTaskCreation()).resolves.toEqual([]);
@@ -124,14 +124,14 @@ describe(SendNotificationTaskCreator, () => {
                 activeTasks: 1,
                 runningTasks: 0,
             },
-        ])('returns messages from queue - %o', async poolLoad => {
+        ])('returns messages from queue - %o', async (poolLoad) => {
             const expectedMessageCount =
                 taskCreator.jobManagerConfig.sendNotificationTasksCount - (poolLoad.activeTasks + poolLoad.runningTasks - 1);
             const messages: any[] = ['message 1', 'message 2'];
             poolMetricsInfo.load = poolLoad;
 
             queueMock
-                .setup(async q => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, expectedMessageCount))
+                .setup(async (q) => q.getMessagesWithTotalCount(storageConfigStub.notificationQueue, expectedMessageCount))
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
 

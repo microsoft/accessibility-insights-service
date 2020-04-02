@@ -33,18 +33,18 @@ describe(WebApiScanRunnerEntryPoint, () => {
 
         testSubject = new TestWebApiScanRunnerEntryPoint(containerMock.object);
 
-        containerMock.setup(c => c.get(Runner)).returns(() => runnerMock.object);
-        containerMock.setup(c => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(Runner)).returns(() => runnerMock.object);
+        containerMock.setup((c) => c.get(ContextAwareLogger)).returns(() => loggerMock.object);
     });
 
     it('invokes runner.run', async () => {
         loggerMock
-            .setup(async l => l.setup())
+            .setup(async (l) => l.setup())
             .returns(async () => Promise.resolve())
             .verifiable(Times.once());
 
         runnerMock
-            .setup(async r => r.run())
+            .setup(async (r) => r.run())
             .returns(async () => Promise.resolve())
             .verifiable();
 

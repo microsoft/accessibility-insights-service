@@ -6,12 +6,9 @@ import { WebDriver } from 'service-library';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 
 export function registerScannerToContainer(container: inversify.Container): inversify.Container {
-    container
-        .bind<AxePuppeteerFactory>(AxePuppeteerFactory)
-        .toSelf()
-        .inSingletonScope();
+    container.bind<AxePuppeteerFactory>(AxePuppeteerFactory).toSelf().inSingletonScope();
 
-    container.bind<inversify.interfaces.Factory<Browser>>('Factory<Browser>').toFactory<Browser>(context => {
+    container.bind<inversify.interfaces.Factory<Browser>>('Factory<Browser>').toFactory<Browser>((context) => {
         return () => {
             return context.container.get<WebDriver>(WebDriver).browser;
         };

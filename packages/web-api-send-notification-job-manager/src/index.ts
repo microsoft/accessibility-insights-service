@@ -13,7 +13,7 @@ const whyNodeRunLogger = new WhyNodeRunningLogger();
     const sendNotificationJobManagerEntryPoint = new SendNotificationJobManagerEntryPoint(setupSendNotificationJobManagerContainer());
     await sendNotificationJobManagerEntryPoint.start();
     await whyNodeRunLogger.logAfterSeconds(2);
-})().catch(error => {
+})().catch((error) => {
     console.log('Exception thrown in send notification job manager: ', error);
     process.exit(1);
 });

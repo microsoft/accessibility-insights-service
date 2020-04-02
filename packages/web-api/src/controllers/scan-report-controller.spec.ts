@@ -47,7 +47,7 @@ describe(ScanReportController, () => {
 
         bodyParserMock = Mock.ofType(BodyParser);
         bodyParserMock
-            .setup(async bpm => bpm.getRawBody(contentMock.object as Readable))
+            .setup(async (bpm) => bpm.getRawBody(contentMock.object as Readable))
             .returns(async () => buffer)
             .verifiable(Times.once());
         context.req.query['api-version'] = '1.0';
@@ -58,14 +58,14 @@ describe(ScanReportController, () => {
             content: contentMock.object,
         };
         reportServiceMock
-            .setup(async rm => rm.readReport(It.isAnyString()))
-            .returns(async id => {
+            .setup(async (rm) => rm.readReport(It.isAnyString()))
+            .returns(async (id) => {
                 return id === validId ? downloadResponse : notFoundDownloadResponse;
             });
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock
-            .setup(gm => gm.isValidV6Guid(It.isAnyString()))
-            .returns(id => {
+            .setup((gm) => gm.isValidV6Guid(It.isAnyString()))
+            .returns((id) => {
                 return id !== invalidId;
             });
 

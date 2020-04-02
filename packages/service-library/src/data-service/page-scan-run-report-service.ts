@@ -39,7 +39,8 @@ export class PageScanRunReportService {
     public getBlobFilePath(fileId: string): string {
         const fileCreatedTime = this.guidGenerator.getGuidTimestamp(fileId);
 
-        return `${fileCreatedTime.getUTCFullYear()}/${fileCreatedTime.getUTCMonth() +
-            1}/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileId}`;
+        return `${fileCreatedTime.getUTCFullYear()}/${
+            fileCreatedTime.getUTCMonth() + 1
+        }/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileId}`;
     }
 }

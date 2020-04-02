@@ -47,24 +47,24 @@ describe('AIScanner', () => {
     });
 
     function setupNewPageCall(url: string): void {
-        pageMock.setup(async p => p.create(undefined)).verifiable(Times.once());
-        pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
+        pageMock.setup(async (p) => p.create(undefined)).verifiable(Times.once());
+        pageMock.setup(async (p) => p.enableBypassCSP()).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {
-        pageMock.setup(async b => b.close()).verifiable();
+        pageMock.setup(async (b) => b.close()).verifiable();
     }
 
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url, undefined))
+            .setup(async (p) => p.scanForA11yIssues(url, undefined))
             .returns(async () => Promise.resolve({ results: axeResults }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url, undefined))
+            .setup(async (p) => p.scanForA11yIssues(url, undefined))
             .returns(async () => Promise.resolve({ error: errorMessage }))
             .verifiable(Times.once());
     }

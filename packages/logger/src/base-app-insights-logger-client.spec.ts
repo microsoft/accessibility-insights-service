@@ -38,7 +38,7 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
         this.telemetryClient = this.telemetryClientMock.object;
 
         this.appInsightsConfigMock = Mock.ofType<typeof appInsights.Configuration>(null);
-        this.telemetryClientMock.setup(t => t.config).returns(() => this.appInsightsConfigMock.object as any);
+        this.telemetryClientMock.setup((t) => t.config).returns(() => this.appInsightsConfigMock.object as any);
     }
 
     public getTelemetryClient(): appInsights.TelemetryClient {
@@ -98,7 +98,7 @@ describe(BaseAppInsightsLoggerClient, () => {
     describe('trackMetric', () => {
         it('when value passed', async () => {
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackMetric(
                         It.isValue({ name: 'metric1', value: 10, properties: testSubject.getAdditionalPropertiesToAddToEvent() }),
                     ),
@@ -113,7 +113,7 @@ describe(BaseAppInsightsLoggerClient, () => {
     describe('trackEvent', () => {
         it('when properties/measurements not passed', async () => {
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackEvent(
                         It.isValue({
                             name: 'HealthCheck',
@@ -131,7 +131,7 @@ describe(BaseAppInsightsLoggerClient, () => {
 
         it('when properties/measurements passed', async () => {
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackEvent(
                         It.isValue({
                             name: 'HealthCheck',
@@ -153,7 +153,7 @@ describe(BaseAppInsightsLoggerClient, () => {
             await testSubject.setup();
 
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackTrace(
                         It.isValue({
                             message: 'trace1',
@@ -195,7 +195,7 @@ describe(BaseAppInsightsLoggerClient, () => {
             await testSubject.setup();
 
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackTrace(
                         It.isValue({
                             message: 'trace1',
@@ -230,7 +230,7 @@ describe(BaseAppInsightsLoggerClient, () => {
             };
 
             testSubject.telemetryClientMock
-                .setup(t =>
+                .setup((t) =>
                     t.trackAvailability({
                         name: telemetryName,
                         success: availabilityData.success,
@@ -255,7 +255,7 @@ describe(BaseAppInsightsLoggerClient, () => {
             const error = new Error('some error');
 
             testSubject.telemetryClientMock
-                .setup(t => t.trackException({ exception: error, properties: testSubject.getAdditionalPropertiesToAddToEvent() }))
+                .setup((t) => t.trackException({ exception: error, properties: testSubject.getAdditionalPropertiesToAddToEvent() }))
                 .verifiable();
 
             testSubject.trackException(error);
@@ -271,8 +271,8 @@ describe(BaseAppInsightsLoggerClient, () => {
         it('flushes events', async () => {
             let flushCb: Function;
             testSubject.telemetryClientMock
-                .setup(t => t.flush(It.isAny()))
-                .returns(options => {
+                .setup((t) => t.flush(It.isAny()))
+                .returns((options) => {
                     flushCb = options.callback;
                     flushCb();
                 })
@@ -286,7 +286,7 @@ describe(BaseAppInsightsLoggerClient, () => {
 
     describe('setCustomProperties', () => {
         beforeEach(async () => {
-            testSubject.telemetryClientMock.setup(t => t.commonProperties).returns(() => commonProperties);
+            testSubject.telemetryClientMock.setup((t) => t.commonProperties).returns(() => commonProperties);
         });
 
         it('sets custom properties on telemetry client', () => {
@@ -305,7 +305,7 @@ describe(BaseAppInsightsLoggerClient, () => {
 
     function verifyCommonProperties(additionalProps?: { [key: string]: string }): void {
         testSubject.telemetryClientMock.verify(
-            t => (t.commonProperties = It.isValue({ ...commonProperties, ...additionalProps })),
+            (t) => (t.commonProperties = It.isValue({ ...commonProperties, ...additionalProps })),
             Times.atLeastOnce(),
         );
     }

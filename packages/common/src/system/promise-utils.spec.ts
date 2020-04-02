@@ -14,7 +14,7 @@ describe(PromiseUtils, () => {
         it('returns resolved promise', async () => {
             const resolvedValue = 'resolved promise value';
 
-            const promise = new Promise<string>(resolve => {
+            const promise = new Promise<string>((resolve) => {
                 resolve(resolvedValue);
             });
 
@@ -62,7 +62,7 @@ describe(PromiseUtils, () => {
             let exceptionThrown = false;
 
             // tslint:disable-next-line: promise-must-complete
-            const promise = new Promise<string>(resolve => {
+            const promise = new Promise<string>((resolve) => {
                 resolvePromise = resolve;
             });
 

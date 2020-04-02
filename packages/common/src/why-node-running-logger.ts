@@ -20,7 +20,7 @@ export class WhyNodeRunningLogger {
     }
 
     public async logAfterSeconds(timeoutInSeconds: number): Promise<void> {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             this.globalObj.setTimeout(() => {
                 WhyNodeRunningLogger.logMessage(`Logging after ${timeoutInSeconds}`);
                 WhyNodeRunningLogger.logHandles();

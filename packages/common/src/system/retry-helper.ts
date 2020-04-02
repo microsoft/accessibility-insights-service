@@ -7,7 +7,7 @@ export type ErrorHandler = (err: Error) => Promise<void>;
 
 async function defaultSleepFunction(milliseconds: number): Promise<void> {
     // tslint:disable-next-line: no-string-based-set-timeout
-    return new Promise(resolve => setTimeout(resolve, milliseconds));
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 @injectable()

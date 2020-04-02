@@ -16,8 +16,9 @@ describe(PageScanRunReportService, () => {
     const time = new Date(2019, 2, 1, 10, 20, 30);
     const guid = 'some guid';
     // tslint:disable-next-line: mocha-no-side-effect-code
-    const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${time.getUTCMonth() +
-        1}/${time.getUTCDate()}/${time.getUTCHours()}/${guid}`;
+    const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${
+        time.getUTCMonth() + 1
+    }/${time.getUTCDate()}/${time.getUTCHours()}/${guid}`;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
@@ -29,12 +30,12 @@ describe(PageScanRunReportService, () => {
         const blobContent = 'blob content1';
 
         guidGeneratorMock
-            .setup(g => g.getGuidTimestamp(guid))
+            .setup((g) => g.getGuidTimestamp(guid))
             .returns(() => time)
             .verifiable();
 
         blobStorageClientMock
-            .setup(async b => b.uploadBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath, blobContent))
+            .setup(async (b) => b.uploadBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath, blobContent))
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
@@ -46,12 +47,12 @@ describe(PageScanRunReportService, () => {
         const expectedResponse: BlobContentDownloadResponse = { content: 'blob content1' as any, notFound: false };
 
         guidGeneratorMock
-            .setup(g => g.getGuidTimestamp(guid))
+            .setup((g) => g.getGuidTimestamp(guid))
             .returns(() => time)
             .verifiable();
 
         blobStorageClientMock
-            .setup(async b => b.getBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath))
+            .setup(async (b) => b.getBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath))
             .returns(async () => Promise.resolve(expectedResponse))
             .verifiable();
 

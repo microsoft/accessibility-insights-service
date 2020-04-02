@@ -76,7 +76,7 @@ describe(NotificationQueueMessageSender, () => {
         loggerMock = Mock.ofType(MockableLogger);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
-            .setup(async s => s.getConfigValue('scanConfig'))
+            .setup(async (s) => s.getConfigValue('scanConfig'))
             .returns(async () => scanConfig)
             .verifiable(Times.once());
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
@@ -101,7 +101,7 @@ describe(NotificationQueueMessageSender, () => {
         setupRetryHelperMock();
 
         queueMock
-            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .returns(async () => Promise.resolve(true))
             .verifiable(Times.once());
 
@@ -117,7 +117,7 @@ describe(NotificationQueueMessageSender, () => {
         setupRetryHelperMock();
 
         queueMock
-            .setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
+            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
             .returns(async () => Promise.resolve(false))
             .verifiable(Times.once());
 
@@ -132,7 +132,7 @@ describe(NotificationQueueMessageSender, () => {
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
         setupRetryHelperMock();
 
-        queueMock.setup(qm => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata)).verifiable(Times.once());
+        queueMock.setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata)).verifiable(Times.once());
 
         await dispatcher.sendNotificationMessage(notificationSenderMetadata);
     });
@@ -154,7 +154,7 @@ describe(NotificationQueueMessageSender, () => {
     function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         const clonedResult = cloneDeep(result);
         onDemandPageScanRunResultProviderMock
-            .setup(async d => d.updateScanRun(clonedResult))
+            .setup(async (d) => d.updateScanRun(clonedResult))
             .returns(async () => Promise.resolve(clonedResult as OnDemandPageScanResult))
             .verifiable(Times.once());
     }
@@ -169,7 +169,7 @@ describe(NotificationQueueMessageSender, () => {
 
     function setupRetryHelperMock(): void {
         retryHelperMock
-            .setup(r => r.executeWithRetries(It.isAny(), It.isAny(), scanConfig.maxSendNotificationRetryCount, 1000))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), scanConfig.maxSendNotificationRetryCount, 1000))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 try {
                     await action();

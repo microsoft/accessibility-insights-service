@@ -44,7 +44,7 @@ describe('Scanner', () => {
 
     describe('scan', () => {
         beforeEach(() => {
-            serviceConfigMock.setup(s => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
+            serviceConfigMock.setup((s) => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
         });
 
         it('should launch browser page with given url and scan the page with axe-core', async () => {
@@ -96,7 +96,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromisetoReturnOriginalPromise(): void {
             promiseUtilsMock
-                .setup(s => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return scanPromiseObj;
                 })
@@ -105,7 +105,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromiseToReturnTimeoutPromise(): void {
             promiseUtilsMock
-                .setup(s => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return timeoutCb();
                 })
@@ -114,24 +114,24 @@ describe('Scanner', () => {
     });
 
     function setupNewPageCall(url: string): void {
-        pageMock.setup(async p => p.create()).verifiable(Times.once());
-        pageMock.setup(async p => p.enableBypassCSP()).verifiable(Times.once());
+        pageMock.setup(async (p) => p.create()).verifiable(Times.once());
+        pageMock.setup(async (p) => p.enableBypassCSP()).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {
-        pageMock.setup(async b => b.close()).verifiable();
+        pageMock.setup(async (b) => b.close()).verifiable();
     }
 
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url))
+            .setup(async (p) => p.scanForA11yIssues(url))
             .returns(async () => Promise.resolve({ results: axeResults, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
-            .setup(async p => p.scanForA11yIssues(url))
+            .setup(async (p) => p.scanForA11yIssues(url))
             .returns(async () => Promise.resolve({ error: errorMessage, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }

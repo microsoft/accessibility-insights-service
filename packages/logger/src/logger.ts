@@ -25,7 +25,7 @@ export abstract class Logger {
             return;
         }
 
-        this.invokeLoggerClient(async client => {
+        this.invokeLoggerClient(async (client) => {
             await client.setup(baseProperties);
         });
         this.isDebugEnabled = /--debug|--inspect/i.test(this.currentProcess.execArgv.join(' '));
@@ -35,19 +35,19 @@ export abstract class Logger {
     public trackMetric(name: string, value: number = 1): void {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.trackMetric(name, value));
+        this.invokeLoggerClient((client) => client.trackMetric(name, value));
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.trackEvent(name, properties, measurements));
+        this.invokeLoggerClient((client) => client.trackEvent(name, properties, measurements));
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
-        this.invokeLoggerClient(client => client.log(message, logLevel, properties));
+        this.invokeLoggerClient((client) => client.log(message, logLevel, properties));
     }
 
     public logInfo(message: string, properties?: { [name: string]: string }): void {
@@ -56,7 +56,7 @@ export abstract class Logger {
 
     public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
         this.ensureInitialized();
-        this.invokeLoggerClient(client => client.trackAvailability(name, telemetry));
+        this.invokeLoggerClient((client) => client.trackAvailability(name, telemetry));
     }
 
     public logVerbose(message: string, properties?: { [name: string]: string }): void {
@@ -75,7 +75,7 @@ export abstract class Logger {
 
     public trackException(error: Error): void {
         this.ensureInitialized();
-        this.invokeLoggerClient(client => client.trackException(error));
+        this.invokeLoggerClient((client) => client.trackException(error));
     }
 
     // tslint:disable-next-line: no-any
@@ -89,18 +89,18 @@ export abstract class Logger {
     public async flush(): Promise<void> {
         this.ensureInitialized();
 
-        const promises = this.invokeLoggerClient(client => client.flush());
+        const promises = this.invokeLoggerClient((client) => client.flush());
         await Promise.all(promises);
     }
 
     public setCustomProperties(properties: LoggerProperties): void {
-        this.invokeLoggerClient(client => client.setCustomProperties(properties));
+        this.invokeLoggerClient((client) => client.setCustomProperties(properties));
     }
 
     private invokeLoggerClient<T>(action: (loggerClient: LoggerClient) => T): T[] {
         const results: T[] = [];
 
-        this.loggerClients.forEach(client => {
+        this.loggerClients.forEach((client) => {
             results.push(action(client));
         });
 

@@ -163,7 +163,7 @@ export class DbMockHelper {
         const items = await this.cosmosClient.readAllItem(this.dbContainer.dbName, this.dbContainer.collectionName);
 
         await Promise.all(
-            items.item.map(async item => {
+            items.item.map(async (item) => {
                 await this.cosmosClient.deleteItem(item.id, this.dbContainer.dbName, this.dbContainer.collectionName, item.partitionKey);
             }),
         );
@@ -175,14 +175,14 @@ export class DbMockHelper {
 
     public async upsertItems<T>(items: T[]): Promise<void> {
         await Promise.all(
-            items.map(async item => {
+            items.map(async (item) => {
                 await this.upsertItem(item);
             }),
         );
     }
 
     public getDocumentProjections(documents: any[]): any[] {
-        return documents.map(d => {
+        return documents.map((d) => {
             return { id: d.id, label: d.label };
         });
     }

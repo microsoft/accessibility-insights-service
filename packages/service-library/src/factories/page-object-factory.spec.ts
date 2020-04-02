@@ -31,7 +31,7 @@ describe('createImmutableInstance', () => {
         };
 
         hashGeneratorMock
-            .setup(b => b.getWebsitePageDocumentId(instance.baseUrl, instance.url))
+            .setup((b) => b.getWebsitePageDocumentId(instance.baseUrl, instance.url))
             .returns(() => 'hash-id')
             .verifiable(Times.once());
 

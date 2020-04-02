@@ -53,16 +53,16 @@ describe(ProcessEntryPointBase, () => {
             taskTimeoutInMinutes: 100,
         };
         serviceConfig = Mock.ofType(ServiceConfiguration);
-        serviceConfig.setup(async s => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
+        serviceConfig.setup(async (s) => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
 
         testSubject = new TestEntryPoint(containerMock.object);
-        containerMock.setup(c => c.get(loggerTypes.Process)).returns(() => processMock.object);
-        containerMock.setup(c => c.get(ServiceConfiguration)).returns(() => serviceConfig.object);
+        containerMock.setup((c) => c.get(loggerTypes.Process)).returns(() => processMock.object);
+        containerMock.setup((c) => c.get(ServiceConfiguration)).returns(() => serviceConfig.object);
     });
 
     describe('start', () => {
         beforeEach(() => {
-            loggerMock.setup(l => l.logInfo('[ProcessEntryPointBase] Exiting process.')).verifiable(Times.once());
+            loggerMock.setup((l) => l.logInfo('[ProcessEntryPointBase] Exiting process.')).verifiable(Times.once());
         });
 
         it('should not exit process', async () => {
@@ -70,15 +70,15 @@ describe(ProcessEntryPointBase, () => {
             taskConfig.exitOnComplete = false;
             const errorMsg = 'dotEnvLoadedFirst';
             containerMock
-                .setup(c => c.get(loggerTypes.DotEnvConfig))
+                .setup((c) => c.get(loggerTypes.DotEnvConfig))
                 .returns(() => {
                     throw errorMsg;
                 });
             containerMock
-                .setup(c => c.get(It.is(val => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
+                .setup((c) => c.get(It.is((val) => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
                 .verifiable(Times.never());
             loggerMock.reset();
-            processMock.setup(p => p.exit(It.isAny())).verifiable(Times.never());
+            processMock.setup((p) => p.exit(It.isAny())).verifiable(Times.never());
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
 
@@ -92,14 +92,14 @@ describe(ProcessEntryPointBase, () => {
             loggerMock.reset();
             const errorMsg = 'dotEnvLoadedFirst';
             containerMock
-                .setup(c => c.get(loggerTypes.DotEnvConfig))
+                .setup((c) => c.get(loggerTypes.DotEnvConfig))
                 .returns(() => {
                     throw errorMsg;
                 });
             containerMock
-                .setup(c => c.get(It.is(val => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
+                .setup((c) => c.get(It.is((val) => val !== loggerTypes.DotEnvConfig && val !== loggerTypes.Process)))
                 .verifiable(Times.never());
-            processMock.setup(p => p.exit(It.isAny())).verifiable(Times.never());
+            processMock.setup((p) => p.exit(It.isAny())).verifiable(Times.never());
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
 
@@ -113,7 +113,7 @@ describe(ProcessEntryPointBase, () => {
             const errorMsg = 'logger setup error';
             setupContainerForDotEnvConfig();
             setupContainerForLogger();
-            loggerMock.setup(async l => l.setup(testSubject.baseTelemetryProperties)).returns(async () => Promise.reject(errorMsg));
+            loggerMock.setup(async (l) => l.setup(testSubject.baseTelemetryProperties)).returns(async () => Promise.reject(errorMsg));
             setupVerifiableFailureProcessExit();
 
             await expect(testSubject.start()).rejects.toEqual(errorMsg);
@@ -132,9 +132,9 @@ describe(ProcessEntryPointBase, () => {
             it('verifies logging for valid data', async () => {
                 dotEnvConfigStub = { parsed: { foo: 'bar' } };
 
-                loggerMock.setup(l => l.logInfo('[ProcessEntryPointBase] Config based environment variables:')).verifiable();
+                loggerMock.setup((l) => l.logInfo('[ProcessEntryPointBase] Config based environment variables:')).verifiable();
                 loggerMock
-                    .setup(l => l.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfigStub.parsed, undefined, 2)}`))
+                    .setup((l) => l.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfigStub.parsed, undefined, 2)}`))
                     .verifiable();
                 setupVerifiableSuccessProcessExit();
 
@@ -148,7 +148,7 @@ describe(ProcessEntryPointBase, () => {
                 dotEnvConfigStub = { error: new Error('error1') };
 
                 loggerMock
-                    .setup(l => l.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfigStub.error}`))
+                    .setup((l) => l.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfigStub.error}`))
                     .verifiable();
                 setupVerifiableSuccessProcessExit();
 
@@ -169,7 +169,7 @@ describe(ProcessEntryPointBase, () => {
 
             it('invoked when start is called', async () => {
                 setupVerifiableSuccessProcessExit();
-                processMock.setup(p => p.exit(0)).verifiable(Times.once());
+                processMock.setup((p) => p.exit(0)).verifiable(Times.once());
 
                 await expect(testSubject.start()).resolves.toBeUndefined();
 
@@ -198,7 +198,7 @@ describe(ProcessEntryPointBase, () => {
                     throw error;
                 };
                 loggerMock
-                    .setup(l => l.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.'))
+                    .setup((l) => l.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.'))
                     .verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
@@ -216,54 +216,54 @@ describe(ProcessEntryPointBase, () => {
     }
 
     function setupVerifiableSuccessProcessExit(): void {
-        processMock.setup(p => p.exit(0)).verifiable(Times.once());
+        processMock.setup((p) => p.exit(0)).verifiable(Times.once());
     }
     function setupVerifiableFailureProcessExit(): void {
-        processMock.setup(p => p.exit(1)).verifiable(Times.once());
+        processMock.setup((p) => p.exit(1)).verifiable(Times.once());
     }
 
     function verifyNoLoggingCalls(hasLogger: boolean = true): void {
-        loggerMock.verify(l => l.log(It.isAny(), It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.log(It.isAny(), It.isAny(), It.isAny()), Times.never());
         if (hasLogger) {
             loggerMock.verify(
-                l =>
+                (l) =>
                     l.logInfo(
-                        It.is(s => s !== '[ProcessEntryPointBase] Exiting process.'),
+                        It.is((s) => s !== '[ProcessEntryPointBase] Exiting process.'),
                         It.isAny(),
                     ),
                 Times.never(),
             );
         } else {
-            loggerMock.verify(l => l.logInfo(It.isAny(), It.isAny()), Times.never());
+            loggerMock.verify((l) => l.logInfo(It.isAny(), It.isAny()), Times.never());
         }
-        loggerMock.verify(l => l.logVerbose(It.isAny(), It.isAny()), Times.never());
-        loggerMock.verify(l => l.trackEvent(It.isAny(), It.isAny()), Times.never());
-        loggerMock.verify(l => l.trackMetric(It.isAny(), It.isAny()), Times.never());
-        loggerMock.verify(l => l.trackException(It.isAny()), Times.never());
-        loggerMock.verify(l => l.trackExceptionAny(It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.logVerbose(It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.trackEvent(It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.trackMetric(It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.trackException(It.isAny()), Times.never());
+        loggerMock.verify((l) => l.trackExceptionAny(It.isAny(), It.isAny()), Times.never());
     }
 
     function verifyLogFlushCall(times: Times = Times.once()): void {
-        loggerMock.verify(l => l.flush(), times);
+        loggerMock.verify((l) => l.flush(), times);
     }
 
     function setupContainerForDotEnvConfig(): void {
         containerMock
-            .setup(c => c.get(loggerTypes.DotEnvConfig))
+            .setup((c) => c.get(loggerTypes.DotEnvConfig))
             .returns(() => dotEnvConfigStub)
             .verifiable();
     }
 
     function setupContainerForLogger(): void {
         containerMock
-            .setup(c => c.get(GlobalLogger))
+            .setup((c) => c.get(GlobalLogger))
             .returns(() => loggerMock.object)
             .verifiable();
     }
 
     function setupLoggerSetupCall(): void {
         loggerMock
-            .setup(async l => l.setup(testSubject.baseTelemetryProperties))
+            .setup(async (l) => l.setup(testSubject.baseTelemetryProperties))
             .returns(async () => Promise.resolve())
             .verifiable();
     }

@@ -28,8 +28,8 @@ describe(BlobStorageClient, () => {
         containerClientMock = Mock.ofType<ContainerClient>();
         containerClientMock = getPromisableDynamicMock(containerClientMock);
 
-        blobServiceClientMock.setup(b => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
-        containerClientMock.setup(c => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
+        blobServiceClientMock.setup((b) => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
+        containerClientMock.setup((c) => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
 
         testSubject = new BlobStorageClient(async () => blobServiceClientMock.object);
     });
@@ -39,7 +39,7 @@ describe(BlobStorageClient, () => {
             const readableStream: NodeJS.ReadableStream = 'test stream' as any;
 
             blobClientMock
-                .setup(async b => b.download(0, undefined))
+                .setup(async (b) => b.download(0, undefined))
                 .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as BlobDownloadResponseModel))
                 .verifiable();
 
@@ -50,7 +50,7 @@ describe(BlobStorageClient, () => {
 
         it('returns not found, if blob does not exist', async () => {
             blobClientMock
-                .setup(async b => b.download(0, undefined))
+                .setup(async (b) => b.download(0, undefined))
                 .returns(async () => Promise.reject({ statusCode: 404 } as RestError))
                 .verifiable();
 
@@ -61,7 +61,7 @@ describe(BlobStorageClient, () => {
 
         it('throws if unknown error occurred', async () => {
             blobClientMock
-                .setup(async b => b.download(0, undefined))
+                .setup(async (b) => b.download(0, undefined))
                 // tslint:disable-next-line:
                 .returns(async () => Promise.reject('test error 1'))
                 .verifiable();
@@ -77,12 +77,12 @@ describe(BlobStorageClient, () => {
         beforeEach(() => {
             blockBlobClientMock = Mock.ofType<BlockBlobClient>();
             blockBlobClientMock = getPromisableDynamicMock(blockBlobClientMock);
-            blobClientMock.setup(b => b.getBlockBlobClient()).returns(() => blockBlobClientMock.object);
+            blobClientMock.setup((b) => b.getBlockBlobClient()).returns(() => blockBlobClientMock.object);
         });
 
         it('uploads content', async () => {
             blockBlobClientMock
-                .setup(async b => b.upload(content, content.length))
+                .setup(async (b) => b.upload(content, content.length))
                 .returns(async () => Promise.resolve(undefined))
                 .verifiable();
 

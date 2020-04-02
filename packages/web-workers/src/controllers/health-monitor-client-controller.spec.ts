@@ -87,7 +87,7 @@ describe(HealthMonitorClientController, () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
             webApiClientMock
-                .setup(async w => w.postScanUrl(scanUrl, 1))
+                .setup(async (w) => w.postScanUrl(scanUrl, 1))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -105,7 +105,7 @@ describe(HealthMonitorClientController, () => {
         it('handles getScanResult', async () => {
             const scanId = 'scan-id';
             webApiClientMock
-                .setup(async w => w.getScanStatus(scanId))
+                .setup(async (w) => w.getScanStatus(scanId))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -123,7 +123,7 @@ describe(HealthMonitorClientController, () => {
             const scanId = 'scan-id';
             const reportId = 'report-id';
             webApiClientMock
-                .setup(async w => w.getScanReport(scanId, reportId))
+                .setup(async (w) => w.getScanReport(scanId, reportId))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -141,7 +141,7 @@ describe(HealthMonitorClientController, () => {
 
         it('handles getHealthStatus', async () => {
             webApiClientMock
-                .setup(async w => w.checkHealth())
+                .setup(async (w) => w.checkHealth())
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -156,7 +156,7 @@ describe(HealthMonitorClientController, () => {
                 name: 'track availability data name',
                 telemetry: 'availability telemetry' as any,
             };
-            loggerMock.setup(async l => l.trackAvailability(data.name, data.telemetry)).verifiable(Times.once());
+            loggerMock.setup(async (l) => l.trackAvailability(data.name, data.telemetry)).verifiable(Times.once());
 
             const args: ActivityRequestData = {
                 activityName: ActivityAction.trackAvailability,
@@ -180,10 +180,10 @@ describe(HealthMonitorClientController, () => {
             };
 
             let testContainer: any;
-            testRunnerMock.setup(t => t.setLogger(loggerMock.object)).verifiable(Times.once());
+            testRunnerMock.setup((t) => t.setLogger(loggerMock.object)).verifiable(Times.once());
             testRunnerMock
-                .setup(async t => t.run(It.isAny(), TestEnvironment.canary, releaseId, runId))
-                .callback(testGroup => {
+                .setup(async (t) => t.run(It.isAny(), TestEnvironment.canary, releaseId, runId))
+                .callback((testGroup) => {
                     testContainer = testGroup;
                 })
                 .verifiable(Times.once());

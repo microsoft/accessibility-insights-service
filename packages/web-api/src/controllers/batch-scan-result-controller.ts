@@ -26,7 +26,7 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
-        const scanIds = payload.map(request => request.scanId);
+        const scanIds = payload.map((request) => request.scanId);
         const responseBody: ScanResultResponse[] = [];
         const scanIdsToQuery: string[] = [];
 
@@ -48,7 +48,7 @@ export class BatchScanResultController extends BaseScanResultController {
         }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQuery);
-        scanIdsToQuery.forEach(scanId => {
+        scanIdsToQuery.forEach((scanId) => {
             if (isEmpty(scanResultItemMap[scanId])) {
                 responseBody.push({
                     scanId: scanId,

@@ -34,15 +34,15 @@ describe(StorageContainerSASUrlProvider, () => {
         secretProviderMock = Mock.ofType<SecretProvider>();
         secretProviderMock = getPromisableDynamicMock(secretProviderMock);
 
-        blobServiceClientMock.setup(b => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
-        containerClientMock.setup(c => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
-        containerClientMock.setup(c => c.url).returns(() => containerUrl);
+        blobServiceClientMock.setup((b) => b.getContainerClient(containerName)).returns(() => containerClientMock.object);
+        containerClientMock.setup((c) => c.getBlobClient(blobName)).returns(() => blobClientMock.object);
+        containerClientMock.setup((c) => c.url).returns(() => containerUrl);
         secretProviderMock
-            .setup(async s => s.getSecret(secretNames.storageAccountName))
+            .setup(async (s) => s.getSecret(secretNames.storageAccountName))
             .returns(async () => storageAccountName)
             .verifiable(Times.once());
         secretProviderMock
-            .setup(async s => s.getSecret(secretNames.storageAccountKey))
+            .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
             .returns(async () => storageAccountKey)
             .verifiable(Times.once());
 

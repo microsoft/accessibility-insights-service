@@ -65,7 +65,7 @@ export class ScanRequestController extends ApiController {
         };
 
         const totalUrls: number = processedData.scanResponses.length;
-        const invalidUrls: number = processedData.scanResponses.filter(i => i.error !== undefined).length;
+        const invalidUrls: number = processedData.scanResponses.filter((i) => i.error !== undefined).length;
 
         this.logger.setCustomProperties({ batchRequestId: batchId });
         this.logger.logInfo('Accepted scan run batch request', {
@@ -89,7 +89,7 @@ export class ScanRequestController extends ApiController {
         const isV2 = this.context.req.query['api-version'] === '2.0' ? true : false;
         let response;
         if (isV2) {
-            response = processedData.scanResponses.find(x => x !== undefined);
+            response = processedData.scanResponses.find((x) => x !== undefined);
         } else {
             response = processedData.scanResponses;
         }
@@ -117,7 +117,7 @@ export class ScanRequestController extends ApiController {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
 
-        scanRunRequests.forEach(scanRunRequest => {
+        scanRunRequests.forEach((scanRunRequest) => {
             const runRequestValidationResult = this.validateRunRequest(scanRunRequest);
             if (runRequestValidationResult.valid) {
                 // preserve GUID origin for a single batch scope

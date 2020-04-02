@@ -45,7 +45,7 @@ describe(ApplicationInsightsClient, () => {
         requestStub.defaults = defaultsMock.object;
 
         defaultsMock
-            .setup(d =>
+            .setup((d) =>
                 d({
                     forever: true,
                     resolveWithFullResponse: true,
@@ -87,7 +87,7 @@ describe(ApplicationInsightsClient, () => {
             options.simple = testSubject.throwOnRequestFailure;
 
             postMock
-                .setup(req => req(requestUrl, options))
+                .setup((req) => req(requestUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
@@ -101,7 +101,7 @@ describe(ApplicationInsightsClient, () => {
             options.simple = throwOnFailure;
 
             postMock
-                .setup(req => req(requestUrl, options))
+                .setup((req) => req(requestUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
@@ -127,7 +127,7 @@ describe(ApplicationInsightsClient, () => {
                 json: true,
             };
             getMock
-                .setup(req => req(eventsUrl, options))
+                .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
@@ -148,7 +148,7 @@ describe(ApplicationInsightsClient, () => {
             };
 
             getMock
-                .setup(req => req(eventsUrl, options))
+                .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 
@@ -166,7 +166,7 @@ describe(ApplicationInsightsClient, () => {
             };
 
             getMock
-                .setup(req => req(eventsUrl, options))
+                .setup((req) => req(eventsUrl, options))
                 .returns(async () => Promise.resolve(response))
                 .verifiable(Times.once());
 

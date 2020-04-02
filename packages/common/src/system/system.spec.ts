@@ -6,7 +6,7 @@ import { System } from './system';
 
 describe('create instance if nil', () => {
     // tslint:disable-next-line: no-null-keyword
-    test.each([null, undefined])('creates instance when nil - %o', testCase => {
+    test.each([null, undefined])('creates instance when nil - %o', (testCase) => {
         expect(
             System.createInstanceIfNil(testCase, () => {
                 return 1;
@@ -47,11 +47,11 @@ describe('create instance if nil', () => {
 
 describe('isNullOrEmptyString', () => {
     // tslint:disable-next-line: no-null-keyword
-    test.each([null, undefined, ''])('returns true when for %o', testCase => {
+    test.each([null, undefined, ''])('returns true when for %o', (testCase) => {
         expect(System.isNullOrEmptyString(testCase)).toBe(true);
     });
 
-    test.each(['val1', ' '])('returns false for non null value %o', testCase => {
+    test.each(['val1', ' '])('returns false for non null value %o', (testCase) => {
         expect(System.isNullOrEmptyString(testCase)).toBe(false);
     });
 });

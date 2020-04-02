@@ -31,21 +31,21 @@ describe(getProcessLifeCycleContainer, () => {
         expect(testSubject.get(CredentialsProvider)).toBeDefined();
     });
 
-    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', testCase => {
+    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', (testCase) => {
         expect(() => testSubject.get(testCase)).toThrowError();
     });
 
     it('verifies A11yServiceClient registration', async () => {
         secretProviderMock
-            .setup(async s => s.getSecret('restApiSpAppId'))
+            .setup(async (s) => s.getSecret('restApiSpAppId'))
             .returns(async () => Promise.resolve('sp app id'))
             .verifiable();
         secretProviderMock
-            .setup(async s => s.getSecret('restApiSpSecret'))
+            .setup(async (s) => s.getSecret('restApiSpSecret'))
             .returns(async () => Promise.resolve('sp app secret'))
             .verifiable();
         secretProviderMock
-            .setup(async s => s.getSecret('authorityUrl'))
+            .setup(async (s) => s.getSecret('authorityUrl'))
             .returns(async () => Promise.resolve('https://login.microsoft.com/tenantid'))
             .verifiable();
 

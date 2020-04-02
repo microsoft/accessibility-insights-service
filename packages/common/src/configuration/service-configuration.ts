@@ -91,7 +91,7 @@ export class ServiceConfiguration {
             this.loadConfigPromise = new Promise((resolve, reject) => {
                 const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
 
-                this.fileSystem.exists(ServiceConfiguration.profilePath, exists => {
+                this.fileSystem.exists(ServiceConfiguration.profilePath, (exists) => {
                     if (exists === true) {
                         config.loadFile(ServiceConfiguration.profilePath);
                         config.validate({ allowed: 'strict' });
