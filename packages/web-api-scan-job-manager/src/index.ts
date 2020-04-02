@@ -12,7 +12,7 @@ const whyNodeRunLogger = new WhyNodeRunningLogger();
 (async () => {
     const webApiJobManagerEntryPoint = new WebApiScanJobManagerEntryPoint(setupWebApiScanJobManagerContainer());
     await webApiJobManagerEntryPoint.start();
-    await whyNodeRunLogger.logAfterSeconds(10);
+    await whyNodeRunLogger.logAfterSeconds(2);
 })().catch(error => {
     console.log('Exception thrown in web api job manager: ', error);
     process.exit(1);

@@ -12,7 +12,7 @@ const whyNodeRunLogger = new WhyNodeRunningLogger();
 
 (async () => {
     await new WebApiScanRequestSenderEntryPoint(setupWebApiScanRequestSenderContainer()).start();
-    await whyNodeRunLogger.logAfterSeconds(10);
+    await whyNodeRunLogger.logAfterSeconds(2);
 })().catch(async () => {
     process.exit(1);
 });
