@@ -85,10 +85,10 @@
     "@opentelemetry/types" "^0.2.0"
     tslib "^1.9.3"
 
-"@azure/cosmos@^3.6.2":
-  version "3.6.2"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.6.2.tgz#8998bf9587a6f22bc1ad07c980a443d75d583e60"
-  integrity sha512-UOcZSLO0gHuIh/Gam01GC6KGjjDYWWM2PXZDjhW7FWVOeFi0FBRYPvTpI2Iw799GnskPfEF+LJ8nNqmur1wEWA==
+"@azure/cosmos@^3.6.3":
+  version "3.6.3"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.6.3.tgz#bb53bde35fbf338160691d2b6a62f47b4a9a1cbb"
+  integrity sha512-JoCDxl0TnL6EHL4xD3KC9r2bMivK13q1jl7h69wd/YFLlt3aBTTCehtAX+y4alNSENpL53XdRdw/cna0mI2XDw==
   dependencies:
     "@types/debug" "^4.1.4"
     debug "^4.1.1"
