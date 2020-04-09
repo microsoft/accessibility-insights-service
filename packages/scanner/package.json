@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/jest": "^25.2.1",
         "@types/lodash": "^4.14.136",
-        "@types/node": "^13.9.8",
+        "@types/node": "^13.11.1",
         "@types/puppeteer": "^2.0.1",
         "jest": "^25.2.7",
         "jest-circus": "^25.2.7",
