@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { client } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { Logger } from 'logger';
 import { ResponseAsJSON } from 'request';
@@ -26,12 +27,15 @@ class MockableLogger extends Logger {}
 
 describe(NotificationSender, () => {
     let sender: NotificationSender;
+
+    let clientMock: IMock<typeof client>;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let webAPIMock: IMock<NotificationSenderWebAPIClient>;
     let notificationSenderMetadataMock: IMock<NotificationSenderConfig>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let systemMock: IMock<typeof System>;
+
     let processStub: typeof process;
     let scanConfig: ScanRunTimeConfig;
 
@@ -76,6 +80,7 @@ describe(NotificationSender, () => {
             .returns(async () => scanConfig)
             .verifiable(Times.once());
         systemMock = Mock.ofInstance(System, MockBehavior.Strict);
+        clientMock = Mock.ofInstance(client);
         notificationSenderMetadataMock = Mock.ofType(NotificationSenderConfig);
         notificationSenderMetadataMock.setup((s) => s.getConfig()).returns(() => notificationSenderMetadata);
 
@@ -90,6 +95,7 @@ describe(NotificationSender, () => {
             serviceConfigMock.object,
             processStub,
             systemMock.object,
+            clientMock.object,
         );
     });
 
@@ -99,6 +105,10 @@ describe(NotificationSender, () => {
 
         const response = { statusCode: 200 } as ResponseAsJSON;
 
+        clientMock
+            .setup((c) => c.isSuccessStatusCode(response))
+            .returns(() => true)
+            .verifiable(Times.once());
         systemMock
             .setup((sm) => sm.wait(5000))
             .returns(async () => Promise.resolve())
@@ -135,6 +145,10 @@ describe(NotificationSender, () => {
             .setup((wam) => wam.sendNotification(notificationSenderMetadata))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
+        clientMock
+            .setup((c) => c.isSuccessStatusCode(response))
+            .returns(() => false)
+            .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         await sender.sendNotification();
     });
@@ -170,6 +184,7 @@ describe(NotificationSender, () => {
         loggerMock.verifyAll();
         serviceConfigMock.verifyAll();
         systemMock.verifyAll();
+        clientMock.verifyAll();
     });
 
     function getRunningJobStateScanResult(notification: ScanCompletedNotification): Partial<OnDemandPageScanResult> {

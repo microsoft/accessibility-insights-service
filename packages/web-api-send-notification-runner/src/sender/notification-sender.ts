@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { client } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger, loggerTypes } from 'logger';
@@ -21,6 +22,7 @@ export class NotificationSender {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
+        private readonly responseParser: typeof client = client,
     ) {}
 
     public async sendNotification(): Promise<void> {
@@ -57,7 +59,7 @@ export class NotificationSender {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
                 statusCode = response.statusCode;
 
-                if (response.statusCode === 200) {
+                if (this.responseParser.isSuccessStatusCode(response)) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
                     this.logger.logInfo(`Notification sent Successfully!, try #${numberOfTries}`);
                     notificationState = 'sent';
