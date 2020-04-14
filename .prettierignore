@@ -14,6 +14,7 @@ test-results/
 **/obj/
 **/bin/
 **/*.dat
+**/*.png
 **/*.sh
 **/*.pbix
 dist/
