@@ -230,7 +230,7 @@ export class CosmosClientWrapper {
     }
 
     private getFailedOperationResponse<T>(error: any): CosmosOperationResponse<T> {
-        const errorResponse = client.getErrorResponse<T>(error);
+        const errorResponse = client.getErrorResponse(error);
         if (errorResponse !== undefined) {
             return errorResponse;
         } else {
