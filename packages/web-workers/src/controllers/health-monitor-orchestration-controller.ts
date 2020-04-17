@@ -3,8 +3,9 @@
 // tslint:disable: no-submodule-imports no-any
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
-import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
+import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData } from 'functional-tests';
+import { SerializableResponse } from 'functional-tests/dist/test-group-data';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
@@ -52,7 +53,9 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     private getOrchestrationExecutor(): (context: IOrchestrationFunctionContext) => void {
-        return this.df.orchestrator(function* (context: IOrchestrationFunctionContext): IterableIterator<unknown> {
+        return this.df.orchestrator(function* (
+            context: IOrchestrationFunctionContext,
+        ): Generator<Task | TaskSet, void, SerializableResponse & void> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
