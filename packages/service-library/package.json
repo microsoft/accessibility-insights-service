@@ -46,7 +46,7 @@
         "lodash": "^4.17.14",
         "logger": "1.0.0",
         "moment": "2.24.0",
-        "puppeteer": "^2.1.1",
+        "puppeteer": "^3.0.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0"
