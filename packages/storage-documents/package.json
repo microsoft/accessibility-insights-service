@@ -23,7 +23,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^25.2.1",
-        "@types/node": "^13.11.1",
+        "@types/node": "^13.13.1",
         "jest": "^25.4.0",
         "jest-circus": "^25.2.7",
         "jest-junit": "^10.0.0",
