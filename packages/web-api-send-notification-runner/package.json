@@ -23,7 +23,7 @@
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^25.2.1",
-        "@types/lodash": "^4.14.136",
+        "@types/lodash": "^4.14.150",
         "@types/request": "^2.48.4",
         "@types/request-promise": "^4.1.46",
         "@types/node": "^13.11.1",
