@@ -12,7 +12,7 @@ set -eo pipefail
 export resourceGroupName
 export batchAccountName
 export parameterFilePath
-export dropPools=false
+export dropPools
 
 # Set default ARM Batch account template files
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
