@@ -25,7 +25,7 @@ export releaseVersion
 export templatesFolder="${0%/*}/../templates/"
 export apiTemplates="$templatesFolder"rest-api-templates
 export enableSoftDeleteOnKeyVault=true
-export dropPools=false
+export dropPools
 
 exitWithUsageInfo() {
     echo "
