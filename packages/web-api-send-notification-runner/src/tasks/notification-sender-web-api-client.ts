@@ -34,7 +34,7 @@ export class NotificationSenderWebAPIClient {
         const requestBody = {
             scanId: notificationSenderConfigData.scanId,
             runStatus: notificationSenderConfigData.runStatus,
-            scanStatus: notificationSenderConfigData.scanStatus,
+            scanStatus: notificationSenderConfigData.runStatus == 'failed' ? null : notificationSenderConfigData.scanStatus,
         };
         const options: requestPromise.RequestPromiseOptions = { body: requestBody };
 
