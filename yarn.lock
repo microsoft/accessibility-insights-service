@@ -4645,10 +4645,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-durable-functions@^1.3.0:
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.0.tgz#76124ef4c9dea46001865aad5073a8aee167b837"
-  integrity sha512-QqPWbQqqWoizmWa4zfFDXKMpMGCpqvtBeSYFPsWFp41H+0h9SJDjwLGmK/XXpQhjbt//8mzBalNN3czow7jaEQ==
+durable-functions@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.1.tgz#f316a9b49971fbe39e3dc078a1c78b7ed93e5521"
+  integrity sha512-tvoxsd+endsprdhCDpdMr1+577iRZ9yIJRSrsAeICK0xuZoNkpIPIP8K5VjIH+qWMohwfRxWDFsZfNB1Xnwb4g==
   dependencies:
     "@azure/functions" "^1.0.2-beta2"
     "@types/lodash" "^4.14.119"
