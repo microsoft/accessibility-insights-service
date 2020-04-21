@@ -39,7 +39,7 @@ describe(NotificationSenderWebAPIClient, () => {
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
             // tslint:disable-next-line: no-empty
-            const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
+            const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => { });
             requestStub.defaults = defaultsMock.object;
 
             defaultsMock
@@ -69,6 +69,7 @@ describe(NotificationSenderWebAPIClient, () => {
         const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: scanStatus };
         const options = {
             body: requestBody,
+            timeout: 5000,
         };
 
         postMock
