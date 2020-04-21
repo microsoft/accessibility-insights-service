@@ -24,7 +24,7 @@
     "devDependencies": {
         "@types/convict": "^4.2.1",
         "@types/jest": "^25.2.1",
-        "@types/node": "^13.11.1",
+        "@types/node": "^13.13.1",
         "@types/wtfnode": "^0.7.0",
         "@types/sha.js": "^2.4.0",
         "jest": "^25.4.0",
