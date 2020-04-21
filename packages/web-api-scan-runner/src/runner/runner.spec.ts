@@ -457,7 +457,7 @@ describe(Runner, () => {
         describe('on run failed', () => {
             it('sets state to failed if web driver launch crashes', async () => {
                 notificationMessage.runStatus = 'failed';
-                notificationMessage.scanStatus = undefined;
+                notificationMessage.scanStatus = 'pending';
 
                 const failureMessage = 'failed to launch';
                 webDriverTaskMock
@@ -499,7 +499,9 @@ describe(Runner, () => {
                 timestamp: dateNow.toJSON(),
                 error: null,
             },
-            scanResult: null,
+            scanResult: {
+                state: 'pending',
+            },
             reports: null,
         };
     }
@@ -524,7 +526,9 @@ describe(Runner, () => {
                 timestamp: dateNow.toJSON(),
                 error,
             },
-            scanResult: null,
+            scanResult: {
+                state: 'pending',
+            },
             reports: null,
         };
 
