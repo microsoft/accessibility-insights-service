@@ -8,9 +8,6 @@
     "queueConfig": {
         "maxQueueSize": 10
     },
-    "taskConfig": {
-        "taskTimeoutInMinutes": 3
-    },
 
     "scanConfig": {
         "minLastReferenceSeenInDays": 3,

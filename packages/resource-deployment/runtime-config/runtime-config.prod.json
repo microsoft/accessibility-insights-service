@@ -9,7 +9,6 @@
         "maxQueueSize": 40
     },
     "taskConfig": {
-        "taskTimeoutInMinutes": 5,
         "exitOnComplete": true
     },
 

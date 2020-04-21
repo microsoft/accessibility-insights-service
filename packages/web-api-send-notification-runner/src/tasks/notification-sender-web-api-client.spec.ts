@@ -69,6 +69,7 @@ describe(NotificationSenderWebAPIClient, () => {
         const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: scanStatus };
         const options = {
             body: requestBody,
+            timeout: 30000,
         };
 
         postMock
