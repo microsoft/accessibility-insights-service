@@ -37,7 +37,7 @@ export class NotificationSenderWebAPIClient {
             runStatus: notificationSenderConfigData.runStatus,
             scanStatus: isEmpty(notificationSenderConfigData.scanStatus) ? undefined : notificationSenderConfigData.scanStatus,
         };
-        const options: requestPromise.RequestPromiseOptions = { body: requestBody };
+        const options: requestPromise.RequestPromiseOptions = { body: requestBody, timeout: 30000 };
 
         return this.defaultRequestObject.post(notificationSenderConfigData.scanNotifyUrl, options);
     }
