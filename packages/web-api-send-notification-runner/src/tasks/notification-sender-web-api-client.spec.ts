@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { isEmpty } from 'lodash';
 import { ResponseAsJSON } from 'request';
 import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
@@ -54,7 +55,7 @@ describe(NotificationSenderWebAPIClient, () => {
     });
 
     describe('postReplyUrl', () => {
-        test.each(['pass', undefined])('verifies when scanState is %o', async (scanStatus: any) => {
+        test.each(['pass', 'fail', '', undefined])('verifies when scanState is %o', async (scanStatus: any) => {
             const scanNotifyUrl = 'scanNotifyUrl';
             const scanId = 'scanId';
             const runStatus = 'completed';
@@ -66,7 +67,7 @@ describe(NotificationSenderWebAPIClient, () => {
                 runStatus: runStatus,
             };
             const response = { statusCode: 200 } as ResponseAsJSON;
-            const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: scanStatus };
+            const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: isEmpty(scanStatus) ? undefined : scanStatus };
             const options = {
                 body: requestBody,
                 timeout: 30000,
