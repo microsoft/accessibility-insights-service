@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { ResponseAsJSON } from 'request';
 import * as requestPromise from 'request-promise';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
@@ -34,7 +35,7 @@ export class NotificationSenderWebAPIClient {
         const requestBody = {
             scanId: notificationSenderConfigData.scanId,
             runStatus: notificationSenderConfigData.runStatus,
-            scanStatus: notificationSenderConfigData.scanStatus,
+            scanStatus: isEmpty(notificationSenderConfigData.scanStatus) ? undefined : notificationSenderConfigData.scanStatus,
         };
         const options: requestPromise.RequestPromiseOptions = { body: requestBody, timeout: 30000 };
 

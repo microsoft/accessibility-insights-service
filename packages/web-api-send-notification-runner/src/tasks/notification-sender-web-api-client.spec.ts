@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { isEmpty } from 'lodash';
 import { ResponseAsJSON } from 'request';
 import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
@@ -53,33 +54,34 @@ describe(NotificationSenderWebAPIClient, () => {
         });
     });
 
-    it('postReplyUrl', async () => {
-        const scanNotifyUrl = 'scanNotifyUrl';
-        const scanId = 'scanId';
-        const scanStatus = 'pass';
-        const runStatus = 'completed';
+    describe('postReplyUrl', () => {
+        test.each(['pass', 'fail', '', undefined])('verifies when scanState is %o', async (scanStatus: any) => {
+            const scanNotifyUrl = 'scanNotifyUrl';
+            const scanId = 'scanId';
+            const runStatus = 'completed';
 
-        const notificationSenderConfigData: NotificationSenderMetadata = {
-            scanNotifyUrl: scanNotifyUrl,
-            scanId: scanId,
-            scanStatus: scanStatus,
-            runStatus: runStatus,
-        };
-        const response = { statusCode: 200 } as ResponseAsJSON;
-        const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: scanStatus };
-        const options = {
-            body: requestBody,
-            timeout: 30000,
-        };
+            const notificationSenderConfigData: NotificationSenderMetadata = {
+                scanNotifyUrl: scanNotifyUrl,
+                scanId: scanId,
+                scanStatus: scanStatus,
+                runStatus: runStatus,
+            };
+            const response = { statusCode: 200 } as ResponseAsJSON;
+            const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: isEmpty(scanStatus) ? undefined : scanStatus };
+            const options = {
+                body: requestBody,
+                timeout: 30000,
+            };
 
-        postMock
-            .setup((req) => req(scanNotifyUrl, options))
-            .returns(async () => Promise.resolve(response))
-            .verifiable(Times.once());
+            postMock
+                .setup((req) => req(scanNotifyUrl, options))
+                .returns(async () => Promise.resolve(response))
+                .verifiable(Times.once());
 
-        const actualResponse = await testSubject.sendNotification(notificationSenderConfigData);
+            const actualResponse = await testSubject.sendNotification(notificationSenderConfigData);
 
-        expect(actualResponse).toEqual(response);
-        postMock.verifyAll();
+            expect(actualResponse).toEqual(response);
+            postMock.verifyAll();
+        });
     });
 });
