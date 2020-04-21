@@ -58,9 +58,7 @@ export class Runner {
                 timestamp: new Date().toJSON(),
                 error: null,
             },
-            scanResult: {
-                state: 'pending',
-            },
+            scanResult: null,
             reports: null,
         };
 
