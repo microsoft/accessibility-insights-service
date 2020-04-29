@@ -106,10 +106,10 @@
   resolved "https://registry.yarnpkg.com/@azure/functions/-/functions-1.2.0.tgz#e668c3811c6effee93e4553e69de017e2f48acd3"
   integrity sha512-qkaQqTnr56xUnYNkKBM/2wsnf6imAJ3NF6Nbpk691Y6JYliA1YdZngsZsrpHS9tQ9/71MqARl8m50+EmEfLG3g==
 
-"@azure/identity@^1.0.0-preview.3":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@azure/identity/-/identity-1.0.2.tgz#5290035149a89a231469a725fa158e5e1648b349"
-  integrity sha512-kGGiRT9pSlo7Op8I9gBtjufUaqe4AqQv+nPWVOmdDBaf3zD0rPa7zHnDT6dHP/oNdBjlxDczf7Ks+s9KdtAmag==
+"@azure/identity@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@azure/identity/-/identity-1.0.3.tgz#834d05b121c39a36e7d6158bd8df8137ba40b9a1"
+  integrity sha512-yWoOL3WjbD1sAYHdx4buFCGd9mCIHGzlTHgkhhLrmMpBztsfp9ejo5LRPYIV2Za4otfJzPL4kH/vnSLTS/4WYA==
   dependencies:
     "@azure/core-http" "^1.0.0"
     "@azure/core-tracing" "1.0.0-preview.7"
