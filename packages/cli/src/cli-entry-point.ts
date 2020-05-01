@@ -12,17 +12,17 @@ export class CliEntryPoint {
     constructor(private readonly container: Container) {}
 
     public async runScan(scanArguments: ScanArguments): Promise<void> {
-        const commandRunner = this.commandRunnerFactory(scanArguments);
+        const commandRunner = this.getCommandRunner(scanArguments);
         await commandRunner.runCommand(scanArguments);
     }
 
-    private commandRunnerFactory(scanArguments: ScanArguments): CommandRunner {
+    private getCommandRunner(scanArguments: ScanArguments): CommandRunner {
         if (!isEmpty(scanArguments.url)) {
             return this.container.get(URLCommandRunner);
-        } else if (!isEmpty(scanArguments.filePath)) {
+        } else if (!isEmpty(scanArguments.inputFile)) {
             return this.container.get(FileCommandRunner);
         } else {
-            throw new Error('You should provide either url or filePath parameter only!');
+            throw new Error('You should provide either url or inputFile parameter only!');
         }
     }
 }

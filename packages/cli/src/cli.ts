@@ -12,15 +12,15 @@ import { setupCliContainer } from './setup-cli-container';
 
 (async () => {
     const scanArguments = (yargs
-        .usage('Usage: $0 --url <url> --filePath <filePath> --output <directoryPath>')
+        .usage('Usage: $0 --url <url> --inputFile <inputFile> --output <directoryPath>')
         .options({
             url: { type: 'string', describe: 'url to scan for accessibility' },
-            filePath: { type: 'string', describe: 'file path that contians multiple urls to scan' },
+            inputFile: { type: 'string', describe: 'ile path that contains multiple urls separated by newline to scan' },
             output: { type: 'string', describe: 'output directory' },
         })
         .check((args) => {
-            if ((isEmpty(args.url) && isEmpty(args.filePath)) || (!isEmpty(args.url) && !isEmpty(args.filePath))) {
-                throw new Error('You should provide either url or filePath parameter only!');
+            if ((isEmpty(args.url) && isEmpty(args.inputFile)) || (!isEmpty(args.url) && !isEmpty(args.inputFile))) {
+                throw new Error('You should provide either url or inputFile parameter only!');
             }
 
             return true;

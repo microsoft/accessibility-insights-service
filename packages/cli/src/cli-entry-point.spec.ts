@@ -33,7 +33,7 @@ describe(CliEntryPoint, () => {
             expect(runCommand).toBeCalled();
         });
         it('returns File Command Runner', async () => {
-            const testInput: ScanArguments = { filePath: 'inputFile.txt', output: '/users/xyz' };
+            const testInput: ScanArguments = { inputFile: 'inputFile.txt', output: '/users/xyz' };
             containerMock.setup((cm) => cm.get(FileCommandRunner)).returns(() => fileCommandRunnerMock.object);
             const runCommand = jest.spyOn(fileCommandRunnerMock.object, 'runCommand').mockImplementationOnce(async () => Promise.resolve());
             // tslint:disable-next-line: no-floating-promises
@@ -45,7 +45,7 @@ describe(CliEntryPoint, () => {
             const testInput: ScanArguments = { output: '/users/xyz' };
             // tslint:disable-next-line: no-floating-promises
             await testSubject.runScan(testInput).catch((error) => {
-                expect((error as Error).message).toEqual('You should provide either url or filePath parameter only!');
+                expect((error as Error).message).toEqual('You should provide either url or inputFile parameter only!');
             });
         });
     });

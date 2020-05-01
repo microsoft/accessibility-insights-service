@@ -2,6 +2,6 @@
 // Licensed under the MIT License.
 export interface ScanArguments {
     url?: string;
-    filePath?: string;
+    inputFile?: string;
     output?: string;
 }
