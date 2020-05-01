@@ -11,6 +11,7 @@ export class ReportDiskWriter {
 
     public writeToDirectory(directory: string, fileName: string, format: string, content: string): void {
         if (isEmpty(directory)) {
+            // tslint:disable-next-line: no-parameter-reassignment
             directory = '.';
         }
 

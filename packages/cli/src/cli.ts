@@ -22,6 +22,7 @@ import { setupCliContainer } from './setup-cli-container';
             if ((isEmpty(args.url) && isEmpty(args.filePath)) || (!isEmpty(args.url) && !isEmpty(args.filePath))) {
                 throw new Error('You should input either url or filePath (only one)!');
             }
+
             return true;
         })
         .describe('help', 'show help').argv as unknown) as ScanArguments;
