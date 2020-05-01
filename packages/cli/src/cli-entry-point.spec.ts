@@ -28,7 +28,6 @@ describe(CliEntryPoint, () => {
             const testInput: ScanArguments = { url: 'https://www.bing.com', output: '/users/xyz' };
             containerMock.setup((cm) => cm.get(URLCommandRunner)).returns(() => urlCommandRunnerMock.object);
             const runCommand = jest.spyOn(urlCommandRunnerMock.object, 'runCommand').mockImplementationOnce(async () => Promise.resolve());
-            // tslint:disable-next-line: no-floating-promises
             await testSubject.runScan(testInput);
             expect(runCommand).toBeCalled();
         });
@@ -36,14 +35,12 @@ describe(CliEntryPoint, () => {
             const testInput: ScanArguments = { inputFile: 'inputFile.txt', output: '/users/xyz' };
             containerMock.setup((cm) => cm.get(FileCommandRunner)).returns(() => fileCommandRunnerMock.object);
             const runCommand = jest.spyOn(fileCommandRunnerMock.object, 'runCommand').mockImplementationOnce(async () => Promise.resolve());
-            // tslint:disable-next-line: no-floating-promises
             await testSubject.runScan(testInput);
             expect(runCommand).toBeCalled();
         });
 
         it('returns null', async () => {
             const testInput: ScanArguments = { output: '/users/xyz' };
-            // tslint:disable-next-line: no-floating-promises
             await expect(testSubject.runScan(testInput)).rejects.toThrow(new Error('You should provide either url or inputFile parameter only!'));
         });
     });

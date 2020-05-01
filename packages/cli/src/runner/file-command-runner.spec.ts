@@ -50,7 +50,6 @@ describe('FileCommandRunner', () => {
         reportDiskWriterMock
             .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
             .verifiable(Times.once());
-        // tslint:disable-next-line: no-floating-promises
         await testSubject.runCommand(testInput);
 
         scannerMock.verifyAll();
