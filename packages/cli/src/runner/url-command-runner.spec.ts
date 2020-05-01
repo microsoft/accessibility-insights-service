@@ -55,23 +55,4 @@ describe('URLCommandRunner', () => {
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
     });
-
-    it('Run Command Failed', async () => {
-        scannerMock
-            .setup((sm) => sm.scan(testInput.url))
-            .returns(async () => Promise.reject())
-            .verifiable(Times.once());
-        reportGeneratorMock
-            .setup((rg) => rg.generateReport(scanResults))
-            .returns(() => htmlReportString)
-            .verifiable(Times.never());
-        reportDiskWriterMock
-            .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
-            .verifiable(Times.never());
-        // tslint:disable-next-line: no-floating-promises
-        await testSubject.runCommand(testInput);
-
-        scannerMock.verifyAll();
-        reportGeneratorMock.verifyAll();
-    });
 });
