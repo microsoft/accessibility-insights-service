@@ -8,15 +8,21 @@ import { ReportFormats } from './report-formats';
 
 @injectable()
 export class ReportDiskWriter {
-    constructor(private readonly fileSystemObj: typeof fs = fs) {}
+    constructor(private readonly fileSystemObj: typeof fs = fs) { }
 
-    public writeToDirectory(directory: string, fileName: string, format: ReportFormats, content: string): void {
+    public writeToDirectory(directory: string, fileName: string, format: ReportFormats, content: string): string {
         if (isEmpty(directory)) {
             // tslint:disable-next-line: no-parameter-reassignment
             directory = '.';
         }
 
-        const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+        let reportFileName;
+
+        try {
+            reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+        } catch{
+            reportFileName = `${directory}/${fileName}.${format}`;
+        }
 
         if (!this.fileSystemObj.existsSync(directory)) {
             console.log('output directory does not exists.');
@@ -25,5 +31,7 @@ export class ReportDiskWriter {
         }
 
         this.fileSystemObj.writeFileSync(reportFileName, content);
+
+        return reportFileName;
     }
 }
