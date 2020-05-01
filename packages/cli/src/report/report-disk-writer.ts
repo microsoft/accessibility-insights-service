@@ -4,12 +4,13 @@ import * as filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
+import { ReportFormats } from './report-formats';
 
 @injectable()
 export class ReportDiskWriter {
     constructor(private readonly fileSystemObj: typeof fs = fs) {}
 
-    public writeToDirectory(directory: string, fileName: string, format: string, content: string): void {
+    public writeToDirectory(directory: string, fileName: string, format: ReportFormats, content: string): void {
         if (isEmpty(directory)) {
             // tslint:disable-next-line: no-parameter-reassignment
             directory = '.';
@@ -24,29 +25,5 @@ export class ReportDiskWriter {
         }
 
         this.fileSystemObj.writeFileSync(reportFileName, content);
-
-        // this.fileSystemObj.exists(directory, async (exists) => {
-        //     if (!exists) {
-        //         console.log('output directory does not exists.');
-        //         console.log(`creating output directory - ${directory}`);
-        //         this.fileSystemObj.mkdir(directory, async (error) => {
-        //             if (error) {
-        //                 return console.error(error);
-        //             }
-        //             await this.writeFile(reportFileName, content);
-        //         });
-        //     } else {
-        //         await this.writeFile(reportFileName, content);
-        //     }
-        // })
     }
-
-    // private async writeFile(fileName: string, content: string): Promise<void> {
-    //     this.fileSystemObj.writeFile(fileName, content, (error) => {
-    //         if (error) {
-    //             return console.error(error);
-    //         }
-    //         console.log(`scan report saved successfully ${fileName}`);
-    //     });
-    // }
 }

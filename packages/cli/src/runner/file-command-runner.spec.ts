@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
-import { ReportFormats } from '../report/report-formats';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
@@ -49,8 +48,27 @@ describe('FileCommandRunner', () => {
             .returns(() => htmlReportString)
             .verifiable(Times.once());
         reportDiskWriterMock
-            .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, ReportFormats.html, htmlReportString))
+            .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
             .verifiable(Times.once());
+        // tslint:disable-next-line: no-floating-promises
+        await testSubject.runCommand(testInput);
+
+        scannerMock.verifyAll();
+        reportGeneratorMock.verifyAll();
+    });
+
+    it('Run Command Failed', async () => {
+        scannerMock
+            .setup((sm) => sm.scan(testInput.url))
+            .returns(async () => Promise.reject())
+            .verifiable(Times.once());
+        reportGeneratorMock
+            .setup((rg) => rg.generateReport(scanResults))
+            .returns(() => htmlReportString)
+            .verifiable(Times.never());
+        reportDiskWriterMock
+            .setup((rdwm) => rdwm.writeToDirectory(testInput.output, testInput.url, 'html', htmlReportString))
+            .verifiable(Times.never());
         // tslint:disable-next-line: no-floating-promises
         await testSubject.runCommand(testInput);
 

@@ -6,7 +6,6 @@ import * as filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from './report-disk-writer';
-import { ReportFormats } from './report-formats';
 
 // tslint:disable: no-empty no-http-string
 describe('ReportDiskWriter', () => {
@@ -21,7 +20,7 @@ describe('ReportDiskWriter', () => {
     it('output directory exists', () => {
         const directory = '.';
         const fileName = 'http://www.bing.com';
-        const format = ReportFormats.html;
+        const format = 'html';
         const content = 'content';
 
         const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
@@ -47,7 +46,7 @@ describe('ReportDiskWriter', () => {
     it('output directory does not exists', () => {
         const directory = '.';
         const fileName = 'http://www.bing.com';
-        const format = ReportFormats.html;
+        const format = 'html';
         const content = 'content';
 
         const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
@@ -73,7 +72,7 @@ describe('ReportDiskWriter', () => {
     it('output directory is empty', () => {
         const directory = '.';
         const fileName = 'http://www.bing.com';
-        const format = ReportFormats.html;
+        const format = 'html';
         const content = 'content';
 
         const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;

@@ -4,7 +4,6 @@
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
-import { ReportFormats } from '../report/report-formats';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
@@ -27,12 +26,15 @@ export class FileCommandRunner implements CommandRunner {
             spinner.start();
 
             axeResults = await this.scanner.scan(scanArguments.url);
+        } catch (error) {
+            console.log('Exception thrown while running scanner: ', error);
+            process.exit(1);
         } finally {
             spinner.stop();
         }
 
         const reportContent = this.reportGenerator.generateReport(axeResults);
 
-        this.reportDiskWriter.writeToDirectory(scanArguments.output, scanArguments.url, ReportFormats.html, reportContent);
+        this.reportDiskWriter.writeToDirectory(scanArguments.output, scanArguments.url, 'html', reportContent);
     }
 }

@@ -20,7 +20,7 @@ import { setupCliContainer } from './setup-cli-container';
         })
         .check((args) => {
             if ((isEmpty(args.url) && isEmpty(args.filePath)) || (!isEmpty(args.url) && !isEmpty(args.filePath))) {
-                throw new Error('You should input either url or filePath (only one)!');
+                throw new Error('You should provide either url or filePath parameter only!');
             }
 
             return true;
