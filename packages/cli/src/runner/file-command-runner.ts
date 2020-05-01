@@ -26,9 +26,6 @@ export class FileCommandRunner implements CommandRunner {
             spinner.start();
 
             axeResults = await this.scanner.scan(scanArguments.url);
-        } catch (error) {
-            console.log('Exception thrown while running scanner: ', error);
-            process.exit(1);
         } finally {
             spinner.stop();
         }
