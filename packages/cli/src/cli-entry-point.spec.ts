@@ -44,9 +44,7 @@ describe(CliEntryPoint, () => {
         it('returns null', async () => {
             const testInput: ScanArguments = { output: '/users/xyz' };
             // tslint:disable-next-line: no-floating-promises
-            await testSubject.runScan(testInput).catch((error) => {
-                expect((error as Error).message).toEqual('You should provide either url or inputFile parameter only!');
-            });
+            await expect(testSubject.runScan(testInput)).rejects.toThrow(new Error('You should provide either url or inputFile parameter only!'));
         });
     });
 });
