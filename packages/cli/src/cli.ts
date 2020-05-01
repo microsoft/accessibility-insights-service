@@ -15,7 +15,7 @@ import { setupCliContainer } from './setup-cli-container';
         .usage('Usage: $0 --url <url> --inputFile <inputFile> --output <directoryPath>')
         .options({
             url: { type: 'string', describe: 'url to scan for accessibility' },
-            inputFile: { type: 'string', describe: 'ile path that contains multiple urls separated by newline to scan' },
+            inputFile: { type: 'string', describe: 'file path that contains multiple urls separated by newline to scan' },
             output: { type: 'string', describe: 'output directory' },
         })
         .check((args) => {
