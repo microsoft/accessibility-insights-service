@@ -10,7 +10,7 @@ import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 import * as fs from 'fs';
-import { isEmpty } from 'lodash';
+import { cloneDeep, isEmpty } from 'lodash';
 import { SummaryReportData } from '../report/summary-report/summary-report-data';
 import { ConsoleSummaryReportGenerator } from '../report/summary-report/console-summary-report-generator';
 import { JsonSummaryReportGenerator } from '../report/summary-report/json-summary-report-generator';
@@ -23,6 +23,8 @@ export class FileCommandRunner implements CommandRunner {
         urlToReportMap: {},
     } as SummaryReportData;
 
+    private uniqueUrls = new Set()
+
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
@@ -34,53 +36,48 @@ export class FileCommandRunner implements CommandRunner {
     }
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
-        const spinner = new Spinner(`Running scanner...`);
+        const spinner = new Spinner(`Running scanner...\n`);
         spinner.start();
+        const promises: any[] = [];
+
         try {
             const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'UTF-8').split(/\r?\n/);
 
             lines.forEach(async (line) => {
                 line = line.trim();
-                if (!isEmpty(line)) {
-                    console.log('1');
-                    const reportContent = await this.scanURL(line);
-                    console.log('2');
-                    const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, line, 'html', reportContent);
-                    console.log(`reportName ${reportName}`);
-                    this.summaryReportData.urlToReportMap[line] = reportName;
+                if (!isEmpty(line) && !this.uniqueUrls.has(line)) {
+                    this.uniqueUrls.add(line);
+                    promises.push(this.scanURL(line).then((reportContent)=>{
+                        const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, line, 'html', reportContent);
+                        this.summaryReportData.urlToReportMap[line] = reportName;
+                    }));
                 }
             });
         } finally {
             spinner.stop();
         }
 
-        console.log(`this.summaryReportData ${this.summaryReportData}`);
-        console.log(`this.summaryReportData.urlToReportMap ${this.summaryReportData.urlToReportMap}`)
-        console.log(`this.summaryReportData.violationCountByRuleMap ${this.summaryReportData.violationCountByRuleMap}`)
-        console.log(this.consoleSummaryReportGenerator.generateReport(this.summaryReportData));
-        const jsonSummryReportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, `ViolationCountByRuleMap_${new Date().toDateString()}`, 'json', this.jsonSummaryReportGenerator.generateReport(this.summaryReportData));
-        console.log(`ViolationCountByRuleMap was saved in file ${jsonSummryReportName}`)
+        Promise.all(promises).then(()=>{
+            console.log(this.consoleSummaryReportGenerator.generateReport(this.summaryReportData));
+            const jsonSummryReportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, `ViolationCountByRuleMap`, 'json', this.jsonSummaryReportGenerator.generateReport(this.summaryReportData));
+            console.log(`ViolationCountByRuleMap summary was saved in file ${jsonSummryReportName}`)
+        });
+        
     }
 
     private async scanURL(url: string): Promise<string> {
-        console.log(`Running scanner for ${url}...`);
         let axeResults: AxeScanResults;
 
-        console.log('11');
-        axeResults = await this.scanner.scan(url);
+        axeResults = await cloneDeep(this.scanner).scan(url);
 
         this.processURLScanResult(axeResults);
-        console.log('13');
         return this.reportGenerator.generateReport(axeResults);
     }
 
     private processURLScanResult(axeResults: AxeScanResults): void {
-        console.log('131');
-        // axeResults.results.violations?.forEach((violation) => {
-        //     console.log('132');
-        //     this.summaryReportData.violationCountByRuleMap[violation.id] =
-        //         (this.summaryReportData.violationCountByRuleMap[violation.id] ? this.summaryReportData.violationCountByRuleMap[violation.id] : 0) + 1;
-        // });
-        console.log('133');
+        axeResults?.results?.violations?.forEach((violation) => {
+            this.summaryReportData.violationCountByRuleMap[violation.id] =
+                (this.summaryReportData.violationCountByRuleMap[violation.id] ? this.summaryReportData.violationCountByRuleMap[violation.id] : 0) + 1;
+        });
     }
 }

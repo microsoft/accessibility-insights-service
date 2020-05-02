@@ -15,7 +15,7 @@ import { ConsoleSummaryReportGenerator } from './report/summary-report/console-s
 import { JsonSummaryReportGenerator } from './report/summary-report/json-summary-report-generator';
 export function setupCliContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
-    container.bind(AIScanner).toSelf().inSingletonScope();
+    container.bind(AIScanner).toSelf().inRequestScope();
     container.bind('ReporterFactory').toConstantValue(reporterFactory);
     container.bind(ReportGenerator).toSelf().inSingletonScope();
     container.bind(URLCommandRunner).toSelf().inSingletonScope();
