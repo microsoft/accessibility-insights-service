@@ -10,7 +10,7 @@ import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 import * as fs from 'fs';
-import { cloneDeep, isEmpty } from 'lodash';
+import * as lodash from 'lodash';
 import { SummaryReportData } from '../report/summary-report/summary-report-data';
 import { ConsoleSummaryReportGenerator } from '../report/summary-report/console-summary-report-generator';
 import { JsonSummaryReportGenerator } from '../report/summary-report/json-summary-report-generator';
@@ -32,6 +32,7 @@ export class FileCommandRunner implements CommandRunner {
         @inject(JsonSummaryReportGenerator) private readonly jsonSummaryReportGenerator: JsonSummaryReportGenerator,
         @inject(ConsoleSummaryReportGenerator) private readonly consoleSummaryReportGenerator: ConsoleSummaryReportGenerator,
         private readonly fileSystemObj: typeof fs = fs,
+        private readonly lodashObj: typeof lodash = lodash,
     ) {
     }
 
@@ -45,7 +46,7 @@ export class FileCommandRunner implements CommandRunner {
 
             lines.forEach(async (line) => {
                 line = line.trim();
-                if (!isEmpty(line) && !this.uniqueUrls.has(line)) {
+                if (!this.lodashObj.isEmpty(line) && !this.uniqueUrls.has(line)) {
                     this.uniqueUrls.add(line);
                     promises.push(this.scanURL(line).then((reportContent)=>{
                         const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, line, 'html', reportContent);
@@ -68,7 +69,7 @@ export class FileCommandRunner implements CommandRunner {
     private async scanURL(url: string): Promise<string> {
         let axeResults: AxeScanResults;
 
-        axeResults = await cloneDeep(this.scanner).scan(url);
+        axeResults = await this.lodashObj.cloneDeep(this.scanner).scan(url);
 
         this.processURLScanResult(axeResults);
         return this.reportGenerator.generateReport(axeResults);
