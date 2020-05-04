@@ -7,12 +7,12 @@ import { Browser } from 'puppeteer';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { ReportDiskWriter } from './report/report-disk-writer';
 import { ReportGenerator } from './report/report-generator';
+import { ConsoleSummaryReportGenerator } from './report/summary-report/console-summary-report-generator';
+import { JsonSummaryReportGenerator } from './report/summary-report/json-summary-report-generator';
 import { FileCommandRunner } from './runner/file-command-runner';
 import { URLCommandRunner } from './runner/url-command-runner';
 import { AIScanner } from './scanner/ai-scanner';
 import { WebDriver } from './web-driver/web-driver';
-import { ConsoleSummaryReportGenerator } from './report/summary-report/console-summary-report-generator';
-import { JsonSummaryReportGenerator } from './report/summary-report/json-summary-report-generator';
 export function setupCliContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     container.bind(AIScanner).toSelf().inSingletonScope();

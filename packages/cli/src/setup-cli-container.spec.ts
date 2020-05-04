@@ -5,12 +5,12 @@ import 'reflect-metadata';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { ReportDiskWriter } from './report/report-disk-writer';
 import { ReportGenerator } from './report/report-generator';
+import { ConsoleSummaryReportGenerator } from './report/summary-report/console-summary-report-generator';
+import { JsonSummaryReportGenerator } from './report/summary-report/json-summary-report-generator';
 import { FileCommandRunner } from './runner/file-command-runner';
 import { URLCommandRunner } from './runner/url-command-runner';
 import { AIScanner } from './scanner/ai-scanner';
 import { setupCliContainer } from './setup-cli-container';
-import { ConsoleSummaryReportGenerator } from './report/summary-report/console-summary-report-generator';
-import { JsonSummaryReportGenerator } from './report/summary-report/json-summary-report-generator';
 
 describe(setupCliContainer, () => {
     it('resolves dependencies', () => {

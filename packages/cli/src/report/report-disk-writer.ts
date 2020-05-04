@@ -8,7 +8,7 @@ import { ReportFormats } from './report-formats';
 
 @injectable()
 export class ReportDiskWriter {
-    constructor(private readonly fileSystemObj: typeof fs = fs) { }
+    constructor(private readonly fileSystemObj: typeof fs = fs) {}
 
     public writeToDirectory(directory: string, fileName: string, format: ReportFormats, content: string): string {
         if (isEmpty(directory)) {
@@ -20,7 +20,7 @@ export class ReportDiskWriter {
 
         try {
             reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
-        } catch{
+        } catch {
             reportFileName = `${directory}/${fileName}.${format}`;
         }
 

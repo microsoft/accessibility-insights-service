@@ -53,5 +53,6 @@ describe('URLCommandRunner', () => {
 
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
+        reportDiskWriterMock.verifyAll();
     });
 });
