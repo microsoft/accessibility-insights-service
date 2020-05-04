@@ -8,7 +8,8 @@
             "connectionStringSetting": "COSMOS_CONNECTION_STRING",
             "databaseName": "onDemandScanner",
             "collectionName": "scanBatchRequests",
-            "createLeaseCollectionIfNotExists": true
+            "createLeaseCollectionIfNotExists": true,
+            "startFromBeginning": true
         }
     ],
     "scriptFile": "../scan-batch-requests-feed-func/index.js"
