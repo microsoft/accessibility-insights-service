@@ -77,7 +77,7 @@ export class FileCommandRunner implements CommandRunner {
     private async scanURL(url: string): Promise<string> {
         let axeResults: AxeScanResults;
 
-        axeResults = await this.lodashObj.cloneDeep(this.scanner).scan(url);
+        axeResults = await (this.lodashObj.cloneDeep(this.scanner)).scan(url);
 
         this.processURLScanResult(axeResults);
 

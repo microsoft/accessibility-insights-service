@@ -43,13 +43,13 @@ describe('ReportDiskWriter', () => {
         fsMock.verifyAll();
     });
 
-    it('output directory does not exists', () => {
+    it('output directory does not exists/file name is not url', () => {
         const directory = '.';
-        const fileName = 'http://www.bing.com';
-        const format = 'html';
+        const fileName = 'file name';
+        const format = 'json';
         const content = 'content';
 
-        const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFileName = `${directory}/${fileName}.${format}`;
 
         fsMock
             .setup((fsm) => fsm.existsSync('.'))

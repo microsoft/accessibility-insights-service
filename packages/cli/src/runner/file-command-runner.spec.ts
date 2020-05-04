@@ -57,6 +57,15 @@ describe('FileCommandRunner', () => {
             );
         });
 
+        afterEach(() => {
+            fsMock.verifyAll();
+            scannerMock.verifyAll();
+            reportGeneratorMock.verifyAll();
+            reportDiskWriterMock.verifyAll();
+            jsonSummaryReportGeneratorMock.verifyAll();
+            consoleSummaryReportGeneratorMock.verifyAll();
+        });
+
         it('No Violation', async () => {
             const lines = 'https://www.url1.com';
             const jsonSummary = 'summary json';
@@ -102,8 +111,6 @@ describe('FileCommandRunner', () => {
                 .verifiable(Times.once());
 
             await testSubject.runCommand(testInput);
-
-            verifyMocks();
         });
 
         it('Violation, Duplication', async () => {
@@ -159,17 +166,6 @@ describe('FileCommandRunner', () => {
                 .verifiable(Times.once());
 
             await testSubject.runCommand(testInput);
-
-            verifyMocks();
         });
     });
-
-    function verifyMocks(): void {
-        fsMock.verifyAll();
-        scannerMock.verifyAll();
-        reportGeneratorMock.verifyAll();
-        reportDiskWriterMock.verifyAll();
-        jsonSummaryReportGeneratorMock.verifyAll();
-        consoleSummaryReportGeneratorMock.verifyAll();
-    }
 });
