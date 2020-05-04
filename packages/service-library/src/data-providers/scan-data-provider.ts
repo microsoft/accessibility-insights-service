@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
+import { CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 
@@ -20,6 +20,10 @@ export class ScanDataProvider {
         };
 
         await this.cosmosContainerClient.writeDocument(scanRunBatchRequest);
+    }
+
+    public async readAllScanBatchRequest(): Promise<CosmosOperationResponse<OnDemandPageScanBatchRequest[]>> {
+        return this.cosmosContainerClient.readAllDocument<OnDemandPageScanBatchRequest>();
     }
 
     public async deleteBatchRequest(request: OnDemandPageScanBatchRequest): Promise<void> {
