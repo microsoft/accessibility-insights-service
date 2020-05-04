@@ -7,13 +7,15 @@ import { BatchScanRequestMeasurements, ContextAwareLogger } from 'logger';
 import {
     ApiController,
     HttpResponse,
-    ScanDataProvider,
+    OnDemandPageScanRunResultProvider,
+    PageScanRequestProvider,
+    PartitionKeyFactory,
     ScanRunRequest,
     ScanRunResponse,
     WebApiError,
     WebApiErrorCodes,
 } from 'service-library';
-import { ScanRunBatchRequest } from 'storage-documents';
+import { ItemType, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey, ScanRunBatchRequest } from 'storage-documents';
 
 interface ProcessedBatchRequestData {
     scanRequestsToBeStoredInDb: ScanRunBatchRequest[];
@@ -32,7 +34,9 @@ export class ScanRequestController extends ApiController {
     private config: RestApiConfig;
 
     public constructor(
-        @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
+        @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
+        @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
@@ -51,14 +55,17 @@ export class ScanRequestController extends ApiController {
             return;
         }
 
-        if (payload.length > this.config.maxScanRequestBatchCount) {
+        if (payload.length > 1) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
 
             return;
         }
         const batchId = this.guidGenerator.createGuid();
         const processedData = this.getProcessedRequestData(batchId, payload);
-        await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
+
+        await this.writeRequestsToPermanentContainer(processedData.scanRequestsToBeStoredInDb, batchId);
+        await this.writeRequestsToQueueContainer(processedData.scanRequestsToBeStoredInDb);
+
         this.context.res = {
             status: 202, // Accepted
             body: this.getResponse(processedData),
@@ -83,6 +90,56 @@ export class ScanRequestController extends ApiController {
 
         // tslint:disable-next-line: no-null-keyword
         this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
+    }
+
+    private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
+        const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
+            return {
+                id: request.scanId,
+                url: request.url,
+                priority: request.priority,
+                itemType: ItemType.onDemandPageScanRunResult,
+                partitionKey: this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, request.scanId),
+                run: {
+                    state: 'accepted',
+                    timestamp: new Date().toJSON(),
+                },
+                batchRequestId: batchRequestId,
+                ...(isEmpty(request.scanNotifyUrl)
+                    ? {}
+                    : {
+                          notification: {
+                              state: 'pending',
+                              scanNotifyUrl: request.scanNotifyUrl,
+                          },
+                      }),
+            };
+        });
+
+        if (requestDocuments.length > 0) {
+            await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
+            this.logger.logInfo(`[ScanRequestController] Added requests to permanent container`);
+        }
+    }
+
+    private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[]): Promise<void> {
+        const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
+            const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
+
+            return {
+                id: request.scanId,
+                url: request.url,
+                priority: request.priority,
+                itemType: ItemType.onDemandPageScanRequest,
+                partitionKey: PartitionKey.pageScanRequestDocuments,
+                ...scanNotifyUrl,
+            };
+        });
+
+        if (requestDocuments.length > 0) {
+            await this.pageScanRequestProvider.insertRequests(requestDocuments);
+            this.logger.logInfo(`[ScanRequestController] Added requests to queue container`);
+        }
     }
 
     private getResponse(processedData: ProcessedBatchRequestData): ScanRunResponse | ScanRunResponse[] {
@@ -117,7 +174,8 @@ export class ScanRequestController extends ApiController {
         const scanRequestsToBeStoredInDb: ScanRunBatchRequest[] = [];
         const scanResponses: ScanRunResponse[] = [];
 
-        scanRunRequests.forEach((scanRunRequest) => {
+        if (scanRunRequests.length > 0) {
+            const scanRunRequest = scanRunRequests[0];
             const runRequestValidationResult = this.validateRunRequest(scanRunRequest);
             if (runRequestValidationResult.valid) {
                 // preserve GUID origin for a single batch scope
@@ -139,7 +197,7 @@ export class ScanRequestController extends ApiController {
                     error: runRequestValidationResult.error,
                 });
             }
-        });
+        }
 
         return {
             scanRequestsToBeStoredInDb: scanRequestsToBeStoredInDb,

@@ -5,9 +5,17 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { BatchScanRequestMeasurements } from 'logger';
-import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
-import { ScanRunBatchRequest } from 'storage-documents';
-import { IMock, It, Mock, Times } from 'typemoq';
+import * as MockDate from 'mockdate';
+import {
+    HttpResponse,
+    OnDemandPageScanRunResultProvider,
+    PageScanRequestProvider,
+    PartitionKeyFactory,
+    ScanRunResponse,
+    WebApiErrorCodes,
+} from 'service-library';
+import { ItemType, OnDemandPageScanRequest, OnDemandPageScanResult } from 'storage-documents';
+import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
 import { ScanRequestController } from './scan-request-controller';
@@ -21,12 +29,18 @@ interface DataItem {
 describe(ScanRequestController, () => {
     let scanRequestController: ScanRequestController;
     let context: Context;
-    let scanDataProviderMock: IMock<ScanDataProvider>;
+    let pageScanRequestProviderMock: IMock<PageScanRequestProvider>;
+    let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
+    let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
+    let dateNow: Date;
 
     beforeEach(() => {
+        dateNow = new Date(2020, 7, 1);
+        MockDate.set(dateNow);
+
         context = <Context>(<unknown>{
             req: {
                 method: 'POST',
@@ -38,10 +52,18 @@ describe(ScanRequestController, () => {
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
 
-        scanDataProviderMock = Mock.ofType<ScanDataProvider>();
-        scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(It.isAny(), It.isAny()));
+        pageScanRequestProviderMock = Mock.ofType<PageScanRequestProvider>(PageScanRequestProvider, MockBehavior.Strict);
+        onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>(
+            OnDemandPageScanRunResultProvider,
+            MockBehavior.Strict,
+        );
+        partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
 
         guidGeneratorMock = Mock.ofType(GuidGenerator);
+
+        partitionKeyFactoryMock
+            .setup((p) => p.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, It.isAny()))
+            .returns((docType, id) => `pk-${id}`);
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();
         serviceConfigurationMock
@@ -57,9 +79,19 @@ describe(ScanRequestController, () => {
         loggerMock = Mock.ofType<MockableLogger>();
     });
 
+    afterEach(() => {
+        partitionKeyFactoryMock.verifyAll();
+        onDemandPageScanRunResultProviderMock.verifyAll();
+        partitionKeyFactoryMock.verifyAll();
+        loggerMock.verifyAll();
+        MockDate.reset();
+    });
+
     function createScanRequestController(contextReq: Context): ScanRequestController {
         const controller = new ScanRequestController(
-            scanDataProviderMock.object,
+            pageScanRequestProviderMock.object,
+            onDemandPageScanRunResultProviderMock.object,
+            partitionKeyFactoryMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
@@ -92,30 +124,36 @@ describe(ScanRequestController, () => {
             expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
         });
 
-        it('accepts valid request only', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+        test.each([
+            {
+                request: { url: '/invalid/url' },
+                response: { url: '/invalid/url', error: WebApiErrorCodes.invalidURL.error },
+            },
+            {
+                request: { url: 'https://cde/path/', priority: 9999 },
+                response: { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
+            },
+        ])('accepts valid request only %o', async (testCase) => {
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
 
-            context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' }, // valid request
-                { url: '/invalid/url' }, // invalid URL
-                { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
-            ]);
-            const expectedResponse = [
-                { scanId: guid2, url: 'https://abs/path/' },
-                { url: '/invalid/url', error: WebApiErrorCodes.invalidURL.error },
-                { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
-            ];
-            const expectedSavedRequest: ScanRunBatchRequest[] = [
-                { scanId: guid2, url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' },
-            ];
-            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            context.req.rawBody = JSON.stringify([testCase.request]);
+            const expectedResponse = [testCase.response];
 
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
+
+            const expectedMeasurements: BatchScanRequestMeasurements = {
+                totalScanRequests: 1,
+                acceptedScanRequests: 0,
+                rejectedScanRequests: 1,
+            };
+
+            // tslint:disable-next-line: no-null-keyword
+            loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
 
             // normalize random result order
             const expectedResponseSorted = sortData(expectedResponse);
@@ -123,84 +161,40 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(202);
             expect(responseSorted).toEqual(expectedResponseSorted);
-            scanDataProviderMock.verifyAll();
-            guidGeneratorMock.verifyAll();
         });
 
         it('accepts request with priority', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
             const priority = 10;
+            const url = 'https://abs/path/';
 
-            context.req.rawBody = JSON.stringify([{ url: 'https://abs/path/', priority: priority }]);
-            const expectedResponse = [{ scanId: guid2, url: 'https://abs/path/' }];
-            const expectedSavedRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
 
-            scanRequestController = createScanRequestController(context);
-
-            await scanRequestController.handleRequest();
-
-            expect(context.res.status).toEqual(202);
-            expect(context.res.body).toEqual(expectedResponse);
-            scanDataProviderMock.verifyAll();
-            guidGeneratorMock.verifyAll();
-        });
-
-        it('sends telemetry event', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
-
-            context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: 1 }, // valid request
-                { url: '/invalid/url' }, // invalid URL
-                { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
-            ]);
+            context.req.rawBody = JSON.stringify([{ url: url, priority: priority }]);
+            const expectedResponse = [{ scanId: scanGuid, url: url }];
 
             const expectedMeasurements: BatchScanRequestMeasurements = {
-                totalScanRequests: 3,
+                totalScanRequests: 1,
                 acceptedScanRequests: 1,
-                rejectedScanRequests: 2,
+                rejectedScanRequests: 0,
             };
 
             // tslint:disable-next-line: no-null-keyword
             loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
 
-            scanRequestController = createScanRequestController(context);
-            await scanRequestController.handleRequest();
+            const expectedPageScanResults = [getOnDemandScanBatchResultDocument(scanGuid, batchGuid, url, priority)];
+            onDemandPageScanRunResultProviderMock
+                .setup((o) => o.writeScanRuns(expectedPageScanResults))
+                .returns(() => Promise.resolve())
+                .verifiable();
 
-            loggerMock.verifyAll();
-        });
-
-        it('v1.0 accepts an array', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            const guid3 = '1e9cefa6-538a-6df0-dddd-ffffffffffff';
-
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid3);
-
-            const priority = 10;
-
-            context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: priority },
-                { url: 'https://bing.com/path/', priority: priority },
-            ]);
-            const expectedResponse = [
-                { scanId: guid2, url: 'https://abs/path/' },
-                { scanId: guid3, url: 'https://bing.com/path/' },
-            ];
-
-            const expectedSaveRequest: ScanRunBatchRequest[] = [
-                { scanId: guid2, url: 'https://abs/path/', priority: priority },
-                { scanId: guid3, url: 'https://bing.com/path/', priority: priority },
-            ];
-            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            const expectedPageScanRequests = [getOnDemandPageScanRequestDocument(scanGuid, url, priority)];
+            pageScanRequestProviderMock
+                .setup((o) => o.insertRequests(expectedPageScanRequests))
+                .returns(() => Promise.resolve())
+                .verifiable();
 
             scanRequestController = createScanRequestController(context);
 
@@ -208,26 +202,108 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(202);
             expect(context.res.body).toEqual(expectedResponse);
-            scanDataProviderMock.verifyAll();
+        });
+
+        it('accepts request with notification url', async () => {
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const priority = 10;
+            const url = 'https://abs/path/';
+            const scanNotifyUrl = 'https://scan-notfiy-url';
+
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
+
+            context.req.rawBody = JSON.stringify([{ url: url, priority: priority, scanNotifyUrl: scanNotifyUrl }]);
+            const expectedResponse = [{ scanId: scanGuid, url: url }];
+
+            const expectedMeasurements: BatchScanRequestMeasurements = {
+                totalScanRequests: 1,
+                acceptedScanRequests: 1,
+                rejectedScanRequests: 0,
+            };
+
+            // tslint:disable-next-line: no-null-keyword
+            loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+
+            const expectedPageScanResults = [getOnDemandScanBatchResultDocument(scanGuid, batchGuid, url, priority, scanNotifyUrl)];
+            onDemandPageScanRunResultProviderMock
+                .setup((o) => o.writeScanRuns(expectedPageScanResults))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            const expectedPageScanRequests = [getOnDemandPageScanRequestDocument(scanGuid, url, priority, scanNotifyUrl)];
+            pageScanRequestProviderMock
+                .setup((o) => o.insertRequests(expectedPageScanRequests))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
+        it('v1.0 accepts an array', async () => {
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const url = 'https://abs/path/';
+            const priority = 10;
+
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
+
+            context.req.rawBody = JSON.stringify([{ url: url, priority: priority }]);
+            const expectedResponse = [{ scanId: scanGuid, url: url }];
+
+            const expectedPageScanRequestDocuments = [getOnDemandPageScanRequestDocument(scanGuid, 'https://abs/path/', priority)];
+            pageScanRequestProviderMock
+                .setup((o) => o.insertRequests(expectedPageScanRequestDocuments))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            const expectedPageScanResults = [getOnDemandScanBatchResultDocument(scanGuid, batchGuid, url, priority)];
+            onDemandPageScanRunResultProviderMock
+                .setup((o) => o.writeScanRuns(expectedPageScanResults))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
             guidGeneratorMock.verifyAll();
         });
 
         it('v2.0 accepts a single url', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const priority = 10;
+            const url = 'https://abs/path/';
 
             context.req.query['api-version'] = '2.0';
 
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
 
-            const priority = 10;
+            context.req.rawBody = JSON.stringify({ url: url, priority: priority });
+            const expectedResponse = { scanId: scanGuid, url: url };
 
-            context.req.rawBody = JSON.stringify({ url: 'https://abs/path/', priority: priority });
-            const expectedResponse = { scanId: guid2, url: 'https://abs/path/' };
+            const expectedPageScanRequests = [getOnDemandPageScanRequestDocument(scanGuid, url, priority)];
+            pageScanRequestProviderMock
+                .setup((o) => o.insertRequests(expectedPageScanRequests))
+                .returns(() => Promise.resolve())
+                .verifiable();
 
-            const expectedSaveRequest: ScanRunBatchRequest[] = [{ scanId: guid2, url: 'https://abs/path/', priority: priority }];
-            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+            const expectedPageScanResults = [getOnDemandScanBatchResultDocument(scanGuid, batchGuid, url, priority)];
+            onDemandPageScanRunResultProviderMock
+                .setup((o) => o.writeScanRuns(expectedPageScanResults))
+                .returns(() => Promise.resolve())
+                .verifiable();
 
             scanRequestController = createScanRequestController(context);
 
@@ -235,11 +311,10 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(202);
             expect(context.res.body).toEqual(expectedResponse);
-            scanDataProviderMock.verifyAll();
             guidGeneratorMock.verifyAll();
         });
 
-        it('v2.0 accepts does not accept an array', async () => {
+        it('v2.0 does not accept an array', async () => {
             context.req.query['api-version'] = '2.0';
             const priority = 10;
 
@@ -251,5 +326,70 @@ describe(ScanRequestController, () => {
             expect(context.res.status).toEqual(400);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
         });
+
+        it('does not accept more than one request', async () => {
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([
+                { url: 'https://abs/path/', priority: priority },
+                { url: 'https://abs/path2/', priority: priority },
+            ]);
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge));
+        });
     });
+
+    function getOnDemandScanBatchResultDocument(
+        scanId: string,
+        batchId: string,
+        url: string,
+        priority: number,
+        notificationUrl?: string,
+    ): OnDemandPageScanResult {
+        const doc: OnDemandPageScanResult = {
+            id: scanId,
+            url: url,
+            priority: priority,
+            itemType: ItemType.onDemandPageScanRunResult,
+            partitionKey: `pk-${scanId}`,
+            run: {
+                state: 'accepted',
+                timestamp: dateNow.toJSON(),
+            },
+            batchRequestId: batchId,
+        };
+
+        if (notificationUrl !== undefined) {
+            doc.notification = {
+                state: 'pending',
+                scanNotifyUrl: notificationUrl,
+            };
+        }
+
+        return doc;
+    }
+
+    function getOnDemandPageScanRequestDocument(
+        scanId: string,
+        url: string,
+        priority: number,
+        notificationUrl?: string,
+    ): OnDemandPageScanRequest {
+        const doc: OnDemandPageScanRequest = {
+            id: scanId,
+            url: 'https://abs/path/',
+            priority: priority,
+            itemType: ItemType.onDemandPageScanRequest,
+            partitionKey: 'pageScanRequestDocuments',
+        };
+
+        if (notificationUrl !== undefined) {
+            doc.scanNotifyUrl = notificationUrl;
+        }
+
+        return doc;
+    }
 });
