@@ -5,7 +5,7 @@ name: $(Build.SourceBranchName)_$(Date:yyyyMMdd)$(Rev:.r)
 jobs:
     - job: 'BuildArtifactsAndRunSomeTests'
       pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
           demands: npm
       steps:
           - template: ./azure-pipeline/build-artifacts-and-run-tests-job.yaml
@@ -13,7 +13,7 @@ jobs:
 
     - job: 'RunRemainingTests'
       pool:
-          vmImage: 'ubuntu-16.04'
+          vmImage: 'ubuntu-18.04'
           demands: npm
       steps:
           - template: ./azure-pipeline/run-tests-job.yaml

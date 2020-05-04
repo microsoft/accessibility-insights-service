@@ -18,7 +18,7 @@ You can use the following PowerShell commands to accept the Azure Marketplace le
 ```PowerShell
 Add-AzureRmAccount
 Set-AzureRmContext -SubscriptionId <The name or id of the subscription> -TenantId <Tenant name or ID>
-Get-AzureRmMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-server-container' -Name '16-04-lts' | Set-AzureRmMarketplaceTerms -Accept
+Get-AzureRmMarketplaceTerms -Publisher 'microsoft-azure-batch' -Product 'ubuntu-server-container' -Name '18-04-lts' | Set-AzureRmMarketplaceTerms -Accept
 ```
 
 ### 2. Clone the repository
