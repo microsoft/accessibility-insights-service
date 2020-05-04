@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { registerAzureServicesToContainer } from 'azure-services';
 import { Container, inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { registerGlobalLoggerToContainer, registerContextAwareLoggerToContainer } from 'logger';
+import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
 import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider } from '.';
 import { ScanDataProvider } from './data-providers/scan-data-provider';
@@ -26,13 +26,15 @@ export class MigrateDocuments {
             await this.writeRequestsToPermanentContainer(item);
             await this.writeRequestsToQueueContainer(item);
             await this.scanDataProvider.deleteBatchRequest(item);
+
+            console.log(`Added requests to permanent container for batch request id -`, item);
         }
     }
 
-    private async writeRequestsToPermanentContainer(request: OnDemandPageScanBatchRequest): Promise<void> {
-        const scanRequest = request.scanRunBatchRequest[0];
+    private async writeRequestsToPermanentContainer(batchRequest: OnDemandPageScanBatchRequest): Promise<void> {
+        const scanRequest = batchRequest.scanRunBatchRequest[0];
         const requestDocument: OnDemandPageScanResult = {
-            id: request.id,
+            id: scanRequest.scanId,
             url: scanRequest.url,
             priority: scanRequest.priority,
             itemType: ItemType.onDemandPageScanRunResult,
@@ -41,7 +43,7 @@ export class MigrateDocuments {
                 state: 'accepted',
                 timestamp: new Date().toJSON(),
             },
-            batchRequestId: request.id,
+            batchRequestId: batchRequest.id,
             ...(isEmpty(scanRequest.scanNotifyUrl)
                 ? {}
                 : {
@@ -52,11 +54,11 @@ export class MigrateDocuments {
                   }),
         };
         await this.onDemandPageScanRunResultProvider.writeScanRuns([requestDocument]);
-        console.log(`Added requests to permanent container`);
+        console.log(`Added requests to permanent container for scan request id - ${scanRequest.scanId}`);
     }
 
-    private async writeRequestsToQueueContainer(request: OnDemandPageScanBatchRequest): Promise<void> {
-        const scanRequest = request.scanRunBatchRequest[0];
+    private async writeRequestsToQueueContainer(batchRequest: OnDemandPageScanBatchRequest): Promise<void> {
+        const scanRequest = batchRequest.scanRunBatchRequest[0];
         const scanNotifyUrl = isEmpty(scanRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRequest.scanNotifyUrl };
 
         const requestDocument: OnDemandPageScanRequest = {
@@ -69,7 +71,7 @@ export class MigrateDocuments {
         };
 
         await this.pageScanRequestProvider.insertRequests([requestDocument]);
-        console.log(`Added requests to queue container`);
+        console.log(`Added requests to queue container scan request id -  ${scanRequest.scanId}`);
     }
 }
 
