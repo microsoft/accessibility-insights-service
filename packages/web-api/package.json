@@ -48,7 +48,8 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.8.3",
         "webpack": "^4.43.0",
-        "webpack-cli": "^3.2.3"
+        "webpack-cli": "^3.2.3",
+        "mockdate": "^2.0.5"
     },
     "dependencies": {
         "azure-services": "1.0.0",

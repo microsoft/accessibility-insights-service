@@ -204,6 +204,48 @@ describe(ScanRequestController, () => {
             expect(context.res.body).toEqual(expectedResponse);
         });
 
+        it('accepts request with notification url', async () => {
+            const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            const priority = 10;
+            const url = 'https://abs/path/';
+            const scanNotifyUrl = 'https://scan-notfiy-url';
+
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => batchGuid);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(batchGuid)).returns(() => scanGuid);
+
+            context.req.rawBody = JSON.stringify([{ url: url, priority: priority, scanNotifyUrl: scanNotifyUrl }]);
+            const expectedResponse = [{ scanId: scanGuid, url: url }];
+
+            const expectedMeasurements: BatchScanRequestMeasurements = {
+                totalScanRequests: 1,
+                acceptedScanRequests: 1,
+                rejectedScanRequests: 0,
+            };
+
+            // tslint:disable-next-line: no-null-keyword
+            loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+
+            const expectedPageScanResults = [getOnDemandScanBatchResultDocument(scanGuid, batchGuid, url, priority, scanNotifyUrl)];
+            onDemandPageScanRunResultProviderMock
+                .setup((o) => o.writeScanRuns(expectedPageScanResults))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            const expectedPageScanRequests = [getOnDemandPageScanRequestDocument(scanGuid, url, priority, scanNotifyUrl)];
+            pageScanRequestProviderMock
+                .setup((o) => o.insertRequests(expectedPageScanRequests))
+                .returns(() => Promise.resolve())
+                .verifiable();
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
+        });
+
         it('v1.0 accepts an array', async () => {
             const batchGuid = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const scanGuid = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
@@ -300,10 +342,16 @@ describe(ScanRequestController, () => {
         });
     });
 
-    function getOnDemandScanBatchResultDocument(scanId: string, batchId: string, url: string, priority: number): OnDemandPageScanResult {
-        return {
+    function getOnDemandScanBatchResultDocument(
+        scanId: string,
+        batchId: string,
+        url: string,
+        priority: number,
+        notificationUrl?: string,
+    ): OnDemandPageScanResult {
+        const doc: OnDemandPageScanResult = {
             id: scanId,
-            url: 'https://abs/path/',
+            url: url,
             priority: priority,
             itemType: ItemType.onDemandPageScanRunResult,
             partitionKey: `pk-${scanId}`,
@@ -313,15 +361,35 @@ describe(ScanRequestController, () => {
             },
             batchRequestId: batchId,
         };
+
+        if (notificationUrl !== undefined) {
+            doc.notification = {
+                state: 'pending',
+                scanNotifyUrl: notificationUrl,
+            };
+        }
+
+        return doc;
     }
 
-    function getOnDemandPageScanRequestDocument(scanId: string, url: string, priority: number): OnDemandPageScanRequest {
-        return {
+    function getOnDemandPageScanRequestDocument(
+        scanId: string,
+        url: string,
+        priority: number,
+        notificationUrl?: string,
+    ): OnDemandPageScanRequest {
+        const doc: OnDemandPageScanRequest = {
             id: scanId,
             url: 'https://abs/path/',
             priority: priority,
             itemType: ItemType.onDemandPageScanRequest,
             partitionKey: 'pageScanRequestDocuments',
         };
+
+        if (notificationUrl !== undefined) {
+            doc.scanNotifyUrl = notificationUrl;
+        }
+
+        return doc;
     }
 });
