@@ -9,7 +9,8 @@
             "databaseName": "onDemandScanner",
             "collectionName": "scanBatchRequests",
             "createLeaseCollectionIfNotExists": true,
-            "startFromBeginning": true
+            "startFromBeginning": true,
+            "maxItemsPerInvocation": 10
         }
     ],
     "scriptFile": "../scan-batch-requests-feed-func/index.js"
