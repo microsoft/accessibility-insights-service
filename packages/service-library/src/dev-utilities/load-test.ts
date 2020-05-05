@@ -59,11 +59,16 @@ async function runLoadTest(): Promise<void> {
     let successfulRequests = 0;
     let errorRequests = 0;
     const requestOptions = getRequestOptions();
+    const responseCountByStatusCode: { [key: number]: number } = {};
 
     const submitRequest = async () => {
         try {
             const response = await nodeFetch.default(inputArgs.requestUrl, requestOptions);
             successfulRequests += 1;
+            responseCountByStatusCode[response.status] = responseCountByStatusCode[response.status]
+                ? responseCountByStatusCode[response.status] + 1
+                : 1;
+
             console.log(`received response with status ${response.status}`);
             console.log(`Response body ${await response.text()}`);
         } catch (error) {
@@ -80,7 +85,8 @@ async function runLoadTest(): Promise<void> {
     await Promise.all(promises);
 
     console.log(`Total Requests Submitted: ${inputArgs.maxLoad}`);
-    console.log(`Successful Requests ${successfulRequests}`);
+    console.log(`Completed Requests ${successfulRequests}`);
+    console.log('Completed Request count by status code', responseCountByStatusCode);
     console.log(`Failed Requests ${errorRequests}`);
 }
 
