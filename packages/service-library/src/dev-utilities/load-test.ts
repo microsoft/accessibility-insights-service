@@ -29,7 +29,6 @@ function setupInputArgsExpectation(): void {
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('scanNotifyUrl', {
         alias: 'n',
-        demandOption: true,
     });
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('adAuthToken', {
@@ -50,7 +49,7 @@ function getRequestOptions(): nodeFetch.RequestInit {
         {
             url: 'https://www.bing.com',
             priority: 1,
-            scanNotifyUrl: process.env.scanNotifyUrl,
+            scanNotifyUrl: inputArgs.scanNotifyUrl,
         },
     ]);
 
