@@ -1,8 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as yargs from 'yargs';
 import * as nodeFetch from 'node-fetch';
+import * as yargs from 'yargs';
+
+setupInputArgsExpectation();
+const inputArgs = yargs.argv as yargs.Arguments<LoadTestArgs>;
+console.log('Input args passed', inputArgs);
 
 type LoadTestArgs = {
     scanNotifyUrl: string;
@@ -11,33 +15,34 @@ type LoadTestArgs = {
     maxLoad: number;
 };
 
-yargs.option('maxLoad', {
-    alias: 'l',
-    default: 10,
-});
+function setupInputArgsExpectation(): void {
+    yargs.option<keyof LoadTestArgs, yargs.Options>('maxLoad', {
+        alias: 'l',
+        default: 10,
+        type: 'number',
+    });
 
-yargs.option('requestUrl', {
-    alias: 'r',
-});
+    yargs.option<keyof LoadTestArgs, yargs.Options>('requestUrl', {
+        alias: 'r',
+        demandOption: true,
+    });
 
-yargs.option('scanNotifyUrl', {
-    alias: 'n',
-});
+    yargs.option<keyof LoadTestArgs, yargs.Options>('scanNotifyUrl', {
+        alias: 'n',
+        demandOption: true,
+    });
 
-yargs.option('adAuthToken', {
-    alias: 't',
-    default: process.env.adAuthToken,
-    description: 'AD Auth token. Can be created using Postman. Either pass via command line or set env variable - adAuthToken',
-});
-
-yargs.demandOption(['requestUrl', 'adAuthToken']);
-const inputArgs = yargs.argv as yargs.Arguments<LoadTestArgs>;
-
-console.log('Input args passed', inputArgs);
+    yargs.option<keyof LoadTestArgs, yargs.Options>('adAuthToken', {
+        alias: 't',
+        default: process.env.adAuthToken,
+        demandOption: true,
+        description: 'AD Auth token. Can be created using Postman. Either pass via command line or set env variable - adAuthToken',
+    });
+}
 
 function getRequestOptions(): nodeFetch.RequestInit {
-    const myHeaders: { [key: string]: any } = {
-        'Content-Type': ['application/json'],
+    const myHeaders: nodeFetch.HeaderInit = {
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${inputArgs.adAuthToken}`,
     };
 
@@ -68,9 +73,7 @@ async function runLoadTest(): Promise<void> {
         try {
             const response = await nodeFetch.default(inputArgs.requestUrl, requestOptions);
             successfulRequests += 1;
-            responseCountByStatusCode[response.status] = responseCountByStatusCode[response.status]
-                ? responseCountByStatusCode[response.status] + 1
-                : 1;
+            responseCountByStatusCode[response.status] = (responseCountByStatusCode[response.status] ?? 0) + 1;
 
             console.log(`received response with status ${response.status}`);
             console.log(`Response body ${await response.text()}`);
