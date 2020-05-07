@@ -57,14 +57,15 @@
         "axe-puppeteer": "^1.1.0",
         "cli-spinner": "^0.2.10",
         "dotenv": "^8.2.0",
-        "filenamify-url": "2.1.1",
+        "filenamify-url": "^2.1.1",
+        "filenamify": "^4.1.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
         "puppeteer": "^3.0.4",
         "react-helmet": "^6.0.0",
         "reflect-metadata": "^0.1.13",
-        "yargs": "^15.3.1",
-        "table": "^5.4.6"
+        "table": "^5.4.6",
+        "yargs": "^15.3.1"
     },
     "bin": {
         "ai-scan": "dist/ai-scan-cli.js"
