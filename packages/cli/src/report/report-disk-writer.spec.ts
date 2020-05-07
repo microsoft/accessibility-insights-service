@@ -23,14 +23,15 @@ describe('ReportDiskWriter', () => {
         const format = 'html';
         const content = 'content';
 
-        const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFilePath = `${directory}/${reportFileName}`;
 
         fsMock
             .setup((fsm) => fsm.existsSync('.'))
             .returns(() => true)
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.writeFileSync(reportFileName, content))
+            .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
@@ -38,7 +39,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.never());
 
-        testSubject.writeToDirectory(directory, fileName, format, content);
+        expect(testSubject.writeToDirectory(directory, fileName, format, content)).toEqual(reportFileName);
 
         fsMock.verifyAll();
     });
@@ -49,14 +50,14 @@ describe('ReportDiskWriter', () => {
         const format = 'json';
         const content = 'content';
 
-        const reportFileName = `${directory}/${fileName}.${format}`;
-
+        const reportFileName = `${fileName}.${format}`;
+        const reportFilePath = `${directory}/${reportFileName}`;
         fsMock
             .setup((fsm) => fsm.existsSync('.'))
             .returns(() => false)
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.writeFileSync(reportFileName, content))
+            .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
@@ -64,7 +65,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
 
-        testSubject.writeToDirectory(directory, fileName, format, content);
+        expect(testSubject.writeToDirectory(directory, fileName, format, content)).toEqual(reportFileName);
 
         fsMock.verifyAll();
     });
@@ -75,14 +76,15 @@ describe('ReportDiskWriter', () => {
         const format = 'html';
         const content = 'content';
 
-        const reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFilePath = `${directory}/${reportFileName}`;
 
         fsMock
             .setup((fsm) => fsm.existsSync('.'))
             .returns(() => false)
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.writeFileSync(reportFileName, content))
+            .setup((fsm) => fsm.writeFileSync(reportFilePath, content))
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
@@ -90,7 +92,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
 
-        testSubject.writeToDirectory('', fileName, format, content);
+        expect(testSubject.writeToDirectory('', fileName, format, content)).toEqual(reportFileName);
 
         fsMock.verifyAll();
     });

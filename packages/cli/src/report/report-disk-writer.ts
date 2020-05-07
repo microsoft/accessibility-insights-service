@@ -20,9 +20,9 @@ export class ReportDiskWriter {
         let reportFileName;
 
         try {
-            reportFileName = `${directory}/${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
+            reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
         } catch {
-            reportFileName = `${directory}/${filenamify(fileName, { replacement: '_' })}.${format}`;
+            reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
         }
 
         if (!this.fileSystemObj.existsSync(directory)) {
@@ -31,7 +31,7 @@ export class ReportDiskWriter {
             this.fileSystemObj.mkdirSync(directory);
         }
 
-        this.fileSystemObj.writeFileSync(reportFileName, content);
+        this.fileSystemObj.writeFileSync(`${directory}/${reportFileName}`, content);
 
         return reportFileName;
     }
