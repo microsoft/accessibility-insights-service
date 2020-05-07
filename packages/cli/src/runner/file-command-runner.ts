@@ -39,7 +39,7 @@ export class FileCommandRunner implements CommandRunner {
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
-        const spinner = new Spinner(`Running scanner...\n`);
+        const spinner = new Spinner(`Running scanner... %s \t`);
         spinner.start();
         // tslint:disable-next-line: no-any
         let promise = Promise.resolve();
