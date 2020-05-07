@@ -32,29 +32,29 @@ export class FileCommandRunner implements CommandRunner {
         @inject(JsonSummaryReportGenerator) private readonly jsonSummaryReportGenerator: JsonSummaryReportGenerator,
         @inject(ConsoleSummaryReportGenerator) private readonly consoleSummaryReportGenerator: ConsoleSummaryReportGenerator,
         private readonly fileSystemObj: typeof fs = fs,
-        private readonly lodashObj: typeof lodash = lodash,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
         const spinner = new Spinner(`Running scanner...\n`);
         spinner.start();
         // tslint:disable-next-line: no-any
-        const promises: any[] = [];
+        let promise = Promise.resolve();
 
         try {
             const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'UTF-8').split(/\r?\n/);
 
-            lines.forEach(async (line) => {
+            lines.forEach((line) => {
                 // tslint:disable-next-line: no-parameter-reassignment
                 line = line.trim();
-                if (!this.lodashObj.isEmpty(line) && !this.uniqueUrls.has(line)) {
+                if (!lodash.isEmpty(line) && !this.uniqueUrls.has(line)) {
                     this.uniqueUrls.add(line);
-                    promises.push(
-                        this.scanURL(line).then((reportContent) => {
+                    // tslint:disable-next-line: promise-function-async
+                    promise = promise.then(() => {
+                        return this.scanURL(line).then((reportContent) => {
                             const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, line, 'html', reportContent);
                             this.summaryReportData.urlToReportMap[line] = reportName;
-                        }),
-                    );
+                        });
+                    });
                 }
             });
         } finally {
@@ -62,7 +62,7 @@ export class FileCommandRunner implements CommandRunner {
         }
 
         // tslint:disable-next-line: no-floating-promises
-        Promise.all(promises).then(() => {
+        promise.then(() => {
             console.log(this.consoleSummaryReportGenerator.generateReport(this.summaryReportData));
             const jsonSummryReportName = this.reportDiskWriter.writeToDirectory(
                 scanArguments.output,
@@ -77,7 +77,7 @@ export class FileCommandRunner implements CommandRunner {
     private async scanURL(url: string): Promise<string> {
         let axeResults: AxeScanResults;
 
-        axeResults = await this.lodashObj.cloneDeep(this.scanner).scan(url);
+        axeResults = await this.scanner.scan(url);
 
         this.processURLScanResult(axeResults);
 

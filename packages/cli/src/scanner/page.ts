@@ -21,7 +21,7 @@ export class Page {
     ) {}
 
     public async create(chromePath?: string): Promise<void> {
-        if (isEmpty(this.browser)) {
+        if (isEmpty(this.browser) || !this.browser.isConnected()) {
             this.browser = await this.webDriver.launch(chromePath);
         }
         this.puppeteerPage = await this.browser.newPage();

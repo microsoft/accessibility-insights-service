@@ -5,7 +5,6 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import * as fs from 'fs';
-import * as lodash from 'lodash';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
@@ -22,8 +21,6 @@ describe('FileCommandRunner', () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let fsMock: IMock<typeof fs>;
-    // let lodashMock: IMock<typeof lodash>;
-    let lodashStub: any;
     let jsonSummaryReportGeneratorMock: IMock<JsonSummaryReportGenerator>;
     let consoleSummaryReportGeneratorMock: IMock<ConsoleSummaryReportGenerator>;
     let testSubject: FileCommandRunner;
@@ -40,12 +37,7 @@ describe('FileCommandRunner', () => {
             jsonSummaryReportGeneratorMock = Mock.ofType<JsonSummaryReportGenerator>();
             consoleSummaryReportGeneratorMock = Mock.ofType<ConsoleSummaryReportGenerator>();
             fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
-            // lodashMock = Mock.ofInstance(lodash, MockBehavior.Strict);
 
-            lodashStub = {
-                cloneDeep: (scanner: AIScanner) => scanner,
-                isEmpty: (value: string) => lodash.isEmpty(value),
-            };
             testSubject = new FileCommandRunner(
                 scannerMock.object,
                 reportGeneratorMock.object,
@@ -53,7 +45,6 @@ describe('FileCommandRunner', () => {
                 jsonSummaryReportGeneratorMock.object,
                 consoleSummaryReportGeneratorMock.object,
                 fsMock.object,
-                lodashStub,
             );
         });
 
