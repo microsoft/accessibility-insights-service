@@ -18,7 +18,8 @@ describe(ConsoleSummaryReportGenerator, () => {
         [
             'has violations',
             {
-                urlToReportMap: { url1: 'file1' },
+                failedUrlToReportMap: { url1: 'file1' },
+                passedUrlToReportMap: { url1: 'file1' },
                 violationCountByRuleMap: {
                     rule1WithALongName11111111111111111: 10,
                     rule2: 3,
@@ -28,7 +29,8 @@ describe(ConsoleSummaryReportGenerator, () => {
         [
             'has no violations',
             {
-                urlToReportMap: { url1: 'file1' },
+                failedUrlToReportMap: { url1: 'file1' },
+                passedUrlToReportMap: { url1: 'file1' },
                 violationCountByRuleMap: {},
             } as SummaryReportData,
         ],
