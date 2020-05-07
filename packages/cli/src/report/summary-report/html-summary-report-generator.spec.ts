@@ -21,6 +21,7 @@ describe(HtmlSummaryReportGenerator, () => {
                 failedUrlToReportMap: {},
                 passedUrlToReportMap: {},
                 violationCountByRuleMap: {},
+                unScannableUrls: [],
             } as SummaryReportData,
         ],
         [
@@ -32,6 +33,7 @@ describe(HtmlSummaryReportGenerator, () => {
                 },
                 passedUrlToReportMap: {},
                 violationCountByRuleMap: { rule1: 3 },
+                unScannableUrls: [],
             } as SummaryReportData,
         ],
         [
@@ -43,6 +45,7 @@ describe(HtmlSummaryReportGenerator, () => {
                     'https://www.passedUrl2.com': './passed-url2.html',
                 },
                 violationCountByRuleMap: {},
+                unScannableUrls: [],
             } as SummaryReportData,
         ],
         [
@@ -59,6 +62,7 @@ describe(HtmlSummaryReportGenerator, () => {
                 violationCountByRuleMap: {
                     rule1: 3,
                 },
+                unScannableUrls: [],
             } as SummaryReportData,
         ],
     ])('logs violation summary when %s', async (testCaseName, testCase) => {
