@@ -26,6 +26,7 @@
         "@types/node": "^13.13.4",
         "@types/puppeteer": "^2.0.1",
         "@types/sha.js": "^2.4.0",
+        "@types/yargs": "^12.0.9",
         "jest": "^25.5.3",
         "jest-circus": "^25.5.3",
         "jest-junit": "^10.0.0",
@@ -46,9 +47,11 @@
         "lodash": "^4.17.14",
         "logger": "1.0.0",
         "moment": "2.25.3",
+        "node-fetch": "^2.6.0",
         "puppeteer": "^3.0.2",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
-        "storage-documents": "1.0.0"
+        "storage-documents": "1.0.0",
+        "yargs": "^15.3.1"
     }
 }
