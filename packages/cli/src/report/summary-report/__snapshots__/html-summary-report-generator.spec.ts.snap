@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HtmlSummaryReportGenerator logs violation summary when has both failed & passed urls 1`] = `
+"<!DOCTYPE html>
+<html lang='en'>
+
+  <head>
+    <meta charset=\\"UTF-8\\">
+    <title>Accessibility Insights Summary Report</title>
+  </head>
+
+  <body>
+
+
+    <b>
+      Total Urls Scanned - 4
+    </b>
+
+    <ul>
+
+      <li>
+        Failed Urls
+        <ul>
+
+          <li>
+            <a href='./failed-url1.html'>https://www.failedUrl1.com</a>
+          </li>
+
+          <li>
+            <a href='./failed-url2.html'>https://www.failedUrl2.com</a>
+          </li>
+        </ul>
+      </li>
+
+      <li>
+        Passed Urls
+        <ul>
+
+          <li>
+            <a href='./passed-url1.html'>https://www.passedUrl1.com</a>
+          </li>
+
+          <li>
+            <a href='./passed-url2.html'>https://www.passedUrl2.com</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+
+</html>"
+`;
+
+exports[`HtmlSummaryReportGenerator logs violation summary when has failed urls only 1`] = `
+"<!DOCTYPE html>
+<html lang='en'>
+
+  <head>
+    <meta charset=\\"UTF-8\\">
+    <title>Accessibility Insights Summary Report</title>
+  </head>
+
+  <body>
+
+
+    <b>
+      Total Urls Scanned - 2
+    </b>
+
+    <ul>
+
+      <li>
+        Failed Urls
+        <ul>
+
+          <li>
+            <a href='./failed-url1.html'>https://www.failedUrl1.com</a>
+          </li>
+
+          <li>
+            <a href='./failed-url2.html'>https://www.failedUrl2.com</a>
+          </li>
+        </ul>
+      </li>
+
+    </ul>
+  </body>
+
+</html>"
+`;
+
+exports[`HtmlSummaryReportGenerator logs violation summary when has no scanned urls 1`] = `
+"<!DOCTYPE html>
+<html lang='en'>
+
+  <head>
+    <meta charset=\\"UTF-8\\">
+    <title>Accessibility Insights Summary Report</title>
+  </head>
+
+  <body>
+
+    <b>
+      Total Urls Scanned - 0
+    </b>
+
+  </body>
+
+</html>"
+`;
+
+exports[`HtmlSummaryReportGenerator logs violation summary when has passed urls only 1`] = `
+"<!DOCTYPE html>
+<html lang='en'>
+
+  <head>
+    <meta charset=\\"UTF-8\\">
+    <title>Accessibility Insights Summary Report</title>
+  </head>
+
+  <body>
+
+
+    <b>
+      Total Urls Scanned - 2
+    </b>
+
+    <ul>
+
+
+      <li>
+        Passed Urls
+        <ul>
+
+          <li>
+            <a href='./passed-url1.html'>https://www.passedUrl1.com</a>
+          </li>
+
+          <li>
+            <a href='./passed-url2.html'>https://www.passedUrl2.com</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </body>
+
+</html>"
+`;

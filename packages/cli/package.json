@@ -52,6 +52,7 @@
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
+        "@types/escape-html": "^0.0.20",
         "accessibility-insights-report": "^1.0.2",
         "axe-core": "3.5.1",
         "axe-puppeteer": "^1.1.0",
@@ -59,8 +60,10 @@
         "dotenv": "^8.2.0",
         "filenamify-url": "^2.1.1",
         "filenamify": "^4.1.0",
+        "escape-html": "^1.0.3",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
+        "pretty": "^2.0.0",
         "puppeteer": "^3.0.4",
         "react-helmet": "^6.0.0",
         "reflect-metadata": "^0.1.13",
