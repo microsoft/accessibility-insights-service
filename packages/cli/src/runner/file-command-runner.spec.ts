@@ -76,6 +76,7 @@ describe(FileCommandRunner, () => {
                 'fail-url-1-rule-2': 2,
                 'fail-url-2-rule-1': 1,
                 'fail-url-2-rule-2': 2,
+                'common-fail-rule1': 2,
             };
             const failedUrlToReportMap: UrlToReportMap = {
                 'fail-url-1': 'fail-url-1-report',
@@ -126,6 +127,46 @@ describe(FileCommandRunner, () => {
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: {},
                 passedUrlToReportMap: {},
+                unScannableUrls: [],
+                violationCountByRuleMap: {},
+            };
+
+            setupSummaryFileCreationCall(expectedSummaryData);
+
+            await testSubject.runCommand(testInput);
+        });
+
+        it('when violations is undefined', async () => {
+            fileContent = `
+            pass-url-1
+        `;
+
+            scannerMock.reset();
+            scannerMock
+                .setup((s) => s.scan('pass-url-1'))
+                .returns(async (url: string) => {
+                    const result = {
+                        results: {
+                            passes: [
+                                {
+                                    id: `${url}-rule-1`,
+                                    nodes: [{}],
+                                },
+                            ],
+                        },
+                    } as AxeScanResults;
+
+                    setupReportCreationCalls(url, result);
+
+                    return result;
+                })
+                .verifiable(Times.atLeast(0));
+
+            const expectedSummaryData: SummaryReportData = {
+                failedUrlToReportMap: {},
+                passedUrlToReportMap: {
+                    'pass-url-1': 'pass-url-1-report',
+                },
                 unScannableUrls: [],
                 violationCountByRuleMap: {},
             };
@@ -209,6 +250,10 @@ describe(FileCommandRunner, () => {
                             {
                                 id: `${url}-rule-2`,
                                 nodes: [{}, {}],
+                            },
+                            {
+                                id: 'common-fail-rule1',
+                                nodes: [{}],
                             },
                         ],
                     },
