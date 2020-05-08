@@ -53,6 +53,18 @@ export class Page {
             return { error: this.getScanErrorFromNavigationFailure((err as Error).message), pageResponseCode: undefined };
         }
 
+        if (!response.ok()) {
+            this.log(LogLevel.error, url, 'url navigation returned failed response', { statusCode: response.status().toString() });
+
+            return {
+                error: {
+                    errorType: 'HttpErrorCode',
+                    message: 'Page returned an unsuccessful response code',
+                },
+                pageResponseCode: response.status(),
+            };
+        }
+
         if (!this.isHtmlPage(response)) {
             const contentType = this.getContentType(response.headers());
 
@@ -63,18 +75,6 @@ export class Page {
                 error: {
                     errorType: 'InvalidContentType',
                     message: `Content type - ${contentType}`,
-                },
-                pageResponseCode: response.status(),
-            };
-        }
-
-        if (!response.ok()) {
-            this.log(LogLevel.error, url, 'url navigation returned failed response', { statusCode: response.status().toString() });
-
-            return {
-                error: {
-                    errorType: 'HttpErrorCode',
-                    message: 'Page returned an unsuccessful response code',
                 },
                 pageResponseCode: response.status(),
             };
