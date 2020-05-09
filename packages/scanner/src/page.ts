@@ -54,7 +54,7 @@ export class Page {
         }
 
         if (!response.ok()) {
-            this.log(LogLevel.error, url, 'url navigation returned failed response', { statusCode: response.status().toString() });
+            this.log(LogLevel.error, url, 'The URL navigation returned an unsuccessful response code', { statusCode: response.status().toString() });
 
             return {
                 error: {

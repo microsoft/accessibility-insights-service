@@ -56,7 +56,7 @@ export class Page {
         }
 
         if (!response.ok()) {
-            console.log('url navigation returned failed response', { statusCode: response.status().toString() });
+            console.log('The URL navigation returned an unsuccessful response code', { statusCode: response.status().toString() });
 
             return {
                 error: {
