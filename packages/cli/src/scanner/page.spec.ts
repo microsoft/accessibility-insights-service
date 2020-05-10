@@ -152,6 +152,38 @@ describe('Page', () => {
         expect(result).toEqual(errorResult);
     });
 
+    it('should check page response before cheking if page is not html', async () => {
+        const scanUrl = 'https://www.non-html-url.com';
+        const contentType = 'text/plain';
+
+        const errorResult: AxeScanResults = {
+            error: {
+                errorType: 'HttpErrorCode',
+                message: 'Page returned an unsuccessful response code',
+                responseStatusCode: 500,
+            },
+        };
+        const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 500 });
+
+        gotoMock
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
+        axePuppeteerFactoryMock
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        expect(result).toEqual(errorResult);
+    });
+
     it('should analyze accessibility issues, even if error thrown when waitForNavigation', async () => {
         const scanUrl = 'https://www.example.com';
         const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
