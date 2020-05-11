@@ -1,7 +1,7 @@
 {
     "id": "on-demand-send-notification-schedule",
     "schedule": {
-        "recurrenceInterval": "PT1M"
+        "recurrenceInterval": "PT2M"
     },
     "jobSpecification": {
         "priority": 0,
@@ -22,7 +22,7 @@
             ],
             "constraints": {
                 "maxWallClockTime": "PT1H",
-                "retentionTime": "P7D",
+                "retentionTime": "P3D",
                 "maxTaskRetryCount": 0
             },
             "killJobOnCompletion": true,

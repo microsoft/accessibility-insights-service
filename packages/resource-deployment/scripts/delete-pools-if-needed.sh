@@ -12,7 +12,7 @@ export enableSoftDeleteOnKeyVault
 export pools
 
 areVmssOld=false
-recycleVmssIntervalDays=15
+recycleVmssIntervalDays=10
 
 exitWithUsageInfo() {
     echo "
@@ -26,7 +26,7 @@ Usage: $0 -r <resource group> -p <parameter template file path> [-d <pass \"true
 function checkIfVmssAreOld {
     areVmssOld=false
     local hasCreatedDateTags=false
-    
+
     local createdDates=$(az vmss list \
         --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
         -o tsv
@@ -37,9 +37,9 @@ function checkIfVmssAreOld {
         echo "VMSS created date: $createdDate"
         local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
         local currentDate=$(date "+%Y-%m-%d")
-        
+
         if [[ "$currentDate" > "$recycleDate" ]] || [[ "$currentDate" == "$recycleDate" ]]; then
-            echo "Found vmss with older created date $createdDate. 
+            echo "Found vmss with older created date $createdDate.
                 Expected to be not older than $recycleVmssIntervalDays days.
                 Marking all vmss as old
             "
@@ -48,9 +48,9 @@ function checkIfVmssAreOld {
         else
             echo "Found vmss to be new. Next recycle date - $recycleDate"
         fi
-        
+
     done
-    
+
     if [[ $hasCreatedDateTags == false ]]; then
         echo "Unable to find VmssCreatedDate tag. Assuming vmss are old."
         areVmssOld=true
