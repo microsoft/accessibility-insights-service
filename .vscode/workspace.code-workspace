@@ -75,6 +75,9 @@
         {
             "name": "cli",
             "path": "../packages/cli"
+        },        {
+            "name": "crawler-library",
+            "path": "../packages/crawler-library"
         },
         {
             "name": "root",
@@ -102,6 +105,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Apify",
             "Finalizer",
             "Newable",
             "Rescan",
