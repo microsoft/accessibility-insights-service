@@ -22,7 +22,7 @@
             ],
             "constraints": {
                 "maxWallClockTime": "PT1H",
-                "retentionTime": "P7D",
+                "retentionTime": "P3D",
                 "maxTaskRetryCount": 0
             },
             "killJobOnCompletion": true,
