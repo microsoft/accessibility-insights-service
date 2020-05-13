@@ -1,15 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Apify from 'apify';
-import { PageData } from '../page-data';
-
-// tslint:disable: no-unsafe-any
-
-const {
-    utils: {
-        puppeteer: { gotoExtended },
-    },
-} = Apify;
+import Apify from 'apify';
+import { Page } from 'puppeteer';
+import { accessibilityScanOperation, AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
+import { ScanData } from '../scan-data';
+import { LocalBlobStore } from '../storage/local-blob-store';
+import { LocalDataStore } from '../storage/local-data-store';
+import { BlobStore, DataStore } from '../storage/store-types';
 
 export interface PageProcessorOptions {
     baseUrl: string;
@@ -32,17 +29,22 @@ export abstract class PageProcessorBase {
      */
     public gotoTimeoutSecs = 30;
 
-    protected keyValueStore: Apify.KeyValueStore;
-    protected datasetStore: Apify.Dataset;
-
-    public constructor(protected readonly requestQueue: Apify.RequestQueue, protected readonly discoveryPatterns?: string[]) {}
+    public constructor(
+        protected readonly requestQueue: Apify.RequestQueue,
+        protected readonly discoveryPatterns?: string[],
+        protected readonly accessibilityScanOp: AccessibilityScanOperation = accessibilityScanOperation,
+        protected readonly dataStore: DataStore = new LocalDataStore('scan-results'),
+        protected readonly blobStore: BlobStore = new LocalBlobStore('scan-results'),
+        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        private readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
+    ) {}
 
     /**
      * Overrides the function that opens the page in Puppeteer.
      * Return the result of Puppeteer's [page.goto()](https://pptr.dev/#?product=Puppeteer&show=api-pagegotourl-options) function.
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
-        return gotoExtended(inputs.page, inputs.request, {
+        return this.gotoExtended(inputs.page, inputs.request, {
             waitUntil: 'networkidle0',
             timeout: this.gotoTimeoutSecs * 1000,
         });
@@ -51,26 +53,26 @@ export abstract class PageProcessorBase {
     /**
      * This function is called when the crawling of a request failed after several reties
      */
-    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }) => {
-        const pageData: PageData = {
+    public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }: Apify.HandleFailedRequestInput) => {
+        const scanData: ScanData = {
+            id: request.id as string,
             title: '',
             url: request.url,
             succeeded: false,
             error: JSON.stringify(error),
-            requestErrors: request.errorMessages,
+            requestErrors: request.errorMessages as string[],
         };
-        await Apify.pushData(pageData);
+        await Apify.pushData(scanData);
     };
 
-    protected async openDatasetStore(): Promise<void> {
-        if (this.datasetStore === undefined) {
-            this.datasetStore = await Apify.openDataset('scan-results');
-        }
-    }
+    protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+        const enqueued = await this.enqueueLinksExt({
+            page,
+            requestQueue: this.requestQueue,
+            pseudoUrls: this.discoveryPatterns,
+        });
+        console.log(`Discovered ${enqueued.length} links on ${page.url()} page.`);
 
-    protected async openKeyValueStore(): Promise<void> {
-        if (this.keyValueStore === undefined) {
-            this.keyValueStore = await Apify.openKeyValueStore('scan-results');
-        }
+        return enqueued;
     }
 }

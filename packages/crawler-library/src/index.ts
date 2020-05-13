@@ -2,10 +2,9 @@
 // Licensed under the MIT License.
 
 // tslint:disable: no-unsafe-any no-import-side-effect no-require-imports no-var-requires
-
 require = require('esm')(module); // support ES6 module syntax for Office Fabric package
 
-import './overrides';
+import './overrides'; // should be the first package import
 
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';

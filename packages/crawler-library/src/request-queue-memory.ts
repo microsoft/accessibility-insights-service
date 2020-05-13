@@ -2,9 +2,10 @@
 // Licensed under the MIT License.
 
 // tslint:disable: no-unsafe-any no-any no-require-imports no-var-requires no-submodule-imports
-import * as Apify from 'apify';
+import Apify from 'apify';
 import { cloneDeep, isNil } from 'lodash';
 import { RequestQueueBase } from './request-queue-base';
+import * as utilities from './utilities';
 
 const apifyUtilities = require('apify-shared/utilities');
 
@@ -28,6 +29,7 @@ export class RequestQueueMemory extends RequestQueueBase {
         },
     ): Promise<Apify.QueueOperationInfo> {
         const newRequest = request instanceof Apify.Request ? request : new Apify.Request(request);
+        newRequest.id = utilities.generateHash(newRequest.uniqueKey);
 
         if (isNil(this.requests[newRequest.uniqueKey])) {
             // tslint:disable-next-line: no-object-literal-type-assertion

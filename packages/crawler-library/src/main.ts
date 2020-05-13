@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Apify from 'apify';
+import Apify from 'apify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { CloudApifyFactory, CrawlerFactory } from './crawler-factory';

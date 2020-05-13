@@ -1,55 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Apify from 'apify';
-import { ActiveElementFinder } from '../discovery/active-element-finder';
-// import { PageData } from '../page-data';
-// import { PageScanner } from '../page-scanner';
+import Apify from 'apify';
+import { EnqueueButtonsOperation, enqueueButtonsOperation } from '../page-operations/enqueue-buttons-operation';
+import { Operation } from '../page-operations/operation';
 import { PageProcessorBase, PageProcessorOptions } from './page-processor-base';
 import { PageProcessorFactoryBase } from './page-processor-factory';
-
-// const {
-//     utils: { enqueueLinks },
-// } = Apify;
 
 export class SimulatorPageProcessor extends PageProcessorBase {
     public constructor(
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns: string[],
         private readonly selectors: string[],
-        private readonly activeElementFinder: ActiveElementFinder = new ActiveElementFinder(),
+        private readonly enqueueButtonsOp: EnqueueButtonsOperation = enqueueButtonsOperation,
     ) {
         super(requestQueue, discoveryPatterns);
     }
 
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
-        await this.openDatasetStore();
-        await this.openKeyValueStore();
+        if ((request.userData as Operation).operationType === undefined || (request.userData as Operation).operationType === 'no-op') {
+            // await this.enqueueLinks(page);
+            await this.enqueueButtonsOp(page, this.selectors, this.requestQueue);
+        }
 
-        const elements = await this.activeElementFinder.getActiveElements(page, this.selectors);
-
-        console.log(elements);
-
-        // const enqueued = await enqueueLinks({
-        //     page,
-        //     requestQueue: this.requestQueue,
-        //     pseudoUrls: this.discoveryPatterns,
-        // });
-        // console.log(`Discovered ${enqueued.length} links on ${request.url} page.`);
-
-        // const scanner = new PageScanner(page);
-        // const scanResult = await scanner.scan();
-        // if (scanResult.axeResults.violations.length > 0) {
-        //     console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on ${request.url} page.`);
-        // }
-
-        // const pageData: PageData = {
-        //     title: await page.title(),
-        //     url: request.url,
-        //     succeeded: true,
-        //     axeResults: scanResult.axeResults,
-        // };
-        // await this.datasetStore.pushData(pageData);
-        // await this.keyValueStore.setValue(`id-${Date.now().toString()}`, scanResult.report.asHTML(), { contentType: 'text/html' });
+        await this.accessibilityScanOp(page, request.id as string, this.blobStore);
     };
 }
 

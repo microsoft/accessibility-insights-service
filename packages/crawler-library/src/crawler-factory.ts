@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Apify from 'apify';
+import Apify from 'apify';
 import { RequestQueueBase } from './request-queue-base';
 import { RequestQueueMemory } from './request-queue-memory';
 

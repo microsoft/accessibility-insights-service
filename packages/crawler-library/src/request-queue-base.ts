@@ -1,9 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as Apify from 'apify';
-
-// tslint:disable: no-var-requires no-submodule-imports no-require-imports no-unsafe-any
-const apifyUtilities = require('apify-shared/utilities');
+import Apify from 'apify';
 
 /**
  * Represents Apify {@link RequestQueue} minimal set of required APIs.
@@ -14,11 +11,7 @@ export abstract class RequestQueueBase {
      * @param string [queueName]
      * @param string [clientKey]
      */
-    constructor(
-        protected readonly queueId: string,
-        protected readonly queueName: string,
-        protected readonly clientKey: string = apifyUtilities.cryptoRandomObjectId(),
-    ) {}
+    constructor(protected readonly queueId: string, protected readonly queueName: string) {}
 
     /**
      * Adds a request to the queue.
