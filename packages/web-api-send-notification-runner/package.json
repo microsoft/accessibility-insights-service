@@ -27,7 +27,7 @@
         "@types/request": "^2.48.4",
         "@types/request-promise": "^4.1.46",
         "@types/node": "^13.13.5",
-        "@types/puppeteer": "^2.0.1",
+        "@types/puppeteer": "^2.1.0",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.3",
         "@types/yargs": "^12.0.9",
