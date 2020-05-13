@@ -56,13 +56,12 @@ export abstract class PageProcessorBase {
     public pageErrorProcessor: Apify.HandleFailedRequest = async ({ request, error }: Apify.HandleFailedRequestInput) => {
         const scanData: ScanData = {
             id: request.id as string,
-            title: '',
             url: request.url,
             succeeded: false,
             error: JSON.stringify(error),
             requestErrors: request.errorMessages as string[],
         };
-        await Apify.pushData(scanData);
+        await this.dataStore.pushData(scanData);
     };
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
@@ -74,5 +73,15 @@ export abstract class PageProcessorBase {
         console.log(`Discovered ${enqueued.length} links on ${page.url()} page.`);
 
         return enqueued;
+    }
+
+    protected async pushScanData(id: string, url: string, button?: string): Promise<void> {
+        const scanData: ScanData = {
+            id,
+            url,
+            button,
+            succeeded: true,
+        };
+        await this.dataStore.pushData(scanData);
     }
 }

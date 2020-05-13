@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
+import { ActiveElement } from '../discovery/active-element-finder';
 import { EnqueueButtonsOperation, enqueueButtonsOperation } from '../page-operations/enqueue-buttons-operation';
 import { Operation } from '../page-operations/operation';
 import { PageProcessorBase, PageProcessorOptions } from './page-processor-base';
@@ -17,12 +18,17 @@ export class SimulatorPageProcessor extends PageProcessorBase {
     }
 
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
-        if ((request.userData as Operation).operationType === undefined || (request.userData as Operation).operationType === 'no-op') {
+        const operation = request.userData as Operation;
+        if (operation.operationType === undefined || operation.operationType === 'no-op') {
             // await this.enqueueLinks(page);
             await this.enqueueButtonsOp(page, this.selectors, this.requestQueue);
-        }
+            await this.accessibilityScanOp(page, request.id as string, this.blobStore);
+            await this.pushScanData(request.id as string, request.url);
+        } else if ((request.userData as Operation).operationType === 'click') {
+            const element = operation.data as ActiveElement;
 
-        await this.accessibilityScanOp(page, request.id as string, this.blobStore);
+            await this.pushScanData(request.id as string, request.url, element.html);
+        }
     };
 }
 
