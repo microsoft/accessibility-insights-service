@@ -2321,10 +2321,10 @@
   dependencies:
     dotenv "*"
 
-"@types/escape-html@^0.0.20":
-  version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-0.0.20.tgz#cae698714dd61ebee5ab3f2aeb9a34ba1011735a"
-  integrity sha512-6dhZJLbA7aOwkYB2GDGdIqJ20wmHnkDzaxV9PJXe7O02I2dSFTERzRB6JrX6cWKaS+VqhhY7cQUMCbO5kloFUw==
+"@types/escape-html@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@types/escape-html/-/escape-html-1.0.0.tgz#9135124510b0930b664255149e59ed750fc11f65"
+  integrity sha512-Ehe6irbxo5BSYwG03buglLJCmy3JqqtC69UvopsBWYf4hDa+ZODJ7BuZU6y+YE4U6MaoSruTxM2+uePfAHts9Q==
 
 "@types/events@*":
   version "3.0.0"

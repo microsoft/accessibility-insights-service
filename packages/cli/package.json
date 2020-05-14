@@ -52,7 +52,7 @@
         "webpack-node-externals": "^1.7.2"
     },
     "dependencies": {
-        "@types/escape-html": "^0.0.20",
+        "@types/escape-html": "^1.0.0",
         "accessibility-insights-report": "^1.0.2",
         "axe-core": "3.5.1",
         "axe-puppeteer": "^1.1.0",
