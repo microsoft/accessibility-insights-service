@@ -28,4 +28,8 @@ export const enqueueActiveElementsOperation: EnqueueActiveElementsOperation = as
             await requestQueue.addRequest({ url, uniqueKey, userData });
         }),
     );
+
+    if (elements.length > 0) {
+        console.log(`Discovered ${elements.length} active elements on page ${url}`);
+    }
 };

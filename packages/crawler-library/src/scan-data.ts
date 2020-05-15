@@ -5,7 +5,10 @@ export interface ScanData {
     id: string;
     url: string;
     succeeded: boolean;
-    activeElement?: string;
+    activeElement?: {
+        html: string;
+        selector: string;
+    };
     error?: string;
     requestErrors?: string[];
 }

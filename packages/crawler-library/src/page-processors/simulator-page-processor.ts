@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { ActiveElement } from '../discovery/active-elements-finder';
+import { ClickElementOperation, clickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation, enqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { Operation } from '../page-operations/operation';
 import { PageProcessorBase, PageProcessorOptions } from './page-processor-base';
@@ -13,6 +14,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         protected readonly discoveryPatterns: string[],
         private readonly selectors: string[],
         private readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation = enqueueActiveElementsOperation,
+        private readonly clickElementOp: ClickElementOperation = clickElementOperation,
     ) {
         super(requestQueue, discoveryPatterns);
     }
@@ -20,14 +22,20 @@ export class SimulatorPageProcessor extends PageProcessorBase {
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         const operation = request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
-            // await this.enqueueLinks(page);
+            console.log(`Crawling page ${page.url()}`);
+            await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp(page, this.selectors, this.requestQueue);
             await this.accessibilityScanOp(page, request.id as string, this.blobStore);
             await this.pushScanData(request.id as string, request.url);
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-
-            await this.pushScanData(request.id as string, request.url, activeElement.html);
+            console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            const clickState = await this.clickElementOp(page, activeElement.selector, this.requestQueue, this.discoveryPatterns);
+            if (clickState === 'action') {
+                await this.enqueueLinks(page);
+                await this.saveSnapshot(page, activeElement.hash);
+            }
+            await this.pushScanData(request.id as string, request.url, activeElement);
         }
     };
 }

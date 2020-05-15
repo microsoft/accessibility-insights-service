@@ -18,6 +18,6 @@ export const accessibilityScanOperation: AccessibilityScanOperation = async (
     await keyValueStore.setValue(`report-${id}`, scanResult.report.asHTML(), { contentType: 'text/html' });
 
     if (scanResult.axeResults.violations.length > 0) {
-        console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on ${page.url()} page.`);
+        console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on page ${page.url()}`);
     }
 };

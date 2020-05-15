@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { Page } from 'puppeteer';
+import { ActiveElement } from '../discovery/active-elements-finder';
 import { accessibilityScanOperation, AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
-import { BlobStore, DataStore } from '../storage/store-types';
+import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 
 export interface PageProcessorOptions {
     baseUrl: string;
@@ -33,8 +34,8 @@ export abstract class PageProcessorBase {
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns?: string[],
         protected readonly accessibilityScanOp: AccessibilityScanOperation = accessibilityScanOperation,
-        protected readonly dataStore: DataStore = new LocalDataStore('scan-results'),
-        protected readonly blobStore: BlobStore = new LocalBlobStore('scan-results'),
+        protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
+        protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         private readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
     ) {}
@@ -70,18 +71,32 @@ export abstract class PageProcessorBase {
             requestQueue: this.requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
-        console.log(`Discovered ${enqueued.length} links on ${page.url()} page.`);
+        console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
 
         return enqueued;
     }
 
-    protected async pushScanData(id: string, url: string, activeElement?: string): Promise<void> {
+    protected async pushScanData(id: string, url: string, activeElement?: ActiveElement): Promise<void> {
         const scanData: ScanData = {
             id,
             url,
-            activeElement,
             succeeded: true,
+            activeElement:
+                activeElement === undefined
+                    ? undefined
+                    : {
+                          html: activeElement.html,
+                          selector: activeElement.selector,
+                      },
         };
         await this.dataStore.pushData(scanData);
+    }
+
+    protected async saveSnapshot(page: Page, id: string): Promise<void> {
+        await Apify.utils.puppeteer.saveSnapshot(page, {
+            key: `screenshot-${id}`,
+            saveHtml: false,
+            keyValueStoreName: scanResultStorageName,
+        });
     }
 }
