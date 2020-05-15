@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 
 import * as escapeHtml from 'escape-html';
+import { link } from 'fs';
 import { injectable } from 'inversify';
 import { SummaryReportData, UrlToReportMap } from './summary-report-data';
 import { SummaryReportGenerator } from './summary-report-generator';
-import { link } from 'fs';
 
 // tslint:disable-next-line: no-var-requires no-require-imports no-unsafe-any
 const pretty: (html: string) => string = require('pretty');
@@ -55,7 +55,11 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
         </b>
         `;
 
-        if (htmlSummaryData.failedLinks.length === 0 && htmlSummaryData.passedLinks.length === 0 && htmlSummaryData.unScannableUrls.length === 0) {
+        if (
+            htmlSummaryData.failedLinks.length === 0 &&
+            htmlSummaryData.passedLinks.length === 0 &&
+            htmlSummaryData.unScannableUrls.length === 0
+        ) {
             return totalUrlsScannedInfo;
         }
 
@@ -93,7 +97,7 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
             return {
                 fileName: url,
                 link: url,
-            } as HtmlSummaryLink;
+            };
         });
 
         return this.getLinksSection('UnScannable Urls', htmlLinks);
