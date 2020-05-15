@@ -2299,10 +2299,12 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/convict@^5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-5.2.0.tgz#11fc585e9e55e508c693b107284dc76705316f73"
-  integrity sha512-mDP9wkxWY8zFrxbMldRhQc/ml6qD8IPALsSu/NkMteJ3cFibmlQhKkODLPvpuQDrccaIiXOE0Q4o7PCWLxwOow==
+"@types/convict@^5.2.1":
+  version "5.2.1"
+  resolved "https://registry.yarnpkg.com/@types/convict/-/convict-5.2.1.tgz#35d997d1532e469f02f5da21a5910205ca96bc3f"
+  integrity sha512-SbtKO7CzkSaBZ/yMo9+qDPG2q59BN2ONry2Qra+boPXoXfjW4gVX/ohcmRsKpZZGGNszkLCl2Wi8coIDp/qPQg==
+  dependencies:
+    "@types/node" "*"
 
 "@types/dateformat@^3.0.1":
   version "3.0.1"
