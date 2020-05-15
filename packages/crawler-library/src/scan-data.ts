@@ -5,7 +5,9 @@ export interface ScanData {
     id: string;
     url: string;
     succeeded: boolean;
-    activeElement?: {
+    elementClickTransition?: string;
+    elementNavigationUrl?: string;
+    activatedElement?: {
         html: string;
         selector: string;
     };

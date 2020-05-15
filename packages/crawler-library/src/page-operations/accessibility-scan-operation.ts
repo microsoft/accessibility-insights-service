@@ -14,8 +14,8 @@ export const accessibilityScanOperation: AccessibilityScanOperation = async (
     const scanner = new PageScanner(page);
     const scanResult = await scanner.scan();
 
-    await keyValueStore.setValue(`axe-${id}`, scanResult.axeResults);
-    await keyValueStore.setValue(`report-${id}`, scanResult.report.asHTML(), { contentType: 'text/html' });
+    await keyValueStore.setValue(`${id}.axe`, scanResult.axeResults);
+    await keyValueStore.setValue(`${id}.report`, scanResult.report.asHTML(), { contentType: 'text/html' });
 
     if (scanResult.axeResults.violations.length > 0) {
         console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on page ${page.url()}`);

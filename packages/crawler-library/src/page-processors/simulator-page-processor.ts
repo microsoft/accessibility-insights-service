@@ -30,12 +30,17 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
-            const clickState = await this.clickElementOp(page, activeElement.selector, this.requestQueue, this.discoveryPatterns);
-            if (clickState === 'action') {
-                await this.enqueueLinks(page);
+            const operationResult = await this.clickElementOp(page, activeElement.selector, this.requestQueue, this.discoveryPatterns);
+            if (operationResult.transition === 'action') {
                 await this.saveSnapshot(page, activeElement.hash);
+                await this.enqueueLinks(page);
+                await this.accessibilityScanOp(page, request.id as string, this.blobStore);
             }
-            await this.pushScanData(request.id as string, request.url, activeElement);
+            await this.pushScanData(request.id as string, request.url, {
+                activatedElement: activeElement,
+                elementClickTransition: operationResult.transition,
+                elementNavigationUrl: operationResult.navigationUrl,
+            });
         }
     };
 }

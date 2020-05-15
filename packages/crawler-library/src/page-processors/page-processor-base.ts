@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { ActiveElement } from '../discovery/active-elements-finder';
 import { accessibilityScanOperation, AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
@@ -76,25 +75,19 @@ export abstract class PageProcessorBase {
         return enqueued;
     }
 
-    protected async pushScanData(id: string, url: string, activeElement?: ActiveElement): Promise<void> {
-        const scanData: ScanData = {
+    protected async pushScanData(id: string, url: string, scanData?: Partial<ScanData>): Promise<void> {
+        const mergedScanData: ScanData = {
             id,
             url,
             succeeded: true,
-            activeElement:
-                activeElement === undefined
-                    ? undefined
-                    : {
-                          html: activeElement.html,
-                          selector: activeElement.selector,
-                      },
+            ...scanData,
         };
-        await this.dataStore.pushData(scanData);
+        await this.blobStore.setValue(`${id}.data`, mergedScanData);
     }
 
     protected async saveSnapshot(page: Page, id: string): Promise<void> {
         await Apify.utils.puppeteer.saveSnapshot(page, {
-            key: `screenshot-${id}`,
+            key: `${id}.screenshot`,
             saveHtml: false,
             keyValueStoreName: scanResultStorageName,
         });

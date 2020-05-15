@@ -3,14 +3,19 @@
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 
-export declare type ElementClickState = 'navigation' | 'action';
+export declare type ElementClickTransition = 'navigation' | 'action';
+
+export interface ElementClickOperationResult {
+    transition: ElementClickTransition;
+    navigationUrl?: string;
+}
 
 export type ClickElementOperation = (
     page: Page,
     selector: string,
     requestQueue: Apify.RequestQueue,
     discoveryPatterns: string[],
-) => Promise<ElementClickState>;
+) => Promise<ElementClickOperationResult>;
 
 export const clickElementOperation: ClickElementOperation = async (
     page: Page,
@@ -19,8 +24,9 @@ export const clickElementOperation: ClickElementOperation = async (
     discoveryPatterns: string[],
     enqueueLinksByClickingElementsExt: typeof Apify.utils.puppeteer.enqueueLinksByClickingElements = Apify.utils.puppeteer
         .enqueueLinksByClickingElements,
-): Promise<ElementClickState> => {
+): Promise<ElementClickOperationResult> => {
     let navigated = false;
+    let navigationUrl: string;
     await enqueueLinksByClickingElementsExt({
         page,
         requestQueue,
@@ -28,11 +34,12 @@ export const clickElementOperation: ClickElementOperation = async (
         pseudoUrls: discoveryPatterns,
         transformRequestFunction: (request: Apify.RequestOptions) => {
             navigated = true;
+            navigationUrl = request.url;
             console.log(`Click on element with selector '${selector}' from page ${page.url()} resulted navigation to URL ${request.url}`);
 
             return request;
         },
     });
 
-    return navigated ? 'navigation' : 'action';
+    return { transition: navigated ? 'navigation' : 'action', navigationUrl };
 };
