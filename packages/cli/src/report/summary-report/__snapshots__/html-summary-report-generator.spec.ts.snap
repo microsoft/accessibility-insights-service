@@ -13,13 +13,13 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has both failed 
 
 
     <b>
-      Total Urls Scanned - 4
+      Total Urls - 4
     </b>
 
     <ul>
 
       <li>
-        Failed Urls
+        Failed Urls - 3
         <ul>
 
           <li>
@@ -33,7 +33,7 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has both failed 
       </li>
 
       <li>
-        Passed Urls
+        Passed Urls - 3
         <ul>
 
           <li>
@@ -45,6 +45,7 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has both failed 
           </li>
         </ul>
       </li>
+
     </ul>
   </body>
 
@@ -64,13 +65,13 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has failed urls 
 
 
     <b>
-      Total Urls Scanned - 2
+      Total Urls - 2
     </b>
 
     <ul>
 
       <li>
-        Failed Urls
+        Failed Urls - 3
         <ul>
 
           <li>
@@ -82,6 +83,7 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has failed urls 
           </li>
         </ul>
       </li>
+
 
     </ul>
   </body>
@@ -101,7 +103,7 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has no scanned u
   <body>
 
     <b>
-      Total Urls Scanned - 0
+      Total Urls - 0
     </b>
 
   </body>
@@ -122,14 +124,14 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has passed urls 
 
 
     <b>
-      Total Urls Scanned - 2
+      Total Urls - 2
     </b>
 
     <ul>
 
 
       <li>
-        Passed Urls
+        Passed Urls - 3
         <ul>
 
           <li>
@@ -138,6 +140,42 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has passed urls 
 
           <li>
             <a href='./passed-url2.html'>https://www.passedUrl2.com</a>
+          </li>
+        </ul>
+      </li>
+
+    </ul>
+  </body>
+
+</html>"
+`;
+
+exports[`HtmlSummaryReportGenerator logs violation summary when has unScannable urls only 1`] = `
+"<!DOCTYPE html>
+<html lang='en'>
+
+  <head>
+    <meta charset=\\"UTF-8\\">
+    <title>Accessibility Insights Summary Report</title>
+  </head>
+
+  <body>
+
+
+    <b>
+      Total Urls - 1
+    </b>
+
+    <ul>
+
+
+
+      <li>
+        UnScannable Urls - 3
+        <ul>
+
+          <li>
+            <a href='url'>url</a>
           </li>
         </ul>
       </li>
