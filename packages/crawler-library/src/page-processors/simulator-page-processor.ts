@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { ActiveElement } from '../discovery/active-element-finder';
-import { EnqueueButtonsOperation, enqueueButtonsOperation } from '../page-operations/enqueue-buttons-operation';
+import { ActiveElement } from '../discovery/active-elements-finder';
+import { EnqueueActiveElementsOperation, enqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { Operation } from '../page-operations/operation';
 import { PageProcessorBase, PageProcessorOptions } from './page-processor-base';
 import { PageProcessorFactoryBase } from './page-processor-factory';
@@ -12,7 +12,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns: string[],
         private readonly selectors: string[],
-        private readonly enqueueButtonsOp: EnqueueButtonsOperation = enqueueButtonsOperation,
+        private readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation = enqueueActiveElementsOperation,
     ) {
         super(requestQueue, discoveryPatterns);
     }
@@ -21,13 +21,13 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         const operation = request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
             // await this.enqueueLinks(page);
-            await this.enqueueButtonsOp(page, this.selectors, this.requestQueue);
+            await this.enqueueActiveElementsOp(page, this.selectors, this.requestQueue);
             await this.accessibilityScanOp(page, request.id as string, this.blobStore);
             await this.pushScanData(request.id as string, request.url);
         } else if ((request.userData as Operation).operationType === 'click') {
-            const element = operation.data as ActiveElement;
+            const activeElement = operation.data as ActiveElement;
 
-            await this.pushScanData(request.id as string, request.url, element.html);
+            await this.pushScanData(request.id as string, request.url, activeElement.html);
         }
     };
 }

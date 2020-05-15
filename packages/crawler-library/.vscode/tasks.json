@@ -6,13 +6,19 @@
         {
             "type": "shell",
             "label": "run",
-            "dependsOn": "tsc",
+            "dependsOn": "imports",
             "windows": {
                 "command": "xcopy .env ./dist /y"
             },
             "osx": {
                 "command": "cp .env ./dist"
             }
+        },
+        {
+            "type": "shell",
+            "label": "imports",
+            "dependsOn": "tsc",
+            "command": "rollup -c"
         },
         {
             "type": "shell",

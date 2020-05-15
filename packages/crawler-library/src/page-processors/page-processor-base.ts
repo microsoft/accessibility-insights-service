@@ -75,11 +75,11 @@ export abstract class PageProcessorBase {
         return enqueued;
     }
 
-    protected async pushScanData(id: string, url: string, button?: string): Promise<void> {
+    protected async pushScanData(id: string, url: string, activeElement?: string): Promise<void> {
         const scanData: ScanData = {
             id,
             url,
-            button,
+            activeElement,
             succeeded: true,
         };
         await this.dataStore.pushData(scanData);
