@@ -30,7 +30,7 @@
         "@types/lodash": "^4.14.150",
         "@types/node": "^13.13.5",
         "@types/sha.js": "^2.4.0",
-        "@types/verror": "^1.10.3",
+        "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
         "copy-webpack-plugin": "^5.1.1",
         "fork-ts-checker-webpack-plugin": "^4.1.3",
