@@ -5,6 +5,7 @@ import * as escapeHtml from 'escape-html';
 import { injectable } from 'inversify';
 import { SummaryReportData, UrlToReportMap } from './summary-report-data';
 import { SummaryReportGenerator } from './summary-report-generator';
+import { link } from 'fs';
 
 // tslint:disable-next-line: no-var-requires no-require-imports no-unsafe-any
 const pretty: (html: string) => string = require('pretty');
@@ -17,6 +18,7 @@ type HtmlSummaryLink = {
 type HtmlSummaryData = {
     passedLinks: HtmlSummaryLink[];
     failedLinks: HtmlSummaryLink[];
+    unScannableUrls: string[];
 };
 
 @injectable()
@@ -25,10 +27,12 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
         const htmlSummaryData: HtmlSummaryData = {
             failedLinks: [],
             passedLinks: [],
+            unScannableUrls: [],
         };
 
         htmlSummaryData.failedLinks = this.getHtmlLinkData(summaryReportData.failedUrlToReportMap);
         htmlSummaryData.passedLinks = this.getHtmlLinkData(summaryReportData.passedUrlToReportMap);
+        htmlSummaryData.unScannableUrls = summaryReportData.unScannableUrls;
 
         return pretty(`
         <!DOCTYPE html>
@@ -47,10 +51,11 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
     private getHtmlBody(htmlSummaryData: HtmlSummaryData): string {
         const totalUrlsScannedInfo = `
         <b>
-            Total Urls Scanned - ${htmlSummaryData.failedLinks.length + htmlSummaryData.passedLinks.length}
+            Total Urls - ${htmlSummaryData.failedLinks.length + htmlSummaryData.passedLinks.length + htmlSummaryData.unScannableUrls.length}
         </b>
         `;
-        if (htmlSummaryData.failedLinks.length === 0 && htmlSummaryData.passedLinks.length === 0) {
+
+        if (htmlSummaryData.failedLinks.length === 0 && htmlSummaryData.passedLinks.length === 0 && htmlSummaryData.unScannableUrls.length === 0) {
             return totalUrlsScannedInfo;
         }
 
@@ -59,6 +64,7 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
         <ul>
             ${this.getFailedLinksHtml(htmlSummaryData)}
             ${this.getPassedLinksHtml(htmlSummaryData)}
+            ${this.getunScannableUrls(htmlSummaryData)}
         </ul>`;
     }
 
@@ -78,10 +84,25 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
         return this.getLinksSection('Passed Urls', htmlSummaryData.passedLinks);
     }
 
+    private getunScannableUrls(htmlSummaryData: HtmlSummaryData): string {
+        if (htmlSummaryData.unScannableUrls.length === 0) {
+            return '';
+        }
+
+        const htmlLinks: HtmlSummaryLink[] = htmlSummaryData.unScannableUrls.map((url) => {
+            return {
+                fileName: url,
+                link: url,
+            } as HtmlSummaryLink;
+        });
+
+        return this.getLinksSection('UnScannable Urls', htmlLinks);
+    }
+
     private getLinksSection(sectionName: string, links: HtmlSummaryLink[]): string {
         return `
         <li>
-            ${sectionName}
+            ${sectionName} - ${link.length}
             <ul>
                 ${this.getHtmlLinks(links)}
             </ul>

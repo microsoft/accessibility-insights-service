@@ -65,6 +65,15 @@ describe(HtmlSummaryReportGenerator, () => {
                 unScannableUrls: [],
             } as SummaryReportData,
         ],
+        [
+            'has unScannable urls only',
+            {
+                failedUrlToReportMap: {},
+                passedUrlToReportMap: {},
+                violationCountByRuleMap: {},
+                unScannableUrls: ['url'],
+            } as SummaryReportData,
+        ],
     ])('logs violation summary when %s', async (testCaseName, testCase) => {
         expect(testSubject.generateReport(testCase)).toMatchSnapshot();
     });
