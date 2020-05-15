@@ -13,5 +13,5 @@ export interface SummaryReportData {
     violationCountByRuleMap: ViolationCountMap;
     failedUrlToReportMap: UrlToReportMap;
     passedUrlToReportMap: UrlToReportMap;
-    unScannableUrls: string[];
+    unscannableUrls: string[];
 }

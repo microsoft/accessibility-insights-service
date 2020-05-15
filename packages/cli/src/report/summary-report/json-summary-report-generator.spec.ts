@@ -24,7 +24,7 @@ describe(JsonSummaryReportGenerator, () => {
                     rule1WithALongName11111111111111111: 10,
                     rule2: 3,
                 },
-                unScannableUrls: [],
+                unscannableUrls: [],
             } as SummaryReportData,
         ],
         [
@@ -33,7 +33,7 @@ describe(JsonSummaryReportGenerator, () => {
                 failedUrlToReportMap: { url1: 'file1' },
                 passedUrlToReportMap: { url1: 'file1' },
                 violationCountByRuleMap: {},
-                unScannableUrls: [],
+                unscannableUrls: [],
             } as SummaryReportData,
         ],
     ])('logs violation summary when %s', async (testCaseName, testCase) => {

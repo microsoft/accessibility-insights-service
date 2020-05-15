@@ -23,7 +23,7 @@ export class FileCommandRunner implements CommandRunner {
         violationCountByRuleMap: {},
         failedUrlToReportMap: {},
         passedUrlToReportMap: {},
-        unScannableUrls: [],
+        unscannableUrls: [],
     } as SummaryReportData;
 
     private readonly uniqueUrls = new Set();
@@ -93,7 +93,7 @@ export class FileCommandRunner implements CommandRunner {
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
-            this.summaryReportData.unScannableUrls.push(url);
+            this.summaryReportData.unscannableUrls.push(url);
         }
     }
 
