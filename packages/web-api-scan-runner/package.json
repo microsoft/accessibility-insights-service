@@ -65,6 +65,6 @@
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
         "yargs": "^15.3.1",
-        "accessibility-insights-report": "^1.0.2"
+        "accessibility-insights-report": "^1.0.3"
     }
 }
