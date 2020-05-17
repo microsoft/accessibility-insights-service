@@ -3,7 +3,6 @@
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { accessibilityScanOperation, AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
-import { RequestQueueMemory } from '../request-queue-memory';
 import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
@@ -70,20 +69,6 @@ export abstract class PageProcessorBase {
             page,
             requestQueue: this.requestQueue,
             pseudoUrls: this.discoveryPatterns,
-            transformRequestFunction: (request: Apify.RequestOptions) => {
-                // TODO remove RequestQueueMemory dependency
-                if (this.requestQueue instanceof RequestQueueMemory) {
-                    if (this.requestQueue.sameOriginRequestFrequency(request.url) > 25) {
-                        console.log(`The URL ${request.url} has exceeded same-origin threshold and will not be queued.`);
-
-                        return undefined;
-                    } else {
-                        return request;
-                    }
-                }
-
-                return request;
-            },
         });
         console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
 

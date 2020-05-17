@@ -36,7 +36,17 @@ export class RequestQueueMemory extends RequestQueueBase {
         const newRequest = request instanceof Apify.Request ? request : new Apify.Request(request);
         newRequest.id = utilities.generateHash(newRequest.uniqueKey);
 
-        // count original requests and skip requests with element simulation
+        // skip requests that has exceeded same-origin threshold
+        if (this.exceededSameOriginRequestFrequency(newRequest.url)) {
+            return {
+                request: newRequest,
+                requestId: newRequest.uniqueKey as string,
+                wasAlreadyPresent: true,
+                wasAlreadyHandled: true,
+            };
+        }
+
+        // count original requests only
         if (isEmpty(newRequest.userData)) {
             this.countRequestOrigin(newRequest.url);
         }
@@ -147,20 +157,27 @@ export class RequestQueueMemory extends RequestQueueBase {
         return handledCount;
     }
 
-    public sameOriginRequestFrequency(url: string): number {
+    private async getFirstRequestToDequeue(): Promise<CustomRequest> {
+        for (const key of Object.keys(this.requests)) {
+            if (!this.requests[key].dequeued && isNil(this.requests[key].handledAt)) {
+                return this.requests[key];
+            }
+        }
+
+        return undefined;
+    }
+
+    private exceededSameOriginRequestFrequency(url: string): boolean {
+        const maximumSameOriginRequestsThreshold = 25;
         const urlNormalized = this.normalizeUrl(url);
         const origin = this.getUrlOrigin(urlNormalized);
 
-        return this.sameOriginRequests[origin] === undefined ? undefined : this.sameOriginRequests[origin];
+        return this.sameOriginRequests[origin] > maximumSameOriginRequestsThreshold;
     }
 
     private countRequestOrigin(url: string): void {
-        const minimumSegmentsToCount = 3;
         const urlNormalized = this.normalizeUrl(url);
-
-        const urlParsed = nodeUrl.parse(urlNormalized);
-        const segments = urlParsed.pathname.split('/').filter((s) => !isEmpty(s));
-        if (segments.length < minimumSegmentsToCount) {
+        if (!this.hasMinimumSegments(urlNormalized)) {
             return;
         }
 
@@ -172,6 +189,14 @@ export class RequestQueueMemory extends RequestQueueBase {
         }
     }
 
+    private hasMinimumSegments(url: string): boolean {
+        const minimumSegmentsToCount = 3;
+        const urlParsed = nodeUrl.parse(url);
+        const segments = urlParsed.pathname.split('/').filter((s) => !isEmpty(s));
+
+        return segments.length >= minimumSegmentsToCount;
+    }
+
     private getUrlOrigin(url: string): string {
         return url.substring(0, url.lastIndexOf('/'));
     }
@@ -180,15 +205,5 @@ export class RequestQueueMemory extends RequestQueueBase {
         const urlParsed = nodeUrl.parse(url);
 
         return url.replace(urlParsed.hash, '').replace(urlParsed.search, '').toLocaleLowerCase();
-    }
-
-    private async getFirstRequestToDequeue(): Promise<CustomRequest> {
-        for (const key of Object.keys(this.requests)) {
-            if (!this.requests[key].dequeued && isNil(this.requests[key].handledAt)) {
-                return this.requests[key];
-            }
-        }
-
-        return undefined;
     }
 }
