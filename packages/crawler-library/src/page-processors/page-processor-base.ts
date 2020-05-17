@@ -74,7 +74,7 @@ export abstract class PageProcessorBase {
                 // TODO remove RequestQueueMemory dependency
                 if (this.requestQueue instanceof RequestQueueMemory) {
                     if (this.requestQueue.sameOriginRequestFrequency(request.url) > 25) {
-                        console.log(`URL ${request.url} has exceeded same-origin threshold and will not be queued.`);
+                        console.log(`The URL ${request.url} has exceeded same-origin threshold and will not be queued.`);
 
                         return undefined;
                     } else {

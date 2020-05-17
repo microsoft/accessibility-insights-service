@@ -149,20 +149,22 @@ export class RequestQueueMemory extends RequestQueueBase {
 
     public sameOriginRequestFrequency(url: string): number {
         const urlNormalized = this.normalizeUrl(url);
+        const origin = this.getUrlOrigin(urlNormalized);
 
-        return this.sameOriginRequests[urlNormalized] === undefined ? undefined : this.sameOriginRequests[urlNormalized];
+        return this.sameOriginRequests[origin] === undefined ? undefined : this.sameOriginRequests[origin];
     }
 
     private countRequestOrigin(url: string): void {
         const minimumSegmentsToCount = 3;
         const urlNormalized = this.normalizeUrl(url);
+
         const urlParsed = nodeUrl.parse(urlNormalized);
         const segments = urlParsed.pathname.split('/').filter((s) => !isEmpty(s));
         if (segments.length < minimumSegmentsToCount) {
             return;
         }
 
-        const origin = urlNormalized.substring(0, urlNormalized.lastIndexOf('/'));
+        const origin = this.getUrlOrigin(urlNormalized);
         if (this.sameOriginRequests[origin] === undefined) {
             this.sameOriginRequests[origin] = 1;
         } else {
@@ -170,10 +172,14 @@ export class RequestQueueMemory extends RequestQueueBase {
         }
     }
 
+    private getUrlOrigin(url: string): string {
+        return url.substring(0, url.lastIndexOf('/'));
+    }
+
     private normalizeUrl(url: string): string {
         const urlParsed = nodeUrl.parse(url);
 
-        return url.replace(urlParsed.hash, '').replace(urlParsed.search, '');
+        return url.replace(urlParsed.hash, '').replace(urlParsed.search, '').toLocaleLowerCase();
     }
 
     private async getFirstRequestToDequeue(): Promise<CustomRequest> {
