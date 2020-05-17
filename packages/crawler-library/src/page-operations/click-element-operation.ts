@@ -3,10 +3,10 @@
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 
-export declare type ElementClickTransition = 'navigation' | 'action';
+export declare type ElementClickAction = 'navigation' | 'page-action';
 
 export interface ElementClickOperationResult {
-    transition: ElementClickTransition;
+    clickAction: ElementClickAction;
     navigationUrl?: string;
 }
 
@@ -41,5 +41,5 @@ export const clickElementOperation: ClickElementOperation = async (
         },
     });
 
-    return { transition: navigated ? 'navigation' : 'action', navigationUrl };
+    return { clickAction: navigated ? 'navigation' : 'page-action', navigationUrl };
 };

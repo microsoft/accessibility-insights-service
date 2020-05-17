@@ -3,7 +3,8 @@
 
 // tslint:disable: no-unsafe-any no-any no-require-imports no-var-requires no-submodule-imports
 import Apify from 'apify';
-import { cloneDeep, isNil } from 'lodash';
+import { cloneDeep, isEmpty, isNil } from 'lodash';
+import * as nodeUrl from 'url';
 import { RequestQueueBase } from './request-queue-base';
 import * as utilities from './utilities';
 
@@ -18,6 +19,10 @@ export class RequestQueueMemory extends RequestQueueBase {
         [key: string]: CustomRequest;
     } = {};
 
+    private readonly sameOriginRequests: {
+        [key: string]: number;
+    } = {};
+
     constructor() {
         super(apifyUtilities.cryptoRandomObjectId(), 'inMemoryQueue');
     }
@@ -30,6 +35,11 @@ export class RequestQueueMemory extends RequestQueueBase {
     ): Promise<Apify.QueueOperationInfo> {
         const newRequest = request instanceof Apify.Request ? request : new Apify.Request(request);
         newRequest.id = utilities.generateHash(newRequest.uniqueKey);
+
+        // count original requests and skip requests with element simulation
+        if (isEmpty(newRequest.userData)) {
+            this.countRequestOrigin(newRequest.url);
+        }
 
         if (isNil(this.requests[newRequest.uniqueKey])) {
             // tslint:disable-next-line: no-object-literal-type-assertion
@@ -135,6 +145,35 @@ export class RequestQueueMemory extends RequestQueueBase {
         }
 
         return handledCount;
+    }
+
+    public sameOriginRequestFrequency(url: string): number {
+        const urlNormalized = this.normalizeUrl(url);
+
+        return this.sameOriginRequests[urlNormalized] === undefined ? undefined : this.sameOriginRequests[urlNormalized];
+    }
+
+    private countRequestOrigin(url: string): void {
+        const minimumSegmentsToCount = 3;
+        const urlNormalized = this.normalizeUrl(url);
+        const urlParsed = nodeUrl.parse(urlNormalized);
+        const segments = urlParsed.pathname.split('/').filter((s) => !isEmpty(s));
+        if (segments.length < minimumSegmentsToCount) {
+            return;
+        }
+
+        const origin = urlNormalized.substring(0, urlNormalized.lastIndexOf('/'));
+        if (this.sameOriginRequests[origin] === undefined) {
+            this.sameOriginRequests[origin] = 1;
+        } else {
+            this.sameOriginRequests[origin] += 1;
+        }
+    }
+
+    private normalizeUrl(url: string): string {
+        const urlParsed = nodeUrl.parse(url);
+
+        return url.replace(urlParsed.hash, '').replace(urlParsed.search, '');
     }
 
     private async getFirstRequestToDequeue(): Promise<CustomRequest> {

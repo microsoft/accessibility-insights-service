@@ -31,15 +31,17 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
             const operationResult = await this.clickElementOp(page, activeElement.selector, this.requestQueue, this.discoveryPatterns);
-            if (operationResult.transition === 'action') {
+            if (operationResult.clickAction === 'page-action') {
                 await this.saveSnapshot(page, activeElement.hash);
                 await this.enqueueLinks(page);
                 await this.accessibilityScanOp(page, request.id as string, this.blobStore);
             }
             await this.pushScanData(request.id as string, request.url, {
-                activatedElement: activeElement,
-                elementClickTransition: operationResult.transition,
-                elementNavigationUrl: operationResult.navigationUrl,
+                activatedElement: {
+                    ...activeElement,
+                    clickAction: operationResult.clickAction,
+                    navigationUrl: operationResult.navigationUrl,
+                },
             });
         }
     };
