@@ -58,6 +58,7 @@ export abstract class PageProcessorBase {
             id: request.id as string,
             url: request.url,
             succeeded: false,
+            context: request.userData,
             error: JSON.stringify(error),
             requestErrors: request.errorMessages as string[],
         };

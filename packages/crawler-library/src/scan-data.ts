@@ -12,6 +12,7 @@ export interface ScanData {
         clickAction: string;
         navigationUrl?: string;
     };
+    context?: unknown;
     error?: string;
     requestErrors?: string[];
 }
