@@ -28,7 +28,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/cli-spinner": "^0.2.0",
-        "@types/jest": "^25.2.1",
+        "@types/jest": "^25.2.3",
         "@types/lodash": "^4.14.150",
         "@types/node": "^13.13.5",
         "@types/request-promise": "^4.1.46",
