@@ -2358,10 +2358,10 @@
     jest-diff "^25.2.1"
     pretty-format "^25.2.1"
 
-"@types/lodash@^4.14.119", "@types/lodash@^4.14.150":
-  version "4.14.150"
-  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.150.tgz#649fe44684c3f1fcb6164d943c5a61977e8cf0bd"
-  integrity sha512-kMNLM5JBcasgYscD9x/Gvr6lTAv2NVgsKtet/hm93qMyf/D1pt+7jeEZklKJKxMVmXjxbRVQQGfqDSfipYCO6w==
+"@types/lodash@^4.14.119", "@types/lodash@^4.14.152":
+  version "4.14.152"
+  resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.152.tgz#7e7679250adce14e749304cdb570969f77ec997c"
+  integrity sha512-Vwf9YF2x1GE3WNeUMjT5bTHa2DqgUo87ocdgTScupY2JclZ5Nn7W2RLM/N0+oreexUk8uaVugR81NnTY/jNNXg==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -2413,10 +2413,10 @@
   resolved "https://registry.yarnpkg.com/@types/prettier/-/prettier-1.19.1.tgz#33509849f8e679e4add158959fdb086440e9553f"
   integrity sha512-5qOlnZscTn4xxM5MeGXAMOsIOIKIbh9e85zJWfBRVPlRMEVawzoPhINYbRGkBZCI8LxvBe7tJCdWiarA99OZfQ==
 
-"@types/puppeteer@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-2.1.0.tgz#31367580654632f87f86df565f1bde0533577401"
-  integrity sha512-QIRQXl0VaSgnwOZ1LwxD321Tfb1jLOzCWuF2BrwjEkWq2IhxSicPOddUywLV7dRSO6mcU4sWKRdoGdci6gk0Aw==
+"@types/puppeteer@^3.0.0":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/puppeteer/-/puppeteer-3.0.0.tgz#24cdcc131e319477608d893f0017e08befd70423"
+  integrity sha512-59+fkfHHXHzX5rgoXIMnZyzum7ZLx/Wc3fhsOduFThpTpKbzzdBHMZsrkKGLunimB4Ds/tI5lXTRLALK8Mmnhg==
   dependencies:
     "@types/node" "*"
 
@@ -6481,10 +6481,10 @@ jest-haste-map@^25.5.1:
   optionalDependencies:
     fsevents "^2.1.2"
 
-jest-html-reporter@^3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/jest-html-reporter/-/jest-html-reporter-3.1.2.tgz#fc6cba42050bda7d8b0f5747bc527b9468f409cc"
-  integrity sha512-ZLPCvjQ/9kKU1m7GkzmNudaIoWvCdYW/Zk5SwtIvBgPd3bC5pHcoRVyQp3DH0qIWhXFkhaXqwuU5p0FE96mo/g==
+jest-html-reporter@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/jest-html-reporter/-/jest-html-reporter-3.1.3.tgz#e000c7a1e83674fc540bc5146ae511f17859c231"
+  integrity sha512-OZFCCwH/N2X8nsCK11dKJy88DdziKwJOZvW4ZzczS+TP74bpGOxTFcJ876nShAMbiPbSQc9VOFuc1x+RejTSYQ==
   dependencies:
     "@babel/core" "^7.9.0"
     "@babel/preset-env" "^7.8.7"
@@ -7592,10 +7592,10 @@ moment@2.24.0:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
-moment@2.25.3, moment@^2.25.3:
-  version "2.25.3"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.25.3.tgz#252ff41319cf41e47761a1a88cab30edfe9808c0"
-  integrity sha512-PuYv0PHxZvzc15Sp8ybUCoQ+xpyPWvjOuK72a5ovzp2LI32rJXOiIfyoFoYvG3s6EwwrdkMyWuRiEHSZRLJNdg==
+moment@2.26.0, moment@^2.25.3, moment@^2.26.0:
+  version "2.26.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.26.0.tgz#5e1f82c6bafca6e83e808b30c8705eed0dcbd39a"
+  integrity sha512-oIixUO+OamkUkwjhAVE18rAMfRJNsNe/Stid/gwHSOfHrOtw9EhAY2AHvdKZ/k/MggcYELFCJz/Sn2pL8b8JMw==
 
 move-concurrently@^1.0.1:
   version "1.0.1"
