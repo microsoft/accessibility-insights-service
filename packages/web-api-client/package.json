@@ -21,7 +21,7 @@
     "devDependencies": {
         "@types/jest": "^25.2.1",
         "@types/lodash": "^4.14.152",
-        "@types/node": "^13.13.5",
+        "@types/node": "^14.0.5",
         "@types/request-promise": "^4.1.46",
         "@types/request": "^2.48.5",
         "jest": "^25.5.3",
