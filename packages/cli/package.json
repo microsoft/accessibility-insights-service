@@ -39,7 +39,7 @@
         "jest-circus": "^25.5.3",
         "jest-junit": "^10.0.0",
         "mkdirp": "^1.0.4",
-        "mockdate": "^2.0.5",
+        "mockdate": "^3.0.2",
         "rimraf": "^3.0.2",
         "shebang-loader": "^0.0.1",
         "ts-jest": "^26.0.0",
