@@ -45,7 +45,7 @@ export class OnDemandDispatcher {
                     await this.sender.sendRequestToScan(response.item);
                     this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
                     // tslint:disable-next-line: no-null-keyword
-                    this.logger.trackEvent('ScanRequestQueued', null, { queuedRequests: itemCount });
+                    this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: itemCount });
                 }
             } while (continuationToken !== undefined);
             currentQueueSize = await this.sender.getCurrentQueueSize();

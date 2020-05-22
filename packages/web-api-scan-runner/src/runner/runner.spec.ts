@@ -253,7 +253,13 @@ describe(Runner, () => {
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
 
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
+
         await runner.run();
+
+        loggerMock.verifyAll();
     });
 
     it('sets scan status to pass if violation length = 0', async () => {
@@ -321,6 +327,10 @@ describe(Runner, () => {
             scanExecutionTime: executionTime,
             scanTotalTime: executionTime + queueTime,
         };
+
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
 
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();

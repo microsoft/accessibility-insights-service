@@ -3,7 +3,7 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ContextAwareLogger, ScanUrlsAddedMeasurements } from 'logger';
+import { ContextAwareLogger, ScanRequestAcceptedMeasurements } from 'logger';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRequestProvider,
@@ -54,11 +54,11 @@ export class ScanBatchRequestFeedController extends WebController {
         await Promise.all(
             batchDocuments.map(async (document) => {
                 const addedRequests = await this.processDocument(document);
-                const scanUrlsAddedMeasurements: ScanUrlsAddedMeasurements = {
-                    addedUrls: addedRequests,
+                const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
+                    acceptedScanRequests: addedRequests,
                 };
 
-                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanUrlsAddedMeasurements);
+                this.logger.trackEvent('ScanRequestsAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
 
                 this.logger.logInfo(
                     `[ScanBatchRequestFeedController] processed batch request document`,

@@ -653,11 +653,11 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/acceptedScanRequests",
+                                                            "name": "customEvents/custom/pendingScanRequests",
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "acceptedScanRequests(Sum)",
+                                                                "displayName": "pendingScanRequests(Sum)",
                                                                 "color": "#2dc004"
                                                             }
                                                         },
