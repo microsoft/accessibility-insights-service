@@ -3,7 +3,7 @@
 import { GuidGenerator, RestApiConfig, ServiceConfiguration, Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { BatchScanRequestMeasurements, ContextAwareLogger } from 'logger';
+import { ContextAwareLogger, ScanRequestReceivedMeasurements } from 'logger';
 import {
     ApiController,
     HttpResponse,
@@ -75,14 +75,14 @@ export class ScanRequestController extends ApiController {
             scanRequestResponse: JSON.stringify(processedData.scanResponses),
         });
 
-        const measurements: BatchScanRequestMeasurements = {
+        const measurements: ScanRequestReceivedMeasurements = {
             totalScanRequests: totalUrls,
-            acceptedScanRequests: totalUrls - invalidUrls,
+            pendingScanRequests: totalUrls - invalidUrls,
             rejectedScanRequests: invalidUrls,
         };
 
         // tslint:disable-next-line: no-null-keyword
-        this.logger.trackEvent('BatchScanRequestSubmitted', null, measurements);
+        this.logger.trackEvent('ScanRequestReceived', null, measurements);
     }
 
     private getResponse(processedData: ProcessedBatchRequestData): ScanRunResponse | ScanRunResponse[] {

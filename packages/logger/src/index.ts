@@ -8,12 +8,12 @@ export { registerGlobalLoggerToContainer, registerContextAwareLoggerToContainer 
 export { BaseTelemetryProperties } from './base-telemetry-properties';
 export {
     BaseTelemetryMeasurements,
-    BatchScanRequestMeasurements,
+    ScanRequestReceivedMeasurements,
     BatchPoolMeasurements,
     ScanTaskStartedMeasurements,
     ScanTaskCompletedMeasurements,
     TelemetryMeasurements,
-    ScanUrlsAddedMeasurements,
+    ScanRequestAcceptedMeasurements,
     ScanRequestQueuedMeasurements,
 } from './logger-event-measurements';
 export { AvailabilityTelemetry } from './availability-telemetry';

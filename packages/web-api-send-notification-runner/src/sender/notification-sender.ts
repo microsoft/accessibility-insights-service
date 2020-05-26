@@ -26,15 +26,15 @@ export class NotificationSender {
     ) {}
 
     public async sendNotification(): Promise<void> {
-        const notificationSenderConfigData = this.notificationSenderConfig.getConfig();
+        const notificationSenderMetadata = this.notificationSenderConfig.getConfig();
 
-        this.logger.logInfo(`Reading page scan run result ${notificationSenderConfigData.scanId}`);
+        this.logger.logInfo(`Reading page scan run result ${notificationSenderMetadata.scanId}`);
         this.logger.setCustomProperties({
-            scanId: notificationSenderConfigData.scanId,
+            scanId: notificationSenderMetadata.scanId,
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
         });
 
-        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderConfigData);
+        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderMetadata);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -53,7 +53,7 @@ export class NotificationSender {
 
         this.logger.trackEvent('SendNotificationTaskStarted');
         while (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-            this.logger.logInfo(`Sending notification, try #${numberOfTries}`);
+            this.logger.logInfo(`Sending scan result notification. Retry count ${numberOfTries}`);
             let response;
             try {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
@@ -61,27 +61,35 @@ export class NotificationSender {
 
                 if (this.responseParser.isSuccessStatusCode(response)) {
                     this.logger.trackEvent('SendNotificationTaskSucceeded');
-                    this.logger.logInfo(`Notification sent Successfully!, try #${numberOfTries}`);
+                    this.logger.logInfo(`Scan result notification request succeeded. Retry count ${numberOfTries}`);
                     notificationState = 'sent';
                     error = null;
+
                     break;
                 } else {
                     this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(
-                        `Notification sent failed!, try #${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
+                        `Scan result notification request failed. Retry count ${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
                     // tslint:disable-next-line: no-unsafe-any
                     error = { errorType: 'HttpErrorCode', message: response.body };
                 }
             } catch (e) {
                 this.logger.trackEvent('SendNotificationTaskFailed');
-                this.logger.logError(`Notification sent failed!, error message: ${(e as Error).message}`);
+                this.logger.logError(`Scan result notification request failed. Error: ${(e as Error).message}`);
                 error = { errorType: 'InternalError', message: (e as Error).message };
             }
+
             numberOfTries = numberOfTries + 1;
             if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
                 await this.system.wait(5000);
             }
+        }
+
+        if (notificationState === 'sent') {
+            this.logger.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 });
+        } else {
+            this.logger.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 });
         }
 
         return {
