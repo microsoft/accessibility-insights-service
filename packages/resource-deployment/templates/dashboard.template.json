@@ -940,11 +940,11 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/scanRequestNotificationsSucceeded",
+                                                            "name": "customEvents/custom/scanRequestNotificationsCompleted",
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
                                                             "metricVisualization": {
-                                                                "displayName": "scanRequestNotificationsSucceeded"
+                                                                "displayName": "scanRequestNotificationsCompleted"
                                                             }
                                                         },
                                                         {
@@ -1186,7 +1186,7 @@
                                                             {
                                                                 "key": "customEvent/name",
                                                                 "operator": 0,
-                                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                                                "values": ["ScanTaskStarted", "ScanTaskCompleted", "ScanTaskFailed"]
                                                             }
                                                         ]
                                                     },
@@ -1222,7 +1222,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Batch Scan Task Count Succeeded vs Completed",
+                                                    "title": "Batch Scan Task States",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -1257,7 +1257,7 @@
                                         "customEvent/name": {
                                             "model": {
                                                 "operator": "equals",
-                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                                "values": ["ScanTaskStarted", "ScanTaskCompleted", "ScanTaskFailed"]
                                             }
                                         }
                                     }
@@ -1676,7 +1676,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Task states",
+                                                    "title": "Task States",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -1748,7 +1748,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Batch Account Task states",
+                                                    "title": "Batch Account Task States",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,

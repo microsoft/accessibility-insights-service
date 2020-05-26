@@ -135,13 +135,13 @@ describe(BaseAppInsightsLoggerClient, () => {
                         It.isValue({
                             name: 'HealthCheck',
                             properties: { foo: 'bar', ...testSubject.getAdditionalPropertiesToAddToEvent() },
-                            measurements: { succeededScanTasks: 1 },
+                            measurements: { completedScanRequests: 1 },
                         }),
                     ),
                 )
                 .verifiable();
 
-            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { succeededScanTasks: 1 });
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { completedScanRequests: 1 });
 
             verifyMocks();
         });

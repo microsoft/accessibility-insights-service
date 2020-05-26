@@ -71,7 +71,6 @@ export class Runner {
         try {
             await this.webDriverTask.launch();
             await this.scan(pageScanResult, scanMetadata.url);
-            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         } catch (error) {
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
@@ -86,6 +85,8 @@ export class Runner {
                 completedScanTasks: 1,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
+            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+
             try {
                 await this.webDriverTask.close();
             } catch (error) {
@@ -116,11 +117,9 @@ export class Runner {
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Updating page scan run result state to failed`);
-            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
         } else {
             this.logger.logInfo(`Updating page scan run result state to completed`);
-            this.logger.trackEvent('ScanTaskSucceeded', undefined, { succeededScanTasks: 1 });
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
