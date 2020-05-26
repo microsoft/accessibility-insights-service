@@ -113,7 +113,7 @@ describe(GlobalLogger, () => {
 
         it('when properties/measurements passed', async () => {
             const properties = { foo: 'bar' };
-            const measurements = { scanWaitTime: 1 };
+            const measurements = { succeededScanTasks: 1 };
             setupCallsForTelemetrySetup();
             await testSubject.setup();
 

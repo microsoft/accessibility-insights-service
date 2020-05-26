@@ -34,8 +34,12 @@ All event names are defined in src/logger-event.ts
     -   scanRequestNotificationsFailed: number of scan result notification request failed
 -   **ScanTaskStarted:** Sent when a scan begins executing. Custom measurements:
     -   scanWaitTime: number of seconds between when the original scan request was received and when the scan begins executing
+    -   startedScanTasks: number of scan task started
 -   **ScanTaskCompleted:** Sent when a scan completes (on both success and failure). Custom measurements:
     -   scanExecutionTime: number of seconds between when the scan began executing (when scanTaskStarted was sent) and when the scan completed
     -   scanTotalTime: number of seconds between when the original scan request was received and when the scan completed (equal to scanExecutionTime + scanWaitTime)
--   **ScanTaskSucceeded:** Sent when a scan completes successfully (in addition to ScanTaskCompleted)
--   **ScanTaskFailed:** Sent when a scan fails (in addition to ScanTaskCompleted)
+    -   completedScanTasks: number of scan task completed
+-   **ScanTaskSucceeded:** Sent when a scan completes successfully (in addition to ScanTaskCompleted). Custom measurements:
+    -   succeededScanTasks: number of scan task succeeded
+-   **ScanTaskFailed:** Sent when a scan fails (in addition to ScanTaskCompleted). Custom measurements:
+    -   failedScanTasks: number of scan task failed

@@ -322,10 +322,11 @@ describe(Runner, () => {
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
 
-        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime };
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime, startedScanTasks: 1 };
         const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
             scanExecutionTime: executionTime,
             scanTotalTime: executionTime + queueTime,
+            completedScanTasks: 1,
         };
 
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
@@ -334,8 +335,8 @@ describe(Runner, () => {
 
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded')).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed')).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded', undefined, { succeededScanTasks: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
 
         setupWebDriverCalls();
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());
@@ -362,16 +363,17 @@ describe(Runner, () => {
         const executionTime: number = 30;
         const timestamps = setupTimeMocks(queueTime, executionTime, passedAxeScanResults);
 
-        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime };
+        const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime, startedScanTasks: 1 };
         const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
             scanExecutionTime: executionTime,
             scanTotalTime: executionTime + queueTime,
+            completedScanTasks: 1,
         };
 
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed')).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded')).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskSucceeded', undefined, { succeededScanTasks: 1 })).verifiable(Times.never());
 
         setupWebDriverCalls();
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());

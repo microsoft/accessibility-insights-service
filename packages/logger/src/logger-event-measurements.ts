@@ -20,11 +20,21 @@ export interface BatchPoolMeasurements extends BaseTelemetryMeasurements {
 
 export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
     scanWaitTime: number;
+    startedScanTasks: number;
 }
 
 export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
     scanExecutionTime: number;
     scanTotalTime: number;
+    completedScanTasks: number;
+}
+
+export interface ScanTaskSucceededMeasurements extends BaseTelemetryMeasurements {
+    succeededScanTasks: number;
+}
+
+export interface ScanTaskFailedMeasurements extends BaseTelemetryMeasurements {
+    failedScanTasks: number;
 }
 
 export interface ScanRequestAcceptedMeasurements extends BaseTelemetryMeasurements {
@@ -60,8 +70,8 @@ export type TelemetryMeasurements = {
     BatchPoolStats: BatchPoolMeasurements;
     ScanTaskStarted: ScanTaskStartedMeasurements;
     ScanTaskCompleted: ScanTaskCompletedMeasurements;
-    ScanTaskSucceeded: null;
-    ScanTaskFailed: null;
+    ScanTaskSucceeded: ScanTaskSucceededMeasurements;
+    ScanTaskFailed: ScanTaskFailedMeasurements;
     ScanRequestReceived: ScanRequestReceivedMeasurements;
     ScanRequestsAccepted: ScanRequestAcceptedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;

@@ -4,7 +4,6 @@ import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
@@ -136,13 +135,13 @@ describe(BaseAppInsightsLoggerClient, () => {
                         It.isValue({
                             name: 'HealthCheck',
                             properties: { foo: 'bar', ...testSubject.getAdditionalPropertiesToAddToEvent() },
-                            measurements: { scanWaitTime: 1 },
+                            measurements: { succeededScanTasks: 1 },
                         }),
                     ),
                 )
                 .verifiable();
 
-            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { scanWaitTime: 1 });
+            testSubject.trackEvent('HealthCheck', { foo: 'bar' }, { succeededScanTasks: 1 });
 
             verifyMocks();
         });

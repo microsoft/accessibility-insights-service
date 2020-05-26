@@ -49,7 +49,10 @@ export class Runner {
         this.logger.setCustomProperties({ scanId: scanMetadata.id });
 
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
+        this.logger.trackEvent('ScanTaskStarted', undefined, {
+            scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
+            startedScanTasks: 1,
+        });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         const pageScanResult: Partial<OnDemandPageScanResult> = {
@@ -74,12 +77,13 @@ export class Runner {
             pageScanResult.run = this.createRunResult('failed', errorMessage);
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
             this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-            this.logger.trackEvent('ScanTaskFailed');
+            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
                 scanExecutionTime: (scanCompletedTimestamp - scanStartedTimestamp) / 1000,
                 scanTotalTime: (scanCompletedTimestamp - scanSubmittedTimestamp) / 1000,
+                completedScanTasks: 1,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
             try {
@@ -112,11 +116,11 @@ export class Runner {
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Updating page scan run result state to failed`);
-            this.logger.trackEvent('ScanTaskFailed');
+            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
         } else {
             this.logger.logInfo(`Updating page scan run result state to completed`);
-            this.logger.trackEvent('ScanTaskSucceeded');
+            this.logger.trackEvent('ScanTaskSucceeded', undefined, { succeededScanTasks: 1 });
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
