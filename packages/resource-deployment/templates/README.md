@@ -29,48 +29,59 @@ Time settings, including the overall time range and granularity of aggregations,
 
     -   Scan performance as a percentage of cases where the scanExecutionTime (see notes on Scan duration graph) did not exceed the target
 
--   **Scan duration (Seconds)**
+-   **Scan duration (seconds)**
 
     -   scanExecutionTime: The amount of time it took for the scan to run (starting when the batch worker begins the scan)
     -   scanWaitTime: The time from when the scan was submitted to when the batch worker started the scan
     -   scanTotalTime: The time from when the scan was submitted to when the scan completed and the report became available (scanExecutionTime + scanWaitTime)
 
--   **API Response Time (Seconds)**
+-   **API Response Time (milliseconds)**
 
-    -   Average response time for each azure function (including web-workers) during the time range
+    -   Average response time for each Azure function (including web-workers) during the time range
 
 -   **API Request Count**
 
-    -   Total number of requests for each azure function (including web-workers) during the time range
+    -   Total number of requests for each Azure function (including web-workers) during the time range
 
-*   **Failed Requests By Function Name**
+-   **API Failed Request Count**
 
-    -   Sum of failures by all azure functions (including web-workers) during the time range
+    -   Sum of failures by all Azure functions (including web-workers) during the time range
     -   Failure counts are aggregated over the set time granularity
 
--   **API Response Codes Count**
+-   **API Response Status Code Count**
 
-    -   Count of API response codes by category
+    -   Total number of API HTTP response status code by category during the time range
 
-*   **Scan Requests Accepted vs Rejected**
+-   **Scan Request Count by pipeline stages**
+
+    -   Total number of scan request by service pipeline stages during the time range
+
+-   **Scan Request Count Accepted vs Rejected**
 
     -   The total number of submitted scan requests, as well as how many were accepted or rejected (for invalid urls)
     -   Counts are aggregated over the set time granularity
 
--   **Scan Requests Succeeded vs Completed**
+-   **Batch Scan Task Count Succeeded vs Completed**
 
-    -   The total number of scans completed, as well as how many succeeded or failed
-    -   Counts are aggregated over the set time granularity
+    -   The total number of Batch scan task completed and succeeded
     -   Note: If there are no failures for the given time range, ScanTaskFailure may not appear in the legend
 
--   **Nodes State**
+-   **Batch Scan Task Duration (sec)**
 
-    -   State of all nodes in batch pools. Can be used to check batch pool availability. (This is the same as the Node States graph on the batch account overview)
+    -   The Batch scan task duration (seconds). Include task waiting, execution, and total time
 
--   **Average pool Sampling Interval (Seconds)**
+-   **Batch Account Node Count**
 
-    -   Sampling interval used for polling batch tasks
+    -   The Batch account pools node count by state during the time range. Can be used to check batch pool availability
 
--   **Batch Running Tasks**
+-   **Batch Account Task states**
 
-    -   Number of running pool tasks compared to the maximum number of allowed parallel tasks
+    -   The Batch account pools task events. Include task start, complete, and fail events.
+
+-   **E2E Test Results**
+
+    -   E2E test results for each service pipeline stage
+
+-   **E2E Test Results Over Time**
+
+    -   E2E test results during the time range
