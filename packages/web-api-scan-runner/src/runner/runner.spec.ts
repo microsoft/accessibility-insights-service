@@ -211,12 +211,11 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
 
         const timestamps = setupTimeMocks(queueTime, executionTime);
+        // need mock Date.Now() after code throws
+        loggerMock.setup((o) => o.logInfo(`Page scan run failed.`, It.isAny())).returns(() => MockDate.set(timestamps.scanCompleteTime));
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock
-            .setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 }))
-            .returns(() => MockDate.set(timestamps.scanCompleteTime))
-            .verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
 
         await runner.run();
 
@@ -281,12 +280,11 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
 
         const timestamps = setupTimeMocks(queueTime, executionTime);
+        // need mock Date.Now() after code throws
+        loggerMock.setup((o) => o.logInfo(`Page scan run failed.`, It.isAny())).returns(() => MockDate.set(timestamps.scanCompleteTime));
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock
-            .setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 }))
-            .returns(() => MockDate.set(timestamps.scanCompleteTime))
-            .verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
 
         await runner.run();
 
@@ -384,11 +382,11 @@ describe(Runner, () => {
 
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
 
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
 
         setupWebDriverCalls();
         setupUpdateScanRunResultCall(getRunningJobStateScanResult());

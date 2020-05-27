@@ -68,15 +68,15 @@ export class Runner {
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
+        let scanSucceeded: boolean;
         try {
             await this.webDriverTask.launch();
-            await this.scan(pageScanResult, scanMetadata.url);
+            scanSucceeded = await this.scan(pageScanResult, scanMetadata.url);
         } catch (error) {
+            scanSucceeded = false;
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
-            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
@@ -92,6 +92,11 @@ export class Runner {
             } catch (error) {
                 this.logger.logError(`Unable to close the web driver instance.`, { error: this.getErrorMessage(error) });
             }
+        }
+
+        if (!scanSucceeded) {
+            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
+            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         }
 
         this.logger.logInfo(`Writing page scan run result to a storage.`);
@@ -110,7 +115,7 @@ export class Runner {
         return isEmpty(notification?.scanNotifyUrl);
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<boolean> {
         this.logger.logInfo(`Running page scan.`);
 
         const axeScanResults = await this.scannerTask.scan(url);
@@ -130,6 +135,8 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+
+        return isNil(axeScanResults.error);
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {

@@ -3,6 +3,7 @@
 
 export declare type LoggerEvent =
     | 'HealthCheck'
+    | 'FunctionalTest'
     | 'BatchPoolStats'
     | 'ScanRequestReceived'
     | 'ScanRequestAccepted'
@@ -16,7 +17,6 @@ export declare type LoggerEvent =
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskFailed'
-    | 'FunctionalTest'
     | 'SendNotificationTaskStarted'
     | 'SendNotificationTaskCompleted'
     | 'SendNotificationTaskFailed';

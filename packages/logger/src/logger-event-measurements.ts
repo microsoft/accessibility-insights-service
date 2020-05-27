@@ -4,9 +4,7 @@
 // The measurement should include three main events by following the pattern:
 //
 // - Started event: This event is emitted once an operation has been started
-//
 // - Completed event: This event is emitted once an operation is completed, regardless of the operation success/failure state
-//
 // - Failed event: This event is emitted when an operation completes with a failure state
 //
 export interface BaseTelemetryMeasurements {
@@ -82,10 +80,6 @@ export interface SendNotificationTaskCompletedMeasurements extends BaseTelemetry
 
 export interface SendNotificationTaskFailedMeasurements extends BaseTelemetryMeasurements {
     failedScanNotificationTasks: number;
-}
-
-export interface SendNotificationTaskSucceededMeasurements extends BaseTelemetryMeasurements {
-    succeededScanNotificationTasks: number;
 }
 
 export type TelemetryMeasurements = {
