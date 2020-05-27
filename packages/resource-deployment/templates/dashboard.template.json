@@ -1232,6 +1232,46 @@
                                                                 "displayName": "startedScanTasks"
                                                             }
                                                         },
+                                                        "axisVisualization": {
+                                                            "x": {
+                                                                "isVisible": true,
+                                                                "axisType": 2
+                                                            },
+                                                            "y": {
+                                                                "isVisible": true,
+                                                                "axisType": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "filterCollection": {
+                                                        "filters": [
+                                                            {
+                                                                "key": "customEvent/name",
+                                                                "operator": 0,
+                                                                "values": ["ScanTaskFailed", "ScanTaskCompleted", "ScanTaskSucceeded"]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "grouping": {
+                                                        "dimension": "customEvent/name",
+                                                        "sort": 2,
+                                                        "top": 3
+                                                    }
+                                                },
+                                                "version": 2
+                                            }
+                                        },
+                                        {
+                                            "name": "sharedTimeRange",
+                                            "isOptional": true
+                                        }
+                                    ],
+                                    "type": "Extension/HubsExtension/PartType/MonitorChartPart",
+                                    "settings": {
+                                        "content": {
+                                            "options": {
+                                                "chart": {
+                                                    "metrics": [
                                                         {
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
