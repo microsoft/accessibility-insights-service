@@ -850,7 +850,7 @@
                                 "position": {
                                     "x": 0,
                                     "y": 14,
-                                    "colSpan": 11,
+                                    "colSpan": 12,
                                     "rowSpan": 4
                                 },
                                 "metadata": {
@@ -940,6 +940,17 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
+                                                            "name": "customEvents/custom/scanRequestNotificationsStarted",
+                                                            "aggregationType": 1,
+                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "metricVisualization": {
+                                                                "displayName": "scanRequestNotificationsStarted"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
                                                             "name": "customEvents/custom/scanRequestNotificationsCompleted",
                                                             "aggregationType": 1,
                                                             "namespace": "microsoft.insights/components/kusto",
@@ -988,9 +999,9 @@
                             },
                             "9": {
                                 "position": {
-                                    "x": 12,
+                                    "x": 13,
                                     "y": 14,
-                                    "colSpan": 9,
+                                    "colSpan": 8,
                                     "rowSpan": 4
                                 },
                                 "metadata": {
@@ -1107,7 +1118,7 @@
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Scan Request Count Accepted vs Rejected",
+                                                    "title": "Received Scan Request States",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -1214,15 +1225,70 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/count",
+                                                            "name": "startedScanTasks",
                                                             "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
-                                                                "displayName": "Events"
+                                                                "displayName": "startedScanTasks"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "completedScanTasks",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "completedScanTasks"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "failedScanTasks",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "failedScanTasks"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "startedScanNotificationTasks",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "startedScanNotificationTasks"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "completedScanNotificationTasks",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "completedScanNotificationTasks"
+                                                            }
+                                                        },
+                                                        {
+                                                            "resourceMetadata": {
+                                                                "id": "[variables('appInsightsResourceId')]"
+                                                            },
+                                                            "name": "failedScanNotificationTasks",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
+                                                            "metricVisualization": {
+                                                                "displayName": "failedScanNotificationTasks"
                                                             }
                                                         }
                                                     ],
-                                                    "title": "Batch Scan Task States",
+                                                    "title": "Batch Pipeline Task States",
                                                     "titleKind": 2,
                                                     "visualization": {
                                                         "chartType": 2,
@@ -1242,22 +1308,9 @@
                                                             }
                                                         },
                                                         "disablePinning": true
-                                                    },
-                                                    "grouping": {
-                                                        "dimension": "customEvent/name",
-                                                        "sort": 2,
-                                                        "top": 3
                                                     }
                                                 },
                                                 "version": 2
-                                            }
-                                        }
-                                    },
-                                    "filters": {
-                                        "customEvent/name": {
-                                            "model": {
-                                                "operator": "equals",
-                                                "values": ["ScanTaskStarted", "ScanTaskCompleted", "ScanTaskFailed"]
                                             }
                                         }
                                     }

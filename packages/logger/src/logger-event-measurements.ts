@@ -17,21 +17,7 @@ export interface BatchPoolMeasurements extends BaseTelemetryMeasurements {
     maxParallelTasks: number;
 }
 
-export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
-    scanWaitTime: number;
-    startedScanTasks: number;
-}
-
-export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
-    scanExecutionTime: number;
-    scanTotalTime: number;
-    completedScanTasks: number;
-}
-
-export interface ScanTaskFailedMeasurements extends BaseTelemetryMeasurements {
-    failedScanTasks: number;
-}
-
+// ScanRequest events
 export interface ScanRequestReceivedMeasurements extends BaseTelemetryMeasurements {
     totalScanRequests: number;
     pendingScanRequests: number;
@@ -70,6 +56,23 @@ export interface ScanRequestNotificationFailedMeasurements extends BaseTelemetry
     scanRequestNotificationsFailed: number;
 }
 
+// ScanTask events
+export interface ScanTaskStartedMeasurements extends BaseTelemetryMeasurements {
+    scanWaitTime: number;
+    startedScanTasks: number;
+}
+
+export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements {
+    scanExecutionTime: number;
+    scanTotalTime: number;
+    completedScanTasks: number;
+}
+
+export interface ScanTaskFailedMeasurements extends BaseTelemetryMeasurements {
+    failedScanTasks: number;
+}
+
+// SendNotificationTask events
 export interface SendNotificationTaskStartedMeasurements extends BaseTelemetryMeasurements {
     startedScanNotificationTasks: number;
 }
@@ -86,9 +89,6 @@ export type TelemetryMeasurements = {
     HealthCheck: null;
     FunctionalTest: null;
     BatchPoolStats: BatchPoolMeasurements;
-    ScanTaskStarted: ScanTaskStartedMeasurements;
-    ScanTaskCompleted: ScanTaskCompletedMeasurements;
-    ScanTaskFailed: ScanTaskFailedMeasurements;
     ScanRequestReceived: ScanRequestReceivedMeasurements;
     ScanRequestAccepted: ScanRequestAcceptedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;
@@ -98,6 +98,9 @@ export type TelemetryMeasurements = {
     ScanRequestNotificationStarted: ScanRequestNotificationStartedMeasurements;
     ScanRequestNotificationCompleted: ScanRequestNotificationCompletedMeasurements;
     ScanRequestNotificationFailed: ScanRequestNotificationFailedMeasurements;
+    ScanTaskStarted: ScanTaskStartedMeasurements;
+    ScanTaskCompleted: ScanTaskCompletedMeasurements;
+    ScanTaskFailed: ScanTaskFailedMeasurements;
     SendNotificationTaskStarted: SendNotificationTaskStartedMeasurements;
     SendNotificationTaskCompleted: SendNotificationTaskCompletedMeasurements;
     SendNotificationTaskFailed: SendNotificationTaskFailedMeasurements;
