@@ -76,11 +76,11 @@ Azure region - Azure region where the instances will be deployed. Available Azur
 
 . "${0%/*}/process-utilities.sh"
 
-function onExit {
+function onExit() {
     local exitCode=$?
 
     if [[ $exitCode != 0 ]]; then
-        echo "Installation failed with exit code $exitCode" 
+        echo "Installation failed with exit code $exitCode"
         echo "Killing all descendant processes"
         killDescendantProcesses $$
         echo "Killed all descendant processes"
@@ -127,10 +127,9 @@ function install() {
     . "${0%/*}/create-resource-group.sh"
     . "${0%/*}/wait-for-pending-deployments.sh"
     . "${0%/*}/create-storage-account.sh"
-
     . "${0%/*}/get-resource-names.sh"
 
-    echo "Starting parallel processes.."
+    echo "Starting parallel processes..."
 
     . "${0%/*}/create-api-management.sh" &
     apiManagmentProcessId="$!"
@@ -149,28 +148,21 @@ function install() {
     # Additionally, these should run sequentially because of interdependence.
 
     . "${0%/*}/setup-key-vault.sh"
-
-    parallelProcesses=(
-        "\"${0%/*}/batch-account-create.sh\" ; \"${0%/*}/job-schedule-create.sh\""
-        "${0%/*}/function-app-create.sh"
-    )
-    echo "Waiting for batch & function app setup processes"
-    runCommandsWithoutSecretsInParallel parallelProcesses
-
-    asyncProcessIds=()
+    . "${0%/*}/batch-account-create.sh"
+    . "${0%/*}/job-schedule-create.sh"
+    . "${0%/*}/function-app-create.sh"
 
     . "${0%/*}/create-dashboard.sh" &
-    asyncProcessIds+=("$!")
+    dashboardProcessId="$!"
 
-    echo "Waiting for api management creation process"
+    echo "Waiting for API Management service deployment completion"
     waitForProcesses apiManagmentProcessId
-
-    echo "Deploying rest api to apim"
+    echo "Deploying REST API configuration to API Management service"
     . "${0%/*}/deploy-rest-api.sh"
 
-    echo "Waiting for create dashboard process"
-    waitForProcesses asyncProcessIds
+    echo "Waiting for dashboard deployment completion"
+    waitForProcesses dashboardProcessId
 }
 
 install
-echo "Installation completed."
+echo "Installation completed"

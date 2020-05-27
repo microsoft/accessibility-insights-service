@@ -48,6 +48,7 @@ export class Runner {
         this.logger.logInfo(`Reading page scan run result.`);
         this.logger.setCustomProperties({ scanId: scanMetadata.id });
 
+        this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
@@ -67,10 +68,12 @@ export class Runner {
         try {
             await this.webDriverTask.launch();
             await this.scan(pageScanResult, scanMetadata.url);
+            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         } catch (error) {
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
+            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
             this.logger.trackEvent('ScanTaskFailed');
         } finally {
             const scanCompletedTimestamp: number = Date.now();

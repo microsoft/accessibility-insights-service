@@ -6,9 +6,9 @@ export interface BaseTelemetryMeasurements {
     [name: string]: number;
 }
 
-export interface BatchScanRequestMeasurements extends BaseTelemetryMeasurements {
+export interface ScanRequestReceivedMeasurements extends BaseTelemetryMeasurements {
     totalScanRequests: number;
-    acceptedScanRequests: number;
+    pendingScanRequests: number;
     rejectedScanRequests: number;
 }
 
@@ -27,25 +27,49 @@ export interface ScanTaskCompletedMeasurements extends BaseTelemetryMeasurements
     scanTotalTime: number;
 }
 
-export interface ScanUrlsAddedMeasurements extends BaseTelemetryMeasurements {
-    addedUrls: number;
+export interface ScanRequestAcceptedMeasurements extends BaseTelemetryMeasurements {
+    acceptedScanRequests: number;
 }
 
 export interface ScanRequestQueuedMeasurements extends BaseTelemetryMeasurements {
-    queuedRequests: number;
+    queuedScanRequests: number;
+}
+
+export interface ScanRequestRunningMeasurements extends BaseTelemetryMeasurements {
+    runningScanRequests: number;
+}
+
+export interface ScanRequestCompletedMeasurements extends BaseTelemetryMeasurements {
+    completedScanRequests: number;
+}
+
+export interface ScanRequestFailedMeasurements extends BaseTelemetryMeasurements {
+    failedScanRequests: number;
+}
+
+export interface ScanRequestNotificationSucceededMeasurements extends BaseTelemetryMeasurements {
+    scanRequestNotificationsSucceeded: number;
+}
+
+export interface ScanRequestNotificationFailedMeasurements extends BaseTelemetryMeasurements {
+    scanRequestNotificationsFailed: number;
 }
 
 export type TelemetryMeasurements = {
     HealthCheck: null;
-    ScanRequestSubmitted: null;
     BatchPoolStats: BatchPoolMeasurements;
-    BatchScanRequestSubmitted: BatchScanRequestMeasurements;
     ScanTaskStarted: ScanTaskStartedMeasurements;
     ScanTaskCompleted: ScanTaskCompletedMeasurements;
     ScanTaskSucceeded: null;
     ScanTaskFailed: null;
-    ScanRequestsAccepted: ScanUrlsAddedMeasurements;
+    ScanRequestReceived: ScanRequestReceivedMeasurements;
+    ScanRequestsAccepted: ScanRequestAcceptedMeasurements;
     ScanRequestQueued: ScanRequestQueuedMeasurements;
+    ScanRequestRunning: ScanRequestRunningMeasurements;
+    ScanRequestCompleted: ScanRequestCompletedMeasurements;
+    ScanRequestFailed: ScanRequestFailedMeasurements;
+    ScanRequestNotificationSucceeded: ScanRequestNotificationSucceededMeasurements;
+    ScanRequestNotificationFailed: ScanRequestNotificationFailedMeasurements;
     FunctionalTest: null;
     SendNotificationTaskStarted: null;
     SendNotificationTaskCompleted: null;

@@ -3,10 +3,15 @@
 
 export declare type LoggerEvent =
     | 'HealthCheck'
-    | 'BatchScanRequestSubmitted'
+    | 'ScanRequestReceived'
     | 'BatchPoolStats'
     | 'ScanRequestsAccepted'
     | 'ScanRequestQueued'
+    | 'ScanRequestRunning'
+    | 'ScanRequestCompleted'
+    | 'ScanRequestFailed'
+    | 'ScanRequestNotificationSucceeded'
+    | 'ScanRequestNotificationFailed'
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
     | 'ScanTaskSucceeded'

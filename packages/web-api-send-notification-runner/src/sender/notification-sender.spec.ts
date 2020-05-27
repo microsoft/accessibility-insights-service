@@ -119,7 +119,16 @@ describe(NotificationSender, () => {
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 }))
+            .verifiable(Times.never());
+
         await sender.sendNotification();
+
+        loggerMock.verifyAll();
     });
 
     it('Send Notification Failed', async () => {
@@ -150,7 +159,16 @@ describe(NotificationSender, () => {
             .returns(() => false)
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 }))
+            .verifiable(Times.never());
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 }))
+            .verifiable();
+
         await sender.sendNotification();
+
+        loggerMock.verifyAll();
     });
 
     it('Send Notification Failed Error', async () => {

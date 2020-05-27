@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
-import { BatchScanRequestMeasurements } from 'logger';
+import { ScanRequestReceivedMeasurements } from 'logger';
 import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -161,14 +161,14 @@ describe(ScanRequestController, () => {
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
             ]);
 
-            const expectedMeasurements: BatchScanRequestMeasurements = {
+            const expectedMeasurements: ScanRequestReceivedMeasurements = {
                 totalScanRequests: 3,
-                acceptedScanRequests: 1,
+                pendingScanRequests: 1,
                 rejectedScanRequests: 2,
             };
 
             // tslint:disable-next-line: no-null-keyword
-            loggerMock.setup((lm) => lm.trackEvent('BatchScanRequestSubmitted', null, expectedMeasurements)).verifiable();
+            loggerMock.setup((lm) => lm.trackEvent('ScanRequestReceived', null, expectedMeasurements)).verifiable();
 
             scanRequestController = createScanRequestController(context);
             await scanRequestController.handleRequest();
