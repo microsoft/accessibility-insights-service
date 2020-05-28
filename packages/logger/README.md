@@ -14,25 +14,25 @@ All event names are defined in src/logger-event.ts
     -   runningTasks: number of running tasks
     -   samplingIntervalInSeconds: the time interval to take pool metrics measurement
     -   maxParallelTasks: the pool configured maximum number of parallel tasks to run
--   **ScanRequestReceived:** Sent when request received by post-scans-func. Custom measurements:
+-   **ScanRequestReceived:** Sent when a request is received by post-scans-func. Custom measurements:
     -   totalScanRequests
     -   pendingScanRequests
     -   rejectedScanRequests
--   **ScanRequestAccepted:** Sent by web-worker each time received request is processed and split into multiple separate scan requests. Custom measurements:
+-   **ScanRequestAccepted:** Sent by web-worker each time a received request is processed and split into multiple separate scan requests. Custom measurements:
     -   acceptedScanRequests: number of scans that were accepted for the processing
--   **ScanRequestQueued:** Sent when scan request is queued for processing by Batch scan task. Custom measurements:
+-   **ScanRequestQueued:** Sent when a scan request is queued for processing by Batch scan task. Custom measurements:
     -   queuedScanRequests: number of requests that were queued
--   **ScanRequestRunning** Sent when scan request is processing by Batch scan task. Custom measurements:
+-   **ScanRequestRunning** Sent when a scan request is processing by Batch scan task. Custom measurements:
     -   runningScanRequests: number of running scan requests
--   **ScanRequestCompleted** Sent when scan request completed, regardless of the operation result. Custom measurements:
+-   **ScanRequestCompleted** Sent when a scan request completed, regardless of the operation result. Custom measurements:
     -   completedScanRequests: number of scan requests completed
--   **ScanRequestFailed** Sent when scan request failed. Custom measurements:
+-   **ScanRequestFailed** Sent when a scan request failed. Custom measurements:
     -   failedScanRequests: number of scan requests failed
--   **ScanRequestNotificationStarted** Sent when scan result notification request started. Custom measurements:
+-   **ScanRequestNotificationStarted** Sent when a scan result notification request started. Custom measurements:
     -   scanRequestNotificationsStarted: number of scan result notification requests started
--   **ScanRequestNotificationCompleted** Sent when scan result notification request completed, regardless of the operation result. Custom measurements:
+-   **ScanRequestNotificationCompleted** Sent when a scan result notification request completed, regardless of the operation result. Custom measurements:
     -   scanRequestNotificationsCompleted: number of scan result notification requests completed
--   **ScanRequestNotificationFailed** Sent when scan result notification request failed. Custom measurements:
+-   **ScanRequestNotificationFailed** Sent when a scan result notification request failed. Custom measurements:
     -   scanRequestNotificationsFailed: number of scan result notification requests failed
 -   **ScanTaskStarted:** Sent when a scan begins executing. Custom measurements:
     -   scanWaitTime: number of seconds between when the original scan request was received and when the scan begins executing
