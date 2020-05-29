@@ -49,7 +49,10 @@ export class Runner {
         this.logger.setCustomProperties({ scanId: scanMetadata.id });
 
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskStarted', undefined, { scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000 });
+        this.logger.trackEvent('ScanTaskStarted', undefined, {
+            scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
+            startedScanTasks: 1,
+        });
 
         this.logger.logInfo(`Updating page scan run result state to running.`);
         const pageScanResult: Partial<OnDemandPageScanResult> = {
@@ -65,28 +68,35 @@ export class Runner {
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
+        let scanSucceeded: boolean;
         try {
             await this.webDriverTask.launch();
-            await this.scan(pageScanResult, scanMetadata.url);
-            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+            scanSucceeded = await this.scan(pageScanResult, scanMetadata.url);
         } catch (error) {
+            scanSucceeded = false;
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
             this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
-            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-            this.logger.trackEvent('ScanTaskFailed');
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
                 scanExecutionTime: (scanCompletedTimestamp - scanStartedTimestamp) / 1000,
                 scanTotalTime: (scanCompletedTimestamp - scanSubmittedTimestamp) / 1000,
+                completedScanTasks: 1,
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
+            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+
             try {
                 await this.webDriverTask.close();
             } catch (error) {
                 this.logger.logError(`Unable to close the web driver instance.`, { error: this.getErrorMessage(error) });
             }
+        }
+
+        if (!scanSucceeded) {
+            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
+            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         }
 
         this.logger.logInfo(`Writing page scan run result to a storage.`);
@@ -105,18 +115,16 @@ export class Runner {
         return isEmpty(notification?.scanNotifyUrl);
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<boolean> {
         this.logger.logInfo(`Running page scan.`);
 
         const axeScanResults = await this.scannerTask.scan(url);
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Updating page scan run result state to failed`);
-            this.logger.trackEvent('ScanTaskFailed');
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
         } else {
             this.logger.logInfo(`Updating page scan run result state to completed`);
-            this.logger.trackEvent('ScanTaskSucceeded');
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
@@ -127,6 +135,8 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+
+        return isNil(axeScanResults.error);
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {

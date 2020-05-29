@@ -34,61 +34,67 @@ export class NotificationSender {
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
         });
 
+        this.logger.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 });
+        this.logger.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 });
+
         const pageScanResult = await this.sendNotificationWithRetry(notificationSenderMetadata);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
-        this.logger.trackEvent('SendNotificationTaskCompleted');
+        this.logger.trackEvent('ScanRequestNotificationCompleted', undefined, { scanRequestNotificationsCompleted: 1 });
+        this.logger.trackEvent('SendNotificationTaskCompleted', undefined, { completedScanNotificationTasks: 1 });
     }
 
     private async sendNotificationWithRetry(
         notificationSenderConfigData: NotificationSenderMetadata,
     ): Promise<Partial<OnDemandPageScanResult>> {
-        let numberOfTries = 1;
+        let runFailed = false;
+        let numberOfRetries = 1;
         let notificationState: NotificationState = 'sendFailed';
         let error: NotificationError = null;
         let statusCode: number;
         const scanConfig = await this.getScanConfig();
 
-        this.logger.trackEvent('SendNotificationTaskStarted');
-        while (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
-            this.logger.logInfo(`Sending scan result notification. Retry count ${numberOfTries}`);
+        while (numberOfRetries <= scanConfig.maxSendNotificationRetryCount) {
+            this.logger.logInfo(`Sending scan result notification. Retry count ${numberOfRetries}`);
             let response;
             try {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
                 statusCode = response.statusCode;
 
                 if (this.responseParser.isSuccessStatusCode(response)) {
-                    this.logger.trackEvent('SendNotificationTaskSucceeded');
-                    this.logger.logInfo(`Scan result notification request succeeded. Retry count ${numberOfTries}`);
+                    this.logger.logInfo(`Scan result notification request succeeded. Retry count ${numberOfRetries}`);
                     notificationState = 'sent';
                     error = null;
 
                     break;
                 } else {
-                    this.logger.trackEvent('SendNotificationTaskFailed');
                     this.logger.logInfo(
-                        `Scan result notification request failed. Retry count ${numberOfTries}, statusCode: ${response.statusCode}, body: ${response.body}`,
+                        `Scan result notification request failed. Retry count ${numberOfRetries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
                     // tslint:disable-next-line: no-unsafe-any
                     error = { errorType: 'HttpErrorCode', message: response.body };
                 }
+
+                runFailed = false; // reset run state if retry succeeded
             } catch (e) {
-                this.logger.trackEvent('SendNotificationTaskFailed');
+                runFailed = true;
                 this.logger.logError(`Scan result notification request failed. Error: ${(e as Error).message}`);
                 error = { errorType: 'InternalError', message: (e as Error).message };
             }
 
-            numberOfTries = numberOfTries + 1;
-            if (numberOfTries <= scanConfig.maxSendNotificationRetryCount) {
+            numberOfRetries = numberOfRetries + 1;
+            if (numberOfRetries <= scanConfig.maxSendNotificationRetryCount) {
                 await this.system.wait(5000);
             }
         }
 
-        if (notificationState === 'sent') {
-            this.logger.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 });
-        } else {
+        if (runFailed) {
+            this.logger.trackEvent('SendNotificationTaskFailed', undefined, { failedScanNotificationTasks: 1 });
+        }
+
+        if (notificationState !== 'sent') {
             this.logger.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 });
         }
 

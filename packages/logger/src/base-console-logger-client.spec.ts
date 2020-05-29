@@ -5,11 +5,10 @@ import 'reflect-metadata';
 import { ServiceConfiguration } from 'common';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
-
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
-import { ScanTaskStartedMeasurements } from './logger-event-measurements';
+import { ScanTaskFailedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
 
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
@@ -88,7 +87,7 @@ describe(BaseConsoleLoggerClient, () => {
             consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
         });
 
-        it('log data with propertiestoAddToEvent', async () => {
+        it('log data with propertiesToAddToEvent', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -134,7 +133,7 @@ describe(BaseConsoleLoggerClient, () => {
             consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
         });
 
-        it('log data with propertiestoAddToEvent', async () => {
+        it('log data with propertiesToAddToEvent', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -152,7 +151,7 @@ describe(BaseConsoleLoggerClient, () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
             await testSubject.setup(baseProps);
             const eventProps = { eventProp1: 'prop value' };
-            const eventMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: 1 };
+            const eventMeasurements: ScanTaskFailedMeasurements = { failedScanTasks: 1 };
 
             testSubject.trackEvent('HealthCheck', eventProps, eventMeasurements);
             const properties = `[properties - ${util.inspect({ ...baseProps, ...eventProps })}]`;

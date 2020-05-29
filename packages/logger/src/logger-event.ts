@@ -3,21 +3,20 @@
 
 export declare type LoggerEvent =
     | 'HealthCheck'
-    | 'ScanRequestReceived'
+    | 'FunctionalTest'
     | 'BatchPoolStats'
-    | 'ScanRequestsAccepted'
+    | 'ScanRequestReceived'
+    | 'ScanRequestAccepted'
     | 'ScanRequestQueued'
     | 'ScanRequestRunning'
     | 'ScanRequestCompleted'
     | 'ScanRequestFailed'
-    | 'ScanRequestNotificationSucceeded'
+    | 'ScanRequestNotificationStarted'
+    | 'ScanRequestNotificationCompleted'
     | 'ScanRequestNotificationFailed'
     | 'ScanTaskStarted'
     | 'ScanTaskCompleted'
-    | 'ScanTaskSucceeded'
     | 'ScanTaskFailed'
-    | 'FunctionalTest'
     | 'SendNotificationTaskStarted'
     | 'SendNotificationTaskCompleted'
-    | 'SendNotificationTaskFailed'
-    | 'SendNotificationTaskSucceeded';
+    | 'SendNotificationTaskFailed';

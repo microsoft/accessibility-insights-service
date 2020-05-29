@@ -120,10 +120,21 @@ describe(NotificationSender, () => {
             .verifiable(Times.once());
 
         loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 }))
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationCompleted', undefined, { scanRequestNotificationsCompleted: 1 }))
             .verifiable();
         loggerMock
             .setup((lm) => lm.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 }))
+            .verifiable(Times.never());
+
+        loggerMock.setup((lm) => lm.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 })).verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('SendNotificationTaskCompleted', undefined, { completedScanNotificationTasks: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('SendNotificationTaskFailed', undefined, { failedScanNotificationTasks: 1 }))
             .verifiable(Times.never());
 
         await sender.sendNotification();
@@ -131,7 +142,7 @@ describe(NotificationSender, () => {
         loggerMock.verifyAll();
     });
 
-    it('Send Notification Failed', async () => {
+    it('Send Notification HTTP Request Error', async () => {
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -160,18 +171,29 @@ describe(NotificationSender, () => {
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
 
         loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestNotificationSucceeded', undefined, { scanRequestNotificationsSucceeded: 1 }))
-            .verifiable(Times.never());
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationCompleted', undefined, { scanRequestNotificationsCompleted: 1 }))
+            .verifiable();
         loggerMock
             .setup((lm) => lm.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 }))
             .verifiable();
+
+        loggerMock.setup((lm) => lm.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 })).verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('SendNotificationTaskCompleted', undefined, { completedScanNotificationTasks: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('SendNotificationTaskFailed', undefined, { failedScanNotificationTasks: 1 }))
+            .verifiable(Times.never());
 
         await sender.sendNotification();
 
         loggerMock.verifyAll();
     });
 
-    it('Send Notification Failed Error', async () => {
+    it('Send Notification Run Error', async () => {
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -192,6 +214,22 @@ describe(NotificationSender, () => {
             .setup((wam) => wam.sendNotification(notificationSenderMetadata))
             .throws(new Error('Unexpected Error'))
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount));
+
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationCompleted', undefined, { scanRequestNotificationsCompleted: 1 }))
+            .verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestNotificationFailed', undefined, { scanRequestNotificationsFailed: 1 }))
+            .verifiable();
+
+        loggerMock.setup((lm) => lm.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 })).verifiable();
+        loggerMock
+            .setup((lm) => lm.trackEvent('SendNotificationTaskCompleted', undefined, { completedScanNotificationTasks: 1 }))
+            .verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('SendNotificationTaskFailed', undefined, { failedScanNotificationTasks: 1 })).verifiable();
 
         await sender.sendNotification();
     });

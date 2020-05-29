@@ -127,10 +127,10 @@ describe(ScanBatchRequestFeedController, () => {
         setupPartitionKeyFactoryMock(documents);
         // tslint:disable-next-line: no-null-keyword
         loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[0].id }, { acceptedScanRequests: 2 }))
+            .setup((lm) => lm.trackEvent('ScanRequestAccepted', { batchRequestId: documents[0].id }, { acceptedScanRequests: 2 }))
             .verifiable(Times.once());
         loggerMock
-            .setup((lm) => lm.trackEvent('ScanRequestsAccepted', { batchRequestId: documents[1].id }, { acceptedScanRequests: 2 }))
+            .setup((lm) => lm.trackEvent('ScanRequestAccepted', { batchRequestId: documents[1].id }, { acceptedScanRequests: 2 }))
             .verifiable(Times.once());
 
         await scanBatchRequestFeedController.invoke(context, documents);
