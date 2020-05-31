@@ -61,7 +61,7 @@ Time settings, including the overall time range and granularity of aggregations,
     -   The total number of submitted scan requests, as well as how many were accepted or rejected (for invalid urls)
     -   Counts are aggregated over the set time granularity
 
--   **Batch Scan Task Count Succeeded vs Completed**
+-   **Batch Scan Task States**
 
     -   The total number of Batch scan task completed and succeeded
     -   Note: If there are no failures for the given time range, ScanTaskFailure may not appear in the legend
@@ -74,7 +74,7 @@ Time settings, including the overall time range and granularity of aggregations,
 
     -   The Batch account pools node count by state during the time range. Can be used to check batch pool availability
 
--   **Batch Account Task states**
+-   **Batch Account Task States**
 
     -   The Batch account pools task events. Include task start, complete, and fail events.
 
