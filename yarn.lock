@@ -2994,10 +2994,10 @@ anymatch@^3.0.3:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-applicationinsights@^1.7.5:
-  version "1.7.5"
-  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-1.7.5.tgz#423d9b58cd20117d724b86811935de9ddab8b852"
-  integrity sha512-sl3rNhVnQOG4ecJNKh7dlAZOc/DLfZTRs1F6PO3nb969AsnVg7C4xWRoybI9+mbtqyPR4NA2JbG4bHJOGP3j+A==
+applicationinsights@^1.7.6:
+  version "1.7.6"
+  resolved "https://registry.yarnpkg.com/applicationinsights/-/applicationinsights-1.7.6.tgz#ee6b7dc3801769c2be1fb3f24af0b5480273dd3c"
+  integrity sha512-D+vAdBu9ohT18DQjtqu7QlXByrvSvDhf03JZ+7VUcaeZfwHXqMuXZENfq629nmjt24Ly7wQlQY9wHReWO2FqPA==
   dependencies:
     cls-hooked "^4.2.2"
     continuation-local-storage "^3.2.1"
