@@ -24,7 +24,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@azure/functions": "^1.0.3",
+        "@azure/functions": "^1.2.2",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^25.2.1",
         "@types/lodash": "^4.14.153",
