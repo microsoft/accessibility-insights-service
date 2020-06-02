@@ -48,7 +48,7 @@
         "logger": "1.0.0",
         "moment": "2.26.0",
         "node-fetch": "^2.6.0",
-        "puppeteer": "^3.2.0",
+        "puppeteer": "^3.3.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
