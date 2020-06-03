@@ -33,7 +33,7 @@
         "@types/node": "^13.13.5",
         "@types/request-promise": "^4.1.46",
         "@types/table": "^5.0.0",
-        "copy-webpack-plugin": "^5.1.1",
+        "copy-webpack-plugin": "^6.0.2",
         "fork-ts-checker-webpack-plugin": "^4.1.6",
         "jest": "^25.5.3",
         "jest-circus": "^25.5.3",
