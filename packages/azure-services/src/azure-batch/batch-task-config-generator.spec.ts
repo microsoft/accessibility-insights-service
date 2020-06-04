@@ -36,7 +36,12 @@ describe(BatchTaskConfigGenerator, () => {
         const commandLine = 'command line1';
         const environmentSettings = 'environment settings1' as any;
         const resourceFiles = 'resource files1' as any;
-        const defaultTaskConfig: TaskRuntimeConfig = { taskTimeoutInMinutes: 2, exitOnComplete: false };
+        const defaultTaskConfig: TaskRuntimeConfig = {
+            taskTimeoutInMinutes: 2,
+            exitOnComplete: false,
+            retentionTimeInDays: 3,
+            maxTaskRetryCount: 2,
+        };
 
         batchTaskPropertyProviderMock
             .setup((s) => s.getCommandLine(message))
@@ -46,12 +51,10 @@ describe(BatchTaskConfigGenerator, () => {
             .setup((s) => s.getAllEnvironmentSettings(message))
             .returns(() => environmentSettings)
             .verifiable(Times.once());
-
         batchTaskPropertyProviderMock
             .setup((s) => s.getResourceFiles())
             .returns(() => resourceFiles)
             .verifiable(Times.once());
-
         batchTaskPropertyProviderMock
             .setup(async (s) => s.getDefaultTaskConfig())
             .returns(async () => defaultTaskConfig)

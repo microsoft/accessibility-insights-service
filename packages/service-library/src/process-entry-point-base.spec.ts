@@ -51,6 +51,8 @@ describe(ProcessEntryPointBase, () => {
         taskConfig = {
             exitOnComplete: true,
             taskTimeoutInMinutes: 100,
+            maxTaskRetryCount: 2,
+            retentionTimeInDays: 3,
         };
         serviceConfig = Mock.ofType(ServiceConfiguration);
         serviceConfig.setup(async (s) => s.getConfigValue('taskConfig')).returns(async () => Promise.resolve(taskConfig));
