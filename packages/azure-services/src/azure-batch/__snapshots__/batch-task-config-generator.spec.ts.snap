@@ -4,7 +4,9 @@ exports[`BatchTaskConfigGenerator generates task config 1`] = `
 Object {
   "commandLine": "command line1",
   "constraints": Object {
+    "maxTaskRetryCount": 2,
     "maxWallClockTime": "PT2M",
+    "retentionTime": "P3D",
   },
   "environmentSettings": "environment settings1",
   "id": "task id1",
