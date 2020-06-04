@@ -20,7 +20,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^25.2.1",
-        "@types/lodash": "^4.14.154",
+        "@types/lodash": "^4.14.155",
         "@types/node": "^13.13.5",
         "@types/request-promise": "^4.1.46",
         "@types/request": "^2.48.5",
