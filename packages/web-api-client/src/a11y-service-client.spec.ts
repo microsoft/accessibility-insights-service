@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { RetryHelper } from 'common';
 import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(A11yServiceClient, () => {
@@ -16,6 +18,8 @@ describe(A11yServiceClient, () => {
     let requestStub: any;
     let getMock: IMock<(url: string) => {}>;
     let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
+    let retryHelperMock: IMock<RetryHelper<unknown>>;
+    let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
         getMock = Mock.ofInstance(() => {
@@ -30,8 +34,18 @@ describe(A11yServiceClient, () => {
             post: postMock.object,
         };
         credMock = Mock.ofType<A11yServiceCredential>(null);
+        loggerMock = Mock.ofType<MockableLogger>();
+        retryHelperMock = Mock.ofType<RetryHelper<unknown>>();
 
-        testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, false, requestStub);
+        testSubject = new A11yServiceClient(
+            credMock.object,
+            baseUrl,
+            apiVersion,
+            false,
+            requestStub,
+            loggerMock.object,
+            retryHelperMock.object,
+        );
     });
 
     afterEach(() => {
@@ -70,7 +84,15 @@ describe(A11yServiceClient, () => {
                 .returns(() => 'some object' as any)
                 .verifiable(Times.once());
 
-            testSubject = new A11yServiceClient(credMock.object, baseUrl, apiVersion, throwOnFailure, requestStub);
+            testSubject = new A11yServiceClient(
+                credMock.object,
+                baseUrl,
+                apiVersion,
+                throwOnFailure,
+                requestStub,
+                loggerMock.object,
+                retryHelperMock.object,
+            );
 
             defaultsMock.verifyAll();
         });
