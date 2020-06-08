@@ -97,7 +97,7 @@ export class Worker extends BatchTaskCreator {
                               `${error}, Error category: ${failedTask.failureInfo.category}, Error details: ${failedTask.failureInfo.message}`
                             : error;
 
-                    let pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
+                    const pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
                     if (pageScanResult !== undefined) {
                         if (pageScanResult.run.state !== 'failed') {
                             pageScanResult.run = {
@@ -105,7 +105,7 @@ export class Worker extends BatchTaskCreator {
                                 timestamp: failedTask.timestamp.toJSON(),
                                 error,
                             };
-                            pageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+                            await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
                         }
                     } else {
                         this.logger.logError(`Task has no corresponding state in a service storage`, {

@@ -22,6 +22,10 @@ export abstract class BatchTaskCreator {
         protected readonly system: typeof System = System,
     ) {}
 
+    /**
+     * The batch task may be retried when a task has failed.
+     * Implement a task lock logic to prevent task reentrancy.
+     */
     public async run(): Promise<void> {
         if (!this.hasInitialized) {
             throw new Error('[BatchTaskCreator] not initialized');

@@ -2,10 +2,11 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 
-import { CosmosContainerClient, cosmosContainerClientTypes } from 'azure-services';
+import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
+import { OperationResult } from './operation-result';
 
 @injectable()
 export class OnDemandPageScanRunResultProvider {
@@ -45,14 +46,30 @@ export class OnDemandPageScanRunResultProvider {
         return flatMap(response);
     }
 
-    public async updateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OnDemandPageScanResult> {
-        if (pageScanResult.id === undefined) {
-            throw new Error(`Cannot update scan run using partial scan run without id: ${JSON.stringify(pageScanResult)}`);
+    /**
+     * Returns succeeded equals to true if operation completed successfully.
+     * Otherwise returns succeeded equals to false if storage document was updated by other process
+     * at the time of merge storage operation.
+     *
+     * @param pageScanResult Page scan result to merge with storage corresponding document
+     */
+    public async tryUpdateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OperationResult<OnDemandPageScanResult>> {
+        const operationResponse = await this.updateScanRunImpl(pageScanResult, false);
+        if (client.isSuccessStatusCode(operationResponse)) {
+            return { succeeded: true, result: operationResponse.item };
+        } else if (operationResponse.statusCode === 412) {
+            // HTTP 412 Precondition failure
+            // The server rejects the operation when document has been updated by other process
+            return { succeeded: false };
+        } else {
+            throw this.getOperationError(pageScanResult.id, operationResponse);
         }
-        const persistedResult = pageScanResult as OnDemandPageScanResult;
-        this.setSystemProperties(persistedResult);
+    }
 
-        return (await this.cosmosContainerClient.mergeOrWriteDocument(persistedResult)).item;
+    public async updateScanRun(pageScanResult: Partial<OnDemandPageScanResult>): Promise<OnDemandPageScanResult> {
+        const operationResponse = await this.updateScanRunImpl(pageScanResult, true);
+
+        return operationResponse.item;
     }
 
     public async writeScanRuns(scanRuns: OnDemandPageScanResult[]): Promise<void> {
@@ -69,6 +86,19 @@ export class OnDemandPageScanRunResultProvider {
         );
     }
 
+    private async updateScanRunImpl(
+        pageScanResult: Partial<OnDemandPageScanResult>,
+        throwIfNotSuccess: boolean,
+    ): Promise<CosmosOperationResponse<OnDemandPageScanResult>> {
+        if (pageScanResult.id === undefined) {
+            throw new Error(`Cannot update scan run using partial scan run without id: ${JSON.stringify(pageScanResult)}`);
+        }
+        const persistedResult = pageScanResult as OnDemandPageScanResult;
+        this.setSystemProperties(persistedResult);
+
+        return this.cosmosContainerClient.mergeOrWriteDocument(persistedResult, undefined, throwIfNotSuccess);
+    }
+
     private getReadScanQueryForScanIds(scanIds: string[], partitionKey: string): string {
         return `select * from c where c.partitionKey = "${partitionKey}" and c.id in (\"${scanIds.join('", "')}\")`;
     }
@@ -80,5 +110,11 @@ export class OnDemandPageScanRunResultProvider {
 
     private getPartitionKey(scanId: string): string {
         return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, scanId);
+    }
+
+    private getOperationError(scanId: string, operationResponse: CosmosOperationResponse<unknown>): Error {
+        return new Error(
+            `Scan result document operation failed. Scan Id: ${scanId} Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
+        );
     }
 }

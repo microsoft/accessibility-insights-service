@@ -49,11 +49,15 @@ describe('CosmosClientWrapper', () => {
             itemsMock.setup((i) => i.readAll()).returns(() => queryIteratorMock.object);
             queryIteratorMock.setup(async (qm) => qm.fetchAll()).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readAllItem(dbName, collectionName);
+            const result = await testSubject.readAllItem(dbName, collectionName, false);
             expect(result).toEqual(expectedResult);
             itemsMock.verifyAll();
             queryIteratorMock.verifyAll();
             verifyMocks();
+
+            await expect(testSubject.readAllItem(dbName, collectionName)).rejects.toThrowError(
+                `The Cosmos DB 'readAllItems' operation failed. Response status code: 404 Response: NotFound`,
+            );
         });
 
         it('read all items', async () => {
@@ -100,11 +104,15 @@ describe('CosmosClientWrapper', () => {
             collectionMock.setup((c) => c.item('id', partitionKey)).returns(() => itemMock.object);
             itemMock.setup(async (i) => i.read()).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readItem('id', dbName, collectionName, partitionKey);
+            const result = await testSubject.readItem('id', dbName, collectionName, partitionKey, false);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
             verifyMocks();
+
+            await expect(testSubject.readItem('id', dbName, collectionName, partitionKey)).rejects.toThrowError(
+                `The Cosmos DB 'readItem' operation failed. Document Id: id Response status code: 404 Response: NotFound`,
+            );
         });
 
         it('read item with success', async () => {
@@ -155,7 +163,7 @@ describe('CosmosClientWrapper', () => {
     });
 
     describe('readItems()', () => {
-        it('read items with failed response ', async () => {
+        it('read items with failed response', async () => {
             const expectedResult = {
                 response: 'NotFound',
                 statusCode: 404,
@@ -169,11 +177,15 @@ describe('CosmosClientWrapper', () => {
             itemsMock.setup((i) => i.query('query', It.isAny())).returns(() => queryIteratorMock.object);
             queryIteratorMock.setup(async (qm) => qm.fetchNext()).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.readItems(dbName, collectionName, 'query');
+            const result = await testSubject.readItems(dbName, collectionName, 'query', undefined, false);
 
             expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
             verifyMocks();
+
+            await expect(testSubject.readItems(dbName, collectionName, 'query')).rejects.toThrowError(
+                `The Cosmos DB 'queryItems' operation failed. Response status code: 404 Response: NotFound`,
+            );
         });
 
         it('read items using query', async () => {
@@ -286,15 +298,42 @@ describe('CosmosClientWrapper', () => {
     });
 
     describe('deleteItem()', () => {
-        it('deletes item', async () => {
+        it('deletes item with failed response', async () => {
             collectionMock.setup((c) => c.item('id', partitionKey)).returns(() => itemMock.object);
             itemMock
                 .setup(async (i) => i.delete())
-                .returns(async () => Promise.resolve({} as any))
+                .returns(async () => Promise.reject(errorResponse))
                 .verifiable();
 
-            await testSubject.deleteItem('id', dbName, collectionName, partitionKey);
+            const result = await testSubject.deleteItem('id', dbName, collectionName, partitionKey, false);
+            expect(result).toEqual({ response: undefined, statusCode: 500 });
+            itemMock.verifyAll();
+            verifyMocks();
 
+            await expect(testSubject.deleteItem('id', dbName, collectionName, partitionKey)).rejects.toThrowError(
+                `The Cosmos DB 'deleteItem' operation failed. Document Id: id Response status code: 500 Response: undefined`,
+            );
+        });
+
+        it('deletes item', async () => {
+            collectionMock.setup((c) => c.item('id', partitionKey)).returns(() => itemMock.object);
+            const responseItem = {
+                id: 'id-1',
+                propA: 'propA',
+                _etag: 'etag-1',
+                _ts: 123456789,
+            };
+            const expectedResult = {
+                item: responseItem,
+                statusCode: 200,
+            };
+            itemMock
+                .setup(async (i) => i.delete())
+                .returns(async () => Promise.resolve({ resource: responseItem } as any))
+                .verifiable();
+
+            const result = await testSubject.deleteItem('id', dbName, collectionName, partitionKey);
+            expect(result).toEqual(expectedResult);
             itemMock.verifyAll();
             verifyMocks();
         });
@@ -319,10 +358,13 @@ describe('CosmosClientWrapper', () => {
 
             itemsMock.setup(async (i) => i.upsert<DbItemMock>(item, undefined)).returns(async () => Promise.reject(responseError));
 
-            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey);
-
+            const result = await testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey, false);
             expect(result).toEqual(expectedResult);
             verifyMocks();
+
+            await expect(testSubject.upsertItem<DbItemMock>(item, dbName, collectionName, partitionKey)).rejects.toThrowError(
+                `The Cosmos DB 'upsertItem' operation failed. Document Id: id-1 Response status code: 412 Response: PreconditionFailed`,
+            );
         });
 
         it('upsert item with etag condition with success', async () => {
@@ -412,8 +454,14 @@ describe('CosmosClientWrapper', () => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            const expectedResult = [
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+            ];
 
+            const results = await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            expect(results).toEqual(expectedResult);
             verifyMocks();
         });
 
@@ -438,13 +486,21 @@ describe('CosmosClientWrapper', () => {
                     partitionKey,
                 },
             ];
-            const options: cosmos.RequestOptions = undefined;
+            const options: cosmos.RequestOptions = {
+                accessCondition: { type: 'IfMatch', condition: '1' },
+            };
             items.map((item) => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            const expectedResult = [
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+            ];
 
+            const results = await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            expect(results).toEqual(expectedResult);
             verifyMocks();
         });
 
@@ -469,36 +525,76 @@ describe('CosmosClientWrapper', () => {
                     partitionKey,
                 },
             ];
-            const options: cosmos.RequestOptions = undefined;
+            const options: cosmos.RequestOptions = {
+                accessCondition: { type: 'IfMatch', condition: '1' },
+            };
             items.map((item) => {
                 setupVerifiableUpsertItemCallWithOptions(item, options);
             });
 
-            await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            const expectedResult = [
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+                { item: 'stored data', statusCode: 200 },
+            ];
 
+            const results = await testSubject.upsertItems(items, dbName, collectionName, partitionKey);
+            expect(results).toEqual(expectedResult);
             verifyMocks();
         });
 
-        it('should fail if one of the items failed to upsert', async () => {
+        it('should return fail response if one of the items failed to upsert', async () => {
             const items = [
                 {
                     id: 'id-1',
                     propA: 'propA',
+                    _etag: '1',
                     partitionKey,
                 },
                 {
                     id: 'id-2',
                     propA: 'propB',
+                    _etag: '1',
                     partitionKey,
                 },
             ];
-            setupVerifiableUpsertItemCall(items[0]);
-            setupVerifiableRejectedUpsertItemCall(items[1]);
+            const options: cosmos.RequestOptions = {
+                accessCondition: { type: 'IfMatch', condition: '1' },
+            };
+            setupVerifiableUpsertItemCallWithOptions(items[0], options);
+            itemsMock.setup(async (i) => i.upsert(items[1], options)).returns(async () => Promise.reject(errorResponse));
 
-            loggerMock.setup((o) => o.logError(`[storage-client] The Cosmos DB 'upsertItem' operation failed.`, It.isAny())).verifiable();
+            const expectedResult = [{ item: 'stored data', statusCode: 200 }, { statusCode: 500 }];
 
-            await expect(testSubject.upsertItems(items, dbName, collectionName, partitionKey)).rejects.toEqual(errorResponse);
+            const results = await testSubject.upsertItems(items, dbName, collectionName, partitionKey, false);
+            expect(results).toEqual(expectedResult);
+            verifyMocks();
+        });
 
+        it('should throw if one of the items failed to upsert', async () => {
+            const items = [
+                {
+                    id: 'id-1',
+                    propA: 'propA',
+                    _etag: '1',
+                    partitionKey,
+                },
+                {
+                    id: 'id-2',
+                    propA: 'propB',
+                    _etag: '1',
+                    partitionKey,
+                },
+            ];
+            const options: cosmos.RequestOptions = {
+                accessCondition: { type: 'IfMatch', condition: '1' },
+            };
+            setupVerifiableUpsertItemCallWithOptions(items[0], options);
+            itemsMock.setup(async (i) => i.upsert(items[1], options)).returns(async () => Promise.reject(errorResponse));
+
+            loggerMock.setup((o) => o.logError(`[storage-client] The Cosmos DB 'upsertItems' operation failed.`, It.isAny())).verifiable();
+
+            await expect(testSubject.upsertItems(items, dbName, collectionName, partitionKey)).rejects.toThrowError(``);
             verifyMocks();
         });
     });
@@ -539,20 +635,10 @@ describe('CosmosClientWrapper', () => {
             .verifiable();
     }
 
-    function setupVerifiableUpsertItemCall(item: any): void {
-        itemsMock
-            .setup(async (i) => i.upsert(item))
-            .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined } as any));
-    }
-
     function setupVerifiableUpsertItemCallWithOptions(item: any, options: cosmos.RequestOptions): void {
         itemsMock
             .setup(async (i) => i.upsert(item, options))
             .returns(async () => Promise.resolve({ resource: 'stored data' as any, item: undefined } as any));
-    }
-
-    function setupVerifiableRejectedUpsertItemCall(item: any): void {
-        itemsMock.setup(async (i) => i.upsert(item, undefined)).returns(async () => Promise.reject(errorResponse));
     }
 });
 

@@ -99,7 +99,24 @@ describe(NotificationSender, () => {
         );
     });
 
+    it('Task run skipped', async () => {
+        setupTryUpdateScanRunResultCall(false);
+        serviceConfigMock.reset();
+        loggerMock
+            .setup((o) =>
+                o.logInfo(
+                    `Update page scan notification state to 'sending' failed due to merge conflict with other process. Exiting page scan notification task.`,
+                ),
+            )
+            .verifiable();
+
+        await sender.sendNotification();
+
+        loggerMock.verifyAll();
+    });
+
     it('Send Notification Succeeded', async () => {
+        setupTryUpdateScanRunResultCall();
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null, 200);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
@@ -143,6 +160,7 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification HTTP Request Error', async () => {
+        setupTryUpdateScanRunResultCall();
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -194,6 +212,7 @@ describe(NotificationSender, () => {
     });
 
     it('Send Notification Run Error', async () => {
+        setupTryUpdateScanRunResultCall();
         const notification = generateNotification(
             notificationSenderMetadata.scanNotifyUrl,
             'sendFailed',
@@ -254,6 +273,20 @@ describe(NotificationSender, () => {
         onDemandPageScanRunResultProviderMock
             .setup(async (d) => d.updateScanRun(result))
             .returns(async () => Promise.resolve(result as OnDemandPageScanResult))
+            .verifiable(Times.once());
+    }
+
+    function setupTryUpdateScanRunResultCall(succeeded: boolean = true): void {
+        const result = {
+            id: notificationSenderMetadata.scanId,
+            notification: {
+                scanNotifyUrl: notificationSenderMetadata.scanNotifyUrl,
+                state: 'sending',
+            },
+        } as OnDemandPageScanResult;
+        onDemandPageScanRunResultProviderMock
+            .setup(async (d) => d.tryUpdateScanRun(result))
+            .returns(async () => Promise.resolve({ succeeded, result }))
             .verifiable(Times.once());
     }
 

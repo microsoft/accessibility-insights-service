@@ -68,7 +68,11 @@ export class CosmosContainerClient {
      * @param document Document to merge with the current storage document
      * @param partitionKey The storage partition key
      */
-    public async mergeOrWriteDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async mergeOrWriteDocument<T extends CosmosDocument>(
+        document: T,
+        partitionKey?: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
         if (document.id === undefined) {
             return Promise.reject(
                 'Document id property is undefined. Storage document merge operation must have a valid document id property value.',
@@ -76,9 +80,21 @@ export class CosmosContainerClient {
         }
 
         const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
-        const response = await this.cosmosClientWrapper.readItem<T>(document.id, this.dbName, this.collectionName, effectivePartitionKey);
+        const response = await this.cosmosClientWrapper.readItem<T>(
+            document.id,
+            this.dbName,
+            this.collectionName,
+            effectivePartitionKey,
+            false,
+        );
         if (response.statusCode === 404) {
-            return this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+            return this.cosmosClientWrapper.upsertItem<T>(
+                document,
+                this.dbName,
+                this.collectionName,
+                effectivePartitionKey,
+                throwIfNotSuccess,
+            );
         }
 
         const mergedDocument = response.item;
@@ -94,7 +110,13 @@ export class CosmosContainerClient {
         // normalize document properties by converting from null to undefined
         const normalizedDocument = <T>this.getNormalizeMergedDocument(mergedDocument);
 
-        return this.cosmosClientWrapper.upsertItem<T>(normalizedDocument, this.dbName, this.collectionName, effectivePartitionKey);
+        return this.cosmosClientWrapper.upsertItem<T>(
+            normalizedDocument,
+            this.dbName,
+            this.collectionName,
+            effectivePartitionKey,
+            throwIfNotSuccess,
+        );
     }
 
     /**
