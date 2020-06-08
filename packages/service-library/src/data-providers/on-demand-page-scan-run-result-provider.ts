@@ -62,7 +62,9 @@ export class OnDemandPageScanRunResultProvider {
             // The server rejects the operation when document has been updated by other process
             return { succeeded: false };
         } else {
-            throw this.getOperationError(pageScanResult.id, operationResponse);
+            throw new Error(
+                `Scan result document operation failed. Scan Id: ${pageScanResult.id} Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
+            );
         }
     }
 
@@ -110,11 +112,5 @@ export class OnDemandPageScanRunResultProvider {
 
     private getPartitionKey(scanId: string): string {
         return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.onDemandPageScanRunResult, scanId);
-    }
-
-    private getOperationError(scanId: string, operationResponse: CosmosOperationResponse<unknown>): Error {
-        return new Error(
-            `Scan result document operation failed. Scan Id: ${scanId} Response status code: ${operationResponse.statusCode} Response: ${operationResponse.response}`,
-        );
     }
 }
