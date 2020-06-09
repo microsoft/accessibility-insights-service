@@ -68,6 +68,7 @@ describe(A11yServiceClient, () => {
         getMock.verifyAll();
         postMock.verifyAll();
         retryHelperMock.verifyAll();
+        loggerMock.verifyAll();
     });
 
     function setupVerifiableSignRequestCall(): void {
@@ -90,6 +91,10 @@ describe(A11yServiceClient, () => {
                 }
             })
             .verifiable();
+    }
+
+    function setupLoggerMock(): void {
+        loggerMock.setup((o) => o.logError(It.isAny(), It.isAny())).verifiable();
     }
 
     describe('verify default options', () => {
@@ -141,6 +146,18 @@ describe(A11yServiceClient, () => {
         expect(actualResponse).toEqual(response);
     });
 
+    it('postScanUrl with retry', async () => {
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(true);
+        setupLoggerMock();
+        postMock
+            .setup((req) => req(`${baseUrl}/scans`, requestOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        await expect(testSubject.postScanUrl(scanUrl, priority)).rejects.toThrowError();
+    });
+
     it('postScanUrl, priority not set', async () => {
         requestBody = [{ url: scanUrl, priority: 0 }];
         requestOptions = { body: requestBody };
@@ -170,6 +187,18 @@ describe(A11yServiceClient, () => {
         expect(actualResponse).toEqual(response);
     });
 
+    it('getScanStatus with retry', async () => {
+        const scanId = 'scanId';
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(true);
+        getMock
+            .setup((req) => req(`${baseUrl}/scans/${scanId}`))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        await expect(testSubject.getScanStatus(scanId)).rejects.toThrowError();
+    });
+
     it('getScanReport', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
@@ -185,6 +214,19 @@ describe(A11yServiceClient, () => {
         expect(actualResponse).toEqual(response);
     });
 
+    it('getScanReport with retry', async () => {
+        const scanId = 'scanId';
+        const reportId = 'reportId';
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(true);
+        getMock
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        await expect(testSubject.getScanReport(scanId, reportId)).rejects.toThrowError();
+    });
+
     it('checkHealth', async () => {
         const suffix = '/abc';
         setupVerifiableSignRequestCall();
@@ -195,6 +237,18 @@ describe(A11yServiceClient, () => {
             .verifiable(Times.once());
 
         await testSubject.checkHealth(suffix);
+    });
+
+    it('checkHealth', async () => {
+        const suffix = '/abc';
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(true);
+        getMock
+            .setup((req) => req(`${baseUrl}/health${suffix}`))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        await expect(testSubject.checkHealth(suffix)).rejects.toThrowError();
     });
 
     it('should handle failure request', async () => {
