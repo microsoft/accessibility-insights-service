@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { CredentialType, registerAzureServicesToContainer, SecretProvider } from 'azure-services';
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
@@ -35,7 +34,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
                     logger,
                 );
 
-                return new A11yServiceClient(a11yServiceCredential, process.env.WEB_API_BASE_URL);
+                return new A11yServiceClient(a11yServiceCredential, process.env.WEB_API_BASE_URL, logger);
             },
         );
     }

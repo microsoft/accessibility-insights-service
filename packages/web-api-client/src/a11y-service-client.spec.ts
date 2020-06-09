@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { RetryHelper } from 'common';
 import * as requestPromise from 'request-promise';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
@@ -20,8 +20,21 @@ describe(A11yServiceClient, () => {
     let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
     let retryHelperMock: IMock<RetryHelper<unknown>>;
     let loggerMock: IMock<MockableLogger>;
+    const maxRetryCount = 5;
+    const msecBetweenRetries = 10;
+    let error: Error;
+    const scanUrl = 'url';
+    const priority = 3;
+    let response: unknown;
+    let requestBody: unknown;
+    let requestOptions: unknown;
 
     beforeEach(() => {
+        error = new Error('HTTP 500 Server Error');
+        response = { statusCode: 200 };
+        requestBody = [{ url: scanUrl, priority }];
+        requestOptions = { body: requestBody };
+
         getMock = Mock.ofInstance(() => {
             return null;
         });
@@ -40,11 +53,13 @@ describe(A11yServiceClient, () => {
         testSubject = new A11yServiceClient(
             credMock.object,
             baseUrl,
+            loggerMock.object,
             apiVersion,
             false,
             requestStub,
-            loggerMock.object,
             retryHelperMock.object,
+            maxRetryCount,
+            msecBetweenRetries,
         );
     });
 
@@ -52,6 +67,7 @@ describe(A11yServiceClient, () => {
         credMock.verifyAll();
         getMock.verifyAll();
         postMock.verifyAll();
+        retryHelperMock.verifyAll();
     });
 
     function setupVerifiableSignRequestCall(): void {
@@ -61,11 +77,25 @@ describe(A11yServiceClient, () => {
             .verifiable();
     }
 
+    function setupRetryHelperMock(shouldFail: boolean): void {
+        retryHelperMock
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
+            .returns(async (action: () => Promise<unknown>, errorHandler: (error: Error) => Promise<void>, maxAttempts: number) => {
+                if (shouldFail) {
+                    await action();
+                    await errorHandler(error);
+                    throw error;
+                } else {
+                    return action();
+                }
+            })
+            .verifiable();
+    }
+
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
             const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
             requestStub.defaults = defaultsMock.object;
-
             defaultsMock
                 .setup((d) =>
                     d({
@@ -87,10 +117,10 @@ describe(A11yServiceClient, () => {
             testSubject = new A11yServiceClient(
                 credMock.object,
                 baseUrl,
+                loggerMock.object,
                 apiVersion,
                 throwOnFailure,
                 requestStub,
-                loggerMock.object,
                 retryHelperMock.object,
             );
 
@@ -99,14 +129,10 @@ describe(A11yServiceClient, () => {
     });
 
     it('postScanUrl', async () => {
-        const scanUrl = 'url';
-        const priority = 3;
-        const response = { statusCode: 200 };
-        const requestBody = [{ url: scanUrl, priority }];
-        const options = { body: requestBody };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         postMock
-            .setup((req) => req(`${baseUrl}/scans`, options))
+            .setup((req) => req(`${baseUrl}/scans`, requestOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -116,13 +142,12 @@ describe(A11yServiceClient, () => {
     });
 
     it('postScanUrl, priority not set', async () => {
-        const scanUrl = 'url';
-        const response = { statusCode: 200 };
-        const requestBody = [{ url: scanUrl, priority: 0 }];
-        const options = { body: requestBody };
+        requestBody = [{ url: scanUrl, priority: 0 }];
+        requestOptions = { body: requestBody };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         postMock
-            .setup((req) => req(`${baseUrl}/scans`, options))
+            .setup((req) => req(`${baseUrl}/scans`, requestOptions))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -133,8 +158,8 @@ describe(A11yServiceClient, () => {
 
     it('getScanStatus', async () => {
         const scanId = 'scanId';
-        const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         getMock
             .setup((req) => req(`${baseUrl}/scans/${scanId}`))
             .returns(async () => Promise.resolve(response))
@@ -148,8 +173,8 @@ describe(A11yServiceClient, () => {
     it('getScanReport', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
-        const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         getMock
             .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
             .returns(async () => Promise.resolve(response))
@@ -162,8 +187,8 @@ describe(A11yServiceClient, () => {
 
     it('checkHealth', async () => {
         const suffix = '/abc';
-        const response = { statusCode: 200 };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         getMock
             .setup((req) => req(`${baseUrl}/health${suffix}`))
             .returns(async () => Promise.resolve(response))
@@ -180,6 +205,7 @@ describe(A11yServiceClient, () => {
             body: errBody,
         };
         setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
         getMock
             .setup((req) => req(`${baseUrl}/health`))
             .returns(async () => Promise.reject(errRes))

@@ -10,7 +10,6 @@ import { isEmpty } from 'lodash';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider, RunState, ScanResultResponse, ScanRunResultResponse } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
-
 import { TestEnvironment } from './common-types';
 import { functionalTestGroupTypes, TestGroupName } from './functional-test-group-types';
 import { TestRunner } from './runner/test-runner';
@@ -144,7 +143,7 @@ describe('functional tests', () => {
                 container.get(GlobalLogger),
             );
 
-            return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`);
+            return new A11yServiceClient(cred, `https://apim-${apimName}.azure-api.net`, logger);
         });
 
         return container;

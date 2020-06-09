@@ -32,15 +32,15 @@ export class A11yServiceClient {
     constructor(
         private readonly credential: A11yServiceCredential,
         private readonly requestBaseUrl: string,
+        private readonly logger: Logger,
         private readonly apiVersion = '1.0',
         private readonly throwOnRequestFailure: boolean = false,
-        httpRequest: any = requestPromise,
-        private readonly logger: Logger,
+        private readonly httpRequest: any = requestPromise,
         private readonly retryHelper: RetryHelper<unknown> = new RetryHelper(),
         private readonly maxRetryCount: number = 5,
         private readonly msecBetweenRetries: number = 1000,
     ) {
-        this.defaultRequestObject = httpRequest.defaults({
+        this.defaultRequestObject = this.httpRequest.defaults({
             ...this.defaultOptions,
             simple: this.throwOnRequestFailure,
         });
