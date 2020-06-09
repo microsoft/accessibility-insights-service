@@ -65,7 +65,7 @@
         "lodash": "^4.17.14",
         "pretty": "^2.0.0",
         "puppeteer": "^3.3.0",
-        "react-helmet": "^6.0.0",
+        "react-helmet": "^6.1.0",
         "reflect-metadata": "^0.1.13",
         "table": "^5.4.6",
         "yargs": "^15.3.1"
