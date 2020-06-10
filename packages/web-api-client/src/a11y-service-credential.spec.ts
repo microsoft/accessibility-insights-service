@@ -4,12 +4,11 @@
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
+import { RetryHelper } from 'common';
 import * as requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from './test-utilities/mockable-logger';
-
-import { RetryHelper } from 'common';
 import { A11yServiceCredential } from './a11y-service-credential';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 describe(A11yServiceCredential, () => {
     let authenticationContextMock: IMock<AuthenticationContext>;
@@ -26,7 +25,6 @@ describe(A11yServiceCredential, () => {
     const numTokenAttempts = 5;
     let loggerMock: IMock<MockableLogger>;
     let retryHelperMock: IMock<RetryHelper<TokenResponse>>;
-
     let error: Error;
 
     beforeEach(() => {

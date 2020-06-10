@@ -30,7 +30,7 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
     const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
     await logger.setup();
     const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
-    const client = new A11yServiceClient(cred, argv.baseUrl);
+    const client = new A11yServiceClient(cred, argv.baseUrl, logger);
     const testTimeoutInMinutes = 20;
     const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
     const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
