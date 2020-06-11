@@ -26,18 +26,35 @@ export class NotificationSender {
     ) {}
 
     public async sendNotification(): Promise<void> {
-        const notificationSenderMetadata = this.notificationSenderConfig.getConfig();
+        const senderMetadata = this.notificationSenderConfig.getConfig();
+        this.logger.logInfo(`Starting scan notification for scan id ${senderMetadata.scanId}.`);
 
-        this.logger.logInfo(`Reading page scan run result ${notificationSenderMetadata.scanId}`);
+        this.logger.logInfo(`Updating page scan notification state to 'sending'.`);
+        let pageScanResult: Partial<OnDemandPageScanResult> = {
+            id: senderMetadata.scanId,
+            notification: {
+                scanNotifyUrl: senderMetadata.scanNotifyUrl,
+                state: 'sending',
+            },
+        };
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(pageScanResult);
+        if (!response.succeeded) {
+            this.logger.logInfo(
+                `Update page scan notification state to 'sending' failed due to merge conflict with other process. Exiting page scan notification task.`,
+            );
+
+            return;
+        }
+
         this.logger.setCustomProperties({
-            scanId: notificationSenderMetadata.scanId,
+            scanId: senderMetadata.scanId,
             batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
         });
 
         this.logger.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 });
         this.logger.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 });
 
-        const pageScanResult = await this.sendNotificationWithRetry(notificationSenderMetadata);
+        pageScanResult = await this.sendNotificationWithRetry(senderMetadata);
 
         this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);

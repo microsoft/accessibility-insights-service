@@ -53,7 +53,7 @@ describe(OnDemandPageScanRunResultProvider, () => {
         verifyAll();
     });
 
-    it('updates scan run document', async () => {
+    it('try update scan run document with success', async () => {
         const partition1Result1 = {
             id: 'partition1id1',
         } as Partial<OnDemandPageScanResult>;
@@ -63,7 +63,75 @@ describe(OnDemandPageScanRunResultProvider, () => {
 
         setupVerifiableGetNodeCall('bucket1', 'partition1id1');
         cosmosContainerClientMock
-            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved))
+            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved, undefined, false))
+            .returns(() =>
+                Promise.resolve({ item: partition1Result1Saved, statusCode: 200 } as CosmosOperationResponse<OnDemandPageScanResult>),
+            )
+            .verifiable();
+
+        const response = await testSubject.tryUpdateScanRun(partition1Result1);
+        expect(response.succeeded).toBeTrue();
+        expect(response.result).toEqual(partition1Result1Saved);
+        verifyAll();
+    });
+
+    it('try update scan run document with HTTP 412 precondition failure', async () => {
+        const partition1Result1 = {
+            id: 'partition1id1',
+        } as Partial<OnDemandPageScanResult>;
+        const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        partition1Result1Saved._etag = 'etag-1';
+
+        setupVerifiableGetNodeCall('bucket1', 'partition1id1');
+        cosmosContainerClientMock
+            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved, undefined, false))
+            .returns(() =>
+                Promise.resolve({ item: partition1Result1Saved, statusCode: 412 } as CosmosOperationResponse<OnDemandPageScanResult>),
+            )
+            .verifiable();
+
+        const response = await testSubject.tryUpdateScanRun(partition1Result1);
+        expect(response.succeeded).toBeFalse();
+        expect(response.result).toEqual(undefined);
+        verifyAll();
+    });
+
+    it('try update scan run document with failure', async () => {
+        const partition1Result1 = {
+            id: 'partition1id1',
+        } as Partial<OnDemandPageScanResult>;
+        const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        partition1Result1Saved._etag = 'etag-1';
+
+        setupVerifiableGetNodeCall('bucket1', 'partition1id1');
+        cosmosContainerClientMock
+            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved, undefined, false))
+            .returns(() =>
+                Promise.resolve({ item: partition1Result1Saved, statusCode: 500, response: 'server error' } as CosmosOperationResponse<
+                    OnDemandPageScanResult
+                >),
+            )
+            .verifiable();
+
+        await expect(testSubject.tryUpdateScanRun(partition1Result1)).rejects.toThrowError(
+            `Scan result document operation failed. Scan Id: partition1id1 Response status code: 500 Response: server error`,
+        );
+        verifyAll();
+    });
+
+    it('update scan run document', async () => {
+        const partition1Result1 = {
+            id: 'partition1id1',
+        } as Partial<OnDemandPageScanResult>;
+        const partition1Result1ToBeSaved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        const partition1Result1Saved = getDocumentWithSysProps('partition1id1', 'bucket1');
+        partition1Result1Saved._etag = 'etag-1';
+
+        setupVerifiableGetNodeCall('bucket1', 'partition1id1');
+        cosmosContainerClientMock
+            .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved, undefined, true))
             .returns(() => Promise.resolve({ item: partition1Result1Saved } as CosmosOperationResponse<OnDemandPageScanResult>))
             .verifiable();
 

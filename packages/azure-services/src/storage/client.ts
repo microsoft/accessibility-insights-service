@@ -10,11 +10,11 @@ export interface ErrorResponse {
 }
 
 export namespace client {
-    export function isSuccessStatusCode<T>(response: { statusCode: number }): boolean {
+    export function isSuccessStatusCode(response: { statusCode: number }): boolean {
         return response.statusCode !== undefined && response.statusCode >= 200 && response.statusCode <= 299;
     }
 
-    export function ensureSuccessStatusCode<T>(response: { statusCode: number }): void {
+    export function ensureSuccessStatusCode(response: { statusCode: number }): void {
         if (!isSuccessStatusCode(response)) {
             throw new VError(
                 `Failed request response - ${JSON.stringify({
