@@ -41,20 +41,9 @@ export class Runner {
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
+        this.logger.logInfo(`Starting page scan for scan id ${scanMetadata.id}.`);
 
-        const scanStartedTimestamp: number = Date.now();
-        const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
-
-        this.logger.logInfo(`Reading page scan run result.`);
-        this.logger.setCustomProperties({ scanId: scanMetadata.id });
-
-        this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskStarted', undefined, {
-            scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
-            startedScanTasks: 1,
-        });
-
-        this.logger.logInfo(`Updating page scan run result state to running.`);
+        this.logger.logInfo(`Updating page scan run state to 'running'.`);
         const pageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanMetadata.id,
             run: {
@@ -65,8 +54,25 @@ export class Runner {
             scanResult: null,
             reports: null,
         };
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(pageScanResult);
+        if (!response.succeeded) {
+            this.logger.logInfo(
+                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
+            );
 
-        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+            return;
+        }
+
+        const scanStartedTimestamp: number = Date.now();
+        const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
+
+        this.logger.setCustomProperties({ scanId: scanMetadata.id });
+
+        this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
+        this.logger.trackEvent('ScanTaskStarted', undefined, {
+            scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
+            startedScanTasks: 1,
+        });
 
         let scanSucceeded: boolean;
         try {

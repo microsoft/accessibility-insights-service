@@ -47,6 +47,7 @@
         "webpack-cli": "^3.2.3"
     },
     "dependencies": {
+        "accessibility-insights-report": "^1.0.3",
         "@azure/cosmos": "^3.7.0",
         "axe-core": "3.5.1",
         "axe-puppeteer": "^1.1.0",
@@ -64,7 +65,6 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
-        "yargs": "^15.3.1",
-        "accessibility-insights-report": "^1.0.3"
+        "yargs": "^15.3.1"
     }
 }

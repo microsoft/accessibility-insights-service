@@ -54,23 +54,23 @@ mkdir -p "$SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION"
 
 cd "$WEB_API_SCAN_JOB_MANAGER_SHARED_LOCATION"
 echo "Installing web api scan job manager dependencies"
-npm install yargs@13.2.4 applicationinsights@1.4.0
+npm install yargs@15.3.1 applicationinsights@1.7.6
 
 cd "$WEB_API_SEND_NOTIFICATION_JOB_MANAGER_SHARED_LOCATION"
 echo "Installing web api send notification job manager dependencies"
-npm install yargs@13.2.4 applicationinsights@1.4.0
+npm install yargs@15.3.1 applicationinsights@1.7.6
 
 cd "$WEB_API_SCAN_RUNNER_SHARED_LOCATION"
 echo "Installing web api scan runner dependencies"
-npm install yargs@13.2.4 puppeteer@1.18.1 axe-core@3.5.1 axe-puppeteer@1.0.0 applicationinsights@1.4.0
+npm install yargs@15.3.1 puppeteer@3.3.0 axe-core@3.5.1 axe-puppeteer@1.1.0 applicationinsights@1.7.6
 
 cd "$WEB_API_SEND_NOTIFICATION_RUNNER_SHARED_LOCATION"
 echo "Installing web api send notification runner dependencies"
-npm install yargs@13.2.4 applicationinsights@1.4.0
+npm install yargs@15.3.1 applicationinsights@1.7.6
 
 cd "$SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION"
 echo "Installing on demand scan request sender dependencies"
-npm install yargs@13.2.4 applicationinsights@1.4.0
+npm install yargs@15.3.1 applicationinsights@1.7.6
 
 echo "Invoking custom pool startup script"
 "${0%/*}/custom-pool-post-startup.sh"
