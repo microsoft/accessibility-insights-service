@@ -136,7 +136,7 @@ export class ScanRequestController extends ApiController {
                     url: scanRunRequest.url,
                 });
 
-                this.logger.logInfo('Generated new scan Id for the scan request URL.', { batchId, scanId, url: scanRunRequest.url });
+                this.logger.logInfo('Generated new scan id for the scan request URL.', { batchId, scanId, url: scanRunRequest.url });
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,

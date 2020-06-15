@@ -61,7 +61,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
 
                 this.logger.logInfo(
-                    `Processed batch request document.`,
+                    `The batch request document processed successfully.`,
                     this.getLogPropertiesForRequests(document.scanRunBatchRequest, document.id),
                 );
             }),
