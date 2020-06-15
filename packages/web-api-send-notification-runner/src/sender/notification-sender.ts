@@ -3,7 +3,7 @@
 import { client } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger, loggerTypes } from 'logger';
+import { GlobalLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { NotificationError, NotificationState, OnDemandPageScanResult, ScanCompletedNotification } from 'storage-documents';
 import { NotificationSenderConfig } from '../notification-sender-config';
@@ -20,14 +20,14 @@ export class NotificationSender {
         @inject(NotificationSenderConfig) private readonly notificationSenderConfig: NotificationSenderConfig,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(loggerTypes.Process) private readonly currentProcess: typeof process,
         private readonly system: typeof System = System,
         private readonly responseParser: typeof client = client,
     ) {}
 
     public async sendNotification(): Promise<void> {
         const senderMetadata = this.notificationSenderConfig.getConfig();
-        this.logger.logInfo(`Starting scan notification for scan id ${senderMetadata.scanId}.`);
+        this.logger.setCommonProperties({ scanId: senderMetadata.scanId });
+        this.logger.logInfo(`Starting scan notification task.`);
 
         this.logger.logInfo(`Updating page scan notification state to 'sending'.`);
         let pageScanResult: Partial<OnDemandPageScanResult> = {
@@ -46,17 +46,11 @@ export class NotificationSender {
             return;
         }
 
-        this.logger.setCustomProperties({
-            scanId: senderMetadata.scanId,
-            batchJobId: this.currentProcess.env.AZ_BATCH_JOB_ID,
-        });
-
         this.logger.trackEvent('ScanRequestNotificationStarted', undefined, { scanRequestNotificationsStarted: 1 });
         this.logger.trackEvent('SendNotificationTaskStarted', undefined, { startedScanNotificationTasks: 1 });
 
         pageScanResult = await this.sendNotificationWithRetry(senderMetadata);
 
-        this.logger.logInfo(`Writing page notification status to a storage.`);
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
         this.logger.trackEvent('ScanRequestNotificationCompleted', undefined, { scanRequestNotificationsCompleted: 1 });
@@ -74,14 +68,14 @@ export class NotificationSender {
         const scanConfig = await this.getScanConfig();
 
         while (numberOfRetries <= scanConfig.maxSendNotificationRetryCount) {
-            this.logger.logInfo(`Sending scan result notification. Retry count ${numberOfRetries}`);
+            this.logger.logInfo(`Sending scan result notification. Retry count ${numberOfRetries}.`);
             let response;
             try {
                 response = await this.notificationSenderWebAPIClient.sendNotification(notificationSenderConfigData);
                 statusCode = response.statusCode;
 
                 if (this.responseParser.isSuccessStatusCode(response)) {
-                    this.logger.logInfo(`Scan result notification request succeeded. Retry count ${numberOfRetries}`);
+                    this.logger.logInfo(`Scan result notification request succeeded. Retry count ${numberOfRetries}.`);
                     notificationState = 'sent';
                     error = null;
 

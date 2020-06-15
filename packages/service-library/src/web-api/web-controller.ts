@@ -18,9 +18,9 @@ export abstract class WebController {
         this.context = requestContext;
 
         try {
-            this.logger.setCustomProperties(this.getBaseTelemetryProperties());
+            this.logger.setCommonProperties(this.getBaseTelemetryProperties());
 
-            this.logger.logInfo('[WebController] request started');
+            this.logger.logInfo('Started HTTP web request processing.');
 
             let result: unknown;
             if (this.validateRequest(...args)) {
@@ -29,11 +29,11 @@ export abstract class WebController {
 
             this.setResponseContentTypeHeader();
 
-            this.logger.logInfo('[WebController] request completed');
+            this.logger.logInfo('The HTTP web request completed successfully.');
 
             return result;
         } catch (error) {
-            this.logger.trackExceptionAny(error, '[WebController] Request failed');
+            this.logger.logError('Encountered an error while processing HTTP web request.', { error: JSON.stringify(error) });
             throw error;
         }
     }

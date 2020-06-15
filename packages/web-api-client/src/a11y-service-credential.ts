@@ -33,7 +33,7 @@ export class A11yServiceCredential {
                 this.msecBetweenRetries,
             );
         } catch (err) {
-            throw new Error(`Auth getToken failed with error: ${JSON.stringify(err)}`);
+            throw new Error(`Error while acquiring Azure AD client token. ${JSON.stringify(err)}`);
         }
     }
 
@@ -61,6 +61,6 @@ export class A11yServiceCredential {
     }
 
     private async handleGetTokenError(err: Error): Promise<void> {
-        this.logger.logError(`Auth getToken call failed with error: ${JSON.stringify(err)}`);
+        this.logger.logError(`Error while acquiring Azure AD client token. ${JSON.stringify(err)}`);
     }
 }

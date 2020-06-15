@@ -4,21 +4,14 @@ import 'reflect-metadata';
 
 import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 
-class TestableAppInsightsLoggerClient extends AppInsightsLoggerClient {
-    // tslint:disable-next-line: no-unnecessary-override
-    public getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {
-        return super.getAdditionalPropertiesToAddToEvent();
-    }
-}
 // tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
 
 describe(AppInsightsLoggerClient, () => {
     let appInsightsMock: IMock<typeof appInsights>;
     let appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
-    let testSubject: TestableAppInsightsLoggerClient;
+    let testSubject: AppInsightsLoggerClient;
     let appInsightsTelemetryClientMock: IMock<appInsights.TelemetryClient>;
     let processStub: typeof process;
     let envVariables: {
@@ -60,7 +53,7 @@ describe(AppInsightsLoggerClient, () => {
             .returns(() => appInsightsTelemetryClientMock.object)
             .verifiable(Times.atLeastOnce());
 
-        testSubject = new TestableAppInsightsLoggerClient(appInsightsMock.object, processStub);
+        testSubject = new AppInsightsLoggerClient(appInsightsMock.object, processStub);
     });
 
     describe('setup', () => {
@@ -91,14 +84,16 @@ describe(AppInsightsLoggerClient, () => {
 
             expect(testSubject.isInitialized()).toBe(true);
         });
-    });
 
-    describe('getAdditionalPropertiesToAddToEvent', () => {
-        it('returns empty object', async () => {
-            setupCallsForTelemetrySetup();
-            await testSubject.setup({ source: 'bar' });
+        it('setup without batch properties', async () => {
+            commonProperties = {};
+            envVariables = {};
+            processStub.env = envVariables;
 
-            expect(testSubject.getAdditionalPropertiesToAddToEvent()).toEqual({});
+            await testSubject.setup(null);
+
+            verifyCommonProperties();
+            verifyMocks();
         });
     });
 
@@ -119,6 +114,7 @@ describe(AppInsightsLoggerClient, () => {
             Times.atLeastOnce(),
         );
     }
+
     function setupAppInsightsCall(): void {
         appInsightsMock.setup((a) => a.setup()).returns(() => appInsightsConfigMock.object);
         appInsightsMock.setup((a) => a.start()).verifiable(Times.once());

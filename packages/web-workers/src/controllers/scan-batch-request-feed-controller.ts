@@ -48,7 +48,8 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     public async handleRequest(...args: unknown[]): Promise<void> {
-        this.logger.logInfo('processing the documents');
+        this.logger.setCommonProperties({ source: 'scanBatchCosmosFeedTriggerFunc' });
+        this.logger.logInfo('Processing the scan batch documents.');
 
         const batchDocuments = <OnDemandPageScanBatchRequest[]>args[0];
         await Promise.all(
@@ -57,15 +58,16 @@ export class ScanBatchRequestFeedController extends WebController {
                 const scanRequestAcceptedMeasurements: ScanRequestAcceptedMeasurements = {
                     acceptedScanRequests: addedRequests,
                 };
-
                 this.logger.trackEvent('ScanRequestAccepted', { batchRequestId: document.id }, scanRequestAcceptedMeasurements);
 
                 this.logger.logInfo(
-                    `[ScanBatchRequestFeedController] processed batch request document`,
+                    `Processed batch request document.`,
                     this.getLogPropertiesForRequests(document.scanRunBatchRequest, document.id),
                 );
             }),
         );
+
+        this.logger.logInfo('The scan batch documents processed successfully.');
     }
 
     protected validateRequest(...args: unknown[]): boolean {
@@ -79,9 +81,10 @@ export class ScanBatchRequestFeedController extends WebController {
         if (requests.length > 0) {
             await this.writeRequestsToPermanentContainer(requests, batchDocument.id);
             await this.writeRequestsToQueueContainer(requests, batchDocument.id);
+
             await this.scanDataProvider.deleteBatchRequest(batchDocument);
             this.logger.logInfo(
-                `[ScanBatchRequestFeedController] deleted batch request document ${batchDocument.id}`,
+                `The batch request document deleted from inbound storage container.`,
                 this.getLogPropertiesForRequests(requests, batchDocument.id),
             );
         }
@@ -91,6 +94,11 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
+            this.logger.logInfo('Created new scan result document for the scan result storage container from the scan batch document.', {
+                batchRequestId,
+                scanId: request.scanId,
+            });
+
             return {
                 id: request.scanId,
                 url: request.url,
@@ -115,7 +123,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
         this.logger.logInfo(
-            `[ScanBatchRequestFeedController] Added requests to permanent container`,
+            `Added scan requests to permanent scan result storage container.`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
         );
     }
@@ -123,6 +131,10 @@ export class ScanBatchRequestFeedController extends WebController {
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
             const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
+            this.logger.logInfo('Created new scan request document for the queue storage container from the scan batch document.', {
+                batchRequestId,
+                scanId: request.scanId,
+            });
 
             return {
                 id: request.scanId,
@@ -136,7 +148,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
         await this.pageScanRequestProvider.insertRequests(requestDocuments);
         this.logger.logInfo(
-            `[ScanBatchRequestFeedController] Added requests to queue container`,
+            `Added scan requests to scan queue storage container.`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
         );
     }
@@ -161,7 +173,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private validateRequestData(documents: OnDemandPageScanBatchRequest[]): boolean {
         if (documents === undefined || documents.length === 0 || !documents.some((d) => d.itemType === ItemType.scanRunBatchRequest)) {
-            this.logger.logInfo(`[ScanBatchRequestFeedController] passed documents were not valid - ${JSON.stringify(documents)}`);
+            this.logger.logInfo(`The scan batch documents were malformed.`, { documents: JSON.stringify(documents) });
 
             return false;
         }

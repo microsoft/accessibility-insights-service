@@ -14,5 +14,5 @@ export interface LoggerClient {
     log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void;
     trackException(error: Error): void;
     flush(): Promise<void>;
-    setCustomProperties(properties: LoggerProperties): void;
+    setCommonProperties(properties: LoggerProperties): void;
 }

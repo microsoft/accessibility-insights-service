@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoad, PoolMetricsInfo, Queue } from 'azure-services';
@@ -136,14 +135,6 @@ describe(BatchTaskCreator, () => {
                 .returns(async () => Promise.resolve(batchConfig.jobId))
                 .verifiable(Times.once());
 
-            loggerMock
-                .setup(async (l) =>
-                    l.setCustomProperties({
-                        batchJobId: batchConfig.jobId,
-                    }),
-                )
-                .verifiable(Times.once());
-
             expect((testSubject as any).hasInitialized).toBe(false);
 
             await testSubject.init();
@@ -182,7 +173,7 @@ describe(BatchTaskCreator, () => {
             batchMock.reset();
 
             (testSubject as any).hasInitialized = false;
-            await expect(testSubject.run()).rejects.toEqual(new Error('[BatchTaskCreator] not initialized'));
+            await expect(testSubject.run()).rejects.toEqual(new Error('The BatchTaskCreator instance is not initialized.'));
             expect(testSubject.onExitCallCount).toBe(0);
         });
 
@@ -315,6 +306,9 @@ describe(BatchTaskCreator, () => {
             jobTasksBatch1[0].state = JobTaskState.failed;
             const expectedDeletedMessages = messagesBatch1.slice(1);
 
+            setupLoggerLogInfoCall(5, 2);
+            setupLoggerLogErrorCall(1);
+
             setupVerifiableBatchCreateTasksCall(messagesBatch1, jobTasksBatch1);
 
             setupVerifiableDeleteQueueMessagesCall(expectedDeletedMessages);
@@ -368,13 +362,43 @@ describe(BatchTaskCreator, () => {
         }
     });
 
+    function setupLoggerLogInfoCall(totalCount: number, startIndex: number): void {
+        for (let count = startIndex; count <= totalCount; count += 1) {
+            loggerMock
+                .setup((o) =>
+                    o.logInfo('The scan task created successfully.', It.isValue({ scanId: `${count}`, scanTaskId: `task-id-${count}` })),
+                )
+                .verifiable(Times.once());
+        }
+        loggerMock.setup((o) => o.logInfo(`Added ${totalCount - startIndex + 1} new scan tasks.`)).verifiable(Times.once());
+    }
+
+    function setupLoggerLogErrorCall(totalCount: number): void {
+        for (let count = 1; count <= totalCount; count += 1) {
+            const id = `${count}`;
+            loggerMock
+                .setup((o) =>
+                    o.logError(
+                        'Failure to create scan task.',
+                        It.isValue({
+                            scanId: id,
+                            scanTaskId: `task-id-${id}`,
+                            scanTaskError: undefined,
+                            scanTaskState: 'failed',
+                        }),
+                    ),
+                )
+                .verifiable(Times.once());
+        }
+    }
+
     function generateMessages(totalCount: number): Message[] {
         const messages: Message[] = [];
         for (let count = 1; count <= totalCount; count += 1) {
             messageIdCounter += 1;
             messages.push({
                 messageId: `id-${messageIdCounter}`,
-                messageText: `message text for ${messageIdCounter}`,
+                messageText: JSON.stringify({ id: `${messageIdCounter}`, url: `https://localhost/site/${messageIdCounter}` }),
             });
         }
 
@@ -395,6 +419,7 @@ describe(BatchTaskCreator, () => {
 
         return jobTasks;
     }
+
     afterEach(() => {
         batchMock.verifyAll();
         queueMock.verifyAll();

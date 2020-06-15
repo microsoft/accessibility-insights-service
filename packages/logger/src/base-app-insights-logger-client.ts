@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Contracts, TelemetryClient } from 'applicationinsights';
 import { injectable } from 'inversify';
-import { BaseTelemetryProperties, TelemetryMeasurements } from '.';
+import { merge } from 'lodash';
 import { AvailabilityTelemetry } from './availability-telemetry';
+import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 import { LoggerEvent } from './logger-event';
+import { TelemetryMeasurements } from './logger-event-measurements';
+import { LoggerProperties } from './logger-properties';
 
 @injectable()
 export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     protected telemetryClient: TelemetryClient;
-
     protected initialized: boolean = false;
 
     public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
@@ -25,21 +26,21 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         this.telemetryClient.trackMetric({
             name: name,
             value: value,
-            properties: { ...this.getAdditionalPropertiesToAddToEvent() },
+            properties: { ...this.getCommonProperties() },
         });
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
-        this.telemetryClient.trackEvent({ name: name, properties: this.getMergedProperties(properties), measurements });
+        this.telemetryClient.trackEvent({ name: name, properties: merge(this.getCommonProperties(), properties), measurements });
     }
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         const severity = this.getAppInsightsSeverityLevel(logLevel);
 
         this.telemetryClient.trackTrace({
-            message: message,
+            message: this.setMessageSource(message),
             severity: severity,
-            properties: this.getMergedProperties(properties),
+            properties: merge(this.getCommonProperties(), properties),
         });
     }
 
@@ -57,7 +58,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     }
 
     public trackException(error: Error): void {
-        this.telemetryClient.trackException({ exception: error, properties: { ...this.getAdditionalPropertiesToAddToEvent() } });
+        this.telemetryClient.trackException({ exception: error, properties: { ...this.getCommonProperties() } });
     }
 
     public async flush(): Promise<void> {
@@ -70,27 +71,23 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
         });
     }
 
-    public setCustomProperties(properties: { [key: string]: string }): void {
+    public setCommonProperties(properties: LoggerProperties): void {
         this.telemetryClient.commonProperties = {
             ...this.telemetryClient.commonProperties,
             ...properties,
         };
     }
 
-    public getDefaultProperties(): { [key: string]: string } {
+    public getCommonProperties(): LoggerProperties {
         return {
             ...this.telemetryClient.commonProperties,
         };
     }
 
-    protected abstract getAdditionalPropertiesToAddToEvent(): { [key: string]: string };
+    private setMessageSource(message: string): string {
+        const source = this.getCommonProperties().source;
 
-    private getMergedProperties(properties?: { [key: string]: string }): { [key: string]: string } {
-        if (properties === undefined) {
-            return { ...this.getAdditionalPropertiesToAddToEvent() };
-        }
-
-        return { ...this.getAdditionalPropertiesToAddToEvent(), ...properties };
+        return source !== undefined ? `[${source}] ${message}` : message;
     }
 
     private getAppInsightsSeverityLevel(logLevel: LogLevel): Contracts.SeverityLevel {
@@ -108,7 +105,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
                 return Contracts.SeverityLevel.Warning;
 
             default:
-                throw new Error(`unknown log level ${logLevel}`);
+                throw new Error(`Unknown log level '${logLevel}'`);
         }
     }
 }

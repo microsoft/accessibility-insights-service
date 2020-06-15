@@ -80,7 +80,7 @@ describe(BaseConsoleLoggerClient, () => {
             const customProps = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.trackMetric('metric1', 1);
 
@@ -94,7 +94,7 @@ describe(BaseConsoleLoggerClient, () => {
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
 
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.trackMetric('metric1', 1);
 
@@ -126,7 +126,7 @@ describe(BaseConsoleLoggerClient, () => {
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
 
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.trackEvent('HealthCheck');
 
@@ -140,7 +140,7 @@ describe(BaseConsoleLoggerClient, () => {
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
 
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.trackEvent('HealthCheck');
 
@@ -185,7 +185,7 @@ describe(BaseConsoleLoggerClient, () => {
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.log('trace1', LogLevel.warn);
 
@@ -203,7 +203,7 @@ describe(BaseConsoleLoggerClient, () => {
                 propToAdd: 'val2',
             };
             await testSubject.setup(baseProps);
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
 
             testSubject.log('trace1', LogLevel.warn);
 
@@ -254,7 +254,7 @@ describe(BaseConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             const error = new Error('error1');
 
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
             testSubject.trackException(error);
 
             consoleMock.verify(
@@ -272,7 +272,7 @@ describe(BaseConsoleLoggerClient, () => {
             await testSubject.setup(baseProps);
             const error = new Error('error1');
 
-            testSubject.setCustomProperties(customProps);
+            testSubject.setCommonProperties(customProps);
             testSubject.trackException(error);
 
             consoleMock.verify(

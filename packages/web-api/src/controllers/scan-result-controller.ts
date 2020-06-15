@@ -25,8 +25,11 @@ export class ScanResultController extends BaseScanResultController {
 
     public async handleRequest(): Promise<void> {
         const scanId = <string>this.context.bindingData.scanId;
+        this.logger.setCommonProperties({ source: 'getScanResultRESTApi', scanId });
+
         if (!this.isScanIdValid(scanId)) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
+            this.logger.logError('The client request scan id is malformed.');
 
             return;
         }
@@ -42,7 +45,7 @@ export class ScanResultController extends BaseScanResultController {
                     status: 200,
                     body: this.getTooSoonRequestResponse(scanId),
                 };
-                this.logger.logInfo('Scan result not found in result storage.', { scanId });
+                this.logger.logInfo('Scan result not found in a storage.');
             } else {
                 // return scan not found response
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
@@ -52,7 +55,7 @@ export class ScanResultController extends BaseScanResultController {
                 status: 200,
                 body: this.getScanResultResponse(scanResult),
             };
-            this.logger.logInfo('Scan result fetched from result storage.', { scanId });
+            this.logger.logInfo('Scan result successfully fetched from a storage.');
         }
     }
 }

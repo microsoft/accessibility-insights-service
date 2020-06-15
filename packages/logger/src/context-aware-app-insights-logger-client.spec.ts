@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { TelemetryClient } from 'applicationinsights';
@@ -12,20 +11,15 @@ export class TestableContextAwareAppInsightsLoggerClient extends ContextAwareApp
     public getTelemetryClient(): TelemetryClient {
         return this.telemetryClient;
     }
-
-    // tslint:disable-next-line: no-unnecessary-override
-    public getAdditionalPropertiesToAddToEvent(): { [key: string]: string } {
-        return super.getAdditionalPropertiesToAddToEvent();
-    }
 }
 
 describe(ContextAwareAppInsightsLoggerClient, () => {
     let testSubject: TestableContextAwareAppInsightsLoggerClient;
-    let rootLoggerClient: IMock<AppInsightsLoggerClient>;
+    let globalLoggerClient: IMock<AppInsightsLoggerClient>;
 
     beforeEach(() => {
-        rootLoggerClient = Mock.ofType(AppInsightsLoggerClient);
-        testSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
+        globalLoggerClient = Mock.ofType(AppInsightsLoggerClient);
+        testSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
         process.env.APPINSIGHTS_INSTRUMENTATIONKEY = '00000000-0000-0000-0000-000000000000';
     });
 
@@ -42,8 +36,8 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
 
         beforeEach(() => {
             rootLoggerSetup = false;
-            rootLoggerClient.setup((r) => r.setup()).callback(() => (rootLoggerSetup = true));
-            rootLoggerClient.setup((r) => r.isInitialized()).returns(() => rootLoggerSetup);
+            globalLoggerClient.setup((r) => r.setup()).callback(() => (rootLoggerSetup = true));
+            globalLoggerClient.setup((r) => r.isInitialized()).returns(() => rootLoggerSetup);
         });
 
         it('should create telemetry client with base properties', async () => {
@@ -61,9 +55,9 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
 
         it('should only initialize rootLoggerClient once', async () => {
-            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
 
-            rootLoggerClient
+            globalLoggerClient
                 .setup((r) => r.setup())
                 .callback(() => (rootLoggerSetup = true))
                 .verifiable(Times.once());
@@ -71,11 +65,11 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
             await testSubject.setup({});
             await siblingTestSubject.setup({});
 
-            rootLoggerClient.verifyAll();
+            globalLoggerClient.verifyAll();
         });
 
         it('isInitialized works as expected with shared rootLoggerClient', async () => {
-            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(rootLoggerClient.object);
+            const siblingTestSubject = new TestableContextAwareAppInsightsLoggerClient(globalLoggerClient.object);
 
             await testSubject.setup({});
 
@@ -84,15 +78,29 @@ describe(ContextAwareAppInsightsLoggerClient, () => {
         });
     });
 
-    describe('getAdditionalPropertiesToAddToEvent', () => {
-        it('should return properties from root logger', () => {
-            const rootLoggerProps = {
-                rootProps: 'rootPropValue',
+    describe('getCommonProperties()', () => {
+        it('should return properties from global logger', () => {
+            const globalLoggerProps = {
+                apiName: 'globalPropValue',
             };
 
-            rootLoggerClient.setup((r) => r.getDefaultProperties()).returns(() => rootLoggerProps);
+            globalLoggerClient.setup((r) => r.getCommonProperties()).returns(() => globalLoggerProps);
 
-            expect(testSubject.getAdditionalPropertiesToAddToEvent()).toEqual(rootLoggerProps);
+            expect(testSubject.getCommonProperties()).toEqual(globalLoggerProps);
+        });
+
+        it('should merge properties from global logger', async () => {
+            const globalLoggerProps = {
+                apiName: 'globalPropValue',
+            };
+            globalLoggerClient.setup((r) => r.getCommonProperties()).returns(() => globalLoggerProps);
+
+            const localLoggerProps = {
+                scanId: '123',
+            };
+            await testSubject.setup({ ...localLoggerProps });
+
+            expect(testSubject.getCommonProperties()).toEqual({ ...globalLoggerProps, ...localLoggerProps });
         });
     });
 });

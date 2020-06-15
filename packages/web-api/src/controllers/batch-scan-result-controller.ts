@@ -5,7 +5,6 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse, WebApiErrorCodes } from 'service-library';
-
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -25,6 +24,8 @@ export class BatchScanResultController extends BaseScanResultController {
     }
 
     public async handleRequest(): Promise<void> {
+        this.logger.setCommonProperties({ source: 'getBatchScanResultRESTApi' });
+
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
         const scanIds = payload.map((request) => request.scanId);
         const responseBody: ScanResultResponse[] = [];
@@ -64,6 +65,6 @@ export class BatchScanResultController extends BaseScanResultController {
             body: responseBody,
         };
 
-        this.logger.logInfo('Batch scan result fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
+        this.logger.logInfo('Batch scan result successfully fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
     }
 }

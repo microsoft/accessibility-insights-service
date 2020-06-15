@@ -27,6 +27,7 @@ export class HealthCheckController extends ApiController {
 
     public async handleRequest(): Promise<void> {
         this.logger.trackEvent('HealthCheck');
+        this.logger.setCommonProperties({ source: 'getHealthCheckReportRESTApi' });
 
         const target: HealthTarget = this.context.bindingData.target as HealthTarget;
         if (target === undefined) {
@@ -83,13 +84,13 @@ export class HealthCheckController extends ApiController {
         | order by timestamp asc nulls last`;
         const queryResponse = await appInsightsClient.executeQuery(queryString, logQueryTimeRange);
         if (queryResponse.statusCode === 200) {
-            this.logger.logInfo('App Insights query succeeded', {
+            this.logger.logInfo('App Insights query succeeded.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
                 response: JSON.stringify(queryResponse),
             });
         } else {
-            this.logger.logError('App Insights query failed', {
+            this.logger.logError('App Insights query failed.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
                 response: JSON.stringify(queryResponse),

@@ -3,10 +3,14 @@
 
 export interface LoggerProperties {
     scanId?: string;
+    url?: string;
     batchRequestId?: string;
     batchJobId?: string;
+    batchTaskId?: string;
     apiName?: string;
     apiVersion?: string;
     controller?: string;
     invocationId?: string;
+    source?: string;
+    reportId?: string;
 }

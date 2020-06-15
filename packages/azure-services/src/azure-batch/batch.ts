@@ -108,7 +108,7 @@ export class Batch {
 
                 await client.job.add(jobAddParameter);
 
-                this.logger.logInfo(`New job ${serviceJobId} created.`);
+                this.logger.logInfo(`New batch job created successfully.`, { batchJobId: serviceJobId });
             } else {
                 throw new VError(error as Error, `An error occurred while retrieving state of ${jobId} job.`);
             }
@@ -224,7 +224,8 @@ export class Batch {
         try {
             sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
         } catch (error) {
-            this.logger.logError(`Encountered the error while generating Blob Storage SAS URL. ${error}`, {
+            this.logger.logError(`Encountered the error while generating Blob Storage SAS URL`, {
+                error: JSON.stringify(error),
                 blobContainerName: Batch.batchLogContainerName,
             });
         }
@@ -246,7 +247,12 @@ export class Batch {
             } else {
                 jobTasks.get(taskAddResult.taskId).state = JobTaskState.failed;
                 jobTasks.get(taskAddResult.taskId).error = taskAddResult.error.message.value;
-                this.logger.logError(`An error occurred while adding new task ${JSON.stringify(taskAddResult)} to the job ${jobId}.`);
+                this.logger.logError(`An error occurred while adding new task to the job.`, {
+                    batchJobId: jobId,
+                    batchTaskId: taskAddResult.taskId,
+                    error: taskAddResult.error.message.value,
+                    taskAddResult: JSON.stringify(taskAddResult),
+                });
             }
         });
 

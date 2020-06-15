@@ -4,7 +4,6 @@ export { CosmosContainerClient } from './storage/cosmos-container-client';
 export { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 export { CosmosOperationResponse } from './azure-cosmos/cosmos-operation-response';
 export { Message } from './azure-queue/message';
-export { ScanMessage } from './azure-queue/scan-message';
 export { Queue } from './azure-queue/queue';
 export { RetryOptions } from './storage/retry-options';
 export { registerAzureServicesToContainer } from './register-azure-services-to-container';

@@ -16,7 +16,7 @@ export class WebDriver {
             timeout: 15000,
             args: ['--disable-dev-shm-usage'],
         });
-        this.logger.logInfo('[web-driver] Browser instance is started.');
+        this.logger.logInfo('Web browser instance is started.');
 
         return this.browser;
     }
@@ -24,7 +24,7 @@ export class WebDriver {
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
             await this.browser.close();
-            this.logger.logInfo('[web-driver] Browser instance has stopped.');
+            this.logger.logInfo('Web browser instance has stopped.');
         }
     }
 }

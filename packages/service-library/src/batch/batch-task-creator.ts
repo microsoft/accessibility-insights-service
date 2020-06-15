@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
+import { OnDemandScanRequestMessage } from 'storage-documents';
 
 @injectable()
 export abstract class BatchTaskCreator {
@@ -28,7 +28,7 @@ export abstract class BatchTaskCreator {
      */
     public async run(): Promise<void> {
         if (!this.hasInitialized) {
-            throw new Error('[BatchTaskCreator] not initialized');
+            throw new Error('The BatchTaskCreator instance is not initialized.');
         }
 
         const restartAfterTime = moment().add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour').toDate();
@@ -60,12 +60,7 @@ export abstract class BatchTaskCreator {
 
     public async init(): Promise<void> {
         this.jobManagerConfig = await this.fetchJobManagerConfig();
-        this.logger.setCustomProperties({
-            batchJobId: this.batchConfig.jobId,
-        });
-
         this.jobId = await this.batch.createJobIfNotExists(this.batchConfig.jobId, true);
-
         this.hasInitialized = true;
     }
 
@@ -78,7 +73,7 @@ export abstract class BatchTaskCreator {
     protected abstract onExit(): Promise<void>;
 
     protected async waitForChildTasks(): Promise<void> {
-        this.logger.logInfo('Waiting for child tasks to complete');
+        this.logger.logInfo('Waiting for child tasks to complete.');
 
         let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
         while (this.hasChildTasksRunning(poolMetricsInfo)) {
@@ -103,15 +98,24 @@ export abstract class BatchTaskCreator {
 
         await Promise.all(
             jobTasks.map(async (jobTask) => {
+                const message = messages.find((value) => value.messageId === jobTask.correlationId);
+                const scanRequest = JSON.parse(message.messageText) as OnDemandScanRequestMessage;
                 if (jobTask.state === JobTaskState.queued) {
-                    const message = messages.find((value) => value.messageId === jobTask.correlationId);
                     await this.queue.deleteMessage(this.getQueueName(), message);
+                    this.logger.logInfo('The scan task created successfully.', { scanId: scanRequest.id, scanTaskId: jobTask.id });
+                } else {
+                    this.logger.logError('Failure to create scan task.', {
+                        scanId: scanRequest.id,
+                        scanTaskId: jobTask.id,
+                        scanTaskError: jobTask.error,
+                        scanTaskState: jobTask.state,
+                    });
                 }
             }),
         );
 
         const jobQueuedTasks = jobTasks.filter((jobTask) => jobTask.state === JobTaskState.queued);
-        this.logger.logInfo(`Added ${jobQueuedTasks.length} new tasks`);
+        this.logger.logInfo(`Added ${jobQueuedTasks.length} new scan tasks.`);
 
         return jobQueuedTasks;
     }

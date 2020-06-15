@@ -19,11 +19,11 @@ export class OnDemandDispatcher {
 
     public async dispatchOnDemandScanRequests(): Promise<void> {
         const configQueueSize = (await this.serviceConfig.getConfigValue('queueConfig')).maxQueueSize;
-        this.logger.logInfo(`[Sender] Maximum queue size configuration set to ${configQueueSize}`);
+        this.logger.logInfo(`Maximum scan task queue size configuration set to ${configQueueSize}.`);
         let currentQueueSize = await this.sender.getCurrentQueueSize();
-        this.logger.logInfo(`[Sender] Current queue size is ${currentQueueSize}`);
+        this.logger.logInfo(`Current scan task queue size is ${currentQueueSize}.`);
         if (currentQueueSize >= configQueueSize) {
-            this.logger.logWarn('[Sender] Unable to queue new scan request as queue already reached to its maximum capacity');
+            this.logger.logWarn('Unable to queue new scan request as scan task queue already reached to its maximum capacity.');
 
             return;
         }
@@ -43,7 +43,7 @@ export class OnDemandDispatcher {
                 itemCount = response.item.length;
                 if (itemCount > 0) {
                     await this.sender.sendRequestToScan(response.item);
-                    this.logger.logInfo(`[Sender] Queued ${itemCount} scan requests to the queue`);
+                    this.logger.logInfo(`Queued ${itemCount} scan requests to the task scan queue.`);
                     // tslint:disable-next-line: no-null-keyword
                     this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: itemCount });
                 }
@@ -52,11 +52,11 @@ export class OnDemandDispatcher {
         } while (configQueueSize > currentQueueSize && itemCount > 0);
 
         if (itemCount === 0) {
-            this.logger.logInfo(`[Sender] No scan requests available for a queuing`);
+            this.logger.logInfo(`No scan requests available for a queuing.`);
         } else {
-            this.logger.logInfo(`[Sender] Queue reached its maximum capacity`);
+            this.logger.logInfo(`Task scan queue reached its maximum capacity.`);
         }
 
-        this.logger.logInfo(`[Sender] Sending scan requests completed. Queue size ${currentQueueSize}`);
+        this.logger.logInfo(`Sending scan requests to the task scan queue completed. Queue size ${currentQueueSize}.`);
     }
 }

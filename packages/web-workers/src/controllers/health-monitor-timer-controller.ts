@@ -24,6 +24,7 @@ export class HealthMonitorTimerController extends WebController {
 
     protected async handleRequest(...args: any[]): Promise<void> {
         const funcTimer = <FunctionTimer>args[0];
+        this.logger.setCommonProperties({ source: 'healthMonitorTimerFunc' });
         this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,

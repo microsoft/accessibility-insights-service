@@ -53,10 +53,13 @@ export class ScanRequestController extends ApiController {
 
         if (payload.length > this.config.maxScanRequestBatchCount) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.requestBodyTooLarge);
+            this.logger.logError(`The HTTP request body is too large. The requests count: ${payload.length}.`);
 
             return;
         }
         const batchId = this.guidGenerator.createGuid();
+        this.logger.setCommonProperties({ batchRequestId: batchId });
+
         const processedData = this.getProcessedRequestData(batchId, payload);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, processedData.scanRequestsToBeStoredInDb);
         this.context.res = {
@@ -67,8 +70,7 @@ export class ScanRequestController extends ApiController {
         const totalUrls: number = processedData.scanResponses.length;
         const invalidUrls: number = processedData.scanResponses.filter((i) => i.error !== undefined).length;
 
-        this.logger.setCustomProperties({ batchRequestId: batchId });
-        this.logger.logInfo('Accepted scan run batch request', {
+        this.logger.logInfo('Accepted scan run batch request.', {
             batchId: batchId,
             totalUrls: totalUrls.toString(),
             invalidUrls: invalidUrls.toString(),
@@ -133,11 +135,14 @@ export class ScanRequestController extends ApiController {
                     scanId: scanId,
                     url: scanRunRequest.url,
                 });
+
+                this.logger.logInfo('Generated new scan Id for the scan request URL.', { batchId, scanId, url: scanRunRequest.url });
             } else {
                 scanResponses.push({
                     url: scanRunRequest.url,
                     error: runRequestValidationResult.error,
                 });
+                this.logger.logInfo('The posted scan request URL is rejected as malformed.', { batchId, url: scanRunRequest.url });
             }
         });
 
@@ -165,5 +170,6 @@ export class ScanRequestController extends ApiController {
 
     private async init(): Promise<void> {
         this.config = await this.getRestApiConfig();
+        this.logger.setCommonProperties({ source: 'postScanRequestRESTApi' });
     }
 }
