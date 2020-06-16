@@ -38,7 +38,7 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.7.0",
+        "@azure/cosmos": "^3.7.1",
         "@azure/functions": "^1.2.2",
         "azure-services": "1.0.0",
         "common": "1.0.0",
