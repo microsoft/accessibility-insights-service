@@ -55,7 +55,9 @@ export class NotificationQueueMessageSender {
                 }
             },
             async (e: Error) => {
-                this.logger.logError(`Failed to enqueue scan result notification message. Retrying on error.`, { error: JSON.stringify(e) });
+                this.logger.logError(`Failed to enqueue scan result notification message. Retrying on error.`, {
+                    error: JSON.stringify(e),
+                });
                 error = { errorType: 'InternalError', message: e.message };
             },
             scanConfig.maxSendNotificationRetryCount,
