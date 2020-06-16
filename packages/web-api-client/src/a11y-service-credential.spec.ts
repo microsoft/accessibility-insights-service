@@ -81,7 +81,7 @@ describe(A11yServiceCredential, () => {
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
         setupRetryHelperMock(true);
-        loggerMock.setup((l) => l.logError(`Auth getToken call failed with error: ${JSON.stringify(error)}`)).verifiable();
+        loggerMock.setup((l) => l.logError(`Error while acquiring Azure AD client token. ${JSON.stringify(error)}`)).verifiable();
 
         let caughtError: Error;
         await testSubject.getToken().catch((reason) => {

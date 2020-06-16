@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { WhyNodeRunningLogger } from 'common';
-
 import { SendNotificationJobManagerEntryPoint } from './send-notification-job-manager-entry-point';
 import { setupSendNotificationJobManagerContainer } from './setup-send-notification-job-manager-container';
 

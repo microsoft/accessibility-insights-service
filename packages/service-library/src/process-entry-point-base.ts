@@ -22,33 +22,33 @@ export abstract class ProcessEntryPointBase {
             const dotEnvConfig: DotenvConfigOutput = this.container.get(loggerTypes.DotEnvConfig);
             const serviceConfig: ServiceConfiguration = this.container.get(ServiceConfiguration);
             taskConfig = await serviceConfig.getConfigValue('taskConfig');
-            logger = this.container.get(GlobalLogger);
 
+            logger = this.container.get(GlobalLogger);
             await logger.setup(this.getTelemetryBaseProperties());
             loggerInitialized = true;
+
             this.verifyDotEnvParsing(dotEnvConfig, logger);
 
             await this.invokeCustomActionWithLogging(this.container, logger, ...args);
         } catch (error) {
             processExitCode = 1;
-            if (loggerInitialized === false) {
-                console.log('Unable to setup logger.', error);
+            if (loggerInitialized === true) {
+                logger.logError('Unhandled exception while running main process.', { error: JSON.stringify(error) });
             } else {
-                logger.trackExceptionAny(error, '[ProcessEntryPointBase] Unhandled exception');
+                console.log('Unhandled exception while running main process.', { error: JSON.stringify(error) });
             }
-
             throw error;
         } finally {
             if (loggerInitialized === true) {
-                logger.logInfo('[ProcessEntryPointBase] Flushing telemetry events');
+                logger.logInfo('Flushing telemetry events.');
                 await logger.flush();
             }
 
             if (this.shouldExitAfterInvocation(taskConfig)) {
-                if (logger !== undefined) {
-                    logger.logInfo('[ProcessEntryPointBase] Exiting process.');
+                if (loggerInitialized === true) {
+                    logger.logInfo('Exiting main process.');
                 } else {
-                    console.log('[ProcessEntryPointBase] Exiting process.');
+                    console.log('Exiting main process.');
                 }
                 processObj.exit(processExitCode);
             }
@@ -67,19 +67,18 @@ export abstract class ProcessEntryPointBase {
         try {
             await this.runCustomAction(container, ...args);
         } catch (error) {
-            logger.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.');
+            logger.logError('Error occurred while executing main process action.', { error: JSON.stringify(error) });
             throw error;
         }
     }
 
     private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: GlobalLogger): void {
         if (dotEnvConfig.parsed !== undefined) {
-            logger.logInfo('[ProcessEntryPointBase] Config based environment variables:');
-            logger.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfig.parsed, undefined, 2)}`);
+            logger.logInfo(`Loaded environment variables from the .env config file.\n${JSON.stringify(dotEnvConfig.parsed, undefined, 2)}`);
         }
 
         if (dotEnvConfig.error !== undefined) {
-            logger.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfig.error}`);
+            logger.logWarn(`Unable to load the .env config file. ${dotEnvConfig.error}`);
         }
     }
 }

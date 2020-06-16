@@ -41,7 +41,8 @@ export class Runner {
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
-        this.logger.logInfo(`Starting page scan for scan id ${scanMetadata.id}.`);
+        this.logger.setCommonProperties({ scanId: scanMetadata.id });
+        this.logger.logInfo('Starting page scan task.');
 
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
         const pageScanResult: Partial<OnDemandPageScanResult> = {
@@ -66,8 +67,6 @@ export class Runner {
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
-        this.logger.setCustomProperties({ scanId: scanMetadata.id });
-
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, {
             scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
@@ -76,13 +75,15 @@ export class Runner {
 
         let scanSucceeded: boolean;
         try {
+            this.logger.logInfo('Starting the web driver page scanner.');
             await this.webDriverTask.launch();
             scanSucceeded = await this.scan(pageScanResult, scanMetadata.url);
+            this.logger.logInfo('Web driver scanner successfully completed a page scan.');
         } catch (error) {
             scanSucceeded = false;
             const errorMessage = this.getErrorMessage(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
-            this.logger.logInfo(`Page scan run failed.`, { error: errorMessage });
+            this.logger.logError(`Web driver failed to scan a page.`, { error: errorMessage });
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
@@ -95,8 +96,9 @@ export class Runner {
 
             try {
                 await this.webDriverTask.close();
+                this.logger.logInfo('Web driver successfully closed.');
             } catch (error) {
-                this.logger.logError(`Unable to close the web driver instance.`, { error: this.getErrorMessage(error) });
+                this.logger.logError(`Failure to close the web driver.`, { error: this.getErrorMessage(error) });
             }
         }
 
@@ -105,13 +107,14 @@ export class Runner {
             this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         }
 
-        this.logger.logInfo(`Writing page scan run result to a storage.`);
         const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
 
         const featureFlags = await this.getDefaultFeatureFlags();
-        this.logger.logInfo(`sendNotification feature flag ${featureFlags.sendNotification}`);
+        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
         if (featureFlags.sendNotification && !this.scanNotifyUrlEmpty(fullPageScanResult.notification)) {
-            this.logger.logInfo(`Sending notification to ${fullPageScanResult.notification.scanNotifyUrl}`);
+            this.logger.logInfo(`Queuing scan completion notification message.`, {
+                scanNotifyUrl: fullPageScanResult.notification.scanNotifyUrl,
+            });
             await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
         }
     }
@@ -122,15 +125,15 @@ export class Runner {
     }
 
     private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<boolean> {
-        this.logger.logInfo(`Running page scan.`);
+        this.logger.logInfo(`Running page scan on web driver.`);
 
         const axeScanResults = await this.scannerTask.scan(url);
 
         if (!isNil(axeScanResults.error)) {
-            this.logger.logInfo(`Updating page scan run result state to failed`);
+            this.logger.logInfo(`Updating page scan run result state to 'failed'.`);
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
         } else {
-            this.logger.logInfo(`Updating page scan run result state to completed`);
+            this.logger.logInfo(`Updating page scan run result state to 'completed'.`);
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
@@ -167,16 +170,15 @@ export class Runner {
     }
 
     private async generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
-        this.logger.logInfo(`Generating reports from scan results`);
+        this.logger.logInfo(`Generating reports from scan results.`);
         const reports = this.reportGenerator.generateReports(axeResults);
 
         return Promise.all(reports.map(async (report) => this.saveScanReport(report)));
     }
 
     private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
-        this.logger.logInfo(`Saving ${report.format} report to a blob storage.`);
         const href = await this.pageScanRunReportService.saveReport(report.id, report.content);
-        this.logger.logInfo(`${report.format} report saved to a blob ${href}`);
+        this.logger.logInfo(`The '${report.format}' report saved to a blob storage.`, { reportId: report.id, blobUrl: href });
 
         return {
             format: report.format,

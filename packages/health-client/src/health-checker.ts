@@ -35,17 +35,15 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
     const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
     const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
 
-    logger.logInfo('[health-client] Start evaluation of functional tests result.');
-    logger.logInfo(
-        `[health-client] Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`,
-    );
+    logger.logInfo('Start evaluation of functional tests result.');
+    logger.logInfo(`Waiting for ${argv.waitTimeBeforeEvaluationInMinutes} minutes before evaluating functional tests result.`);
     await System.wait(waitTimeBeforeEvaluation);
 
     let healthStatus: TestRunResult;
     const startTime = new Date();
     while (healthStatus !== 'pass') {
         try {
-            logger.logInfo('[health-client] Retrieving functional tests result.');
+            logger.logInfo('Retrieving functional tests result.');
 
             const response = await client.checkHealth(`/release/${argv.releaseId}`);
             if (response.statusCode !== 200) {
@@ -54,29 +52,27 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
                 );
             }
 
-            logger.logInfo(`[health-client] Functional tests result: ${JSON.stringify(response.body)}`);
+            logger.logInfo(`Functional tests result: ${JSON.stringify(response.body)}`);
 
             healthStatus = response.body.healthStatus;
         } catch (error) {
-            logger.logInfo(`[health-client] Failed to retrieve functional tests result. ${error}`);
+            logger.logInfo(`Failed to retrieve functional tests result. ${error}`);
         }
 
         if (healthStatus !== 'pass') {
             if (isTestTimeout(startTime, new Date(), testTimeoutInMinutes * 60000)) {
-                logger.logInfo('[health-client] Functional tests result validation timed out.');
+                logger.logInfo('Functional tests result validation timed out.');
 
-                throw new Error('[health-client] Functional tests result validation timed out.');
+                throw new Error('Functional tests result validation timed out.');
             }
 
             logger.logInfo(
-                `[health-client] Functional tests health status: ${
-                    healthStatus ? healthStatus : 'unknown'
-                } . Waiting for next evaluation result.`,
+                `Functional tests health status: ${healthStatus ? healthStatus : 'unknown'} . Waiting for next evaluation result.`,
             );
 
             await System.wait(evaluationInterval);
         } else {
-            logger.logInfo('[health-client] Functional tests succeeded.');
+            logger.logInfo('Functional tests succeeded.');
         }
     }
 })().catch((error) => {

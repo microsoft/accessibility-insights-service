@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
+import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider } from 'service-library';
 import {
@@ -16,12 +17,15 @@ import {
 import { IMock, Mock, Times } from 'typemoq';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
+export class MockableLogger extends Logger {}
+
 describe('Scan request sender', () => {
     let queueMock: IMock<Queue>;
     let testSubject: OnDemandScanRequestSender;
     let storageConfigStub: StorageConfig;
     let pageScanRequestProvider: IMock<PageScanRequestProvider>;
     let onDemandPageScanRunResultProvider: IMock<OnDemandPageScanRunResultProvider>;
+    let loggerMock: IMock<MockableLogger>;
     let dateNow: Date;
     const batchRequestId: string = 'batch request id';
 
@@ -34,6 +38,7 @@ describe('Scan request sender', () => {
             scanQueue: 'test-scan-queue',
         } as StorageConfig;
 
+        loggerMock = Mock.ofType(MockableLogger);
         queueMock = Mock.ofType<Queue>();
         pageScanRequestProvider = Mock.ofType<PageScanRequestProvider>();
         onDemandPageScanRunResultProvider = Mock.ofType<OnDemandPageScanRunResultProvider>();
@@ -42,6 +47,7 @@ describe('Scan request sender', () => {
             onDemandPageScanRunResultProvider.object,
             queueMock.object,
             storageConfigStub,
+            loggerMock.object,
         );
     });
 
@@ -50,6 +56,7 @@ describe('Scan request sender', () => {
         queueMock.verifyAll();
         pageScanRequestProvider.verifyAll();
         onDemandPageScanRunResultProvider.verifyAll();
+        loggerMock.verifyAll();
     });
 
     it('sends the request to scan', async () => {
@@ -79,6 +86,13 @@ describe('Scan request sender', () => {
                 .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
+
+            loggerMock
+                .setup((o) => o.logInfo('Sending scan request to the scan task queue.', { scanId: request.id }))
+                .verifiable(Times.once());
+            loggerMock
+                .setup((o) => o.logInfo('Scan request successfully added to the scan task queue.', { scanId: request.id }))
+                .verifiable(Times.once());
         });
 
         await testSubject.sendRequestToScan(onDemandPageScanRequests);
@@ -90,7 +104,7 @@ describe('Scan request sender', () => {
             const pageScanRunResultDoc = createResultDoc(request, 'accepted');
             const failedPageScanRunResultDoc = createResultDoc(request, 'failed', {
                 errorType: 'InternalError',
-                message: 'Failed to create scan message in queue.',
+                message: 'Failed to create scan message in a queue.',
             });
 
             onDemandPageScanRunResultProvider
@@ -113,6 +127,13 @@ describe('Scan request sender', () => {
             pageScanRequestProvider
                 .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
+            loggerMock
+                .setup((o) => o.logInfo('Sending scan request to the scan task queue.', { scanId: request.id }))
+                .verifiable(Times.once());
+            loggerMock
+                .setup((o) => o.logError('Failed to add scan request to the scan task queue.', { scanId: request.id }))
                 .verifiable(Times.once());
         });
 
@@ -144,6 +165,17 @@ describe('Scan request sender', () => {
             pageScanRequestProvider
                 .setup(async (doc) => doc.deleteRequests([request.id]))
                 .returns(async () => Promise.resolve())
+                .verifiable(Times.once());
+
+            loggerMock
+                .setup((o) => o.logInfo('Sending scan request to the scan task queue.', { scanId: request.id }))
+                .verifiable(Times.once());
+            loggerMock
+                .setup((o) =>
+                    o.logWarn('Scan request state is not valid for adding to the scan task queue.', {
+                        scanId: request.id,
+                    }),
+                )
                 .verifiable(Times.once());
         });
         await testSubject.sendRequestToScan(onDemandPageScanRequests);

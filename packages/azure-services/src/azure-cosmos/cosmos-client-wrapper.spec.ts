@@ -592,7 +592,7 @@ describe('CosmosClientWrapper', () => {
             setupVerifiableUpsertItemCallWithOptions(items[0], options);
             itemsMock.setup(async (i) => i.upsert(items[1], options)).returns(async () => Promise.reject(errorResponse));
 
-            loggerMock.setup((o) => o.logError(`[storage-client] The Cosmos DB 'upsertItems' operation failed.`, It.isAny())).verifiable();
+            loggerMock.setup((o) => o.logError(`The Cosmos DB 'upsertItems' operation failed.`, It.isAny())).verifiable();
 
             await expect(testSubject.upsertItems(items, dbName, collectionName, partitionKey)).rejects.toThrowError(``);
             verifyMocks();

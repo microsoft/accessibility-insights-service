@@ -53,6 +53,7 @@ export class HealthMonitorClientController extends WebController {
 
     protected async handleRequest(...args: any[]): Promise<unknown> {
         const activityRequestData = args[0] as ActivityRequestData;
+        this.logger.setCommonProperties({ source: 'healthMonitorClientFunc' });
         this.logger.logInfo(`Executing ${activityRequestData.activityName} activity action.`);
 
         const activityCallback = this.activityCallbacks[activityRequestData.activityName];

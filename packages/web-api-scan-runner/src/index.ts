@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { WhyNodeRunningLogger } from 'common';
-
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
 

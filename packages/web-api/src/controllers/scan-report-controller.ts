@@ -23,9 +23,13 @@ export class ScanReportController extends ApiController {
     }
 
     public async handleRequest(): Promise<void> {
+        const scanId = <string>this.context.bindingData.scanId;
         const reportId = <string>this.context.bindingData.reportId;
+        this.logger.setCommonProperties({ source: 'getScanReportRESTApi', scanId, reportId });
+
         if (!this.guidGenerator.isValidV6Guid(reportId)) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.invalidResourceId);
+            this.logger.logError('The request report id is malformed.');
 
             return;
         }
@@ -33,6 +37,7 @@ export class ScanReportController extends ApiController {
         const blobContentDownloadResponse = await this.pageScanRunReportService.readReport(reportId);
         if (blobContentDownloadResponse.notFound === true) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+            this.logger.logError('The report is not found.');
 
             return;
         }
@@ -43,6 +48,6 @@ export class ScanReportController extends ApiController {
             body: content,
         };
 
-        this.logger.logInfo('Report fetched from blob store.', { reportId });
+        this.logger.logInfo('The report successfully fetched from a blob store.');
     }
 }

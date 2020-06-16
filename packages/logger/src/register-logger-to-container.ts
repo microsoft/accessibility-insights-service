@@ -46,7 +46,6 @@ function registerLoggerDependenciesToContainer(container: Container): void {
     container.bind(loggerTypes.Process).toConstantValue(process);
     container.bind(AppInsightsLoggerClient).toSelf().inSingletonScope();
     container.bind(ConsoleLoggerClient).toSelf().inSingletonScope();
-
     container.bind(loggerTypes.DotEnvConfig).toConstantValue(dotenv.config());
     container.bind(loggerTypes.Argv).toConstantValue(argv);
     container.bind(loggerTypes.Console).toConstantValue(console);

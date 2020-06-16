@@ -193,8 +193,9 @@ describe(Worker, () => {
             loggerMock
                 .setup((l) =>
                     l.logError(
-                        'Task has no run arguments defined',
+                        'Task has no run arguments defined.',
                         It.isValue({
+                            batchTaskId: failedTasks[0].id,
                             taskProperties: JSON.stringify(failedTasks[0]),
                         }),
                     ),
@@ -219,9 +220,13 @@ describe(Worker, () => {
 
             loggerMock
                 .setup((l) =>
-                    l.logError('Task has no corresponding state in a service storage', {
-                        taskProperties: JSON.stringify(failedTasks[0]),
-                    }),
+                    l.logError(
+                        'Task has no corresponding state in a result storage.',
+                        It.isValue({
+                            batchTaskId: failedTasks[0].id,
+                            taskProperties: JSON.stringify(failedTasks[0]),
+                        }),
+                    ),
                 )
                 .verifiable(Times.once());
 

@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { WhyNodeRunningLogger } from 'common';
-
 import { setupWebApiNotificationSenderContainer } from './setup-web-api-notification-sender-container';
 import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
 

@@ -169,19 +169,19 @@ export class CosmosContainerClient {
                     const operationResponse = await operation(...args);
 
                     if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
-                        this.logger.logInfo(`[storage-client] Operation completed. Response status code ${operationResponse.statusCode}.`);
+                        this.logger.logInfo(`Cosmos storage operation completed. Response status code ${operationResponse.statusCode}.`);
                         resolve(operationResponse);
 
                         break;
                     } else if (Date.now() > timeoutTimestamp) {
-                        this.logger.logWarn(`[storage-client] Operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
+                        this.logger.logWarn(`Cosmos storage operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
                         reject(operationResponse);
 
                         break;
                     } else {
                         this.logger.logInfo(
                             // tslint:disable-next-line:max-line-length
-                            `[storage-client] Retrying operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
+                            `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
                         );
                     }
                 } catch (error) {
