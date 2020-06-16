@@ -16,7 +16,7 @@ export class WebDriver {
             timeout: 15000,
             args: ['--disable-dev-shm-usage'],
         });
-        this.logger.logInfo('Web browser instance is started.');
+        this.logger.logInfo('Puppeteer browser is started.');
 
         return this.browser;
     }
@@ -24,7 +24,7 @@ export class WebDriver {
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
             await this.browser.close();
-            this.logger.logInfo('Web browser instance has stopped.');
+            this.logger.logInfo('Puppeteer browser has stopped.');
         }
     }
 }

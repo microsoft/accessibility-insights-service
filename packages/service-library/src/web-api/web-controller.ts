@@ -20,16 +20,12 @@ export abstract class WebController {
         try {
             this.logger.setCommonProperties(this.getBaseTelemetryProperties());
 
-            this.logger.logInfo('Started HTTP web request processing.');
-
             let result: unknown;
             if (this.validateRequest(...args)) {
                 result = await this.handleRequest(...args);
             }
 
             this.setResponseContentTypeHeader();
-
-            this.logger.logInfo('The HTTP web request completed successfully.');
 
             return result;
         } catch (error) {
