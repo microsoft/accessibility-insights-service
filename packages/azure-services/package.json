@@ -28,7 +28,7 @@
         "@types/yargs": "^15.0.5",
         "@types/request": "^2.48.5",
         "copy-webpack-plugin": "^5.1.1",
-        "fork-ts-checker-webpack-plugin": "^5.0.0",
+        "fork-ts-checker-webpack-plugin": "^5.0.1",
         "jest": "^25.5.3",
         "jest-circus": "^25.5.3",
         "jest-junit": "^10.0.0",
