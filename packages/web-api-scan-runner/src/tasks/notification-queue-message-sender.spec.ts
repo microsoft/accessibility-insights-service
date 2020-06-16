@@ -29,7 +29,6 @@ describe(NotificationQueueMessageSender, () => {
     let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    let processStub: typeof process;
     let scanConfig: ScanRunTimeConfig;
     let storageConfigStub: StorageConfig;
     let retryHelperMock: IMock<RetryHelper<void>>;
@@ -81,16 +80,12 @@ describe(NotificationQueueMessageSender, () => {
             .verifiable(Times.once());
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
-        processStub = {} as typeof process;
-        processStub.env = { batchJobId: 'job 1' };
-
         dispatcher = new NotificationQueueMessageSender(
             onDemandPageScanRunResultProviderMock.object,
             serviceConfigMock.object,
             storageConfigStub,
             queueMock.object,
             loggerMock.object,
-            processStub,
             retryHelperMock.object,
         );
     });

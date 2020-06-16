@@ -26,6 +26,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     }
 
     protected async handleRequest(...args: any[]): Promise<void> {
+        this.logger.setCommonProperties({ source: 'healthMonitorOrchestrationFunc' });
         this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,

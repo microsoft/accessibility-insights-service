@@ -212,7 +212,9 @@ describe(Runner, () => {
 
         const timestamps = setupTimeMocks(queueTime, executionTime);
         // need mock Date.Now() after code throws
-        loggerMock.setup((o) => o.logInfo(`Page scan run failed.`, It.isAny())).returns(() => MockDate.set(timestamps.scanCompleteTime));
+        loggerMock
+            .setup((o) => o.logError(`Web driver failed to scan a page.`, It.isAny()))
+            .returns(() => MockDate.set(timestamps.scanCompleteTime));
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
@@ -281,7 +283,9 @@ describe(Runner, () => {
 
         const timestamps = setupTimeMocks(queueTime, executionTime);
         // need mock Date.Now() after code throws
-        loggerMock.setup((o) => o.logInfo(`Page scan run failed.`, It.isAny())).returns(() => MockDate.set(timestamps.scanCompleteTime));
+        loggerMock
+            .setup((o) => o.logError(`Web driver failed to scan a page.`, It.isAny()))
+            .returns(() => MockDate.set(timestamps.scanCompleteTime));
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();

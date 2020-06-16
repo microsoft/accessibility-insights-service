@@ -93,8 +93,8 @@ export abstract class Logger {
         await Promise.all(promises);
     }
 
-    public setCustomProperties(properties: LoggerProperties): void {
-        this.invokeLoggerClient((client) => client.setCustomProperties(properties));
+    public setCommonProperties(properties: LoggerProperties): void {
+        this.invokeLoggerClient((client) => client.setCommonProperties(properties));
     }
 
     private invokeLoggerClient<T>(action: (loggerClient: LoggerClient) => T): T[] {

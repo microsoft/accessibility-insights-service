@@ -1,9 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-
-import { ServiceConfiguration } from 'common';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { loggerTypes } from './logger-types';
@@ -19,6 +18,6 @@ export class ContextAwareConsoleLoggerClient extends BaseConsoleLoggerClient {
     }
 
     protected getPropertiesToAddToEvent(): { [name: string]: string } {
-        return { ...this.rootLoggerClient.getDefaultProperties() };
+        return { ...this.rootLoggerClient.getCommonProperties() };
     }
 }

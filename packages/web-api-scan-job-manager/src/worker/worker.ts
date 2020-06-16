@@ -108,14 +108,18 @@ export class Worker extends BatchTaskCreator {
                             await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
                         }
                     } else {
-                        this.logger.logError(`Task has no corresponding state in a service storage`, {
+                        this.logger.logError(`Task has no corresponding state in a result storage.`, {
+                            batchTaskId: failedTask.id,
                             taskProperties: JSON.stringify(failedTask),
                         });
                     }
 
-                    this.logger.logError(error, { taskProperties: JSON.stringify(failedTask) });
+                    this.logger.logError(error, { batchTaskId: failedTask.id, taskProperties: JSON.stringify(failedTask) });
                 } else {
-                    this.logger.logError(`Task has no run arguments defined`, { taskProperties: JSON.stringify(failedTask) });
+                    this.logger.logError(`Task has no run arguments defined.`, {
+                        batchTaskId: failedTask.id,
+                        taskProperties: JSON.stringify(failedTask),
+                    });
                 }
             }),
         );
@@ -147,7 +151,10 @@ export class Worker extends BatchTaskCreator {
                     await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
                     this.logger.logWarn(
                         // tslint:disable-next-line:max-line-length
-                        `The scan request with ID ${scanMessage.scanId} has been cancelled since run state has been changed to '${scanRun.run.state}'`,
+                        `The scan request has been cancelled since run state has been changed to '${scanRun.run.state}'`,
+                        {
+                            scanId: scanMessage.scanId,
+                        },
                     );
                 }
             }),

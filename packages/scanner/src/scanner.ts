@@ -35,23 +35,23 @@ export class Scanner {
 
     private async scanWithoutTimeout(url: string): Promise<AxeScanResults> {
         try {
-            this.logger.logInfo(`[scanner] Starting accessibility scanning of URL ${url}.`);
+            this.logger.logInfo(`Starting accessibility website page scanning.`, { url });
 
             await this.page.create();
             await this.page.enableBypassCSP();
 
             return await this.page.scanForA11yIssues(url);
         } catch (error) {
-            this.logger.trackExceptionAny(error, `[scanner] An error occurred while scanning website page ${url}.`);
+            this.logger.logError(`An error occurred while scanning website page.`, { url, error: JSON.stringify(error) });
 
             return { error: util.inspect(error), pageResponseCode: undefined };
         } finally {
             try {
                 await this.page.close();
             } catch (error) {
-                this.logger.logError('[scanner] unable to close web page');
+                this.logger.logError('An error occurred while closing web page.', { url, error: JSON.stringify(error) });
             }
-            this.logger.logInfo(`[scanner] Accessibility scanning of URL ${url} completed.`);
+            this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
         }
     }
 }

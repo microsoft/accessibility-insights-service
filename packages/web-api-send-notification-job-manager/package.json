@@ -27,7 +27,7 @@
         "@types/node": "^13.13.5",
         "@types/verror": "^1.10.4",
         "copy-webpack-plugin": "^5.1.1",
-        "fork-ts-checker-webpack-plugin": "^4.1.6",
+        "fork-ts-checker-webpack-plugin": "^5.0.1",
         "jest": "^25.5.3",
         "jest-circus": "^25.5.3",
         "jest-junit": "^10.0.0",

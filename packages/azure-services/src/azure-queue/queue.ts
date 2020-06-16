@@ -42,7 +42,7 @@ export class Queue {
 
                 this.logger.logWarn(
                     // tslint:disable-next-line:max-line-length
-                    `[Queue] Message ${serverMessage.messageId} exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
+                    `Storage queue message ${serverMessage.messageId} exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
                 );
             } else {
                 messages.push(new Message(serverMessage.messageText, serverMessage.messageId, serverMessage.popReceipt));
@@ -80,7 +80,7 @@ export class Queue {
 
             return true;
         } catch (error) {
-            this.logger.logError(`[Queue] Failed to create message: ${util.inspect(message)}. Error: ${util.inspect(error)}`);
+            this.logger.logError(`Failed to create message in a queue storage: ${util.inspect(message)}. Error: ${util.inspect(error)}`);
 
             return false;
         }
@@ -98,7 +98,7 @@ export class Queue {
 
         const response = await messagesURL.enqueue(Aborter.none, JSON.stringify(message));
         if (_.isNil(response) || _.isNil(response.messageId)) {
-            throw new Error(`Enqueue Failed with response: ${util.inspect(response)}`);
+            throw new Error(`Enqueue failed with response: ${util.inspect(response)}`);
         }
 
         return message;

@@ -6,13 +6,13 @@ export class WhyNodeRunningLogger {
     constructor(private readonly globalObj = global) {}
 
     private static logHandles(): void {
-        WhyNodeRunningLogger.logMessage('start logging open handles');
+        WhyNodeRunningLogger.logMessage('Start logging node open handles.');
         dump();
-        WhyNodeRunningLogger.logMessage('after logging open handles');
+        WhyNodeRunningLogger.logMessage('Stop logging node open handles.');
     }
 
     private static logMessage(message: string): void {
-        console.log(`[WhyNodeRunningLogger][${new Date().toUTCString()}] ${message}`);
+        console.log(`[TraceNodeOpenHandles] [${new Date().toUTCString()}] ${message}`);
     }
 
     public log(): void {

@@ -13,28 +13,28 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-unsafe-any no-any
 
-describe(ProcessEntryPointBase, () => {
-    class TestEntryPoint extends ProcessEntryPointBase {
-        public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
-        public customActionInvoked = false;
-        public customActionArgs: any[];
+class TestEntryPoint extends ProcessEntryPointBase {
+    public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };
+    public customActionInvoked = false;
+    public customActionArgs: any[];
 
-        public customActionToBeInvoked: () => void;
-        public taskConfig: TaskRuntimeConfig;
+    public customActionToBeInvoked: () => void;
+    public taskConfig: TaskRuntimeConfig;
 
-        protected getTelemetryBaseProperties(): BaseTelemetryProperties {
-            return this.baseTelemetryProperties;
-        }
-
-        protected async runCustomAction(container: Container, ...args: any[]): Promise<void> {
-            if (!_.isNil(this.customActionToBeInvoked)) {
-                this.customActionToBeInvoked();
-            }
-            this.customActionInvoked = true;
-            this.customActionArgs = args;
-        }
+    protected getTelemetryBaseProperties(): BaseTelemetryProperties {
+        return this.baseTelemetryProperties;
     }
 
+    protected async runCustomAction(container: Container, ...args: any[]): Promise<void> {
+        if (!_.isNil(this.customActionToBeInvoked)) {
+            this.customActionToBeInvoked();
+        }
+        this.customActionInvoked = true;
+        this.customActionArgs = args;
+    }
+}
+
+describe(ProcessEntryPointBase, () => {
     let testSubject: TestEntryPoint;
     let loggerMock: IMock<MockableLogger>;
     let dotEnvConfigStub: DotenvConfigOutput;
@@ -64,7 +64,7 @@ describe(ProcessEntryPointBase, () => {
 
     describe('start', () => {
         beforeEach(() => {
-            loggerMock.setup((l) => l.logInfo('[ProcessEntryPointBase] Exiting process.')).verifiable(Times.once());
+            loggerMock.setup((l) => l.logInfo('Exiting main process.')).verifiable(Times.once());
         });
 
         it('should not exit process', async () => {
@@ -112,6 +112,7 @@ describe(ProcessEntryPointBase, () => {
         });
 
         it('return log setup failure', async () => {
+            loggerMock.reset();
             const errorMsg = 'logger setup error';
             setupContainerForDotEnvConfig();
             setupContainerForLogger();
@@ -134,9 +135,16 @@ describe(ProcessEntryPointBase, () => {
             it('verifies logging for valid data', async () => {
                 dotEnvConfigStub = { parsed: { foo: 'bar' } };
 
-                loggerMock.setup((l) => l.logInfo('[ProcessEntryPointBase] Config based environment variables:')).verifiable();
                 loggerMock
-                    .setup((l) => l.logInfo(`[ProcessEntryPointBase] ${JSON.stringify(dotEnvConfigStub.parsed, undefined, 2)}`))
+                    .setup((l) =>
+                        l.logInfo(
+                            `Loaded environment variables from the .env config file.\n${JSON.stringify(
+                                dotEnvConfigStub.parsed,
+                                undefined,
+                                2,
+                            )}`,
+                        ),
+                    )
                     .verifiable();
                 setupVerifiableSuccessProcessExit();
 
@@ -149,9 +157,7 @@ describe(ProcessEntryPointBase, () => {
             it('verifies logging for invalid data', async () => {
                 dotEnvConfigStub = { error: new Error('error1') };
 
-                loggerMock
-                    .setup((l) => l.logWarn(`[ProcessEntryPointBase] Unable to load env config file. ${dotEnvConfigStub.error}`))
-                    .verifiable();
+                loggerMock.setup((l) => l.logWarn(`Unable to load the .env config file. ${dotEnvConfigStub.error}`)).verifiable();
                 setupVerifiableSuccessProcessExit();
 
                 await expect(testSubject.start()).resolves.toBeUndefined();
@@ -199,9 +205,7 @@ describe(ProcessEntryPointBase, () => {
                 testSubject.customActionToBeInvoked = () => {
                     throw error;
                 };
-                loggerMock
-                    .setup((l) => l.trackExceptionAny(error, '[ProcessEntryPointBase] Error occurred while executing action.'))
-                    .verifiable();
+                loggerMock.setup((l) => l.logError('Error occurred while executing main process action.', It.isAny())).verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
 
@@ -230,7 +234,7 @@ describe(ProcessEntryPointBase, () => {
             loggerMock.verify(
                 (l) =>
                     l.logInfo(
-                        It.is((s) => s !== '[ProcessEntryPointBase] Exiting process.'),
+                        It.is((s) => s !== 'Exiting main process.'),
                         It.isAny(),
                     ),
                 Times.never(),
@@ -241,8 +245,7 @@ describe(ProcessEntryPointBase, () => {
         loggerMock.verify((l) => l.logVerbose(It.isAny(), It.isAny()), Times.never());
         loggerMock.verify((l) => l.trackEvent(It.isAny(), It.isAny()), Times.never());
         loggerMock.verify((l) => l.trackMetric(It.isAny(), It.isAny()), Times.never());
-        loggerMock.verify((l) => l.trackException(It.isAny()), Times.never());
-        loggerMock.verify((l) => l.trackExceptionAny(It.isAny(), It.isAny()), Times.never());
+        loggerMock.verify((l) => l.logError(It.isAny(), It.isAny()), Times.never());
     }
 
     function verifyLogFlushCall(times: Times = Times.once()): void {
