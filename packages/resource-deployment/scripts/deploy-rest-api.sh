@@ -47,11 +47,5 @@ fi
 
 echo "Starting deployment for REST api..."
 
-echo "Deploying products"
-deployResource "$apiTemplates/model-products.template.json"
-
-echo "Deploying backends"
-deployResourceWithFunctionName "$apiTemplates/model-backends.template.json"
-
 echo "Deploying api"
 deployResourceWithFunctionName "$apiTemplates/model-accessibility-insight-service-scan-api-api.template.json"

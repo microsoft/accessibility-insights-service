@@ -12,6 +12,33 @@
     "resources": [
         {
             "properties": {
+                "description": "Subscribers have completely unlimited access to the API. Administrator approval is required.",
+                "subscriptionRequired": false,
+                "state": "published",
+                "displayName": "Unlimited"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/unlimited')]",
+            "type": "Microsoft.ApiManagement/service/products",
+            "apiVersion": "2019-01-01",
+            "dependsOn": []
+        },
+        {
+            "properties": {
+                "description": "[parameters('functionName')]",
+                "resourceId": "[concat('https://management.azure.com/subscriptions/',subscription().subscriptionId,'/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/',parameters('functionName'))]",
+                "credentials": {
+                    "header": {}
+                },
+                "url": "[concat('https://', parameters('functionName'), '.azurewebsites.net/api')]",
+                "protocol": "http"
+            },
+            "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
+            "type": "Microsoft.ApiManagement/service/backends",
+            "apiVersion": "2019-01-01",
+            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/products', parameters('apimServiceName'), 'unlimited')]"]
+        },
+        {
+            "properties": {
                 "authenticationSettings": {
                     "subscriptionKeyRequired": false
                 },
@@ -29,7 +56,9 @@
             "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api')]",
             "type": "Microsoft.ApiManagement/service/apis",
             "apiVersion": "2019-01-01",
-            "dependsOn": []
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apimServiceName'), parameters('functionName'))]"
+            ]
         },
         {
             "properties": {
