@@ -48,6 +48,6 @@
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
         "lodash": "^4.17.14",
-        "why-is-node-running": "^2.1.0"
+        "why-is-node-running": "^2.2.0"
     }
 }
