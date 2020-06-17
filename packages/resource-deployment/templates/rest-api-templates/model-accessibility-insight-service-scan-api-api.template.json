@@ -35,7 +35,7 @@
             "name": "[concat(parameters('apimServiceName'), '/', parameters('functionName'))]",
             "type": "Microsoft.ApiManagement/service/backends",
             "apiVersion": "2019-01-01",
-            "dependsOn": ["[resourceId('Microsoft.ApiManagement/service/products', parameters('apimServiceName'), 'unlimited')]"]
+            "dependsOn": []
         },
         {
             "properties": {
@@ -57,7 +57,8 @@
             "type": "Microsoft.ApiManagement/service/apis",
             "apiVersion": "2019-01-01",
             "dependsOn": [
-                "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apimServiceName'), parameters('functionName'))]"
+                "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apimServiceName'), parameters('functionName'))]",
+                "[resourceId('Microsoft.ApiManagement/service/products', parameters('apimServiceName'), 'unlimited')]"
             ]
         },
         {

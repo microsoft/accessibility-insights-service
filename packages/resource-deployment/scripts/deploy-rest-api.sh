@@ -6,16 +6,9 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-deployResource() {
-    local templateName=$1
-    echo "Deploying with resource parameters: Resource = $resourceGroupName, Template = $templateName, API Instance = $apiManagementName"
-    az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters apimServiceName="$apiManagementName" 1>/dev/null
-    echo "  Completed"
-}
-
-deployResourceWithFunctionName() {
-    local templateName=$1
-    echo "Deploying with resource parameters: Resource = $resourceGroupName, Template = $templateName, API Instance = $apiManagementName"
+deployRestApi() {
+    local templateName="$apiTemplates/model-accessibility-insight-service-scan-api-api.template.json"
+    echo "Deploying REST API template with resource parameters: Resource = $resourceGroupName, API Instance = $apiManagementName"
     az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
     echo "  Completed"
 }
@@ -45,7 +38,4 @@ if [[ -z $apiTemplates ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-echo "Starting deployment for REST api..."
-
-echo "Deploying api"
-deployResourceWithFunctionName "$apiTemplates/model-accessibility-insight-service-scan-api-api.template.json"
+deployRestApi 
