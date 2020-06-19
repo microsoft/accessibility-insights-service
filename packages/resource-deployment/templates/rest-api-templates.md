@@ -122,3 +122,26 @@ Licensed under the MIT License.
     ```
 
 8.  Open `*.namedValues.template.json` and delete the key.
+
+### To merge all api deployment templates into one file
+
+Note: this assumes that the only relevant files used are `model-accessibility-insight-service-scan-api-api.template.json`, `model-backends.template.json`, and `model-products.template.json`, but the same basic steps can be used to merge any azure deployment templates.
+
+1.  Follow the steps above to create the necessary templates
+
+2.  move everything in the `resources` blocks of `*backends.template.json` and `*products.template.json` into the `resources` block of `*apis.template.json`
+
+3.  Find the subscription key resource in `*apis.template.json`. This should be the only resource that has an empty list under `dependsOn`.
+
+4.  Add dependencies on the backend and policy resources to the empty list under `dependsOn`. This will likely look like:
+
+    ```
+    "dependsOn": [
+      "[resourceId('Microsoft.ApiManagement/service/backends', parameters('apimServiceName'), parameters('functionName'))]",
+      "[resourceId('Microsoft.ApiManagement/service/products', parameters('apimServiceName'), 'unlimited')]"
+    ]
+    ```
+
+    Note that "unlimited" should be the last segment in the name of the product that the api belongs to.
+
+5.  Delete `*backends.template.json` and `*products.template.json`

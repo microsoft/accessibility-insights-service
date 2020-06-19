@@ -33,7 +33,7 @@
         "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
         "copy-webpack-plugin": "^5.1.1",
-        "fork-ts-checker-webpack-plugin": "^5.0.1",
+        "fork-ts-checker-webpack-plugin": "^5.0.3",
         "jest": "^25.5.3",
         "jest-circus": "^25.5.3",
         "jest-junit": "^10.0.0",
@@ -47,7 +47,7 @@
         "typemoq": "^2.1.0",
         "typescript": "^3.8.3",
         "webpack": "^4.43.0",
-        "webpack-cli": "^3.2.3"
+        "webpack-cli": "^3.3.12"
     },
     "dependencies": {
         "azure-services": "1.0.0",
@@ -56,7 +56,7 @@
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
         "logger": "1.0.0",
-        "moment": "^2.26.0",
+        "moment": "^2.27.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
