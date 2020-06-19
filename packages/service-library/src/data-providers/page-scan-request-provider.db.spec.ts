@@ -65,9 +65,9 @@ describe('PageScanRequestProvider.Db', () => {
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
 
-            await testSubject.writeScanRequests([request1, request2, request3]);
+            await testSubject.insertRequests([request1, request2, request3]);
 
-            const itemsInDb = await testSubject.readScanRequests();
+            const itemsInDb = await testSubject.getRequests();
 
             expect(itemsInDb.item.length).toBe(3);
             expect(itemsInDb.item[0]).toMatchObject(request2);
@@ -99,11 +99,11 @@ describe('PageScanRequestProvider.Db', () => {
                 partitionKey: PartitionKey.pageScanRequestDocuments,
             };
 
-            await testSubject.writeScanRequests([request1, request2, requestNotToBeDeleted]);
+            await testSubject.insertRequests([request1, request2, requestNotToBeDeleted]);
 
-            await testSubject.deleteScanRequests([request1.id, request2.id]);
+            await testSubject.deleteRequests([request1.id, request2.id]);
 
-            const requests = await testSubject.readScanRequests();
+            const requests = await testSubject.getRequests();
 
             expect(requests.item.length).toBe(1);
             expect(requests.item[0]).toMatchObject(requestNotToBeDeleted);
