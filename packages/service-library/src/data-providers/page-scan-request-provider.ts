@@ -12,7 +12,7 @@ export class PageScanRequestProvider {
         private readonly cosmosContainerClient: CosmosContainerClient,
     ) {}
 
-    public async getRequests(
+    public async readScanRequests(
         continuationToken?: string,
         itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
@@ -21,11 +21,23 @@ export class PageScanRequestProvider {
         return this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(query, continuationToken);
     }
 
-    public async insertRequests(requests: OnDemandPageScanRequest[]): Promise<void> {
+    public async updateScanRequest(scanRequest: Partial<OnDemandPageScanRequest>): Promise<OnDemandPageScanRequest> {
+        if (scanRequest.id === undefined) {
+            throw new Error(`Cannot update scan request using partial scan request without id: ${JSON.stringify(scanRequest)}`);
+        }
+
+        const persistedRequest = scanRequest as OnDemandPageScanRequest;
+        persistedRequest.itemType = ItemType.onDemandPageScanRequest;
+        persistedRequest.partitionKey = PartitionKey.pageScanRequestDocuments;
+
+        return (await this.cosmosContainerClient.mergeOrWriteDocument(persistedRequest)).item;
+    }
+
+    public async writeScanRequests(requests: OnDemandPageScanRequest[]): Promise<void> {
         return this.cosmosContainerClient.writeDocuments(requests, PartitionKey.pageScanRequestDocuments);
     }
 
-    public async deleteRequests(ids: string[]): Promise<void> {
+    public async deleteScanRequests(ids: string[]): Promise<void> {
         await Promise.all(
             ids.map(async (id) => {
                 await this.cosmosContainerClient.deleteDocument(id, PartitionKey.pageScanRequestDocuments);

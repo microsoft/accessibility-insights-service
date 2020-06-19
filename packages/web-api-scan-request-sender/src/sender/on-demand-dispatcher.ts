@@ -34,7 +34,7 @@ export class OnDemandDispatcher {
         do {
             const totalItemsToAdd = configQueueSize - currentQueueSize;
             do {
-                const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
+                const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.readScanRequests(
                     continuationToken,
                     totalItemsToAdd,
                 );

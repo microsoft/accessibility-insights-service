@@ -143,10 +143,14 @@ export class ScanBatchRequestFeedController extends WebController {
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...scanNotifyUrl,
+                run: {
+                    state: 'accepted',
+                    timestamp: new Date().toJSON(),
+                },
             };
         });
 
-        await this.pageScanRequestProvider.insertRequests(requestDocuments);
+        await this.pageScanRequestProvider.writeScanRequests(requestDocuments);
         this.logger.logInfo(
             `Added scan requests to scan queue storage container.`,
             this.getLogPropertiesForRequests(requests, batchRequestId),

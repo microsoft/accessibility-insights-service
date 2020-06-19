@@ -186,7 +186,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
 
                 return res;
             });
-        pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
+        pageScanRequestProviderMock.setup(async (o) => o.writeScanRequests(dbDocuments)).verifiable(Times.once());
         scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(document)).verifiable(Times.once());
     });
 }
@@ -206,7 +206,7 @@ function setupPartitionKeyFactoryMock(documents: OnDemandPageScanBatchRequest[])
 
 function setupMocksWithTimesNever(): void {
     onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(It.isAny())).verifiable(Times.never());
-    pageScanRequestProviderMock.setup(async (o) => o.insertRequests(It.isAny())).verifiable(Times.never());
+    pageScanRequestProviderMock.setup(async (o) => o.writeScanRequests(It.isAny())).verifiable(Times.never());
     scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(It.isAny())).verifiable(Times.never());
     partitionKeyFactoryMock.setup((o) => o.createPartitionKeyForDocument(It.isAny(), It.isAny())).verifiable(Times.never());
 }

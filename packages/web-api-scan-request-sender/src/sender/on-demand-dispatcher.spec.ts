@@ -166,7 +166,7 @@ describe('Dispatcher', () => {
         setupVerifiableQueueSizeCall();
 
         pageScanRequestProvider
-            .setup(async (p) => p.getRequests(It.isAny(), It.isAny()))
+            .setup(async (p) => p.readScanRequests(It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve(getErrorResponse()))
             .verifiable(Times.once());
 
@@ -239,12 +239,12 @@ describe('Dispatcher', () => {
         expectedItemsCount: number,
     ): void {
         pageScanRequestProvider
-            .setup(async (p) => p.getRequests(previousContinuationToken, expectedItemsCount))
+            .setup(async (p) => p.readScanRequests(previousContinuationToken, expectedItemsCount))
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
     function setupPageScanRequestProviderNotCalled(): void {
-        pageScanRequestProvider.setup(async (p) => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
+        pageScanRequestProvider.setup(async (p) => p.readScanRequests(It.isAny(), It.isAny())).verifiable(Times.never());
     }
     function setupVerifiableQueueSizeCall(): void {
         scanRequestSenderMock

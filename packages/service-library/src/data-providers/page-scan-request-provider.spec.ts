@@ -39,7 +39,7 @@ describe(PageScanRequestProvider, () => {
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 
-        await testSubject.insertRequests([request1, request2]);
+        await testSubject.writeScanRequests([request1, request2]);
 
         cosmosContainerClientMock.verifyAll();
     });
@@ -71,7 +71,7 @@ describe(PageScanRequestProvider, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
 
-        const actualResponse = await testSubject.getRequests(continuationToken, itemCount);
+        const actualResponse = await testSubject.readScanRequests(continuationToken, itemCount);
 
         cosmosContainerClientMock.verifyAll();
         expect(actualResponse).toBe(response);
@@ -90,7 +90,7 @@ describe(PageScanRequestProvider, () => {
             .returns(() => Promise.resolve({} as any))
             .verifiable();
 
-        await testSubject.deleteRequests([request1Id, request2Id]);
+        await testSubject.deleteScanRequests([request1Id, request2Id]);
 
         cosmosContainerClientMock.verifyAll();
     });
