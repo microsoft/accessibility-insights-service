@@ -111,7 +111,7 @@ export class Runner {
 
         const featureFlags = await this.getDefaultFeatureFlags();
         this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
-        if (featureFlags.sendNotification && !this.scanNotifyUrlEmpty(fullPageScanResult.notification)) {
+        if (featureFlags.sendNotification && !this.isScanNotifyUrlEmpty(fullPageScanResult.notification)) {
             this.logger.logInfo(`Queuing scan completion notification message.`, {
                 scanNotifyUrl: fullPageScanResult.notification.scanNotifyUrl,
             });
@@ -119,7 +119,7 @@ export class Runner {
         }
     }
 
-    private scanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
+    private isScanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
         // tslint:disable-next-line: strict-boolean-expressions whitespace
         return isEmpty(notification?.scanNotifyUrl);
     }

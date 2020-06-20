@@ -33,6 +33,25 @@ export class Batch {
         private readonly maxTasks = 100,
     ) {}
 
+    public async getSucceededTasks(jobId: string): Promise<BatchTask[]> {
+        const batchTasks: BatchTask[] = [];
+        const tasks = await this.getSucceededTaskList(jobId);
+        tasks.map((task) => {
+            const taskArguments =
+                task.environmentSettings !== undefined ? task.environmentSettings.find((e) => e.name === 'TASK_ARGUMENTS') : undefined;
+
+            batchTasks.push({
+                id: task.id,
+                taskArguments: taskArguments !== undefined ? taskArguments.value : undefined,
+                exitCode: task.executionInfo.exitCode,
+                result: task.executionInfo.result,
+                timestamp: task.stateTransitionTime,
+            });
+        });
+
+        return batchTasks;
+    }
+
     public async getFailedTasks(jobId: string): Promise<BatchTask[]> {
         const batchTasks: BatchTask[] = [];
         const tasks = await this.getFailedTaskList(jobId);
@@ -157,6 +176,12 @@ export class Batch {
             activeTasks: activeTasks,
             runningTasks: runningTasks,
         };
+    }
+
+    private async getSucceededTaskList(jobId: string): Promise<CloudTask[]> {
+        const filterClause = `state eq 'completed' and executionInfo/result eq 'success'`;
+
+        return this.getTaskList(jobId, { filter: filterClause });
     }
 
     private async getFailedTaskList(jobId: string): Promise<CloudTask[]> {

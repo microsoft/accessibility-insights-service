@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
-import { RetryHelper, ServiceConfiguration } from 'common';
+import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
@@ -19,7 +19,7 @@ export class Queue {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) private readonly logger: ContextAwareLogger,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
-        private readonly maxAttempts: number = 3,
+        private readonly maxEnqueueRetryCount: number = 3,
         private readonly retryIntervalMilliseconds: number = 1000,
     ) {}
 
@@ -27,7 +27,7 @@ export class Queue {
      * @param numberOfMessages - number of messages to dequeue. Maximum supported is 32 per call (limited by Azure storage service)
      */
     public async getMessages(queue: string, numberOfMessages: number = 32): Promise<Message[]> {
-        const maxDequeueCount = 2;
+        const maxDequeueCount = (await this.getQueueConfig()).maxDequeueCount;
         const messages: Message[] = [];
         const queueURL = await this.getQueueURL(queue);
         const deadQueueURL = await this.getQueueURL(`${queue}-dead`);
@@ -114,7 +114,7 @@ export class Queue {
             async (error: Error) => {
                 return;
             },
-            this.maxAttempts,
+            this.maxEnqueueRetryCount,
             this.retryIntervalMilliseconds,
         );
     }
@@ -135,8 +135,7 @@ export class Queue {
     }
 
     private async getQueueMessages(queueURL: QueueURL, numberOfMessages: number): Promise<Models.DequeuedMessageItem[]> {
-        const messageVisibilityTimeoutInSeconds = (await this.serviceConfig.getConfigValue('queueConfig'))
-            .messageVisibilityTimeoutInSeconds;
+        const messageVisibilityTimeoutInSeconds = (await this.getQueueConfig()).messageVisibilityTimeoutInSeconds;
         const requestOptions: Models.MessagesDequeueOptionalParams = {
             numberOfMessages,
             visibilitytimeout: messageVisibilityTimeoutInSeconds,
@@ -172,5 +171,9 @@ export class Queue {
         const serviceURL = await this.queueServiceURLProvider();
 
         return this.queueURLProvider(serviceURL, queueName);
+    }
+
+    private async getQueueConfig(): Promise<QueueRuntimeConfig> {
+        return this.serviceConfig.getConfigValue('queueConfig');
     }
 }

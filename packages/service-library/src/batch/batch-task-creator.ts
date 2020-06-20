@@ -101,7 +101,6 @@ export abstract class BatchTaskCreator {
                 const message = messages.find((value) => value.messageId === jobTask.correlationId);
                 const scanRequest = JSON.parse(message.messageText) as OnDemandScanRequestMessage;
                 if (jobTask.state === JobTaskState.queued) {
-                    await this.queue.deleteMessage(this.getQueueName(), message);
                     this.logger.logInfo('The scan task created successfully.', { scanId: scanRequest.id, scanTaskId: jobTask.id });
                 } else {
                     this.logger.logError('Failure to create scan task.', {

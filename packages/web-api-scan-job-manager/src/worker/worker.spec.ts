@@ -131,13 +131,6 @@ describe(Worker, () => {
             .verifiable(Times.once());
     }
 
-    function setupVerifiableReadScanRunsCall(scanIds: string[], documents: OnDemandPageScanResult[]): void {
-        onDemandPageScanRunResultProviderMock
-            .setup(async (s) => s.readScanRuns(scanIds))
-            .returns(async () => Promise.resolve(documents))
-            .verifiable(Times.once());
-    }
-
     function setupVerifiableUpdateScanRunCall(
         document: OnDemandPageScanResult,
         callback?: (toUpdateDoc: OnDemandPageScanResult) => void,
@@ -193,7 +186,7 @@ describe(Worker, () => {
             loggerMock
                 .setup((l) =>
                     l.logError(
-                        'Task has no run arguments defined.',
+                        'Unable to update failed scan run result. Task has no scan id run arguments defined.',
                         It.isValue({
                             batchTaskId: failedTasks[0].id,
                             taskProperties: JSON.stringify(failedTasks[0]),
@@ -393,6 +386,71 @@ describe(Worker, () => {
             setupBatchPoolLoadSnapshotProviderMock();
         });
 
+        it('delete queue messages when scan task succeeded', async () => {
+            poolLoadSnapshot.tasksIncrementCountPerInterval = 10;
+            const queueMessages: Message[] = [];
+            for (let i = 0; i < 4; i = i + 1) {
+                queueMessages.push({
+                    messageId: `id-${i}`,
+                    messageText: JSON.stringify({ id: `id-${i}` }),
+                });
+            }
+            setupVerifiableGetQueueMessagesCall(queueMessages);
+
+            const scanDocuments: OnDemandPageScanResult[] = [];
+            for (let i = 0; i < 4; i = i + 1) {
+                scanDocuments.push({
+                    id: queueMessages[0].messageId,
+                    run: {
+                        state: 'queued',
+                    },
+                } as OnDemandPageScanResult);
+            }
+            onDemandPageScanRunResultProviderMock
+                .setup(async (s) => s.readScanRuns(queueMessages.map((m) => m.messageId)))
+                .returns(async () => Promise.resolve(scanDocuments))
+                .verifiable(Times.once());
+            systemMock
+                .setup((s) =>
+                    s.chunkArray(
+                        It.is((arr) => arr.length === queueMessages.length),
+                        100,
+                    ),
+                )
+                .returns((arr: any[]) => {
+                    const chunks = [];
+                    chunks.push(arr);
+
+                    return chunks;
+                })
+                .verifiable(Times.once());
+
+            const succeededTasks: BatchTask[] = [];
+            for (let i = 0; i < 4; i = i + 1) {
+                const taskArgs: TaskArguments = {
+                    id: `id-${i}`,
+                };
+                succeededTasks.push({
+                    taskArguments: JSON.stringify(taskArgs),
+                } as BatchTask);
+            }
+            batchMock
+                .setup((o) => o.getSucceededTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve(succeededTasks))
+                .verifiable(Times.once());
+            batchMock
+                .setup((o) => o.getFailedTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+
+            queueMessages.map((m) => {
+                setupVerifiableDeleteQueueMessageCall(m);
+            });
+
+            await worker.getMessagesForTaskCreation();
+            await worker.onExit();
+        });
+
         it('does not get messages if already has enough pending tasks', async () => {
             poolLoadSnapshot.tasksIncrementCountPerInterval = 0;
 
@@ -410,18 +468,16 @@ describe(Worker, () => {
             expect(messages).toHaveLength(0);
         });
 
-        it('gets only messages that are not scanned', async () => {
+        it('gets only messages that are terminated or failed', async () => {
             poolLoadSnapshot.tasksIncrementCountPerInterval = 10;
-            const queueMessages: Message[] = [
-                {
-                    messageId: 'id1',
-                    messageText: JSON.stringify({ id: 'id1' }),
-                },
-                {
-                    messageId: 'id2',
-                    messageText: JSON.stringify({ id: 'id2' }),
-                },
-            ];
+            const queueMessages: Message[] = [];
+            for (let i = 0; i < 4; i = i + 1) {
+                queueMessages.push({
+                    messageId: `id-${i}`,
+                    messageText: JSON.stringify({ id: `id-${i}` }),
+                });
+            }
+            setupVerifiableGetQueueMessagesCall(queueMessages);
 
             const scanDocuments = [
                 {
@@ -436,33 +492,45 @@ describe(Worker, () => {
                         state: 'running',
                     },
                 } as OnDemandPageScanResult,
+                {
+                    id: queueMessages[2].messageId,
+                    run: {
+                        state: 'failed',
+                    },
+                } as OnDemandPageScanResult,
+                {
+                    id: queueMessages[3].messageId,
+                    run: {
+                        state: 'completed',
+                    },
+                } as OnDemandPageScanResult,
             ];
 
-            setupVerifiableGetQueueMessagesCall(queueMessages);
+            onDemandPageScanRunResultProviderMock
+                .setup(async (s) => s.readScanRuns(queueMessages.map((m) => m.messageId)))
+                .returns(async () => Promise.resolve(scanDocuments))
+                .verifiable(Times.once());
             systemMock
                 .setup((s) =>
                     s.chunkArray(
-                        It.is((arr) => arr.length === 2),
+                        It.is((arr) => arr.length === queueMessages.length),
                         100,
                     ),
                 )
                 .returns((arr: any[]) => {
                     const chunks = [];
-                    chunks.push(arr.slice(0, 1));
-                    chunks.push(arr.slice(1, 2));
+                    chunks.push(arr);
 
                     return chunks;
                 })
                 .verifiable(Times.once());
 
-            setupVerifiableReadScanRunsCall([queueMessages[0].messageId], [scanDocuments[0]]);
-            setupVerifiableReadScanRunsCall([queueMessages[1].messageId], [scanDocuments[1]]);
-            setupVerifiableDeleteQueueMessageCall(queueMessages[1]);
+            setupVerifiableDeleteQueueMessageCall(queueMessages[3]);
 
             const messages = await worker.getMessagesForTaskCreation();
 
-            expect(messages).toHaveLength(1);
-            expect(messages[0]).toBe(queueMessages[0]);
+            const expectedMessages = queueMessages.slice(0, 3);
+            expect(messages).toEqual(expectedMessages);
         });
 
         function setupBatchPoolLoadSnapshotProviderMock(times: Times = Times.once()): void {

@@ -15,6 +15,7 @@ export interface TaskRuntimeConfig {
 export interface QueueRuntimeConfig {
     maxQueueSize: number;
     messageVisibilityTimeoutInSeconds: number;
+    maxDequeueCount: number;
 }
 
 export interface LogRuntimeConfig {
@@ -129,19 +130,25 @@ export class ServiceConfiguration {
                 maxQueueSize: {
                     format: 'int',
                     default: 10,
-                    doc: 'Maximum message the queue can have',
+                    doc: 'Maximum message count in scan request queue.',
+                },
+                maxDequeueCount: {
+                    format: 'int',
+                    default: 2,
+                    doc: 'Maximum number of times message can be dequeued from a storage queue.',
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: 180,
-                    doc: 'Message visibility timeout in seconds',
+                    default: 300,
+                    doc: 'Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.',
                 },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
                     default: 5,
-                    doc: 'Timeout value after which the task has to be terminated',
+                    doc:
+                        'Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.',
                 },
                 retentionTimeInDays: {
                     format: 'int',
@@ -175,7 +182,7 @@ export class ServiceConfiguration {
                 maxWallClockTimeInHours: {
                     format: 'int',
                     default: 2,
-                    doc: 'The amount of time the job manager instance will run.',
+                    doc: 'The amount of time the job manager instance will run continuously.',
                 },
                 sendNotificationTasksCount: {
                     format: 'int',
@@ -294,7 +301,7 @@ export class ServiceConfiguration {
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',
-                    default: 600,
+                    default: 900,
                     doc: 'Maximum wait time for fetching scan status of the submitted request',
                 },
                 scanWaitIntervalInSeconds: {

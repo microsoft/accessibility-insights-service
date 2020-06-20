@@ -110,6 +110,77 @@ describe(Batch, () => {
         );
     });
 
+    describe('getSucceededTasks()', () => {
+        it('get succeeded tasks', async () => {
+            const timestamp = new Date();
+            const taskArguments = {
+                arg1: 'arg-1-value',
+                arg2: 'arg-2-value',
+            };
+            const tasks = [
+                {
+                    id: 'id-1: task info',
+                    environmentSettings: [
+                        { name: 'name-1', value: 'value-1' },
+                        { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
+                    ] as BatchServiceModels.EnvironmentSetting[],
+                    executionInfo: {
+                        exitCode: 0,
+                        result: 'success',
+                    } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
+                },
+                {
+                    id: 'id-2: task without environment settings data',
+                    environmentSettings: undefined,
+                    executionInfo: {
+                        exitCode: 0,
+                        result: 'success',
+                    } as TaskExecutionInformation,
+                    stateTransitionTime: timestamp,
+                },
+            ];
+
+            const items1 = new TaskListStub(tasks.slice(0, 1));
+            items1.odatanextLink = 'odatanextLink-1';
+            const items2 = new TaskListStub(tasks.slice(1, tasks.length));
+
+            const options = {
+                taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'success'` },
+            };
+            taskMock
+                .setup(async (o) => o.list(config.jobId, options))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items1)))
+                .verifiable();
+            taskMock
+                .setup(async (o) => o.listNext(items1.odatanextLink, options))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items2)))
+                .verifiable();
+
+            const expectedSucceededTasks: BatchTask[] = [
+                {
+                    id: 'id-1: task info',
+                    taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
+                    exitCode: 0,
+                    result: 'success',
+                    timestamp,
+                },
+                {
+                    id: 'id-2: task without environment settings data',
+                    taskArguments: undefined,
+                    exitCode: 0,
+                    result: 'success',
+                    timestamp: timestamp,
+                },
+            ];
+
+            const succeededTasks = await batch.getSucceededTasks(config.jobId);
+
+            expect(succeededTasks).toEqual(expectedSucceededTasks);
+            taskMock.verifyAll();
+        });
+    });
+
     describe('getFailedTasks()', () => {
         it('get failed tasks', async () => {
             const timestamp = new Date();
@@ -402,7 +473,7 @@ describe(Batch, () => {
                     messageId: 'messageId-2',
                 },
             ];
-            const taskAddCollectionResult = {
+            const taskAddCollectionResult = <BatchServiceModels.TaskAddCollectionResponse>(<unknown>{
                 value: [
                     {
                         status: 'success',
@@ -418,7 +489,7 @@ describe(Batch, () => {
                         },
                     },
                 ],
-            } as BatchServiceModels.TaskAddCollectionResponse;
+            });
             const jobTasksExpected = [
                 {
                     id: '',

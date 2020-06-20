@@ -21,6 +21,8 @@ export interface ScanMessage {
 
 @injectable()
 export class Worker extends BatchTaskCreator {
+    private scanMessages: ScanMessage[] = [];
+
     public constructor(
         @inject(Batch) batch: Batch,
         @inject(Queue) queue: Queue,
@@ -45,14 +47,16 @@ export class Worker extends BatchTaskCreator {
         const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
-        let scanMessages: Message[] = [];
+        let messages: Message[] = [];
 
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            scanMessages = await this.queue.getMessagesWithTotalCount(this.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval);
+            messages = await this.queue.getMessagesWithTotalCount(this.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval);
+            this.scanMessages = messages.map((message) => ({
+                scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
+                queueMessage: message,
+            }));
 
-            if (scanMessages.length > 0) {
-                scanMessages = await this.dropCompletedScans(scanMessages);
-            }
+            messages = await this.excludeCompletedScans(this.scanMessages);
         }
 
         this.logger.logInfo(
@@ -69,7 +73,7 @@ export class Worker extends BatchTaskCreator {
             maxParallelTasks: poolMetricsInfo.maxTasksPerPool,
         });
 
-        return scanMessages;
+        return messages;
     }
 
     protected async onTasksAdded(tasks: JobTask[]): Promise<void> {
@@ -77,10 +81,37 @@ export class Worker extends BatchTaskCreator {
     }
 
     protected async onExit(): Promise<void> {
-        await this.completeTerminatedTasks();
+        await this.deleteScanQueueMessagesForSucceededTasks(this.scanMessages);
+        await this.updateScanRunStateForTerminatedTasks();
     }
 
-    private async completeTerminatedTasks(): Promise<void> {
+    private async deleteScanQueueMessagesForSucceededTasks(scanMessages: ScanMessage[]): Promise<void> {
+        if (scanMessages.length === 0) {
+            return;
+        }
+
+        const succeededTasks = await this.batch.getSucceededTasks(this.batchConfig.jobId);
+        if (succeededTasks === undefined || succeededTasks.length === 0) {
+            return;
+        }
+
+        await Promise.all(
+            succeededTasks.map(async (succeededTask) => {
+                const taskArguments = JSON.parse(succeededTask.taskArguments) as TaskArguments;
+                if (!isNil(taskArguments?.id)) {
+                    const scanMessage = scanMessages.find((message) => message.scanId === taskArguments.id);
+                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
+                } else {
+                    this.logger.logError(`Unable to delete scan queue message. Task has no scan id run arguments defined.`, {
+                        batchTaskId: succeededTask.id,
+                        taskProperties: JSON.stringify(succeededTask),
+                    });
+                }
+            }),
+        );
+    }
+
+    private async updateScanRunStateForTerminatedTasks(): Promise<void> {
         const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
         if (failedTasks === undefined || failedTasks.length === 0) {
             return;
@@ -116,7 +147,7 @@ export class Worker extends BatchTaskCreator {
 
                     this.logger.logError(error, { batchTaskId: failedTask.id, taskProperties: JSON.stringify(failedTask) });
                 } else {
-                    this.logger.logError(`Task has no run arguments defined.`, {
+                    this.logger.logError(`Unable to update failed scan run result. Task has no scan id run arguments defined.`, {
                         batchTaskId: failedTask.id,
                         taskProperties: JSON.stringify(failedTask),
                     });
@@ -125,11 +156,10 @@ export class Worker extends BatchTaskCreator {
         );
     }
 
-    private async dropCompletedScans(messages: Message[]): Promise<Message[]> {
-        const scanMessages: ScanMessage[] = messages.map((message) => ({
-            scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
-            queueMessage: message,
-        }));
+    private async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<Message[]> {
+        if (scanMessages.length === 0) {
+            return [];
+        }
 
         const scanRuns: OnDemandPageScanResult[] = [];
         const chunks = this.system.chunkArray(scanMessages, 100);
@@ -145,13 +175,18 @@ export class Worker extends BatchTaskCreator {
         await Promise.all(
             scanRuns.map(async (scanRun) => {
                 const scanMessage = scanMessages.find((message) => message.scanId === scanRun.id);
-                if (scanRun.run.state === 'queued') {
+                // When storage scan request queue has a message then retry scan request should be honored.
+                // Should include 'queued' and 'running' states to re-run abnormally terminated scan tasks.
+                if (scanRun.run.state === 'queued' || scanRun.run.state === 'running' || scanRun.run.state === 'failed') {
+                    this.logger.logWarn(
+                        'The scan request did not complete successfully during the last task run. Retrying scan with new task run.',
+                        { scanId: scanRun.id, scanRunState: scanRun.run.state },
+                    );
                     acceptedScanMessages.push(scanMessage.queueMessage);
                 } else {
                     await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
                     this.logger.logWarn(
-                        // tslint:disable-next-line:max-line-length
-                        `The scan request has been cancelled since run state has been changed to '${scanRun.run.state}'`,
+                        `The scan request has been cancelled since the run state has been changed to '${scanRun.run.state}'`,
                         {
                             scanId: scanMessage.scanId,
                         },
