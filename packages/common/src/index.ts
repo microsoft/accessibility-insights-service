@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 export { WhyNodeRunningLogger } from './why-node-running-logger';
-
 export { HashGenerator } from './ciphers/hash-generator';
 export { IoC } from './dependency-injection/setup-singleton-provider';
 export { System } from './system/system';
@@ -20,7 +19,6 @@ export {
     FeatureFlags,
 } from './configuration/service-configuration';
 export { setupRuntimeConfigContainer } from './setup-runtime-config-container';
-
 export { EnvironmentSettings } from './system/environment-settings';
 export { commonIocTypes } from './common-ioc-types';
 export { PromiseUtils } from './system/promise-utils';
