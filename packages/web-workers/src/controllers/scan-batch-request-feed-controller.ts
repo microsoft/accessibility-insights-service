@@ -94,7 +94,7 @@ export class ScanBatchRequestFeedController extends WebController {
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
-            this.logger.logInfo('Created new scan result document for the scan result storage container from the scan batch document.', {
+            this.logger.logInfo('Created new scan result document in scan result storage container.', {
                 batchRequestId,
                 scanId: request.scanId,
             });
@@ -131,7 +131,7 @@ export class ScanBatchRequestFeedController extends WebController {
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
         const requestDocuments = requests.map<OnDemandPageScanRequest>((request) => {
             const scanNotifyUrl = isEmpty(request.scanNotifyUrl) ? {} : { scanNotifyUrl: request.scanNotifyUrl };
-            this.logger.logInfo('Created new scan request document for the queue storage container from the scan batch document.', {
+            this.logger.logInfo('Created new scan request document in queue storage container.', {
                 batchRequestId,
                 scanId: request.scanId,
             });
