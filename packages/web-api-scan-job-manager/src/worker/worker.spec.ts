@@ -107,6 +107,23 @@ describe(Worker, () => {
         );
     });
 
+    function setupSystemChunkArrayMock(arrayLength: number): void {
+        systemMock
+            .setup((s) =>
+                s.chunkArray(
+                    It.is((array) => array.length === arrayLength),
+                    100,
+                ),
+            )
+            .returns((array: any[]) => {
+                const chunks = [];
+                chunks.push(array);
+
+                return chunks;
+            })
+            .verifiable(Times.once());
+    }
+
     describe('onTasksAdded', () => {
         it('sets pool load generator last increment count', async () => {
             const tasks: any[] = ['task1', 'task2'];
@@ -386,6 +403,48 @@ describe(Worker, () => {
             setupBatchPoolLoadSnapshotProviderMock();
         });
 
+        it('skip delete queue messages when no succeeded tasks', async () => {
+            poolLoadSnapshot.tasksIncrementCountPerInterval = 10;
+            const messageCount = 4;
+            const queueMessages: Message[] = [];
+            for (let i = 0; i < messageCount; i = i + 1) {
+                queueMessages.push({
+                    messageId: `id-${i}`,
+                    messageText: JSON.stringify({ id: `id-${i}` }),
+                });
+            }
+            setupVerifiableGetQueueMessagesCall(queueMessages);
+
+            const scanDocuments: OnDemandPageScanResult[] = [];
+            for (const queueMessage of queueMessages) {
+                scanDocuments.push({
+                    id: queueMessage.messageId,
+                    run: {
+                        state: 'queued',
+                    },
+                } as OnDemandPageScanResult);
+            }
+            onDemandPageScanRunResultProviderMock
+                .setup(async (s) => s.readScanRuns(queueMessages.map((m) => m.messageId)))
+                .returns(async () => Promise.resolve(scanDocuments))
+                .verifiable(Times.once());
+
+            setupSystemChunkArrayMock(queueMessages.length);
+
+            const succeededTasks: BatchTask[] = [];
+            batchMock
+                .setup((o) => o.getSucceededTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve(succeededTasks))
+                .verifiable(Times.once());
+            batchMock
+                .setup((o) => o.getFailedTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+
+            await worker.getMessagesForTaskCreation();
+            await worker.onExit();
+        });
+
         it('delete queue messages when scan task succeeded', async () => {
             poolLoadSnapshot.tasksIncrementCountPerInterval = 10;
             const messageCount = 4;
@@ -411,20 +470,8 @@ describe(Worker, () => {
                 .setup(async (s) => s.readScanRuns(queueMessages.map((m) => m.messageId)))
                 .returns(async () => Promise.resolve(scanDocuments))
                 .verifiable(Times.once());
-            systemMock
-                .setup((s) =>
-                    s.chunkArray(
-                        It.is((arr) => arr.length === queueMessages.length),
-                        100,
-                    ),
-                )
-                .returns((arr: any[]) => {
-                    const chunks = [];
-                    chunks.push(arr);
 
-                    return chunks;
-                })
-                .verifiable(Times.once());
+            setupSystemChunkArrayMock(queueMessages.length);
 
             const succeededTasks: BatchTask[] = [];
             for (let i = 0; i < messageCount; i = i + 1) {
@@ -531,20 +578,8 @@ describe(Worker, () => {
                 .setup(async (s) => s.readScanRuns(queueMessages.map((m) => m.messageId)))
                 .returns(async () => Promise.resolve(scanDocuments))
                 .verifiable(Times.once());
-            systemMock
-                .setup((s) =>
-                    s.chunkArray(
-                        It.is((arr) => arr.length === queueMessages.length),
-                        100,
-                    ),
-                )
-                .returns((arr: any[]) => {
-                    const chunks = [];
-                    chunks.push(arr);
 
-                    return chunks;
-                })
-                .verifiable(Times.once());
+            setupSystemChunkArrayMock(queueMessages.length);
 
             setupVerifiableDeleteQueueMessageCall(queueMessages[3]);
 
