@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
+import * as moment from 'moment';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
@@ -11,7 +12,7 @@ import { LogLevel } from './logger';
 import { ScanTaskFailedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
+// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty no-unsafe-any
 
 class TestableBaseConsoleLoggerClient extends BaseConsoleLoggerClient {
     public propertiesToAddToEvent: { [name: string]: string };
@@ -26,6 +27,7 @@ describe(BaseConsoleLoggerClient, () => {
     let serviceConfigMock: IMock<ServiceConfiguration>;
     let consoleMock: IMock<typeof console>;
     let logInConsole: boolean;
+    const timestamp = '2020-06-21T23:33:00.111Z';
 
     beforeEach(() => {
         logInConsole = true;
@@ -38,6 +40,7 @@ describe(BaseConsoleLoggerClient, () => {
         consoleMock = Mock.ofInstance({ log: () => {} } as typeof console);
 
         testSubject = new TestableBaseConsoleLoggerClient(serviceConfigMock.object, consoleMock.object);
+        moment.prototype.toISOString = () => timestamp;
     });
 
     describe('console not enabled', () => {
@@ -62,7 +65,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify((c) => c.log('[Metric] === metric1 - 1'), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Metric] metric1: 1`), Times.once());
         });
 
         it('log data with base properties with circular reference', async () => {
@@ -72,10 +75,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...baseProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Metric] metric1: 1\n${util.inspect({ ...baseProps })}`), Times.once());
         });
 
-        it('log data with custom runtime properties', async () => {
+        it('log metric data with custom runtime properties', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
@@ -84,10 +87,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Metric] metric1: 1\n${util.inspect({ ...mergedProps })}`), Times.once());
         });
 
-        it('log data with propertiesToAddToEvent', async () => {
+        it('log metric data with propertiesToAddToEvent', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -98,7 +101,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackMetric('metric1', 1);
 
-            consoleMock.verify((c) => c.log(`[Metric][properties - ${util.inspect({ ...mergedProps })}] === metric1 - 1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Metric] metric1: 1\n${util.inspect({ ...mergedProps })}`), Times.once());
         });
     });
 
@@ -108,7 +111,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify((c) => c.log('[Event] === HealthCheck'), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Event][HealthCheck]`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -117,10 +120,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(baseProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Event][HealthCheck] \n${util.inspect(baseProps)}`), Times.once());
         });
 
-        it('log data with custom runtime properties', async () => {
+        it('log event data with custom runtime properties', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
@@ -130,10 +133,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Event][HealthCheck] \n${util.inspect(mergedProps)}`), Times.once());
         });
 
-        it('log data with propertiesToAddToEvent', async () => {
+        it('log event data with propertiesToAddToEvent', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -144,7 +147,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackEvent('HealthCheck');
 
-            consoleMock.verify((c) => c.log(`[Event][properties - ${util.inspect(mergedProps)}] === HealthCheck`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Event][HealthCheck] \n${util.inspect(mergedProps)}`), Times.once());
         });
 
         it('log data with event properties and measurements', async () => {
@@ -154,9 +157,9 @@ describe(BaseConsoleLoggerClient, () => {
             const eventMeasurements: ScanTaskFailedMeasurements = { failedScanTasks: 1 };
 
             testSubject.trackEvent('HealthCheck', eventProps, eventMeasurements);
-            const properties = `[properties - ${util.inspect({ ...baseProps, ...eventProps })}]`;
-            const measurements = `[measurements - ${util.inspect(eventMeasurements)}]`;
-            const expectedLogMessage = `[Event]${properties}${measurements} === HealthCheck`;
+            const properties = util.inspect({ ...baseProps, ...eventProps });
+            const measurements = util.inspect(eventMeasurements);
+            const expectedLogMessage = `[${timestamp}][Event][HealthCheck] ${measurements}\n${properties}`;
 
             consoleMock.verify((c) => c.log(expectedLogMessage), Times.once());
         });
@@ -168,7 +171,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.verbose);
 
-            consoleMock.verify((c) => c.log('[Trace][verbose] === trace1'), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][verbose] trace1`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -177,10 +180,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(baseProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(baseProps)}`), Times.once());
         });
 
-        it('log data with custom runtime properties', async () => {
+        it('log trace data with custom runtime properties', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             const mergedProps = { source: 'test-source', scanId: 'scan-id', batchRequestId: 'batch-req-id' };
@@ -189,10 +192,10 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
         });
 
-        it('log data with custom runtime properties', async () => {
+        it('log trace data with added custom runtime properties', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -207,7 +210,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.log('trace1', LogLevel.warn);
 
-            consoleMock.verify((c) => c.log(`[Trace][warn][properties - ${util.inspect(mergedProps)}] === trace1`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect(mergedProps)}`), Times.once());
         });
 
         it('log data with event properties', async () => {
@@ -218,7 +221,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.log('trace1', LogLevel.warn, traceProps);
 
             consoleMock.verify(
-                (c) => c.log(`[Trace][warn][properties - ${util.inspect({ ...baseProps, ...traceProps })}] === trace1`),
+                (c) => c.log(`[${timestamp}][Trace][warn] trace1\n${util.inspect({ ...baseProps, ...traceProps })}`),
                 Times.once(),
             );
         });
@@ -231,7 +234,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackException(error);
 
-            consoleMock.verify((c) => c.log(`[Exception] === ${util.inspect(error, { depth: null })}`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -242,7 +245,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[Exception][properties - ${util.inspect(baseProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(baseProps)}`),
                 Times.once(),
             );
         });
@@ -258,12 +261,12 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(mergedProps)}`),
                 Times.once(),
             );
         });
 
-        it('log data with custom runtime properties', async () => {
+        it('log data with custom runtime merged properties', async () => {
             const baseProps: BaseTelemetryProperties = { source: 'test-source' };
             const customProps: LoggerProperties = { scanId: 'scan-id', batchRequestId: 'batch-req-id' };
             testSubject.propertiesToAddToEvent = { batchRequestId: 'overriddenVal1', propToAdd: 'val2' };
@@ -276,7 +279,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[Exception][properties - ${util.inspect(mergedProps)}] === ${util.inspect(error, { depth: null })}`),
+                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(mergedProps)}`),
                 Times.once(),
             );
         });
