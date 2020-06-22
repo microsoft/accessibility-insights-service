@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Batch, BatchConfig, JobTask, Message, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -26,9 +25,8 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
     }
 
     protected async getMessagesForTaskCreation(): Promise<Message[]> {
-        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
-
-        const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - this.getChildTasksCount(poolMetricsInfo);
+        const pendingTasks = await this.getJobPendingTasksCount();
+        const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - pendingTasks;
         if (messagesCount > 0) {
             return this.queue.getMessagesWithTotalCount(this.getQueueName(), messagesCount);
         }

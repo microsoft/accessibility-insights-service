@@ -6,7 +6,6 @@ import 'reflect-metadata';
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';
 import {
     ErrorCategory,
-    JobGetTaskCountsResponse,
     JobListResponse,
     PoolGetResponse,
     TaskExecutionInformation,
@@ -282,7 +281,7 @@ describe(Batch, () => {
                 maxTasksPerPool: 32,
                 load: {
                     activeTasks: 4,
-                    runningTasks: 7,
+                    runningTasks: 2,
                 },
             };
             poolMock
@@ -296,27 +295,60 @@ describe(Batch, () => {
                 )
                 .verifiable();
 
-            const options = {
+            const jobOptions = {
                 jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${config.poolId}'` },
             };
-            const items1 = new JobListStub([{ id: 'job-id-1' }]);
-            items1.odatanextLink = 'odatanextLink-1';
-            const items2 = new JobListStub([{ id: 'job-id-2' }]);
+            const jobListItems1 = new JobListStub([{ id: 'job-id-11' }]);
+            jobListItems1.odatanextLink = 'odatanextLink-1';
+            const jobListItems2 = new JobListStub([{ id: 'job-id-22' }]);
             jobMock
-                .setup(async (o) => o.list(options))
-                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items1)))
+                .setup(async (o) => o.list(jobOptions))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>jobListItems1)))
                 .verifiable();
             jobMock
-                .setup(async (o) => o.listNext(items1.odatanextLink, options))
-                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>items2)))
+                .setup(async (o) => o.listNext(jobListItems1.odatanextLink, jobOptions))
+                .returns(async () => Promise.resolve(<JobListResponse>(<unknown>jobListItems2)))
                 .verifiable();
-            jobMock
-                .setup(async (o) => o.getTaskCounts(items1.items[0].id))
-                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 1, running: 2 })))
+
+            const tasks = [
+                {
+                    id: 'id-1',
+                    state: 'preparing',
+                },
+                {
+                    id: 'id-2',
+                    state: 'active',
+                },
+                {
+                    id: 'id-3',
+                    state: 'running',
+                },
+                {
+                    id: 'id-4',
+                    state: 'completed',
+                },
+                {
+                    id: 'id-5',
+                    state: 'active',
+                },
+            ];
+            const taskListItems1 = new TaskListStub(tasks.slice(0, 2));
+            taskListItems1.odatanextLink = 'odatanextLink-2';
+            const taskListItems2 = new TaskListStub(tasks.slice(2, tasks.length));
+            const taskOptions = {
+                taskListOptions: { filter: `state ne 'completed'` },
+            };
+            taskMock
+                .setup(async (o) => o.list(jobListItems1.items[0].id, taskOptions))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>taskListItems1)))
                 .verifiable();
-            jobMock
-                .setup(async (o) => o.getTaskCounts(items2.items[0].id))
-                .returns(async () => Promise.resolve(<JobGetTaskCountsResponse>(<unknown>{ active: 3, running: 5 })))
+            taskMock
+                .setup(async (o) => o.listNext(taskListItems1.odatanextLink, taskOptions))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>taskListItems2)))
+                .verifiable();
+            taskMock
+                .setup(async (o) => o.list(jobListItems2.items[0].id, taskOptions))
+                .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>taskListItems2)))
                 .verifiable();
 
             const poolMetricsInfo = await batch.getPoolMetricsInfo();
@@ -324,6 +356,7 @@ describe(Batch, () => {
             expect(poolMetricsInfo).toEqual(poolMetricsInfoExpected);
             poolMock.verifyAll();
             jobMock.verifyAll();
+            taskMock.verifyAll();
         });
     });
 
