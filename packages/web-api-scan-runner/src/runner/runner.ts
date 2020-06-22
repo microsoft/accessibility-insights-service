@@ -117,6 +117,8 @@ export class Runner {
             });
             await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
         }
+
+        this.logger.logInfo('Page scan task completed.');
     }
 
     private scanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
