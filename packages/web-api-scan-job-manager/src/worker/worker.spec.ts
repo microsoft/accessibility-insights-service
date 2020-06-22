@@ -388,8 +388,9 @@ describe(Worker, () => {
 
         it('delete queue messages when scan task succeeded', async () => {
             poolLoadSnapshot.tasksIncrementCountPerInterval = 10;
+            const messageCount = 4;
             const queueMessages: Message[] = [];
-            for (let i = 0; i < 4; i = i + 1) {
+            for (let i = 0; i < messageCount; i = i + 1) {
                 queueMessages.push({
                     messageId: `id-${i}`,
                     messageText: JSON.stringify({ id: `id-${i}` }),
@@ -398,9 +399,9 @@ describe(Worker, () => {
             setupVerifiableGetQueueMessagesCall(queueMessages);
 
             const scanDocuments: OnDemandPageScanResult[] = [];
-            for (let i = 0; i < 4; i = i + 1) {
+            for (const queueMessage of queueMessages) {
                 scanDocuments.push({
-                    id: queueMessages[0].messageId,
+                    id: queueMessage.messageId,
                     run: {
                         state: 'queued',
                     },
@@ -426,13 +427,21 @@ describe(Worker, () => {
                 .verifiable(Times.once());
 
             const succeededTasks: BatchTask[] = [];
-            for (let i = 0; i < 4; i = i + 1) {
+            for (let i = 0; i < messageCount; i = i + 1) {
                 const taskArgs: TaskArguments = {
                     id: `id-${i}`,
                 };
-                succeededTasks.push({
-                    taskArguments: JSON.stringify(taskArgs),
-                } as BatchTask);
+                if (i + 1 === messageCount) {
+                    // set last task without task parameters
+                    succeededTasks.push({
+                        id: '12',
+                        taskArguments: JSON.stringify({}),
+                    } as BatchTask);
+                } else {
+                    succeededTasks.push({
+                        taskArguments: JSON.stringify(taskArgs),
+                    } as BatchTask);
+                }
             }
             batchMock
                 .setup((o) => o.getSucceededTasks(batchConfig.jobId))
@@ -443,9 +452,21 @@ describe(Worker, () => {
                 .returns(async () => Promise.resolve([]))
                 .verifiable(Times.once());
 
-            queueMessages.map((m) => {
+            queueMessages.slice(0, messageCount - 1).map((m) => {
                 setupVerifiableDeleteQueueMessageCall(m);
             });
+
+            loggerMock
+                .setup((o) =>
+                    o.logError(
+                        'Unable to delete scan queue message. Task has no scan id run arguments defined.',
+                        It.isValue({
+                            batchTaskId: succeededTasks[messageCount - 1].id,
+                            taskProperties: JSON.stringify(succeededTasks[messageCount - 1]),
+                        }),
+                    ),
+                )
+                .verifiable(Times.once());
 
             await worker.getMessagesForTaskCreation();
             await worker.onExit();
