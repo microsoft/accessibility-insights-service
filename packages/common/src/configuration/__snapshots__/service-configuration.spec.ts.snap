@@ -177,11 +177,6 @@ Object {
     },
   },
   "taskConfig": Object {
-    "exitOnComplete": Object {
-      "default": false,
-      "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
-      "format": "Boolean",
-    },
     "maxTaskRetryCount": Object {
       "default": 2,
       "doc": "The maximum number of times the task may be retried.",
@@ -378,11 +373,6 @@ Object {
     },
   },
   "taskConfig": Object {
-    "exitOnComplete": Object {
-      "default": false,
-      "doc": "Temporary flag to unblock tasks that get stuck with open socket issue if happens",
-      "format": "Boolean",
-    },
     "maxTaskRetryCount": Object {
       "default": 2,
       "doc": "The maximum number of times the task may be retried.",
