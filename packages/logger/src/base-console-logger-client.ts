@@ -3,8 +3,8 @@
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 import * as utils from 'util';
-
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -32,15 +32,16 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
 
     public trackMetric(name: string, value: number): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Metric]${this.getPrintablePropertiesString()}`, `${name} - ${value}`);
+            this.logInConsole(`[Metric]`, `${name}: ${value}`, this.getPrintablePropertiesString());
         });
     }
 
     public trackEvent(name: LoggerEvent, properties?: { [name: string]: string }, measurements?: TelemetryMeasurements[LoggerEvent]): void {
         this.executeInDebugMode(() => {
             this.logInConsole(
-                `[Event]${this.getPrintablePropertiesString(properties)}${this.getPrintableMeasurementsString(measurements)}`,
-                name,
+                `[Event][${name}]`,
+                this.getPrintableMeasurementsString(measurements),
+                this.getPrintablePropertiesString(properties),
             );
         });
     }
@@ -50,13 +51,13 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Trace][${LogLevel[logLevel]}]${this.getPrintablePropertiesString(properties)}`, message);
+            this.logInConsole(`[Trace][${LogLevel[logLevel]}]`, message, this.getPrintablePropertiesString(properties));
         });
     }
 
     public trackException(error: Error): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Exception]${this.getPrintablePropertiesString()}`, this.getPrintableString(error));
+            this.logInConsole(`[Exception]`, this.getPrintableString(error), this.getPrintablePropertiesString());
         });
     }
 
@@ -76,11 +77,11 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
     private getPrintablePropertiesString(properties?: { [name: string]: string }): string {
         const allProperties = { ...this.baseProperties, ...this.getPropertiesToAddToEvent(), ...properties };
 
-        return _.isEmpty(allProperties) ? '' : `[properties - ${this.getPrintableString(allProperties)}]`;
+        return _.isEmpty(allProperties) ? '' : `${this.getPrintableString(allProperties)}`;
     }
 
     private getPrintableMeasurementsString(measurements?: BaseTelemetryMeasurements): string {
-        return _.isEmpty(measurements) ? '' : `[measurements - ${this.getPrintableString(measurements)}]`;
+        return _.isEmpty(measurements) ? '' : `${this.getPrintableString(measurements)}`;
     }
 
     private executeInDebugMode(action: () => void): void {
@@ -95,7 +96,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         return utils.inspect(obj, { depth: null });
     }
 
-    private logInConsole(tag: string, content: string): void {
-        this.consoleObject.log(`${tag} === ${content}`);
+    private logInConsole(tag: string, message: string, properties: string): void {
+        this.consoleObject.log(`[${moment.utc().toISOString()}]${tag} ${message}\n${properties}`.trim());
     }
 }

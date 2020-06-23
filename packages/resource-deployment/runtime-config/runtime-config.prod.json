@@ -8,10 +8,6 @@
     "queueConfig": {
         "maxQueueSize": 40
     },
-    "taskConfig": {
-        "exitOnComplete": true
-    },
-
     "scanConfig": {
         "minLastReferenceSeenInDays": 3,
         "pageRescanIntervalInDays": 3,

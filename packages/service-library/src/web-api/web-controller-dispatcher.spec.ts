@@ -11,11 +11,6 @@ import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
 
 // tslint:disable: no-any no-unsafe-any
-export class TestableWebControllerDispatcher extends WebControllerDispatcher {
-    public shouldExitAfterExecution(): boolean {
-        return this.shouldExitAfterInvocation();
-    }
-}
 
 export class TestableWebController extends WebController {
     public static readonly handleRequestResult = 'handle-request-result';
@@ -40,7 +35,7 @@ export class TestableWebController extends WebController {
 }
 
 describe(WebControllerDispatcher, () => {
-    let webControllerDispatcher: TestableWebControllerDispatcher;
+    let webControllerDispatcher: WebControllerDispatcher;
     let containerMock: IMock<Container>;
     let context: Context;
     let testableWebController: TestableWebController;
@@ -66,7 +61,7 @@ describe(WebControllerDispatcher, () => {
     });
 
     it('should invoke controller instance with args', async () => {
-        webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
 
         loggerMock
             .setup((l) => l.setup())
@@ -89,7 +84,7 @@ describe(WebControllerDispatcher, () => {
 
         processLifeCycleContainerMock.setup((c) => c.get(loggerTypes.Process)).returns(() => processStub);
 
-        webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
 
         expect((webControllerDispatcher as any).getTelemetryBaseProperties()).toEqual({
             source: 'azure-function',
@@ -98,7 +93,7 @@ describe(WebControllerDispatcher, () => {
     });
 
     it('should do nothing on invoking custom action', async () => {
-        webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
 
         await expect((webControllerDispatcher as any).runCustomAction()).toResolve();
     });
@@ -109,14 +104,9 @@ describe(WebControllerDispatcher, () => {
             .returns(() => Promise.resolve())
             .verifiable(Times.once());
 
-        webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
+        webControllerDispatcher = new WebControllerDispatcher(processLifeCycleContainerMock.object);
         await expect(webControllerDispatcher.processRequest(containerMock.object, TestableWebController, context)).resolves.toBe(
             TestableWebController.handleRequestResult,
         );
-    });
-
-    it('returns false for shouldExitAfterInvocation', async () => {
-        webControllerDispatcher = new TestableWebControllerDispatcher(processLifeCycleContainerMock.object);
-        expect(webControllerDispatcher.shouldExitAfterExecution()).toBe(false);
     });
 });

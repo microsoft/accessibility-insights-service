@@ -9,7 +9,6 @@ export interface TaskRuntimeConfig {
     taskTimeoutInMinutes: number;
     retentionTimeInDays: number;
     maxTaskRetryCount: number;
-    exitOnComplete: boolean;
 }
 
 export interface QueueRuntimeConfig {
@@ -160,11 +159,6 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 2,
                     doc: 'The maximum number of times the task may be retried.',
-                },
-                exitOnComplete: {
-                    format: 'Boolean',
-                    default: false,
-                    doc: 'Temporary flag to unblock tasks that get stuck with open socket issue if happens',
                 },
             },
             jobManagerConfig: {
