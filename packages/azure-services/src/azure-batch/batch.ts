@@ -143,13 +143,15 @@ export class Batch {
 
         let activeTasks = 0;
         let runningTasks = 0;
-
-        const client = await this.batchClientProvider();
         await Promise.all(
             activeJobIds.map(async (jobId) => {
-                const jobInfo = await client.job.getTaskCounts(jobId);
-                activeTasks += jobInfo.active;
-                runningTasks += jobInfo.running;
+                const pendingTasks = await this.getPendingTaskList(jobId);
+                const pendingTaskInfoList = pendingTasks.map((task) => {
+                    return { id: task.id, state: task.state };
+                });
+
+                activeTasks += pendingTaskInfoList.filter((task) => task.state === 'preparing' || task.state === 'active').length;
+                runningTasks += pendingTaskInfoList.filter((task) => task.state === 'running').length;
             }),
         );
 
@@ -157,6 +159,12 @@ export class Batch {
             activeTasks: activeTasks,
             runningTasks: runningTasks,
         };
+    }
+
+    private async getPendingTaskList(jobId: string): Promise<CloudTask[]> {
+        const filterClause = `state ne 'completed'`;
+
+        return this.getTaskList(jobId, { filter: filterClause });
     }
 
     private async getFailedTaskList(jobId: string): Promise<CloudTask[]> {

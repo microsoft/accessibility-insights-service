@@ -37,8 +37,4 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
             serverInstanceId: currentProcess.env.WEBSITE_INSTANCE_ID,
         };
     }
-
-    protected shouldExitAfterInvocation(): boolean {
-        return false;
-    }
 }

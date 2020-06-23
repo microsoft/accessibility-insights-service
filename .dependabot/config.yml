@@ -2,7 +2,7 @@ version: 1
 update_configs:
     - package_manager: 'javascript'
       directory: '/'
-      update_schedule: 'daily'
+      update_schedule: 'weekly'
       version_requirement_updates: 'increase_versions'
       default_labels:
           - 'category: engineering'
@@ -16,6 +16,26 @@ update_configs:
                 # on false positives and breaking ai-web, so avoiding
                 # dependabot auto-update for them like other deps.
                 dependency_name: 'axe-core'
+          - match:
+                # package is deployed on a server as stand-alone
+                # and will require update of deployment script
+                # that is not part of dependabot auto-update
+                dependency_name: 'axe-puppeteer'
+          - match:
+                # package is deployed on a server as stand-alone
+                # and will require update of deployment script
+                # that is not part of dependabot auto-update
+                dependency_name: 'puppeteer'
+          - match:
+                # package is deployed on a server as stand-alone
+                # and will require update of deployment script
+                # that is not part of dependabot auto-update
+                dependency_name: 'applicationinsights'
+          - match:
+                # package is deployed on a server as stand-alone
+                # and will require update of deployment script
+                # that is not part of dependabot auto-update
+                dependency_name: 'yargs'
 
     - package_manager: 'dotnet:nuget'
       directory: '/packages/web-workers/'

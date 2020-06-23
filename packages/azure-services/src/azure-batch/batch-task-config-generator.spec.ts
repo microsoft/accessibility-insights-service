@@ -38,7 +38,6 @@ describe(BatchTaskConfigGenerator, () => {
         const resourceFiles = 'resource files1' as any;
         const defaultTaskConfig: TaskRuntimeConfig = {
             taskTimeoutInMinutes: 2,
-            exitOnComplete: false,
             retentionTimeInDays: 3,
             maxTaskRetryCount: 2,
         };

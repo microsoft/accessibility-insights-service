@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolMetricsInfo, Queue } from 'azure-services';
+import { Batch, BatchConfig, JobTask, JobTaskState, Message, Queue } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
@@ -37,17 +37,20 @@ export abstract class BatchTaskCreator {
         while (true) {
             const messages = await this.getMessagesForTaskCreation();
 
-            if (messages.length === 0 && !this.hasChildTasksRunning(await this.batch.getPoolMetricsInfo())) {
-                this.logger.logInfo(`No new tasks added when there are no active/running tasks.`);
+            if (messages.length === 0 && (await this.getJobPendingTasksCount()) === 0) {
+                this.logger.logInfo(`No new scan messages being queued while all scan tasks were completed. Exiting job manager.`);
+
                 break;
             } else if (messages.length > 0) {
                 const jobTasks = await this.addTasksToJob(messages);
-
                 await this.onTasksAdded(jobTasks);
             }
 
             if (moment().toDate() >= restartAfterTime) {
-                this.logger.logInfo(`Performing scheduled termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`);
+                this.logger.logInfo(
+                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`,
+                );
+
                 break;
             }
 
@@ -73,22 +76,24 @@ export abstract class BatchTaskCreator {
     protected abstract onExit(): Promise<void>;
 
     protected async waitForChildTasks(): Promise<void> {
-        this.logger.logInfo('Waiting for child tasks to complete.');
-
-        let poolMetricsInfo: PoolMetricsInfo = await this.batch.getPoolMetricsInfo();
-        while (this.hasChildTasksRunning(poolMetricsInfo)) {
-            await this.system.wait(5000);
-            poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        this.logger.logInfo('Waiting for job tasks to complete.');
+        // tslint:disable-next-line: no-constant-condition
+        while (true) {
+            const pendingTasks = await this.getJobPendingTasksCount();
+            if (pendingTasks > 0) {
+                console.log(`Pending job tasks: ${pendingTasks}`);
+                await this.system.wait(5000);
+            } else {
+                break;
+            }
         }
+
+        this.logger.logInfo('All job tasks are completed.');
     }
 
-    protected hasChildTasksRunning(poolMetricsInfo: PoolMetricsInfo): boolean {
-        // The Batch service API may set activeTasks value instead of runningTasks value hence handle this case
-        return this.getChildTasksCount(poolMetricsInfo) > 0;
-    }
-
-    protected getChildTasksCount(poolMetricsInfo: PoolMetricsInfo): number {
-        const taskCount = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks - 1;
+    protected async getJobPendingTasksCount(): Promise<number> {
+        const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
+        const taskCount = poolMetricsInfo.load.activeTasks + poolMetricsInfo.load.runningTasks - 1; // exclude this job manager task
 
         return taskCount < 0 ? 0 : taskCount;
     }
