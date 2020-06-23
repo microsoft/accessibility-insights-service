@@ -180,6 +180,12 @@ export class Batch {
         };
     }
 
+    private async getPendingTaskList(jobId: string): Promise<CloudTask[]> {
+        const filterClause = `state ne 'completed'`;
+
+        return this.getTaskList(jobId, { filter: filterClause });
+    }
+
     private async getSucceededTaskList(jobId: string): Promise<CloudTask[]> {
         const filterClause = `state eq 'completed' and executionInfo/result eq 'success'`;
 
