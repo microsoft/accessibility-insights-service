@@ -90,9 +90,6 @@ describe('Scan request sender', () => {
             loggerMock
                 .setup((o) => o.logInfo('Sending scan request to the scan task queue.', { scanId: request.id }))
                 .verifiable(Times.once());
-            loggerMock
-                .setup((o) => o.logInfo('Scan request successfully added to the scan task queue.', { scanId: request.id }))
-                .verifiable(Times.once());
         });
 
         await testSubject.sendRequestToScan(onDemandPageScanRequests);
