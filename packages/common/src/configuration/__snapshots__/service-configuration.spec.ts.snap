@@ -26,7 +26,7 @@ Object {
     "urlToScan": Object {
       "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
-      "format": "url",
+      "format": "String",
     },
   },
   "featureFlags": Object {
@@ -222,7 +222,7 @@ Object {
     "urlToScan": Object {
       "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
-      "format": "url",
+      "format": "String",
     },
   },
   "featureFlags": Object {

@@ -282,7 +282,7 @@ export class ServiceConfiguration {
             },
             availabilityTestConfig: {
                 urlToScan: {
-                    format: 'url',
+                    format: 'String',
                     default: 'https://www.washington.edu/accesscomputing/AU/before.html',
                     doc: 'Url to scan for availability testing',
                 },
