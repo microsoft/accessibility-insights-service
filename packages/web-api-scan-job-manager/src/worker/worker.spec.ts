@@ -22,7 +22,7 @@ import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from
 import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { TaskArguments, Worker } from './worker';
+import { ScanMessage, TaskArguments, Worker } from './worker';
 
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any mocha-no-side-effect-code no-null-keyword
 
@@ -42,6 +42,10 @@ jest.mock('moment', () => {
 });
 
 class TestableWorker extends Worker {
+    public setScanMessages(scanMessages: ScanMessage[]): void {
+        super.scanMessages = scanMessages;
+    }
+
     // tslint:disable-next-line: no-unnecessary-override
     public async onTasksAdded(tasks: JobTask[]): Promise<void> {
         return super.onTasksAdded(tasks);
@@ -55,6 +59,11 @@ class TestableWorker extends Worker {
     // tslint:disable-next-line: no-unnecessary-override
     public async getMessagesForTaskCreation(): Promise<Message[]> {
         return super.getMessagesForTaskCreation();
+    }
+
+    // tslint:disable-next-line: no-unnecessary-override
+    public async onTasksValidation(): Promise<void> {
+        return super.onTasksValidation();
     }
 }
 
@@ -401,6 +410,52 @@ describe(Worker, () => {
                 .verifiable(Times.once());
 
             setupBatchPoolLoadSnapshotProviderMock();
+        });
+
+        it('delete queue messages on tasks validation', async () => {
+            worker.setScanMessages([
+                {
+                    scanId: 'id',
+                    queueMessage: undefined,
+                },
+            ]);
+
+            poolLoadGeneratorMock.reset();
+            batchPoolLoadSnapshotProviderMock.reset();
+            batchMock.reset();
+            batchMock
+                .setup((o) => o.getSucceededTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+            batchMock
+                .setup((o) => o.getFailedTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+
+            await worker.onTasksValidation();
+        });
+
+        it('delete queue messages on exit', async () => {
+            worker.setScanMessages([
+                {
+                    scanId: 'id',
+                    queueMessage: undefined,
+                },
+            ]);
+
+            poolLoadGeneratorMock.reset();
+            batchPoolLoadSnapshotProviderMock.reset();
+            batchMock.reset();
+            batchMock
+                .setup((o) => o.getSucceededTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+            batchMock
+                .setup((o) => o.getFailedTasks(batchConfig.jobId))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+
+            await worker.onExit();
         });
 
         it('skip delete queue messages when no succeeded tasks', async () => {

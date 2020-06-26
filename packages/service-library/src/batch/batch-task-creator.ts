@@ -38,7 +38,7 @@ export abstract class BatchTaskCreator {
             const messages = await this.getMessagesForTaskCreation();
 
             if (messages.length === 0 && (await this.getJobPendingTasksCount()) === 0) {
-                this.logger.logInfo(`No new scan messages being queued while all scan tasks were completed. Exiting job manager.`);
+                this.logger.logInfo(`All tasks are completed and no new scan requests available. Exiting the job manager.`);
 
                 break;
             } else if (messages.length > 0) {
@@ -55,6 +55,8 @@ export abstract class BatchTaskCreator {
             }
 
             await this.system.wait(this.jobManagerConfig.addTasksIntervalInSeconds * 1000);
+
+            await this.onTasksValidation();
         }
 
         await this.waitForChildTasks();
@@ -74,6 +76,8 @@ export abstract class BatchTaskCreator {
     protected abstract onTasksAdded(tasks: JobTask[]): Promise<void>;
 
     protected abstract onExit(): Promise<void>;
+
+    protected abstract onTasksValidation(): Promise<void>;
 
     protected async waitForChildTasks(): Promise<void> {
         this.logger.logInfo('Waiting for job tasks to complete.');

@@ -33,6 +33,7 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     public jobId: string;
 
     public getMessagesForTaskCreationCallback: () => Message[];
+    public onTasksValidationCallCount: number = 0;
     public onExitCallCount: number = 0;
     public taskAddedCallback: (tasks: JobTask[]) => void;
 
@@ -54,6 +55,10 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         }
 
         this.taskAddedCallback(tasks);
+    }
+
+    protected async onTasksValidation(): Promise<void> {
+        this.onTasksValidationCallCount += 1;
     }
 
     protected async onExit(): Promise<void> {
@@ -179,6 +184,7 @@ describe(BatchTaskCreator, () => {
 
             (testSubject as any).hasInitialized = false;
             await expect(testSubject.run()).rejects.toEqual(new Error('The BatchTaskCreator instance is not initialized.'));
+            expect(testSubject.onTasksValidationCallCount).toBe(0);
             expect(testSubject.onExitCallCount).toBe(0);
         });
 
@@ -217,6 +223,7 @@ describe(BatchTaskCreator, () => {
 
             await testSubject.run();
 
+            expect(testSubject.onTasksValidationCallCount).toBe(2);
             expect(testSubject.onExitCallCount).toBe(1);
         });
 

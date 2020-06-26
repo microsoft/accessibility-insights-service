@@ -35,6 +35,9 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
     }
 
     // tslint:disable-next-line: no-empty
+    protected async onTasksValidation(): Promise<void> {}
+
+    // tslint:disable-next-line: no-empty
     protected async onExit(): Promise<void> {}
 
     // tslint:disable-next-line: no-empty

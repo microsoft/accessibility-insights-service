@@ -21,7 +21,7 @@ export interface ScanMessage {
 
 @injectable()
 export class Worker extends BatchTaskCreator {
-    private scanMessages: ScanMessage[] = [];
+    protected scanMessages: ScanMessage[] = [];
 
     public constructor(
         @inject(Batch) batch: Batch,
@@ -80,7 +80,15 @@ export class Worker extends BatchTaskCreator {
         this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
     }
 
+    protected async onTasksValidation(): Promise<void> {
+        await this.validateTasks();
+    }
+
     protected async onExit(): Promise<void> {
+        await this.validateTasks();
+    }
+
+    private async validateTasks(): Promise<void> {
         await this.deleteScanQueueMessagesForSucceededTasks(this.scanMessages);
         await this.updateScanRunStateForTerminatedTasks();
     }

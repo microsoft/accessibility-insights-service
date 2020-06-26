@@ -170,7 +170,7 @@ export class ServiceConfiguration {
                 },
                 addTasksIntervalInSeconds: {
                     format: 'int',
-                    default: 15,
+                    default: 20,
                     doc: 'The time interval at which a job manager adds tasks to the job.',
                 },
                 maxWallClockTimeInHours: {
