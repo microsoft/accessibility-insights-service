@@ -10,7 +10,7 @@
             "collectionName": "scanBatchRequests",
             "createLeaseCollectionIfNotExists": true,
             "startFromBeginning": true,
-            "maxItemsPerInvocation": 10
+            "maxItemsPerInvocation": 20
         }
     ],
     "scriptFile": "../scan-batch-requests-feed-func/index.js"
