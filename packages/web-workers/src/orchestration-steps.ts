@@ -248,7 +248,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
             throw new Error(`Request failed ${JSON.stringify(response)}`);
         } else {
-            this.logOrchestrationStep(`${activityName} activity completed}`, LogLevel.info, {
+            this.logOrchestrationStep(`${activityName} activity completed`, LogLevel.info, {
                 activityName,
                 requestResponse: JSON.stringify(response),
             });
@@ -296,7 +296,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         if (isWebResponse) {
             yield* this.ensureSuccessStatusCode(response, activityName);
         } else {
-            this.logOrchestrationStep(`${activityName} activity completed}`);
+            this.logOrchestrationStep(`${activityName} activity completed`);
         }
 
         return response;

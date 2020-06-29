@@ -33,6 +33,7 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     public jobId: string;
 
     public getMessagesForTaskCreationCallback: () => Message[];
+    public onTasksValidationCallCount: number = 0;
     public onExitCallCount: number = 0;
     public taskAddedCallback: (tasks: JobTask[]) => void;
 
@@ -54,6 +55,10 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         }
 
         this.taskAddedCallback(tasks);
+    }
+
+    protected async onTasksValidation(): Promise<void> {
+        this.onTasksValidationCallCount += 1;
     }
 
     protected async onExit(): Promise<void> {
@@ -83,7 +88,7 @@ describe(BatchTaskCreator, () => {
         batchConfig = {
             accountName: 'batch-account-name',
             accountUrl: '',
-            poolId: 'pool-Id',
+            poolId: 'patch-pool-Id',
             jobId: 'batch-job-id',
         };
         batchMock = Mock.ofType(Batch, MockBehavior.Strict);
@@ -92,7 +97,7 @@ describe(BatchTaskCreator, () => {
         loggerMock = Mock.ofType(MockableLogger);
         systemMock = Mock.ofInstance(
             {
-                wait: async (milliSec) => {
+                wait: async (msecs) => {
                     return;
                 },
             } as typeof System,
@@ -121,6 +126,11 @@ describe(BatchTaskCreator, () => {
             loggerMock.object,
             systemMock.object,
         );
+
+        queueMock
+            .setup(async (q) => q.deleteMessage(testSubject.getQueueName(), It.isAny()))
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.never());
     });
 
     describe('init', () => {
@@ -174,6 +184,7 @@ describe(BatchTaskCreator, () => {
 
             (testSubject as any).hasInitialized = false;
             await expect(testSubject.run()).rejects.toEqual(new Error('The BatchTaskCreator instance is not initialized.'));
+            expect(testSubject.onTasksValidationCallCount).toBe(0);
             expect(testSubject.onExitCallCount).toBe(0);
         });
 
@@ -212,6 +223,7 @@ describe(BatchTaskCreator, () => {
 
             await testSubject.run();
 
+            expect(testSubject.onTasksValidationCallCount).toBe(2);
             expect(testSubject.onExitCallCount).toBe(1);
         });
 
@@ -256,8 +268,6 @@ describe(BatchTaskCreator, () => {
             setupVerifiableBatchCreateTasksCall(messagesBatch1, jobTasksBatch1);
             setupVerifiableBatchCreateTasksCall(messagesBatch2, jobTasksBatch2);
 
-            setupVerifiableDeleteQueueMessagesCall(messagesBatch1);
-            setupVerifiableDeleteQueueMessagesCall(messagesBatch2);
             setupVerifiableOnTaskAddedCall(jobTasksBatch1);
             setupVerifiableOnTaskAddedCall(jobTasksBatch2);
 
@@ -296,7 +306,7 @@ describe(BatchTaskCreator, () => {
             expect(testSubject.onExitCallCount).toBe(1);
         });
 
-        it('deletes queue messages after creating queueing tasks', async () => {
+        it('create scan tasks', async () => {
             const startTime = currentTime;
 
             setPoolLoad({ activeTasks: 0, runningTasks: 1 });
@@ -310,8 +320,6 @@ describe(BatchTaskCreator, () => {
             setupLoggerLogErrorCall(1);
 
             setupVerifiableBatchCreateTasksCall(messagesBatch1, jobTasksBatch1);
-
-            setupVerifiableDeleteQueueMessagesCall(expectedDeletedMessages);
             setupVerifiableOnTaskAddedCall(generateJobTasks(expectedDeletedMessages));
 
             getMessagesForTaskCreationMock
@@ -338,19 +346,6 @@ describe(BatchTaskCreator, () => {
             batchMock
                 .setup(async (b) => b.createTasks(batchConfig.jobId, It.isValue(messages)))
                 .returns(async () => Promise.resolve(jobTasks))
-                .verifiable(Times.once());
-        }
-
-        function setupVerifiableDeleteQueueMessagesCall(messages: Message[]): void {
-            for (const message of messages) {
-                setupVerifiableDeleteQueueMessageCall(message);
-            }
-        }
-
-        function setupVerifiableDeleteQueueMessageCall(message: Message): void {
-            queueMock
-                .setup(async (q) => q.deleteMessage(testSubject.getQueueName(), message))
-                .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }
 
