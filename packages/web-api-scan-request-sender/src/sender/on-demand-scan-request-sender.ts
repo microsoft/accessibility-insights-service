@@ -34,9 +34,6 @@ export class OnDemandScanRequestSender {
                     const isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
                     if (isEnqueueSuccessful === true) {
                         await this.updateOnDemandPageResultDoc(resultDoc, 'queued');
-                        this.logger.logInfo('Scan request successfully added to the scan task queue.', {
-                            scanId: resultDoc.id,
-                        });
                     } else {
                         const error: ScanError = {
                             errorType: 'InternalError',
