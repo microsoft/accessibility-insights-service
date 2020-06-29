@@ -28,7 +28,7 @@
         "@types/sha.js": "^2.4.0",
         "@types/yargs": "^15.0.5",
         "jest": "^25.5.3",
-        "jest-circus": "^25.5.3",
+        "jest-circus": "^26.1.0",
         "jest-junit": "^11.0.1",
         "rimraf": "^3.0.2",
         "ts-jest": "^26.1.1",
