@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Batch, BatchConfig, JobTask, JobTaskState, Message, Queue } from 'azure-services';
-import { JobManagerConfig, ServiceConfiguration, System } from 'common';
+import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
@@ -64,7 +64,7 @@ export abstract class BatchTaskCreator {
     }
 
     public async init(): Promise<void> {
-        this.jobManagerConfig = await this.fetchJobManagerConfig();
+        this.jobManagerConfig = await this.getJobManagerConfig();
         this.jobId = await this.batch.createJobIfNotExists(this.batchConfig.jobId, true);
         this.hasInitialized = true;
     }
@@ -128,7 +128,11 @@ export abstract class BatchTaskCreator {
         return jobQueuedTasks;
     }
 
-    protected async fetchJobManagerConfig(): Promise<JobManagerConfig> {
+    protected async getJobManagerConfig(): Promise<JobManagerConfig> {
         return this.serviceConfig.getConfigValue('jobManagerConfig');
+    }
+
+    protected async getQueueConfig(): Promise<QueueRuntimeConfig> {
+        return this.serviceConfig.getConfigValue('queueConfig');
     }
 }
