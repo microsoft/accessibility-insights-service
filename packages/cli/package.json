@@ -35,7 +35,7 @@
         "@types/table": "^5.0.0",
         "copy-webpack-plugin": "^5.1.1",
         "fork-ts-checker-webpack-plugin": "^5.0.4",
-        "jest": "^25.5.3",
+        "jest": "^26.1.0",
         "jest-circus": "^25.5.3",
         "jest-junit": "^11.0.1",
         "mkdirp": "^1.0.4",
