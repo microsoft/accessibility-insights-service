@@ -93,10 +93,10 @@
     "@opentelemetry/api" "^0.6.1"
     tslib "^1.10.0"
 
-"@azure/cosmos@^3.7.2":
-  version "3.7.2"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.7.2.tgz#df57ed92ea26db6a3c06e67780a965b6cfeca91a"
-  integrity sha512-XyHGM/QaMml4VJ4LsrWAnCAHzVDsXQAI6AY/rFmM2N6NsJR38djQJzMltZTKbDcp4RJxY8LatkWwLais/Gq6HA==
+"@azure/cosmos@^3.7.4":
+  version "3.7.4"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.7.4.tgz#d94f9e5ff36bfcd42957d25e10e4f2a6ebbbfcf5"
+  integrity sha512-IbSEadapQDajSCXj7gUc8OklkOd/oAY4w7XBLHouWc4iKQTtntb2DmGjhrbh2W5Ku+pmBSr1GTApCjQ55iIjlQ==
   dependencies:
     "@types/debug" "^4.1.4"
     debug "^4.1.1"
@@ -1425,16 +1425,6 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^15.0.0"
     chalk "^3.0.0"
-
-"@jest/types@^26.1.0":
-  version "26.1.0"
-  resolved "https://registry.yarnpkg.com/@jest/types/-/types-26.1.0.tgz#f8afaaaeeb23b5cad49dd1f7779689941dcb6057"
-  integrity sha512-GXigDDsp6ZlNMhXQDeuy/iYCDsRIHJabWtDzvnn36+aqFfG14JmFV0e/iXxY4SP9vbXSiPNOWdehU5MeqrYHBQ==
-  dependencies:
-    "@types/istanbul-lib-coverage" "^2.0.0"
-    "@types/istanbul-reports" "^1.1.1"
-    "@types/yargs" "^15.0.0"
-    chalk "^4.0.0"
 
 "@jest/types@^26.1.0":
   version "26.1.0"
@@ -4845,10 +4835,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-durable-functions@^1.4.1:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.1.tgz#f316a9b49971fbe39e3dc078a1c78b7ed93e5521"
-  integrity sha512-tvoxsd+endsprdhCDpdMr1+577iRZ9yIJRSrsAeICK0xuZoNkpIPIP8K5VjIH+qWMohwfRxWDFsZfNB1Xnwb4g==
+durable-functions@^1.4.3:
+  version "1.4.3"
+  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.3.tgz#e8258f62fd9ee80829fc7e6fa31425a26065612b"
+  integrity sha512-MJMnqpHmAuZt+IK6uTij7DE+yzMa+++YPhdb1FOIwm+AeBI/R4CYZnnsmOo6DnrmOIfnF0XBewL0nEhx23se8g==
   dependencies:
     "@azure/functions" "^1.0.2-beta2"
     "@types/lodash" "^4.14.119"
@@ -5453,10 +5443,10 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-fork-ts-checker-webpack-plugin@^5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-5.0.4.tgz#92ae758e581239e1e37ddd5a6c9cb955764ef470"
-  integrity sha512-nSEqM3KhAjTf8VmuZym2k6WadIasvXybJExFegqMJDkTrOBOY8yGjsXG2FGFJls3DOHtXKzrr3Bv0ZD1LaM7cA==
+fork-ts-checker-webpack-plugin@^5.0.6:
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-5.0.6.tgz#02af713af02e47b338a3992279209bc65d34c773"
+  integrity sha512-8h4S7WANr69Resw+tMd5U23xdbVPsT+VOeMKQhUaKhkGeMm0fNf7ObJPP81WG+tsmy4LK4ayIf0JXBY+hy6vMw==
   dependencies:
     "@babel/code-frame" "^7.8.3"
     chalk "^2.4.1"
@@ -9172,16 +9162,6 @@ pretty-format@^26.1.0:
     ansi-styles "^4.0.0"
     react-is "^16.12.0"
 
-pretty-format@^26.1.0:
-  version "26.1.0"
-  resolved "https://registry.yarnpkg.com/pretty-format/-/pretty-format-26.1.0.tgz#272b9cd1f1a924ab5d443dc224899d7a65cb96ec"
-  integrity sha512-GmeO1PEYdM+non4BKCj+XsPJjFOJIPnsLewqhDVoqY1xo0yNmDas7tC2XwpMrRAHR3MaE2hPo37deX5OisJ2Wg==
-  dependencies:
-    "@jest/types" "^26.1.0"
-    ansi-regex "^5.0.0"
-    ansi-styles "^4.0.0"
-    react-is "^16.12.0"
-
 pretty@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/pretty/-/pretty-2.0.0.tgz#adbc7960b7bbfe289a557dc5f737619a220d06a5"
@@ -11145,10 +11125,10 @@ typemoq@^2.1.0:
     lodash "^4.17.4"
     postinstall-build "^5.0.1"
 
-typescript@^3.8.3:
-  version "3.8.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
-  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
+typescript@^3.9.6:
+  version "3.9.6"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
+  integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
 
 uglify-js@^3.1.4:
   version "3.9.1"

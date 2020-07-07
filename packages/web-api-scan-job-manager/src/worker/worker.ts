@@ -5,6 +5,7 @@ import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
 import { GlobalLogger } from 'logger';
+import * as moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider } from 'service-library';
 import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
 
@@ -179,22 +180,29 @@ export class Worker extends BatchTaskCreator {
             }),
         );
 
+        const messageVisibilityTimeout = (await this.getQueueConfig()).messageVisibilityTimeoutInSeconds;
         const acceptedScanMessages: Message[] = [];
         await Promise.all(
             scanRuns.map(async (scanRun) => {
                 const scanMessage = scanMessages.find((message) => message.scanId === scanRun.id);
-                // When storage scan request queue has a message then retry scan request should be honored.
-                // Should include 'queued' and 'running' states to re-run abnormally terminated scan tasks.
-                if (scanRun.run.state === 'queued' || scanRun.run.state === 'running' || scanRun.run.state === 'failed') {
+                if (
+                    scanRun.run.state === 'queued' &&
+                    moment.utc(scanRun.run.timestamp).add(messageVisibilityTimeout, 'second') > moment.utc()
+                ) {
+                    // Scan request just queued
+                    acceptedScanMessages.push(scanMessage.queueMessage);
+                } else if (scanRun.run.state === 'queued' || scanRun.run.state === 'running' || scanRun.run.state === 'failed') {
+                    // Should include 'queued', 'running', and 'failed' states to retry abnormally terminated scan tasks
                     this.logger.logWarn(
                         'The scan request did not complete successfully during the last task run. Retrying scan with new task run.',
                         { scanId: scanRun.id, scanRunState: scanRun.run.state },
                     );
                     acceptedScanMessages.push(scanMessage.queueMessage);
                 } else {
+                    // Cancel scan request if current scan run state does not allow to retry scan task
                     await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
                     this.logger.logWarn(
-                        `The scan request has been cancelled since the run state has been changed to '${scanRun.run.state}'`,
+                        `The scan request has been cancelled because current scan run state does not allow to retry scan task.`,
                         {
                             scanId: scanMessage.scanId,
                         },
