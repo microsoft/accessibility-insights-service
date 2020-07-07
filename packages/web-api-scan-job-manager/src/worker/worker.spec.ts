@@ -15,7 +15,7 @@ import {
     Queue,
     StorageConfig,
 } from 'azure-services';
-import { ServiceConfiguration, System } from 'common';
+import { QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { isEqual, isNil } from 'lodash';
 import * as moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, OnDemandPageScanRunResultProvider } from 'service-library';
@@ -25,21 +25,6 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanMessage, TaskArguments, Worker } from './worker';
 
 // tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any mocha-no-side-effect-code no-null-keyword
-
-const unMockedMoment = jest.requireActual('moment') as typeof moment;
-let currentTime: string;
-
-jest.mock('moment', () => {
-    return () => {
-        return {
-            subtract: (amount: moment.DurationInputArg1, unit: moment.unitOfTime.DurationConstructor) =>
-                unMockedMoment(currentTime).subtract(amount, unit),
-            add: (amount: moment.DurationInputArg1, unit: moment.unitOfTime.DurationConstructor) =>
-                unMockedMoment(currentTime).add(amount, unit),
-            toDate: () => unMockedMoment(currentTime).toDate(),
-        } as moment.Moment;
-    };
-});
 
 class TestableWorker extends Worker {
     public setScanMessages(scanMessages: ScanMessage[]): void {
@@ -67,9 +52,23 @@ class TestableWorker extends Worker {
     }
 }
 
+const messageVisibilityTimeout = 10;
+const dateNowIso = '2019-12-12T12:00:00.000Z';
+const dateNow = new Date(dateNowIso);
+
+moment.prototype.toDate = () => dateNow;
+moment.prototype.add = (amount?: number, unit?: moment.DurationInputArg2) => {
+    if (unit !== 'second') {
+        throw new Error(`Unit '${unit}' is not implemented by test mock.`);
+    }
+
+    return moment(new Date(dateNow.valueOf() + amount * 1000));
+};
+moment.prototype.utc = (inp?: moment.MomentInput, format?: moment.MomentFormatSpecification, language?: string, strict?: boolean) =>
+    moment(dateNow);
+
 describe(Worker, () => {
     let worker: TestableWorker;
-
     let batchMock: IMock<Batch>;
     let queueMock: IMock<Queue>;
     let poolLoadGeneratorMock: IMock<PoolLoadGenerator>;
@@ -86,14 +85,17 @@ describe(Worker, () => {
         poolId: 'pool-Id',
         jobId: 'batch-job-id',
     };
-    const dateNow = new Date('2019-12-12T12:00:00.000Z');
 
     beforeEach(() => {
-        currentTime = '2019-01-01';
         batchMock = Mock.ofType(Batch, MockBehavior.Strict);
         queueMock = Mock.ofType(Queue, MockBehavior.Strict);
         poolLoadGeneratorMock = Mock.ofType(PoolLoadGenerator, MockBehavior.Strict);
-        serviceConfigMock = Mock.ofType(ServiceConfiguration, MockBehavior.Strict);
+        serviceConfigMock = Mock.ofType(ServiceConfiguration);
+        serviceConfigMock
+            .setup(async (o) => o.getConfigValue('queueConfig'))
+            .returns(async () =>
+                Promise.resolve(<QueueRuntimeConfig>(<unknown>{ messageVisibilityTimeoutInSeconds: messageVisibilityTimeout })),
+            );
         loggerMock = Mock.ofType(MockableLogger);
         batchPoolLoadSnapshotProviderMock = Mock.ofType(BatchPoolLoadSnapshotProvider, MockBehavior.Strict);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
