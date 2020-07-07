@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Batch, BatchConfig, JobTask, JobTaskState, Message, PoolLoad, PoolMetricsInfo, Queue } from 'azure-services';
-import { JobManagerConfig, ServiceConfiguration, System } from 'common';
+import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { isNil } from 'lodash';
 import { Logger } from 'logger';
 import * as moment from 'moment';
@@ -41,6 +41,11 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         return 'queue-1';
     }
 
+    // tslint:disable-next-line: no-unnecessary-override
+    public async getQueueConfig(): Promise<QueueRuntimeConfig> {
+        return super.getQueueConfig();
+    }
+
     protected async getMessagesForTaskCreation(): Promise<Message[]> {
         if (isNil(this.getMessagesForTaskCreationCallback)) {
             return [];
@@ -76,6 +81,7 @@ describe(BatchTaskCreator, () => {
 
     let testSubject: TestableBatchTaskCreator;
     let jobManagerConfig: JobManagerConfig;
+    let queueRuntimeConfig: QueueRuntimeConfig;
 
     let maxWallClockTimeInHours: number;
     let poolMetricsInfo: PoolMetricsInfo;
@@ -108,6 +114,11 @@ describe(BatchTaskCreator, () => {
             maxWallClockTimeInHours: maxWallClockTimeInHours,
             addTasksIntervalInSeconds: 10,
         } as JobManagerConfig;
+        queueRuntimeConfig = {
+            maxQueueSize: 10,
+            messageVisibilityTimeoutInSeconds: 30,
+            maxDequeueCount: 2,
+        } as QueueRuntimeConfig;
 
         poolMetricsInfo = {
             id: 'pool-id',
@@ -152,6 +163,16 @@ describe(BatchTaskCreator, () => {
             expect(testSubject.jobId).toBe(batchConfig.jobId);
             expect(testSubject.jobManagerConfig).toBe(jobManagerConfig);
             expect((testSubject as any).hasInitialized).toBe(true);
+        });
+
+        it('get queue runtime configuration', async () => {
+            serviceConfigMock
+                .setup(async (s) => s.getConfigValue('queueConfig'))
+                .returns(async () => Promise.resolve(queueRuntimeConfig))
+                .verifiable(Times.once());
+
+            const queueConfig = await testSubject.getQueueConfig();
+            expect(queueConfig).toBe(queueRuntimeConfig);
         });
     });
 
