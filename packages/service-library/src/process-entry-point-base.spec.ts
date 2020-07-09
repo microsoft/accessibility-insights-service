@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { System } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import * as _ from 'lodash';
@@ -153,7 +154,14 @@ describe(ProcessEntryPointBase, () => {
                 testSubject.customActionToBeInvoked = () => {
                     throw error;
                 };
-                loggerMock.setup((l) => l.logError('Error occurred while executing main process.', It.isAny())).verifiable();
+                loggerMock
+                    .setup((l) =>
+                        l.logError(
+                            'Error occurred while executing main process.',
+                            It.is((o) => _.isEqual(o.error, System.serializeError(error))),
+                        ),
+                    )
+                    .verifiable();
 
                 await expect(testSubject.start()).rejects.toEqual(error);
 

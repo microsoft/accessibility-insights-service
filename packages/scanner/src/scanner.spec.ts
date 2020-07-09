@@ -4,14 +4,13 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from './test-utilities/mockable-logger';
-
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration } from 'common';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
 import { Scanner } from './scanner';
+import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-object-literal-type-assertion no-unsafe-any
 

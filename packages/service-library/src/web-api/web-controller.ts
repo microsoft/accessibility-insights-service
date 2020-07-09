@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Context } from '@azure/functions';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 
@@ -29,7 +30,7 @@ export abstract class WebController {
 
             return result;
         } catch (error) {
-            this.logger.logError('Encountered an error while processing HTTP web request.', { error: JSON.stringify(error) });
+            this.logger.logError('Encountered an error while processing HTTP web request.', { error: System.serializeError(error) });
             throw error;
         }
     }

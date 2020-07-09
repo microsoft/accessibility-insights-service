@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { System } from 'common';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
 import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry-point';
 
@@ -9,6 +10,6 @@ import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry
     const webApiJobManagerEntryPoint = new WebApiScanJobManagerEntryPoint(setupWebApiScanJobManagerContainer());
     await webApiJobManagerEntryPoint.start();
 })().catch((error) => {
-    console.log(JSON.stringify(error));
+    console.log(System.serializeError(error));
     process.exitCode = 1;
 });

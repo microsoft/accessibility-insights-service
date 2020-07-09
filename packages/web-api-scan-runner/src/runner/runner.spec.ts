@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
@@ -149,7 +149,7 @@ describe(Runner, () => {
 
     beforeEach(() => {
         browser = <Browser>{};
-        webDriverTaskMock = Mock.ofType(WebDriverTask, MockBehavior.Strict);
+        webDriverTaskMock = Mock.ofType(WebDriverTask);
         loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
@@ -199,7 +199,7 @@ describe(Runner, () => {
     it('sets state to failed if web driver launch crashes', async () => {
         const failureMessage = 'failed to launch';
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
         webDriverTaskMock
             .setup(async (o) => o.launch())
@@ -275,7 +275,7 @@ describe(Runner, () => {
             .returns(async () => Promise.reject(failureMessage))
             .verifiable();
 
-        setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false));
+        setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
@@ -516,7 +516,7 @@ describe(Runner, () => {
                 const fullResult = cloneDeep(onDemandPageScanResult);
                 fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
                 setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-                setupUpdateScanRunResultCall(getFailingJobStateScanResult(JSON.stringify(failureMessage), false), fullResult);
+                setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false), fullResult);
 
                 setupVerifiableSendNotificationMessageCall();
                 await runner.run();
@@ -542,7 +542,7 @@ describe(Runner, () => {
     function setupTryUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>, succeeded: boolean = true): void {
         const clonedResult = cloneDeep(result) as OnDemandPageScanResult;
         onDemandPageScanRunResultProviderMock
-            .setup(async (d) => d.tryUpdateScanRun(result))
+            .setup(async (d) => d.tryUpdateScanRun(It.isValue(result)))
             .returns(async () => Promise.resolve({ succeeded, result: clonedResult }))
             .verifiable(Times.once());
     }
@@ -603,7 +603,7 @@ describe(Runner, () => {
         fullClonedResult.reports = cloneDeep(clonedResult.reports);
 
         onDemandPageScanRunResultProviderMock
-            .setup(async (d) => d.updateScanRun(clonedResult))
+            .setup(async (d) => d.updateScanRun(It.isValue(clonedResult)))
             .returns(async () => Promise.resolve(fullClonedResult))
             .verifiable();
     }

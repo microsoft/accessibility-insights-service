@@ -5,11 +5,10 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
-import * as Puppeteer from 'puppeteer';
-import { IMock, It, Mock, Times } from 'typemoq';
-
 import { ServiceConfiguration } from 'common';
+import * as Puppeteer from 'puppeteer';
 import { WebDriver } from 'service-library';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page, PuppeteerBrowserFactory } from './page';
