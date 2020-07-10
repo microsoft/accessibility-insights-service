@@ -79,6 +79,7 @@ describe('Scanner', () => {
             expect(scanResult.error).toEqual(expectedResult);
 
             verifyMocks();
+            loggerMock.verifyAll();
         });
 
         it('should return timeout promise', async () => {
