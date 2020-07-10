@@ -4,8 +4,9 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration } from 'common';
+import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { IMock, It, Mock, Times } from 'typemoq';
+import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
@@ -62,12 +63,20 @@ describe('Scanner', () => {
             const url = 'some url';
             const errorMessage: string = `An error occurred while scanning website page ${url}.`;
             setupNewPageCall(url);
-            setupPageErrorScanCall(url, errorMessage);
+            const axeScanResults = setupPageErrorScanCall(url, errorMessage);
             setupPageCloseCall();
             setupWaitForPromisetoReturnOriginalPromise();
 
+            loggerMock
+                .setup((o) => {
+                    o.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(axeScanResults) });
+                })
+                .verifiable();
+
+            const expectedResult = util.inspect(axeScanResults);
+
             const scanResult: AxeScanResults = await scanner.scan(url);
-            expect(scanResult.error).not.toBeNull();
+            expect(scanResult.error).toEqual(expectedResult);
 
             verifyMocks();
         });
@@ -128,11 +137,14 @@ describe('Scanner', () => {
             .verifiable(Times.once());
     }
 
-    function setupPageErrorScanCall(url: string, errorMessage: string): void {
+    function setupPageErrorScanCall(url: string, errorMessage: string): AxeScanResults {
+        const error = { error: errorMessage, pageResponseCode: 101 };
         pageMock
             .setup(async (p) => p.scanForA11yIssues(url))
-            .returns(async () => Promise.reject({ error: errorMessage, pageResponseCode: 101 }))
+            .returns(async () => Promise.reject(error))
             .verifiable(Times.once());
+
+        return error;
     }
 
     function verifyMocks(): void {
