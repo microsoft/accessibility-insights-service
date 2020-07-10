@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
+import { System } from 'common';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
@@ -123,5 +124,24 @@ describe(WebController, () => {
 
     it('returns handleRequest result', async () => {
         await expect(testSubject.invoke(context, 'valid')).resolves.toBe(TestableWebController.handleRequestResponse);
+    });
+
+    it('log exception', async () => {
+        const error = new Error('Logger.setCommonProperties() exception.');
+        loggerMock.reset();
+        loggerMock
+            .setup((o) => {
+                o.setCommonProperties(It.isAny());
+            })
+            .throws(error)
+            .verifiable();
+
+        loggerMock
+            .setup((o) => {
+                o.logError('Encountered an error while processing HTTP web request.', { error: System.serializeError(error) });
+            })
+            .verifiable();
+
+        await expect(testSubject.invoke(context, 'valid')).rejects.toEqual(error);
     });
 });

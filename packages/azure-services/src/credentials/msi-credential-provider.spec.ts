@@ -15,7 +15,7 @@ describe(MSICredentialsProvider, () => {
     let retryHelperMock: IMock<RetryHelper<Credentials>>;
     const maxAttempts = 3;
     const msBetweenRetries = 0;
-    const expectedCredentials: any = 'test creds';
+    const expectedCredentials: any = 'test credentials';
 
     async function retryHelperStub(
         action: () => Promise<Credentials>,

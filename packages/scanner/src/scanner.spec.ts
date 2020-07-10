@@ -131,7 +131,7 @@ describe('Scanner', () => {
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
             .setup(async (p) => p.scanForA11yIssues(url))
-            .returns(async () => Promise.resolve({ error: errorMessage, pageResponseCode: 101 }))
+            .returns(async () => Promise.reject({ error: errorMessage, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 

@@ -205,6 +205,7 @@ export class Worker extends BatchTaskCreator {
                         `The scan request has been cancelled because current scan run state does not allow to retry scan task.`,
                         {
                             scanId: scanMessage.scanId,
+                            scanRunState: scanRun.run.state,
                         },
                     );
                 }
