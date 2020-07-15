@@ -54,7 +54,7 @@
         "common": "1.0.0",
         "durable-functions": "^1.4.3",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.14",
+        "lodash": "^4.17.19",
         "logger": "1.0.0",
         "moment": "^2.27.0",
         "reflect-metadata": "^0.1.13",
