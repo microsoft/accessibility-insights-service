@@ -4,7 +4,7 @@
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import { RetryHelper } from 'common';
+import { RetryHelper, System } from 'common';
 import * as requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceCredential } from './a11y-service-credential';
@@ -81,7 +81,7 @@ describe(A11yServiceCredential, () => {
     it('should reject when acquireTokenWithClientCredentials fails', async () => {
         error = new Error('err');
         setupRetryHelperMock(true);
-        loggerMock.setup((l) => l.logError(`Error while acquiring Azure AD client token. ${JSON.stringify(error)}`)).verifiable();
+        loggerMock.setup((l) => l.logError(`Error while acquiring Azure AD client token. ${System.serializeError(error)}`)).verifiable();
 
         let caughtError: Error;
         await testSubject.getToken().catch((reason) => {

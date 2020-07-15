@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { System } from 'common';
 import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { LoggerClient } from './logger-client';
@@ -81,7 +82,7 @@ export abstract class Logger {
     // tslint:disable-next-line: no-any
     public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
         const parsedErrorObject =
-            underlyingErrorData instanceof Error ? underlyingErrorData : new Error(JSON.stringify(underlyingErrorData));
+            underlyingErrorData instanceof Error ? underlyingErrorData : new Error(System.serializeError(underlyingErrorData));
 
         this.trackException(new VError(parsedErrorObject, message));
     }

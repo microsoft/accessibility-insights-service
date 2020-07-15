@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AuthenticationContext, TokenResponse } from 'adal-node';
-import { RetryHelper } from 'common';
+import { RetryHelper, System } from 'common';
 import { Logger } from 'logger';
 import * as requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
@@ -32,8 +32,8 @@ export class A11yServiceCredential {
                 this.maxTokenAttempts,
                 this.msecBetweenRetries,
             );
-        } catch (err) {
-            throw new Error(`Error while acquiring Azure AD client token. ${JSON.stringify(err)}`);
+        } catch (error) {
+            throw new Error(`Error while acquiring Azure AD client token. ${System.serializeError(error)}`);
         }
     }
 
@@ -61,6 +61,6 @@ export class A11yServiceCredential {
     }
 
     private async handleGetTokenError(err: Error): Promise<void> {
-        this.logger.logError(`Error while acquiring Azure AD client token. ${JSON.stringify(err)}`);
+        this.logger.logError(`Error while acquiring Azure AD client token. ${System.serializeError(err)}`);
     }
 }

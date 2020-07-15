@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { System } from 'common';
 import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
@@ -25,9 +26,9 @@ export abstract class ProcessEntryPointBase {
             await this.runCustomAction(this.container, ...args);
         } catch (error) {
             if (loggerInitialized === true) {
-                logger.logError('Error occurred while executing main process.', { error: JSON.stringify(error) });
+                logger.logError('Error occurred while executing main process.', { error: System.serializeError(error) });
             } else {
-                console.log('Error occurred while executing main process.', { error: JSON.stringify(error) });
+                console.log('Error occurred while executing main process.', { error: System.serializeError(error) });
             }
             throw error;
         } finally {

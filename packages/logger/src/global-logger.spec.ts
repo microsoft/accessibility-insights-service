@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { System } from 'common';
 import * as _ from 'lodash';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { VError } from 'verror';
@@ -402,7 +403,7 @@ describe(GlobalLogger, () => {
 
             invokeAllLoggerClientMocks((m) =>
                 m
-                    .setup((c) => c.trackException(new VError(new Error(JSON.stringify(underlyingError)), errorMessage)))
+                    .setup((c) => c.trackException(new VError(new Error(System.serializeError(underlyingError)), errorMessage)))
                     .verifiable(Times.once()),
             );
 

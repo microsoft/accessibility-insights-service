@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { ServiceConfiguration } from 'common';
+import { ServiceConfiguration, System } from 'common';
 import * as moment from 'moment';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
@@ -234,7 +234,7 @@ describe(BaseConsoleLoggerClient, () => {
 
             testSubject.trackException(error);
 
-            consoleMock.verify((c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}`), Times.once());
+            consoleMock.verify((c) => c.log(`[${timestamp}][Exception] ${System.serializeError(error)}`), Times.once());
         });
 
         it('log data with base properties', async () => {
@@ -245,7 +245,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(baseProps)}`),
+                (c) => c.log(`[${timestamp}][Exception] ${System.serializeError(error)}\n${util.inspect(baseProps)}`),
                 Times.once(),
             );
         });
@@ -261,7 +261,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(mergedProps)}`),
+                (c) => c.log(`[${timestamp}][Exception] ${System.serializeError(error)}\n${util.inspect(mergedProps)}`),
                 Times.once(),
             );
         });
@@ -279,7 +279,7 @@ describe(BaseConsoleLoggerClient, () => {
             testSubject.trackException(error);
 
             consoleMock.verify(
-                (c) => c.log(`[${timestamp}][Exception] ${util.inspect(error, { depth: null })}\n${util.inspect(mergedProps)}`),
+                (c) => c.log(`[${timestamp}][Exception] ${System.serializeError(error)}\n${util.inspect(mergedProps)}`),
                 Times.once(),
             );
         });

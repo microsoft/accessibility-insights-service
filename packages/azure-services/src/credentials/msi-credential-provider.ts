@@ -1,8 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { RetryHelper } from 'common';
+import { RetryHelper, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { iocTypeNames } from '../ioc-types';
 
@@ -26,7 +25,7 @@ export class MSICredentialsProvider {
         @inject(iocTypeNames.CredentialType) private readonly credentialType: CredentialType,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<Credentials>,
         private readonly maxAttempts: number = 3,
-        private readonly millisBetweenRetries: number = 1000,
+        private readonly msBetweenRetries: number = 1000,
     ) {}
 
     public async getCredentials(resource: string): Promise<Credentials> {
@@ -48,14 +47,14 @@ export class MSICredentialsProvider {
         try {
             return this.retryHelper.executeWithRetries(
                 getCredentialsFunction,
-                async (err: Error) => {
+                async (error: Error) => {
                     return;
                 },
                 this.maxAttempts,
-                this.millisBetweenRetries,
+                this.msBetweenRetries,
             );
-        } catch (err) {
-            throw new Error(`MSI getToken failed ${this.maxAttempts} times with error: ${JSON.stringify(err)}`);
+        } catch (error) {
+            throw new Error(`MSI getToken failed ${this.maxAttempts} times with error: ${System.serializeError(error)}`);
         }
     }
 }

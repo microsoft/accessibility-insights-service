@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { RetryHelper } from 'common';
+import { RetryHelper, System } from 'common';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AuthenticationMethod, Credentials, CredentialType, MSICredentialsProvider } from './msi-credential-provider';
 
@@ -14,14 +14,14 @@ describe(MSICredentialsProvider, () => {
     let mockMsRestNodeAuth: IMock<typeof msRestNodeAuth>;
     let retryHelperMock: IMock<RetryHelper<Credentials>>;
     const maxAttempts = 3;
-    const millisBetweenRetries = 0;
-    const expectedCreds: any = 'test creds';
+    const msBetweenRetries = 0;
+    const expectedCredentials: any = 'test credentials';
 
     async function retryHelperStub(
         action: () => Promise<Credentials>,
         onRetry: (err: Error) => Promise<void>,
         numMaxAttempts: number,
-        numMillisBetweenRetries: number,
+        numMsBetweenRetries: number,
     ): Promise<Credentials> {
         return action();
     }
@@ -31,7 +31,7 @@ describe(MSICredentialsProvider, () => {
         retryHelperMock = Mock.ofType<RetryHelper<Credentials>>();
 
         retryHelperMock
-            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, millisBetweenRetries))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, msBetweenRetries))
             .returns(retryHelperStub)
             .verifiable();
     });
@@ -48,17 +48,17 @@ describe(MSICredentialsProvider, () => {
             CredentialType.AppService,
             retryHelperMock.object,
             maxAttempts,
-            millisBetweenRetries,
+            msBetweenRetries,
         );
 
         mockMsRestNodeAuth
             .setup(async (m) => m.loginWithAppServiceMSI({ resource: 'r1' }))
-            .returns(async () => Promise.resolve(expectedCreds))
+            .returns(async () => Promise.resolve(expectedCredentials))
             .verifiable(Times.once());
 
         const creds = await testSubject.getCredentials('r1');
 
-        expect(creds).toBe(expectedCreds);
+        expect(creds).toBe(expectedCredentials);
     });
 
     it('creates credential for vm', async () => {
@@ -68,17 +68,17 @@ describe(MSICredentialsProvider, () => {
             CredentialType.VM,
             retryHelperMock.object,
             maxAttempts,
-            millisBetweenRetries,
+            msBetweenRetries,
         );
 
         mockMsRestNodeAuth
             .setup(async (m) => m.loginWithVmMSI({ resource: 'r1' }))
-            .returns(async () => Promise.resolve(expectedCreds))
+            .returns(async () => Promise.resolve(expectedCredentials))
             .verifiable(Times.once());
 
         const creds = await testSubject.getCredentials('r1');
 
-        expect(creds).toBe(expectedCreds);
+        expect(creds).toBe(expectedCredentials);
     });
 
     it('creates credentials with service principal', async () => {
@@ -92,7 +92,7 @@ describe(MSICredentialsProvider, () => {
             CredentialType.AppService,
             retryHelperMock.object,
             maxAttempts,
-            millisBetweenRetries,
+            msBetweenRetries,
         );
 
         mockMsRestNodeAuth
@@ -101,12 +101,12 @@ describe(MSICredentialsProvider, () => {
                     tokenAudience: 'r1',
                 }),
             )
-            .returns(async () => Promise.resolve(expectedCreds))
+            .returns(async () => Promise.resolve(expectedCredentials))
             .verifiable(Times.once());
 
         const creds = await testSubject.getCredentials('r1');
 
-        expect(creds).toBe(expectedCreds);
+        expect(creds).toBe(expectedCredentials);
     });
 
     it('Throws error on failure', async () => {
@@ -116,7 +116,7 @@ describe(MSICredentialsProvider, () => {
             CredentialType.AppService,
             retryHelperMock.object,
             maxAttempts,
-            millisBetweenRetries,
+            msBetweenRetries,
         );
 
         const error = new Error('test error');
@@ -134,6 +134,6 @@ describe(MSICredentialsProvider, () => {
         });
 
         expect(caughtError).not.toBeUndefined();
-        expect(caughtError.message).toEqual(`MSI getToken failed ${maxAttempts} times with error: ${JSON.stringify(error)}`);
+        expect(caughtError.message).toEqual(`MSI getToken failed ${maxAttempts} times with error: ${System.serializeError(error)}`);
     });
 });
