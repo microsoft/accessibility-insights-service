@@ -2,7 +2,9 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 
-export type ErrorHandler = (err: Error) => Promise<void>;
+import { System } from './system';
+
+export type ErrorHandler = (error: Error) => Promise<void>;
 
 async function defaultSleepFunction(milliseconds: number): Promise<void> {
     // tslint:disable-next-line: no-string-based-set-timeout
@@ -23,8 +25,9 @@ export class RetryHelper<T> {
         for (let i = 0; i < maxRetryCount; i += 1) {
             try {
                 return await action();
-            } catch (err) {
-                lastError = err as Error;
+            } catch (error) {
+                lastError = error instanceof Error ? error : new Error(System.serializeError(error));
+
                 if (i < maxRetryCount - 1) {
                     await onRetry(lastError);
                     if (retryIntervalMilliseconds > 0) {
@@ -33,6 +36,7 @@ export class RetryHelper<T> {
                 }
             }
         }
+
         throw lastError;
     }
 }

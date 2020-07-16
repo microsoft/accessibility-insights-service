@@ -54,7 +54,7 @@ export class MSICredentialsProvider {
                 this.msBetweenRetries,
             );
         } catch (error) {
-            throw new Error(`MSI getToken failed ${this.maxAttempts} times with error: ${System.serializeError(error)}`);
+            throw new Error(`MSI getToken() failed ${this.maxAttempts} times with error: ${System.serializeError(error)}`);
         }
     }
 }
