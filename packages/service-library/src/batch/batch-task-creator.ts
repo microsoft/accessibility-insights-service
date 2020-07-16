@@ -86,11 +86,6 @@ export abstract class BatchTaskCreator {
 
     protected abstract onTasksAdded(tasks: JobTask[]): Promise<void>;
 
-    /**
-     * Updates the scan run state with the task error.
-     * The failed tasks will be retried up-to scan request queue message maximum dequeue count.
-     * @param failedTasks The list of failed tasks.
-     */
     protected abstract handleFailedTasks(failedTasks: BatchTask[]): Promise<void>;
 
     protected abstract onExit(): Promise<void>;

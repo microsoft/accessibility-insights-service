@@ -73,11 +73,6 @@ export class Worker extends BatchTaskCreator {
     // tslint:disable-next-line: no-empty
     protected async onExit(): Promise<void> {}
 
-    /**
-     * Updates the scan run state with a task error.
-     * The failed tasks will be retried up-to scan request queue message maximum dequeue count.
-     * @param failedTasks The list of failed tasks.
-     */
     protected async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
         await Promise.all(
             failedTasks.map(async (failedTask) => {
@@ -116,11 +111,6 @@ export class Worker extends BatchTaskCreator {
         );
     }
 
-    /**
-     * Invokes to validate corresponding scan run state before task is created.
-     * The expected scan run state is 'queued' at this workflow stage.
-     * @param scanMessages The scan messages to validate.
-     */
     protected async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<ScanMessage[]> {
         if (scanMessages.length === 0) {
             return [];
