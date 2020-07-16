@@ -152,11 +152,7 @@ export abstract class BatchTaskCreator {
 
     protected async validateTasks(): Promise<void> {
         await this.deleteScanQueueMessagesForSucceededTasks(this.activeScanMessages);
-
-        const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
-        if (failedTasks !== undefined || failedTasks.length > 0) {
-            await this.handleFailedTasks(failedTasks);
-        }
+        await this.handleFailedTasksImpl();
     }
 
     protected async deleteScanQueueMessagesForSucceededTasks(scanMessages: ScanMessage[]): Promise<void> {
@@ -169,23 +165,36 @@ export abstract class BatchTaskCreator {
             return;
         }
 
+        // select tasks that match to the current active tasks list
+        const unprocessedTasks = succeededTasks.filter((task) => this.activeScanMessages.some((m) => m.messageId === task.correlationId));
         await Promise.all(
-            succeededTasks.map(async (succeededTask) => {
-                const scanMessage = this.activeScanMessages.find((m) => m.messageId === succeededTask.correlationId);
-                if (scanMessage !== undefined) {
-                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
-                    this.activeScanMessages.splice(this.activeScanMessages.indexOf(scanMessage), 1);
-                    this.logger.logInfo('The scan request deleted from the scan task queue.', {
-                        scanId: scanMessage.scanId,
-                        correlatedBatchTaskId: succeededTask.id,
-                    });
-                } else {
-                    this.logger.logError(`Unable to delete the scan queue message. The cache contains no corresponding queue message.`, {
-                        scanId: scanMessage.scanId,
-                        correlatedBatchTaskId: succeededTask.id,
-                    });
-                }
+            unprocessedTasks.map(async (task) => {
+                const scanMessage = this.activeScanMessages.find((m) => m.messageId === task.correlationId);
+                await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
+                // remove processed task from the current active tasks list
+                this.activeScanMessages.splice(this.activeScanMessages.indexOf(scanMessage), 1);
+                this.logger.logInfo('The scan request deleted from the scan task queue.', {
+                    scanId: scanMessage.scanId,
+                    correlatedBatchTaskId: task.id,
+                });
             }),
         );
+    }
+
+    private async handleFailedTasksImpl(): Promise<void> {
+        const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
+        if (failedTasks === undefined || failedTasks.length === 0) {
+            return;
+        }
+
+        // select tasks that match to the current active tasks list
+        const unprocessedTasks = failedTasks.filter((task) => this.activeScanMessages.some((m) => m.messageId === task.correlationId));
+        await this.handleFailedTasks(unprocessedTasks);
+
+        // remove processed tasks from the current active tasks list
+        unprocessedTasks.map((task) => {
+            const message = this.activeScanMessages.find((m) => m.messageId === task.correlationId);
+            this.activeScanMessages.splice(this.activeScanMessages.indexOf(message), 1);
+        });
     }
 }

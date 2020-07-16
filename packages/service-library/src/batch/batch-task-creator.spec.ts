@@ -8,7 +8,7 @@ import * as _ from 'lodash';
 import { Logger } from 'logger';
 import * as mockDate from 'mockdate';
 import { OnDemandScanRequestMessage } from 'storage-documents';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { BatchTaskCreator, ScanMessage } from './batch-task-creator';
 
@@ -454,7 +454,7 @@ describe(BatchTaskCreator, () => {
         batchMock
             .setup((o) => o.getFailedTasks(batchConfig.jobId))
             .returns(async () => Promise.resolve(batchTasks))
-            .verifiable();
+            .verifiable(Times.exactly(2));
 
         testSubject.enableBaseWorkflow = EnableBaseWorkflow.validateTasks;
 
@@ -462,6 +462,9 @@ describe(BatchTaskCreator, () => {
 
         expect(testSubject.deleteScanQueueMessagesForSucceededTasksCallback).toHaveBeenCalledWith(queueMessagesGenerator.scanMessages);
         expect(testSubject.handleFailedTasksCallback).toHaveBeenCalledWith(batchTasks);
+
+        // the subsequent run should be no-op since active messages cache was cleaned up
+        await testSubject.validateTasks();
     });
 
     it('delete queue messages for succeeded tasks', async () => {
@@ -480,7 +483,7 @@ describe(BatchTaskCreator, () => {
         batchMock
             .setup((o) => o.getSucceededTasks(batchConfig.jobId))
             .returns(async () => Promise.resolve(batchTasks))
-            .verifiable();
+            .verifiable(Times.exactly(2));
 
         const expectScanMessages = _.cloneDeep(queueMessagesGenerator.scanMessages);
         batchTasks.map((task) => {
@@ -503,6 +506,9 @@ describe(BatchTaskCreator, () => {
         await testSubject.deleteScanQueueMessagesForSucceededTasks(queueMessagesGenerator.scanMessages);
 
         expect(testSubject.activeScanMessages).toEqual(expectScanMessages);
+
+        // the subsequent run should be no-op since active messages cache was cleaned up
+        await testSubject.deleteScanQueueMessagesForSucceededTasks(queueMessagesGenerator.scanMessages);
     });
 });
 
