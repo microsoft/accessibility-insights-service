@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Queue, StorageConfig } from 'azure-services';
-import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration } from 'common';
+import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
@@ -12,6 +12,7 @@ import {
     OnDemandPageScanResult,
     ScanCompletedNotification,
 } from 'storage-documents';
+
 // tslint:disable: no-null-keyword no-any
 
 @injectable()
@@ -56,7 +57,7 @@ export class NotificationQueueMessageSender {
             },
             async (e: Error) => {
                 this.logger.logError(`Failed to enqueue scan result notification message. Retrying on error.`, {
-                    error: JSON.stringify(e),
+                    error: System.serializeError(e),
                 });
                 error = { errorType: 'InternalError', message: e.message };
             },

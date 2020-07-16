@@ -2,10 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { serializeError as serializeErrorExt } from 'serialize-error';
+import * as utils from 'util';
 import { System } from './system';
 
+// tslint:disable: no-null-keyword no-floating-promises
+
 describe('create instance if nil', () => {
-    // tslint:disable-next-line: no-null-keyword
     test.each([null, undefined])('creates instance when nil - %o', (testCase) => {
         expect(
             System.createInstanceIfNil(testCase, () => {
@@ -24,9 +27,7 @@ describe('create instance if nil', () => {
 
     it('returns promise when factory returns promise', async () => {
         const promise = Promise.resolve(1);
-        // tslint:disable-next-line: no-floating-promises
         await expect(
-            // tslint:disable-next-line: no-null-keyword
             System.createInstanceIfNil(null, async () => {
                 return promise;
             }),
@@ -35,9 +36,7 @@ describe('create instance if nil', () => {
 
     it('returns promise when passed instance is promise object', async () => {
         const promise = Promise.resolve(1);
-        // tslint:disable-next-line: no-floating-promises
         expect(
-            // tslint:disable-next-line: no-null-keyword
             System.createInstanceIfNil(promise, async () => {
                 return Promise.resolve(10);
             }),
@@ -46,7 +45,6 @@ describe('create instance if nil', () => {
 });
 
 describe('isNullOrEmptyString', () => {
-    // tslint:disable-next-line: no-null-keyword
     test.each([null, undefined, ''])('returns true when for %o', (testCase) => {
         expect(System.isNullOrEmptyString(testCase)).toBe(true);
     });
@@ -74,5 +72,13 @@ describe('createRandomString()', () => {
 
         id = System.createRandomString();
         expect(id.length).toEqual(32);
+    });
+});
+
+describe('serializeError()', () => {
+    it('serialize error object', () => {
+        const error = new Error('Error message');
+        const errorStr = System.serializeError(error);
+        expect(errorStr).toEqual(utils.inspect(serializeErrorExt(error), false, null));
     });
 });

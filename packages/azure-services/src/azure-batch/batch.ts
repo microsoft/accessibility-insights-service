@@ -258,7 +258,7 @@ export class Batch {
             sasUrl = await this.containerSASUrlProvider.generateSASUrl(Batch.batchLogContainerName);
         } catch (error) {
             this.logger.logError(`Encountered the error while generating Blob Storage SAS URL`, {
-                error: JSON.stringify(error),
+                error: System.serializeError(error),
                 blobContainerName: Batch.batchLogContainerName,
             });
         }

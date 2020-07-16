@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RetryHelper } from 'common';
+import { RetryHelper, System } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Response } from 'request';
@@ -56,7 +56,7 @@ export class A11yServiceClient {
             async (e) =>
                 this.logger.logError('POST scans REST API request fail. Retrying on error.', {
                     url: requestUrl,
-                    error: JSON.stringify(e),
+                    error: System.serializeError(e),
                 }),
             this.maxRetryCount,
             this.msecBetweenRetries,
@@ -71,7 +71,7 @@ export class A11yServiceClient {
             async (e) =>
                 this.logger.logError('GET scan result REST API request fail. Retrying on error.', {
                     url: requestUrl,
-                    error: JSON.stringify(e),
+                    error: System.serializeError(e),
                 }),
             this.maxRetryCount,
             this.msecBetweenRetries,
@@ -86,7 +86,7 @@ export class A11yServiceClient {
             async (e) =>
                 this.logger.logError('GET scan report REST API request fail. Retrying on error.', {
                     url: requestUrl,
-                    error: JSON.stringify(e),
+                    error: System.serializeError(e),
                 }),
             this.maxRetryCount,
             this.msecBetweenRetries,
@@ -101,7 +101,7 @@ export class A11yServiceClient {
             async (e) =>
                 this.logger.logError('GET health status REST API request fail. Retrying on error.', {
                     url: requestUrl,
-                    error: JSON.stringify(e),
+                    error: System.serializeError(e),
                 }),
             this.maxRetryCount,
             this.msecBetweenRetries,

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AxePuppeteer } from 'axe-puppeteer';
+import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger, LogLevel } from 'logger';
 import * as Puppeteer from 'puppeteer';
@@ -48,7 +49,7 @@ export class Page {
         try {
             response = await gotoUrlPromise;
         } catch (err) {
-            this.log(LogLevel.error, url, 'The URL navigation failed', { scanError: JSON.stringify(err) });
+            this.log(LogLevel.error, url, 'The URL navigation failed', { scanError: System.serializeError(err) });
 
             return { error: this.getScanErrorFromNavigationFailure((err as Error).message), pageResponseCode: undefined };
         }

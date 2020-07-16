@@ -4,6 +4,7 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
+import { serializeError } from 'serialize-error';
 import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { WebDriver } from '../web-driver/web-driver';
 import { AxeScanResults, ScanError } from './axe-scan-results';
@@ -49,10 +50,10 @@ export class Page {
 
         try {
             response = await gotoUrlPromise;
-        } catch (err) {
-            console.log('The URL navigation failed', { scanError: JSON.stringify(err) });
+        } catch (error) {
+            console.log('The URL navigation failed', { scanError: serializeError(error) });
 
-            return { error: this.getScanErrorFromNavigationFailure((err as Error).message) };
+            return { error: this.getScanErrorFromNavigationFailure((error as Error).message) };
         }
 
         if (!response.ok()) {

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { FeatureFlags, GuidGenerator, ServiceConfiguration } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
@@ -81,7 +81,7 @@ export class Runner {
             this.logger.logInfo('Web driver scanner successfully completed a page scan.');
         } catch (error) {
             scanSucceeded = false;
-            const errorMessage = this.getErrorMessage(error);
+            const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
             this.logger.logError(`Web driver failed to scan a page.`, { error: errorMessage });
         } finally {
@@ -98,7 +98,7 @@ export class Runner {
                 await this.webDriverTask.close();
                 this.logger.logInfo('Web driver successfully closed.');
             } catch (error) {
-                this.logger.logError(`Failure to close the web driver.`, { error: this.getErrorMessage(error) });
+                this.logger.logError(`Failure to close the web driver.`, { error: System.serializeError(error) });
             }
         }
 
@@ -187,10 +187,6 @@ export class Runner {
             href,
             reportId: report.id,
         };
-    }
-
-    private getErrorMessage(error: any): string {
-        return error instanceof Error ? error.message : JSON.stringify(error);
     }
 
     private createOnDemandNotificationRequestMessage(scanResult: OnDemandPageScanResult): OnDemandNotificationRequestMessage {

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ServiceConfiguration } from 'common';
+import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import * as moment from 'moment';
@@ -57,7 +57,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
 
     public trackException(error: Error): void {
         this.executeInDebugMode(() => {
-            this.logInConsole(`[Exception]`, this.getPrintableString(error), this.getPrintablePropertiesString());
+            this.logInConsole(`[Exception]`, System.serializeError(error), this.getPrintablePropertiesString());
         });
     }
 

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { PromiseUtils, ServiceConfiguration } from 'common';
+import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as util from 'util';
@@ -42,14 +42,14 @@ export class Scanner {
 
             return await this.page.scanForA11yIssues(url);
         } catch (error) {
-            this.logger.logError(`An error occurred while scanning website page.`, { url, error: JSON.stringify(error) });
+            this.logger.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(error) });
 
             return { error: util.inspect(error), pageResponseCode: undefined };
         } finally {
             try {
                 await this.page.close();
             } catch (error) {
-                this.logger.logError('An error occurred while closing web page.', { url, error: JSON.stringify(error) });
+                this.logger.logError('An error occurred while closing web page.', { url, error: System.serializeError(error) });
             }
             this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
         }

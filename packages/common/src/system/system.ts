@@ -2,6 +2,10 @@
 // Licensed under the MIT License.
 import * as crypto from 'crypto';
 import { isNil } from 'lodash';
+import { serializeError as serializeErrorExt } from 'serialize-error';
+import * as utils from 'util';
+
+// tslint:disable: no-null-keyword no-any
 
 export namespace System {
     export function createInstanceIfNil<T>(instance: T, factory: () => T): T {
@@ -34,5 +38,9 @@ export namespace System {
         const bytes = length % 2 === 0 ? length / 2 : (length + 1) / 2;
 
         return crypto.randomBytes(bytes).toString('hex').substr(0, length);
+    }
+
+    export function serializeError(error: any): string {
+        return utils.inspect(serializeErrorExt(error), false, null);
     }
 }
