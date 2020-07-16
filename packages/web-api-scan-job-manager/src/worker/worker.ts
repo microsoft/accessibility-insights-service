@@ -1,29 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue, StorageConfig } from 'azure-services';
+import { Batch, BatchConfig, BatchTask, JobTask, Message, PoolLoadGenerator, PoolLoadSnapshot, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
 import { GlobalLogger } from 'logger';
 import * as moment from 'moment';
-import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider } from 'service-library';
-import { OnDemandPageScanResult, StorageDocument } from 'storage-documents';
+import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
+import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 
-// tslint:disable: no-unsafe-any no-any
-
-export interface TaskArguments {
-    id: string;
-}
-
-export interface ScanMessage {
-    scanId: string;
-    queueMessage: Message;
-}
+// tslint:disable: no-unsafe-any no-any no-null-keyword
 
 @injectable()
 export class Worker extends BatchTaskCreator {
-    protected scanMessages: ScanMessage[] = [];
-
     public constructor(
         @inject(Batch) batch: Batch,
         @inject(Queue) queue: Queue,
@@ -43,21 +32,22 @@ export class Worker extends BatchTaskCreator {
         return this.storageConfig.scanQueue;
     }
 
-    protected async getMessagesForTaskCreation(): Promise<Message[]> {
+    protected async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
         const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
-        let messages: Message[] = [];
-
+        let messages: ScanMessage[] = [];
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            messages = await this.queue.getMessagesWithTotalCount(this.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval);
-            this.scanMessages = messages.map((message) => ({
-                scanId: (<TaskArguments>JSON.parse(message.messageText)).id,
-                queueMessage: message,
-            }));
+            const queueMessages = await this.queue.getMessagesWithTotalCount(
+                this.getQueueName(),
+                poolLoadSnapshot.tasksIncrementCountPerInterval,
+            );
 
-            messages = await this.excludeCompletedScans(this.scanMessages);
+            if (queueMessages?.length > 0) {
+                messages = this.convertToScanMessages(queueMessages);
+                messages = await this.excludeCompletedScans(messages);
+            }
         }
 
         this.logger.logInfo(
@@ -67,7 +57,6 @@ export class Worker extends BatchTaskCreator {
             ) as any,
         );
 
-        // tslint:disable-next-line: no-null-keyword
         this.logger.trackEvent('BatchPoolStats', null, {
             runningTasks: poolMetricsInfo.load.runningTasks,
             samplingIntervalInSeconds: poolLoadSnapshot.samplingIntervalInSeconds,
@@ -81,54 +70,18 @@ export class Worker extends BatchTaskCreator {
         this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
     }
 
-    protected async onTasksValidation(): Promise<void> {
-        await this.validateTasks();
-    }
+    // tslint:disable-next-line: no-empty
+    protected async onExit(): Promise<void> {}
 
-    protected async onExit(): Promise<void> {
-        await this.validateTasks();
-    }
-
-    private async validateTasks(): Promise<void> {
-        await this.deleteScanQueueMessagesForSucceededTasks(this.scanMessages);
-        await this.updateScanRunStateForTerminatedTasks();
-    }
-
-    private async deleteScanQueueMessagesForSucceededTasks(scanMessages: ScanMessage[]): Promise<void> {
-        if (scanMessages.length === 0) {
-            return;
-        }
-
-        const succeededTasks = await this.batch.getSucceededTasks(this.batchConfig.jobId);
-        if (succeededTasks === undefined || succeededTasks.length === 0) {
-            return;
-        }
-
-        await Promise.all(
-            succeededTasks.map(async (succeededTask) => {
-                const taskArguments = JSON.parse(succeededTask.taskArguments) as TaskArguments;
-                if (!isNil(taskArguments?.id)) {
-                    const scanMessage = scanMessages.find((message) => message.scanId === taskArguments.id);
-                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
-                } else {
-                    this.logger.logError(`Unable to delete scan queue message. Task has no scan id run arguments defined.`, {
-                        batchTaskId: succeededTask.id,
-                        taskProperties: JSON.stringify(succeededTask),
-                    });
-                }
-            }),
-        );
-    }
-
-    private async updateScanRunStateForTerminatedTasks(): Promise<void> {
-        const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
-        if (failedTasks === undefined || failedTasks.length === 0) {
-            return;
-        }
-
+    /**
+     * Updates the scan run state with a task error.
+     * The failed tasks will be retried up-to scan request queue message maximum dequeue count.
+     * @param failedTasks The list of failed tasks.
+     */
+    protected async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
         await Promise.all(
             failedTasks.map(async (failedTask) => {
-                const taskArguments = JSON.parse(failedTask.taskArguments) as TaskArguments;
+                const taskArguments = JSON.parse(failedTask.taskArguments) as OnDemandScanRequestMessage;
                 if (!isNil(taskArguments?.id)) {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
                     error =
@@ -139,25 +92,23 @@ export class Worker extends BatchTaskCreator {
 
                     const pageScanResult = await this.onDemandPageScanRunResultProvider.readScanRun(taskArguments.id);
                     if (pageScanResult !== undefined) {
-                        if (pageScanResult.run.state !== 'failed') {
-                            pageScanResult.run = {
-                                state: 'failed',
-                                timestamp: failedTask.timestamp.toJSON(),
-                                error,
-                            };
-                            await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
-                        }
+                        pageScanResult.run = {
+                            state: 'failed',
+                            timestamp: failedTask.timestamp.toJSON(),
+                            error,
+                        };
+                        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
                     } else {
-                        this.logger.logError(`Task has no corresponding state in a result storage.`, {
-                            batchTaskId: failedTask.id,
+                        this.logger.logError(`Unable to find corresponding scan document in a result storage.`, {
+                            correlatedBatchTaskId: failedTask.id,
                             taskProperties: JSON.stringify(failedTask),
                         });
                     }
 
-                    this.logger.logError(error, { batchTaskId: failedTask.id, taskProperties: JSON.stringify(failedTask) });
+                    this.logger.logError(error, { correlatedBatchTaskId: failedTask.id, taskProperties: JSON.stringify(failedTask) });
                 } else {
                     this.logger.logError(`Unable to update failed scan run result. Task has no scan id run arguments defined.`, {
-                        batchTaskId: failedTask.id,
+                        correlatedBatchTaskId: failedTask.id,
                         taskProperties: JSON.stringify(failedTask),
                     });
                 }
@@ -165,7 +116,12 @@ export class Worker extends BatchTaskCreator {
         );
     }
 
-    private async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<Message[]> {
+    /**
+     * Invokes to validate corresponding scan run state before task is created.
+     * The expected scan run state is 'queued' at this workflow stage.
+     * @param scanMessages The scan messages to validate.
+     */
+    protected async excludeCompletedScans(scanMessages: ScanMessage[]): Promise<ScanMessage[]> {
         if (scanMessages.length === 0) {
             return [];
         }
@@ -181,7 +137,7 @@ export class Worker extends BatchTaskCreator {
         );
 
         const messageVisibilityTimeout = (await this.getQueueConfig()).messageVisibilityTimeoutInSeconds;
-        const acceptedScanMessages: Message[] = [];
+        const acceptedScanMessages: ScanMessage[] = [];
         await Promise.all(
             scanRuns.map(async (scanRun) => {
                 const scanMessage = scanMessages.find((message) => message.scanId === scanRun.id);
@@ -190,17 +146,17 @@ export class Worker extends BatchTaskCreator {
                     moment.utc(scanRun.run.timestamp).add(messageVisibilityTimeout, 'second') > moment.utc()
                 ) {
                     // Scan request just queued
-                    acceptedScanMessages.push(scanMessage.queueMessage);
+                    acceptedScanMessages.push(scanMessage);
                 } else if (scanRun.run.state === 'queued' || scanRun.run.state === 'running' || scanRun.run.state === 'failed') {
                     // Should include 'queued', 'running', and 'failed' states to retry abnormally terminated scan tasks
                     this.logger.logWarn(
                         'The scan request did not complete successfully during the last task run. Retrying scan with new task run.',
                         { scanId: scanRun.id, scanRunState: scanRun.run.state },
                     );
-                    acceptedScanMessages.push(scanMessage.queueMessage);
+                    acceptedScanMessages.push(scanMessage);
                 } else {
                     // Cancel scan request if current scan run state does not allow to retry scan task
-                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.queueMessage);
+                    await this.queue.deleteMessage(this.getQueueName(), scanMessage.message);
                     this.logger.logWarn(
                         `The scan request has been cancelled because current scan run state does not allow to retry scan task.`,
                         {
@@ -222,5 +178,19 @@ export class Worker extends BatchTaskCreator {
             batchAccountName: this.batchConfig.accountName,
             ...poolLoadSnapshot,
         });
+    }
+
+    private convertToScanMessages(messages: Message[]): ScanMessage[] {
+        return messages.map((message) => {
+            return {
+                scanId: this.parseMessageBody(message).id,
+                messageId: message.messageId,
+                message: message,
+            };
+        });
+    }
+
+    private parseMessageBody(message: Message): OnDemandScanRequestMessage {
+        return message.messageText === undefined ? undefined : (JSON.parse(message.messageText) as OnDemandScanRequestMessage);
     }
 }

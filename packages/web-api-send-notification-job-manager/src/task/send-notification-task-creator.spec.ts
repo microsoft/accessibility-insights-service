@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import { Batch, BatchConfig, Message, PoolMetricsInfo, Queue, StorageConfig } from 'azure-services';
 import { JobManagerConfig, ServiceConfiguration, System } from 'common';
+import { ScanMessage } from 'service-library';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SendNotificationTaskCreator } from './send-notification-task-creator';
@@ -14,10 +15,11 @@ class TestableSendNotificationTaskCreator extends SendNotificationTaskCreator {
     public jobManagerConfig: JobManagerConfig;
 
     // tslint:disable-next-line: no-unnecessary-override
-    public async getMessagesForTaskCreation(): Promise<Message[]> {
+    public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         return super.getMessagesForTaskCreation();
     }
 }
+
 describe(SendNotificationTaskCreator, () => {
     let taskCreator: TestableSendNotificationTaskCreator;
 
@@ -127,7 +129,20 @@ describe(SendNotificationTaskCreator, () => {
         ])('returns messages from queue - %o', async (poolLoad) => {
             const expectedMessageCount =
                 taskCreator.jobManagerConfig.sendNotificationTasksCount - (poolLoad.activeTasks + poolLoad.runningTasks - 1);
-            const messages: any[] = ['message 1', 'message 2'];
+            const messages: Message[] = [
+                {
+                    messageId: 'messageId-1',
+                    messageText: JSON.stringify({
+                        scanId: 'scanId-1',
+                    }),
+                },
+                {
+                    messageId: 'messageId-2',
+                    messageText: JSON.stringify({
+                        scanId: 'scanId-2',
+                    }),
+                },
+            ];
             poolMetricsInfo.load = poolLoad;
 
             queueMock
@@ -135,7 +150,15 @@ describe(SendNotificationTaskCreator, () => {
                 .returns(async () => Promise.resolve(messages))
                 .verifiable(Times.once());
 
-            await expect(taskCreator.getMessagesForTaskCreation()).resolves.toEqual(messages);
+            const expectedMessages = messages.map((message) => {
+                return {
+                    scanId: JSON.parse(message.messageText).scanId,
+                    messageId: message.messageId,
+                    message: message,
+                };
+            });
+
+            await expect(taskCreator.getMessagesForTaskCreation()).resolves.toEqual(expectedMessages);
         });
     });
 

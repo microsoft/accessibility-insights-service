@@ -14,7 +14,7 @@ import { Message } from '../azure-queue/message';
 import { BatchServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { BatchConfig } from './batch-config';
 import { BatchTaskConfigGenerator } from './batch-task-config-generator';
-import { BatchTask, BatchTaskErrorCategory, BatchTaskFailureInfo, JobTask, JobTaskState } from './job-task';
+import { BatchTask, BatchTaskErrorCategory, BatchTaskFailureInfo, getTaskCorrelationId, JobTask, JobTaskState } from './job-task';
 import { PoolLoad, PoolMetricsInfo } from './pool-load-generator';
 
 @injectable()
@@ -42,6 +42,7 @@ export class Batch {
 
             batchTasks.push({
                 id: task.id,
+                correlationId: getTaskCorrelationId(task.id),
                 taskArguments: taskArguments !== undefined ? taskArguments.value : undefined,
                 exitCode: task.executionInfo.exitCode,
                 result: task.executionInfo.result,
@@ -80,6 +81,7 @@ export class Batch {
 
             batchTasks.push({
                 id: task.id,
+                correlationId: getTaskCorrelationId(task.id),
                 taskArguments: taskArguments !== undefined ? taskArguments.value : undefined,
                 exitCode: task.executionInfo.exitCode,
                 result: task.executionInfo.result,
@@ -281,8 +283,8 @@ export class Batch {
                 jobTasks.get(taskAddResult.taskId).state = JobTaskState.failed;
                 jobTasks.get(taskAddResult.taskId).error = taskAddResult.error.message.value;
                 this.logger.logError(`An error occurred while adding new task to the job.`, {
-                    batchJobId: jobId,
-                    batchTaskId: taskAddResult.taskId,
+                    correlatedBatchJobId: jobId,
+                    correlatedBatchTaskId: taskAddResult.taskId,
                     error: taskAddResult.error.message.value,
                     taskAddResult: JSON.stringify(taskAddResult),
                 });

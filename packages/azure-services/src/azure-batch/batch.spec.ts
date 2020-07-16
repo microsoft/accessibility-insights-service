@@ -118,7 +118,7 @@ describe(Batch, () => {
             };
             const tasks = [
                 {
-                    id: 'id-1: task info',
+                    id: 'id-1_correlationId-1_ task info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -130,7 +130,7 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    id: 'id-2: task without environment settings data',
+                    id: 'id-2_correlationId-2_ task without environment settings data',
                     environmentSettings: undefined,
                     executionInfo: {
                         exitCode: 0,
@@ -158,14 +158,16 @@ describe(Batch, () => {
 
             const expectedSucceededTasks: BatchTask[] = [
                 {
-                    id: 'id-1: task info',
+                    id: 'id-1_correlationId-1_ task info',
+                    correlationId: 'correlationId-1',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 0,
                     result: 'success',
                     timestamp,
                 },
                 {
-                    id: 'id-2: task without environment settings data',
+                    id: 'id-2_correlationId-2_ task without environment settings data',
+                    correlationId: 'correlationId-2',
                     taskArguments: undefined,
                     exitCode: 0,
                     result: 'success',
@@ -189,7 +191,7 @@ describe(Batch, () => {
             };
             const tasks = [
                 {
-                    id: 'id-1: task with full failure info',
+                    id: 'id-1_correlationId-1_ task with full failure info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -216,7 +218,7 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    id: 'id-2: task with empty failure info',
+                    id: 'id-2_correlationId-2_ task with empty failure info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -229,7 +231,7 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    id: 'id-3: task with empty failure details info',
+                    id: 'id-3_correlationId-3_ task with empty failure details info',
                     environmentSettings: [
                         { name: 'name-1', value: 'value-1' },
                         { name: 'TASK_ARGUMENTS', value: JSON.stringify(taskArguments) },
@@ -246,7 +248,7 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    id: 'id-4: task without environment settings data',
+                    id: 'id-4_correlationId-4_ task without environment settings data',
                     environmentSettings: undefined,
                     executionInfo: {
                         exitCode: 1,
@@ -260,7 +262,7 @@ describe(Batch, () => {
                     stateTransitionTime: timestamp,
                 },
                 {
-                    id: 'id-5: task without TASK_ARGUMENTS environment value',
+                    id: 'id-5_correlationId-5_ task without TASK_ARGUMENTS environment value',
                     environmentSettings: [{ name: 'name-1', value: 'value-1' }] as BatchServiceModels.EnvironmentSetting[],
                     executionInfo: {
                         exitCode: 1,
@@ -293,7 +295,8 @@ describe(Batch, () => {
 
             const expectedFailedTasks: BatchTask[] = [
                 {
-                    id: 'id-1: task with full failure info',
+                    id: 'id-1_correlationId-1_ task with full failure info',
+                    correlationId: 'correlationId-1',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 1,
                     result: 'failure',
@@ -305,7 +308,8 @@ describe(Batch, () => {
                     timestamp,
                 },
                 {
-                    id: 'id-2: task with empty failure info',
+                    id: 'id-2_correlationId-2_ task with empty failure info',
+                    correlationId: 'correlationId-2',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 1,
                     result: 'failure',
@@ -313,7 +317,8 @@ describe(Batch, () => {
                     timestamp,
                 },
                 {
-                    id: 'id-3: task with empty failure details info',
+                    id: 'id-3_correlationId-3_ task with empty failure details info',
+                    correlationId: 'correlationId-3',
                     taskArguments: '{"arg1":"arg-1-value","arg2":"arg-2-value"}',
                     exitCode: 1,
                     result: 'failure',
@@ -321,7 +326,8 @@ describe(Batch, () => {
                     timestamp,
                 },
                 {
-                    id: 'id-4: task without environment settings data',
+                    id: 'id-4_correlationId-4_ task without environment settings data',
+                    correlationId: 'correlationId-4',
                     taskArguments: undefined,
                     exitCode: 1,
                     result: 'failure',
@@ -329,7 +335,8 @@ describe(Batch, () => {
                     timestamp: timestamp,
                 },
                 {
-                    id: 'id-5: task without TASK_ARGUMENTS environment value',
+                    id: 'id-5_correlationId-5_ task without TASK_ARGUMENTS environment value',
+                    correlationId: 'correlationId-5',
                     taskArguments: undefined,
                     exitCode: 1,
                     result: 'failure',
