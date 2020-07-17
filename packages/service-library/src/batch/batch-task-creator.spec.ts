@@ -173,6 +173,7 @@ let testSubject: TestableBatchTaskCreator;
 let jobManagerConfig: JobManagerConfig;
 let maxWallClockTimeInHours: number;
 let poolMetricsInfo: PoolMetricsInfo;
+let queueMessagesGenerator: QueueMessagesGenerator;
 
 describe(BatchTaskCreator, () => {
     beforeEach(() => {
@@ -210,6 +211,7 @@ describe(BatchTaskCreator, () => {
             },
         };
         batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject = new TestableBatchTaskCreator(
             batchMock.object,
@@ -263,8 +265,6 @@ describe(BatchTaskCreator, () => {
             .setup((o) => o.logInfo(`All tasks are completed and no new scan requests available. Exiting the job manager.`))
             .verifiable();
 
-        const queueMessagesGenerator = new QueueMessagesGenerator();
-
         testSubject.getMessagesForTaskCreationCallback = queueMessagesGenerator.queueMessagesGeneratorFn();
         testSubject.addTasksToJobCallback = jest.fn().mockImplementation(() => {
             return queueMessagesGenerator.jobTaskGeneratorFn()();
@@ -305,8 +305,6 @@ describe(BatchTaskCreator, () => {
                 o.logInfo(`Performing scheduled job manager termination after ${jobManagerConfig.maxWallClockTimeInHours} hours.`),
             )
             .verifiable();
-
-        const queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject.getMessagesForTaskCreationCallback = queueMessagesGenerator.queueMessagesGeneratorFn();
         testSubject.addTasksToJobCallback = jest.fn().mockImplementation(() => {
@@ -366,7 +364,6 @@ describe(BatchTaskCreator, () => {
     it('add tasks to job', async () => {
         await testSubject.init();
 
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.queueMessagesGeneratorFn()();
         queueMessagesGenerator.jobTaskGeneratorFn()();
 
@@ -435,7 +432,6 @@ describe(BatchTaskCreator, () => {
     });
 
     it('validate tasks', async () => {
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.queueMessagesGeneratorFn()();
         queueMessagesGenerator.jobTaskGeneratorFn()();
 
@@ -467,8 +463,25 @@ describe(BatchTaskCreator, () => {
         await testSubject.validateTasks();
     });
 
+    it('skip task validation when no succeeded and failed tasks', async () => {
+        queueMessagesGenerator.queueMessagesGeneratorFn()();
+        testSubject.activeScanMessages = queueMessagesGenerator.scanMessages;
+
+        batchMock
+            .setup((o) => o.getSucceededTasks(batchConfig.jobId))
+            .returns(async () => Promise.resolve([]))
+            .verifiable();
+        batchMock
+            .setup((o) => o.getFailedTasks(batchConfig.jobId))
+            .returns(async () => Promise.resolve([]))
+            .verifiable();
+
+        testSubject.enableBaseWorkflow = EnableBaseWorkflow.validateTasks | EnableBaseWorkflow.deleteScanQueueMessagesForSucceededTasks;
+
+        await testSubject.validateTasks();
+    });
+
     it('delete queue messages for succeeded tasks', async () => {
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.queueMessagesGeneratorFn()();
         queueMessagesGenerator.jobTaskGeneratorFn()();
 

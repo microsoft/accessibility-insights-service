@@ -152,6 +152,7 @@ let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvid
 let storageConfigStub: StorageConfig;
 let poolMetricsInfo: PoolMetricsInfo;
 let batchConfig: BatchConfig;
+let queueMessagesGenerator: QueueMessagesGenerator;
 
 describe(Worker, () => {
     beforeEach(() => {
@@ -186,6 +187,7 @@ describe(Worker, () => {
         loggerMock = Mock.ofType(MockableLogger);
 
         batchMock.setup((o) => o.getPoolMetricsInfo()).returns(async () => Promise.resolve(poolMetricsInfo));
+        queueMessagesGenerator = new QueueMessagesGenerator();
 
         testSubject = new TestableWorker(
             batchMock.object,
@@ -276,7 +278,6 @@ describe(Worker, () => {
             )
             .verifiable();
 
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.queueMessagesGeneratorFn()();
         queueMock
             .setup((o) => o.getMessagesWithTotalCount(testSubject.getQueueName(), poolLoadSnapshot.tasksIncrementCountPerInterval))
@@ -446,7 +447,6 @@ describe(Worker, () => {
     });
 
     it('excludeCompletedScans() - keep scan request when request has `queued` run state within allowed time span threshold', async () => {
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.queueMessagesGeneratorFn()();
 
         const scanResults = createScanResults(queueMessagesGenerator.scanMessages, 'queued');
@@ -465,7 +465,6 @@ describe(Worker, () => {
     it('excludeCompletedScans() - remove scan request when request has aborted run state', async () => {
         setupServiceConfigMock(-600); // set queue message as expired
 
-        const queueMessagesGenerator = new QueueMessagesGenerator();
         queueMessagesGenerator.messagesPerRun = 5;
         queueMessagesGenerator.queueMessagesGeneratorFn()();
 
