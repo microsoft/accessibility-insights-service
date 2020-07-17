@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, BatchTask, JobTask, Message, Queue, StorageConfig } from 'azure-services';
+import { Batch, BatchConfig, Message, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
@@ -25,7 +25,7 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         return this.storageConfig.notificationQueue;
     }
 
-    protected async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
+    public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         const pendingTasks = await this.getJobPendingTasksCount();
         const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - pendingTasks;
         if (messagesCount < 1) {
@@ -36,15 +36,6 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
 
         return this.convertToScanMessages(queueMessages);
     }
-
-    // tslint:disable-next-line: no-empty
-    protected async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {}
-
-    // tslint:disable-next-line: no-empty
-    protected async onExit(): Promise<void> {}
-
-    // tslint:disable-next-line: no-empty
-    protected async onTasksAdded(tasks: JobTask[]): Promise<void> {}
 
     private convertToScanMessages(messages: Message[]): ScanMessage[] {
         return messages.map((message) => {

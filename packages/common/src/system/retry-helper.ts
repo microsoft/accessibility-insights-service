@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
 
-import { System } from './system';
-
 export type ErrorHandler = (error: Error) => Promise<void>;
 
 async function defaultSleepFunction(milliseconds: number): Promise<void> {
@@ -26,7 +24,8 @@ export class RetryHelper<T> {
             try {
                 return await action();
             } catch (error) {
-                lastError = error instanceof Error ? error : new Error(System.serializeError(error));
+                lastError =
+                    error instanceof Error ? error : { name: 'RetryError', message: JSON.stringify(error), stack: new Error().stack };
 
                 if (i < maxRetryCount - 1) {
                     await onRetry(lastError);

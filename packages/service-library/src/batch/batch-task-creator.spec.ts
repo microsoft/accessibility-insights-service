@@ -91,19 +91,19 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         await this.invokeOverrides(EnableBaseWorkflow.validateTasks, this.validateTasksCallback, async () => super.validateTasks());
     }
 
-    protected async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
+    public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         return this.invokeOverrides(EnableBaseWorkflow.getMessagesForTaskCreation, this.getMessagesForTaskCreationCallback, undefined, []);
     }
 
-    protected async onTasksAdded(tasks: JobTask[]): Promise<void> {
+    public async onTasksAdded(tasks: JobTask[]): Promise<void> {
         await this.invokeOverrides(EnableBaseWorkflow.onTasksAdded, this.onTasksAddedCallback, undefined, undefined, tasks);
     }
 
-    protected async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
+    public async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
         await this.invokeOverrides(EnableBaseWorkflow.handleFailedTasks, this.handleFailedTasksCallback, undefined, undefined, failedTasks);
     }
 
-    protected async onExit(): Promise<void> {
+    public async onExit(): Promise<void> {
         await this.invokeOverrides(EnableBaseWorkflow.onExit, this.onExitCallback);
     }
 

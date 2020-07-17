@@ -32,7 +32,7 @@ export class Worker extends BatchTaskCreator {
         return this.storageConfig.scanQueue;
     }
 
-    protected async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
+    public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         const poolMetricsInfo = await this.batch.getPoolMetricsInfo();
         const poolLoadSnapshot = await this.poolLoadGenerator.getPoolLoadSnapshot(poolMetricsInfo);
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
@@ -66,14 +66,11 @@ export class Worker extends BatchTaskCreator {
         return messages;
     }
 
-    protected async onTasksAdded(tasks: JobTask[]): Promise<void> {
+    public async onTasksAdded(tasks: JobTask[]): Promise<void> {
         this.poolLoadGenerator.setLastTasksIncrementCount(tasks.length);
     }
 
-    // tslint:disable-next-line: no-empty
-    protected async onExit(): Promise<void> {}
-
-    protected async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
+    public async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
         await Promise.all(
             failedTasks.map(async (failedTask) => {
                 const taskArguments = JSON.parse(failedTask.taskArguments) as OnDemandScanRequestMessage;
