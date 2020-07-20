@@ -175,7 +175,7 @@ export class ServiceConfiguration {
                 },
                 maxWallClockTimeInHours: {
                     format: 'int',
-                    default: 2,
+                    default: 1,
                     doc: 'The amount of time the job manager instance will run continuously.',
                 },
                 sendNotificationTasksCount: {

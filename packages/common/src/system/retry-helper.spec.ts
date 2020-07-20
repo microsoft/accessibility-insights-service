@@ -12,7 +12,7 @@ describe(RetryHelper, () => {
     let errorHandlerMock: IMock<ErrorHandler>;
     let actionMock: IMock<() => Promise<number>>;
     let testError: Error;
-    let sleepFunctionMock: IMock<(millis: number) => Promise<void>>;
+    let sleepFunctionMock: IMock<(ms: number) => Promise<void>>;
     const maxAttempts = 3;
     const returnValue = 42;
     const retryIntervalMilliseconds = 10;
@@ -21,7 +21,7 @@ describe(RetryHelper, () => {
         errorHandlerMock = Mock.ofType<ErrorHandler>();
         actionMock = Mock.ofType<() => Promise<number>>();
         testError = new Error('test error');
-        sleepFunctionMock = Mock.ofType<(millis: number) => Promise<void>>();
+        sleepFunctionMock = Mock.ofType<(ms: number) => Promise<void>>();
         testSubject = new RetryHelper(sleepFunctionMock.object);
     });
 
@@ -85,21 +85,45 @@ describe(RetryHelper, () => {
         let thrownError: Error;
         await testSubject
             .executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, retryIntervalMilliseconds)
-            .catch((err) => {
-                thrownError = err;
+            .catch((error) => {
+                thrownError = error;
             });
         expect(thrownError).toBe(testError);
     });
 
-    it('does not call sleepFunction if milliSecondsBetweenRetries is 0', async () => {
+    it('does not call sleep function if retryIntervalMilliseconds is 0', async () => {
         actionMock
             .setup((a) => a())
             .throws(testError)
             .verifiable(Times.exactly(maxAttempts));
         sleepFunctionMock.setup((s) => s(It.isAny())).verifiable(Times.never());
 
-        await testSubject.executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts).catch((err) => {
+        await testSubject.executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts).catch((error) => {
             return;
         });
+    });
+
+    it('convert error type', async () => {
+        const testErrorObj = { message: 'other error type' };
+        actionMock
+            .setup((a) => a())
+            .returns(() => {
+                throw testErrorObj;
+            })
+            .verifiable(Times.exactly(maxAttempts));
+        errorHandlerMock.setup((e) => e(It.isAny())).verifiable(Times.exactly(maxAttempts - 1));
+        sleepFunctionMock.setup((s) => s(It.isAny())).verifiable(Times.exactly(maxAttempts - 1));
+
+        let thrownError: Error;
+        await testSubject
+            .executeWithRetries(actionMock.object, errorHandlerMock.object, maxAttempts, retryIntervalMilliseconds)
+            .catch((error) => {
+                thrownError = error;
+            });
+
+        const expectedError = { name: 'RetryError', message: JSON.stringify(testErrorObj), stack: '' };
+        expect(thrownError.stack).toBeDefined();
+        thrownError.stack = '';
+        expect(thrownError).toEqual(expectedError);
     });
 });

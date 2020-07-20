@@ -1,0 +1,19 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug current unit test file",
+            "program": "${workspaceFolder:root}/node_modules/jest/bin/jest",
+            // ${relativeFile} returns path with back slash. jest can't find the file if we use back slash. So, just passing file name instead
+            "args": ["${fileBasename}", "--runInBand", "--coverage=false"],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "cwd": "${fileDirname}"
+        }
+    ]
+}

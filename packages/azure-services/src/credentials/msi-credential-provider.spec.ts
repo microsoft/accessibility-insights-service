@@ -134,6 +134,6 @@ describe(MSICredentialsProvider, () => {
         });
 
         expect(caughtError).not.toBeUndefined();
-        expect(caughtError.message).toEqual(`MSI getToken failed ${maxAttempts} times with error: ${System.serializeError(error)}`);
+        expect(caughtError.message).toEqual(`MSI getToken() failed ${maxAttempts} times with error: ${System.serializeError(error)}`);
     });
 });

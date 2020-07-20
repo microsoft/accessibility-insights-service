@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Batch, BatchConfig, JobTask, Message, Queue, StorageConfig } from 'azure-services';
+import { Batch, BatchConfig, Message, Queue, StorageConfig } from 'azure-services';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { BatchTaskCreator } from 'service-library';
+import { BatchTaskCreator, ScanMessage } from 'service-library';
+import { OnDemandNotificationRequestMessage } from 'storage-documents';
 
 @injectable()
 export class SendNotificationTaskCreator extends BatchTaskCreator {
@@ -24,22 +25,29 @@ export class SendNotificationTaskCreator extends BatchTaskCreator {
         return this.storageConfig.notificationQueue;
     }
 
-    protected async getMessagesForTaskCreation(): Promise<Message[]> {
+    public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         const pendingTasks = await this.getJobPendingTasksCount();
         const messagesCount = this.jobManagerConfig.sendNotificationTasksCount - pendingTasks;
-        if (messagesCount > 0) {
-            return this.queue.getMessagesWithTotalCount(this.getQueueName(), messagesCount);
+        if (messagesCount < 1) {
+            return [];
         }
 
-        return [];
+        const queueMessages = await this.queue.getMessagesWithTotalCount(this.getQueueName(), messagesCount);
+
+        return this.convertToScanMessages(queueMessages);
     }
 
-    // tslint:disable-next-line: no-empty
-    protected async onTasksValidation(): Promise<void> {}
+    private convertToScanMessages(messages: Message[]): ScanMessage[] {
+        return messages.map((message) => {
+            return {
+                scanId: this.parseMessageBody(message).scanId,
+                messageId: message.messageId,
+                message: message,
+            };
+        });
+    }
 
-    // tslint:disable-next-line: no-empty
-    protected async onExit(): Promise<void> {}
-
-    // tslint:disable-next-line: no-empty
-    protected async onTasksAdded(tasks: JobTask[]): Promise<void> {}
+    private parseMessageBody(message: Message): OnDemandNotificationRequestMessage {
+        return message.messageText === undefined ? undefined : (JSON.parse(message.messageText) as OnDemandNotificationRequestMessage);
+    }
 }
