@@ -54,7 +54,7 @@
         "moment": "^2.27.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
-        "verror": "^1.10.0",
-        "storage-documents": "1.0.0"
+        "storage-documents": "1.0.0",
+        "verror": "^1.10.0"
     }
 }

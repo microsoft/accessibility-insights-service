@@ -41,6 +41,13 @@ export class JobTask {
     }
 }
 
+export function getTaskCorrelationId(taskId: string): string {
+    // expected taskId equals to string template '..._correlationId_...'
+    const segments = taskId.split('_');
+
+    return segments.length > 1 ? segments[1] : undefined;
+}
+
 export interface BatchTaskFailureInfo {
     category: BatchTaskErrorCategory;
     code?: string;
@@ -49,6 +56,7 @@ export interface BatchTaskFailureInfo {
 
 export interface BatchTask {
     id: string;
+    correlationId: string;
     taskArguments: any;
     exitCode: number;
     result: BatchTaskExecutionResult;

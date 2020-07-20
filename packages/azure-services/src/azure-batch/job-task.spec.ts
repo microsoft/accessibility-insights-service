@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { JobTask } from './job-task';
+import { getTaskCorrelationId, JobTask } from './job-task';
 
 describe(JobTask, () => {
     let jobTask: JobTask;
@@ -18,5 +18,12 @@ describe(JobTask, () => {
         const correlationId = 'x'.repeat(64);
 
         expect(() => new JobTask(correlationId)).toThrowError(/correlationId string value is too long/);
+    });
+});
+
+describe(getTaskCorrelationId, () => {
+    it('get correlation id', () => {
+        expect('correlationId').toEqual(getTaskCorrelationId('abc_correlationId'));
+        expect(undefined).toEqual(getTaskCorrelationId('abcdef'));
     });
 });
