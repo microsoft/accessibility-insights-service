@@ -69,12 +69,6 @@
             "metadata": {
                 "description": "Release version number"
             }
-        },
-        "apimIpAddress": {
-            "type": "string",
-            "metadata": {
-                "description": "Public IP address of APIM instance"
-            }
         }
     },
     "resources": [
@@ -146,23 +140,7 @@
                         "tokenStoreEnabled": true,
                         "defaultProvider": "AzureActiveDirectory",
                         "clientId": "[parameters('clientId')]",
-                        "issuer": "[concat('https://sts.windows.net/', parameters('tenantId'), '/')]",
-                        "ipSecurityRestrictions": [
-                            {
-                                "ipAddress": "[parameters('apimIpAddress')]",
-                                "action": "Allow",
-                                "tag": "Default",
-                                "priority": 200,
-                                "name": "APIM"
-                            },
-                            {
-                                "ipAddress": "Any",
-                                "action": "Deny",
-                                "priority": 2147483647,
-                                "name": "Deny all",
-                                "description": "Deny all access"
-                            }
-                        ]
+                        "issuer": "[concat('https://sts.windows.net/', parameters('tenantId'), '/')]"
                     }
                 }
             ]
