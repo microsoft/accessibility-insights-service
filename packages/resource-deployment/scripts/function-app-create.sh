@@ -144,7 +144,8 @@ deployFunctionApp() {
 }
 
 function deployWebApiFunction {
-    deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" "$webApiFuncAppName" "clientId=$webApiAdClientId"
+    apimIpAddress=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "publicIpAddresses" -o tsv)
+    deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" "$webApiFuncAppName" "clientId=$webApiAdClientId apimIpAddress=$apimIpAddress"
 }
 
 function deployWebWorkersFunction {
