@@ -39,6 +39,7 @@ steps:
               functional-tests/dist/**/*
               health-client/dist/**/*
               cli/drop/*
+              docker-images-config/dist/**/*
               !**/node_modules/**/*
               !**/.vscode/**/*
               !**/*.md
