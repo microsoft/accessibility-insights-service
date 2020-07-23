@@ -74,7 +74,7 @@ az acr login -n $containerRegistryName
 echo "Building the web api scan runner image to the $containerRegistryName container registry"
 
 # Change directory to the function app scripts folder
-cd "${0%/*}/../../docker-images-config/web-api-scan-runner"
+cd "${0%/*}/../../../docker-images-config/dist/web-api-scan-runner"
 
 az acr build --image webapiscanrunner:latest --registry $containerRegistryName --file Dockerfile .
 
