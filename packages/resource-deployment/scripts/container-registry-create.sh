@@ -71,12 +71,15 @@ echo "The '$containerRegistryName' Azure Container registry successfully deploye
 # Login to Azure container
 az acr login -n $containerRegistryName
 
+# Build and publish the web api scan job manager image
+echo "Building the web api scan job manager image to the $containerRegistryName container registry"
+cd "${0%/*}/../../../web-api-scan-job-manager/dist/docker-images-config/"
+az acr build --image webapiscanjobmanager:latest --registry $containerRegistryName --file Dockerfile .
+echo "The webapiscanjobmanager:latest image was pushed successfully to the  $containerRegistryName Azure Container registry"
+
+# Build and publish the web api scan runner image
 echo "Building the web api scan runner image to the $containerRegistryName container registry"
-
-# Change directory to the function app scripts folder
-cd "${0%/*}/../../../docker-images-config/dist/web-api-scan-runner"
-
+cd "${0%/*}/../../../web-api-scan-runner/dist/docker-images-config/"
 az acr build --image webapiscanrunner:latest --registry $containerRegistryName --file Dockerfile .
-
 echo "The webapiscanrunner:latest image was pushed successfully to the  $containerRegistryName Azure Container registry"
 
