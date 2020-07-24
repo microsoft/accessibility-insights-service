@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+// tslint:disable-next-line: no-implicit-dependencies
 import { ServiceConfiguration } from 'common';
 import { Runner } from './runner/runner';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';

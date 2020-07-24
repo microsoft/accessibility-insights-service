@@ -9,4 +9,4 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-ENTRYPOINT [ "node", "../index.js" ]
+ENTRYPOINT [ "node", "../web-api-scan-job-manager.js" ]

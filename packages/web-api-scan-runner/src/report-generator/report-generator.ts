@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+// tslint:disable: no-implicit-dependencies
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner';

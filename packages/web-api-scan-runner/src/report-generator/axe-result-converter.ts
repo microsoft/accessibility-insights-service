@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 import { AxeResults } from 'axe-core';
+// tslint:disable-next-line: no-implicit-dependencies
 import { ReportFormat } from 'storage-documents';
 
 export type ReportGenerationParams = {

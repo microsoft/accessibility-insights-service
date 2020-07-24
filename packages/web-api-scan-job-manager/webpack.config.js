@@ -58,19 +58,19 @@ module.exports = (env) => {
                 {
                     context: '',
                     from: 'package.json',
-                    to: 'docker-image-config',
+                    to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },
                 {
                     context: './docker-image-config',
                     from: '.dockerignore',
-                    to: 'docker-image-config',
+                    to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },
                 {
                     context: './docker-image-config',
                     from: 'Dockerfile',
-                    to: 'docker-image-config',
+                    to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },
             ]),

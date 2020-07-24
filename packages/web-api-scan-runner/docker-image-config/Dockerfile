@@ -3,12 +3,12 @@
 FROM node:12-slim
 
 # Install Chrome
-RUN apt-get update \
+RUN dpkg --configure -a \
+    && apt-get update \
     && apt-get install -y wget gnupg \
     && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >/etc/apt/sources.list.d/google.list' \
 	&& apt-get update && apt-get install -y google-chrome-stable
-
 
 # Install app dependencies
 COPY package*.json ./
@@ -17,4 +17,4 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-ENTRYPOINT [ "node", "../index.js" ]
+ENTRYPOINT [ "node", "web-api-scan-runner.js" ]

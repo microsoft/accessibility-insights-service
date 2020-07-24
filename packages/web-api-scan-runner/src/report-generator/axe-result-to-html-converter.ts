@@ -4,6 +4,7 @@
 import { AxeReportParameters, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { inject, injectable } from 'inversify';
+// tslint:disable-next-line: no-implicit-dependencies
 import { ReportFormat } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';

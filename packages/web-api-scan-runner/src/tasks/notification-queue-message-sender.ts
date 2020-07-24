@@ -1,5 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+// tslint:disable: no-implicit-dependencies
+
 import { Queue, StorageConfig } from 'azure-services';
 import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
