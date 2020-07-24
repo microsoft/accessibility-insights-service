@@ -13,7 +13,7 @@ export resourceGroupName
 export keyVault
 export enableSoftDeleteOnKeyVault
 
-# Set default ARM Batch account template files
+# Set default ARM template files
 createKeyVaultTemplateFile="${0%/*}/../templates/key-vault-create.template.json"
 setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resources.template.json"
 
@@ -27,19 +27,20 @@ Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <we
 . "${0%/*}/process-utilities.sh"
 
 function createKeyvaultIfNotExists() {
-    local existingResourceId=$(az keyvault list \
-                                --query "[?name=='$keyVault'].id|[0]" \
-                                -o tsv
-                            )
+    local existingResourceId=$(
+        az keyvault list \
+            --query "[?name=='$keyVault'].id|[0]" \
+            -o tsv
+    )
     if [[ -z $existingResourceId ]]; then
         echo "Key vault does not exist. Creating using ARM template."
         resources=$(
-        az deployment group create \
-            --resource-group "$resourceGroupName" \
-            --template-file "$createKeyVaultTemplateFile" \
-            --query "properties.outputResources[].id" \
-            --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
-            -o tsv
+            az deployment group create \
+                --resource-group "$resourceGroupName" \
+                --template-file "$createKeyVaultTemplateFile" \
+                --query "properties.outputResources[].id" \
+                --parameters enableSoftDeleteOnKeyVault="$enableSoftDeleteOnKeyVault" \
+                -o tsv
         )
 
         echo "Created Key vault:
@@ -51,16 +52,16 @@ function createKeyvaultIfNotExists() {
 }
 
 function setupKeyVaultResources() {
-     echo "Setting up key vault resources using ARM template."
-        resources=$(
+    echo "Setting up key vault resources using ARM template."
+    resources=$(
         az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$setupKeyVaultResourcesTemplateFile" \
             --query "properties.outputResources[].id" \
             -o tsv
-        )
+    )
 
-        echo "Successfully setup Key vault resources:
+    echo "Successfully setup Key vault resources:
             resource: $resources
         "
 }
@@ -95,4 +96,3 @@ setupKeyVaultResources
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
 echo "The '$keyVault' Azure Key Vault account successfully deployed"
-

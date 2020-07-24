@@ -3,15 +3,14 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# shellcheck disable=SC1090
 set -eo pipefail
 
 # Set default ARM template file
-dashboardTemplateFile="${0%/*}/../templates/dashboard.template.json"
+registryTemplateFile="${0%/*}/../templates/container-registry.template.json"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-t <dashboard template file (optional)>]
+Usage: $0 -r <resource group> [-t <container registry template file (optional)>]
 "
     exit 1
 }
@@ -20,22 +19,22 @@ Usage: $0 -r <resource group> [-t <dashboard template file (optional)>]
 while getopts ":r:t:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
-    t) dashboardTemplateFile=${OPTARG} ;;
+    t) registryTemplateFile=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]] || [[ -z $dashboardTemplateFile ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $registryTemplateFile ]]; then
     exitWithUsageInfo
 fi
 
-# Deploy Azure dashboard using resource manager template
-echo "Deploying dashboard in resource group $resourceGroupName with template $dashboardTemplateFile"
+# Deploy Azure Container registry
+echo "Deploying Azure Container registry in resource group $resourceGroupName with template $registryTemplateFile"
 resources=$(
     az deployment group create \
         --resource-group "$resourceGroupName" \
-        --template-file "$dashboardTemplateFile" \
+        --template-file "$registryTemplateFile" \
         --query "properties.outputResources[].id" \
         -o tsv
 )

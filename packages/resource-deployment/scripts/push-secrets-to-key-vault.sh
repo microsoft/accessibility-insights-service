@@ -11,6 +11,7 @@ export storageAccountName
 export cosmosAccountName
 export cosmosDbUrl
 export cosmosAccessKey
+export containerRegistryName
 
 export loggedInUserType
 export loggedInServicePrincipalName
@@ -50,11 +51,9 @@ grantWritePermissionToKeyVault() {
         echo "Setting write policy for service principal"
         az keyvault set-policy --name "$keyVault" --spn "$loggedInServicePrincipalName" --secret-permissions set 1>/dev/null
     fi
-
 }
 
 revokePermissionsToKeyVault() {
-
     echo "Revoking permission to key vault $keyVault for logged in user"
 
     if [[ $loggedInUserType == "user" ]]; then
@@ -84,7 +83,6 @@ getCosmosDbUrl() {
 }
 
 getCosmosAccessKey() {
-
     cosmosAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
 
     if [[ -z $cosmosAccessKey ]]; then
@@ -98,6 +96,16 @@ getStorageAccessKey() {
 
     if [[ -z $storageAccountKey ]]; then
         echo "Unable to get accessKey for storage account $storageAccountName"
+        exit 1
+    fi
+}
+
+getContainerRegistryLogin() {
+    containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
+    containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
+
+    if [[ -z $containerRegistryUsername ]] || [[ -z $containerRegistryPassword ]]; then
+        echo "Unable to get login for container registry $containerRegistryName"
         exit 1
     fi
 }
@@ -126,7 +134,6 @@ while getopts ":r:c:p:" option; do
     *) exitWithUsageInfo ;;
     esac
 done
-
 
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdClientSecret ]]; then
@@ -164,3 +171,7 @@ pushSecretToKeyVault "authorityUrl" "https://login.microsoftonline.com/${tenantI
 
 createAppInsightsApiKey
 pushSecretToKeyVault "appInsightsApiKey" "$appInsightsApiKey"
+
+getContainerRegistryLogin
+pushSecretToKeyVault "containerRegistryUsername" "$containerRegistryUsername"
+pushSecretToKeyVault "containerRegistryPassword" "$containerRegistryPassword"

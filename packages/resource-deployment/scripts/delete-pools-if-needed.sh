@@ -23,13 +23,14 @@ Usage: $0 -r <resource group> -p <parameter template file path> [-d <pass \"true
 
 . "${0%/*}/process-utilities.sh"
 
-function checkIfVmssAreOld {
+function checkIfVmssAreOld() {
     areVmssOld=false
     local hasCreatedDateTags=false
 
-    local createdDates=$(az vmss list \
-        --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
-        -o tsv
+    local createdDates=$(
+        az vmss list \
+            --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
+            -o tsv
     )
 
     for createdDate in $createdDates; do
@@ -78,7 +79,7 @@ function compareParameterFileToDeployedConfig() {
     fi
 }
 
-function checkIfPoolConfigOutdated {
+function checkIfPoolConfigOutdated() {
     poolId=$1
     poolPropertyNamePrefix=$2
 
@@ -95,7 +96,7 @@ function checkIfPoolConfigOutdated {
     fi
 }
 
-function checkPoolConfigs {
+function checkPoolConfigs() {
     for pool in $pools; do
         camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
         checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"

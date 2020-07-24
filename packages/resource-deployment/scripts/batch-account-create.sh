@@ -14,7 +14,7 @@ export batchAccountName
 export parameterFilePath
 export dropPools
 
-# Set default ARM Batch account template files
+# Set default ARM template file
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
@@ -25,6 +25,27 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 }
 
 . "${0%/*}/process-utilities.sh"
+
+getSecretValue() {
+    local key=$1
+
+    local secretValue=$(az keyvault secret show --name "$key" --vault-name "$keyVault" --query "value" -o tsv)
+
+    if [[ -z $secretValue ]]; then
+        echo "Unable to get secret for the $key"
+        exit 1
+    fi
+
+    eval $2=$secretValue
+}
+
+getContainerRegistryServerLogin() {
+    containerRegistryUsername=""
+    containerRegistryPassword=""
+
+    getSecretValue "containerRegistryUsername" containerRegistryUsername
+    getSecretValue "containerRegistryPassword" containerRegistryPassword
+}
 
 function setParameterFilePath() {
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
@@ -41,8 +62,10 @@ function deployBatch() {
         az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
-            --query "properties.outputResources[].id" \
             --parameters "$parameterFilePath" \
+            --parameters containerRegistryServerUserName=$containerRegistryUsername \
+            --parameters containerRegistryServerPassword=$containerRegistryPassword \
+            --query "properties.outputResources[].id" \
             -o tsv
     )
 
@@ -61,7 +84,6 @@ while getopts ":r:t:e:d:" option; do
     *) exitWithUsageInfo ;;
     esac
 done
-
 
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]]; then
@@ -84,9 +106,9 @@ setParameterFilePath
 
 . "${0%/*}/delete-pools-if-needed.sh"
 
+getContainerRegistryServerLogin
 deployBatch
 
 . "${0%/*}/setup-all-pools-for-batch.sh"
 
 echo "The '$batchAccountName' Azure Batch account successfully deployed"
-

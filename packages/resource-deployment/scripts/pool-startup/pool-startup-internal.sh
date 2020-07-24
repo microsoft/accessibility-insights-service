@@ -4,30 +4,60 @@
 # Licensed under the MIT License.
 
 # shellcheck disable=SC1090
-
 set -eo pipefail
 
+exitWithUsageInfo() {
+    echo "
+Usage: $0 -k <key vault name>
+"
+    exit 1
+}
+
 waitForApplicationUpdates() {
-    echo "waiting for other application updates"
+    echo "Waiting for other application updates"
     while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock* >/dev/null 2>&1; do
-        echo "waiting ..."
+        echo "waiting..."
         sleep 5
     done
 }
 
-waitForApplicationUpdates
+installBootstrapPackages() {
+    # wait for OS updates on reboot
+    waitForApplicationUpdates
 
-echo "restoring dpkg configuration"
-dpkg --configure -a
+    echo "Restoring dpkg configuration"
+    dpkg --configure -a
+    waitForApplicationUpdates
 
-echo "running - apt-get update"
-apt-get update
+    echo "Running apt-get update"
+    apt-get update
+    waitForApplicationUpdates
 
-waitForApplicationUpdates
+    echo "Installing curl"
+    apt-get install -y curl
+    waitForApplicationUpdates
 
-echo "Installing curl"
-apt-get install -y curl
+    echo "Installing az cli"
+    curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+    waitForApplicationUpdates
+}
 
+# Read script arguments
+while getopts "k:" option; do
+    case $option in
+    k) KEY_VAULT_NAME=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+if [[ -z $KEY_VAULT_NAME ]]; then
+    exitWithUsageInfo
+fi
+
+installBootstrapPackages
+
+# Commented out deployment will be part of the container image
+<<block
 echo "Installing chrome"
 #referred from https://www.ubuntuupdates.org/ppa/google_chrome
 wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
@@ -71,6 +101,7 @@ npm install yargs@15.3.1 applicationinsights@1.8.0
 cd "$SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION"
 echo "Installing on demand scan request sender dependencies"
 npm install yargs@15.3.1 applicationinsights@1.8.0
+block
 
 echo "Invoking custom pool startup script"
 "${0%/*}/custom-pool-post-startup.sh"
