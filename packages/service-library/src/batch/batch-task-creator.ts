@@ -15,7 +15,6 @@ export interface ScanMessage {
 }
 
 export interface BatchTaskCreator {
-    getMessagesForTaskCreation(): Promise<ScanMessage[]>;
     onTasksAdded?(tasks: JobTask[]): Promise<void>;
     handleFailedTasks?(failedTasks: BatchTask[]): Promise<void>;
     onExit?(): Promise<void>;
@@ -88,6 +87,20 @@ export abstract class BatchTaskCreator {
     }
 
     public abstract getQueueName(): string;
+
+    public abstract getMessagesForTaskCreation(): Promise<ScanMessage[]>;
+
+    public async onTasksAdded?(tasks: JobTask[]): Promise<void> {
+        return;
+    }
+
+    public async handleFailedTasks?(failedTasks: BatchTask[]): Promise<void> {
+        return;
+    }
+
+    public async onExit?(): Promise<void> {
+        return;
+    }
 
     protected async waitForChildTasks(): Promise<void> {
         this.logger.logInfo('Waiting for job tasks to complete.');
