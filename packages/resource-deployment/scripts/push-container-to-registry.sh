@@ -29,8 +29,8 @@ fi
 
 az acr login --name "$containerRegistryName"
 
-src="${0%/*}/../../../web-api-scan-runner/dist/docker-image-config/"
+src="${0%/*}/../../../web-api-scan-runner/dist/"
 az acr build --image $containerRegistryName.azurecr.io/batch-scan-runner:latest --registry $containerRegistryName $src
 
-src="${0%/*}/../../../web-api-scan-job-manager/dist/docker-image-config/"
+src="${0%/*}/../../../web-api-scan-job-manager/dist/"
 az acr build --image $containerRegistryName.azurecr.io/batch-scan-manager:latest --registry $containerRegistryName $src
