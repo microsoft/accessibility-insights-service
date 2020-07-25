@@ -2,6 +2,15 @@
 # Licensed under the MIT License.
 FROM node:12-slim
 
+# Set Environment variables
+ENV APPINSIGHTS_INSTRUMENTATIONKEY=%APP_INSIGHTS_TOKEN%
+ENV AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
+ENV AZURE_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
+ENV KEY_VAULT_URL=%KEY_VAULT_TOKEN%
+
+# Copy configuration
+COPY runtime-config*.json ./
+
 # Install Chrome
 RUN dpkg --configure -a \
     && apt-get update \
@@ -18,3 +27,4 @@ RUN npm install
 COPY . .
 
 ENTRYPOINT [ "node", "web-api-scan-runner.js" ]
+CMD [${arg}]

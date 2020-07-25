@@ -69,7 +69,7 @@ module.exports = (env) => {
                 },
                 {
                     context: './docker-image-config',
-                    from: 'Dockerfile',
+                    from: 'Dockerfile-Template',
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
                 },

@@ -19,7 +19,7 @@
         "**/dist",
         "**/*.snap",
         "**/.dockerignore",
-        "**/Dockerfile",
+        "**/Dockerfile-Template",
         "**/package.json"
     ],
     "license": "./copyright-header.txt",
