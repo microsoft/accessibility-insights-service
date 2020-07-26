@@ -25,7 +25,7 @@
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^25.2.1",
         "@types/lodash": "^4.14.157",
-        "@types/node": "^13.13.5",
+        "@types/node": "^14.0.26",
         "@types/yargs": "^15.0.5",
         "jest": "^26.1.0",
         "jest-circus": "^25.5.3",
