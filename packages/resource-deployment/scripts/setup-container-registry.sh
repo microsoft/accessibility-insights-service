@@ -41,17 +41,10 @@ cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../.
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../..//web-api-scan-job-manager/dist/runtime-config.json"
 echo "Runtime configuration was copied successfully"
 
-
 . "${0%/*}/get-resource-names.sh"
 
 if [[ -z $keyVaultUrl ]]; then
-    echo "Resolving Key Vault URL for Key Vault $keyVault..."
-    keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
-    if [[ -z "$keyVaultUrl" ]]; then
-        echo "could not find keyvault in resource group $resourceGroupName"
-        exitWithUsageInfo
-    fi
-    echo "  Key Vault URL $keyVaultUrl"
+    keyVaultUrl="https://$keyVault.vault.azure.net/"
 fi
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
