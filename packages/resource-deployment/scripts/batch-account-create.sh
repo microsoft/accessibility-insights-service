@@ -26,25 +26,14 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 
 . "${0%/*}/process-utilities.sh"
 
-getSecretValue() {
-    local key=$1
+getContainerRegistryLogin() {
+    containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
+    containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
 
-    local secretValue=$(az keyvault secret show --name "$key" --vault-name "$keyVault" --query "value" -o tsv)
-
-    if [[ -z $secretValue ]]; then
-        echo "Unable to get secret for the $key"
+    if [[ -z $containerRegistryUsername ]] || [[ -z $containerRegistryPassword ]]; then
+        echo "Unable to get login for container registry $containerRegistryName"
         exit 1
     fi
-
-    eval $2=$secretValue
-}
-
-getContainerRegistryServerLogin() {
-    containerRegistryUsername=""
-    containerRegistryPassword=""
-
-    getSecretValue "containerRegistryUsername" containerRegistryUsername
-    getSecretValue "containerRegistryPassword" containerRegistryPassword
 }
 
 function setParameterFilePath() {
@@ -106,7 +95,7 @@ setParameterFilePath
 
 . "${0%/*}/delete-pools-if-needed.sh"
 
-getContainerRegistryServerLogin
+getContainerRegistryLogin
 deployBatch
 
 . "${0%/*}/setup-all-pools-for-batch.sh"
