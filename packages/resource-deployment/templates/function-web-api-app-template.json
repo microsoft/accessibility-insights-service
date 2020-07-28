@@ -82,6 +82,7 @@
                 "type": "SystemAssigned"
             },
             "properties": {
+                "httpsOnly": true,
                 "siteConfig": {
                     "appSettings": [
                         {
