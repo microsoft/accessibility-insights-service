@@ -23,7 +23,7 @@
     "homepage": "https://github.com/manishsat/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^25.2.1",
-        "@types/lodash": "^4.14.157",
+        "@types/lodash": "^4.14.158",
         "@types/request": "^2.48.5",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
@@ -41,7 +41,7 @@
         "tslint-microsoft-contrib": "6.0.0",
         "typemoq": "^2.1.0",
         "typescript": "^3.9.7",
-        "webpack": "^4.43.0",
+        "webpack": "^4.44.0",
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
