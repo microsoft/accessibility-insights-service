@@ -151,6 +151,18 @@ function deployWebWorkersFunction {
     deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
 }
 
+function restrictWebApiAccess {
+    echo "restricting access to APIM IP address"
+    apimIpAddress=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "publicIpAddresses" -o tsv)
+    az functionapp config access-restriction add -g "$resourceGroupName" \
+                                                 -n "$webApiFuncAppName" \
+                                                 --rule-name "APIM" \
+                                                 --action "Allow" \
+                                                 --ip-address "$apimIpAddress" \
+                                                 --priority 100 1>/dev/null
+    
+}
+
 function enableManagedIdentityOnFunctions {
     getFunctionAppPrincipalId $webApiFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
@@ -177,6 +189,7 @@ function setupAzureFunctions {
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
     enableManagedIdentityOnFunctions
+    restrictWebApiAccess
 
     functionSetupProcesses=(
         "publishWebApiScripts"
