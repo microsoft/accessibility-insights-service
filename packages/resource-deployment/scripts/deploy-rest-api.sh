@@ -13,6 +13,18 @@ deployRestApi() {
     echo "  Completed"
 }
 
+restrictWebApiAccess() {
+    echo "restricting access to APIM IP address"
+    apimIpAddress=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "publicIpAddresses" -o tsv)
+    az functionapp config access-restriction add -g "$resourceGroupName" \
+                                                 -n "$webApiFuncAppName" \
+                                                 --rule-name "APIM" \
+                                                 --action "Allow" \
+                                                 --ip-address "$apimIpAddress" \
+                                                 --priority 100 1>/dev/null
+    
+}
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 -t <Template Location> -r <resource group>
@@ -38,4 +50,10 @@ if [[ -z $templatesFolder ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-deployRestApi 
+. "${0%/*}/process-utilities.sh"
+
+restApiProcesses=(
+    "deployRestApi"
+    "restrictWebApiAccess"
+)
+runCommandsWithoutSecretsInParallel restApiProcesses
