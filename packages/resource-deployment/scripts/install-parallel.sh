@@ -152,7 +152,7 @@ function install() {
     . "${0%/*}/job-schedule-create.sh"
     . "${0%/*}/function-app-create.sh"
     . "${0%/*}/setup-container-registry.sh"
-    . "${0%/*}/push-container-to-registry.sh"
+    . "${0%/*}/push-image-to-container-registry.sh"
 
     . "${0%/*}/create-dashboard.sh" &
     dashboardProcessId="$!"

@@ -26,7 +26,7 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 
 . "${0%/*}/process-utilities.sh"
 
-getContainerRegistryLogin() {
+getContainerRegistryLoginCredentials() {
     containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
     containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
 
@@ -95,7 +95,7 @@ setParameterFilePath
 
 . "${0%/*}/delete-pools-if-needed.sh"
 
-getContainerRegistryLogin
+getContainerRegistryLoginCredentials
 deployBatch
 
 . "${0%/*}/setup-all-pools-for-batch.sh"
