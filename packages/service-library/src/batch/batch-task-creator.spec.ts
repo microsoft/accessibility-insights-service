@@ -96,15 +96,27 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     }
 
     public async onTasksAdded(tasks: JobTask[]): Promise<void> {
-        await this.invokeOverrides(EnableBaseWorkflow.onTasksAdded, this.onTasksAddedCallback, undefined, undefined, tasks);
+        await this.invokeOverrides(
+            EnableBaseWorkflow.onTasksAdded,
+            this.onTasksAddedCallback,
+            async () => super.onTasksAdded(tasks),
+            undefined,
+            tasks,
+        );
     }
 
     public async handleFailedTasks(failedTasks: BatchTask[]): Promise<void> {
-        await this.invokeOverrides(EnableBaseWorkflow.handleFailedTasks, this.handleFailedTasksCallback, undefined, undefined, failedTasks);
+        await this.invokeOverrides(
+            EnableBaseWorkflow.handleFailedTasks,
+            this.handleFailedTasksCallback,
+            async () => super.handleFailedTasks(failedTasks),
+            undefined,
+            failedTasks,
+        );
     }
 
     public async onExit(): Promise<void> {
-        await this.invokeOverrides(EnableBaseWorkflow.onExit, this.onExitCallback);
+        await this.invokeOverrides(EnableBaseWorkflow.onExit, this.onExitCallback, async () => super.onExit());
     }
 
     private async invokeOverrides(
@@ -232,6 +244,13 @@ describe(BatchTaskCreator, () => {
 
     afterAll(() => {
         mockDate.reset();
+    });
+
+    it('should not throw on optional method overrides', async () => {
+        testSubject.enableBaseWorkflow = EnableBaseWorkflow.onExit | EnableBaseWorkflow.onTasksAdded | EnableBaseWorkflow.handleFailedTasks;
+        await testSubject.onExit();
+        await testSubject.onTasksAdded([]);
+        await testSubject.handleFailedTasks([]);
     });
 
     it('throw if not initialized', async () => {

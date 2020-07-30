@@ -7,6 +7,7 @@ import { BaseTelemetryProperties, ContextAwareLogger, Logger } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry-point';
 import { Worker } from './worker/worker';
+
 // tslint:disable: no-object-literal-type-assertion
 
 class TestableWebApiScanJobManagerEntryPoint extends WebApiScanJobManagerEntryPoint {
