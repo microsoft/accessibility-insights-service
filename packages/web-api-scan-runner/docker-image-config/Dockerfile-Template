@@ -26,5 +26,5 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-ENTRYPOINT [ "node", "web-api-scan-runner.js" ]
+ENTRYPOINT [ "node", "./web-api-scan-runner.js" ]
 CMD [${arg}]

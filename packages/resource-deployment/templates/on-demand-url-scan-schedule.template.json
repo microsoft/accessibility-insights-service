@@ -11,7 +11,7 @@
         },
         "jobManagerTask": {
             "id": "on-demand-url-scan-job-manager-task",
-            "commandLine": "/bin/bash -c run-on-demand-scan-job-manager.sh",
+            "commandLine": "",
             "containerSettings": {
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-manager"
             },
