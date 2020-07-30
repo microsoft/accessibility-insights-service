@@ -28,8 +28,8 @@ export class OnDemandScanRequestSender {
             onDemandPageScanRequests.map(async (page) => {
                 const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
                 const resultDoc = resultDocs.pop();
-                this.logger.logInfo('Sending scan request to the scan task queue.', { scanId: resultDoc.id });
                 if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
+                    this.logger.logInfo('Sending scan request to the scan task queue.', { scanId: resultDoc.id });
                     const message = this.createOnDemandScanRequestMessage(page);
                     const isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
                     if (isEnqueueSuccessful === true) {

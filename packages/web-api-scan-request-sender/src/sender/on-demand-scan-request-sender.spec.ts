@@ -165,9 +165,6 @@ describe('Scan request sender', () => {
                 .verifiable(Times.once());
 
             loggerMock
-                .setup((o) => o.logInfo('Sending scan request to the scan task queue.', { scanId: request.id }))
-                .verifiable(Times.once());
-            loggerMock
                 .setup((o) =>
                     o.logWarn('Scan request state is not valid for adding to the scan task queue.', {
                         scanId: request.id,
