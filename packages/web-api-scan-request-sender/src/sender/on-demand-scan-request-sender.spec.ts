@@ -14,7 +14,7 @@ import {
     OnDemandScanRequestMessage,
     ScanError,
 } from 'storage-documents';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { OnDemandScanRequestSender } from './on-demand-scan-request-sender';
 
 export class MockableLogger extends Logger {}
@@ -101,16 +101,16 @@ describe('Scan request sender', () => {
             const pageScanRunResultDoc = createResultDoc(request, 'accepted');
             const failedPageScanRunResultDoc = createResultDoc(request, 'failed', {
                 errorType: 'InternalError',
-                message: 'Failed to create scan message in a queue.',
+                message: 'Failed to create a scan request queue message.',
             });
 
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
+                .setup(async (resultProvider) => resultProvider.readScanRuns(It.isValue([request.id])))
                 .returns(async () => Promise.resolve([pageScanRunResultDoc]))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.writeScanRuns([failedPageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.writeScanRuns(It.isValue([failedPageScanRunResultDoc])))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
 
@@ -166,7 +166,27 @@ describe('Scan request sender', () => {
 
             loggerMock
                 .setup((o) =>
-                    o.logWarn('Scan request state is not valid for adding to the scan task queue.', {
+                    o.logError('Scan request state is not valid for adding to the scan task queue.', {
+                        scanId: request.id,
+                        scanRunState: pageScanRunResultDoc.run.state,
+                    }),
+                )
+                .verifiable(Times.once());
+        });
+        await testSubject.sendRequestToScan(onDemandPageScanRequests);
+    });
+
+    it('does not queue a scan when scan result not found in a result storage', async () => {
+        const onDemandPageScanRequests = getValidPageScanRequests();
+        onDemandPageScanRequests.forEach((request) => {
+            onDemandPageScanRunResultProvider
+                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
+                .returns(async () => Promise.resolve([]))
+                .verifiable(Times.once());
+
+            loggerMock
+                .setup((o) =>
+                    o.logError('The scan document not found in a result storage.', {
                         scanId: request.id,
                     }),
                 )
