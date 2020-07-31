@@ -36,7 +36,7 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
-echo "Copy the runtime configuration to the container"
+echo "Copy the runtime configuration to the image"
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-runner/dist/runtime-config.json"
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../..//web-api-scan-job-manager/dist/runtime-config.json"
 echo "Runtime configuration was copied successfully"
@@ -49,7 +49,7 @@ fi
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 
-echo "Setting the enviroment variables for the container"
+echo "Setting the enviroment variables for the image"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "${0%/*}/../../../web-api-scan-runner/dist/Dockerfile-Template" >"${0%/*}/../../../web-api-scan-runner/dist/Dockerfile"
 sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "${0%/*}/../../../web-api-scan-job-manager/dist/Dockerfile-Template" >"${0%/*}/../../../web-api-scan-job-manager/dist/Dockerfile"
 echo "Enviroment variables were set successfully."
