@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --colors",
+        "build": "webpack --config ./webpack.config.js --colors && node ./create-image-package-json.js",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
@@ -48,6 +48,7 @@
     },
     "dependencies": {
         "accessibility-insights-report": "^1.0.3",
+        "applicationinsights": "^1.8.0",
         "@azure/cosmos": "^3.7.4",
         "axe-core": "3.5.1",
         "axe-puppeteer": "^1.1.0",

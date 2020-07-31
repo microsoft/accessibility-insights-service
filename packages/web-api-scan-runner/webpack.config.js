@@ -51,12 +51,6 @@ module.exports = (env) => {
             new copyWebpackPlugin([
                 {
                     context: './docker-image-config',
-                    from: 'package.json',
-                    to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
-                },
-                {
-                    context: './docker-image-config',
                     from: '.dockerignore',
                     to: '',
                     ignore: ['dist/**', 'node_modules/**'],
