@@ -47,6 +47,10 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
         super.activeScanMessages = messages;
     }
 
+    public set jobId(value: string) {
+        super.jobId = value;
+    }
+
     public getQueueName(): string {
         return 'queue-name';
     }
@@ -233,6 +237,7 @@ describe(BatchTaskCreator, () => {
             loggerMock.object,
             systemMock.object,
         );
+        testSubject.jobId = batchConfig.jobId;
     });
 
     afterEach(() => {
