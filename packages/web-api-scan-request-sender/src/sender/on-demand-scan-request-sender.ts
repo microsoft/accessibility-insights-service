@@ -25,32 +25,39 @@ export class OnDemandScanRequestSender {
 
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
         await Promise.all(
-            onDemandPageScanRequests.map(async (page) => {
-                const resultDocs = await this.onDemandPageScanRunResultProvider.readScanRuns([page.id]);
-                const resultDoc = resultDocs.pop();
-                this.logger.logInfo('Sending scan request to the scan task queue.', { scanId: resultDoc.id });
-                if (resultDoc !== undefined && resultDoc.run !== undefined && resultDoc.run.state === 'accepted') {
-                    const message = this.createOnDemandScanRequestMessage(page);
+            onDemandPageScanRequests.map(async (scanRequest) => {
+                const scans = await this.onDemandPageScanRunResultProvider.readScanRuns([scanRequest.id]);
+                const scan = scans.pop();
+                if (scan !== undefined && scan.run !== undefined && scan.run.state === 'accepted') {
+                    this.logger.logInfo('Sending scan request to the scan task queue.', { scanId: scan.id });
+                    const message = this.createOnDemandScanRequestMessage(scanRequest);
                     const isEnqueueSuccessful = await this.queue.createMessage(this.storageConfig.scanQueue, message);
                     if (isEnqueueSuccessful === true) {
-                        await this.updateOnDemandPageResultDoc(resultDoc, 'queued');
+                        await this.updateOnDemandPageResultDoc(scan, 'queued');
                     } else {
                         const error: ScanError = {
                             errorType: 'InternalError',
-                            message: 'Failed to create scan message in a queue.',
+                            message: 'Failed to create a scan request queue message.',
                         };
-                        await this.updateOnDemandPageResultDoc(resultDoc, 'failed', error);
+                        await this.updateOnDemandPageResultDoc(scan, 'failed', error);
                         this.logger.logError('Failed to add scan request to the scan task queue.', {
-                            scanId: resultDoc.id,
+                            scanId: scan.id,
                         });
                     }
                 } else {
-                    this.logger.logWarn('Scan request state is not valid for adding to the scan task queue.', {
-                        scanId: resultDoc.id,
-                    });
+                    if (scan !== undefined) {
+                        this.logger.logError('Scan request state is not valid for adding to the scan task queue.', {
+                            scanId: scan.id,
+                            scanRunState: scan.run?.state,
+                        });
+                    } else {
+                        this.logger.logError('The scan document not found in a result storage.', {
+                            scanId: scanRequest.id,
+                        });
+                    }
                 }
 
-                await this.pageScanRequestProvider.deleteRequests([page.id]);
+                await this.pageScanRequestProvider.deleteRequests([scanRequest.id]);
             }),
         );
     }
