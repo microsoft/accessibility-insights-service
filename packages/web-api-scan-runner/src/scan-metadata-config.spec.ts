@@ -16,8 +16,14 @@ describe(ScanMetadataConfig, () => {
     beforeEach(() => {
         argvMock = Mock.ofType<Argv>();
         testSubject = new ScanMetadataConfig(argvMock.object);
-        argvMock.setup((a) => a.env()).returns(() => argvMock.object as any);
-        argvMock.setup((a) => a.argv).returns(() => argvVal as any);
+        argvMock
+            .setup((a) => a.env())
+            .returns(() => argvMock.object as any)
+            .verifiable();
+        argvMock
+            .setup((a) => a.argv)
+            .returns(() => argvVal as any)
+            .verifiable();
     });
 
     it('getConfig', () => {
