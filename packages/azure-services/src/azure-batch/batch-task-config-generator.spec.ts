@@ -96,6 +96,7 @@ describe(BatchTaskConfigGenerator, () => {
         expect(actualTaskConfig).toEqual(expectedTaskConfig);
     });
 
+    // tslint:disable-next-line: no-any
     function getEnvironmentSettings(taskArgsString: string): any[] {
         return [
             {
