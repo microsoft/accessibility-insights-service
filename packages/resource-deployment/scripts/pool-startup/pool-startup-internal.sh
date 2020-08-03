@@ -57,7 +57,9 @@ fi
 installBootstrapPackages
 
 # Commented out deployment will be part of the container image
-<<block
+
+# remove block after converting to containers
+# <<block
 echo "Installing chrome"
 #referred from https://www.ubuntuupdates.org/ppa/google_chrome
 wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
@@ -101,7 +103,7 @@ npm install yargs@15.3.1 applicationinsights@1.8.0
 cd "$SCAN_REQUEST_ON_DEMAND_SHARED_LOCATION"
 echo "Installing on demand scan request sender dependencies"
 npm install yargs@15.3.1 applicationinsights@1.8.0
-block
+# block
 
 echo "Invoking custom pool startup script"
 "${0%/*}/custom-pool-post-startup.sh"

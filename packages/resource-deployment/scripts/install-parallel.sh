@@ -148,7 +148,6 @@ function install() {
     # Additionally, these should run sequentially because of interdependence.
 
     . "${0%/*}/setup-key-vault.sh"
-    . "${0%/*}/create-docker-file.sh"
     . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/batch-account-create.sh"
     . "${0%/*}/job-schedule-create.sh"

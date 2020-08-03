@@ -7,15 +7,16 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group>
+Usage: $0 -r <resource group> [-e <runtime environment>]
 "
     exit 1
 }
 
 # Read script arguments
-while getopts ":r:" option; do
+while getopts ":r:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -25,7 +26,16 @@ if [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
+if [[ -z $environment ]]; then
+    environment="dev"
+fi
+
 . "${0%/*}/get-resource-names.sh"
+
+echo "Copy the $environment runtime configuration to the image"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-runner/dist/runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../..//web-api-scan-job-manager/dist/runtime-config.json"
+echo "Runtime configuration was copied successfully"
 
 az acr login --name "$containerRegistryName"
 

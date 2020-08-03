@@ -26,6 +26,8 @@ export interface JobManagerConfig {
     addTasksIntervalInSeconds: number;
     maxWallClockTimeInHours: number;
     sendNotificationTasksCount: number;
+    scanRunnerTaskImageName: string;
+    sendNotificationTaskImageName: string;
 }
 
 export interface ScanRunTimeConfig {
@@ -68,6 +70,8 @@ export interface AvailabilityTestConfig {
     environmentDefinition: string;
 }
 
+export declare type ResourceType = 'batch' | 'registry';
+
 @injectable()
 export class ServiceConfiguration {
     public static readonly profilePath = `${__dirname}/runtime-config.json`;
@@ -86,6 +90,11 @@ export class ServiceConfiguration {
         const config = await this.getConvictConfig();
 
         return config.get(key);
+    }
+
+    public getAzureResourceName(sourceResourceType: ResourceType, sourceResourceName: string, targetResourceType: ResourceType): string {
+        // Expected resource name format ally<resourceType><resourceGroupSuffix>
+        return sourceResourceName.replace(sourceResourceType, targetResourceType);
     }
 
     private async getConvictConfig(): Promise<convict.Config<RuntimeConfig>> {
@@ -182,6 +191,16 @@ export class ServiceConfiguration {
                     format: 'int',
                     default: 100,
                     doc: 'Number of scan notification tasks that can be in active/running state',
+                },
+                scanRunnerTaskImageName: {
+                    format: 'String',
+                    default: 'batch-scan-runner',
+                    doc: 'The Docker image name used for task creation.',
+                },
+                sendNotificationTaskImageName: {
+                    format: 'String',
+                    default: 'batch-notification-runner',
+                    doc: 'The Docker image name used for task creation.',
                 },
             },
             scanConfig: {

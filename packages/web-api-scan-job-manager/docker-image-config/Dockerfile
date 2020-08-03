@@ -3,10 +3,8 @@
 FROM node:12-slim
 
 # Set Environment variables
-ENV APPINSIGHTS_INSTRUMENTATIONKEY=%APP_INSIGHTS_TOKEN%
 ENV AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
 ENV AZURE_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
-ENV KEY_VAULT_URL=%KEY_VAULT_TOKEN%
 
 # Copy configuration
 COPY runtime-config*.json ./

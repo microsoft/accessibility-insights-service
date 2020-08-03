@@ -13,6 +13,7 @@
             "id": "on-demand-url-scan-job-manager-task",
             "commandLine": "",
             "containerSettings": {
+                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-manager"
             },
             "resourceFiles": [

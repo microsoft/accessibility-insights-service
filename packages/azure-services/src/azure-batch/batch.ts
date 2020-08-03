@@ -300,7 +300,11 @@ export class Batch {
         messageText: string,
         sasUrl: string,
     ): Promise<BatchServiceModels.TaskAddParameter> {
-        const taskParameter = await this.batchTaskConfigGenerator.getTaskConfig(taskId, messageText);
+        const taskParameter = await this.batchTaskConfigGenerator.getTaskConfigWithImageSupport(
+            this.config.accountName,
+            taskId,
+            messageText,
+        );
         if (taskParameter === undefined) {
             return taskParameter;
         }

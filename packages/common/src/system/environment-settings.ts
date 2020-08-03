@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { inject, injectable } from 'inversify';
 import { commonIocTypes } from '../common-ioc-types';
 import { System } from './system';
