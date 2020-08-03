@@ -35,6 +35,9 @@ fi
 echo "Copy the $environment runtime configuration to the image"
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-runner/dist/runtime-config.json"
 cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../..//web-api-scan-job-manager/dist/runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-request-sender/dist/runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-send-notification-job-manager/dist/runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-send-notification-runner/dist/runtime-config.json"
 echo "Runtime configuration was copied successfully"
 
 az acr login --name "$containerRegistryName"
@@ -44,3 +47,12 @@ az acr build --image $containerRegistryName.azurecr.io/batch-scan-runner:latest 
 
 src="${0%/*}/../../../web-api-scan-job-manager/dist/"
 az acr build --image $containerRegistryName.azurecr.io/batch-scan-manager:latest --registry $containerRegistryName $src
+
+src="${0%/*}/../../../web-api-scan-request-sender/dist/"
+az acr build --image $containerRegistryName.azurecr.io/batch-scan-sender:latest --registry $containerRegistryName $src
+
+src="${0%/*}/../../../web-api-send-notification-job-manager/dist/"
+az acr build --image $containerRegistryName.azurecr.io/batch-notification-manager:latest --registry $containerRegistryName $src
+
+src="${0%/*}/../../../web-api-send-notification-runner/dist/"
+az acr build --image $containerRegistryName.azurecr.io/batch-notification-runner:latest --registry $containerRegistryName $src

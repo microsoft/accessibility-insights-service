@@ -1,0 +1,21 @@
+{
+    "name": "web-api-send-notification-runner",
+    "version": "1.0.0",
+    "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "scripts": {},
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
+    },
+    "author": "Microsoft",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
+    },
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
+    "devDependencies": {},
+    "dependencies": {
+        "yargs": "^15.3.1",
+        "applicationinsights": "^1.8.0"
+    }
+}
