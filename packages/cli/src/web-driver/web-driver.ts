@@ -14,7 +14,7 @@ export class WebDriver {
         launchOption = {
             headless: true,
             timeout: 30000,
-            args: ['--disable-dev-shm-usage'],
+            args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
         };
 
         if (chromePath !== undefined) {
