@@ -58,7 +58,7 @@ Object {
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
-      "default": "batch-notification-runner",
+      "default": "batch-scan-notification-runner",
       "doc": "The Docker image name used for task creation.",
       "format": "String",
     },
@@ -269,7 +269,7 @@ Object {
       "format": "String",
     },
     "sendNotificationTaskImageName": Object {
-      "default": "batch-notification-runner",
+      "default": "batch-scan-notification-runner",
       "doc": "The Docker image name used for task creation.",
       "format": "String",
     },
