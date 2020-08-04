@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { Argv } from 'yargs';
 import { NotificationSenderConfig } from './notification-sender-config';
+
 // tslint:disable: no-any
 
 describe(NotificationSenderConfig, () => {
@@ -13,15 +14,20 @@ describe(NotificationSenderConfig, () => {
     const argvVal = { foo: 'test' };
 
     beforeEach(() => {
-        // tslint:disable-next-line: no-empty
-        argvMock = Mock.ofInstance<Argv>(({ argv: undefined, demandOption: () => {} } as unknown) as Argv);
+        argvMock = Mock.ofType<Argv>();
         testSubject = new NotificationSenderConfig(argvMock.object);
-        argvMock.setup((a) => a.argv).returns(() => argvVal as any);
+        argvMock
+            .setup((a) => a.env())
+            .returns(() => argvMock.object as any)
+            .verifiable();
+        argvMock
+            .setup((a) => a.argv)
+            .returns(() => argvVal as any)
+            .verifiable();
     });
 
     it('getConfig', () => {
         expect(testSubject.getConfig()).toBe(argvVal);
-
         argvMock.verify((a) => a.demandOption(['scanId', 'scanNotifyUrl', 'runStatus', 'scanStatus']), Times.once());
     });
 });

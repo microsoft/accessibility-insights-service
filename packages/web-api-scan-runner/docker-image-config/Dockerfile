@@ -2,10 +2,6 @@
 # Licensed under the MIT License.
 FROM node:12-slim
 
-# Set Environment variables
-ENV AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
-ENV AZURE_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
-
 # Install latest chrome dev package and fonts to support major charsets (Chinese, Japanese, Arabic, Hebrew, Thai and a few others)
 # Note: this installs the necessary libs to make the bundled version of Chromium that Puppeteer
 # installs, work.
@@ -15,7 +11,7 @@ RUN apt-get update \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
     && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-      --no-install-recommends \
+    --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Install puppeteer so it's available in the container.
@@ -29,7 +25,6 @@ RUN npm i puppeteer \
 
 # Run everything after as non-privileged user.
 USER pptruser
-
 
 # Copy configuration
 COPY runtime-config*.json ./

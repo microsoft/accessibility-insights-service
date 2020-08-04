@@ -11,7 +11,11 @@
         },
         "jobManagerTask": {
             "id": "on-demand-scan-req-sender-task",
-            "commandLine": "/bin/bash -c run-scan-request-sender.sh",
+            "commandLine": "",
+            "containerSettings": {
+                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_SCAN_QUEUE",
+                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender"
+            },
             "resourceFiles": [
                 {
                     "autoStorageContainerName": "batch-on-demand-scan-request-sender-script"

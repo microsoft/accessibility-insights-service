@@ -2,10 +2,6 @@
 # Licensed under the MIT License.
 FROM node:12-slim
 
-# Set Environment variables
-ENV AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
-ENV AZURE_STORAGE_NOTIFICATION_QUEUE=ondemand-send-notification
-
 # Copy configuration
 COPY runtime-config*.json ./
 
