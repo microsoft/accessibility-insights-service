@@ -4,7 +4,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const copyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
@@ -60,14 +59,6 @@ module.exports = (env) => {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new ForkTsCheckerWebpackPlugin(),
-            new copyWebpackPlugin([
-                {
-                    context: './run-script',
-                    from: '**/*.sh',
-                    to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
-                },
-            ]),
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],

@@ -13,17 +13,9 @@
             "id": "on-demand-scan-req-sender-task",
             "commandLine": "",
             "containerSettings": {
-                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_SCAN_QUEUE",
+                "containerRunOptions": "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender"
             },
-            "resourceFiles": [
-                {
-                    "autoStorageContainerName": "batch-on-demand-scan-request-sender-script"
-                },
-                {
-                    "autoStorageContainerName": "runtime-configuration"
-                }
-            ],
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",

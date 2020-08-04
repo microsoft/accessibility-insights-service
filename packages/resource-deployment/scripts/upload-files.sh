@@ -53,24 +53,15 @@ fi
 . "${0%/*}/process-utilities.sh"
 
 function uploadFiles() {
-    echo "Uploading files to blobs"
+    echo "Uploading files to Blob storage"
 
-    local webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
-    local webApiSendNotificationJobManagerContainerName="batch-web-api-send-notification-job-manager-script"
-    local webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
-    local webApiSendNotificationRunnerContainerName="batch-web-api-send-notification-runner-script"
-    local onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
     local poolStartupContainerName="batch-pool-startup-script"
 
     uploadProcesses=(
-        "uploadFolderContents $webApiScanJobManagerContainerName \"$dropFolder/web-api-scan-job-manager/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiSendNotificationJobManagerContainerName \"$dropFolder/web-api-send-notification-job-manager/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiScanrunnerContainerName \"$dropFolder/web-api-scan-runner/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiSendNotificationRunnerContainerName \"$dropFolder/web-api-send-notification-runner/dist\" \"$storageAccountName\""
-        "uploadFolderContents $onDemandScanRequestSenderContainerName \"$dropFolder/web-api-scan-request-sender/dist\" \"$storageAccountName\""
         "uploadFolderContents $poolStartupContainerName \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
         "${0%/*}/upload-config-files.sh"
     )
+
     runCommandsWithoutSecretsInParallel uploadProcesses
 
     echo "Upload files completed successfully."

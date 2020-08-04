@@ -49,6 +49,6 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Uploading config files to blobs"
+echo "Uploading config files to Blob storage"
 
 uploadFile $runtimeConfigurationContainerName "$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json" "$storageAccountName" "$runtimeConfigurationBlobName"
