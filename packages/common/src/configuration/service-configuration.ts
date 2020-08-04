@@ -199,7 +199,7 @@ export class ServiceConfiguration {
                 },
                 sendNotificationTaskImageName: {
                     format: 'String',
-                    default: 'batch-notification-runner',
+                    default: 'batch-scan-notification-runner',
                     doc: 'The Docker image name used for task creation.',
                 },
             },

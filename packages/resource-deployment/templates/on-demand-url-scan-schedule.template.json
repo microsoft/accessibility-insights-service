@@ -13,7 +13,7 @@
             "id": "on-demand-url-scan-job-manager-task",
             "commandLine": "",
             "containerSettings": {
-                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL",
+                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_SCAN_QUEUE -e AZURE_STORAGE_NOTIFICATION_QUEUE",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-manager"
             },
             "resourceFiles": [
@@ -54,10 +54,6 @@
             {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
-            },
-            {
-                "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
-                "value": "batch-web-api-scan-runner-script"
             }
         ],
         "poolInfo": {

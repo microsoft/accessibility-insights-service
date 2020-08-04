@@ -11,7 +11,11 @@
         },
         "jobManagerTask": {
             "id": "on-demand-send-notification-job-manager-task",
-            "commandLine": "/bin/bash -c run-on-demand-send-notification-job-manager.sh",
+            "commandLine": "",
+            "containerSettings": {
+                "containerRunOptions": "-e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e AZURE_STORAGE_NOTIFICATION_QUEUE",
+                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-notification-manager"
+            },
             "resourceFiles": [
                 {
                     "autoStorageContainerName": "batch-web-api-send-notification-job-manager-script"
@@ -46,10 +50,6 @@
             {
                 "name": "KEY_VAULT_URL",
                 "value": "%KEY_VAULT_TOKEN%"
-            },
-            {
-                "name": "RUNNER_SCRIPTS_CONTAINER_NAME",
-                "value": "batch-web-api-send-notification-runner-script"
             }
         ],
         "poolInfo": {

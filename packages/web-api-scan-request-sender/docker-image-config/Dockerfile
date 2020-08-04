@@ -2,9 +2,6 @@
 # Licensed under the MIT License.
 FROM node:12-slim
 
-# Set Environment variables
-ENV AZURE_STORAGE_SCAN_QUEUE=ondemand-scanrequest
-
 # Copy configuration
 COPY runtime-config*.json ./
 
@@ -15,4 +12,4 @@ RUN npm install
 # Bundle app source
 COPY . .
 
-ENTRYPOINT [ "node", "./sender.js.js" ]
+ENTRYPOINT [ "node", "./sender.js" ]

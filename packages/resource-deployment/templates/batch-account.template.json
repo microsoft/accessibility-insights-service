@@ -214,7 +214,22 @@
                             "sku": "16-04-lts",
                             "version": "latest"
                         },
-                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04",
+                        "containerConfiguration": {
+                            "type": "dockerCompatible",
+                            "containerImageNames": [
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-manager')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-runner')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-request-sender')]"
+                            ],
+                            "containerRegistries": [
+                                {
+                                    "registryServer": "[variables('containerRegistryServerName')]",
+                                    "username": "[parameters('containerRegistryServerUserName')]",
+                                    "password": "[parameters('containerRegistryServerPassword')]"
+                                }
+                            ]
+                        }
                     }
                 },
                 "networkConfiguration": {
