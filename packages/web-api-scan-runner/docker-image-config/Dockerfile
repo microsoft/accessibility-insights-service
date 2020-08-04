@@ -18,8 +18,14 @@ RUN apt-get update \
       --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Install puppeteer so it's available in the container.
-RUN npm i puppeteer \
+
+# Copy configuration
+COPY runtime-config*.json ./
+
+# Install app dependencies
+COPY package*.json ./
+
+RUN npm install \
     # Add user so we don't need --no-sandbox.
     # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
     && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
@@ -30,13 +36,7 @@ RUN npm i puppeteer \
 # Run everything after as non-privileged user.
 USER pptruser
 
-
-# Copy configuration
-COPY runtime-config*.json ./
-
-# Install app dependencies
-COPY package*.json ./
-RUN npm install
+CMD ["google-chrome-unstable"]
 
 # Bundle app source
 COPY . .
