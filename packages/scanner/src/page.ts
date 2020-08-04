@@ -8,21 +8,26 @@ import * as Puppeteer from 'puppeteer';
 import { AxeScanResults, ScanError } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 
-export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
-
 @injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
     public browser: Puppeteer.Browser;
 
     constructor(
-        @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
+        private readonly puppeteer: typeof Puppeteer = Puppeteer,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async create(): Promise<void> {
-        this.browser = this.browserFactory();
+        let launchOption: Puppeteer.LaunchOptions;
+        launchOption = {
+            headless: true,
+            timeout: 30000,
+            args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
+        };
+
+        this.browser = await this.puppeteer.launch(launchOption);
         this.puppeteerPage = await this.browser.newPage();
     }
 
