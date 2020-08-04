@@ -20,7 +20,7 @@ export class BatchTaskConfigGenerator {
 
     // The --rm container option removes the container after the task finishes
     // The --workdir container option defines task working directory
-    private readonly containerRunOptions = '--rm --workdir /';
+    private readonly containerRunOptions = '--rm --workdir --cap-add=SYS_ADMIN /';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
