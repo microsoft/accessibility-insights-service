@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
+import { ServiceConfiguration } from 'common';
 import * as Puppeteer from 'puppeteer';
 import { WebDriver } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
@@ -82,11 +83,9 @@ describe('Page', () => {
     let page: Page;
     let gotoOptions: Puppeteer.DirectNavigationOptions;
     let waitOptions: Puppeteer.DirectNavigationOptions;
-    let webDriverMock: IMock<WebDriver>;
     let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
-        webDriverMock = Mock.ofType<WebDriver>();
         loggerMock = Mock.ofType(MockableLogger);
 
         gotoOptions = {
@@ -112,15 +111,11 @@ describe('Page', () => {
         puppeteerBrowserFactory = Mock.ofType<PuppeteerBrowserFactory>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
-        webDriverMock
-            .setup((wd) => wd.launch())
-            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
         puppeteerBrowserFactory
             .setup((o) => o())
             .returns(() => <Puppeteer.Browser>(<unknown>puppeteerBrowserMock))
             .verifiable(Times.once());
-        page = new Page(axePuppeteerFactoryMock.object, webDriverMock.object, loggerMock.object);
+        page = new Page(puppeteerBrowserFactory.object, axePuppeteerFactoryMock.object, loggerMock.object);
     });
 
     it('should return error info when page is not html', async () => {
@@ -229,6 +224,7 @@ describe('Page', () => {
     it('should create new browser page', async () => {
         await page.create();
         expect(page.puppeteerPage).toEqual(puppeteerBrowserMock.puppeteerPage);
+        puppeteerBrowserFactory.verifyAll();
     });
 
     it('should call setBypassCSP', async () => {
@@ -268,6 +264,17 @@ describe('Page', () => {
     });
 
     it.skip('validates scanning in dev box', async () => {
+        const webDriver = new WebDriver(Mock.ofType(MockableLogger).object);
+        const browser = await webDriver.launch();
+        const getBrowser = () => {
+            return browser;
+        };
+        page = new Page(getBrowser, new AxePuppeteerFactory(new ServiceConfiguration()), loggerMock.object);
+
+        await page.create();
+
+        await page.enableBypassCSP();
+
         const results = await page.scanForA11yIssues('https://www.bing.com');
 
         let violationCount = 0;
