@@ -3,10 +3,14 @@
 import { AxePuppeteer } from 'axe-puppeteer';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import { GlobalLogger, LogLevel } from 'logger';
 import * as Puppeteer from 'puppeteer';
+import { WebDriver } from 'service-library';
 import { AxeScanResults, ScanError } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+
+export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
 
 @injectable()
 export class Page {
@@ -14,20 +18,15 @@ export class Page {
     public browser: Puppeteer.Browser;
 
     constructor(
-        private readonly puppeteer: typeof Puppeteer = Puppeteer,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
+        @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async create(): Promise<void> {
-        let launchOption: Puppeteer.LaunchOptions;
-        launchOption = {
-            headless: true,
-            timeout: 30000,
-            args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
-        };
-
-        this.browser = await this.puppeteer.launch(launchOption);
+        if (isEmpty(this.browser) || !this.browser.isConnected()) {
+            this.browser = await this.webDriver.launch();
+        }
         this.puppeteerPage = await this.browser.newPage();
     }
 

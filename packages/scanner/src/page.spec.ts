@@ -5,15 +5,13 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
-import { ServiceConfiguration } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { WebDriver } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
-import { Page } from './page';
+import { Page, PuppeteerBrowserFactory } from './page';
 import { MockableLogger } from './test-utilities/mockable-logger';
-
-type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
 
 class PuppeteerBrowserMock {
     public static readonly browserVersion = 'browser version';
@@ -78,16 +76,17 @@ describe('Page', () => {
     let setBypassCSPMock: IMock<(enabled: boolean) => Promise<void>>;
     let puppeteerPageMock: PuppeteerPageMock;
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
-    let puppeteer: typeof Puppeteer;
-    let puppeteerLaunchMock: IMock<puppeteerLaunch>;
+    let puppeteerBrowserFactory: IMock<PuppeteerBrowserFactory>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
     let puppeteerBrowserMock: PuppeteerBrowserMock;
     let page: Page;
     let gotoOptions: Puppeteer.DirectNavigationOptions;
     let waitOptions: Puppeteer.DirectNavigationOptions;
+    let webDriverMock: IMock<WebDriver>;
     let loggerMock: IMock<MockableLogger>;
 
     beforeEach(() => {
+        webDriverMock = Mock.ofType<WebDriver>();
         loggerMock = Mock.ofType(MockableLogger);
 
         gotoOptions = {
@@ -110,17 +109,18 @@ describe('Page', () => {
 
         puppeteerPageMock = new PuppeteerPageMock(gotoMock.object, waitForNavigationMock.object, setBypassCSPMock.object);
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
+        puppeteerBrowserFactory = Mock.ofType<PuppeteerBrowserFactory>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
-        puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
-        puppeteerLaunchMock
-            // tslint:disable-next-line: no-unsafe-any
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+        webDriverMock
+            .setup((wd) => wd.launch())
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
-        puppeteer = Puppeteer;
-        puppeteer.launch = puppeteerLaunchMock.object;
-        page = new Page(puppeteer, axePuppeteerFactoryMock.object, loggerMock.object);
+        puppeteerBrowserFactory
+            .setup((o) => o())
+            .returns(() => <Puppeteer.Browser>(<unknown>puppeteerBrowserMock))
+            .verifiable(Times.once());
+        page = new Page(axePuppeteerFactoryMock.object, webDriverMock.object, loggerMock.object);
     });
 
     it('should return error info when page is not html', async () => {
@@ -268,12 +268,6 @@ describe('Page', () => {
     });
 
     it.skip('validates scanning in dev box', async () => {
-        page = new Page(puppeteer, new AxePuppeteerFactory(new ServiceConfiguration()), loggerMock.object);
-
-        await page.create();
-
-        await page.enableBypassCSP();
-
         const results = await page.scanForA11yIssues('https://www.bing.com');
 
         let violationCount = 0;
