@@ -30,29 +30,42 @@ if [[ -z $environment ]]; then
     environment="dev"
 fi
 
-. "${0%/*}/get-resource-names.sh"
+pushImageToRegistry() {
+    local name=$1
+    local source=$2
 
-echo "Copy the $environment runtime configuration to the image"
-cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-runner/dist/runtime-config.json"
-cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../..//web-api-scan-job-manager/dist/runtime-config.json"
-cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-scan-request-sender/dist/runtime-config.json"
-cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-send-notification-job-manager/dist/runtime-config.json"
-cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${0%/*}/../../../web-api-send-notification-runner/dist/runtime-config.json"
+    az acr build --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source 1>/dev/null
+}
+
+. "${0%/*}/get-resource-names.sh"
+. "${0%/*}/process-utilities.sh"
+
+# Set image source location
+batchScanRunnerDist="${0%/*}/../../../web-api-scan-runner/dist/"
+batchScanManagerDist="${0%/*}/../../../web-api-scan-job-manager/dist/"
+batchScanRequestSenderDist="${0%/*}/../../../web-api-scan-request-sender/dist/"
+batchScanNotificationManagerDist="${0%/*}/../../../web-api-send-notification-job-manager/dist/"
+batchScanNotificationRunnerDist="${0%/*}/../../../web-api-send-notification-runner/dist/"
+
+echo "Copy $environment runtime configuration to the dist folder"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRunnerDist}runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanManagerDist}runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanRequestSenderDist}runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanNotificationManagerDist}runtime-config.json"
+cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanNotificationRunnerDist}runtime-config.json"
 echo "Runtime configuration was copied successfully"
 
+imageBuildProcesses=(
+    "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist"
+    "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist"
+    "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist"
+    "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist"
+    "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist"
+)
+
+# Login to container registry
 az acr login --name "$containerRegistryName"
 
-src="${0%/*}/../../../web-api-scan-runner/dist/"
-az acr build --image $containerRegistryName.azurecr.io/batch-scan-runner:latest --registry $containerRegistryName $src
-
-src="${0%/*}/../../../web-api-scan-job-manager/dist/"
-az acr build --image $containerRegistryName.azurecr.io/batch-scan-manager:latest --registry $containerRegistryName $src
-
-src="${0%/*}/../../../web-api-scan-request-sender/dist/"
-az acr build --image $containerRegistryName.azurecr.io/batch-scan-request-sender:latest --registry $containerRegistryName $src
-
-src="${0%/*}/../../../web-api-send-notification-job-manager/dist/"
-az acr build --image $containerRegistryName.azurecr.io/batch-scan-notification-manager:latest --registry $containerRegistryName $src
-
-src="${0%/*}/../../../web-api-send-notification-runner/dist/"
-az acr build --image $containerRegistryName.azurecr.io/batch-scan-notification-runner:latest --registry $containerRegistryName $src
+echo "Pushing images to the container registry..."
+runCommandsWithoutSecretsInParallel imageBuildProcesses
+echo "Images pushed to the container registry"
