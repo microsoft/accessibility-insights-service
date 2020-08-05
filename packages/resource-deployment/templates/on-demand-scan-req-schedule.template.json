@@ -13,7 +13,7 @@
             "id": "on-demand-scan-req-sender-task",
             "commandLine": "",
             "containerSettings": {
-                "containerRunOptions": "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
+                "containerRunOptions": "--workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender"
             },
             "constraints": {
