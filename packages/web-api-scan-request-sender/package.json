@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --colors",
+        "build": "webpack --config ./webpack.config.js --colors && node ./create-image-package-json.js",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
@@ -40,6 +40,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
+        "applicationinsights": "^1.8.0",
         "azure-services": "^1.0.0",
         "common": "1.0.0",
         "inversify": "^5.0.1",
@@ -48,6 +49,7 @@
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
         "lodash": "^4.17.19",
-        "why-is-node-running": "^2.2.0"
+        "why-is-node-running": "^2.2.0",
+        "yargs": "^15.3.1"
     }
 }
