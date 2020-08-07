@@ -13,4 +13,8 @@ export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider 
     public async getImageName(): Promise<string> {
         return (await this.serviceConfig.getConfigValue('jobManagerConfig')).scanRunnerTaskImageName;
     }
+
+    public getAdditionalContainerRunOptions?(): string {
+        return '--cap-add=SYS_ADMIN';
+    }
 }

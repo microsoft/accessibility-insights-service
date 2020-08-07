@@ -14,7 +14,6 @@ RUN apt-get update \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-
 # Copy configuration
 COPY runtime-config*.json ./
 

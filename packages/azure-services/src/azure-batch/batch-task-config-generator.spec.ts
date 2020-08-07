@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { BatchServiceModels } from '@azure/batch';
 import { EnvironmentSettings, ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { IMock, It, Mock } from 'typemoq';
 import { BatchTaskConfigGenerator, BatchTaskPropertyProvider } from './batch-task-config-generator';
@@ -11,6 +12,18 @@ import { BatchTaskConfigGenerator, BatchTaskPropertyProvider } from './batch-tas
 class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
     public async getImageName(): Promise<string> {
         return 'imageNameValue';
+    }
+
+    public getAdditionalContainerRunOptions?(): string {
+        return '--addon option';
+    }
+
+    public getResourceFiles?(): BatchServiceModels.ResourceFile[] {
+        return [
+            {
+                autoStorageContainerName: 'containerName',
+            },
+        ];
     }
 }
 
@@ -57,7 +70,7 @@ describe(BatchTaskConfigGenerator, () => {
         const environmentSettings = getEnvironmentSettings(taskArgsString);
         const actualContainerRunOptions = testSubject.getContainerRunOptions(taskArgsString, environmentSettings);
         expect(actualContainerRunOptions).toEqual(
-            "--rm --workdir / --cap-add=SYS_ADMIN -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value'",
+            "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value' --addon option",
         );
     });
 
@@ -79,11 +92,16 @@ describe(BatchTaskConfigGenerator, () => {
         const expectedTaskConfig = {
             id: 'taskId',
             commandLine: '',
+            resourceFiles: [
+                {
+                    autoStorageContainerName: 'containerName',
+                },
+            ],
             environmentSettings: expectedEnvironmentSettings,
             containerSettings: {
                 imageName: 'allyContainerRegistry.azurecr.io/imageNameValue',
                 containerRunOptions:
-                    "--rm --workdir / --cap-add=SYS_ADMIN -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value'",
+                    "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e KEY_VAULT_URL -e TASK_ARGUMENTS -e arg1='arg1Value' -e arg2='arg2Value' -e arg3='arg3Value' --addon option",
             },
             constraints: {
                 maxWallClockTime: `PT${taskRuntimeConfig.taskTimeoutInMinutes}M`,

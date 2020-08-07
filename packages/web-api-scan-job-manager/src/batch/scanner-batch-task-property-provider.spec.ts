@@ -14,10 +14,6 @@ describe(ScannerBatchTaskPropertyProvider, () => {
 
     beforeEach(() => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        serviceConfigMock
-            .setup(async (o) => o.getConfigValue('jobManagerConfig'))
-            .returns(() => Promise.resolve({ scanRunnerTaskImageName: 'scanRunnerTaskImageName' } as JobManagerConfig))
-            .verifiable();
         testSubject = new ScannerBatchTaskPropertyProvider(serviceConfigMock.object);
     });
 
@@ -26,7 +22,17 @@ describe(ScannerBatchTaskPropertyProvider, () => {
     });
 
     it('get image name', async () => {
+        serviceConfigMock
+            .setup(async (o) => o.getConfigValue('jobManagerConfig'))
+            .returns(() => Promise.resolve({ scanRunnerTaskImageName: 'scanRunnerTaskImageName' } as JobManagerConfig))
+            .verifiable();
+
         const actualImageName = await testSubject.getImageName();
         expect(actualImageName).toEqual('scanRunnerTaskImageName');
+    });
+
+    it('get additional container run options', () => {
+        const actualRunOptions = testSubject.getAdditionalContainerRunOptions();
+        expect(actualRunOptions).toEqual('--cap-add=SYS_ADMIN');
     });
 });

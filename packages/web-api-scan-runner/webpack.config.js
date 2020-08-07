@@ -53,13 +53,11 @@ module.exports = (env) => {
                     context: './docker-image-config',
                     from: '.dockerignore',
                     to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
                 },
                 {
                     context: './docker-image-config',
                     from: 'Dockerfile',
                     to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
                 },
             ]),
         ],

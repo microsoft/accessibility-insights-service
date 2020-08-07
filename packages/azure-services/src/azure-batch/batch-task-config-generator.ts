@@ -6,9 +6,22 @@ import { inject, injectable } from 'inversify';
 import { cloneDeep } from 'lodash';
 import * as moment from 'moment';
 
+export interface BatchTaskPropertyProvider {
+    getResourceFiles?(): BatchServiceModels.ResourceFile[];
+    getAdditionalContainerRunOptions?(): string;
+}
+
 @injectable()
 export abstract class BatchTaskPropertyProvider {
     public abstract async getImageName(): Promise<string>;
+
+    public getAdditionalContainerRunOptions?(): string {
+        return '';
+    }
+
+    public getResourceFiles?(): BatchServiceModels.ResourceFile[] {
+        return [];
+    }
 }
 
 @injectable()
@@ -20,7 +33,7 @@ export class BatchTaskConfigGenerator {
 
     // The --rm container option removes the container after the task finishes
     // The --workdir container option defines task working directory
-    private readonly containerRunOptions = '--rm --workdir / --cap-add=SYS_ADMIN';
+    private readonly containerRunOptions = '--rm --workdir /';
 
     public constructor(
         @inject(BatchTaskPropertyProvider) protected readonly batchTaskPropertyProvider: BatchTaskPropertyProvider,
@@ -37,11 +50,13 @@ export class BatchTaskConfigGenerator {
         const containerRunOptions = this.getContainerRunOptions(messageText, environmentSettings);
         const imageName = await this.getFullImageName(accountName);
         const batchTaskConfig = await this.getDefaultTaskConfig();
+        const resourceFiles = this.batchTaskPropertyProvider.getResourceFiles();
 
         return {
             id: taskId,
             commandLine: '',
             environmentSettings,
+            resourceFiles,
             containerSettings: {
                 imageName,
                 containerRunOptions,
@@ -57,8 +72,11 @@ export class BatchTaskConfigGenerator {
     public getContainerRunOptions(taskArgsString: string, environmentSettings: BatchServiceModels.EnvironmentSetting[]): string {
         const runArgsOptions = this.createRunArgsOptions(taskArgsString);
         const environmentVariableOptions = this.createEnvironmentVariableOptions(environmentSettings);
+        const containerRunOptions = `${
+            this.containerRunOptions
+        } ${environmentVariableOptions} ${runArgsOptions} ${this.batchTaskPropertyProvider.getAdditionalContainerRunOptions()}`;
 
-        return `${this.containerRunOptions} ${environmentVariableOptions} ${runArgsOptions}`;
+        return containerRunOptions.trimRight();
     }
 
     public getEnvironmentSettings(taskArgs: string): BatchServiceModels.EnvironmentSetting[] {

@@ -26,6 +26,15 @@ uploadFolderContents() {
     az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
 }
 
+uploadFile() {
+    destinationContainer=$1
+    pathToSource=$2
+    storageAccountName=$3
+    blobName=$4
+
+    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName" 1>/dev/null
+}
+
 exitWithUsageInfo() {
     echo \
         "
@@ -55,11 +64,9 @@ fi
 function uploadFiles() {
     echo "Uploading files to Blob storage"
 
-    local poolStartupContainerName="batch-pool-startup-script"
-
     uploadProcesses=(
-        "uploadFolderContents $poolStartupContainerName \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
-        "${0%/*}/upload-config-files.sh"
+        "uploadFolderContents \"batch-pool-startup-script\" \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
+        "uploadFile \"runtime-configuration\" \"$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json\" \"$storageAccountName\" \"runtime-config.json\""
     )
 
     runCommandsWithoutSecretsInParallel uploadProcesses
