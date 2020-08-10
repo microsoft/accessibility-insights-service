@@ -61,7 +61,7 @@
         "pretty-format": "^26.1.0",
         "reflect-metadata": "^0.1.13",
         "request": "^2.88.0",
-        "request-promise": "^4.2.4",
+        "request-promise": "^4.2.6",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0"
     }
