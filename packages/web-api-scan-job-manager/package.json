@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --colors",
+        "build": "webpack --config ./webpack.config.js --colors && node ../../create-docker-image-package-json.js",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
@@ -22,7 +22,7 @@
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/dotenv": "^8.2.0",
-        "@types/jest": "^25.2.1",
+        "@types/jest": "^26.0.9",
         "@types/lodash": "^4.14.158",
         "@types/node": "^13.13.5",
         "@types/verror": "^1.10.4",
@@ -56,6 +56,8 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "verror": "^1.10.0",
-        "storage-documents": "1.0.0"
+        "storage-documents": "1.0.0",
+        "yargs": "^15.3.1",
+        "applicationinsights": "^1.8.0"
     }
 }

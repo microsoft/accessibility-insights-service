@@ -52,8 +52,9 @@ exitWithUsageInfo() {
 }
 
 # Read script arguments
-while getopts ":r:k:t:" option; do
+while getopts ":b:r:k:t:" option; do
     case $option in
+    b) batchAccountName=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     k) keyVaultUrl=${OPTARG} ;;
     t) templatesFolder=${OPTARG} ;;
@@ -62,27 +63,21 @@ while getopts ":r:k:t:" option; do
 done
 
 # Print script usage help
-if [[ -z $resourceGroupName ]]; then
+if [[ -z $batchAccountName ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi
 
 . "${0%/*}/get-resource-names.sh"
 
 if [[ -z $keyVaultUrl ]]; then
-    echo "Resolving Key Vault URL for Key Vault $keyVault..."
-    keyVaultUrl=$(az keyvault show --name "$keyVault" --resource-group "$resourceGroupName" --query "properties.vaultUri" -o tsv)
-    if [[ -z "$keyVaultUrl" ]]; then
-        echo "could not find keyvault in resource group $resourceGroupName"
-        exitWithUsageInfo
-    fi
-    echo "  Key Vault URL $keyVaultUrl"
+    keyVaultUrl="https://$keyVault.vault.azure.net/"
 fi
 
 appInsightsKey=$(az monitor app-insights component show --app "$appInsightsName" --resource-group "$resourceGroupName" --query "instrumentationKey" -o tsv)
 
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
-sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-url-scan-schedule.template.json" >"$parsedOnDemandScanScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-scan-req-schedule.template.json" >"$parsedOnDemandScanReqScheduleFileName"
+sed -e "s@%APP_INSIGHTS_TOKEN%@$appInsightsKey@" -e "s@%KEY_VAULT_TOKEN%@$keyVaultUrl@" -e "s@%CONTAINER_REGISTRY_TOKEN%@$containerRegistryName@" "$templatesFolder/on-demand-send-notification-schedule.template.json" >"$parsedOnDemandSendNotificationFileName"
 
 echo "Logging into batch account '$batchAccountName' in resource group '$resourceGroupName'..."
 az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"

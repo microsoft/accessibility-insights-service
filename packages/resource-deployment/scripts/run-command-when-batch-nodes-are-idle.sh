@@ -23,20 +23,20 @@ while getopts ":r:c:n:p:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $command ]] ||  [[ -z $commandName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $command ]] || [[ -z $commandName ]]; then
     exitWithUsageInfo
 fi
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "Invoked command to run when all pools are idle:
-resource group:$resourceGroupName
-commandName: $commandName
+echo "Run command when all pools are idle:
+    Resource group: $resourceGroupName
+    Command name: $commandName
 "
 
 . "${0%/*}/process-utilities.sh"
 
-function setJobScheduleStatus {
+function setJobScheduleStatus() {
     local status=$1
 
     query="[?contains('$pools', jobSpecification.poolInfo.poolId)].id"
@@ -44,15 +44,15 @@ function setJobScheduleStatus {
 
     for schedule in $schedules; do
         echo "Setting job schedule $schedule status to $status"
-        az batch job-schedule $status --job-schedule-id "$schedule"
+        az batch job-schedule $status --job-schedule-id "$schedule" 1>/dev/null
     done
 }
 
-function disableJobSchedule {
+function disableJobSchedule() {
     setJobScheduleStatus "disable"
 }
 
-function enableJobSchedule {
+function enableJobSchedule() {
     setJobScheduleStatus "enable"
 }
 
@@ -69,38 +69,42 @@ waitForNodesToGoIdleByNodeType() {
     printf " - Running .."
     while [ $SECONDS -le $endTime ]; do
 
-        local totalCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.total" \
-                                -o tsv
-                            )
-        local idleCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.idle" \
-                                -o tsv
-                            )  
-        local startTaskFailedCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.startTaskFailed" \
-                                -o tsv
-                            )  
+        local totalCount=$(
+            az batch pool node-counts list \
+                --query "$nodeTypeContentSelector.total" \
+                -o tsv
+        )
+        local idleCount=$(
+            az batch pool node-counts list \
+                --query "$nodeTypeContentSelector.idle" \
+                -o tsv
+        )
+        local startTaskFailedCount=$(
+            az batch pool node-counts list \
+                --query "$nodeTypeContentSelector.startTaskFailed" \
+                -o tsv
+        )
 
-        local unusableCount=$(az batch pool node-counts list \
-                                --query "$nodeTypeContentSelector.unusable" \
-                                -o tsv
-                            )  
+        local unusableCount=$(
+            az batch pool node-counts list \
+                --query "$nodeTypeContentSelector.unusable" \
+                -o tsv
+        )
 
-        local stableCount=$(( $idleCount + $startTaskFailedCount + $unusableCount ))
+        local stableCount=$(($idleCount + $startTaskFailedCount + $unusableCount))
         if [[ $stableCount == $totalCount ]]; then
-            echo "$nodeType nodes under pool: $pool are idle."
+            echo "The '$nodeType' nodes under $pool pool are idle."
             isIdle=true
-            break;
+            break
         else
             printf "."
             sleep 5
         fi
     done
 
-    echo "Currrent Pool Status $pool for $nodeType:"
-    az batch pool node-counts list --query "$nodeTypeContentSelector"
-    
+    echo "Currrent $pool pool status for $nodeType:"
+    az batch pool node-counts list --query "$nodeTypeContentSelector" 1>/dev/null
+
     if [[ $isIdle == false ]]; then
         echo "Pool $pool & $nodeType is not in the expected state."
         exit 1
@@ -125,13 +129,12 @@ function runCommand() {
 
     disableJobSchedule
 
-    echo "sleeping 10 seconds to wait for any jobs that got kicked off
-     before disabling schedule to start using the nodes"
+    echo "Wait for any jobs that got kicked off after disabling schedule before start using the nodes."
     sleep 10
 
     waitForPoolsToBeIdle
-    
-    echo "Invoking command $commandName"
+
+    echo "Invoking command: $commandName"
     eval "$command"
 
     enableJobSchedule

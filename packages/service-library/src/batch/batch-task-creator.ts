@@ -172,7 +172,7 @@ export abstract class BatchTaskCreator {
             return;
         }
 
-        const succeededTasks = await this.batch.getSucceededTasks(this.batchConfig.jobId);
+        const succeededTasks = await this.batch.getSucceededTasks(this.jobId);
         if (succeededTasks === undefined || succeededTasks.length === 0) {
             return;
         }
@@ -194,7 +194,7 @@ export abstract class BatchTaskCreator {
     }
 
     private async handleFailedTasksImpl(): Promise<void> {
-        const failedTasks = await this.batch.getFailedTasks(this.batchConfig.jobId);
+        const failedTasks = await this.batch.getFailedTasks(this.jobId);
         if (failedTasks === undefined || failedTasks.length === 0) {
             return;
         }

@@ -11,15 +11,11 @@
         },
         "jobManagerTask": {
             "id": "on-demand-scan-req-sender-task",
-            "commandLine": "/bin/bash -c run-scan-request-sender.sh",
-            "resourceFiles": [
-                {
-                    "autoStorageContainerName": "batch-on-demand-scan-request-sender-script"
-                },
-                {
-                    "autoStorageContainerName": "runtime-configuration"
-                }
-            ],
+            "commandLine": "",
+            "containerSettings": {
+                "containerRunOptions": "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_SCAN_QUEUE -e KEY_VAULT_URL",
+                "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-request-sender"
+            },
             "constraints": {
                 "maxWallClockTime": "PT1H",
                 "retentionTime": "P3D",

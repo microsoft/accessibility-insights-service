@@ -6,7 +6,7 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-# Set default ARM Batch account template files
+# Set default ARM template file
 dashboardTemplateFile="${0%/*}/../templates/dashboard.template.json"
 
 exitWithUsageInfo() {

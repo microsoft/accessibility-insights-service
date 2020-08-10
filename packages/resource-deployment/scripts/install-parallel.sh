@@ -140,6 +140,7 @@ function install() {
         "${0%/*}/setup-cosmos-db.sh"
         "${0%/*}/create-vnet.sh"
         "${0%/*}/app-insights-create.sh"
+        "${0%/*}/create-container-registry.sh"
     )
     runCommandsWithoutSecretsInParallel parallelProcesses
 
@@ -147,6 +148,7 @@ function install() {
     # Additionally, these should run sequentially because of interdependence.
 
     . "${0%/*}/setup-key-vault.sh"
+    . "${0%/*}/push-image-to-container-registry.sh"
     . "${0%/*}/batch-account-create.sh"
     . "${0%/*}/job-schedule-create.sh"
     . "${0%/*}/function-app-create.sh"

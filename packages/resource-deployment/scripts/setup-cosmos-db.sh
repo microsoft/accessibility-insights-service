@@ -41,7 +41,8 @@ createCosmosCollection() {
             --database-name $dbName \
             --name "$collectionName" \
             --resource-group $resourceGroupName \
-            --throughput $throughput
+            --throughput $throughput \
+            1>/dev/null
     else
         echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
         az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null

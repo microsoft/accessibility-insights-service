@@ -14,7 +14,7 @@ export batchAccountName
 export parameterFilePath
 export dropPools
 
-# Set default ARM Batch account template files
+# Set default ARM template file
 batchTemplateFile="${0%/*}/../templates/batch-account.template.json"
 
 exitWithUsageInfo() {
@@ -25,6 +25,16 @@ Usage: $0 -r <resource group> -e <environment> [-t <batch template file (optiona
 }
 
 . "${0%/*}/process-utilities.sh"
+
+getContainerRegistryLoginCredentials() {
+    containerRegistryUsername=$(az acr credential show --name "$containerRegistryName" --query "username" -o tsv)
+    containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
+
+    if [[ -z $containerRegistryUsername ]] || [[ -z $containerRegistryPassword ]]; then
+        echo "Unable to get login credentials for container registry $containerRegistryName"
+        exit 1
+    fi
+}
 
 function setParameterFilePath() {
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
@@ -41,8 +51,10 @@ function deployBatch() {
         az deployment group create \
             --resource-group "$resourceGroupName" \
             --template-file "$batchTemplateFile" \
-            --query "properties.outputResources[].id" \
             --parameters "$parameterFilePath" \
+            --parameters containerRegistryServerUserName=$containerRegistryUsername \
+            --parameters containerRegistryServerPassword=$containerRegistryPassword \
+            --query "properties.outputResources[].id" \
             -o tsv
     )
 
@@ -62,7 +74,6 @@ while getopts ":r:t:e:d:" option; do
     esac
 done
 
-
 # Print script usage help
 if [[ -z $resourceGroupName ]] || [[ -z $batchTemplateFile ]] || [[ -z $environment ]]; then
     exitWithUsageInfo
@@ -78,15 +89,15 @@ fi
 echo "Setting up batch account $batchAccountName"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
-. "${0%/*}/account-set-batch-app.sh"
+. "${0%/*}/enable-batch-provider.sh"
 
 setParameterFilePath
 
 . "${0%/*}/delete-pools-if-needed.sh"
 
+getContainerRegistryLoginCredentials
 deployBatch
 
 . "${0%/*}/setup-all-pools-for-batch.sh"
 
 echo "The '$batchAccountName' Azure Batch account successfully deployed"
-

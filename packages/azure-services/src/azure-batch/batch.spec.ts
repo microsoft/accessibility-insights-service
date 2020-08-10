@@ -53,7 +53,7 @@ describe(Batch, () => {
     const containerSASUrl = 'https://testcontainer.blob.core.windiows.net/batch-logs/?sv=blah$se=blah';
 
     let batch: Batch;
-    let config: BatchConfig;
+    let batchConfigStub: BatchConfig;
     let batchClientStub: BatchServiceClient;
     let jobMock: IMock<Job>;
     let taskMock: IMock<Task>;
@@ -68,9 +68,9 @@ describe(Batch, () => {
 
     beforeEach(() => {
         maxTaskDurationInMinutes = 5;
-        config = {
-            accountName: '',
-            accountUrl: '',
+        batchConfigStub = {
+            accountName: 'accountName',
+            accountUrl: 'accountUrl',
             poolId: 'poolId',
             jobId: 'jobId',
         };
@@ -103,7 +103,7 @@ describe(Batch, () => {
             batchServiceClientProviderStub,
             batchTaskConfigGenerator.object,
             storageContainerSASUrlProviderMock.object,
-            config,
+            batchConfigStub,
             loggerMock.object,
             maxTasks,
         );
@@ -148,7 +148,7 @@ describe(Batch, () => {
                 taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'success'` },
             };
             taskMock
-                .setup(async (o) => o.list(config.jobId, options))
+                .setup(async (o) => o.list(batchConfigStub.jobId, options))
                 .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items1)))
                 .verifiable();
             taskMock
@@ -175,7 +175,7 @@ describe(Batch, () => {
                 },
             ];
 
-            const succeededTasks = await batch.getSucceededTasks(config.jobId);
+            const succeededTasks = await batch.getSucceededTasks(batchConfigStub.jobId);
 
             expect(succeededTasks).toEqual(expectedSucceededTasks);
             taskMock.verifyAll();
@@ -285,7 +285,7 @@ describe(Batch, () => {
                 taskListOptions: { filter: `state eq 'completed' and executionInfo/result eq 'failure'` },
             };
             taskMock
-                .setup(async (o) => o.list(config.jobId, options))
+                .setup(async (o) => o.list(batchConfigStub.jobId, options))
                 .returns(async () => Promise.resolve(<TaskListResponse>(<unknown>items1)))
                 .verifiable();
             taskMock
@@ -345,7 +345,7 @@ describe(Batch, () => {
                 },
             ];
 
-            const failedTasks = await batch.getFailedTasks(config.jobId);
+            const failedTasks = await batch.getFailedTasks(batchConfigStub.jobId);
 
             expect(failedTasks).toEqual(expectedFailedTasks);
             taskMock.verifyAll();
@@ -363,7 +363,7 @@ describe(Batch, () => {
                 },
             };
             poolMock
-                .setup(async (o) => o.get(config.poolId))
+                .setup(async (o) => o.get(batchConfigStub.poolId))
                 .returns(async () =>
                     Promise.resolve(<PoolGetResponse>(<unknown>{
                         maxTasksPerNode: 8,
@@ -374,7 +374,7 @@ describe(Batch, () => {
                 .verifiable();
 
             const jobOptions = {
-                jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${config.poolId}'` },
+                jobListOptions: { filter: `state eq 'active' and executionInfo/poolId eq '${batchConfigStub.poolId}'` },
             };
             const jobListItems1 = new JobListStub([{ id: 'job-id-11' }]);
             jobListItems1.odatanextLink = 'odatanextLink-1';
@@ -470,12 +470,13 @@ describe(Batch, () => {
 
                 batchTaskConfigGenerator
                     .setup(async (o) =>
-                        o.getTaskConfig(
+                        o.getTaskConfigWithImageSupport(
+                            batchConfigStub.accountName,
                             It.is((actualId) => isExpectedId(actualId, message.messageId)),
                             message.messageText,
                         ),
                     )
-                    .callback((taskId, messageText) => (taskAddParameters[i].id = taskId))
+                    .callback((accountName, taskId, messageText) => (taskAddParameters[i].id = taskId))
                     .returns(async () => Promise.resolve(taskAddParameters[i]))
                     .verifiable(Times.once());
             }
@@ -576,12 +577,13 @@ describe(Batch, () => {
             for (let k = 0; k < messages.length; k++) {
                 batchTaskConfigGenerator
                     .setup(async (o) =>
-                        o.getTaskConfig(
+                        o.getTaskConfigWithImageSupport(
+                            batchConfigStub.accountName,
                             It.is((actualId) => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),
                     )
-                    .callback((taskId, messageText) => (expectedTaskAddParameters[k].id = taskId))
+                    .callback((accountName, taskId, messageText) => (expectedTaskAddParameters[k].id = taskId))
                     .returns(async () => Promise.resolve(expectedTaskAddParameters[k]))
                     .verifiable(Times.once());
             }
@@ -624,7 +626,8 @@ describe(Batch, () => {
             for (let k = 0; k < messages.length; k++) {
                 batchTaskConfigGenerator
                     .setup(async (o) =>
-                        o.getTaskConfig(
+                        o.getTaskConfigWithImageSupport(
+                            batchConfigStub.accountName,
                             It.is((actualId) => isExpectedId(actualId, messages[k].messageId)),
                             messages[k].messageText,
                         ),

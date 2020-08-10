@@ -52,6 +52,16 @@ Object {
       "doc": "The amount of time the job manager instance will run continuously.",
       "format": "int",
     },
+    "scanRunnerTaskImageName": Object {
+      "default": "batch-scan-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
+    },
+    "sendNotificationTaskImageName": Object {
+      "default": "batch-scan-notification-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
+    },
     "sendNotificationTasksCount": Object {
       "default": 100,
       "doc": "Number of scan notification tasks that can be in active/running state",
@@ -252,6 +262,16 @@ Object {
       "default": 1,
       "doc": "The amount of time the job manager instance will run continuously.",
       "format": "int",
+    },
+    "scanRunnerTaskImageName": Object {
+      "default": "batch-scan-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
+    },
+    "sendNotificationTaskImageName": Object {
+      "default": "batch-scan-notification-runner",
+      "doc": "The Docker image name used for task creation.",
+      "format": "String",
     },
     "sendNotificationTasksCount": Object {
       "default": 100,
