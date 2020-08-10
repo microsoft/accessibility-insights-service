@@ -5,7 +5,6 @@
 
 set -eo pipefail
 
-
 export resourceGroupName
 
 exitWithUsageInfo() {
@@ -24,11 +23,11 @@ function setupPools() {
     echo "Setup system identity for created pools"
     for pool in $pools; do
         command=". ${0%/*}/enable-system-identity-for-batch-vmss.sh"
-        commandName="Enable System identity for pool $pool"
+        commandName="Enable system identity for pool $pool"
         . "${0%/*}/run-command-on-all-vmss-for-pool.sh"
     done
 
-    echo "Setup tags in parallel"
+    echo "Setup tags for Batch VMSS"
     parallelProcesses=()
     for pool in $pools; do
         command=". \"${0%/*}/add-tags-for-batch-vmss.sh\""

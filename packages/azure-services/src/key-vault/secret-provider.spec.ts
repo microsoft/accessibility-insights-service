@@ -3,32 +3,32 @@
 import 'reflect-metadata';
 
 import { KeyVaultClient, KeyVaultModels } from '@azure/keyvault';
+import { EnvironmentSettings } from 'common';
 import { IMock, Mock } from 'typemoq';
 import { AzureKeyVaultClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { SecretProvider } from './secret-provider';
+
 // tslint:disable: no-object-literal-type-assertion
 
 describe(SecretProvider, () => {
     let azureKeyVaultClient: IMock<KeyVaultClient>;
     let azureKeyVaultClientProviderStub: AzureKeyVaultClientProvider;
     let testSubject: SecretProvider;
-    let processStub: typeof process;
+    let environmentSettingsMock: IMock<EnvironmentSettings>;
     const keyVaultUrl = 'key vault url';
 
     beforeEach(() => {
-        processStub = ({
-            env: {
-                KEY_VAULT_URL: keyVaultUrl,
-            },
-        } as unknown) as typeof process;
-
+        environmentSettingsMock = Mock.ofType<EnvironmentSettings>();
+        environmentSettingsMock
+            .setup((o) => o.getValue('KEY_VAULT_URL'))
+            .returns(() => keyVaultUrl)
+            .verifiable();
         azureKeyVaultClient = Mock.ofType<KeyVaultClient>();
         getPromisableDynamicMock(azureKeyVaultClient);
-
         azureKeyVaultClientProviderStub = async () => azureKeyVaultClient.object;
 
-        testSubject = new SecretProvider(azureKeyVaultClientProviderStub, processStub);
+        testSubject = new SecretProvider(azureKeyVaultClientProviderStub, environmentSettingsMock.object);
     });
 
     it('gets secret', async () => {

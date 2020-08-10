@@ -4,7 +4,6 @@ const path = require('path');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
-const copyWebpackPlugin = require('copy-webpack-plugin');
 
 function getCommonConfig(version, generateTypings) {
     return {
@@ -47,15 +46,6 @@ function getCommonConfig(version, generateTypings) {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-
-            new copyWebpackPlugin([
-                {
-                    context: './run-script',
-                    from: '**/*.sh',
-                    to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
-                },
-            ]),
         ].concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],

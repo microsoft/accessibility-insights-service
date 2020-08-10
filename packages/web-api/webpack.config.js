@@ -54,12 +54,6 @@ module.exports = (env) => {
             new ForkTsCheckerWebpackPlugin(),
             new copyWebpackPlugin([
                 {
-                    context: './run-script',
-                    from: '**/*.sh',
-                    to: '',
-                    ignore: ['dist/**', 'node_modules/**'],
-                },
-                {
                     context: './',
                     from: '**/function.json',
                     to: '',

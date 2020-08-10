@@ -11,6 +11,7 @@ export keyVault
 export enableSoftDeleteOnKeyVault
 export pools
 
+kernelName=$(uname -s 2>/dev/null) || true
 areVmssOld=false
 recycleVmssIntervalDays=10
 
@@ -23,40 +24,43 @@ Usage: $0 -r <resource group> -p <parameter template file path> [-d <pass \"true
 
 . "${0%/*}/process-utilities.sh"
 
-function checkIfVmssAreOld {
+function checkIfVmssAreOld() {
     areVmssOld=false
     local hasCreatedDateTags=false
 
-    local createdDates=$(az vmss list \
-        --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
-        -o tsv
+    local createdDates=$(
+        az vmss list \
+            --query "[?tags.BatchAccountName=='$batchAccountName'].tags.VmssCreatedDate" \
+            -o tsv
     )
 
     for createdDate in $createdDates; do
         hasCreatedDateTags=true
-        echo "VMSS created date: $createdDate"
-        local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
-        local currentDate=$(date "+%Y-%m-%d")
 
-        if [[ "$currentDate" > "$recycleDate" ]] || [[ "$currentDate" == "$recycleDate" ]]; then
-            echo "Found vmss with older created date $createdDate.
-                Expected to be not older than $recycleVmssIntervalDays days.
-                Marking all vmss as old
-            "
-            areVmssOld=true
-            break
+        if [[ $kernelName == "Darwin" ]]; then
+            local recycleDate=$(date -j -v +"$recycleVmssIntervalDays"d -f "%Y-%m-%d" "$createdDate" "+%Y-%m-%d")
+            local currentDate=$(date "+%Y-%m-%d")
         else
-            echo "Found vmss to be new. Next recycle date - $recycleDate"
+            local recycleDate=$(date -d "$createdDate+$recycleVmssIntervalDays days" "+%Y-%m-%d")
+            local currentDate=$(date "+%Y-%m-%d")
         fi
 
+        if [[ "$currentDate" > "$recycleDate" ]] || [[ "$currentDate" == "$recycleDate" ]]; then
+            areVmssOld=true
+            break
+        fi
     done
 
     if [[ $hasCreatedDateTags == false ]]; then
-        echo "Unable to find VmssCreatedDate tag. Assuming vmss are old."
+        echo "Unable to find 'VmssCreatedDate' VMSS resource group tag. Recycling VMSS."
         areVmssOld=true
+    else
+        if [[ $areVmssOld == true ]]; then
+            echo "Recycling VMSS after $recycleVmssIntervalDays days. VMSS created date $createdDate"
+        else
+            echo "Skipping VMSS recycle. Target recycle date $recycleDate"
+        fi
     fi
-
-    echo "Are vmss old? - $areVmssOld"
 }
 
 function compareParameterFileToDeployedConfig() {
@@ -66,19 +70,19 @@ function compareParameterFileToDeployedConfig() {
 
     query="[?id=='$poolId'].$batchConfigPropertyName"
 
-    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value")
+    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value") || echo "Bash jq command should be installed. Ubuntu 'sudo apt-get install jq'. Mac OS 'brew install jq'" && exit 1
     actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
     if [ -z "$expectedValue" ] || [ "$expectedValue" == "null" ]; then
-        echo "No value for $templateFileParameterName found in deployment template."
+        echo "No value for $templateFileParameterName found in template to be deployed."
     elif [ "$expectedValue" != "$actualValue" ]; then
-        echo "$batchConfigPropertyName for $poolId must be updated from $actualValue to $expectedValue."
+        echo "The $batchConfigPropertyName value for $poolId must be updated from $actualValue to $expectedValue."
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
     fi
 }
 
-function checkIfPoolConfigOutdated {
+function checkIfPoolConfigOutdated() {
     poolId=$1
     poolPropertyNamePrefix=$2
 
@@ -95,9 +99,14 @@ function checkIfPoolConfigOutdated {
     fi
 }
 
-function checkPoolConfigs {
+function checkPoolConfigs() {
     for pool in $pools; do
-        camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+        if [[ $kernelName == "Darwin" ]]; then
+            camelCasePoolId=$(echo "$pool" | sed -E 's/(-)([a-z])/\U\2/g')
+        else
+            camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+        fi
+
         checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
         if [ $poolConfigOutdated ]; then
             return
@@ -107,13 +116,13 @@ function checkPoolConfigs {
 
 deletePools() {
     for pool in $pools; do
-        echo "deleting pool $pool"
+        echo "Deleting Batch pool $pool"
         az batch pool delete --account-name $batchAccountName --pool-id $pool --yes
     done
 
     for pool in $pools; do
         waitForDelete $pool
-        echo "Finished deleting $pool"
+        echo "Finished deleting Batch pool $pool"
     done
 }
 
@@ -137,7 +146,7 @@ waitForDelete() {
     done
 
     if [ "$poolExists" == "true" ]; then
-        echo "Pool did not finish deleting within $deleteTimeout seconds"
+        echo "Unable to delete pool $poolId within $deleteTimeout seconds"
     fi
 }
 
@@ -154,10 +163,10 @@ checkIfPoolExists() {
 
 function deletePoolsWhenNodesAreIdle() {
     command="deletePools"
-    commandName="Delete pool vmss"
+    commandName="Delete pool VMSS"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 
-    echo "Successfully deleted pools"
+    echo "Successfully deleted Btach pools"
 }
 
 function deletePoolsIfNeeded() {
@@ -172,7 +181,6 @@ function deletePoolsIfNeeded() {
         if [[ $areVmssOld != true ]]; then
             checkPoolConfigs
             if [[ $poolConfigOutdated != true ]]; then
-                echo "Pools do not need to be recreated."
                 return
             fi
         fi
@@ -205,7 +213,7 @@ fi
 
 batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
 if [[ -z "$batchAccountExists" ]]; then
-    echo "batch account $batchAccountName has not yet been created."
+    echo "Batch account $batchAccountName has not yet been created."
 else
     deletePoolsIfNeeded
 fi

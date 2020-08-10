@@ -20,7 +20,7 @@
             "type": "string",
             "defaultValue": "[resourceGroup().location]",
             "metadata": {
-                "description": "The location in which the Azure Storage resources should be deployed."
+                "description": "The location in which the Azure resources should be deployed."
             }
         },
         "storageAccountName": {
@@ -35,6 +35,27 @@
             "type": "string",
             "metadata": {
                 "description": "Name of the virtual network to be used for the batch pool nodes"
+            }
+        },
+        "containerRegistryName": {
+            "defaultValue": "[concat('allyregistry',toLower(uniqueString(resourceGroup().id)))]",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure container registry to be used to deploy Docker containers"
+            }
+        },
+        "containerRegistryServerPassword": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "The Azure container registry server login password"
+            }
+        },
+        "containerRegistryServerUserName": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "The Azure container registry server login user name"
             }
         },
         "onDemandScanRequestPoolNodes": {
@@ -82,7 +103,8 @@
     },
     "variables": {
         "keyVaultUrl": "[concat('https://', parameters('keyVault'), '.vault.azure.net/')]",
-        "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]"
+        "vnetResource": "[resourceId('Microsoft.Network/virtualNetworks', parameters('vnetName'))]",
+        "containerRegistryServerName": "[concat(parameters('containerRegistryName'), '.azurecr.io')]"
     },
     "resources": [
         {
@@ -121,7 +143,21 @@
                             "sku": "16-04-lts",
                             "version": "latest"
                         },
-                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04",
+                        "containerConfiguration": {
+                            "type": "dockerCompatible",
+                            "containerImageNames": [
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-manager')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-runner')]"
+                            ],
+                            "containerRegistries": [
+                                {
+                                    "registryServer": "[variables('containerRegistryServerName')]",
+                                    "username": "[parameters('containerRegistryServerUserName')]",
+                                    "password": "[parameters('containerRegistryServerPassword')]"
+                                }
+                            ]
+                        }
                     }
                 },
                 "networkConfiguration": {
@@ -178,7 +214,22 @@
                             "sku": "16-04-lts",
                             "version": "latest"
                         },
-                        "nodeAgentSkuId": "batch.node.ubuntu 16.04"
+                        "nodeAgentSkuId": "batch.node.ubuntu 16.04",
+                        "containerConfiguration": {
+                            "type": "dockerCompatible",
+                            "containerImageNames": [
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-manager')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-notification-runner')]",
+                                "[concat(variables('containerRegistryServerName'), '/batch-scan-request-sender')]"
+                            ],
+                            "containerRegistries": [
+                                {
+                                    "registryServer": "[variables('containerRegistryServerName')]",
+                                    "username": "[parameters('containerRegistryServerUserName')]",
+                                    "password": "[parameters('containerRegistryServerPassword')]"
+                                }
+                            ]
+                        }
                     }
                 },
                 "networkConfiguration": {

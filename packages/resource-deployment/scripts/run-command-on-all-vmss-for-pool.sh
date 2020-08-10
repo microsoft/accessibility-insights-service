@@ -85,12 +85,12 @@ setupVmss() {
         vmssQueryConditions="?tags.PoolName=='$pool' && tags.BatchAccountName=='$batchAccountName' && resourceGroup=='$vmssResourceGroup'"
         vmssDeployedSearchPattern="[$vmssQueryConditions && provisioningState!='Creating' && provisioningState!='Updating'].name"
         vmssCreatedQuery="az vmss list --query \"$vmssDeployedSearchPattern\" -o tsv"
-        
+
         . "${0%/*}/wait-for-deployment.sh" -n "$vmssResourceGroup" -t "1800" -q "$vmssCreatedQuery"
 
         vmssName=$(az vmss list --query "[$vmssQueryConditions].name" -o tsv)
         vmssLocation=$(az vmss list --query "[$vmssQueryConditions].location" -o tsv)
-       
+
         echo "Checking vmss status - $vmssName"
         vmssStatus=$(az vmss list --query "[$vmssQueryConditions].provisioningState" -o tsv)
         if [ "$vmssStatus" != "Succeeded" ]; then
@@ -98,19 +98,19 @@ setupVmss() {
             exit 1
         fi
 
-        echo "Invoking command $commandName"
+        echo "Invoking command: $commandName"
         eval "$command"
 
     done
 }
 . "${0%/*}/get-resource-names.sh"
 
-echo "Invoked command to run all vmss for pools with args:
-resource group:$resourceGroupName
-batch:$batchAccountName
-pool:$pool
-keyVault: $keyVault
-commandName: $commandName
+echo "Invoked command to run all VMSS for pools:
+Resource group: $resourceGroupName
+Batch: $batchAccountName
+Pool: $pool
+Key Vault: $keyVault
+Command name: $commandName
 "
 
 # Read script arguments
@@ -124,7 +124,7 @@ while getopts ":r:p:c:n:" option; do
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $keyVault ]] ||  [[ -z $command ]] ||  [[ -z $commandName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $batchAccountName ]] || [[ -z $pool ]] || [[ -z $keyVault ]] || [[ -z $command ]] || [[ -z $commandName ]]; then
     exitWithUsageInfo
 fi
 

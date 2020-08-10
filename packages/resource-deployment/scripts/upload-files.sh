@@ -26,6 +26,15 @@ uploadFolderContents() {
     az storage blob upload-batch --account-name "$storageAccountName" --destination "$destinationContainer" --source "$pathToSource" --pattern "$includePattern" 1>/dev/null
 }
 
+uploadFile() {
+    destinationContainer=$1
+    pathToSource=$2
+    storageAccountName=$3
+    blobName=$4
+
+    az storage blob upload --account-name "$storageAccountName" --container-name "$destinationContainer" --file "$pathToSource" --name "$blobName" 1>/dev/null
+}
+
 exitWithUsageInfo() {
     echo \
         "
@@ -53,24 +62,13 @@ fi
 . "${0%/*}/process-utilities.sh"
 
 function uploadFiles() {
-    echo "Uploading files to blobs"
-
-    local webApiScanJobManagerContainerName="batch-web-api-scan-job-manager-script"
-    local webApiSendNotificationJobManagerContainerName="batch-web-api-send-notification-job-manager-script"
-    local webApiScanrunnerContainerName="batch-web-api-scan-runner-script"
-    local webApiSendNotificationRunnerContainerName="batch-web-api-send-notification-runner-script"
-    local onDemandScanRequestSenderContainerName="batch-on-demand-scan-request-sender-script"
-    local poolStartupContainerName="batch-pool-startup-script"
+    echo "Uploading files to Blob storage"
 
     uploadProcesses=(
-        "uploadFolderContents $webApiScanJobManagerContainerName \"$dropFolder/web-api-scan-job-manager/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiSendNotificationJobManagerContainerName \"$dropFolder/web-api-send-notification-job-manager/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiScanrunnerContainerName \"$dropFolder/web-api-scan-runner/dist\" \"$storageAccountName\""
-        "uploadFolderContents $webApiSendNotificationRunnerContainerName \"$dropFolder/web-api-send-notification-runner/dist\" \"$storageAccountName\""
-        "uploadFolderContents $onDemandScanRequestSenderContainerName \"$dropFolder/web-api-scan-request-sender/dist\" \"$storageAccountName\""
-        "uploadFolderContents $poolStartupContainerName \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
-        "${0%/*}/upload-config-files.sh"
+        "uploadFolderContents \"batch-pool-startup-script\" \"$dropFolder/resource-deployment/dist/scripts/pool-startup\" \"$storageAccountName\""
+        "uploadFile \"runtime-configuration\" \"$dropFolder/resource-deployment/dist/runtime-config/runtime-config.$environment.json\" \"$storageAccountName\" \"runtime-config.json\""
     )
+
     runCommandsWithoutSecretsInParallel uploadProcesses
 
     echo "Upload files completed successfully."

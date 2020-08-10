@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import * as convict from 'convict';
@@ -96,6 +95,10 @@ describe(ServiceConfiguration, () => {
         await expect(testSubject.getConfigValue(keyToFetch)).rejects.toBe(expectedError);
 
         verifyMocks();
+    });
+
+    it('convert resource name', () => {
+        expect(testSubject.getAzureResourceName('batch', 'abcbatchcde', 'registry')).toEqual('abcregistrycde');
     });
 
     function verifyMocks(): void {
