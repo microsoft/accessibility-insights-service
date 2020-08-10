@@ -24,19 +24,19 @@ addTagToVmss() {
         --query "tags" \
         -o tsv
 
-    echo "Tag $tagName=$tagValue was added to $vmssName vmss under $vmssResourceGroup resource group"
+    echo "Tag $tagName=$tagValue was added to $vmssName VMSS under $vmssResourceGroup resource group"
 }
 
-addResourceGroupNameTagToVMSS(){
-  
+addResourceGroupNameTagToVMSS() {
     addTagToVmss "ResourceGroupName" "$resourceGroupName"
 
-    local vmssCreatedTime=$(az vmss show \
-                                --name "$vmssName" \
-                                --resource-group "$vmssResourceGroup" \
-                                --query "tags.VmssCreatedDate" \
-                                -o tsv
-                           )
+    local vmssCreatedTime=$(
+        az vmss show \
+            --name "$vmssName" \
+            --resource-group "$vmssResourceGroup" \
+            --query "tags.VmssCreatedDate" \
+            -o tsv
+    )
     if [[ -z $vmssCreatedTime ]]; then
         local currentTime=$(date "+%Y-%m-%d")
         addTagToVmss "VmssCreatedDate" "$currentTime"
@@ -55,12 +55,6 @@ done
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "
-Assigning Tag for:
-vmssName:$vmssName
-vmssResourceGroup:$vmssResourceGroup
-resourceGroupName: $resourceGroupName
-"
 if [[ -z $vmssName ]] || [[ -z $vmssResourceGroup ]] || [[ -z $resourceGroupName ]]; then
     exitWithUsageInfo
 fi

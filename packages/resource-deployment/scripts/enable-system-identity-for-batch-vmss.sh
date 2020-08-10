@@ -19,14 +19,13 @@ assignSystemIdentity() {
 
     echo \
         "VMSS Resource configuration:
-  Pool: $pool
+  Batch Pool: $pool
   VMSS resource group: $vmssResourceGroup
   VMSS name: $vmssName
   System-assigned identity: $principalId
   "
-    
-   . "${0%/*}/key-vault-enable-msi.sh"
-   . "${0%/*}/role-assign-for-sp.sh"
+    . "${0%/*}/key-vault-enable-msi.sh"
+    . "${0%/*}/role-assign-for-sp.sh"
 }
 
 # Read script arguments
@@ -41,12 +40,6 @@ done
 
 . "${0%/*}/get-resource-names.sh"
 
-echo "
-Assigning System identity for:
-vmssName:$vmssName
-vmssResourceGroup:$vmssResourceGroup
-pool:$pool
-"
 if [[ -z $vmssName ]] || [[ -z $vmssResourceGroup ]] || [[ -z $pool ]]; then
     exitWithUsageInfo
 fi

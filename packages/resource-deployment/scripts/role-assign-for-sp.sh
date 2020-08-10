@@ -30,29 +30,32 @@ if [[ -z $resourceGroupName ]] || [[ -z $principalId ]] || [[ -z $role ]]; then
     exitWithUsageInfo
 fi
 
-echo "Granting role '$role' to the resource group '$resourceGroupName' for service principal '$principalId'"
+grantRoleToResource() {
+    local scope=$1
+    local end=$((SECONDS + 300))
 
-end=$((SECONDS + 300))
+    echo "Create '$role' role assignment for service principal $principalId in $scope"
+    printf " - Running .."
+    while [ $SECONDS -le $end ]; do
+        response=$(az role assignment create --role "$role" --assignee-object-id "$principalId" --assignee-principal-type ServicePrincipal --$scope --query "roleDefinitionId") || true
+        if [[ -n $response ]]; then
+            break
+        else
+            printf "."
+        fi
 
-printf " - Running .."
+        sleep 5
+    done
+    echo "  ended"
 
-while [ $SECONDS -le $end ]; do
-    response=$(az role assignment create --role "$role" --resource-group "$resourceGroupName" --assignee-object-id "$principalId" --query "roleDefinitionId") || true
-
-    if [[ -n $response ]]; then
-        break
-    else
-        printf "."
+    if [[ -z $response ]]; then
+        echo "Unable to create '$role' role assignment for service principal $principalId in $scope"
+        exit 1
     fi
 
-    sleep 5
-done
-echo "  ended"
+    echo "Successfully granted '$role' role for service principal $principalId in $scope"
+}
 
-if [[ -z $response ]]; then
-    echo "Unable to create role assignment '$role' for service principal '$principalId'"
+. "${0%/*}/get-resource-names.sh"
 
-    exit 1
-fi
-
-echo "Successfully granted role '$role' to the resource group '$resourceGroupName' for service principal '$principalId'"
+grantRoleToResource "resource-group $resourceGroupName"

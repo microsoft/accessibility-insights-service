@@ -31,7 +31,7 @@ getContainerRegistryLoginCredentials() {
     containerRegistryPassword=$(az acr credential show --name "$containerRegistryName" --query "passwords[0].value" -o tsv)
 
     if [[ -z $containerRegistryUsername ]] || [[ -z $containerRegistryPassword ]]; then
-        echo "Unable to get login for container registry $containerRegistryName"
+        echo "Unable to get login credentials for container registry $containerRegistryName"
         exit 1
     fi
 }
@@ -89,7 +89,7 @@ fi
 echo "Setting up batch account $batchAccountName"
 
 # Configure Azure subscription account to support Batch account in user subscription mode
-. "${0%/*}/account-set-batch-app.sh"
+. "${0%/*}/enable-batch-provider.sh"
 
 setParameterFilePath
 
