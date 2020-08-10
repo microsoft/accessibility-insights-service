@@ -14,15 +14,20 @@ deployRestApi() {
 }
 
 restrictWebApiAccess() {
-    echo "restricting access to APIM IP address"
+    echo "Restricting function app access to APIM IP address"
     apimIpAddress=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "publicIpAddresses" -o tsv)
+    az functionapp config access-restriction remove -g "$resourceGroupName" \
+        -n "$webApiFuncAppName" \
+        --rule-name "APIM" \
+        --action "Allow" \
+        --ip-address "$apimIpAddress" 1>/dev/null
+
     az functionapp config access-restriction add -g "$resourceGroupName" \
-                                                 -n "$webApiFuncAppName" \
-                                                 --rule-name "APIM" \
-                                                 --action "Allow" \
-                                                 --ip-address "$apimIpAddress" \
-                                                 --priority 100 1>/dev/null
-    
+        -n "$webApiFuncAppName" \
+        --rule-name "APIM" \
+        --action "Allow" \
+        --ip-address "$apimIpAddress" \
+        --priority 100 1>/dev/null
 }
 
 exitWithUsageInfo() {
@@ -56,4 +61,5 @@ restApiProcesses=(
     "deployRestApi"
     "restrictWebApiAccess"
 )
+
 runCommandsWithoutSecretsInParallel restApiProcesses
