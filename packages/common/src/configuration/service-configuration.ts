@@ -233,10 +233,8 @@ export class ServiceConfiguration {
                     format: Array,
                     default: [
                         'image-redundant-alt',
-                        'checkboxgroup',
                         'empty-heading',
                         'p-as-heading',
-                        'radiogroup',
                         'table-duplicate-name',
                         'table-fake-caption',
                         'td-has-header',
@@ -252,7 +250,6 @@ export class ServiceConfiguration {
                         'skip-link',
                         'landmark-main-is-top-level',
                         'landmark-one-main',
-                        'aria-dpub-role-fallback',
                         'focus-order-semantics',
                         'frame-tested',
                         'landmark-banner-is-top-level',

@@ -37,14 +37,14 @@
         "typescript": "^3.9.7"
     },
     "dependencies": {
-        "axe-core": "3.5.1",
+        "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
-        "puppeteer": "^4.0.0",
         "common": "1.0.0",
-        "service-library": "1.0.0",
-        "logger": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.19",
-        "reflect-metadata": "^0.1.13"
+        "logger": "1.0.0",
+        "puppeteer": "^4.0.0",
+        "reflect-metadata": "^0.1.13",
+        "service-library": "1.0.0"
     }
 }
