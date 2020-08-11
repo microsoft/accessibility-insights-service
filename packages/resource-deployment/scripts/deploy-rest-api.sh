@@ -20,7 +20,7 @@ restrictWebApiAccess() {
         -n "$webApiFuncAppName" \
         --rule-name "APIM" \
         --action "Allow" \
-        --ip-address "$apimIpAddress" --priority 100) || echo "No rule found with the specified criteria"
+        --ip-address "$apimIpAddress") || echo "No rule found with the specified criteria"
 
     az functionapp config access-restriction add -g "$resourceGroupName" \
         -n "$webApiFuncAppName" \
