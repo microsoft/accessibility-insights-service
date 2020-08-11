@@ -69,16 +69,19 @@ function compareParameterFileToDeployedConfig() {
     templateFileParameterName=$3
 
     query="[?id=='$poolId'].$batchConfigPropertyName"
-
-    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value") || echo "Bash jq command should be installed. Ubuntu 'sudo apt-get install jq'. Mac OS 'brew install jq'" && exit 1
+    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value") || {
+        echo "Bash jq command error. Validate if jq command is installed. Run to install on Ubuntu 'sudo apt-get install jq' or Mac OS 'brew install jq'" && exit 1
+    }
     actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
     if [ -z "$expectedValue" ] || [ "$expectedValue" == "null" ]; then
-        echo "No value for $templateFileParameterName found in template to be deployed."
+        echo "No '$templateFileParameterName' parameter value found in template file $parameterFilePath"
     elif [ "$expectedValue" != "$actualValue" ]; then
-        echo "The $batchConfigPropertyName value for $poolId must be updated from $actualValue to $expectedValue."
+        echo "The '$batchConfigPropertyName' value for $poolId must be updated from '$actualValue' to '$expectedValue'"
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
+    else
+        echo "No pool '$poolId' configuration update is required."
     fi
 }
 
