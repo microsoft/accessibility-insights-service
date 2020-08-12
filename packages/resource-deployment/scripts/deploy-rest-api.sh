@@ -22,12 +22,12 @@ restrictWebApiAccess() {
         --action "Allow" \
         --ip-address "$apimIpAddress") || echo "Error while removing function app network rule"
 
-    az functionapp config access-restriction add -g "$resourceGroupName" \
+    result=$(az functionapp config access-restriction add -g "$resourceGroupName" \
         -n "$webApiFuncAppName" \
         --rule-name "APIM" \
         --action "Allow" \
         --ip-address "$apimIpAddress" \
-        --priority 100 1>/dev/null
+        --priority 100) || echo "Error while adding function app network rule"
 }
 
 exitWithUsageInfo() {
