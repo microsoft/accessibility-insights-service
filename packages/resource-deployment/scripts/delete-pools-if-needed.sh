@@ -64,51 +64,62 @@ function checkIfVmssAreOld() {
 }
 
 function compareParameterFileToDeployedConfig() {
-    poolId=$1
-    batchConfigPropertyName=$2
-    templateFileParameterName=$3
+    local poolId=$1
+    local batchConfigPropertyName=$2
+    local templateFileParameterName=$3
 
     query="[?id=='$poolId'].$batchConfigPropertyName"
+    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value") || {
+        echo "Bash jq command error. Validate if jq command is installed. Run to install on Ubuntu 'sudo apt-get install jq' or Mac OS 'brew install jq'" && exit 1
+    }
+    local actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
 
-    expectedValue=$(cat $parameterFilePath | jq -r ".parameters.$templateFileParameterName.value") || echo "Bash jq command should be installed. Ubuntu 'sudo apt-get install jq'. Mac OS 'brew install jq'" && exit 1
-    actualValue=$(az batch pool list --account-name "$batchAccountName" --query "$query" -o tsv)
-
-    if [ -z "$expectedValue" ] || [ "$expectedValue" == "null" ]; then
-        echo "No value for $templateFileParameterName found in template to be deployed."
-    elif [ "$expectedValue" != "$actualValue" ]; then
-        echo "The $batchConfigPropertyName value for $poolId must be updated from $actualValue to $expectedValue."
+    if [[ -z $expectedValue ]] || [[ $expectedValue == "null" ]]; then
+        echo "No '$templateFileParameterName' parameter value found in template file $parameterFilePath"
+    elif [ $expectedValue != $actualValue ]; then
+        echo "The '$batchConfigPropertyName' value for $poolId must be updated from '$actualValue' to '$expectedValue'"
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
+    else
+        echo "The template '$batchConfigPropertyName' value for $poolId has no changes."
     fi
 }
 
 function checkIfPoolConfigOutdated() {
-    poolId=$1
-    poolPropertyNamePrefix=$2
+    local poolId=$1
+    local poolPropertyNamePrefix=$2
 
     poolConfigOutdated=false
 
     compareParameterFileToDeployedConfig $poolId "vmSize" "${poolPropertyNamePrefix}VmSize"
-    if [ $poolConfigOutdated == "true" ]; then
+    if [[ $poolConfigOutdated == "true" ]]; then
         return
     fi
 
     compareParameterFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
-    if [ $poolConfigOutdated == "true" ]; then
+    if [[ $poolConfigOutdated == "true" ]]; then
         return
     fi
 }
 
 function checkPoolConfigs() {
     for pool in $pools; do
+        echo "Validating pool $pool configuration..."
+
+        camelCase=""
         if [[ $kernelName == "Darwin" ]]; then
-            camelCasePoolId=$(echo "$pool" | sed -E 's/(-)([a-z])/\U\2/g')
+            local words=(${pool//-/ })
+            for word in "${words[@]}"; do
+                local lowercase=$(echo ${word} | tr [:upper:] [:lower:])
+                local camelCase=$camelCase$(echo ${lowercase:0:1} | tr [:lower:] [:upper:])${lowercase:1}
+            done
+            local camelCasePoolId=$(echo ${camelCase:0:1} | tr [:upper:] [:lower:])${camelCase:1}
         else
-            camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
+            local camelCasePoolId=$(echo "$pool" | sed -r 's/(-)([a-z])/\U\2/g')
         fi
 
         checkIfPoolConfigOutdated "$pool" "$camelCasePoolId"
-        if [ $poolConfigOutdated ]; then
+        if [[ $poolConfigOutdated == "true" ]]; then
             return
         fi
     done
@@ -127,14 +138,15 @@ deletePools() {
 }
 
 waitForDelete() {
-    poolId=$1
+    local poolId=$1
 
     checkIfPoolExists $poolId
-    waiting=false
-    deleteTimeout=1200
-    end=$((SECONDS + $deleteTimeout))
+
+    local waiting=false
+    local deleteTimeout=1200
+    local end=$((SECONDS + $deleteTimeout))
     while [ "$poolExists" == "true" ] && [ $SECONDS -le $end ]; do
-        if [ "$waiting" != true ]; then
+        if [[ $waiting != true ]]; then
             waiting=true
             echo "Waiting for $poolId to delete"
             printf " - Running .."
@@ -145,13 +157,13 @@ waitForDelete() {
         checkIfPoolExists $poolId
     done
 
-    if [ "$poolExists" == "true" ]; then
+    if [[ $poolExists == "true" ]]; then
         echo "Unable to delete pool $poolId within $deleteTimeout seconds"
     fi
 }
 
 checkIfPoolExists() {
-    poolId=$1
+    local poolId=$1
 
     poolExists=$(az batch pool list --account-name "$batchAccountName" --query "[?id=='$poolId']" -o tsv)
     if [[ -z $poolExists ]]; then
@@ -162,8 +174,8 @@ checkIfPoolExists() {
 }
 
 function deletePoolsWhenNodesAreIdle() {
-    command="deletePools"
-    commandName="Delete pool VMSS"
+    local command="deletePools"
+    local commandName="Delete pool VMSS"
     . "${0%/*}/run-command-when-batch-nodes-are-idle.sh"
 
     echo "Successfully deleted Btach pools"
@@ -172,11 +184,11 @@ function deletePoolsWhenNodesAreIdle() {
 function deletePoolsIfNeeded() {
     az batch account login --name "$batchAccountName" --resource-group "$resourceGroupName"
     pools=$(az batch pool list --query "[].id" -o tsv)
-    if [[ -z "$pools" ]]; then
+    if [[ -z $pools ]]; then
         return
     fi
 
-    if [[ "$dropPools" != true ]]; then
+    if [[ $dropPools != true ]]; then
         checkIfVmssAreOld
         if [[ $areVmssOld != true ]]; then
             checkPoolConfigs
@@ -212,7 +224,7 @@ fi
 . "${0%/*}/get-resource-names.sh"
 
 batchAccountExists=$(az resource list --name $batchAccountName -o tsv)
-if [[ -z "$batchAccountExists" ]]; then
+if [[ -z $batchAccountExists ]]; then
     echo "Batch account $batchAccountName has not yet been created."
 else
     deletePoolsIfNeeded
