@@ -16,11 +16,11 @@ deployRestApi() {
 restrictWebApiAccess() {
     echo "Restricting function app access to APIM IP address"
     apimIpAddress=$(az apim show --name "$apiManagementName" --resource-group "$resourceGroupName" --query "publicIpAddresses" -o tsv)
-    az functionapp config access-restriction remove -g "$resourceGroupName" \
+    result=$(az functionapp config access-restriction remove -g "$resourceGroupName" \
         -n "$webApiFuncAppName" \
         --rule-name "APIM" \
         --action "Allow" \
-        --ip-address "$apimIpAddress" 1>/dev/null
+        --ip-address "$apimIpAddress") || echo "Error while removing function app network rule"
 
     az functionapp config access-restriction add -g "$resourceGroupName" \
         -n "$webApiFuncAppName" \
