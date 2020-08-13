@@ -45,7 +45,7 @@ export class FileCommandRunner implements CommandRunner {
         let promise = Promise.resolve();
 
         try {
-            const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'UTF-8').split(/\r?\n/);
+            const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'utf-8').split(/\r?\n/);
 
             for (let line of lines) {
                 line = line.trim();
