@@ -33,23 +33,23 @@ export class OnDemandDispatcher {
 
         do {
             const totalItemsToAdd = configQueueSize - currentQueueSize;
-            do {
-                const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
-                    continuationToken,
-                    totalItemsToAdd,
-                );
-                client.ensureSuccessStatusCode(response);
-                continuationToken = response.continuationToken;
-                itemCount = response.item.length;
-                if (itemCount > 0) {
-                    await this.sender.sendRequestToScan(response.item);
-                    this.logger.logInfo(`Queued ${itemCount} scan requests to the task scan queue.`);
-                    // tslint:disable-next-line: no-null-keyword
-                    this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: itemCount });
-                }
-            } while (continuationToken !== undefined);
+            const response: CosmosOperationResponse<OnDemandPageScanRequest[]> = await this.pageScanRequestProvider.getRequests(
+                continuationToken,
+                totalItemsToAdd,
+            );
+            client.ensureSuccessStatusCode(response);
+
+            continuationToken = response.continuationToken;
+            itemCount = response.item.length;
+            if (itemCount > 0) {
+                await this.sender.sendRequestToScan(response.item);
+                this.logger.logInfo(`Queued ${itemCount} scan requests to the task scan queue.`);
+                // tslint:disable-next-line: no-null-keyword
+                this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: itemCount });
+            }
+
             currentQueueSize = await this.sender.getCurrentQueueSize();
-        } while (configQueueSize > currentQueueSize && itemCount > 0);
+        } while (currentQueueSize < configQueueSize && continuationToken !== undefined);
 
         if (itemCount === 0) {
             this.logger.logInfo(`No scan requests available for a queuing.`);
