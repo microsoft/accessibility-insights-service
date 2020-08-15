@@ -15,10 +15,13 @@ export interface CrawlerRunOptions {
     // selectors?: string[];
 }
 
+export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
+
 export class CrawlerEngine {
     public constructor(
         private readonly pageProcessorFactory: PageProcessorFactory = new ClassicPageProcessorFactory(),
         private readonly crawlerFactory: CrawlerFactory = new ApifyFactory(),
+        private readonly runApify: ApifyMainFunc = Apify.main,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -28,16 +31,14 @@ export class CrawlerEngine {
             baseUrl: crawlerRunOptions.baseUrl,
             requestQueue,
         });
-
-        Apify.main(async () => {
-            const crawler = new Apify.PuppeteerCrawler({
+        this.runApify(async () => {
+            const crawler = this.crawlerFactory.createPuppeteerCrawler({
                 // requestList,
                 requestQueue,
                 handlePageFunction: pageProcessor.pageProcessor,
                 gotoFunction: pageProcessor.gotoFunction,
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             });
-
             await crawler.run();
         });
     }

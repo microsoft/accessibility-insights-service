@@ -5,6 +5,7 @@ import Apify from 'apify';
 export interface CrawlerFactory {
     createRequestList(existingUrls: string[]): Promise<Apify.RequestList>;
     createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue>;
+    createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler;
 }
 
 export class ApifyFactory implements CrawlerFactory {
@@ -17,5 +18,9 @@ export class ApifyFactory implements CrawlerFactory {
 
     public async createRequestList(existingUrls: string[]): Promise<Apify.RequestList> {
         return Apify.openRequestList('existingUrls', existingUrls === undefined ? [] : existingUrls);
+    }
+
+    public createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler {
+        return new Apify.PuppeteerCrawler(options);
     }
 }

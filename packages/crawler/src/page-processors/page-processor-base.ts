@@ -16,7 +16,13 @@ export interface PageProcessorOptions {
     selectors?: string[];
 }
 
-export abstract class PageProcessorBase {
+export interface PageProcessor {
+    pageProcessor: Apify.PuppeteerHandlePage;
+    gotoFunction: Apify.PuppeteerGoto;
+    pageErrorProcessor: Apify.HandleFailedRequest;
+}
+
+export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called to extract data from a single web page
      * 'page' is an instance of Puppeteer.Page with page.goto(request.url) already called

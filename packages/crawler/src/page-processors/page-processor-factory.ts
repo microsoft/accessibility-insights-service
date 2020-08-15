@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as url from 'url';
-import { PageProcessorBase, PageProcessorOptions } from './page-processor-base';
+import { PageProcessor, PageProcessorOptions } from './page-processor-base';
 
 export interface PageProcessorFactory {
-    createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessorBase;
+    createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor;
 }
 
 export abstract class PageProcessorFactoryBase {
-    public abstract createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessorBase;
+    public abstract createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor;
 
     protected getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
         return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;
