@@ -22,8 +22,8 @@
         "@types/dotenv": "^8.2.0",
         "@types/chai": "^4.2.12",
         "@types/jest": "^26.0.9",
-        "@types/lodash": "^4.14.158",
-        "@types/node": "^13.13.5",
+        "@types/lodash": "^4.14.159",
+        "@types/node": "^14.0.27",
         "jest": "^26.1.0",
         "jest-circus": "^25.5.3",
         "jest-junit": "^11.1.0",
@@ -38,7 +38,7 @@
         "azure-services": "1.0.0",
         "common": "1.0.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.19",
+        "lodash": "^4.17.20",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
@@ -46,7 +46,7 @@
         "storage-documents": "1.0.0",
         "chai": "^4.2.0",
         "yargs": "15.3.1",
-        "@azure/cosmos": "^3.7.4",
+        "@azure/cosmos": "^3.9.0",
         "dotenv": "^8.2.0"
     }
 }

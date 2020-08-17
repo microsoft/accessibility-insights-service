@@ -55,7 +55,7 @@ describe(FileCommandRunner, () => {
 
         beforeEach(() => {
             fsMock
-                .setup((f) => f.readFileSync(testInput.inputFile, 'UTF-8'))
+                .setup((f) => f.readFileSync(testInput.inputFile, 'utf-8'))
                 .returns(() => fileContent)
                 .verifiable(Times.once());
 

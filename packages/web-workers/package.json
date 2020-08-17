@@ -27,8 +27,8 @@
         "@azure/functions": "^1.2.2",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.9",
-        "@types/lodash": "^4.14.158",
-        "@types/node": "^13.13.5",
+        "@types/lodash": "^4.14.159",
+        "@types/node": "^14.0.27",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
@@ -46,7 +46,7 @@
         "tslint-microsoft-contrib": "6.0.0",
         "typemoq": "^2.1.0",
         "typescript": "^3.9.7",
-        "webpack": "^4.44.0",
+        "webpack": "^4.44.1",
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
@@ -54,7 +54,7 @@
         "common": "1.0.0",
         "durable-functions": "^1.4.3",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.19",
+        "lodash": "^4.17.20",
         "logger": "1.0.0",
         "moment": "^2.27.0",
         "reflect-metadata": "^0.1.13",
