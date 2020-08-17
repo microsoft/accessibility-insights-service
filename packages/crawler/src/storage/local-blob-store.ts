@@ -4,16 +4,21 @@ import Apify from 'apify';
 import { BlobStore } from './store-types';
 
 export class LocalBlobStore implements BlobStore {
-    constructor(public readonly storeName: string, private keyValueStore?: Apify.KeyValueStore) {}
+    constructor(
+        public readonly storeName: string,
+        private keyValueStore?: Apify.KeyValueStore,
+        private readonly ApifyObj: typeof Apify = Apify,
+    ) {}
 
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
-        await this.open();
-        await this.keyValueStore.setValue(key, value, options);
+        await this.open().then(async () => {
+            await this.keyValueStore.setValue(key, value, options);
+        });
     }
 
     private async open(): Promise<void> {
         if (this.keyValueStore === undefined) {
-            this.keyValueStore = await Apify.openKeyValueStore(this.storeName);
+            this.keyValueStore = await this.ApifyObj.openKeyValueStore(this.storeName);
         }
     }
 }
