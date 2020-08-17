@@ -44,7 +44,7 @@
         "service-library": "1.0.0",
         "logger": "1.0.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.19",
+        "lodash": "^4.17.20",
         "reflect-metadata": "^0.1.13"
     }
 }

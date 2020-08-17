@@ -42,7 +42,7 @@
         "common": "1.0.0",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
-        "lodash": "^4.17.19",
+        "lodash": "^4.17.20",
         "reflect-metadata": "^0.1.13",
         "verror": "^1.10.0",
         "yargs": "^15.3.1",
