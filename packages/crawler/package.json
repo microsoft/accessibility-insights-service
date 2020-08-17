@@ -50,6 +50,7 @@
         "puppeteer": "^4.0.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
-        "yargs": "^15.3.1"
+        "yargs": "^15.3.1",
+        "logger": "1.0.0"
     }
 }
