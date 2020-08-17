@@ -9,18 +9,20 @@ export interface CrawlerFactory {
 }
 
 export class ApifyFactory implements CrawlerFactory {
+    public constructor(private readonly apify: typeof Apify = Apify) {}
+
     public async createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue> {
-        const requestQueue = await Apify.openRequestQueue();
+        const requestQueue = await this.apify.openRequestQueue();
         await requestQueue.addRequest({ url: baseUrl });
 
         return requestQueue;
     }
 
     public async createRequestList(existingUrls: string[]): Promise<Apify.RequestList> {
-        return Apify.openRequestList('existingUrls', existingUrls === undefined ? [] : existingUrls);
+        return this.apify.openRequestList('existingUrls', existingUrls === undefined ? [] : existingUrls);
     }
 
     public createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler {
-        return new Apify.PuppeteerCrawler(options);
+        return new this.apify.PuppeteerCrawler(options);
     }
 }
