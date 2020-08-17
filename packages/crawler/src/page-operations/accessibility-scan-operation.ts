@@ -4,15 +4,12 @@ import { Page } from 'puppeteer';
 import { PageScanner } from '../page-scanner';
 import { BlobStore } from '../storage/store-types';
 
-export type AccessibilityScanOperation = (page: Page, id: string, keyValueStore: BlobStore) => Promise<void>;
+export class AccessibilityScanOperation {
 
-export const accessibilityScanOperation: AccessibilityScanOperation = async (
-    page: Page,
-    id: string,
-    keyValueStore: BlobStore,
-): Promise<void> => {
-    const scanner = new PageScanner(page);
-    const scanResult = await scanner.scan();
+ constructor (private readonly scanner = new PageScanner()) {}
+
+ public async run(page: Page, id: string, keyValueStore: BlobStore): Promise<void> {
+    const scanResult = await this.scanner.scan(page);
 
     await keyValueStore.setValue(`${id}.axe`, scanResult.axeResults);
     await keyValueStore.setValue(`${id}.report`, scanResult.report.asHTML(), { contentType: 'text/html' });
@@ -20,4 +17,6 @@ export const accessibilityScanOperation: AccessibilityScanOperation = async (
     if (scanResult.axeResults.violations.length > 0) {
         console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on page ${page.url()}`);
     }
-};
+ }
+
+}

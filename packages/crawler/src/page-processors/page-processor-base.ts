@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { accessibilityScanOperation, AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
+import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
@@ -38,7 +38,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     public constructor(
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns?: string[],
-        protected readonly accessibilityScanOp: AccessibilityScanOperation = accessibilityScanOperation,
+        protected readonly accessibilityScanOp: AccessibilityScanOperation= new AccessibilityScanOperation(),
         protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
         protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,

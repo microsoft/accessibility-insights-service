@@ -7,7 +7,7 @@ export class ClassicPageProcessor extends PageProcessorBase {
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         console.log(`Crawling page ${page.url()}`);
         await this.enqueueLinks(page);
-        await this.accessibilityScanOp(page, request.id as string, this.blobStore);
+        await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
         await this.pushScanData(request.id as string, request.url);
     };
 }
