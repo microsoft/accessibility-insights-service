@@ -7,7 +7,7 @@ import { PageProcessorHelper } from './page-processor-helper';
 
 export class ClassicPageProcessorFactory extends PageProcessorFactoryBase {
     public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
-        const helper = new PageProcessorHelper(pageProcessorOptions.requestQueue, pageProcessorOptions.logger);
+        const helper = new PageProcessorHelper(pageProcessorOptions.logger);
 
         return new ClassicPageProcessor(
             pageProcessorOptions.requestQueue,
