@@ -11,11 +11,10 @@ export class ClassicPageProcessorFactory implements PageProcessorFactory {
         pageProcessorOptions: PageProcessorOptions,
         getDiscoveryPatternFunc: typeof getDiscoveryPattern = getDiscoveryPattern,
     ): PageProcessor {
-        const helper = new PageProcessorHelper(pageProcessorOptions.logger);
+        const helper = new PageProcessorHelper();
 
         return new ClassicPageProcessor(
             pageProcessorOptions.requestQueue,
-            pageProcessorOptions.logger,
             helper,
             getDiscoveryPatternFunc(pageProcessorOptions.baseUrl, pageProcessorOptions.discoveryPatterns),
         );

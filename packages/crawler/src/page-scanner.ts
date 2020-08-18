@@ -12,7 +12,7 @@ export interface ScanResult {
 
 export type AxePuppeteerFactory = (page: Page) => AxePuppeteer;
 
-const createAxePuppeteer: AxePuppeteerFactory = (page: Page) => new AxePuppeteer(page);
+const singeltonReporter = reporterFactory();
 
 export class PageScanner {
     // reporterFactory should be instantiated only once per app life cycle.
@@ -20,8 +20,8 @@ export class PageScanner {
     // warning message: `Applications should only call registerIcons for any given icon once.`
 
     public constructor(
-        private readonly reporter: Reporter = reporterFactory(),
-        private readonly createAxePuppeteerFunc: AxePuppeteerFactory = createAxePuppeteer,
+        private readonly reporter: Reporter = singeltonReporter,
+        private readonly createAxePuppeteerFunc: AxePuppeteerFactory = (page: Page) => new AxePuppeteer(page),
     ) {}
 
     public async scan(page: Page): Promise<ScanResult> {

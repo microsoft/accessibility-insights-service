@@ -3,7 +3,6 @@
 import Apify from 'apify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
-import { Logger } from 'logger';
 import { ApifyFactory, CrawlerFactory } from './crawler-factory';
 import { ClassicPageProcessorFactory } from './page-processors/classic-page-processor-factory';
 import { PageProcessorFactory } from './page-processors/page-processor-factory';
@@ -20,7 +19,6 @@ export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
 
 export class CrawlerEngine {
     public constructor(
-        private readonly logger: Logger,
         private readonly pageProcessorFactory: PageProcessorFactory = new ClassicPageProcessorFactory(),
         private readonly crawlerFactory: CrawlerFactory = new ApifyFactory(),
         private readonly runApify: ApifyMainFunc = Apify.main,
@@ -32,7 +30,6 @@ export class CrawlerEngine {
         const pageProcessor = this.pageProcessorFactory.createPageProcessor({
             baseUrl: crawlerRunOptions.baseUrl,
             requestQueue,
-            logger: this.logger,
         });
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({

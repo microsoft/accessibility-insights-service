@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -16,7 +15,6 @@ import { PageProcessorHelper } from './page-processor-helper';
 describe(ClassicPageProcessor, () => {
     let helperMock: IMock<PageProcessorHelper>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
-    let loggerMock: IMock<Logger>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
@@ -32,7 +30,6 @@ describe(ClassicPageProcessor, () => {
     beforeEach(() => {
         helperMock = Mock.ofType<PageProcessorHelper>();
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
-        loggerMock = Mock.ofType<Logger>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
@@ -48,7 +45,6 @@ describe(ClassicPageProcessor, () => {
 
         classicPageProcessor = new ClassicPageProcessor(
             requestQueueMock.object,
-            loggerMock.object,
             helperMock.object,
             discoveryPatterns,
             accessibilityScanOpMock.object,
@@ -58,13 +54,11 @@ describe(ClassicPageProcessor, () => {
     });
 
     afterEach(() => {
-        loggerMock.verifyAll();
         helperMock.verifyAll();
         accessibilityScanOpMock.verifyAll();
     });
 
     it('pageProcessor', async () => {
-        loggerMock.setup((l) => l.logInfo(`Crawling page ${testUrl}`)).verifiable();
         helperMock.setup((h) => h.enqueueLinks(pageStub, requestQueueMock.object, discoveryPatterns)).verifiable();
         accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId, blobStoreMock.object)).verifiable();
         const expectedScanData = {

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { ScanData } from '../scan-data';
 import { BlobStore } from '../storage/store-types';
@@ -12,10 +11,7 @@ export type PartialScanData = {
 } & Partial<ScanData>;
 
 export class PageProcessorHelper {
-    public constructor(
-        private readonly logger: Logger,
-        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-    ) {}
+    public constructor(private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks) {}
 
     public async enqueueLinks(
         page: Page,
@@ -27,7 +23,7 @@ export class PageProcessorHelper {
             requestQueue,
             pseudoUrls: discoveryPatterns,
         });
-        this.logger.logInfo(`Discovered ${enqueued.length} links on page ${page.url()}`);
+        console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
 
         return enqueued;
     }
