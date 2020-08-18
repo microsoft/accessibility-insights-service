@@ -61,9 +61,8 @@ describe('functional tests', () => {
 
     testEach(['PostScan', 'ScanStatus'], isServiceCredProvided);
 
-    testIf('ScanExecution', isServiceCredProvided, async (done: jest.DoneCallback) => {
+    testIf('ScanExecution', isServiceCredProvided, async () => {
         await waitForScanRequestCompletion();
-        done();
     });
 
     testEach(['ScanPreProcessing', 'ScanQueueing', 'ScanReports', 'Finalizer'], isServiceCredProvided);
@@ -79,15 +78,14 @@ describe('functional tests', () => {
         );
     }
 
-    function testIf(name: string, condition: () => boolean | Promise<boolean>, callback: any): void {
+    function testIf(name: string, condition: () => boolean | Promise<boolean>, callback: () => void): void {
         test(
             name,
-            async (done) => {
+            async (): Promise<void> => {
                 if (await condition()) {
-                    callback(done);
+                    callback();
                 } else {
                     console.log(`Functional Test '${name}' Skipped`);
-                    done();
                 }
             },
             10 * 60 * 1000,
@@ -96,10 +94,9 @@ describe('functional tests', () => {
 
     function testEach(names: TestGroupName[], condition: () => boolean | Promise<boolean>): void {
         names.forEach((name) => {
-            testIf(name, condition, async (done: jest.DoneCallback) => {
+            testIf(name, condition, async () => {
                 const testContainer = getTests(name);
                 await testRunner.run(testContainer, TestEnvironment.all, releaseIdStub, runIdStub);
-                done();
             });
         });
     }
