@@ -7,7 +7,7 @@ export class LocalBlobStore implements BlobStore {
     constructor(
         public readonly storeName: string,
         private keyValueStore?: Apify.KeyValueStore,
-        private readonly ApifyObj: typeof Apify = Apify,
+        private readonly apifyObj: typeof Apify = Apify,
     ) {}
 
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
@@ -18,7 +18,7 @@ export class LocalBlobStore implements BlobStore {
 
     private async open(): Promise<void> {
         if (this.keyValueStore === undefined) {
-            this.keyValueStore = await this.ApifyObj.openKeyValueStore(this.storeName);
+            this.keyValueStore = await this.apifyObj.openKeyValueStore(this.storeName);
         }
     }
 }
