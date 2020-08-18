@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { IMock, It, Mock } from 'typemoq';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
@@ -13,7 +12,6 @@ import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(CrawlerEngine, () => {
-    let loggerMock: IMock<Logger>;
     let pageProcessorFactoryMock: IMock<PageProcessorFactory>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
     let runApifyMock: IMock<ApifyMainFunc>;
@@ -30,7 +28,6 @@ describe(CrawlerEngine, () => {
     let crawlerEngine: CrawlerEngine;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType<Logger>();
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
         runApifyMock = Mock.ofType<ApifyMainFunc>();
@@ -42,7 +39,6 @@ describe(CrawlerEngine, () => {
         const pageProcessorOptions: PageProcessorOptions = {
             baseUrl,
             requestQueue: requestQueueMock.object,
-            logger: loggerMock.object,
         };
         const crawlerOptions: Apify.PuppeteerCrawlerOptions = {
             requestQueue: requestQueueMock.object,
@@ -69,12 +65,7 @@ describe(CrawlerEngine, () => {
             .verifiable();
         puppeteerCrawlerMock.setup((pc) => pc.run()).verifiable();
 
-        crawlerEngine = new CrawlerEngine(
-            loggerMock.object,
-            pageProcessorFactoryMock.object,
-            crawlerFactoryMock.object,
-            runApifyMock.object,
-        );
+        crawlerEngine = new CrawlerEngine(pageProcessorFactoryMock.object, crawlerFactoryMock.object, runApifyMock.object);
 
         await crawlerEngine.start({
             baseUrl,

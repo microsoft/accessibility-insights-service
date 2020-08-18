@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { ScanData } from '../scan-data';
@@ -12,7 +11,6 @@ import { PageProcessorHelper } from './page-processor-helper';
 
 describe(PageProcessorHelper, () => {
     let requestQueueMock: IMock<Apify.RequestQueue>;
-    let loggerMock: IMock<Logger>;
     let blobStoreMock: IMock<BlobStore>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
 
@@ -25,7 +23,6 @@ describe(PageProcessorHelper, () => {
 
     beforeEach(() => {
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
-        loggerMock = Mock.ofType<Logger>();
         blobStoreMock = Mock.ofType<BlobStore>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         pageStub = {
@@ -33,7 +30,7 @@ describe(PageProcessorHelper, () => {
             // tslint:disable-next-line: no-any
         } as any;
 
-        helper = new PageProcessorHelper(loggerMock.object, enqueueLinksExtMock.object);
+        helper = new PageProcessorHelper(enqueueLinksExtMock.object);
     });
 
     it('enqueueLinks', async () => {
@@ -48,20 +45,17 @@ describe(PageProcessorHelper, () => {
                 // tslint:disable-next-line: no-any
             } as any,
         ];
-        const expectedLogMessage = `Discovered ${enqueued.length} links on page ${testUrl}`;
 
         enqueueLinksExtMock
             .setup((el) => el(expectedOptions))
             .returns(async () => Promise.resolve(enqueued))
             .verifiable();
-        loggerMock.setup((l) => l.logInfo(expectedLogMessage)).verifiable();
 
         const enqueueResult = await helper.enqueueLinks(pageStub, requestQueueMock.object, discoveryPatterns);
 
         expect(enqueueResult).toBe(enqueued);
 
         enqueueLinksExtMock.verifyAll();
-        loggerMock.verifyAll();
     });
 
     it('pushScanData', async () => {

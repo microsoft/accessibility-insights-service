@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
@@ -12,7 +11,6 @@ import { PageProcessorHelper } from './page-processor-helper';
 export interface PageProcessorOptions {
     baseUrl: string;
     requestQueue: Apify.RequestQueue;
-    logger: Logger;
     discoveryPatterns?: string[];
     simulate?: boolean;
     selectors?: string[];
@@ -39,7 +37,6 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     public constructor(
         protected readonly requestQueue: Apify.RequestQueue,
-        protected readonly logger: Logger,
         protected readonly helper: PageProcessorHelper,
         protected readonly discoveryPatterns?: string[],
         protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(),
