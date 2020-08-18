@@ -3,15 +3,11 @@
 import { ClassicPageProcessor } from './classic-page-processor';
 import { PageProcessor, PageProcessorOptions } from './page-processor-base';
 import { PageProcessorFactoryBase } from './page-processor-factory';
-import { PageProcessorHelper } from './page-processor-helper';
 
 export class ClassicPageProcessorFactory extends PageProcessorFactoryBase {
     public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
-        const helper = new PageProcessorHelper();
-
         return new ClassicPageProcessor(
             pageProcessorOptions.requestQueue,
-            helper,
             this.getDiscoveryPattern(pageProcessorOptions.baseUrl, pageProcessorOptions.discoveryPatterns),
         );
     }

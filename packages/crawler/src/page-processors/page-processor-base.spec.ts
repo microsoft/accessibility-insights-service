@@ -9,7 +9,6 @@ import { AccessibilityScanOperation } from '../page-operations/accessibility-sca
 import { ScanData } from '../scan-data';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { PageProcessorBase } from './page-processor-base';
-import { PageProcessorHelper } from './page-processor-helper';
 
 // tslint:disable: no-any
 
@@ -20,10 +19,10 @@ describe(PageProcessorBase, () => {
     }
 
     let requestQueueMock: IMock<Apify.RequestQueue>;
-    let helperMock: IMock<PageProcessorHelper>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
+    let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
 
     const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
@@ -35,10 +34,10 @@ describe(PageProcessorBase, () => {
 
     beforeEach(() => {
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
-        helperMock = Mock.ofType<PageProcessorHelper>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
+        enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
         requestStub = {
             id: 'id',
@@ -52,11 +51,11 @@ describe(PageProcessorBase, () => {
 
         pageProcessorBase = new TestablePageProcessor(
             requestQueueMock.object,
-            helperMock.object,
             discoveryPatterns,
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            enqueueLinksExtMock.object,
             gotoExtendedMock.object,
         );
     });
