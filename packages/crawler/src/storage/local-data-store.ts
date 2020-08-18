@@ -8,9 +8,8 @@ export class LocalDataStore implements DataStore {
     constructor(public readonly storeName: string, private datasetStore?: Apify.Dataset, private readonly apifyObj: typeof Apify = Apify) {}
 
     public async pushData(data: object | object[]): Promise<void> {
-        await this.open().then(async () => {
-            await this.datasetStore.pushData(data);
-        });
+        await this.open();
+        await this.datasetStore.pushData(data);
     }
 
     private async open(): Promise<void> {

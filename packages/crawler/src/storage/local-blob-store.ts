@@ -11,9 +11,8 @@ export class LocalBlobStore implements BlobStore {
     ) {}
 
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
-        await this.open().then(async () => {
-            await this.keyValueStore.setValue(key, value, options);
-        });
+        await this.open();
+        await this.keyValueStore.setValue(key, value, options);
     }
 
     private async open(): Promise<void> {
