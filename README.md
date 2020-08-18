@@ -94,16 +94,15 @@ This project can be run in an Azure environment and can be set up easily using t
 
 To debug packages locally follow the generic steps below.
 
-1.  Complete deployment of Azure resources on your test subscription.
-2.  Create `.env` plain text file under package root folder with environment variables set required for the package to run. For instance, refer to the batch task schedule `url-scan-schedule.template.json` [template](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/templates) configuration for a list of common environment settings. There is a pre-built [template](https://github.com/microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/.env.template) file that can be used as well. The `.env` file format:
+1.  Complete deployment of Azure resources in your test subscription.
+2.  Run the following script to create the `.env` plain text file under package root folder with environment variables required for the package to run locally:
 
     ```bash
-          VARIABLE_NAME=VARIABLE_VALUE
+          ./dist/scripts/create-env-file-for-debug.sh -r <resourceGroupName>
     ```
 
-3.  Run the Bash script `create-sp-for-key-vault.sh` from [here](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/resource-deployment/scripts) to create a debug service principal entity. Copy script output to `.env` file as per script instruction. `Note:` The script can be run multiple times that result the same service principal entity but with password reset.
-4.  Run the TypeScript compiler `tsc` for the selected package.
-5.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
+3.  Run the TypeScript compiler `tsc` for the selected package.
+4.  Debug selected package using Visual Studio Code selecting respective debug configuration. For instance, select `Start debugging runner (runner)` configuration to debug `runner` package.
 
 ## Telemetry and Monitoring
 

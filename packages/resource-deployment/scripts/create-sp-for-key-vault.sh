@@ -12,6 +12,10 @@ export subscription
 export resourceGroupName
 export keyVault
 
+export clientId
+export tenant
+export password
+
 exitWithUsageInfo() {
     echo "
 Usage: $0 -r <resource group> -s <subscription name or id> -k <key vault>
