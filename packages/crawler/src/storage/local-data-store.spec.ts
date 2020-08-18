@@ -13,7 +13,7 @@ describe(LocalDataStore, () => {
     let store: LocalDataStore;
     let apifyMock: IMock<typeof Apify>;
     const storeName = 'store name';
-    const data = {data: 'data'};
+    const data = { data: 'data' };
 
     beforeEach(() => {
         datasetMock = Mock.ofType(Apify.Dataset);
@@ -26,7 +26,7 @@ describe(LocalDataStore, () => {
             .returns(async () => datasetMock.object)
             .verifiable(Times.never());
 
-            datasetMock
+        datasetMock
             .setup((dsm) => dsm.pushData(data))
             .returns(async () => {})
             .verifiable(Times.once());
@@ -35,20 +35,30 @@ describe(LocalDataStore, () => {
         await store.pushData(data);
     });
 
-    // it('push while store is not open', async () => {
-    //     apifyMock
-    //         .setup((am) => am.openDataset(storeName))
-    //         .returns(async () => datasetMock.object)
-    //         .verifiable(Times.never());
+    it('push while store is not open', async () => {
+        let isDatasetOpen = false;
 
-    //         datasetMock
-    //         .setup((dsm) => dsm.pushData(data))
-    //         .returns(async () => {})
-    //         .verifiable(Times.once());
+        // tslint:disable: no-shadowed-variable
+        const datasetStub: any = {
+            // tslint:disable-next-line: promise-function-async
+            pushData: async (data: object | object[]): Promise<void> => {},
+        };
 
-    //     store = new LocalDataStore(storeName, undefined, apifyMock.object);
-    //     await store.pushData(data);
-    // });
+        const apifyStub: any = {
+            openDataset: (localStoreName: string): any => {
+                if (storeName === localStoreName) {
+                    isDatasetOpen = true;
+                }
+
+                return datasetStub;
+            },
+        };
+
+        store = new LocalDataStore(storeName, undefined, apifyStub);
+        await store.pushData(data).then(() => {
+            expect(isDatasetOpen).toEqual(true);
+        });
+    });
 
     afterEach(() => {
         datasetMock.verifyAll();

@@ -36,20 +36,30 @@ describe(LocalBlobStore, () => {
         await store.setValue(key, value);
     });
 
-    // it('setValue while store is not open', async () => {
-    //     apifyMock
-    //         .setup((am) => am.openKeyValueStore(storeName))
-    //         .returns(async () => keyValueStoreMock.object)
-    //         .verifiable(Times.once());
+    it('setValue while store is not open', async () => {
+        let isKeyValueStoreOpen = false;
 
-    //     keyValueStoreMock
-    //         .setup((kvsm) => kvsm.setValue(key, value, undefined))
-    //         .returns(async () => {})
-    //         .verifiable(Times.once());
+        // tslint:disable: no-shadowed-variable
+        const keyValueStoreStub: any = {
+            // tslint:disable-next-line: promise-function-async
+            setValue: async (key: string, value: string): Promise<void> => {},
+        };
 
-    //     store = new LocalBlobStore(storeName, undefined, apifyMock.object);
-    //     await store.setValue(key, value);
-    // });
+        const apifyStub: any = {
+            openKeyValueStore: (localStoreName: string): any => {
+                if (storeName === localStoreName) {
+                    isKeyValueStoreOpen = true;
+                }
+
+                return keyValueStoreStub;
+            },
+        };
+
+        store = new LocalBlobStore(storeName, undefined, apifyStub);
+        await store.setValue(key, value).then(() => {
+            expect(isKeyValueStoreOpen).toEqual(true);
+        });
+    });
 
     afterEach(() => {
         keyValueStoreMock.verifyAll();
