@@ -9,6 +9,7 @@ export interface CrawlerRunOptions {
     discoveryPatterns?: string[];
     simulate?: boolean;
     selectors?: string[];
+    localOutputDir?: string;
 }
 
 export interface PageProcessorOptions {

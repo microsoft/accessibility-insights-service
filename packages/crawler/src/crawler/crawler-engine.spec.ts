@@ -27,10 +27,11 @@ describe(CrawlerEngine, () => {
         gotoFunction: () => null,
         pageErrorProcessor: () => null,
     };
-
     const baseUrl = 'base url';
 
     let crawlerEngine: CrawlerEngine;
+    let crawlerOptions: Apify.PuppeteerCrawlerOptions;
+    let pageProcessorOptions: PageProcessorOptions;
 
     beforeEach(() => {
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
@@ -39,50 +40,29 @@ describe(CrawlerEngine, () => {
         runApifyMock = Mock.ofType<ApifyMainFunc>();
         requestQueueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
         puppeteerCrawlerStub = {};
-    });
-
-    it('Run crawler with one base url', async () => {
         const crawlerRunOption: CrawlerRunOptions = {
             baseUrl,
             simulate: false,
         };
-
-        const pageProcessorOptions: PageProcessorOptions = {
+        pageProcessorOptions = {
             requestQueue: requestQueueMock.object,
             crawlerRunOptions: crawlerRunOption,
         };
 
-        const crawlerOptions: Apify.PuppeteerCrawlerOptions = {
+        crawlerOptions = {
             requestList: undefined,
             requestQueue: requestQueueMock.object,
             handlePageFunction: pageProcessorStub.pageProcessor,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
         };
+    });
 
-        resourceCreatorMock
-            .setup(async (rcm) => rcm.createRequestList(null))
-            .returns(async () => Promise.resolve(null))
-            .verifiable();
-
-        resourceCreatorMock
-            .setup(async (rcm) => rcm.createRequestQueue(baseUrl))
-            .returns(async () => Promise.resolve(requestQueueMock.object))
-            .verifiable();
-
-        pageProcessorFactoryMock
-            .setup((ppf) => ppf.createPageProcessor(pageProcessorOptions))
-            .returns(() => pageProcessorStub)
-            .verifiable();
-        runApifyMock
-            .setup((ra) => ra(It.isAny()))
-            .callback((userFunc) => userFunc())
-            .verifiable();
-
-        crawlerFactoryMock
-            .setup((cf) => cf.createPuppeteerCrawler(It.isValue(crawlerOptions)))
-            .returns(() => puppeteerCrawlerStub)
-            .verifiable();
+    it('Run crawler with one base url', async () => {
+        setupCreateRequestQueue();
+        setupCreatePageProcessor();
+        setupCreatePuppeteerCrawler();
+        setupRunCrawler();
 
         crawlerEngine = new CrawlerEngine(
             pageProcessorFactoryMock.object,
@@ -91,13 +71,76 @@ describe(CrawlerEngine, () => {
             runApifyMock.object,
         );
 
-        await crawlerEngine.start(crawlerRunOption);
+        await crawlerEngine.start({
+            baseUrl,
+        });
+    });
+
+    it('Run crawler with output dir specified', async () => {
+        const outputDir = 'output dir';
+
+        // Env variable must be set when request queue and page processor are created
+        setupCreateRequestQueue(() => {
+            expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(outputDir);
+        });
+        setupCreatePageProcessor(() => {
+            expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(outputDir);
+        });
+        setupCreatePuppeteerCrawler();
+        setupRunCrawler();
+
+        crawlerEngine = new CrawlerEngine(
+            pageProcessorFactoryMock.object,
+            crawlerFactoryMock.object,
+            resourceCreatorMock.object,
+            runApifyMock.object,
+        );
+
+        await crawlerEngine.start({
+            baseUrl,
+            localOutputDir: outputDir,
+        });
     });
 
     afterEach(() => {
-        crawlerFactoryMock.verifyAll();
         pageProcessorFactoryMock.verifyAll();
         runApifyMock.verifyAll();
         crawlerFactoryMock.verifyAll();
     });
+
+    function setupCreateRequestQueue(callback: () => void = () => null): void {
+        resourceCreatorMock
+            .setup(async (rcm) => rcm.createRequestQueue(baseUrl))
+            .returns(async () => {
+                callback();
+
+                return requestQueueMock.object;
+            })
+            .verifiable();
+    }
+
+    function setupCreatePageProcessor(callback: () => void = () => null): void {
+        pageProcessorFactoryMock
+            .setup((ppf) => ppf.createPageProcessor(pageProcessorOptions))
+            .returns(() => {
+                callback();
+
+                return pageProcessorStub;
+            })
+            .verifiable();
+    }
+
+    function setupRunCrawler(): void {
+        runApifyMock
+            .setup((ram) => ram(It.isAny()))
+            .callback((userFunc) => userFunc())
+            .verifiable();
+    }
+
+    function setupCreatePuppeteerCrawler(): void {
+        crawlerFactoryMock
+            .setup((cf) => cf.createPuppeteerCrawler(crawlerOptions))
+            .returns(() => puppeteerCrawlerStub)
+            .verifiable();
+    }
 });

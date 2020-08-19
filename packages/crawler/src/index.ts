@@ -14,7 +14,8 @@ import { CrawlerEngine } from './crawler/crawler-engine';
 interface Arguments {
     url: string;
     simulate: boolean;
-    // selectors: string[];
+    selectors: string[];
+    output: string;
 }
 
 (async () => {
@@ -34,11 +35,15 @@ interface Arguments {
                 describe: 'Simulate user click on elements that match to the specified selectors',
                 default: false,
             },
-            // selectors: {
-            //     type: 'array',
-            //     describe: `List of CSS selectors to match against. Default selector is 'button'`,
-            //     default: [],
-            // },
+            selectors: {
+                type: 'array',
+                describe: `List of CSS selectors to match against. Default selector is 'button'`,
+                default: [],
+            },
+            output: {
+                type: 'string',
+                describe: `Output directory`,
+            },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
@@ -47,7 +52,7 @@ interface Arguments {
     await crawlerEngine.start({
         baseUrl: args.url,
         simulate: args.simulate,
-        // selectors: args.selectors,
+        selectors: args.selectors,
     });
 })().catch((error) => {
     console.log('Exception: ', error);
