@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
+import { Logger } from 'logger';
 import { DirectNavigationOptions, Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -18,6 +19,7 @@ describe(PageProcessorBase, () => {
         public pageProcessor = async () => {};
     }
 
+    let loggerMock: IMock<Logger>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
@@ -33,6 +35,7 @@ describe(PageProcessorBase, () => {
     let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
+        loggerMock = Mock.ofType<Logger>();
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
@@ -50,6 +53,7 @@ describe(PageProcessorBase, () => {
         } as any;
 
         pageProcessorBase = new TestablePageProcessor(
+            loggerMock.object,
             requestQueueMock.object,
             discoveryPatterns,
             accessibilityScanOpMock.object,

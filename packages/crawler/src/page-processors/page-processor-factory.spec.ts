@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { PageProcessorOptions } from '../types/run-options';
@@ -13,11 +14,13 @@ import { SimulatorPageProcessor } from './simulator-page-processor';
 
 describe(PageProcessorFactory, () => {
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+    let loggerMock: IMock<Logger>;
     let pageProcessorFactory: PageProcessorFactory;
     const baseUrl = 'base url';
 
     beforeEach(() => {
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        loggerMock = Mock.ofType<Logger>();
         pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object);
     });
 
@@ -35,7 +38,7 @@ describe(PageProcessorFactory, () => {
             .setup((ccm) => ccm.getDiscoveryPattern(baseUrl, undefined))
             .returns(() => [])
             .verifiable();
-        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions, loggerMock.object);
         expect(pageProcessor).toBeInstanceOf(ClassicPageProcessor);
     });
 
@@ -57,7 +60,7 @@ describe(PageProcessorFactory, () => {
             .setup((ccm) => ccm.getDefaultSelectors(undefined))
             .returns(() => [])
             .verifiable();
-        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions, loggerMock.object);
         expect(pageProcessor).toBeInstanceOf(SimulatorPageProcessor);
     });
 

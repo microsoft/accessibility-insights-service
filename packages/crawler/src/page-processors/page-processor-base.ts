@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
+import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
@@ -33,9 +34,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     public gotoTimeoutSecs = 30;
 
     public constructor(
+        protected readonly logger: Logger,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns?: string[],
-        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(),
+        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(logger),
         protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
         protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -74,7 +76,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             requestQueue: this.requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
-        console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
+        this.logger.logInfo(`Discovered ${enqueued.length} links on page ${page.url()}`);
 
         return enqueued;
     }

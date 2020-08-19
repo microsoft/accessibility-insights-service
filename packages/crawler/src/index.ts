@@ -9,8 +9,9 @@ export { CrawlerRunOptions } from './types/run-options';
 
 import 'reflect-metadata';
 
-import { System } from 'common';
+import { ServiceConfiguration, System } from 'common';
 import * as dotenv from 'dotenv';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
 
@@ -58,7 +59,11 @@ interface Arguments {
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
-    const crawlerEngine: CrawlerEngine = new CrawlerEngine();
+    const serviceConfig = new ServiceConfiguration();
+    const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
+    await logger.setup();
+
+    const crawlerEngine: CrawlerEngine = new CrawlerEngine(logger);
 
     await crawlerEngine.start({
         baseUrl: args.url,
