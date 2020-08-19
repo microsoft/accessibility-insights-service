@@ -9,7 +9,7 @@ import { ResourceCreator } from '../apify-resources/resource-creator';
 import { PageProcessor } from '../page-processors/page-processor-base';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { PageProcessorOptions, CrawlerRunOptions } from '../types/run-options';
+import { CrawlerRunOptions, PageProcessorOptions } from '../types/run-options';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 

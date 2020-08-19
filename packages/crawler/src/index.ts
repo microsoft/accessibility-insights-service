@@ -5,13 +5,11 @@
 require = require('esm')(module); // support ES6 module syntax for Office Fabric package
 
 export { CrawlerEngine } from './crawler/crawler-engine';
-export {CrawlerRunOptions} from './types/run-options';
-
+export { CrawlerRunOptions } from './types/run-options';
 
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
-
 
 interface Arguments {
     url: string;
@@ -34,6 +32,7 @@ interface Arguments {
             simulate: {
                 type: 'boolean',
                 describe: 'Simulate user click on elements that match to the specified selectors',
+                default: false,
             },
             // selectors: {
             //     type: 'array',

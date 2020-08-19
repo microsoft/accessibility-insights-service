@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import Apify from "apify";
+import Apify from 'apify';
 
 export interface CrawlerRunOptions {
     baseUrl: string;

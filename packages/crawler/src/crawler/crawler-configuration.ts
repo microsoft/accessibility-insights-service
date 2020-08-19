@@ -3,7 +3,6 @@
 import * as url from 'url';
 
 export class CrawlerConfiguration {
-
     public getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
         return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;
     }

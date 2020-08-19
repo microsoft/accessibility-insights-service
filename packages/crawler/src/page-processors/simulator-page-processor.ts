@@ -1,9 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { ClickElementOperation, clickElementOperation } from '../page-operations/click-element-operation';
-import { EnqueueActiveElementsOperation, enqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
+import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
+import { ClickElementOperation } from '../page-operations/click-element-operation';
+import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { Operation } from '../page-operations/operation';
+import { LocalBlobStore } from '../storage/local-blob-store';
+import { LocalDataStore } from '../storage/local-data-store';
+import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ActiveElement } from '../utility/active-elements-finder';
 import { PageProcessorBase } from './page-processor-base';
 
@@ -12,11 +16,16 @@ export class SimulatorPageProcessor extends PageProcessorBase {
     public constructor(
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns: string[],
-        private readonly selectors: string[],
-        private readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation = enqueueActiveElementsOperation,
-        private readonly clickElementOp: ClickElementOperation = clickElementOperation,
+        protected readonly selectors: string[],
+        protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation = new EnqueueActiveElementsOperation(),
+        protected readonly clickElementOp: ClickElementOperation = new ClickElementOperation(),
+        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(),
+        protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
+        protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
+        protected readonly enqueueLinksSimulator: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        protected readonly gotoExtendedSimulator: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
     ) {
-        super(requestQueue, discoveryPatterns);
+        super(requestQueue, discoveryPatterns, accessibilityScanOp, dataStore, blobStore, enqueueLinksSimulator, gotoExtendedSimulator);
     }
 
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
@@ -24,13 +33,18 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
             console.log(`Crawling page ${page.url()}`);
             await this.enqueueLinks(page);
-            await this.enqueueActiveElementsOp(page, this.selectors, this.requestQueue);
+            await this.enqueueActiveElementsOp.find(page, this.selectors, this.requestQueue);
             await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
             await this.pushScanData({ id: request.id as string, url: request.url });
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
-            const operationResult = await this.clickElementOp(page, activeElement.selector, this.requestQueue, this.discoveryPatterns);
+            const operationResult = await this.clickElementOp.click(
+                page,
+                activeElement.selector,
+                this.requestQueue,
+                this.discoveryPatterns,
+            );
             if (operationResult.clickAction === 'page-action') {
                 // await this.saveSnapshot(page, request.id as string);
                 await this.enqueueLinks(page);

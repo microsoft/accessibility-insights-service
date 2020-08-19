@@ -6,8 +6,8 @@ import Apify from 'apify';
 import { DirectNavigationOptions, Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
-import { ScanData } from '../types/scan-data';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
 // tslint:disable: no-any
