@@ -22,7 +22,7 @@ interface Arguments {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> [--simulate] [--selectors <selector1 ...>]')
+        .usage('Usage: $0 --url <url> [--simulate] [--selectors <selector1 ...>] [--output]')
         .options({
             url: {
                 type: 'string',
@@ -53,6 +53,7 @@ interface Arguments {
         baseUrl: args.url,
         simulate: args.simulate,
         selectors: args.selectors,
+        localOutputDir: args.output,
     });
 })().catch((error) => {
     console.log('Exception: ', error);
