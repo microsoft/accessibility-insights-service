@@ -3,12 +3,15 @@
 import Apify from 'apify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
+import { isNil } from 'lodash';
+import { setApifyEnvVars } from './apify-settings';
 import { ApifyFactory, CrawlerFactory } from './crawler-factory';
 import { ClassicPageProcessorFactory } from './page-processors/classic-page-processor-factory';
 import { PageProcessorFactory } from './page-processors/page-processor-factory';
 
 export interface CrawlerRunOptions {
     baseUrl: string;
+    localOutputDir?: string;
     // existingUrls?: string[];
     // discoveryPatterns?: string[];
     // simulate?: boolean;
@@ -25,12 +28,17 @@ export class CrawlerEngine {
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
+        if (!isNil(crawlerRunOptions.localOutputDir)) {
+            this.setLocalOutputDir(crawlerRunOptions.localOutputDir);
+        }
+
         // const requestList = await this.crawlerFactory.createRequestList(crawlerRunOptions.existingUrls);
         const requestQueue = await this.crawlerFactory.createRequestQueue(crawlerRunOptions.baseUrl);
         const pageProcessor = this.pageProcessorFactory.createPageProcessor({
             baseUrl: crawlerRunOptions.baseUrl,
             requestQueue,
         });
+
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({
                 // requestList,
@@ -41,5 +49,9 @@ export class CrawlerEngine {
             });
             await crawler.run();
         });
+    }
+
+    private setLocalOutputDir(outputDir: string): void {
+        setApifyEnvVars({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 }
