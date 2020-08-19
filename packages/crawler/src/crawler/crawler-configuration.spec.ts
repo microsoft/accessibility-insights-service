@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PageProcessor, PageProcessorOptions } from './page-processor-base';
-import { PageProcessorFactoryBase } from './page-processor-factory';
+import { CrawlerConfiguration } from './crawler-configuration';
 
-class TestablePageProcessorFactory extends PageProcessorFactoryBase {
-    public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
+class TestableCrawlerConfiguration extends CrawlerConfiguration {
+    public createPageProcessor(): CrawlerConfiguration {
         return undefined;
     }
 
@@ -18,11 +17,11 @@ class TestablePageProcessorFactory extends PageProcessorFactoryBase {
     }
 }
 
-describe(PageProcessorFactoryBase, () => {
-    let pageProcessorFactory: TestablePageProcessorFactory;
+describe(CrawlerConfiguration, () => {
+    let pageProcessorFactory: TestableCrawlerConfiguration;
 
     beforeEach(() => {
-        pageProcessorFactory = new TestablePageProcessorFactory();
+        pageProcessorFactory = new TestableCrawlerConfiguration();
     });
 
     describe('getDiscoveryPattern', () => {

@@ -4,11 +4,14 @@
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "clean": "rimraf dist test-results",
-        "build": "tsc && echo",
+        "build": "npm-run-all --serial build:ts build:imports",
+        "build:ts": "tsc && echo",
+        "build:imports": "rollup -c",
         "cbuild": "npm-run-all --serial clean build",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
-        "test": "jest --coverage --colors"
+        "test": "jest --coverage --colors",
+        "start": "node ./dist/index.js"
     },
     "repository": {
         "type": "git",
@@ -22,6 +25,8 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
+        "@rollup/plugin-commonjs": "^11.1.0",
+        "@rollup/plugin-node-resolve": "^7.1.3",
         "@types/cheerio": "^0.22.17",
         "@types/jest": "^25.1.4",
         "@types/node": "^13.9.5",
@@ -37,7 +42,8 @@
         "typescript": "^3.8.3"
     },
     "dependencies": {
-        "accessibility-insights-report": "^1.0.3",
+        "@medv/finder": "^1.1.3",
+        "accessibility-insights-report": "^1.0.2",
         "apify": "^0.21.3",
         "apify-shared": "^0.2.12",
         "axe-core": "^3.5.3",
@@ -47,7 +53,7 @@
         "esm": "^3.2.25",
         "inversify": "^5.0.1",
         "lodash": "^4.17.14",
-        "puppeteer": "^4.0.0",
+        "puppeteer": "^3.0.2",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
         "yargs": "^15.3.1"
