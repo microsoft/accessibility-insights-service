@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import Apify, { PuppeteerCrawlerOptions } from 'apify';
+import Apify from 'apify';
 import { IMock, It, Mock } from 'typemoq';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
@@ -62,7 +62,6 @@ describe(CrawlerEngine, () => {
 
     it('Run crawler with output dir specified', async () => {
         const outputDir = 'output dir';
-        const prevApifyStorageDir = 'prev output dir';
 
         // Env variable must be set when request queue and page processor are created
         setupCreateRequestQueue(() => {
@@ -76,14 +75,10 @@ describe(CrawlerEngine, () => {
 
         crawlerEngine = new CrawlerEngine(pageProcessorFactoryMock.object, crawlerFactoryMock.object, runApifyMock.object);
 
-        process.env.APIFY_LOCAL_STORAGE_DIR = prevApifyStorageDir;
-
         await crawlerEngine.start({
             baseUrl,
             localOutputDir: outputDir,
         });
-
-        expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(prevApifyStorageDir);
     });
 
     afterEach(() => {
@@ -123,7 +118,7 @@ describe(CrawlerEngine, () => {
         puppeteerCrawlerMock.setup((pc) => pc.run()).verifiable();
     }
 
-    function setupCreatePuppeteerCrawler(crawlerOptions: PuppeteerCrawlerOptions): void {
+    function setupCreatePuppeteerCrawler(crawlerOptions: Apify.PuppeteerCrawlerOptions): void {
         crawlerFactoryMock
             .setup((cf) => cf.createPuppeteerCrawler(crawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
