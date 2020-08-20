@@ -39,7 +39,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         );
     }
 
-    public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
+    public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         const operation = request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
             this.logger.logInfo(`Crawling page ${page.url()}`);

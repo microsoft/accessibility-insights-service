@@ -26,7 +26,7 @@ describe(CrawlerEngine, () => {
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
 
     const pageProcessorStub: PageProcessor = {
-        pageProcessor: () => null,
+        pageHandler: () => null,
         gotoFunction: () => null,
         pageErrorProcessor: () => null,
     };
@@ -55,7 +55,7 @@ describe(CrawlerEngine, () => {
         baseCrawlerOptions = {
             requestList: undefined,
             requestQueue: requestQueueMock.object,
-            handlePageFunction: pageProcessorStub.pageProcessor,
+            handlePageFunction: pageProcessorStub.pageHandler,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
             maxRequestsPerCrawl: maxRequestsPerCrawl,

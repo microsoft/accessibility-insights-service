@@ -85,7 +85,7 @@ describe(SimulatorPageProcessor, () => {
         blobStoreMock.setup((bs) => bs.setValue(`${expectedScanData.id}.data`, expectedScanData)).verifiable();
 
         const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
-        await simulatorPageProcessor.pageProcessor(inputs);
+        await simulatorPageProcessor.pageHandler(inputs);
     });
 
     it('pageProcessor, click', async () => {
@@ -114,7 +114,7 @@ describe(SimulatorPageProcessor, () => {
             .verifiable();
 
         const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStubClick } as any;
-        await simulatorPageProcessor.pageProcessor(inputs);
+        await simulatorPageProcessor.pageHandler(inputs);
     });
 
     function setupEnqueueLinks(page: Page): void {

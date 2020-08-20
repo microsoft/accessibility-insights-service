@@ -4,7 +4,7 @@ import Apify from 'apify';
 import { PageProcessorBase } from './page-processor-base';
 
 export class ClassicPageProcessor extends PageProcessorBase {
-    public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
+    public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         this.logger.logInfo(`Crawling page ${page.url()}`);
         await this.enqueueLinks(page);
         await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);

@@ -46,7 +46,7 @@ export class CrawlerEngine {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({
                 requestList,
                 requestQueue,
-                handlePageFunction: pageProcessor.pageProcessor,
+                handlePageFunction: pageProcessor.pageHandler,
                 gotoFunction: pageProcessor.gotoFunction,
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
                 maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),

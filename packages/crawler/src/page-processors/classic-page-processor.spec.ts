@@ -75,7 +75,7 @@ describe(ClassicPageProcessor, () => {
 
         // tslint:disable-next-line: no-any
         const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
-        await classicPageProcessor.pageProcessor(inputs);
+        await classicPageProcessor.pageHandler(inputs);
     });
 
     function setupEnqueueLinks(page: Page): void {
