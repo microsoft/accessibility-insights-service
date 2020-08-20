@@ -7,7 +7,7 @@ export interface ApifySettings {
 }
 
 const defaultSettings: ApifySettings = {
-    APIFY_HEADLESS: 'true',
+    APIFY_HEADLESS: '1',
 };
 
 export function setApifyEnvVars(settings?: ApifySettings): void {
@@ -16,6 +16,8 @@ export function setApifyEnvVars(settings?: ApifySettings): void {
         ...settings,
     };
     Object.keys(allSettings).forEach((key: keyof ApifySettings) => {
-        process.env[`${key}`] = allSettings[key];
+        if (allSettings[key] !== undefined) {
+            process.env[`${key}`] = allSettings[key];
+        }
     });
 }

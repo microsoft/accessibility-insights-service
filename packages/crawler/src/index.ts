@@ -7,11 +7,10 @@ require = require('esm')(module); // support ES6 module syntax for Office Fabric
 export { CrawlerEngine } from './crawler/crawler-engine';
 export { CrawlerRunOptions } from './types/run-options';
 
-import 'reflect-metadata';
-
 import { ServiceConfiguration, System } from 'common';
 import * as dotenv from 'dotenv';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
+import 'reflect-metadata';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
 

@@ -5,7 +5,6 @@ import Apify from 'apify';
 
 // @ts-ignore
 import * as cheerio from 'cheerio';
-import { isNil } from 'lodash';
 import { Logger } from 'logger';
 import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resource-creator';
 import { setApifyEnvVars } from '../apify-settings';
@@ -27,9 +26,7 @@ export class CrawlerEngine {
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
-        if (!isNil(crawlerRunOptions.localOutputDir)) {
-            this.setLocalOutputDir(crawlerRunOptions.localOutputDir);
-        }
+        this.setEnvVars(crawlerRunOptions.localOutputDir);
 
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
         const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl);
@@ -55,7 +52,7 @@ export class CrawlerEngine {
         });
     }
 
-    private setLocalOutputDir(outputDir: string): void {
-        setApifyEnvVars({ APIFY_LOCAL_STORAGE_DIR: outputDir });
+    private setEnvVars(localOutputDir?: string): void {
+        setApifyEnvVars({ APIFY_LOCAL_STORAGE_DIR: localOutputDir });
     }
 }

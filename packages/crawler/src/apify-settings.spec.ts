@@ -6,7 +6,7 @@ import { ApifySettings, setApifyEnvVars } from './apify-settings';
 describe('Apify settings', () => {
     it('gets default settings', () => {
         const expectedSettings: ApifySettings = {
-            APIFY_HEADLESS: 'true',
+            APIFY_HEADLESS: '1',
         };
 
         setApifyEnvVars();
@@ -22,7 +22,7 @@ describe('Apify settings', () => {
         };
         const expectedSettings: ApifySettings = {
             ...settings,
-            APIFY_HEADLESS: 'true',
+            APIFY_HEADLESS: '1',
         };
 
         setApifyEnvVars(settings);
@@ -34,7 +34,7 @@ describe('Apify settings', () => {
 
     it('overrides default settings', () => {
         const overrideSettings: ApifySettings = {
-            APIFY_HEADLESS: 'false',
+            APIFY_HEADLESS: '0',
             APIFY_LOCAL_STORAGE_DIR: 'local storage dir',
         };
 
@@ -43,5 +43,18 @@ describe('Apify settings', () => {
         Object.keys(overrideSettings).forEach((key: keyof ApifySettings) => {
             expect(process.env[`${key}`]).toBe(overrideSettings[key]);
         });
+    });
+
+    it('does not override setting if undefined', () => {
+        const settings: ApifySettings = {
+            APIFY_LOCAL_STORAGE_DIR: undefined,
+        };
+
+        const presetLocalStorageDir = 'local storage dir';
+        process.env.APIFY_LOCAL_STORAGE_DIR = presetLocalStorageDir;
+
+        setApifyEnvVars(settings);
+
+        expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(presetLocalStorageDir);
     });
 });
