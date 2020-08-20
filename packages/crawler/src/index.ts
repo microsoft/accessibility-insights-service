@@ -7,6 +7,7 @@ require = require('esm')(module); // support ES6 module syntax for Office Fabric
 export { CrawlerEngine } from './crawler/crawler-engine';
 export { CrawlerRunOptions } from './types/run-options';
 
+import { System } from 'common';
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
@@ -56,6 +57,6 @@ interface Arguments {
         localOutputDir: args.output,
     });
 })().catch((error) => {
-    console.log('Exception: ', error);
+    console.log('Exception: ', System.serializeError(error));
     process.exit(1);
 });

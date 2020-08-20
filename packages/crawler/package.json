@@ -56,6 +56,7 @@
         "puppeteer": "^3.0.2",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
-        "yargs": "^15.3.1"
+        "yargs": "^15.3.1",
+        "common": "1.0.0"
     }
 }
