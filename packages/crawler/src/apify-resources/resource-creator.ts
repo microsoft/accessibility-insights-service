@@ -2,13 +2,12 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 
-export interface CrawlerFactory {
+export interface ResourceCreator {
     createRequestList(existingUrls: string[]): Promise<Apify.RequestList>;
     createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue>;
-    createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler;
 }
 
-export class ApifyFactory implements CrawlerFactory {
+export class ApifyResourceCreator implements ResourceCreator {
     public constructor(private readonly apify: typeof Apify = Apify) {}
 
     public async createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue> {
@@ -20,9 +19,5 @@ export class ApifyFactory implements CrawlerFactory {
 
     public async createRequestList(existingUrls: string[]): Promise<Apify.RequestList> {
         return this.apify.openRequestList('existingUrls', existingUrls === undefined ? [] : existingUrls);
-    }
-
-    public createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler {
-        return new this.apify.PuppeteerCrawler(options);
     }
 }

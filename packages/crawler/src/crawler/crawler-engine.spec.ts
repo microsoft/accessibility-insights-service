@@ -4,11 +4,13 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { IMock, It, Mock } from 'typemoq';
+import { ResourceCreator } from '../apify-resources/resource-creator';
+import { PageProcessor } from '../page-processors/page-processor-base';
+import { PageProcessorFactory } from '../page-processors/page-processor-factory';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { PageProcessorOptions } from '../types/run-options';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
-import { PageProcessor, PageProcessorOptions } from './page-processors/page-processor-base';
-import { PageProcessorFactory } from './page-processors/page-processor-factory';
-import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(CrawlerEngine, () => {
@@ -17,13 +19,13 @@ describe(CrawlerEngine, () => {
     let runApifyMock: IMock<ApifyMainFunc>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
+    let resourceCreatorMock: IMock<ResourceCreator>;
     const pageProcessorStub: PageProcessor = {
         pageProcessor: () => null,
         gotoFunction: () => null,
         pageErrorProcessor: () => null,
     };
     let baseCrawlerOptions: Apify.PuppeteerCrawlerOptions;
-    let basePageProcessorOptions: PageProcessorOptions;
 
     const baseUrl = 'base url';
 
@@ -36,24 +38,31 @@ describe(CrawlerEngine, () => {
         requestQueueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
         baseCrawlerOptions = {
+            requestList: undefined,
             requestQueue: requestQueueMock.object,
             handlePageFunction: pageProcessorStub.pageProcessor,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
         };
-        basePageProcessorOptions = {
-            baseUrl,
-            requestQueue: requestQueueMock.object,
-        };
+        resourceCreatorMock = Mock.ofType<ResourceCreator>();
     });
 
     it('Run crawler with one base url', async () => {
+        const basePageProcessorOptions = {
+            requestQueue: requestQueueMock.object,
+            crawlerRunOptions: { baseUrl },
+        };
         setupCreateRequestQueue();
         setupCreatePageProcessor(basePageProcessorOptions);
         setupCreatePuppeteerCrawler(baseCrawlerOptions);
         setupRunCrawler();
 
-        crawlerEngine = new CrawlerEngine(pageProcessorFactoryMock.object, crawlerFactoryMock.object, runApifyMock.object);
+        crawlerEngine = new CrawlerEngine(
+            pageProcessorFactoryMock.object,
+            crawlerFactoryMock.object,
+            resourceCreatorMock.object,
+            runApifyMock.object,
+        );
 
         await crawlerEngine.start({
             baseUrl,
@@ -62,6 +71,11 @@ describe(CrawlerEngine, () => {
 
     it('Run crawler with output dir specified', async () => {
         const outputDir = 'output dir';
+
+        const basePageProcessorOptions = {
+            requestQueue: requestQueueMock.object,
+            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir },
+        };
 
         // Env variable must be set when request queue and page processor are created
         setupCreateRequestQueue(() => {
@@ -73,23 +87,29 @@ describe(CrawlerEngine, () => {
         setupCreatePuppeteerCrawler(baseCrawlerOptions);
         setupRunCrawler();
 
-        crawlerEngine = new CrawlerEngine(pageProcessorFactoryMock.object, crawlerFactoryMock.object, runApifyMock.object);
+        crawlerEngine = new CrawlerEngine(
+            pageProcessorFactoryMock.object,
+            crawlerFactoryMock.object,
+            resourceCreatorMock.object,
+            runApifyMock.object,
+        );
 
         await crawlerEngine.start({
-            baseUrl,
+            baseUrl: baseUrl,
             localOutputDir: outputDir,
         });
     });
 
     afterEach(() => {
         pageProcessorFactoryMock.verifyAll();
-        runApifyMock.verifyAll();
         crawlerFactoryMock.verifyAll();
         puppeteerCrawlerMock.verifyAll();
+        runApifyMock.verifyAll();
+        resourceCreatorMock.verifyAll();
     });
 
     function setupCreateRequestQueue(callback: () => void = () => null): void {
-        crawlerFactoryMock
+        resourceCreatorMock
             .setup(async (cf) => cf.createRequestQueue(baseUrl))
             .returns(async () => {
                 callback();

@@ -2,53 +2,66 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { PageProcessor, PageProcessorOptions } from './page-processor-base';
-import { PageProcessorFactoryBase } from './page-processor-factory';
+import { IMock, Mock } from 'typemoq';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
+import { PageProcessorOptions } from '../types/run-options';
+import { ClassicPageProcessor } from './classic-page-processor';
+import { PageProcessorFactory } from './page-processor-factory';
+import { SimulatorPageProcessor } from './simulator-page-processor';
 
-class TestablePageProcessorFactory extends PageProcessorFactoryBase {
-    public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
-        return undefined;
-    }
+// tslint:disable: no-any
 
-    // Override to access protected method
-
-    // tslint:disable-next-line: no-unnecessary-override
-    public getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
-        return super.getDiscoveryPattern(baseUrl, discoveryPatterns);
-    }
-}
-
-describe(PageProcessorFactoryBase, () => {
-    let pageProcessorFactory: TestablePageProcessorFactory;
+describe(PageProcessorFactory, () => {
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+    let pageProcessorFactory: PageProcessorFactory;
+    const baseUrl = 'base url';
 
     beforeEach(() => {
-        pageProcessorFactory = new TestablePageProcessorFactory();
+        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object);
     });
 
-    describe('getDiscoveryPattern', () => {
-        const host = 'hostname.com';
-        const path = '/path/to/page';
-        let baseUrl: string;
+    it('PageProcessorFactory, classic page processor', async () => {
+        const pageProcessorOptions: PageProcessorOptions = {
+            requestQueue: undefined,
+            crawlerRunOptions: {
+                baseUrl: baseUrl,
+                discoveryPatterns: undefined,
+                selectors: undefined,
+                simulate: false,
+            },
+        };
+        crawlerConfigurationMock
+            .setup((ccm) => ccm.getDiscoveryPattern(baseUrl, undefined))
+            .returns(() => [])
+            .verifiable();
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
+        expect(pageProcessor).toBeInstanceOf(ClassicPageProcessor);
+    });
 
-        beforeEach(() => {
-            baseUrl = `https://${host}${path}`;
-        });
+    it('PageProcessorFactory, simulate page processor', () => {
+        const pageProcessorOptions: PageProcessorOptions = {
+            requestQueue: undefined,
+            crawlerRunOptions: {
+                baseUrl: baseUrl,
+                discoveryPatterns: undefined,
+                simulate: true,
+            },
+        };
+        crawlerConfigurationMock
+            .setup((ccm) => ccm.getDiscoveryPattern(baseUrl, undefined))
+            .returns(() => [])
+            .verifiable();
 
-        it('with no list provided', () => {
-            const expectedPattern = `http[s?]://${host}${path}[.*]`;
+        crawlerConfigurationMock
+            .setup((ccm) => ccm.getDefaultSelectors(undefined))
+            .returns(() => [])
+            .verifiable();
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
+        expect(pageProcessor).toBeInstanceOf(SimulatorPageProcessor);
+    });
 
-            const discoveryPatterns = pageProcessorFactory.getDiscoveryPattern(baseUrl, undefined);
-
-            expect(discoveryPatterns.length).toBe(1);
-            expect(discoveryPatterns[0]).toBe(expectedPattern);
-        });
-
-        it('with list provided', () => {
-            const expectedDiscoveryPatterns = ['pattern1', 'pattern2'];
-
-            const discoveryPatterns = pageProcessorFactory.getDiscoveryPattern(baseUrl, expectedDiscoveryPatterns);
-
-            expect(discoveryPatterns).toBe(expectedDiscoveryPatterns);
-        });
+    afterEach(() => {
+        crawlerConfigurationMock.verifyAll();
     });
 });
