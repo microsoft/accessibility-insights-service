@@ -34,7 +34,7 @@ describe(CrawlerEngine, () => {
 
     let crawlerEngine: CrawlerEngine;
 
-    const maxRequestsPerCrawl = 100;
+    const maxRequestsPerCrawl: number = 100;
 
     beforeEach(() => {
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
@@ -58,13 +58,12 @@ describe(CrawlerEngine, () => {
             maxRequestsPerCrawl: maxRequestsPerCrawl,
         };
         resourceCreatorMock = Mock.ofType<ResourceCreator>();
-        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
     });
 
     it('Run crawler with one base url', async () => {
         const basePageProcessorOptions = {
             requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl },
+            crawlerRunOptions: { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
         setupCreateRequestQueue();
         setupCreatePageProcessor(basePageProcessorOptions);
@@ -81,6 +80,7 @@ describe(CrawlerEngine, () => {
 
         await crawlerEngine.start({
             baseUrl,
+            maxRequestsPerCrawl: maxRequestsPerCrawl,
         });
     });
 
@@ -89,7 +89,7 @@ describe(CrawlerEngine, () => {
 
         const basePageProcessorOptions = {
             requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir },
+            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
 
         // Env variable must be set when request queue and page processor are created
@@ -113,6 +113,7 @@ describe(CrawlerEngine, () => {
         await crawlerEngine.start({
             baseUrl: baseUrl,
             localOutputDir: outputDir,
+            maxRequestsPerCrawl: maxRequestsPerCrawl,
         });
     });
 

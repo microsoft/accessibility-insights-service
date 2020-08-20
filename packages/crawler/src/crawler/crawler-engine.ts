@@ -37,8 +37,6 @@ export class CrawlerEngine {
             crawlerRunOptions,
         });
 
-        const maxUrls = this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl);
-
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({
                 requestList,
@@ -46,7 +44,7 @@ export class CrawlerEngine {
                 handlePageFunction: pageProcessor.pageProcessor,
                 gotoFunction: pageProcessor.gotoFunction,
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
-                maxRequestsPerCrawl: maxUrls, //this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
+                maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
             });
             await crawler.run();
         });
