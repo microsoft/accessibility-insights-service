@@ -22,16 +22,16 @@ export interface PageProcessor {
 
 export abstract class PageProcessorBase implements PageProcessor {
     /**
+     * Timeout in which page navigation needs to finish, in seconds.
+     */
+    public gotoTimeoutSecs = 30;
+
+    /**
      * This function is called to extract data from a single web page
      * 'page' is an instance of Puppeteer.Page with page.goto(request.url) already called
      * 'request' is an instance of Request class with information about the page to load
      */
     protected abstract processPage: Apify.PuppeteerHandlePage;
-
-    /**
-     * Timeout in which page navigation needs to finish, in seconds.
-     */
-    public gotoTimeoutSecs = 30;
 
     public constructor(
         protected readonly logger: Logger,
