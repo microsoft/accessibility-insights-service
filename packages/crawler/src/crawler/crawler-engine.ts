@@ -10,6 +10,7 @@ import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resour
 import { setApifyEnvVars } from '../apify-settings';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { CrawlerRunOptions } from '../types/run-options';
+import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
 export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
@@ -20,6 +21,7 @@ export class CrawlerEngine {
         private readonly crawlerFactory: CrawlerFactory = new CrawlerFactory(),
         private readonly resourceCreator: ResourceCreator = new ApifyResourceCreator(),
         private readonly runApify: ApifyMainFunc = Apify.main,
+        private readonly crawlerConfiguration: CrawlerConfiguration = new CrawlerConfiguration(),
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -42,6 +44,7 @@ export class CrawlerEngine {
                 handlePageFunction: pageProcessor.pageProcessor,
                 gotoFunction: pageProcessor.gotoFunction,
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
+                maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
             });
             await crawler.run();
         });
