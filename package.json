@@ -49,16 +49,5 @@
         "packages": [
             "packages/*"
         ]
-    },
-    "resolutions": {
-        "jquery": "^3.5.0",
-        "https-proxy-agent": "^3.0.1",
-        "serialize-javascript": "^2.1.1",
-        "minimist": "^1.2.2",
-        "dot-prop": "^5.2.0",
-        "kind-of": "^6.0.3",
-        "chokidar": "^3.4.0",
-        "yargs-parser": "^18.1.1",
-        "lodash": "^4.17.14"
     }
 }
