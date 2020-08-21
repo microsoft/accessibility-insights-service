@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as convict from 'convict';
+import convict from 'convict';
 import * as fs from 'fs';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';

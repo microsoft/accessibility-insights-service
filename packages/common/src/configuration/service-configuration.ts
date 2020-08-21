@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as convict from 'convict';
+import convict from 'convict';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';

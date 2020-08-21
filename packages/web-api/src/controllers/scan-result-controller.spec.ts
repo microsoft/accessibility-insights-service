@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { Logger } from 'logger';
-import * as moment from 'moment';
+import moment from 'moment';
 import { HttpResponse, OnDemandPageScanRunResultProvider, ScanResultResponse, WebApiErrorCodes } from 'service-library';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';

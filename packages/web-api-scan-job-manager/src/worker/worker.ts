@@ -5,7 +5,7 @@ import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil, mergeWith } from 'lodash';
 import { GlobalLogger } from 'logger';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
 import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 

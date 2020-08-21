@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 // tslint:disable: no-submodule-imports no-unsafe-any
 import { AvailabilityTestConfig } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
 import { Logger, LogLevel } from 'logger';
-import * as moment from 'moment';
+import moment from 'moment';
 import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
 import { ActivityAction } from './contracts/activity-actions';
 import {

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import * as sha256 from 'sha.js';
+import sha256 from 'sha.js';
 
 export function toApifyInstance(requestQueue: Apify.RequestQueue): Apify.RequestQueue {
     return <Apify.RequestQueue>(<unknown>requestQueue);

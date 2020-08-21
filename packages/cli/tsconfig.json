@@ -1,10 +1,7 @@
 {
     "extends": "../../tsconfig.base.json",
-    "lib": ["es6", "dom"],
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
     "compilerOptions": {
-        "outDir": "dist",
-        "declaration": false
+        "declaration": false,
+        "outDir": "dist"
     }
 }

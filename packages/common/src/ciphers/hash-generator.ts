@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as fnv1a from '@sindresorhus/fnv1a';
+import fnv1a from '@sindresorhus/fnv1a';
 import { injectable } from 'inversify';
-import * as sha256 from 'sha.js';
+import sha256 from 'sha.js';
 import { JumpConsistentHash } from './jump-consistent-hash';
 
 @injectable()

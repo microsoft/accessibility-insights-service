@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as filenamify from 'filenamify-url';
+import filenamify from 'filenamify-url';
 import * as fs from 'fs';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from './report-disk-writer';

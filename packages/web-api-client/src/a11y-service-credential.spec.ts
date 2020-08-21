@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
-import * as requestPromise from 'request-promise';
+import requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
