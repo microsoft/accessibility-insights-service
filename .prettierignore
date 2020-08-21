@@ -5,6 +5,7 @@
 .prettierignore
 LICENSE
 yarn.lock
+.dockerignore
 
 **/*.code-workspace
 **/Dockerfile
