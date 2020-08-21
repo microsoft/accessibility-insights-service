@@ -1,7 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { injectable } from 'inversify';
 import * as url from 'url';
 
+@injectable()
 export class CrawlerConfiguration {
     public getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
         return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;

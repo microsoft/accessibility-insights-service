@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
+import { injectable } from 'inversify';
 
 export interface ResourceCreator {
     createRequestList(existingUrls: string[]): Promise<Apify.RequestList>;
     createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue>;
 }
 
+@injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     public constructor(private readonly apify: typeof Apify = Apify) {}
 

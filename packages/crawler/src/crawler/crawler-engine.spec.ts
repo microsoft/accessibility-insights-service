@@ -74,8 +74,8 @@ describe(CrawlerEngine, () => {
             pageProcessorFactoryMock.object,
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
-            runApifyMock.object,
             crawlerConfigurationMock.object,
+            runApifyMock.object,
         );
 
         await crawlerEngine.start({
@@ -106,8 +106,8 @@ describe(CrawlerEngine, () => {
             pageProcessorFactoryMock.object,
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
-            runApifyMock.object,
             crawlerConfigurationMock.object,
+            runApifyMock.object,
         );
 
         await crawlerEngine.start({

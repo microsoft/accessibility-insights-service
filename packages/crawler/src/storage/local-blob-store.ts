@@ -1,11 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { BlobStore } from './store-types';
+import { injectable } from 'inversify';
+import { BlobStore, scanResultStorageName } from './store-types';
 
+@injectable()
 export class LocalBlobStore implements BlobStore {
     constructor(
-        public readonly storeName: string,
         private keyValueStore?: Apify.KeyValueStore,
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
@@ -15,9 +16,9 @@ export class LocalBlobStore implements BlobStore {
         await this.keyValueStore.setValue(key, value, options);
     }
 
-    private async open(): Promise<void> {
+    private async open(storeName: string = scanResultStorageName): Promise<void> {
         if (this.keyValueStore === undefined) {
-            this.keyValueStore = await this.apifyObj.openKeyValueStore(this.storeName);
+            this.keyValueStore = await this.apifyObj.openKeyValueStore(storeName);
         }
     }
 }

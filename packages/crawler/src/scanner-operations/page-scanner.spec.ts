@@ -4,10 +4,11 @@ import 'reflect-metadata';
 
 import { Report, Reporter } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
-import AxePuppeteer from 'axe-puppeteer';
+import { AxePuppeteer } from 'axe-puppeteer';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
-import { AxePuppeteerFactory, PageScanner } from './page-scanner';
+import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
+import { PageScanner } from './page-scanner';
 
 // tslint:disable: no-any
 
@@ -35,7 +36,7 @@ describe(PageScanner, () => {
         reporterMock = Mock.ofType<Reporter>();
         createAxePuppeteerMock = Mock.ofType<AxePuppeteerFactory>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
-        createAxePuppeteerMock.setup((cap) => cap(pageStub)).returns(() => axePuppeteerMock.object);
+        createAxePuppeteerMock.setup((cap) => cap.createAxePuppeteer(pageStub)).returns(() => axePuppeteerMock.object);
 
         pageScanner = new PageScanner(reporterMock.object, createAxePuppeteerMock.object);
     });

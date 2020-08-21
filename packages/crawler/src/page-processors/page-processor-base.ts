@@ -1,11 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
+import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
-import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -19,6 +21,7 @@ export interface PageProcessor {
     pageErrorProcessor: Apify.HandleFailedRequest;
 }
 
+@injectable()
 export abstract class PageProcessorBase implements PageProcessor {
     /**
      * This function is called to extract data from a single web page
@@ -33,11 +36,11 @@ export abstract class PageProcessorBase implements PageProcessor {
     public gotoTimeoutSecs = 30;
 
     public constructor(
+        @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
+        @inject(LocalDataStore) protected readonly dataStore: DataStore,
+        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns?: string[],
-        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(),
-        protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
-        protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         private readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
     ) {}

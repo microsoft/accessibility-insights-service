@@ -5,6 +5,7 @@ import Apify from 'apify';
 
 // @ts-ignore
 import * as cheerio from 'cheerio';
+import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resource-creator';
 import { setApifyEnvVars } from '../apify-settings';
@@ -15,13 +16,14 @@ import { CrawlerFactory } from './crawler-factory';
 
 export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
 
+@injectable()
 export class CrawlerEngine {
     public constructor(
-        private readonly pageProcessorFactory: PageProcessorFactory = new PageProcessorFactory(),
-        private readonly crawlerFactory: CrawlerFactory = new CrawlerFactory(),
-        private readonly resourceCreator: ResourceCreator = new ApifyResourceCreator(),
+        @inject(PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
+        @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
+        @inject(ApifyResourceCreator) private readonly resourceCreator: ResourceCreator,
+        @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
         private readonly runApify: ApifyMainFunc = Apify.main,
-        private readonly crawlerConfiguration: CrawlerConfiguration = new CrawlerConfiguration(),
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {

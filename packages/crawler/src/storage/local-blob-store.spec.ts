@@ -6,13 +6,14 @@ import Apify from 'apify';
 
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { LocalBlobStore } from './local-blob-store';
+import { scanResultStorageName } from './store-types';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(LocalBlobStore, () => {
     let keyValueStoreMock: IMock<Apify.KeyValueStore>;
     let store: LocalBlobStore;
     let apifyMock: IMock<typeof Apify>;
-    const storeName = 'store name';
+    const storeName = scanResultStorageName;
     const key = 'key';
     const value = 'value';
 
@@ -32,7 +33,7 @@ describe(LocalBlobStore, () => {
             .returns(async () => {})
             .verifiable(Times.once());
 
-        store = new LocalBlobStore(storeName, keyValueStoreMock.object, apifyMock.object);
+        store = new LocalBlobStore(keyValueStoreMock.object, apifyMock.object);
         await store.setValue(key, value);
     });
 
@@ -55,7 +56,7 @@ describe(LocalBlobStore, () => {
             },
         };
 
-        store = new LocalBlobStore(storeName, undefined, apifyStub);
+        store = new LocalBlobStore(undefined, apifyStub);
         await store.setValue(key, value).then(() => {
             expect(isKeyValueStoreOpen).toEqual(true);
         });

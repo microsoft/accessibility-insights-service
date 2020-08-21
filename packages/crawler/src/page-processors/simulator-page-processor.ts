@@ -1,31 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
+import { inject, injectable } from 'inversify';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
-import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { BlobStore, DataStore } from '../storage/store-types';
 import { ActiveElement } from '../utility/active-elements-finder';
 import { PageProcessorBase } from './page-processor-base';
 
+@injectable()
 // tslint:disable: no-unsafe-any
 export class SimulatorPageProcessor extends PageProcessorBase {
     public constructor(
+        @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
+        @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
+        @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
+        @inject(LocalDataStore) protected readonly dataStore: DataStore,
+        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns: string[],
         protected readonly selectors: string[],
-        protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation = new EnqueueActiveElementsOperation(),
-        protected readonly clickElementOp: ClickElementOperation = new ClickElementOperation(),
-        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(),
-        protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
-        protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
         protected readonly enqueueLinksSimulator: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtendedSimulator: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
     ) {
-        super(requestQueue, discoveryPatterns, accessibilityScanOp, dataStore, blobStore, enqueueLinksSimulator, gotoExtendedSimulator);
+        super(accessibilityScanOp, dataStore, blobStore, requestQueue, discoveryPatterns, enqueueLinksSimulator, gotoExtendedSimulator);
     }
 
     public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {

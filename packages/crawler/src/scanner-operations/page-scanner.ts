@@ -1,31 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Report, Reporter, reporterFactory } from 'accessibility-insights-report';
+import { Report, Reporter } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
+import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
+import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 
 export interface ScanResult {
     axeResults: AxeResults;
     report?: Report;
 }
 
-export type AxePuppeteerFactory = (page: Page) => AxePuppeteer;
-
-const singeltonReporter = reporterFactory();
-
+@injectable()
 export class PageScanner {
     // reporterFactory should be instantiated only once per app life cycle.
     // Creating reporterFactory instance multiple times will result Office Fabric
     // warning message: `Applications should only call registerIcons for any given icon once.`
 
     public constructor(
-        private readonly reporter: Reporter = singeltonReporter,
-        private readonly createAxePuppeteerFunc: AxePuppeteerFactory = (page: Page) => new AxePuppeteer(page),
+        @inject('ReporterFactory') private readonly reporter: Reporter,
+        @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
     ) {}
 
     public async scan(page: Page): Promise<ScanResult> {
-        const axePuppeteer: AxePuppeteer = this.createAxePuppeteerFunc(page);
+        // tslint:disable-next-line: no-unsafe-any
+        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createAxePuppeteer(page);
         const axeResults = await axePuppeteer.analyze();
 
         const report = this.createReport(axeResults, page.url(), await page.title());

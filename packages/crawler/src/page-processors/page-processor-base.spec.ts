@@ -50,11 +50,11 @@ describe(PageProcessorBase, () => {
         } as any;
 
         pageProcessorBase = new TestablePageProcessor(
-            requestQueueMock.object,
-            discoveryPatterns,
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            requestQueueMock.object,
+            discoveryPatterns,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,
         );

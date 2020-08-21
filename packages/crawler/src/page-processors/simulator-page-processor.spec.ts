@@ -50,14 +50,14 @@ describe(SimulatorPageProcessor, () => {
         } as any;
 
         simulatorPageProcessor = new SimulatorPageProcessor(
-            requestQueueMock.object,
-            discoveryPatterns,
-            selectors,
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            requestQueueMock.object,
+            discoveryPatterns,
+            selectors,
             enqueueLinksExtMock.object,
         );
     });
