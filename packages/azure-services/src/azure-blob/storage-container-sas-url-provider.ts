@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { ContainerSASPermissions, generateBlobSASQueryParameters, SASProtocol, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
-import * as moment from 'moment';
+import moment from 'moment';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
 import { secretNames } from '../key-vault/secret-names';
 import { SecretProvider } from '../key-vault/secret-provider';

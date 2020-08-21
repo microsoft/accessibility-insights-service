@@ -4,7 +4,7 @@ import { BatchServiceModels } from '@azure/batch';
 import { EnvironmentSettings, ServiceConfiguration, TaskRuntimeConfig } from 'common';
 import { inject, injectable } from 'inversify';
 import { cloneDeep } from 'lodash';
-import * as moment from 'moment';
+import moment from 'moment';
 
 export interface BatchTaskPropertyProvider {
     getResourceFiles?(): BatchServiceModels.ResourceFile[];

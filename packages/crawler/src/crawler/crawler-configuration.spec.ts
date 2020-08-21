@@ -18,10 +18,10 @@ class TestableCrawlerConfiguration extends CrawlerConfiguration {
 }
 
 describe(CrawlerConfiguration, () => {
-    let pageProcessorFactory: TestableCrawlerConfiguration;
+    let crawlerConfig: TestableCrawlerConfiguration;
 
     beforeEach(() => {
-        pageProcessorFactory = new TestableCrawlerConfiguration();
+        crawlerConfig = new TestableCrawlerConfiguration();
     });
 
     describe('getDiscoveryPattern', () => {
@@ -36,7 +36,7 @@ describe(CrawlerConfiguration, () => {
         it('with no list provided', () => {
             const expectedPattern = `http[s?]://${host}${path}[.*]`;
 
-            const discoveryPatterns = pageProcessorFactory.getDiscoveryPattern(baseUrl, undefined);
+            const discoveryPatterns = crawlerConfig.getDiscoveryPattern(baseUrl, undefined);
 
             expect(discoveryPatterns.length).toBe(1);
             expect(discoveryPatterns[0]).toBe(expectedPattern);
@@ -45,9 +45,44 @@ describe(CrawlerConfiguration, () => {
         it('with list provided', () => {
             const expectedDiscoveryPatterns = ['pattern1', 'pattern2'];
 
-            const discoveryPatterns = pageProcessorFactory.getDiscoveryPattern(baseUrl, expectedDiscoveryPatterns);
+            const discoveryPatterns = crawlerConfig.getDiscoveryPattern(baseUrl, expectedDiscoveryPatterns);
 
             expect(discoveryPatterns).toBe(expectedDiscoveryPatterns);
         });
+    });
+
+    describe('getMaxRequestsPerCrawl', () => {
+        it('with no value provided', () => {
+            expect(crawlerConfig.getMaxRequestsPerCrawl(undefined)).toBe(100);
+        });
+
+        it('with +ve value provided', () => {
+            expect(crawlerConfig.getMaxRequestsPerCrawl(10)).toBe(10);
+        });
+
+        it('with -ve value provided', () => {
+            expect(crawlerConfig.getMaxRequestsPerCrawl(-10)).toBe(100);
+        });
+
+        it('with zero value provided', () => {
+            expect(crawlerConfig.getMaxRequestsPerCrawl(0)).toBe(100);
+        });
+    });
+
+    it('setDefaultApifySettings', () => {
+        process.env.APIFY_HEADLESS = 'apify headless value';
+
+        crawlerConfig.setDefaultApifySettings();
+
+        expect(process.env.APIFY_HEADLESS).toBe('1');
+    });
+
+    it('setLocalOutputDir', () => {
+        process.env.APIFY_LOCAL_STORAGE_DIR = 'previously set local output dir';
+        const localOutputDir = 'new local output dir';
+
+        crawlerConfig.setLocalOutputDir(localOutputDir);
+
+        expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(localOutputDir);
     });
 });

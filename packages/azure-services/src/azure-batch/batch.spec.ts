@@ -13,7 +13,7 @@ import {
     TaskListResponse,
 } from '@azure/batch/esm/models';
 import { ServiceConfiguration, TaskRuntimeConfig } from 'common';
-import * as moment from 'moment';
+import moment from 'moment';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { StorageContainerSASUrlProvider } from '../azure-blob/storage-container-sas-url-provider';
 import { Message } from '../azure-queue/message';

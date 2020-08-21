@@ -30,7 +30,7 @@
         "@types/cli-spinner": "^0.2.0",
         "@types/jest": "^26.0.9",
         "@types/lodash": "^4.14.159",
-        "@types/node": "^14.0.27",
+        "@types/node": "^12.12.54",
         "@types/request-promise": "^4.1.46",
         "@types/table": "^5.0.0",
         "copy-webpack-plugin": "^5.1.1",
@@ -54,7 +54,7 @@
     "dependencies": {
         "@types/escape-html": "^0.0.20",
         "accessibility-insights-report": "^1.0.3",
-        "axe-core": "3.5.1",
+        "axe-core": "^3.5.3",
         "axe-puppeteer": "^1.1.0",
         "cli-spinner": "^0.2.10",
         "dotenv": "^8.2.0",

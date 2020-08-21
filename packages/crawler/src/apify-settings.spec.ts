@@ -1,47 +1,55 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { ApifySettings, setApifyEnvVars } from './apify-settings';
+import { ApifySettings, setApifySettings } from './apify-settings';
 
 describe('Apify settings', () => {
-    it('gets default settings', () => {
-        const expectedSettings: ApifySettings = {
-            APIFY_HEADLESS: 'true',
-        };
+    const defaultEnv: ApifySettings = {
+        APIFY_HEADLESS: '',
+        APIFY_LOCAL_STORAGE_DIR: '',
+    };
 
-        setApifyEnvVars();
-
-        Object.keys(expectedSettings).forEach((key: keyof ApifySettings) => {
-            expect(process.env[`${key}`]).toBe(expectedSettings[key]);
+    beforeEach(() => {
+        Object.keys(defaultEnv).forEach((key: keyof ApifySettings) => {
+            if (defaultEnv[key] !== undefined) {
+                process.env[`${key}`] = defaultEnv[key];
+            }
         });
     });
 
-    it('merges default settings', () => {
-        const settings: ApifySettings = {
-            APIFY_LOCAL_STORAGE_DIR: 'local storage dir',
-        };
-        const expectedSettings: ApifySettings = {
-            ...settings,
-            APIFY_HEADLESS: 'true',
-        };
-
-        setApifyEnvVars(settings);
-
-        Object.keys(expectedSettings).forEach((key: keyof ApifySettings) => {
-            expect(process.env[`${key}`]).toBe(expectedSettings[key]);
-        });
-    });
-
-    it('overrides default settings', () => {
+    it('sets env vars', () => {
         const overrideSettings: ApifySettings = {
-            APIFY_HEADLESS: 'false',
+            APIFY_HEADLESS: '0',
             APIFY_LOCAL_STORAGE_DIR: 'local storage dir',
         };
 
-        setApifyEnvVars(overrideSettings);
+        verifyEnvVarsSet(defaultEnv);
 
-        Object.keys(overrideSettings).forEach((key: keyof ApifySettings) => {
-            expect(process.env[`${key}`]).toBe(overrideSettings[key]);
-        });
+        setApifySettings(overrideSettings);
+
+        verifyEnvVarsSet(overrideSettings);
     });
+
+    it('does not override setting if undefined', () => {
+        const presetLocalStorageDir = 'local storage dir';
+        const expectedEnvVars: ApifySettings = {
+            APIFY_LOCAL_STORAGE_DIR: presetLocalStorageDir,
+        };
+        const settings: ApifySettings = {
+            APIFY_LOCAL_STORAGE_DIR: undefined,
+        };
+
+        process.env.APIFY_LOCAL_STORAGE_DIR = presetLocalStorageDir;
+        verifyEnvVarsSet(expectedEnvVars);
+
+        setApifySettings(settings);
+
+        verifyEnvVarsSet(expectedEnvVars);
+    });
+
+    function verifyEnvVarsSet(expectedEnvVars: ApifySettings): void {
+        Object.keys(expectedEnvVars).forEach((key: keyof ApifySettings) => {
+            expect(process.env[`${key}`]).toBe(expectedEnvVars[key]);
+        });
+    }
 });

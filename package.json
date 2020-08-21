@@ -9,7 +9,7 @@
     "scripts": {
         "bootstrap": "npx lerna bootstrap",
         "clean": "npx lerna run clean --stream && rimraf dist test-results",
-        "cbuild": "npx lerna run cbuild --stream",
+        "cbuild": "npx syncpack fix-mismatches format --indent '    ' && yarn install && npx lerna run cbuild --stream",
         "build": "npx lerna run build --stream",
         "pack": "npx lerna run pack --stream",
         "test": "npx jest",
@@ -39,6 +39,7 @@
         "license-check-and-add": "^3.0.4",
         "npm-run-all": "^4.1.5",
         "prettier": "2.0.5",
+        "syncpack": "^5.1.4",
         "tslint": "^6.1.2",
         "tslint-lines-between-class-members": "^1.3.2",
         "tslint-microsoft-contrib": "^6.0.0",

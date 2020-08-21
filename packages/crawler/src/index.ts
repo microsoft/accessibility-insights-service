@@ -7,8 +7,11 @@ require = require('esm')(module); // support ES6 module syntax for Office Fabric
 export { CrawlerEngine } from './crawler/crawler-engine';
 export { CrawlerRunOptions } from './types/run-options';
 
-import { System } from 'common';
+import 'reflect-metadata';
+
+import { ServiceConfiguration, System } from 'common';
 import * as dotenv from 'dotenv';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
 
@@ -17,13 +20,14 @@ interface Arguments {
     simulate: boolean;
     selectors: string[];
     output: string;
+    maxUrls: number;
 }
 
 (async () => {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> [--simulate] [--selectors <selector1 ...>] [--output]')
+        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls>')
         .options({
             url: {
                 type: 'string',
@@ -45,16 +49,28 @@ interface Arguments {
                 type: 'string',
                 describe: `Output directory`,
             },
+            maxUrls: {
+                type: 'number',
+                describe: ` Maximum number of pages that the crawler will open. The crawl will stop when this limit is reached.
+                            The default is 100.
+                            Note that in cases of parallel crawling, the actual number of pages visited might be slightly higher than this value.`,
+                default: 100,
+            },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
-    const crawlerEngine: CrawlerEngine = new CrawlerEngine();
+    const serviceConfig = new ServiceConfiguration();
+    const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
+    await logger.setup();
+
+    const crawlerEngine: CrawlerEngine = new CrawlerEngine(logger);
 
     await crawlerEngine.start({
         baseUrl: args.url,
         simulate: args.simulate,
         selectors: args.selectors,
         localOutputDir: args.output,
+        maxRequestsPerCrawl: args.maxUrls,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

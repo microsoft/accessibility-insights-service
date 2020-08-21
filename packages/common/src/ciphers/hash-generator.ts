@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as fnv1a from '@sindresorhus/fnv1a';
+import fnv1a from '@sindresorhus/fnv1a';
 import { injectable } from 'inversify';
-import * as sha256 from 'sha.js';
+import SHA from 'sha.js';
 import { JumpConsistentHash } from './jump-consistent-hash';
 
 @injectable()
 export class HashGenerator {
-    public constructor(private readonly sha: typeof sha256 = sha256) {}
+    public constructor(private readonly sha: typeof SHA = SHA) {}
 
     public generateBase64Hash(...values: string[]): string {
         const hashSeed: string = values.join('|').toLowerCase();

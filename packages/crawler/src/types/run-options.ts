@@ -10,6 +10,7 @@ export interface CrawlerRunOptions {
     simulate?: boolean;
     selectors?: string[];
     localOutputDir?: string;
+    maxRequestsPerCrawl?: number;
 }
 
 export interface PageProcessorOptions {
