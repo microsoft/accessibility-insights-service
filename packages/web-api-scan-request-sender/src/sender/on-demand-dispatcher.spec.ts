@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any no-object-literal-type-assertion
+// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion no-null-keyword
 import 'reflect-metadata';
 
 import { CosmosOperationResponse } from 'azure-services';
@@ -16,28 +16,38 @@ export class MockableLogger extends Logger {}
 
 interface QueryDataProviderStubResponse<T> {
     continuationToken: string;
-    data: T[];
+    items: T[];
 }
 
 class QueryDataProviderStub<T> {
-    private readonly data: T[];
-    private currentStartPos: number;
-    private readonly maxItemsPerRequest: number;
+    private nextChunkIndex = 0;
+    private currentItemPos = 0;
 
-    constructor(data: T[], chunkCount: number) {
-        this.data = data;
-        this.currentStartPos = 0;
-        this.maxItemsPerRequest = chunkCount;
+    constructor(private readonly items: T[], private readonly itemsPerNextChunk: number[]) {}
+
+    public reset(): void {
+        this.nextChunkIndex = 0;
+        this.currentItemPos = 0;
     }
 
     public getNextDataChunk(): QueryDataProviderStubResponse<T> {
-        const endPos = this.currentStartPos + this.maxItemsPerRequest;
-        const currentChunk = this.data.slice(this.currentStartPos, endPos);
-        this.currentStartPos = endPos;
+        if (this.itemsPerNextChunk.length < this.nextChunkIndex + 1) {
+            return {
+                continuationToken: undefined,
+                items: [],
+            };
+        }
+
+        const currentChunk = this.items.slice(this.currentItemPos, this.currentItemPos + this.itemsPerNextChunk[this.nextChunkIndex]);
+        this.currentItemPos += this.itemsPerNextChunk[this.nextChunkIndex];
+        this.nextChunkIndex += 1;
 
         return {
-            continuationToken: this.currentStartPos >= this.data.length ? undefined : `token - ${this.currentStartPos}`,
-            data: currentChunk,
+            continuationToken:
+                this.currentItemPos >= this.items.length
+                    ? undefined
+                    : `next chunk [${this.currentItemPos}:${this.currentItemPos + this.itemsPerNextChunk[this.nextChunkIndex]}]`,
+            items: currentChunk,
         };
     }
 }
@@ -92,8 +102,8 @@ describe('Dispatcher', () => {
 
     it('does not call scan request if no pages to add', async () => {
         setupVerifiableQueueSizeCall();
-        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>([], 5);
-        setupReadyToScanPageForAllPages([queryDataProviderStub]);
+        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>([], []);
+        setupReadyToScanPageForAllPages(queryDataProviderStub);
         setupVerifiableScanRequestNotCalled();
 
         await dispatcher.dispatchOnDemandScanRequests();
@@ -106,15 +116,15 @@ describe('Dispatcher', () => {
         currentQueueSize = 1;
         setupVerifiableQueueSizeCall();
         const allPages = getOnDemandRequests(maxQueueSize - 2);
+        const itemsPerChunk = allPages.length / 2;
 
-        const queryDataProviderStub1 = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, 2);
-        const queryDataProviderStub2 = new QueryDataProviderStub<OnDemandPageScanRequest>([], 2);
+        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
+            itemsPerChunk + 1,
+            0,
+            itemsPerChunk - 1,
+        ]);
 
-        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
-        loggerMock
-            // tslint:disable-next-line: no-null-keyword
-            .setup((lm) => lm.trackEvent('ScanRequestQueued', null, { queuedScanRequests: 2 }))
-            .verifiable(Times.exactly(4));
+        setupReadyToScanPageForAllPages(queryDataProviderStub);
 
         await dispatcher.dispatchOnDemandScanRequests();
 
@@ -126,15 +136,16 @@ describe('Dispatcher', () => {
         const initialQueueSize = 1;
         currentQueueSize = 1;
         setupVerifiableQueueSizeCall();
-        const allPages = getOnDemandRequests(maxQueueSize + 1);
+        const allPages = getOnDemandRequests(maxQueueSize + 2);
+        const itemsPerChunk = allPages.length / 2;
 
-        const queryDataProviderStub1 = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages.slice(0, allPages.length / 2), 2);
-        const queryDataProviderStub2 = new QueryDataProviderStub<OnDemandPageScanRequest>(
-            allPages.slice(allPages.length / 2, allPages.length),
-            2,
-        );
+        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
+            itemsPerChunk + 1,
+            0,
+            itemsPerChunk - 1,
+        ]);
 
-        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+        setupReadyToScanPageForAllPages(queryDataProviderStub);
 
         await dispatcher.dispatchOnDemandScanRequests();
         expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
@@ -147,14 +158,15 @@ describe('Dispatcher', () => {
         currentQueueSize = 1;
         setupVerifiableQueueSizeCall();
         const allPages = getOnDemandRequests(maxQueueSize - currentQueueSize);
+        const itemsPerChunk = allPages.length / 2;
 
-        const queryDataProviderStub1 = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages.slice(0, allPages.length / 2), 2);
-        const queryDataProviderStub2 = new QueryDataProviderStub<OnDemandPageScanRequest>(
-            allPages.slice(allPages.length / 2, allPages.length),
-            2,
-        );
+        const queryDataProviderStub = new QueryDataProviderStub<OnDemandPageScanRequest>(allPages, [
+            itemsPerChunk + 1,
+            0,
+            itemsPerChunk - 1,
+        ]);
 
-        setupReadyToScanPageForAllPages([queryDataProviderStub1, queryDataProviderStub2]);
+        setupReadyToScanPageForAllPages(queryDataProviderStub);
 
         await dispatcher.dispatchOnDemandScanRequests();
         expect(currentQueueSize).toBe(initialQueueSize + allPages.length);
@@ -198,29 +210,30 @@ describe('Dispatcher', () => {
         } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
     }
 
-    function setupReadyToScanPageForAllPages(dataProviders: QueryDataProviderStub<OnDemandPageScanRequest>[]): void {
-        let previousProviderCount = 0;
-        dataProviders.forEach((dataProvider) => {
-            let previousContinuationToken;
-            const expectedItemsCount = maxQueueSize - currentQueueSize - previousProviderCount;
-            do {
-                const response = dataProvider.getNextDataChunk();
+    function setupReadyToScanPageForAllPages(dataProvider: QueryDataProviderStub<OnDemandPageScanRequest>): void {
+        let response;
+        let previousContinuationToken;
+        let expectedItemsCount = maxQueueSize - currentQueueSize;
 
-                setupGetReadyToScanPagesCallForChunk(
-                    response.data,
-                    previousContinuationToken,
-                    response.continuationToken,
-                    expectedItemsCount,
-                );
+        do {
+            response = dataProvider.getNextDataChunk();
 
-                if (response.data.length > 0) {
-                    setupVerifiableScanRequestCallForChunk(response.data);
-                    previousProviderCount += response.data.length;
-                }
+            setupGetReadyToScanPagesCallForChunk(response.items, previousContinuationToken, response.continuationToken, expectedItemsCount);
 
-                previousContinuationToken = response.continuationToken;
-            } while (previousContinuationToken !== undefined);
-        });
+            if (response.items.length > 0) {
+                setupVerifiableScanRequestCallForChunk(response.items);
+                setupLoggerTrackEvent(response.items.length);
+            }
+
+            if (response.continuationToken === undefined) {
+                break;
+            }
+
+            expectedItemsCount -= response.items.length;
+            previousContinuationToken = response.continuationToken;
+        } while (response.continuationToken !== undefined);
+
+        dataProvider.reset();
     }
 
     function setupVerifiableScanRequestCallForChunk(onDemandPageScanRequests: OnDemandPageScanRequest[]): void {
@@ -243,9 +256,16 @@ describe('Dispatcher', () => {
             .returns(async () => Promise.resolve(createOnDemandPagesRequestResponse(onDemandPageScanRequests, continuationToken)));
     }
 
+    function setupLoggerTrackEvent(itemCount: number): void {
+        loggerMock
+            .setup((lm) => lm.trackEvent('ScanRequestQueued', null, It.isValue({ queuedScanRequests: itemCount })))
+            .verifiable(Times.once());
+    }
+
     function setupPageScanRequestProviderNotCalled(): void {
         pageScanRequestProvider.setup(async (p) => p.getRequests(It.isAny(), It.isAny())).verifiable(Times.never());
     }
+
     function setupVerifiableQueueSizeCall(): void {
         scanRequestSenderMock
             .setup(async (s) => s.getCurrentQueueSize())
@@ -258,7 +278,6 @@ describe('Dispatcher', () => {
     }
 
     function getErrorResponse(): CosmosOperationResponse<OnDemandPageScanRequest[]> {
-        // tslint:disable-next-line: no-object-literal-type-assertion
         return <CosmosOperationResponse<OnDemandPageScanRequest[]>>{
             type: 'CosmosOperationResponse<OnDemandPageScanRequest>',
             statusCode: 500,

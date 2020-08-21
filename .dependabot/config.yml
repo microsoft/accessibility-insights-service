@@ -22,21 +22,8 @@ update_configs:
                 # that is not part of dependabot auto-update
                 dependency_name: 'axe-puppeteer'
           - match:
-                # package is deployed on a server as stand-alone
-                # and will require update of deployment script
-                # that is not part of dependabot auto-update
-                dependency_name: 'puppeteer'
-          - match:
-                # package is deployed on a server as stand-alone
-                # and will require update of deployment script
-                # that is not part of dependabot auto-update
-                dependency_name: 'applicationinsights'
-          - match:
-                # package is deployed on a server as stand-alone
-                # and will require update of deployment script
-                # that is not part of dependabot auto-update
-                dependency_name: 'yargs'
-
+                # keep node types lock to match with node v12
+                dependency_name: '@types/node'
     - package_manager: 'dotnet:nuget'
       directory: '/packages/web-workers/'
       update_schedule: 'daily'

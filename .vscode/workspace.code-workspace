@@ -77,6 +77,10 @@
             "path": "../packages/cli"
         },
         {
+            "name": "crawler",
+            "path": "../packages/crawler"
+        },
+        {
             "name": "root",
             "path": "../"
         }
