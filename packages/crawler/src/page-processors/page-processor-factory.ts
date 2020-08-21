@@ -1,22 +1,32 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as url from 'url';
-import { PageProcessor, PageProcessorOptions } from './page-processor-base';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
+import { PageProcessorOptions } from '../types/run-options';
+import { ClassicPageProcessor } from './classic-page-processor';
+import { PageProcessor } from './page-processor-base';
+import { SimulatorPageProcessor } from './simulator-page-processor';
 
-export interface PageProcessorFactory {
-    createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor;
-}
+export class PageProcessorFactory {
+    constructor(private readonly crawlerConfiguration: CrawlerConfiguration = new CrawlerConfiguration()) {}
 
-export abstract class PageProcessorFactoryBase {
-    public abstract createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor;
+    public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
+        if (!pageProcessorOptions.crawlerRunOptions.simulate) {
+            return new ClassicPageProcessor(
+                pageProcessorOptions.requestQueue,
+                this.crawlerConfiguration.getDiscoveryPattern(
+                    pageProcessorOptions.crawlerRunOptions.baseUrl,
+                    pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
+                ),
+            );
+        }
 
-    protected getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
-        return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;
-    }
-
-    protected getDefaultDiscoveryPattern(baseUrl: string): string[] {
-        const baseUrlObj = url.parse(baseUrl);
-
-        return [`http[s?]://${baseUrlObj.host}${baseUrlObj.path}[.*]`];
+        return new SimulatorPageProcessor(
+            pageProcessorOptions.requestQueue,
+            this.crawlerConfiguration.getDiscoveryPattern(
+                pageProcessorOptions.crawlerRunOptions.baseUrl,
+                pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
+            ),
+            this.crawlerConfiguration.getDefaultSelectors(pageProcessorOptions.crawlerRunOptions.selectors),
+        );
     }
 }

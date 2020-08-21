@@ -3,18 +3,10 @@
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
-import { ScanData } from '../scan-data';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
-
-export interface PageProcessorOptions {
-    baseUrl: string;
-    requestQueue: Apify.RequestQueue;
-    discoveryPatterns?: string[];
-    simulate?: boolean;
-    selectors?: string[];
-}
+import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
     url: string;
