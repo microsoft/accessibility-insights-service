@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { ServiceConfiguration, System } from 'common';
-import * as moment from 'moment';
+import moment from 'moment';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import * as util from 'util';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';

@@ -4,7 +4,7 @@ import { Batch, BatchConfig, BatchTask, JobTask, JobTaskState, Message, Queue } 
 import { JobManagerConfig, QueueRuntimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import * as moment from 'moment';
+import moment from 'moment';
 
 // tslint:disable: no-unsafe-any
 

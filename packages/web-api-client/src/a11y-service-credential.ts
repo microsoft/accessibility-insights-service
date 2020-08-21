@@ -3,7 +3,7 @@
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
 import { Logger } from 'logger';
-import * as requestPromise from 'request-promise';
+import requestPromise from 'request-promise';
 import { isNullOrUndefined } from 'util';
 
 export class A11yServiceCredential {

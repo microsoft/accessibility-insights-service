@@ -4,7 +4,7 @@ import { RetryHelper, System } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Response } from 'request';
-import * as requestPromise from 'request-promise';
+import requestPromise from 'request-promise';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 

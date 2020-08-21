@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { GuidGenerator } from 'common';
 import { Dictionary, keyBy } from 'lodash';
-import * as moment from 'moment';
+import moment from 'moment';
 import { ApiController, OnDemandPageScanRunResultProvider, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 
