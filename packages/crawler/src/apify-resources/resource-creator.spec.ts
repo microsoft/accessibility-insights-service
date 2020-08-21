@@ -4,22 +4,18 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { IMock, Mock } from 'typemoq';
-import { ApifyFactory } from './crawler-factory';
-import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { ApifyResourceCreator } from './resource-creator';
 
-describe(ApifyFactory, () => {
+describe(ApifyResourceCreator, () => {
     let apifyMock: IMock<typeof Apify>;
-    let apifyFactory: ApifyFactory;
+    let apifyResourceCreator: ApifyResourceCreator;
 
     const url = 'url';
 
-    class PuppeteerCrawlerStub {
-        constructor(public readonly options: Apify.PuppeteerCrawlerOptions) {}
-    }
-
     beforeEach(() => {
         apifyMock = Mock.ofType<typeof Apify>();
-        apifyFactory = new ApifyFactory(apifyMock.object);
+        apifyResourceCreator = new ApifyResourceCreator(apifyMock.object);
     });
 
     afterEach(() => {
@@ -34,7 +30,7 @@ describe(ApifyFactory, () => {
             .verifiable();
         queueMock.setup((q) => q.addRequest({ url: url })).verifiable();
 
-        const queue = await apifyFactory.createRequestQueue(url);
+        const queue = await apifyResourceCreator.createRequestQueue(url);
 
         expect(queue).toBe(queueMock.object);
     });
@@ -46,7 +42,7 @@ describe(ApifyFactory, () => {
             .returns(async () => Promise.resolve(listMock.object))
             .verifiable();
 
-        const list = await apifyFactory.createRequestList(undefined);
+        const list = await apifyResourceCreator.createRequestList(undefined);
 
         expect(list).toBe(listMock.object);
     });
@@ -59,19 +55,8 @@ describe(ApifyFactory, () => {
             .returns(async () => Promise.resolve(listMock.object))
             .verifiable();
 
-        const list = await apifyFactory.createRequestList(existingUrls);
+        const list = await apifyResourceCreator.createRequestList(existingUrls);
 
         expect(list).toBe(listMock.object);
-    });
-
-    it('createPuppeteerCrawler', () => {
-        apifyMock.setup((a) => a.PuppeteerCrawler).returns(() => (PuppeteerCrawlerStub as unknown) as typeof Apify.PuppeteerCrawler);
-        const options: Apify.PuppeteerCrawlerOptions = {
-            handlePageFunction: () => undefined,
-        };
-
-        const crawler = (apifyFactory.createPuppeteerCrawler(options) as unknown) as PuppeteerCrawlerStub;
-
-        expect(crawler.options).toBe(options);
     });
 });
