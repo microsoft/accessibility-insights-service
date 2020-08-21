@@ -256,6 +256,7 @@ export class ServiceConfiguration {
                         'landmark-contentinfo-is-top-level',
                         'landmark-no-duplicate-banner',
                         'landmark-no-duplicate-contentinfo',
+                        'link-name', // accessibility-insights-service issue #976
                         'page-has-heading-one',
                         'aria-allowed-role',
                         'css-orientation-lock',

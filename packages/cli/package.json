@@ -53,7 +53,7 @@
     },
     "dependencies": {
         "@types/escape-html": "^0.0.20",
-        "accessibility-insights-report": "^1.0.3",
+        "accessibility-insights-report": "2.0.0",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cli-spinner": "^0.2.10",
