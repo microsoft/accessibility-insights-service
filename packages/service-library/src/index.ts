@@ -3,8 +3,6 @@
 export { OnDemandPageScanRunResultProvider } from './data-providers/on-demand-page-scan-run-result-provider';
 export { PageObjectFactory } from './factories/page-object-factory';
 export { ProcessEntryPointBase } from './process-entry-point-base';
-export { WebDriver } from './web-driver/web-driver';
-export { registerServiceLibraryToContainer } from './register-service-library-to-container';
 export * from './web-api/web-api-ioc-types';
 export { WebController } from './web-api/web-controller';
 export { ApiController } from './web-api/api-controller';

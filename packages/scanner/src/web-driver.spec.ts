@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
+import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
