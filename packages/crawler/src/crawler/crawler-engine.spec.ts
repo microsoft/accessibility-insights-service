@@ -9,6 +9,7 @@ import { PageProcessor } from '../page-processors/page-processor-base';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageProcessorOptions } from '../types/run-options';
+import { CrawlerConfiguration } from './crawler-configuration';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
@@ -20,6 +21,8 @@ describe(CrawlerEngine, () => {
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
     let resourceCreatorMock: IMock<ResourceCreator>;
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+
     const pageProcessorStub: PageProcessor = {
         pageProcessor: () => null,
         gotoFunction: () => null,
@@ -31,18 +34,28 @@ describe(CrawlerEngine, () => {
 
     let crawlerEngine: CrawlerEngine;
 
+    const maxRequestsPerCrawl: number = 100;
+
     beforeEach(() => {
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
         runApifyMock = Mock.ofType<ApifyMainFunc>();
         requestQueueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
+        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+
+        crawlerConfigurationMock
+            .setup((ccm) => ccm.getMaxRequestsPerCrawl(It.isAny()))
+            .returns(() => maxRequestsPerCrawl)
+            .verifiable();
+
         baseCrawlerOptions = {
             requestList: undefined,
             requestQueue: requestQueueMock.object,
             handlePageFunction: pageProcessorStub.pageProcessor,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
+            maxRequestsPerCrawl: maxRequestsPerCrawl,
         };
         resourceCreatorMock = Mock.ofType<ResourceCreator>();
     });
@@ -50,7 +63,7 @@ describe(CrawlerEngine, () => {
     it('Run crawler with one base url', async () => {
         const basePageProcessorOptions = {
             requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl },
+            crawlerRunOptions: { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
         setupCreateRequestQueue();
         setupCreatePageProcessor(basePageProcessorOptions);
@@ -62,10 +75,12 @@ describe(CrawlerEngine, () => {
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
             runApifyMock.object,
+            crawlerConfigurationMock.object,
         );
 
         await crawlerEngine.start({
             baseUrl,
+            maxRequestsPerCrawl: maxRequestsPerCrawl,
         });
     });
 
@@ -74,7 +89,7 @@ describe(CrawlerEngine, () => {
 
         const basePageProcessorOptions = {
             requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir },
+            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
 
         // Env variable must be set when request queue and page processor are created
@@ -92,11 +107,13 @@ describe(CrawlerEngine, () => {
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
             runApifyMock.object,
+            crawlerConfigurationMock.object,
         );
 
         await crawlerEngine.start({
             baseUrl: baseUrl,
             localOutputDir: outputDir,
+            maxRequestsPerCrawl: maxRequestsPerCrawl,
         });
     });
 

@@ -16,4 +16,8 @@ export class CrawlerConfiguration {
     public getDefaultSelectors(selectors: string[]): string[] {
         return selectors === undefined || selectors.length === 0 ? ['button'] : selectors;
     }
+
+    public getMaxRequestsPerCrawl(maxRequestsPerCrawl: number): number {
+        return maxRequestsPerCrawl === undefined || maxRequestsPerCrawl <= 0 ? 100 : maxRequestsPerCrawl;
+    }
 }

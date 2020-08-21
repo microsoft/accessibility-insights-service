@@ -50,4 +50,22 @@ describe(CrawlerConfiguration, () => {
             expect(discoveryPatterns).toBe(expectedDiscoveryPatterns);
         });
     });
+
+    describe('getMaxRequestsPerCrawl', () => {
+        it('with no value provided', () => {
+            expect(pageProcessorFactory.getMaxRequestsPerCrawl(undefined)).toBe(100);
+        });
+
+        it('with +ve value provided', () => {
+            expect(pageProcessorFactory.getMaxRequestsPerCrawl(10)).toBe(10);
+        });
+
+        it('with -ve value provided', () => {
+            expect(pageProcessorFactory.getMaxRequestsPerCrawl(-10)).toBe(100);
+        });
+
+        it('with zero value provided', () => {
+            expect(pageProcessorFactory.getMaxRequestsPerCrawl(0)).toBe(100);
+        });
+    });
 });
