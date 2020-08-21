@@ -6,18 +6,10 @@ export interface ApifySettings {
     APIFY_LOCAL_STORAGE_DIR?: string;
 }
 
-const defaultSettings: ApifySettings = {
-    APIFY_HEADLESS: '1',
-};
-
-export function setApifyEnvVars(settings?: ApifySettings): void {
-    const allSettings = {
-        ...defaultSettings,
-        ...settings,
-    };
-    Object.keys(allSettings).forEach((key: keyof ApifySettings) => {
-        if (allSettings[key] !== undefined) {
-            process.env[`${key}`] = allSettings[key];
+export function setApifySettings(settings?: ApifySettings): void {
+    Object.keys(settings).forEach((key: keyof ApifySettings) => {
+        if (settings[key] !== undefined) {
+            process.env[`${key}`] = settings[key];
         }
     });
 }
