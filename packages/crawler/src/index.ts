@@ -7,6 +7,9 @@ require = require('esm')(module); // support ES6 module syntax for Office Fabric
 export { CrawlerEngine } from './crawler/crawler-engine';
 export { CrawlerRunOptions } from './types/run-options';
 
+import 'reflect-metadata';
+
+import { System } from 'common';
 import * as dotenv from 'dotenv';
 import * as yargs from 'yargs';
 import { CrawlerEngine } from './crawler/crawler-engine';
@@ -23,7 +26,7 @@ interface Arguments {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> [--simulate] [--selectors <selector1 ...>] [--output] [--maxUrls]')
+        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls>')
         .options({
             url: {
                 type: 'string',
@@ -65,6 +68,6 @@ interface Arguments {
         maxRequestsPerCrawl: args.maxUrls,
     });
 })().catch((error) => {
-    console.log('Exception: ', error);
+    console.log('Exception: ', System.serializeError(error));
     process.exit(1);
 });
