@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
+import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -13,6 +14,7 @@ import { PartialScanData } from './page-processor-base';
 // tslint:disable: no-any
 
 describe(ClassicPageProcessor, () => {
+    let loggerMock: IMock<Logger>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
@@ -28,6 +30,7 @@ describe(ClassicPageProcessor, () => {
     let classicPageProcessor: ClassicPageProcessor;
 
     beforeEach(() => {
+        loggerMock = Mock.ofType<Logger>();
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
@@ -44,6 +47,7 @@ describe(ClassicPageProcessor, () => {
         } as any;
 
         classicPageProcessor = new ClassicPageProcessor(
+            loggerMock.object,
             requestQueueMock.object,
             discoveryPatterns,
             accessibilityScanOpMock.object,
@@ -71,7 +75,7 @@ describe(ClassicPageProcessor, () => {
 
         // tslint:disable-next-line: no-any
         const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
-        await classicPageProcessor.pageProcessor(inputs);
+        await classicPageProcessor.pageHandler(inputs);
     });
 
     function setupEnqueueLinks(page: Page): void {
