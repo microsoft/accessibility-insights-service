@@ -6,10 +6,7 @@ import { BlobStore, scanResultStorageName } from './store-types';
 
 @injectable()
 export class LocalBlobStore implements BlobStore {
-    constructor(
-        private keyValueStore?: Apify.KeyValueStore,
-        private readonly apifyObj: typeof Apify = Apify,
-    ) {}
+    constructor(private keyValueStore?: Apify.KeyValueStore, private readonly apifyObj: typeof Apify = Apify) {}
 
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
         await this.open();

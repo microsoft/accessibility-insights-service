@@ -32,6 +32,5 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(AxePuppeteerFactory)).toBeDefined();
         expect(container.get(ActiveElementsFinder)).toBeDefined();
         expect(container.get(GlobalLogger)).toBeDefined();
-
     });
 });

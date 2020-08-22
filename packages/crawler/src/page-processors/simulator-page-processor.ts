@@ -52,7 +52,9 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.pushScanData({ id: request.id as string, url: request.url });
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-            this.loggerSimulator.logInfo(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            this.loggerSimulator.logInfo(
+                `Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`,
+            );
             const operationResult = await this.clickElementOp.click(
                 page,
                 activeElement.selector,

@@ -31,12 +31,10 @@ export class CrawlerEngine {
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
         const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl);
 
-        const pageProcessor = this.pageProcessorFactory.createPageProcessor(
-            {
-                requestQueue,
-                crawlerRunOptions,
-            },
-        );
+        const pageProcessor = this.pageProcessorFactory.createPageProcessor({
+            requestQueue,
+            crawlerRunOptions,
+        });
 
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({

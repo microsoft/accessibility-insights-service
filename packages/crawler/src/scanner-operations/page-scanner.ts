@@ -14,7 +14,6 @@ export interface ScanResult {
 
 @injectable()
 export class PageScanner {
-
     public constructor(
         @inject('ReporterFactory') private readonly reporter: Reporter,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
