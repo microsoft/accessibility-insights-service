@@ -7,7 +7,7 @@ import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
+import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { PageScanner } from './page-scanner';
 
 // tslint:disable: no-any

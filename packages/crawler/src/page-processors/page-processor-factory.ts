@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 import { reporterFactory } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
+import { GlobalLogger } from 'logger';
+import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
@@ -18,14 +19,18 @@ import { SimulatorPageProcessor } from './simulator-page-processor';
 
 @injectable()
 export class PageProcessorFactory {
-    constructor(@inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration) {}
+    constructor(
+        @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+    ) {}
 
     public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
         if (!pageProcessorOptions.crawlerRunOptions.simulate) {
             return new ClassicPageProcessor(
-                new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
+                new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory()), this.logger),
                 new LocalDataStore(),
                 new LocalBlobStore(),
+                this.logger,
                 pageProcessorOptions.requestQueue,
                 this.crawlerConfiguration.getDiscoveryPattern(
                     pageProcessorOptions.crawlerRunOptions.baseUrl,
@@ -37,9 +42,10 @@ export class PageProcessorFactory {
         return new SimulatorPageProcessor(
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),
-            new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
+            new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory()), this.logger),
             new LocalDataStore(),
             new LocalBlobStore(),
+            this.logger,
             pageProcessorOptions.requestQueue,
             this.crawlerConfiguration.getDiscoveryPattern(
                 pageProcessorOptions.crawlerRunOptions.baseUrl,

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { ResourceCreator } from '../apify-resources/resource-creator';
 import { PageProcessor } from '../page-processors/page-processor-base';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
@@ -24,7 +24,7 @@ describe(CrawlerEngine, () => {
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
 
     const pageProcessorStub: PageProcessor = {
-        pageProcessor: () => null,
+        pageHandler: () => null,
         gotoFunction: () => null,
         pageErrorProcessor: () => null,
     };
@@ -52,7 +52,7 @@ describe(CrawlerEngine, () => {
         baseCrawlerOptions = {
             requestList: undefined,
             requestQueue: requestQueueMock.object,
-            handlePageFunction: pageProcessorStub.pageProcessor,
+            handlePageFunction: pageProcessorStub.pageHandler,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
@@ -65,6 +65,7 @@ describe(CrawlerEngine, () => {
             requestQueue: requestQueueMock.object,
             crawlerRunOptions: { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
+        setupSetDefaultApifySettings();
         setupCreateRequestQueue();
         setupCreatePageProcessor(basePageProcessorOptions);
         setupCreatePuppeteerCrawler(baseCrawlerOptions);
@@ -92,12 +93,13 @@ describe(CrawlerEngine, () => {
             crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir, maxRequestsPerCrawl: maxRequestsPerCrawl },
         };
 
+        setupSetDefaultApifySettings();
         // Env variable must be set when request queue and page processor are created
         setupCreateRequestQueue(() => {
-            expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(outputDir);
+            verifyOutputDirSet(outputDir);
         });
         setupCreatePageProcessor(basePageProcessorOptions, () => {
-            expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(outputDir);
+            verifyOutputDirSet(outputDir);
         });
         setupCreatePuppeteerCrawler(baseCrawlerOptions);
         setupRunCrawler();
@@ -123,7 +125,12 @@ describe(CrawlerEngine, () => {
         puppeteerCrawlerMock.verifyAll();
         runApifyMock.verifyAll();
         resourceCreatorMock.verifyAll();
+        crawlerConfigurationMock.verifyAll();
     });
+
+    function setupSetDefaultApifySettings(): void {
+        crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
+    }
 
     function setupCreateRequestQueue(callback: () => void = () => null): void {
         resourceCreatorMock
@@ -160,5 +167,9 @@ describe(CrawlerEngine, () => {
             .setup((cf) => cf.createPuppeteerCrawler(crawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
+    }
+
+    function verifyOutputDirSet(outputDir: string): void {
+        crawlerConfigurationMock.verify((cc) => cc.setLocalOutputDir(outputDir), Times.once());
     }
 });

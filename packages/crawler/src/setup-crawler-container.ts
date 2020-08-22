@@ -2,12 +2,14 @@
 // Licensed under the MIT License.
 
 import { reporterFactory } from 'accessibility-insights-report';
+import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { ApifyResourceCreator } from './apify-resources/resource-creator';
+import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerEngine } from './crawler/crawler-engine';
 import { CrawlerFactory } from './crawler/crawler-factory';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { AccessibilityScanOperation } from './page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from './page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from './page-operations/enqueue-active-elements-operation';
@@ -40,6 +42,7 @@ export function setupCrawlerContainer(): inversify.Container {
     container.bind(LocalBlobStore).toSelf().inSingletonScope();
     container.bind(LocalDataStore).toSelf().inSingletonScope();
     container.bind(ActiveElementsFinder).toSelf().inSingletonScope();
+    container.bind(GlobalLogger).toConstantValue(new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process));
 
     return container;
 }

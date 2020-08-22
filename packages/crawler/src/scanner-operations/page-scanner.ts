@@ -5,7 +5,7 @@ import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
+import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 
 export interface ScanResult {
     axeResults: AxeResults;
@@ -14,9 +14,6 @@ export interface ScanResult {
 
 @injectable()
 export class PageScanner {
-    // reporterFactory should be instantiated only once per app life cycle.
-    // Creating reporterFactory instance multiple times will result Office Fabric
-    // warning message: `Applications should only call registerIcons for any given icon once.`
 
     public constructor(
         @inject('ReporterFactory') private readonly reporter: Reporter,

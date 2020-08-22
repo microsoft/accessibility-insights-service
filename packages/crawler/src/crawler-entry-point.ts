@@ -2,12 +2,16 @@
 // Licensed under the MIT License.
 
 import { Container } from 'inversify';
+import { GlobalLogger } from 'logger';
 import { CrawlerRunOptions } from '.';
 import { CrawlerEngine } from './crawler/crawler-engine';
 export class CrawlerEntryPoint {
     constructor(private readonly container: Container) {}
 
     public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
+        const logger = this.container.get(GlobalLogger);
+        await logger.setup();
+
         await this.container.get(CrawlerEngine).start(crawlerRunOptions);
     }
 }

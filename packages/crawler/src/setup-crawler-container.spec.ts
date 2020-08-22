@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { GlobalLogger } from 'logger';
 import { ApifyResourceCreator } from './apify-resources/resource-creator';
+import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerEngine } from './crawler/crawler-engine';
 import { CrawlerFactory } from './crawler/crawler-factory';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { AccessibilityScanOperation } from './page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from './page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from './page-operations/enqueue-active-elements-operation';
@@ -30,6 +31,7 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(PageScanner)).toBeDefined();
         expect(container.get(AxePuppeteerFactory)).toBeDefined();
         expect(container.get(ActiveElementsFinder)).toBeDefined();
+        expect(container.get(GlobalLogger)).toBeDefined();
 
     });
 });

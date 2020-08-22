@@ -23,7 +23,7 @@
         "@types/chai": "^4.2.12",
         "@types/jest": "^26.0.9",
         "@types/lodash": "^4.14.159",
-        "@types/node": "^14.0.27",
+        "@types/node": "^12.12.54",
         "jest": "^26.1.0",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -35,7 +35,7 @@
         "typescript": "^3.9.7"
     },
     "dependencies": {
-        "azure-services": "1.0.0",
+        "azure-services": "^1.0.0",
         "common": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
@@ -45,7 +45,7 @@
         "web-api-client": "1.0.0",
         "storage-documents": "1.0.0",
         "chai": "^4.2.0",
-        "yargs": "15.3.1",
+        "yargs": "^15.3.1",
         "@azure/cosmos": "^3.9.0",
         "dotenv": "^8.2.0"
     }

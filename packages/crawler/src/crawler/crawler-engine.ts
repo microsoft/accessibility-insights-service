@@ -6,9 +6,7 @@ import Apify from 'apify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
 import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resource-creator';
-import { setApifyEnvVars } from '../apify-settings';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { CrawlerRunOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -27,32 +25,29 @@ export class CrawlerEngine {
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
-        if (!isNil(crawlerRunOptions.localOutputDir)) {
-            this.setLocalOutputDir(crawlerRunOptions.localOutputDir);
-        }
+        this.crawlerConfiguration.setDefaultApifySettings();
+        this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
 
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
         const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl);
 
-        const pageProcessor = this.pageProcessorFactory.createPageProcessor({
-            requestQueue,
-            crawlerRunOptions,
-        });
+        const pageProcessor = this.pageProcessorFactory.createPageProcessor(
+            {
+                requestQueue,
+                crawlerRunOptions,
+            },
+        );
 
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({
                 requestList,
                 requestQueue,
-                handlePageFunction: pageProcessor.pageProcessor,
+                handlePageFunction: pageProcessor.pageHandler,
                 gotoFunction: pageProcessor.gotoFunction,
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
                 maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
             });
             await crawler.run();
         });
-    }
-
-    private setLocalOutputDir(outputDir: string): void {
-        setApifyEnvVars({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 }

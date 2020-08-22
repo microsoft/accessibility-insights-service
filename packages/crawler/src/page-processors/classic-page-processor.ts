@@ -7,8 +7,8 @@ import { PageProcessorBase } from './page-processor-base';
 
 @injectable()
 export class ClassicPageProcessor extends PageProcessorBase {
-    public pageProcessor: Apify.PuppeteerHandlePage = async ({ page, request }) => {
-        console.log(`Crawling page ${page.url()}`);
+    public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
+        this.logger.logInfo(`Crawling page ${page.url()}`);
         await this.enqueueLinks(page);
         await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
         await this.pushScanData({ id: request.id as string, url: request.url });
