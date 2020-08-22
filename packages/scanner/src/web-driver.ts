@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
-import * as Puppeteer from 'puppeteer';
+import Puppeteer from 'puppeteer';
 
 @injectable()
 export class WebDriver {
