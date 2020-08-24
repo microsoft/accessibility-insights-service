@@ -52,11 +52,9 @@ export class Page {
             this.logger.logWarn(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds`);
         }
 
-        let startPageRenderingTimestamp: [number, number];
         let response: Puppeteer.Response;
         try {
             response = await gotoUrlPromise;
-            startPageRenderingTimestamp = process.hrtime();
         } catch (err) {
             this.logger.logError('The URL navigation failed', { scanError: System.serializeError(err) });
 
@@ -92,7 +90,7 @@ export class Page {
             };
         }
 
-        await this.waitForPageToCompleteRendering(this.puppeteerPage, startPageRenderingTimestamp, this.pageRenderingTimeoutMsecs);
+        await this.waitForPageToCompleteRendering(this.puppeteerPage, this.pageRenderingTimeoutMsecs);
 
         return this.scanPageForIssues(response);
     }
@@ -122,55 +120,38 @@ export class Page {
         return scanResults;
     }
 
-    private async waitForPageToCompleteRendering(
-        page: Puppeteer.Page,
-        pageLoadedTimestamp: [number, number],
-        timeout: number,
-    ): Promise<void> {
+    private async waitForPageToCompleteRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<void> {
         const checkIntervalMsecs = 200;
-        const maxCheckCount = timeout / checkIntervalMsecs;
+        const maxCheckCount = timeoutMsecs / checkIntervalMsecs;
         const minCheckBreakCount = 3;
 
-        let lastCheckPageHtmlContentSize = 0;
-        let checkCount = 1;
+        let checkCount = 0;
         let continuousStableCheckCount = 0;
+        let lastCheckPageHtmlContentSize = 0;
         let pageHasStableContent = false;
 
-        while (checkCount <= maxCheckCount) {
-            const pageHtmlContent = await page.content();
-            const pageHtmlContentSize = pageHtmlContent?.length;
+        while (checkCount < maxCheckCount) {
+            const pageHtmlContentSize = await page.evaluate(() => document.body.innerHTML.length);
 
             if (lastCheckPageHtmlContentSize !== 0 && pageHtmlContentSize === lastCheckPageHtmlContentSize) {
                 continuousStableCheckCount += 1;
             } else {
                 continuousStableCheckCount = 0;
             }
+            lastCheckPageHtmlContentSize = pageHtmlContentSize;
 
             if (continuousStableCheckCount >= minCheckBreakCount) {
                 pageHasStableContent = true;
                 break;
             }
 
-            lastCheckPageHtmlContentSize = pageHtmlContentSize;
-            checkCount += 1;
-
             await page.waitFor(checkIntervalMsecs);
+            checkCount += 1;
         }
 
-        const elapsed = this.getElapsedTime(pageLoadedTimestamp, process.hrtime());
-        if (pageHasStableContent === true) {
-            this.logger.logInfo(`Page completed full rendering within ${elapsed} seconds.`);
-        } else {
-            this.logger.logWarn(`Page did not complete full rendering after the ${elapsed} seconds timeout.`);
+        if (pageHasStableContent !== true) {
+            this.logger.logWarn(`Page did not complete full rendering after ${timeoutMsecs} seconds.`);
         }
-    }
-
-    private getElapsedTime(start: [number, number], end: [number, number]): number {
-        const fraction = 1e9 - start[1] + end[1];
-        const secs = end[0] - start[0] + Math.trunc(fraction / 1e9);
-        const msecs = Math.round(((fraction / 1e9) % 1) * 1000);
-
-        return secs + msecs / 1000;
     }
 
     private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {

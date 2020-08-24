@@ -73,7 +73,7 @@ class PuppeteerPageMock {
         return PuppeteerPageMock.pageTitle;
     }
 
-    public async content(): Promise<string> {
+    public async evaluate(): Promise<string> {
         return this.pageContentMock();
     }
 
@@ -276,14 +276,12 @@ describe('Page', () => {
             })
             .returns(async () => Promise.resolve(content))
             .verifiable(Times.exactly(dynamicContentInvocationCount + 3));
-        loggerMock.setup((o) => o.logInfo(It.is((m) => m.startsWith('Page completed full rendering within')))).verifiable();
 
         await page.create();
         const result = await page.scanForA11yIssues(scanUrl);
 
         axePuppeteerFactoryMock.verifyAll();
         axePuppeteerMock.verifyAll();
-        loggerMock.verifyAll();
         pageContentMock.verifyAll();
 
         expect(result).toEqual(scanResults);
