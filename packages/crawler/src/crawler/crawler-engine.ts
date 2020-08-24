@@ -29,7 +29,7 @@ export class CrawlerEngine {
         this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
 
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
-        const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl);
+        const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, crawlerRunOptions.restartCrawl);
 
         const pageProcessor = this.pageProcessorFactory.createPageProcessor(
             {

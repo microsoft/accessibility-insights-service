@@ -61,18 +61,6 @@ describe(CrawlerEngine, () => {
             maxRequestsPerCrawl: maxRequestsPerCrawl,
         };
         resourceCreatorMock = Mock.ofType<ResourceCreator>();
-    });
-
-    it('Run crawler with one base url', async () => {
-        const basePageProcessorOptions = {
-            requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl },
-        };
-        setupSetDefaultApifySettings();
-        setupCreateRequestQueue();
-        setupCreatePageProcessor(basePageProcessorOptions);
-        setupCreatePuppeteerCrawler(baseCrawlerOptions);
-        setupRunCrawler();
 
         crawlerEngine = new CrawlerEngine(
             loggerMock.object,
@@ -82,24 +70,34 @@ describe(CrawlerEngine, () => {
             runApifyMock.object,
             crawlerConfigurationMock.object,
         );
+    });
 
-        await crawlerEngine.start({
-            baseUrl,
-            maxRequestsPerCrawl: maxRequestsPerCrawl,
-        });
+    it('Run crawler with one base url', async () => {
+        const crawlerRunOptions = { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl };
+        const basePageProcessorOptions = {
+            requestQueue: requestQueueMock.object,
+            crawlerRunOptions,
+        };
+        setupSetDefaultApifySettings();
+        setupCreateRequestQueue();
+        setupCreatePageProcessor(basePageProcessorOptions);
+        setupCreatePuppeteerCrawler(baseCrawlerOptions);
+        setupRunCrawler();
+
+        await crawlerEngine.start(crawlerRunOptions);
     });
 
     it('Run crawler with output dir specified', async () => {
         const outputDir = 'output dir';
-
+        const crawlerRunOptions = { baseUrl: baseUrl, localOutputDir: outputDir, maxRequestsPerCrawl: maxRequestsPerCrawl };
         const basePageProcessorOptions = {
             requestQueue: requestQueueMock.object,
-            crawlerRunOptions: { baseUrl: baseUrl, localOutputDir: outputDir, maxRequestsPerCrawl: maxRequestsPerCrawl },
+            crawlerRunOptions,
         };
 
         setupSetDefaultApifySettings();
         // Env variable must be set when request queue and page processor are created
-        setupCreateRequestQueue(() => {
+        setupCreateRequestQueue(undefined, () => {
             verifyOutputDirSet(outputDir);
         });
         setupCreatePageProcessor(basePageProcessorOptions, () => {
@@ -108,20 +106,22 @@ describe(CrawlerEngine, () => {
         setupCreatePuppeteerCrawler(baseCrawlerOptions);
         setupRunCrawler();
 
-        crawlerEngine = new CrawlerEngine(
-            loggerMock.object,
-            pageProcessorFactoryMock.object,
-            crawlerFactoryMock.object,
-            resourceCreatorMock.object,
-            runApifyMock.object,
-            crawlerConfigurationMock.object,
-        );
+        await crawlerEngine.start(crawlerRunOptions);
+    });
 
-        await crawlerEngine.start({
-            baseUrl: baseUrl,
-            localOutputDir: outputDir,
-            maxRequestsPerCrawl: maxRequestsPerCrawl,
-        });
+    it('Run crawler with restartCrawl=true', async () => {
+        const crawlerRunOptions = { baseUrl, maxRequestsPerCrawl: maxRequestsPerCrawl, restartCrawl: true };
+        const basePageProcessorOptions = {
+            requestQueue: requestQueueMock.object,
+            crawlerRunOptions,
+        };
+        setupSetDefaultApifySettings();
+        setupCreateRequestQueue(true);
+        setupCreatePageProcessor(basePageProcessorOptions);
+        setupCreatePuppeteerCrawler(baseCrawlerOptions);
+        setupRunCrawler();
+
+        await crawlerEngine.start(crawlerRunOptions);
     });
 
     afterEach(() => {
@@ -137,9 +137,9 @@ describe(CrawlerEngine, () => {
         crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
     }
 
-    function setupCreateRequestQueue(callback: () => void = () => null): void {
+    function setupCreateRequestQueue(empty?: boolean, callback: () => void = () => null): void {
         resourceCreatorMock
-            .setup(async (cf) => cf.createRequestQueue(baseUrl))
+            .setup(async (cf) => cf.createRequestQueue(baseUrl, empty))
             .returns(async () => {
                 callback();
 
