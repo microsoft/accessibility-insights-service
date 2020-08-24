@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import * as filenamify from 'filenamify-url';
+import filenamifyUrl from 'filenamify-url';
 import * as fs from 'fs';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from './report-disk-writer';
@@ -23,7 +23,7 @@ describe('ReportDiskWriter', () => {
         const format = 'html';
         const content = 'content';
 
-        const reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
         const reportFilePath = `${directory}/${reportFileName}`;
 
         fsMock
@@ -76,7 +76,7 @@ describe('ReportDiskWriter', () => {
         const format = 'html';
         const content = 'content';
 
-        const reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
+        const reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
         const reportFilePath = `${directory}/${reportFileName}`;
 
         fsMock

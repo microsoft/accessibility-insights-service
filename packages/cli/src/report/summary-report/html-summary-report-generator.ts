@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import * as escapeHtml from 'escape-html';
+import escapeHTML from 'escape-html';
 import { link } from 'fs';
 import { injectable } from 'inversify';
 import { SummaryReportData, UrlToReportMap } from './summary-report-data';
@@ -117,7 +117,7 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
         const htmlLinks: string[] = links.map((item) => {
             return `
             <li>
-                <a href='${item.link}'>${escapeHtml(item.fileName)}</a>
+                <a href='${item.link}'>${escapeHTML(item.fileName)}</a>
             </li>`;
         });
 

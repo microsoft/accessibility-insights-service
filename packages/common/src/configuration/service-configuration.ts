@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as convict from 'convict';
+import convict from 'convict';
 import * as fs from 'fs';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
@@ -233,10 +233,8 @@ export class ServiceConfiguration {
                     format: Array,
                     default: [
                         'image-redundant-alt',
-                        'checkboxgroup',
                         'empty-heading',
                         'p-as-heading',
-                        'radiogroup',
                         'table-duplicate-name',
                         'table-fake-caption',
                         'td-has-header',
@@ -252,13 +250,13 @@ export class ServiceConfiguration {
                         'skip-link',
                         'landmark-main-is-top-level',
                         'landmark-one-main',
-                        'aria-dpub-role-fallback',
                         'focus-order-semantics',
                         'frame-tested',
                         'landmark-banner-is-top-level',
                         'landmark-contentinfo-is-top-level',
                         'landmark-no-duplicate-banner',
                         'landmark-no-duplicate-contentinfo',
+                        'link-name', // accessibility-insights-service issue #976
                         'page-has-heading-one',
                         'aria-allowed-role',
                         'css-orientation-lock',

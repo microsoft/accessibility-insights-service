@@ -21,13 +21,14 @@ interface Arguments {
     selectors: string[];
     output: string;
     maxUrls: number;
+    restart: boolean;
 }
 
 (async () => {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls>')
+        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart')
         .options({
             url: {
                 type: 'string',
@@ -47,7 +48,7 @@ interface Arguments {
             },
             output: {
                 type: 'string',
-                describe: `Output directory`,
+                describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./crawler_storage, if not.`,
             },
             maxUrls: {
                 type: 'number',
@@ -55,6 +56,12 @@ interface Arguments {
                             The default is 100.
                             Note that in cases of parallel crawling, the actual number of pages visited might be slightly higher than this value.`,
                 default: 100,
+            },
+            restart: {
+                type: 'boolean',
+                describe:
+                    'if this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
+                default: false,
             },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
@@ -65,6 +72,7 @@ interface Arguments {
         selectors: args.selectors,
         localOutputDir: args.output,
         maxRequestsPerCrawl: args.maxUrls,
+        restartCrawl: args.restart,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

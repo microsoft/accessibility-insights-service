@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { JobManagerConfig, ServiceConfiguration } from 'common';
-import * as moment from 'moment';
+import moment from 'moment';
 import { IMock, Mock } from 'typemoq';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 

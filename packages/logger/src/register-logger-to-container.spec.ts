@@ -28,11 +28,11 @@ describe(registerGlobalLoggerToContainer, () => {
     it('verify logger dependency resolution', () => {
         registerGlobalLoggerToContainer(container);
 
-        expect(container.get(loggerTypes.AppInsights)).toBe(appInsights);
-        expect(container.get(loggerTypes.Process)).toBe(process);
-        expect(container.get(loggerTypes.Console)).toBe(console);
-        expect(container.get(loggerTypes.Argv)).toBe(argv);
-        expect(container.get(loggerTypes.DotEnvConfig)).toEqual(dotenv.config());
+        expect(container.get(loggerTypes.AppInsights)).toStrictEqual(appInsights);
+        expect(container.get(loggerTypes.Process)).toStrictEqual(process);
+        expect(container.get(loggerTypes.Console)).toStrictEqual(console);
+        expect(container.get(loggerTypes.Argv)).toStrictEqual(argv);
+        expect(container.get(loggerTypes.DotEnvConfig)).toStrictEqual(dotenv.config());
 
         verifySingletonDependencyResolution(AppInsightsLoggerClient);
         verifySingletonDependencyResolution(ConsoleLoggerClient);

@@ -51,6 +51,7 @@
         ]
     },
     "resolutions": {
+        "axe-core": "4.0.1",
         "jquery": "^3.5.0",
         "https-proxy-agent": "^3.0.1",
         "serialize-javascript": "^2.1.1",

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { JobManagerConfig, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import * as moment from 'moment';
+import moment from 'moment';
 
 export interface PoolLoad {
     activeTasks: number;

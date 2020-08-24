@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { injectable } from 'inversify';
+import { isEmpty } from 'lodash';
 import * as url from 'url';
-import { ApifySettings, setApifySettings } from '../apify-settings';
+import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify-settings';
 
 @injectable()
 export class CrawlerConfiguration {
-    private static readonly defaultSettings: ApifySettings = {
-        APIFY_HEADLESS: '1',
-    };
+    public constructor(private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler) {}
 
     public getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
         return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;
@@ -29,10 +28,21 @@ export class CrawlerConfiguration {
     }
 
     public setDefaultApifySettings(): void {
-        setApifySettings(CrawlerConfiguration.defaultSettings);
+        this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
     }
 
     public setLocalOutputDir(outputDir: string): void {
-        setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
+        this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
+    }
+
+    private getDefaultApifySettings(): ApifySettings {
+        const currentSettings = this.settingsHandler.getApifySettings();
+
+        return {
+            APIFY_HEADLESS: '1',
+            APIFY_LOCAL_STORAGE_DIR: isEmpty(currentSettings.APIFY_LOCAL_STORAGE_DIR)
+                ? './crawler_storage'
+                : currentSettings.APIFY_LOCAL_STORAGE_DIR,
+        };
     }
 }

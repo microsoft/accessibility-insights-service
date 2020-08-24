@@ -3,7 +3,7 @@
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
-import * as moment from 'moment';
+import moment from 'moment';
 import * as utils from 'util';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
