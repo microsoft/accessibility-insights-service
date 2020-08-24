@@ -3,10 +3,8 @@
 export class RuleExclusion {
     public accessibilityRuleExclusionList = [
         'image-redundant-alt',
-        'checkboxgroup',
         'empty-heading',
         'p-as-heading',
-        'radiogroup',
         'table-duplicate-name',
         'table-fake-caption',
         'td-has-header',
@@ -22,13 +20,13 @@ export class RuleExclusion {
         'skip-link',
         'landmark-main-is-top-level',
         'landmark-one-main',
-        'aria-dpub-role-fallback',
         'focus-order-semantics',
         'frame-tested',
         'landmark-banner-is-top-level',
         'landmark-contentinfo-is-top-level',
         'landmark-no-duplicate-banner',
         'landmark-no-duplicate-contentinfo',
+        'link-name', // accessibility-insights-service issue #976
         'page-has-heading-one',
         'aria-allowed-role',
         'css-orientation-lock',

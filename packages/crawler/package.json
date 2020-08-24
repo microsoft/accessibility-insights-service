@@ -46,7 +46,7 @@
         "accessibility-insights-report": "2.0.0",
         "apify": "^0.21.3",
         "apify-shared": "^0.2.12",
-        "axe-core": "^3.5.3",
+        "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",
         "common": "1.0.0",
