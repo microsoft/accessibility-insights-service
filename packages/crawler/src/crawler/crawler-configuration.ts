@@ -33,6 +33,14 @@ export class CrawlerConfiguration {
         this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 
+    public setMemoryMBytes(memoryMBytes: number): void {
+        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes === undefined ? undefined : memoryMBytes.toString() });
+    }
+
+    public setSilentMode(silentMode: boolean): void {
+        this.settingsHandler.setApifySettings({ APIFY_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
+    }
+
     private getDefaultApifySettings(): ApifySettings {
         const currentSettings = this.settingsHandler.getApifySettings();
 

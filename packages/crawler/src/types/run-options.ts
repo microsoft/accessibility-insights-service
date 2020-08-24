@@ -12,6 +12,8 @@ export interface CrawlerRunOptions {
     localOutputDir?: string;
     maxRequestsPerCrawl?: number;
     restartCrawl?: boolean;
+    memoryBytes?: number;
+    silentMode?: boolean;
 }
 
 export interface PageProcessorOptions {

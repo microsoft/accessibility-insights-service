@@ -102,13 +102,14 @@ describe(CrawlerConfiguration, () => {
             apifySettingsHandlerMock.verifyAll();
         });
 
-        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR if currently empty', () => {
+        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR and APIFY_HEADLESS', () => {
             const expectedSettings = {
                 APIFY_HEADLESS: defaultApifyHeadless,
                 APIFY_LOCAL_STORAGE_DIR: defaultApifyStorageDir,
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
             existingSettings.APIFY_LOCAL_STORAGE_DIR = undefined;
+            existingSettings.APIFY_HEADLESS = undefined;
 
             crawlerConfig.setDefaultApifySettings();
 
@@ -123,6 +124,18 @@ describe(CrawlerConfiguration, () => {
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
             crawlerConfig.setLocalOutputDir(localOutputDir);
+
+            apifySettingsHandlerMock.verifyAll();
+        });
+
+        it('setSilentMode', () => {
+            const silentMode = false;
+            const expectedSettings = {
+                APIFY_HEADLESS: '0',
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfig.setSilentMode(silentMode);
 
             apifySettingsHandlerMock.verifyAll();
         });

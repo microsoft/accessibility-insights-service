@@ -93,14 +93,13 @@ describe(ApifyResourceCreator, () => {
 
     function setupClearRequestQueue(dirExists: boolean): void {
         const localStorageDir = 'storage dir';
-        const requestQueueDir = `${localStorageDir}/${requestQueueName}/`;
         settingsHandlerMock
             .setup((sh) => sh.getApifySettings())
             .returns(() => {
                 return { APIFY_LOCAL_STORAGE_DIR: localStorageDir };
             });
-        fsMock.setup((fsm) => fsm.existsSync(requestQueueDir)).returns(() => dirExists);
-        fsMock.setup((fsm) => fsm.rmdirSync(requestQueueDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
+        fsMock.setup((fsm) => fsm.existsSync(localStorageDir)).returns(() => dirExists);
+        fsMock.setup((fsm) => fsm.rmdirSync(localStorageDir, { recursive: true })).verifiable(dirExists ? Times.once() : Times.never());
     }
 
     function setupCreateRequestQueue(): void {

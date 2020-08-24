@@ -35,11 +35,10 @@ export class ApifyResourceCreator implements ResourceCreator {
 
     private clearRequestQueue(): void {
         const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
-        const requestQueueDir = `${outputDir}/${this.requestQueueName}/`;
         // tslint:disable-next-line: non-literal-fs-path
-        if (this.filesystem.existsSync(requestQueueDir)) {
+        if (this.filesystem.existsSync(outputDir)) {
             // tslint:disable-next-line: non-literal-fs-path
-            this.filesystem.rmdirSync(requestQueueDir, { recursive: true });
+            this.filesystem.rmdirSync(outputDir, { recursive: true });
         }
     }
 }

@@ -22,6 +22,8 @@ interface Arguments {
     output: string;
     maxUrls: number;
     restart: boolean;
+    memoryBytes: number;
+    silentMode: boolean;
 }
 
 (async () => {
@@ -63,6 +65,17 @@ interface Arguments {
                     'if this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
                 default: false,
             },
+            memoryBytes: {
+                type: 'number',
+                describe:
+                    'the number of megabytes to be used in the memory'
+            },
+            silentMode: {
+                type: 'boolean',
+                describe:
+                    'set to false if you want the browser to open the webpages while crawling',
+                default: true,
+            },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
@@ -79,6 +92,8 @@ interface Arguments {
         localOutputDir: args.output,
         maxRequestsPerCrawl: args.maxUrls,
         restartCrawl: args.restart,
+        memoryBytes: args.memoryBytes,
+        silentMode: args.silentMode,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
