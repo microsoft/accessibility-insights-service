@@ -20,7 +20,6 @@ export class PageScanner {
     ) {}
 
     public async scan(page: Page): Promise<ScanResult> {
-        // tslint:disable-next-line: no-unsafe-any
         const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createAxePuppeteer(page);
         const axeResults = await axePuppeteer.analyze();
 

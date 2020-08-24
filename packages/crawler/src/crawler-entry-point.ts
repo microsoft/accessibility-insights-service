@@ -3,8 +3,9 @@
 
 import { Container } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CrawlerRunOptions } from '.';
 import { CrawlerEngine } from './crawler/crawler-engine';
+import { CrawlerRunOptions } from './types/run-options';
+
 export class CrawlerEntryPoint {
     constructor(private readonly container: Container) {}
 
