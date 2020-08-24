@@ -1,11 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-
-export interface ResourceCreator {
-    createRequestList(existingUrls: string[]): Promise<Apify.RequestList>;
-    createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue>;
-}
+import { ResourceCreator } from '../types/resource-creator';
 
 export class ApifyResourceCreator implements ResourceCreator {
     public constructor(private readonly apify: typeof Apify = Apify) {}

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as url from 'url';
-import { ApifySettings, setApifySettings } from '../apify-settings';
+import { ApifySettings, setApifySettings } from '../apify/apify-settings';
 
 export class CrawlerConfiguration {
     private static readonly defaultSettings: ApifySettings = {

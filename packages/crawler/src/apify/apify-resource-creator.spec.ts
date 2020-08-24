@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { ApifyResourceCreator } from './resource-creator';
+import { ApifyResourceCreator } from './apify-resource-creator';
 
 describe(ApifyResourceCreator, () => {
     let apifyMock: IMock<typeof Apify>;
