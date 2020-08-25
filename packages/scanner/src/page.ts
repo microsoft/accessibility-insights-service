@@ -150,7 +150,7 @@ export class Page {
         }
 
         if (pageHasStableContent !== true) {
-            this.logger.logWarn(`Page did not complete full rendering after ${timeoutMsecs} seconds.`);
+            this.logger.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
         }
     }
 
