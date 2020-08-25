@@ -5,7 +5,7 @@ import { reporterFactory } from 'accessibility-insights-report';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
-import { ApifyResourceCreator } from './apify-resources/resource-creator';
+import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerFactory } from './crawler/crawler-factory';
