@@ -40,13 +40,13 @@ export class PageProcessorFactory {
         }
 
         return new SimulatorPageProcessor(
-            new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
-            new ClickElementOperation(),
             new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory()), this.logger),
             new LocalDataStore(),
             new LocalBlobStore(),
             this.logger,
             pageProcessorOptions.requestQueue,
+            new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
+            new ClickElementOperation(),
             this.crawlerConfiguration.getDiscoveryPattern(
                 pageProcessorOptions.crawlerRunOptions.baseUrl,
                 pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
