@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import * as fs from 'fs';
+import { injectable } from 'inversify';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify-settings';
 
 export interface ResourceCreator {
@@ -9,6 +10,7 @@ export interface ResourceCreator {
     createRequestQueue(baseUrl: string, empty?: boolean): Promise<Apify.RequestQueue>;
 }
 
+@injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 

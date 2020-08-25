@@ -5,7 +5,7 @@ import Apify from 'apify';
 
 // @ts-ignore
 import * as cheerio from 'cheerio';
-import { Logger } from 'logger';
+import { inject, injectable } from 'inversify';
 import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resource-creator';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { CrawlerRunOptions } from '../types/run-options';
@@ -14,14 +14,14 @@ import { CrawlerFactory } from './crawler-factory';
 
 export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
 
+@injectable()
 export class CrawlerEngine {
     public constructor(
-        private readonly logger: Logger,
-        private readonly pageProcessorFactory: PageProcessorFactory = new PageProcessorFactory(),
-        private readonly crawlerFactory: CrawlerFactory = new CrawlerFactory(),
-        private readonly resourceCreator: ResourceCreator = new ApifyResourceCreator(),
+        @inject(PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
+        @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
+        @inject(ApifyResourceCreator) private readonly resourceCreator: ResourceCreator,
+        @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
         private readonly runApify: ApifyMainFunc = Apify.main,
-        private readonly crawlerConfiguration: CrawlerConfiguration = new CrawlerConfiguration(),
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -33,13 +33,10 @@ export class CrawlerEngine {
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
         const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, crawlerRunOptions.restartCrawl);
 
-        const pageProcessor = this.pageProcessorFactory.createPageProcessor(
-            {
-                requestQueue,
-                crawlerRunOptions,
-            },
-            this.logger,
-        );
+        const pageProcessor = this.pageProcessorFactory.createPageProcessor({
+            requestQueue,
+            crawlerRunOptions,
+        });
 
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({

@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as url from 'url';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify-settings';
 
+@injectable()
 export class CrawlerConfiguration {
     public constructor(private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler) {}
 

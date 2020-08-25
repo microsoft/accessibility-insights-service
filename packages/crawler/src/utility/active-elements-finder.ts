@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { injectable } from 'inversify';
 import * as path from 'path';
 import { Page } from 'puppeteer';
 import * as utilities from './utilities';
@@ -17,6 +18,7 @@ interface ElementData {
     selector: string;
 }
 
+@injectable()
 export class ActiveElementsFinder {
     public async getActiveElements(page: Page, selectors: string[]): Promise<ActiveElement[]> {
         const selector = selectors.join(',');

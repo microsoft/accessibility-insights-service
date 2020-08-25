@@ -4,16 +4,16 @@
 // tslint:disable: no-unsafe-any no-import-side-effect no-require-imports no-var-requires
 require = require('esm')(module); // support ES6 module syntax for Office Fabric package
 
+import 'reflect-metadata';
+
 export { CrawlerEngine } from './crawler/crawler-engine';
 export { CrawlerRunOptions } from './types/run-options';
 
-import 'reflect-metadata';
-
-import { ServiceConfiguration, System } from 'common';
+import { System } from 'common';
 import * as dotenv from 'dotenv';
-import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import * as yargs from 'yargs';
-import { CrawlerEngine } from './crawler/crawler-engine';
+import { CrawlerEntryPoint } from './crawler-entry-point';
+import { setupCrawlerContainer } from './setup-crawler-container';
 
 interface Arguments {
     url: string;
@@ -79,13 +79,7 @@ interface Arguments {
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
-    const serviceConfig = new ServiceConfiguration();
-    const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
-    await logger.setup();
-
-    const crawlerEngine: CrawlerEngine = new CrawlerEngine(logger);
-
-    await crawlerEngine.start({
+    await new CrawlerEntryPoint(setupCrawlerContainer()).crawl({
         baseUrl: args.url,
         simulate: args.simulate,
         selectors: args.selectors,

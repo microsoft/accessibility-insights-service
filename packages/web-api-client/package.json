@@ -24,7 +24,7 @@
         "@types/node": "^12.12.54",
         "@types/request-promise": "^4.1.46",
         "@types/request": "^2.48.5",
-        "jest": "^26.1.0",
+        "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
         "rimraf": "^3.0.2",
