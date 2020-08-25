@@ -25,6 +25,9 @@ interface Arguments {
     snapshot: boolean;
     memoryMBytes: number;
     silentMode: boolean;
+    inputFile: string;
+    existingUrls: string[];
+    discoveryPatterns: string[];
 }
 
 (async () => {
@@ -32,7 +35,7 @@ interface Arguments {
 
     const args = (yargs
         .usage(
-            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot> --memoryMBytes <memoryMBytes> --silentMode <silentMode>',
+            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot> --memoryMBytes <memoryMBytes> --silentMode <silentMode> [--existingUrls <url1 ...>] [--discoveryPatterns <pattern1 ...>]',
         )
         .options({
             url: {
@@ -82,6 +85,18 @@ interface Arguments {
                 describe: 'Set to false if you want the browser to open the webpages while crawling',
                 default: true,
             },
+            inputFile: {
+                type: 'string',
+                describe: 'List of URLs to crawl in addition to URLs discovered from crawling base URL',
+            },
+            existingUrls: {
+                type: 'array',
+                describe: `List of URLs to crawl in addition to URLs discovered from crawling base URL`,
+            },
+            discoveryPatterns: {
+                type: 'array',
+                describe: `List of patterns to crawl in addition to the base url`,
+            },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
 
@@ -95,6 +110,9 @@ interface Arguments {
         snapshot: args.snapshot,
         memoryMBytes: args.memoryMBytes,
         silentMode: args.silentMode,
+        inputFile: args.inputFile,
+        existingUrls: args.existingUrls,
+        discoveryPatterns: args.discoveryPatterns,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

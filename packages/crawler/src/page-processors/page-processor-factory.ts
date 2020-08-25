@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { reporterFactory } from 'accessibility-insights-report';
+import { Url } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
@@ -22,6 +23,7 @@ export class PageProcessorFactory {
     constructor(
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        private readonly urlObj: typeof Url = Url,
     ) {}
 
     public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
@@ -37,7 +39,7 @@ export class PageProcessorFactory {
                     pageProcessorOptions.crawlerRunOptions.simulate,
                 ),
                 this.crawlerConfiguration.getDiscoveryPattern(
-                    pageProcessorOptions.crawlerRunOptions.baseUrl,
+                    this.urlObj.getRootUrl(pageProcessorOptions.crawlerRunOptions.baseUrl),
                     pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
                 ),
             );
@@ -57,7 +59,7 @@ export class PageProcessorFactory {
                 pageProcessorOptions.crawlerRunOptions.simulate,
             ),
             this.crawlerConfiguration.getDiscoveryPattern(
-                pageProcessorOptions.crawlerRunOptions.baseUrl,
+                this.urlObj.getRootUrl(pageProcessorOptions.crawlerRunOptions.baseUrl),
                 pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
             ),
         );

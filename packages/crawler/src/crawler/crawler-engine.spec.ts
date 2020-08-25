@@ -50,7 +50,6 @@ describe(CrawlerEngine, () => {
             .verifiable();
 
         baseCrawlerOptions = {
-            requestList: undefined,
             requestQueue: requestQueueMock.object,
             handlePageFunction: pageProcessorStub.pageHandler,
             gotoFunction: pageProcessorStub.gotoFunction,
@@ -135,7 +134,7 @@ describe(CrawlerEngine, () => {
 
     function setupCreateRequestQueue(empty?: boolean, callback: () => void = () => null): void {
         resourceCreatorMock
-            .setup(async (cf) => cf.createRequestQueue(baseUrl, empty))
+            .setup(async (cf) => cf.createRequestQueue(baseUrl, empty, undefined, undefined))
             .returns(async () => {
                 callback();
 
