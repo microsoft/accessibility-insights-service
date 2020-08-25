@@ -16,4 +16,16 @@ export namespace Url {
             return undefined;
         }
     }
+
+    export function getRootUrl(url: string): string {
+        let rootUrl = url.trim();
+        const lastSlashPos = rootUrl.lastIndexOf('/');
+        rootUrl = rootUrl.substr(0, lastSlashPos + 1);
+
+        return rootUrl;
+    }
+
+    export function hasQueryParameters(url: string): boolean {
+        return url.indexOf('?') !== -1;
+    }
 }

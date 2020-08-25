@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
+import { Url } from 'common';
 import * as fs from 'fs';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { URLProcessor } from '../utility/url-processor';
 import { ApifyResourceCreator } from './apify-resource-creator';
 
 describe(ApifyResourceCreator, () => {
@@ -15,7 +15,7 @@ describe(ApifyResourceCreator, () => {
     let settingsHandlerMock: IMock<typeof apifySettingsHandler>;
     let fsMock: IMock<typeof fs>;
     let queueMock: IMock<Apify.RequestQueue>;
-    let urlProcessorMock: IMock<URLProcessor>;
+    let urlMock: IMock<typeof Url>;
 
     let apifyResourceCreator: ApifyResourceCreator;
 
@@ -27,20 +27,15 @@ describe(ApifyResourceCreator, () => {
         settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
         fsMock = Mock.ofType<typeof fs>();
         queueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
-        urlProcessorMock = Mock.ofType(URLProcessor);
-        apifyResourceCreator = new ApifyResourceCreator(
-            urlProcessorMock.object,
-            apifyMock.object,
-            settingsHandlerMock.object,
-            fsMock.object,
-        );
+        urlMock = Mock.ofType<typeof Url>();
+        apifyResourceCreator = new ApifyResourceCreator(urlMock.object, apifyMock.object, settingsHandlerMock.object, fsMock.object);
     });
 
     afterEach(() => {
         apifyMock.verifyAll();
         settingsHandlerMock.verifyAll();
         fsMock.verifyAll();
-        urlProcessorMock.verifyAll();
+        urlMock.verifyAll();
     });
 
     describe('createRequestQueue', () => {
@@ -48,8 +43,8 @@ describe(ApifyResourceCreator, () => {
             setupCreateRequestQueue();
             // tslint:disable-next-line: no-unsafe-any
             fsMock.setup((fsm) => fsm.rmdirSync(It.isAny(), It.isAny())).verifiable(Times.never());
-            urlProcessorMock
-                .setup((upm) => upm.getRootUrl(url))
+            urlMock
+                .setup((um) => um.getRootUrl(url))
                 .returns(() => url)
                 .verifiable(Times.once());
 

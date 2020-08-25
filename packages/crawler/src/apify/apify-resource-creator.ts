@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
+import { Url } from 'common';
 import * as fs from 'fs';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { ResourceCreator } from '../types/resource-creator';
-import { URLProcessor } from '../utility/url-processor';
 
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
 
     public constructor(
-        @inject(URLProcessor) protected readonly urlProcessor: URLProcessor,
+        private readonly urlObj: typeof Url = Url,
         private readonly apify: typeof Apify = Apify,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly filesystem: typeof fs = fs,
@@ -24,7 +24,7 @@ export class ApifyResourceCreator implements ResourceCreator {
         }
 
         const requestQueue = await this.apify.openRequestQueue(this.requestQueueName);
-        await requestQueue.addRequest({ url: this.urlProcessor.getRootUrl(baseUrl) });
+        await requestQueue.addRequest({ url: this.urlObj.getRootUrl(baseUrl) });
 
         return requestQueue;
     }
