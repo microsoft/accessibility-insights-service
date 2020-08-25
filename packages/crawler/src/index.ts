@@ -67,13 +67,11 @@ interface Arguments {
             },
             memoryBytes: {
                 type: 'number',
-                describe:
-                    'the number of megabytes to be used in the memory'
+                describe: 'the number of megabytes to be used in the memory',
             },
             silentMode: {
                 type: 'boolean',
-                describe:
-                    'set to false if you want the browser to open the webpages while crawling',
+                describe: 'set to false if you want the browser to open the webpages while crawling',
                 default: true,
             },
         })
