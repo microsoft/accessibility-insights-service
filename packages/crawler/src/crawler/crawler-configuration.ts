@@ -36,7 +36,7 @@ export class CrawlerConfiguration {
     }
 
     public setMemoryMBytes(memoryMBytes: number): void {
-        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes === undefined ? undefined : memoryMBytes.toString() });
+        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes?.toString() });
     }
 
     public setSilentMode(silentMode: boolean): void {

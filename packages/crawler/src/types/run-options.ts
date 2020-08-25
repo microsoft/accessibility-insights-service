@@ -12,7 +12,7 @@ export interface CrawlerRunOptions {
     localOutputDir?: string;
     maxRequestsPerCrawl?: number;
     restartCrawl?: boolean;
-    memoryBytes?: number;
+    memoryMBytes?: number;
     silentMode?: boolean;
 }
 

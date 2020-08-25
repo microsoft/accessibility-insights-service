@@ -27,7 +27,7 @@ export class CrawlerEngine {
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
         this.crawlerConfiguration.setDefaultApifySettings();
         this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
-        this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryBytes);
+        this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
         const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
