@@ -4,6 +4,7 @@
 export interface ApifySettings {
     APIFY_HEADLESS?: string;
     APIFY_LOCAL_STORAGE_DIR?: string;
+    APIFY_MEMORY_MBYTES?: string;
 }
 
 export interface ApifySettingsHandler {

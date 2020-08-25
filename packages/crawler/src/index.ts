@@ -22,13 +22,17 @@ interface Arguments {
     output: string;
     maxUrls: number;
     restart: boolean;
+    memoryMBytes: number;
+    silentMode: boolean;
 }
 
 (async () => {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart')
+        .usage(
+            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --memoryMBytes <memoryMBytes> --silentMode <silentMode>',
+        )
         .options({
             url: {
                 type: 'string',
@@ -60,8 +64,17 @@ interface Arguments {
             restart: {
                 type: 'boolean',
                 describe:
-                    'if this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
+                    'If this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
                 default: false,
+            },
+            memoryMBytes: {
+                type: 'number',
+                describe: 'The maximum number of megabytes to be used by the crawler',
+            },
+            silentMode: {
+                type: 'boolean',
+                describe: 'Set to false if you want the browser to open the webpages while crawling',
+                default: true,
             },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
@@ -73,6 +86,8 @@ interface Arguments {
         localOutputDir: args.output,
         maxRequestsPerCrawl: args.maxUrls,
         restartCrawl: args.restart,
+        memoryMBytes: args.memoryMBytes,
+        silentMode: args.silentMode,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
