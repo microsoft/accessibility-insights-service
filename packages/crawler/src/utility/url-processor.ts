@@ -1,6 +1,9 @@
+import { injectable } from "inversify";
+
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+@injectable()
 export class URLProcessor {
     public getRootUrl(url: string): string {
         let rootUrl = url.trim();
