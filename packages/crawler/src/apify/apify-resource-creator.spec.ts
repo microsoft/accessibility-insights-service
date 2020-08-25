@@ -84,7 +84,7 @@ describe(ApifyResourceCreator, () => {
             expect(queue).toBe(queueMock.object);
         });
 
-        it('with inputFile', async () => {
+        it('with existing urls"', async () => {
             const existingUrls = ['url1', 'url2'];
 
             setupCreateRequestQueue();
