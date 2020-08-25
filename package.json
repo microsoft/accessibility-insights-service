@@ -49,5 +49,9 @@
         "packages": [
             "packages/*"
         ]
+    },
+    "resolutions": {
+        "axe-core": "4.0.1",
+        "serialize-javascript": "^3.0.0"
     }
 }
