@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
-import { Logger } from 'logger';
+import { inject, injectable } from 'inversify';
+import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
-import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -20,6 +22,7 @@ export interface PageProcessor {
     pageErrorProcessor: Apify.HandleFailedRequest;
 }
 
+@injectable()
 export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Timeout in which page navigation needs to finish, in seconds.
@@ -34,14 +37,14 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
     public constructor(
-        protected readonly logger: Logger,
+        @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
+        @inject(LocalDataStore) protected readonly dataStore: DataStore,
+        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly discoveryPatterns?: string[],
-        protected readonly accessibilityScanOp: AccessibilityScanOperation = new AccessibilityScanOperation(logger),
-        protected readonly dataStore: DataStore = new LocalDataStore(scanResultStorageName),
-        protected readonly blobStore: BlobStore = new LocalBlobStore(scanResultStorageName),
-        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        private readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
+        protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
+        protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
     ) {}
 
     public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {

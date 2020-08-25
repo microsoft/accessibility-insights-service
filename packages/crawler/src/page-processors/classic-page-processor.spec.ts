@@ -47,12 +47,12 @@ describe(ClassicPageProcessor, () => {
         } as any;
 
         classicPageProcessor = new ClassicPageProcessor(
-            loggerMock.object,
-            requestQueueMock.object,
-            discoveryPatterns,
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            loggerMock.object,
+            requestQueueMock.object,
+            discoveryPatterns,
             enqueueLinksExtMock.object,
         );
     });

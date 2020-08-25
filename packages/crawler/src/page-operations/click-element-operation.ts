@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
+import { injectable } from 'inversify';
 import { Page } from 'puppeteer';
 
 export declare type ElementClickAction = 'navigation' | 'page-action';
@@ -10,6 +12,7 @@ export interface ElementClickOperationResult {
     navigationUrl?: string;
 }
 
+@injectable()
 export class ClickElementOperation {
     constructor(
         private readonly enqueueLinksByClickingElementsExt: typeof Apify.utils.puppeteer.enqueueLinksByClickingElements = Apify.utils
