@@ -20,7 +20,7 @@ This package is available on [npm](http://npmjs.com) as `ai-scan`.
 ## Example usage
 
 ```sh
-  ai-scan --url https://wwww.microsoft.com/
+  ai-scan --url https://www.microsoft.com/
 ```
 
 ## Usage
