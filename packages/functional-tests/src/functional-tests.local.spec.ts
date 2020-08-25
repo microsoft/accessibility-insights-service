@@ -109,10 +109,10 @@ describe('functional tests', () => {
             // tslint:disable-next-line: no-empty
             await System.wait(10000);
             scanResultResponse = (await a11yServiceClient.getScanStatus(testContextData.scanId)).body;
-            scanRunState = scanResultResponse.run.state;
+            scanRunState = (<ScanRunResultResponse>scanResultResponse).run.state;
         }
 
-        return scanResultResponse;
+        return <ScanRunResultResponse>scanResultResponse;
     }
 
     function getTests(testGroupName: TestGroupName): FunctionalTestGroup {
