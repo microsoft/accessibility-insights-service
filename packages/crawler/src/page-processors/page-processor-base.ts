@@ -94,6 +94,16 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.logPageError(request, error);
     };
 
+    public async saveSnapshot(page: Page, id: string): Promise<void> {
+        if (this.snapshot) {
+            await this.saveSnapshotExt(page, {
+                key: `${id}.screenshot`,
+                saveHtml: false,
+                keyValueStoreName: scanResultStorageName,
+            });
+        }
+    }
+
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
         const enqueued = await this.enqueueLinksExt({
             page,
@@ -115,15 +125,5 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
         await this.blobStore.setValue(`${request.id}.err`, `Error at URL ${request.url}: ${error.message}`, { contentType: 'text/plain' });
-    }
-
-    protected async saveSnapshot(page: Page, id: string): Promise<void> {
-        if (this.snapshot) {
-            await this.saveSnapshotExt(page, {
-                key: `${id}.screenshot`,
-                saveHtml: false,
-                keyValueStoreName: scanResultStorageName,
-            });
-        }
     }
 }

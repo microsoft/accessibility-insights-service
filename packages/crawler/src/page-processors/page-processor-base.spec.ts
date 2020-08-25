@@ -175,6 +175,7 @@ describe(PageProcessorBase, () => {
             saveSnapshotMock.object,
         );
         (pageProcessorBase as TestablePageProcessor).processPage = processPageMock.object;
+        await pageProcessorBase.saveSnapshot(pageStub, testId);
     });
 
     function setupSaveSnapshot(): void {

@@ -69,7 +69,7 @@ interface Arguments {
             snapshot: {
                 type: 'boolean',
                 describe:
-                    'Save snapshot of the crawled page, if value is not provided if simulation is enabled, true will be default, otherwise false is',
+                    'Save snapshot of the crawled page, if no value is not provided, it will be true  if simulation is enabled, otherwise false',
                 default: false,
             },
         })
