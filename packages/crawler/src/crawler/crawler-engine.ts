@@ -31,8 +31,12 @@ export class CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
-        const requestList = await this.resourceCreator.createRequestList(crawlerRunOptions.existingUrls);
-        const requestQueue = await this.resourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, crawlerRunOptions.restartCrawl);
+        const requestQueue = await this.resourceCreator.createRequestQueue(
+            crawlerRunOptions.baseUrl,
+            crawlerRunOptions.restartCrawl,
+            crawlerRunOptions.inputFile,
+            crawlerRunOptions.existingUrls,
+        );
 
         const pageProcessor = this.pageProcessorFactory.createPageProcessor({
             requestQueue,
@@ -41,7 +45,6 @@ export class CrawlerEngine {
 
         this.runApify(async () => {
             const crawler = this.crawlerFactory.createPuppeteerCrawler({
-                requestList,
                 requestQueue,
                 handlePageFunction: pageProcessor.pageHandler,
                 gotoFunction: pageProcessor.gotoFunction,

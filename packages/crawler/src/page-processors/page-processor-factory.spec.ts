@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Url } from 'common';
 import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -16,12 +17,19 @@ describe(PageProcessorFactory, () => {
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let loggerMock: IMock<Logger>;
     let pageProcessorFactory: PageProcessorFactory;
+    let urlMock: IMock<typeof Url>;
     const baseUrl = 'base url';
 
     beforeEach(() => {
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         loggerMock = Mock.ofType<Logger>();
-        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object, loggerMock.object);
+        urlMock = Mock.ofType<typeof Url>();
+        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object, loggerMock.object, urlMock.object);
+
+        urlMock
+            .setup((um) => um.getRootUrl(baseUrl))
+            .returns(() => baseUrl)
+            .verifiable();
     });
 
     it('PageProcessorFactory, classic page processor', async () => {
@@ -66,5 +74,6 @@ describe(PageProcessorFactory, () => {
 
     afterEach(() => {
         crawlerConfigurationMock.verifyAll();
+        urlMock.verifyAll();
     });
 });

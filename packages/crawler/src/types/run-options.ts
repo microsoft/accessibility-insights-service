@@ -15,6 +15,7 @@ export interface CrawlerRunOptions {
     snapshot?: boolean;
     memoryMBytes?: number;
     silentMode?: boolean;
+    inputFile?: string;
 }
 
 export interface PageProcessorOptions {
