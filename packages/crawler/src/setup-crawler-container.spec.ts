@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { GlobalLogger } from 'logger';
-import { ApifyResourceCreator } from './apify-resources/resource-creator';
+import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerEngine } from './crawler/crawler-engine';

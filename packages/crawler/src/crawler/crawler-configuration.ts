@@ -3,7 +3,7 @@
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as url from 'url';
-import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify-settings';
+import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 
 @injectable()
 export class CrawlerConfiguration {
@@ -41,6 +41,14 @@ export class CrawlerConfiguration {
         }
 
         return simulation;
+    }
+
+    public setMemoryMBytes(memoryMBytes: number): void {
+        this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes?.toString() });
+    }
+
+    public setSilentMode(silentMode: boolean): void {
+        this.settingsHandler.setApifySettings({ APIFY_HEADLESS: silentMode === undefined ? undefined : silentMode ? '1' : '0' });
     }
 
     private getDefaultApifySettings(): ApifySettings {

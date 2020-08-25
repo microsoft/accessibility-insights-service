@@ -13,6 +13,8 @@ export interface CrawlerRunOptions {
     maxRequestsPerCrawl?: number;
     restartCrawl?: boolean;
     snapshot?: boolean;
+    memoryMBytes?: number;
+    silentMode?: boolean;
 }
 
 export interface PageProcessorOptions {

@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ResourceCreator } from '../apify-resources/resource-creator';
 import { PageProcessor } from '../page-processors/page-processor-base';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
+import { ResourceCreator } from '../types/resource-creator';
 import { PageProcessorOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';

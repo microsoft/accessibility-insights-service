@@ -23,6 +23,8 @@ interface Arguments {
     maxUrls: number;
     restart: boolean;
     snapshot: boolean;
+    memoryMBytes: number;
+    silentMode: boolean;
 }
 
 (async () => {
@@ -30,7 +32,7 @@ interface Arguments {
 
     const args = (yargs
         .usage(
-            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot>',
+            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot> --memoryMBytes <memoryMBytes> --silentMode <silentMode>',
         )
         .options({
             url: {
@@ -70,7 +72,15 @@ interface Arguments {
                 type: 'boolean',
                 describe:
                     'Save snapshot of the crawled page, if no value is not provided, it will be true  if simulation is enabled, otherwise false',
-                default: false,
+            },
+            memoryMBytes: {
+                type: 'number',
+                describe: 'The maximum number of megabytes to be used by the crawler',
+            },
+            silentMode: {
+                type: 'boolean',
+                describe: 'Set to false if you want the browser to open the webpages while crawling',
+                default: true,
             },
         })
         .describe('help', 'Print command line options').argv as unknown) as Arguments;
@@ -83,6 +93,8 @@ interface Arguments {
         maxRequestsPerCrawl: args.maxUrls,
         restartCrawl: args.restart,
         snapshot: args.snapshot,
+        memoryMBytes: args.memoryMBytes,
+        silentMode: args.silentMode,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

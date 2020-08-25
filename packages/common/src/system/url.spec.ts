@@ -23,4 +23,19 @@ describe('tryParseUrlString()', () => {
         url = Url.tryParseUrlString('https://abc/');
         expect(url.href).toEqual('https://abc/');
     });
+
+    it('getRootUrl', async () => {
+        const url1 = 'www.bla.com/a/b/';
+        const url2 = 'www.bla.com/a/b/c';
+
+        expect(Url.getRootUrl(url1)).toStrictEqual(Url.getRootUrl(url2));
+    });
+
+    it('hasQueryParameters', async () => {
+        const url1 = 'www.bla.com?p=v';
+        const url2 = 'www.bla.com';
+
+        expect(Url.hasQueryParameters(url1)).toStrictEqual(true);
+        expect(Url.hasQueryParameters(url2)).toStrictEqual(false);
+    });
 });
