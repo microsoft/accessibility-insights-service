@@ -52,6 +52,7 @@ describe(ClassicPageProcessor, () => {
             blobStoreMock.object,
             loggerMock.object,
             requestQueueMock.object,
+            false,
             discoveryPatterns,
             enqueueLinksExtMock.object,
         );

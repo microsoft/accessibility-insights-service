@@ -26,6 +26,7 @@ describe(PageProcessorBase, () => {
     let blobStoreMock: IMock<BlobStore>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
+    let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
 
     const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
@@ -48,6 +49,7 @@ describe(PageProcessorBase, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
+        saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
         requestStub = {
             id: testId,
@@ -65,9 +67,11 @@ describe(PageProcessorBase, () => {
             blobStoreMock.object,
             loggerMock.object,
             requestQueueMock.object,
+            false,
             discoveryPatterns,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,
+            saveSnapshotMock.object,
         );
         (pageProcessorBase as TestablePageProcessor).processPage = processPageMock.object;
     });
@@ -77,6 +81,7 @@ describe(PageProcessorBase, () => {
         blobStoreMock.verifyAll();
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
+        saveSnapshotMock.verifyAll();
     });
 
     it('gotoFunction', async () => {
@@ -154,6 +159,36 @@ describe(PageProcessorBase, () => {
             expect(err).toBe(error);
         }
     });
+
+    it('saveSnapshot', async () => {
+        setupSaveSnapshot();
+        pageProcessorBase = new TestablePageProcessor(
+            accessibilityScanOpMock.object,
+            dataStoreMock.object,
+            blobStoreMock.object,
+            loggerMock.object,
+            requestQueueMock.object,
+            true,
+            discoveryPatterns,
+            enqueueLinksExtMock.object,
+            gotoExtendedMock.object,
+            saveSnapshotMock.object,
+        );
+        (pageProcessorBase as TestablePageProcessor).processPage = processPageMock.object;
+        await pageProcessorBase.saveSnapshot(pageStub, testId);
+    });
+
+    function setupSaveSnapshot(): void {
+        saveSnapshotMock
+            .setup((ssm) =>
+                ssm(pageStub, {
+                    key: `${testId}.screenshot`,
+                    saveHtml: false,
+                    keyValueStoreName: 'scan-results',
+                }),
+            )
+            .verifiable();
+    }
 
     function setupScanErrorLogging(): void {
         const expectedId = `${testId}.err`;

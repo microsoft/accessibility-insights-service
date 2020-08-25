@@ -35,6 +35,14 @@ export class CrawlerConfiguration {
         this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 
+    public getSnapshot(snapshot: boolean, simulation: boolean): boolean {
+        if (snapshot !== undefined) {
+            return snapshot;
+        }
+
+        return simulation;
+    }
+
     public setMemoryMBytes(memoryMBytes: number): void {
         this.settingsHandler.setApifySettings({ APIFY_MEMORY_MBYTES: memoryMBytes?.toString() });
     }

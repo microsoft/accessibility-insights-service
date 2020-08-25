@@ -61,6 +61,7 @@ describe(SimulatorPageProcessor, () => {
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
             selectors,
+            false,
             discoveryPatterns,
             enqueueLinksExtMock.object,
         );

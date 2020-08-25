@@ -22,6 +22,7 @@ interface Arguments {
     output: string;
     maxUrls: number;
     restart: boolean;
+    snapshot: boolean;
     memoryMBytes: number;
     silentMode: boolean;
 }
@@ -31,7 +32,7 @@ interface Arguments {
 
     const args = (yargs
         .usage(
-            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --memoryMBytes <memoryMBytes> --silentMode <silentMode>',
+            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot> --memoryMBytes <memoryMBytes> --silentMode <silentMode>',
         )
         .options({
             url: {
@@ -67,6 +68,11 @@ interface Arguments {
                     'If this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
                 default: false,
             },
+            snapshot: {
+                type: 'boolean',
+                describe:
+                    'Save snapshot of the crawled page, if no value is not provided, it will be true  if simulation is enabled, otherwise false',
+            },
             memoryMBytes: {
                 type: 'number',
                 describe: 'The maximum number of megabytes to be used by the crawler',
@@ -86,6 +92,7 @@ interface Arguments {
         localOutputDir: args.output,
         maxRequestsPerCrawl: args.maxUrls,
         restartCrawl: args.restart,
+        snapshot: args.snapshot,
         memoryMBytes: args.memoryMBytes,
         silentMode: args.silentMode,
     });

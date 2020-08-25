@@ -8,7 +8,7 @@ import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
-import { BlobStore, DataStore } from '../storage/store-types';
+import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -42,9 +42,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly requestQueue: Apify.RequestQueue,
+        protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
+        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {}
 
     public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
@@ -92,6 +94,16 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.logPageError(request, error);
     };
 
+    public async saveSnapshot(page: Page, id: string): Promise<void> {
+        if (this.snapshot) {
+            await this.saveSnapshotExt(page, {
+                key: `${id}.screenshot`,
+                saveHtml: false,
+                keyValueStoreName: scanResultStorageName,
+            });
+        }
+    }
+
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
         const enqueued = await this.enqueueLinksExt({
             page,
@@ -114,12 +126,4 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
         await this.blobStore.setValue(`${request.id}.err`, `Error at URL ${request.url}: ${error.message}`, { contentType: 'text/plain' });
     }
-
-    // protected async saveSnapshot(page: Page, id: string): Promise<void> {
-    //     await Apify.utils.puppeteer.saveSnapshot(page, {
-    //         key: `${id}.screenshot`,
-    //         saveHtml: false,
-    //         keyValueStoreName: scanResultStorageName,
-    //     });
-    // }
 }
