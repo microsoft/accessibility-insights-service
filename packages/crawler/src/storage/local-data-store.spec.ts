@@ -6,13 +6,14 @@ import Apify from 'apify';
 
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { LocalDataStore } from './local-data-store';
+import { scanResultStorageName } from './store-types';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(LocalDataStore, () => {
     let datasetMock: IMock<Apify.Dataset>;
     let store: LocalDataStore;
     let apifyMock: IMock<typeof Apify>;
-    const storeName = 'store name';
+    const storeName = scanResultStorageName;
     const data = { data: 'data' };
 
     beforeEach(() => {
@@ -31,7 +32,7 @@ describe(LocalDataStore, () => {
             .returns(async () => {})
             .verifiable(Times.once());
 
-        store = new LocalDataStore(storeName, datasetMock.object, apifyMock.object);
+        store = new LocalDataStore(datasetMock.object, apifyMock.object);
         await store.pushData(data);
     });
 
@@ -54,7 +55,7 @@ describe(LocalDataStore, () => {
             },
         };
 
-        store = new LocalDataStore(storeName, undefined, apifyStub);
+        store = new LocalDataStore(undefined, apifyStub);
         await store.pushData(data).then(() => {
             expect(isDatasetOpen).toEqual(true);
         });

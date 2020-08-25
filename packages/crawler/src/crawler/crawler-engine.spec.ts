@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ResourceCreator } from '../apify-resources/resource-creator';
 import { PageProcessor } from '../page-processors/page-processor-base';
@@ -16,7 +15,6 @@ import { CrawlerFactory } from './crawler-factory';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(CrawlerEngine, () => {
-    let loggerMock: IMock<Logger>;
     let pageProcessorFactoryMock: IMock<PageProcessorFactory>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
     let runApifyMock: IMock<ApifyMainFunc>;
@@ -39,7 +37,6 @@ describe(CrawlerEngine, () => {
     const maxRequestsPerCrawl: number = 100;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType<Logger>();
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
         runApifyMock = Mock.ofType<ApifyMainFunc>();
@@ -63,12 +60,11 @@ describe(CrawlerEngine, () => {
         resourceCreatorMock = Mock.ofType<ResourceCreator>();
 
         crawlerEngine = new CrawlerEngine(
-            loggerMock.object,
             pageProcessorFactoryMock.object,
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
-            runApifyMock.object,
             crawlerConfigurationMock.object,
+            runApifyMock.object,
         );
     });
 
@@ -150,7 +146,7 @@ describe(CrawlerEngine, () => {
 
     function setupCreatePageProcessor(options: PageProcessorOptions, callback: () => void = () => null): void {
         pageProcessorFactoryMock
-            .setup((ppf) => ppf.createPageProcessor(options, loggerMock.object))
+            .setup((ppf) => ppf.createPageProcessor(options))
             .returns(() => {
                 callback();
 
