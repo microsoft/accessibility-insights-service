@@ -16,6 +16,9 @@ export class Page {
     public puppeteerPage: Puppeteer.Page;
     public browser: Puppeteer.Browser;
 
+    private readonly pageNavigationTimeoutMsecs = 15000;
+    private readonly pageRenderingTimeoutMsecs = 5000;
+
     constructor(
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(WebDriver) private readonly webDriver: WebDriver,
@@ -26,6 +29,7 @@ export class Page {
             this.browser = await this.webDriver.launch(chromePath);
         }
         this.puppeteerPage = await this.browser.newPage();
+        await this.puppeteerPage.setUserAgent(this.webDriver.userAgent);
     }
 
     public async enableBypassCSP(): Promise<void> {
@@ -39,25 +43,29 @@ export class Page {
             deviceScaleFactor: 1,
         });
 
-        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'], timeout: 120000 });
-        const networkLoadTimeoutInMilleSec = 30000;
-        const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({
-            waitUntil: ['networkidle0'],
-            timeout: networkLoadTimeoutInMilleSec,
-        });
+        // separate page load and networkidle0 events to bypass network activity error
+        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: 'load', timeout: this.pageNavigationTimeoutMsecs });
+        try {
+            await this.puppeteerPage.waitForNavigation({
+                waitUntil: 'networkidle0',
+                timeout: this.pageNavigationTimeoutMsecs,
+            }); // tslint:disable-next-line:no-empty
+        } catch {
+            // We ignore error if the page still has network activity after timeout
+            console.log(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds.`, url);
+        }
 
-        let response;
-
+        let response: Puppeteer.Response;
         try {
             response = await gotoUrlPromise;
         } catch (error) {
-            console.log('The URL navigation failed', { scanError: serializeError(error) });
+            console.log('The URL navigation failed.', url, { scanError: serializeError(error) });
 
             return { error: this.getScanErrorFromNavigationFailure((error as Error).message) };
         }
 
         if (!response.ok()) {
-            console.log('The URL navigation returned an unsuccessful response code', { statusCode: response.status().toString() });
+            console.log('The URL navigation returned an unsuccessful response code.', { statusCode: response.status().toString() });
 
             return {
                 error: {
@@ -71,26 +79,30 @@ export class Page {
         if (!this.isHtmlPage(response)) {
             const contentType = this.getContentType(response.headers());
 
-            console.log('The URL returned non-HTML content', { contentType: contentType });
+            console.log('The URL returned non-HTML content.', { contentType: contentType });
 
             return {
                 unscannable: true,
                 error: {
                     errorType: 'InvalidContentType',
                     responseStatusCode: response.status(),
-                    message: `Content type - ${contentType}`,
+                    message: `Content type: ${contentType}`,
                 },
             };
         }
 
-        try {
-            // We ignore error if the page still has network activity after 15 sec
-            await waitForNetworkLoadPromise;
-            // tslint:disable-next-line:no-empty
-        } catch {
-            console.log(`Page still has network activity after the timeout ${networkLoadTimeoutInMilleSec} milliseconds`);
-        }
+        await this.waitForPageToCompleteRendering(this.puppeteerPage, this.pageRenderingTimeoutMsecs);
 
+        return this.scanPageForIssues(response, sourcePath);
+    }
+
+    public async close(): Promise<void> {
+        if (this.webDriver !== undefined) {
+            await this.webDriver.close();
+        }
+    }
+
+    private async scanPageForIssues(response: Puppeteer.Response, sourcePath?: string): Promise<AxeScanResults> {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage, sourcePath);
         const axeResults = await axePuppeteer.analyze();
 
@@ -100,17 +112,45 @@ export class Page {
             browserSpec: await this.browser.version(),
         };
 
-        if (response.request().redirectChain().length > 0) {
+        if (response.request().redirectChain().length > 0 && response.request().url() !== axeResults.url) {
+            console.log(`Scan performed on redirected page ${axeResults.url}`);
             scanResults.scannedUrl = axeResults.url;
         }
 
         return scanResults;
     }
 
-    public async close(): Promise<void> {
-        if (this.puppeteerPage !== undefined) {
-            await this.puppeteerPage.close();
-            await this.webDriver.close();
+    private async waitForPageToCompleteRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<void> {
+        const checkIntervalMsecs = 200;
+        const maxCheckCount = timeoutMsecs / checkIntervalMsecs;
+        const minCheckBreakCount = 3;
+
+        let checkCount = 0;
+        let continuousStableCheckCount = 0;
+        let lastCheckPageHtmlContentSize = 0;
+        let pageHasStableContent = false;
+
+        while (checkCount < maxCheckCount) {
+            const pageHtmlContentSize = await page.evaluate(() => document.body.innerHTML.length);
+
+            if (lastCheckPageHtmlContentSize !== 0 && pageHtmlContentSize === lastCheckPageHtmlContentSize) {
+                continuousStableCheckCount += 1;
+            } else {
+                continuousStableCheckCount = 0;
+            }
+            lastCheckPageHtmlContentSize = pageHtmlContentSize;
+
+            if (continuousStableCheckCount >= minCheckBreakCount) {
+                pageHasStableContent = true;
+                break;
+            }
+
+            await page.waitFor(checkIntervalMsecs);
+            checkCount += 1;
+        }
+
+        if (pageHasStableContent !== true) {
+            console.log(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
         }
     }
 
@@ -144,7 +184,7 @@ export class Page {
     }
 
     private getContentType(headers: Record<string, string>): string {
-        // All header names are lower-case, According to puppeteer API doc
+        // All header names are lower-case, according to puppeteer API doc
         return headers['content-type'];
     }
 }

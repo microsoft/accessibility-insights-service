@@ -17,6 +17,10 @@ class PuppeteerBrowserMock {
 
         return Promise.resolve();
     }
+
+    public async userAgent(): Promise<string> {
+        return 'HeadlessChrome user agent string';
+    }
 }
 
 let testSubject: WebDriver;
@@ -34,7 +38,6 @@ beforeEach(() => {
 
     puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
-
     testSubject = new WebDriver(puppeteer);
 });
 
@@ -58,6 +61,13 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch(chromePath);
 
         expect(browser).toEqual(puppeteerBrowserMock);
+        puppeteerLaunchMock.verifyAll();
+    });
+
+    it('should update user agent string', async () => {
+        await testSubject.launch();
+
+        expect(testSubject.userAgent).toEqual('Chrome user agent string');
         puppeteerLaunchMock.verifyAll();
     });
 });

@@ -9,11 +9,11 @@
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}/dist",
-            "program": "${workspaceFolder}/dist/ai-scan.js",
+            "program": "${workspaceFolder}/dist/ai-scan-cli.js",
             "preLaunchTask": "build",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "args": ["--url=\"https://www.stackoverflow.com/\""]
+            "args": ["--url=\"https://www.microsoft.com/\""]
         }
     ]
 }
