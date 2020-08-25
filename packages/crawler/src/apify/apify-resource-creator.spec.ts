@@ -3,17 +3,19 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
+import { Url } from 'common';
 import * as fs from 'fs';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { apifySettingsHandler, ApifySettingsHandler } from '../apify-settings';
+import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
-import { ApifyResourceCreator } from './resource-creator';
+import { ApifyResourceCreator } from './apify-resource-creator';
 
 describe(ApifyResourceCreator, () => {
     let apifyMock: IMock<typeof Apify>;
     let settingsHandlerMock: IMock<typeof apifySettingsHandler>;
     let fsMock: IMock<typeof fs>;
     let queueMock: IMock<Apify.RequestQueue>;
+    let urlMock: IMock<typeof Url>;
 
     let apifyResourceCreator: ApifyResourceCreator;
 
@@ -25,13 +27,15 @@ describe(ApifyResourceCreator, () => {
         settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
         fsMock = Mock.ofType<typeof fs>();
         queueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
-        apifyResourceCreator = new ApifyResourceCreator(apifyMock.object, settingsHandlerMock.object, fsMock.object);
+        urlMock = Mock.ofType<typeof Url>();
+        apifyResourceCreator = new ApifyResourceCreator(urlMock.object, apifyMock.object, settingsHandlerMock.object, fsMock.object);
     });
 
     afterEach(() => {
         apifyMock.verifyAll();
         settingsHandlerMock.verifyAll();
         fsMock.verifyAll();
+        urlMock.verifyAll();
     });
 
     describe('createRequestQueue', () => {
@@ -39,6 +43,10 @@ describe(ApifyResourceCreator, () => {
             setupCreateRequestQueue();
             // tslint:disable-next-line: no-unsafe-any
             fsMock.setup((fsm) => fsm.rmdirSync(It.isAny(), It.isAny())).verifiable(Times.never());
+            urlMock
+                .setup((um) => um.getRootUrl(url))
+                .returns(() => url)
+                .verifiable(Times.once());
 
             const queue = await apifyResourceCreator.createRequestQueue(url);
 

@@ -6,8 +6,9 @@ import Apify from 'apify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { inject, injectable } from 'inversify';
-import { ApifyResourceCreator, ResourceCreator } from '../apify-resources/resource-creator';
+import { ApifyResourceCreator } from '../apify/apify-resource-creator';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
+import { ResourceCreator } from '../types/resource-creator';
 import { CrawlerRunOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';

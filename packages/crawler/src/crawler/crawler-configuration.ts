@@ -3,7 +3,7 @@
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as url from 'url';
-import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify-settings';
+import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 
 @injectable()
 export class CrawlerConfiguration {

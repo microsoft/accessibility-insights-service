@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
-import { ApifySettings, ApifySettingsHandler } from '../apify-settings';
+import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 class TestableCrawlerConfiguration extends CrawlerConfiguration {
