@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
+// tslint:disable-next-line: no-import-side-effect
+import './module-name-mapper';
 
 import { System } from 'common';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';

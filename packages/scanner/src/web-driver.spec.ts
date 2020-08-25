@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
+import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
@@ -17,6 +17,10 @@ class PuppeteerBrowserMock {
         this.isClosed = true;
 
         return Promise.resolve();
+    }
+
+    public async userAgent(): Promise<string> {
+        return 'HeadlessChrome user agent string';
     }
 }
 
@@ -52,6 +56,13 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch();
 
         expect(browser).toEqual(puppeteerBrowserMock);
+        puppeteerLaunchMock.verifyAll();
+    });
+
+    it('should update user agent string', async () => {
+        await testSubject.launch();
+
+        expect(testSubject.userAgent).toEqual('Chrome user agent string');
         puppeteerLaunchMock.verifyAll();
     });
 });

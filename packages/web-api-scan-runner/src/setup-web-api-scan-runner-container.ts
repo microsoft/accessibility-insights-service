@@ -5,7 +5,6 @@ import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
 import { registerScannerToContainer } from 'scanner';
-import { registerServiceLibraryToContainer } from 'service-library';
 import { registerReportGeneratorToContainer } from './report-generator/register-report-generator-to-container';
 
 export function setupWebApiScanRequestSenderContainer(): inversify.Container {
@@ -15,7 +14,6 @@ export function setupWebApiScanRequestSenderContainer(): inversify.Container {
     registerContextAwareLoggerToContainer(container);
     registerAzureServicesToContainer(container);
     registerScannerToContainer(container);
-    registerServiceLibraryToContainer(container);
     registerReportGeneratorToContainer(container);
 
     return container;

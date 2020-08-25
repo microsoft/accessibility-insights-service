@@ -4,7 +4,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'commo
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
-import { AxeScanResults } from 'scanner';
+import { AxeScanResults, Scanner } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     OnDemandNotificationRequestMessage,
@@ -18,9 +18,7 @@ import {
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { NotificationQueueMessageSender } from '../tasks/notification-queue-message-sender';
-import { ScannerTask } from '../tasks/scanner-task';
-import { WebDriverTask } from '../tasks/web-driver-task';
+import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 
 // tslint:disable: no-null-keyword no-any
 
@@ -29,9 +27,8 @@ export class Runner {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
-        @inject(ScannerTask) private readonly scannerTask: ScannerTask,
+        @inject(Scanner) private readonly scanner: Scanner,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(WebDriverTask) private readonly webDriverTask: WebDriverTask,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
@@ -75,15 +72,14 @@ export class Runner {
 
         let scanSucceeded: boolean;
         try {
-            this.logger.logInfo('Starting the web driver page scanner.');
-            await this.webDriverTask.launch();
+            this.logger.logInfo('Starting the page scanner.');
             scanSucceeded = await this.scan(pageScanResult, scanMetadata.url);
-            this.logger.logInfo('Web driver scanner successfully completed a page scan.');
+            this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             scanSucceeded = false;
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
-            this.logger.logError(`Web driver failed to scan a page.`, { error: errorMessage });
+            this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
@@ -93,13 +89,6 @@ export class Runner {
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
-
-            try {
-                await this.webDriverTask.close();
-                this.logger.logInfo('Web driver successfully closed.');
-            } catch (error) {
-                this.logger.logError(`Failure to close the web driver.`, { error: System.serializeError(error) });
-            }
         }
 
         if (!scanSucceeded) {
@@ -129,7 +118,7 @@ export class Runner {
     private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<boolean> {
         this.logger.logInfo(`Running page scan on web driver.`);
 
-        const axeScanResults = await this.scannerTask.scan(url);
+        const axeScanResults = await this.scanner.scan(url);
 
         if (!isNil(axeScanResults.error)) {
             this.logger.logInfo(`Updating page scan run result state to 'failed'.`);

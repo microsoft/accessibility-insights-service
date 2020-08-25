@@ -14,6 +14,7 @@
         "type": "git",
         "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
     },
+    "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
