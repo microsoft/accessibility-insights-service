@@ -32,6 +32,10 @@ export class PageProcessorFactory {
                 new LocalBlobStore(),
                 this.logger,
                 pageProcessorOptions.requestQueue,
+                this.crawlerConfiguration.getSnapshot(
+                    pageProcessorOptions.crawlerRunOptions.snapshot,
+                    pageProcessorOptions.crawlerRunOptions.simulate,
+                ),
                 this.crawlerConfiguration.getDiscoveryPattern(
                     pageProcessorOptions.crawlerRunOptions.baseUrl,
                     pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
@@ -47,11 +51,15 @@ export class PageProcessorFactory {
             pageProcessorOptions.requestQueue,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),
+            this.crawlerConfiguration.getDefaultSelectors(pageProcessorOptions.crawlerRunOptions.selectors),
+            this.crawlerConfiguration.getSnapshot(
+                pageProcessorOptions.crawlerRunOptions.snapshot,
+                pageProcessorOptions.crawlerRunOptions.simulate,
+            ),
             this.crawlerConfiguration.getDiscoveryPattern(
                 pageProcessorOptions.crawlerRunOptions.baseUrl,
                 pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
             ),
-            this.crawlerConfiguration.getDefaultSelectors(pageProcessorOptions.crawlerRunOptions.selectors),
         );
     }
 }

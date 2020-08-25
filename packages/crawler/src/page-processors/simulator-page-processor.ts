@@ -26,11 +26,24 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         protected readonly selectors: string[],
+        protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
+        protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
-        super(accessibilityScanOp, dataStore, blobStore, logger, requestQueue, discoveryPatterns, enqueueLinksExt, gotoExtended);
+        super(
+            accessibilityScanOp,
+            dataStore,
+            blobStore,
+            logger,
+            requestQueue,
+            snapshot,
+            discoveryPatterns,
+            enqueueLinksExt,
+            gotoExtended,
+            saveSnapshotExt,
+        );
     }
 
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
@@ -40,6 +53,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, this.requestQueue);
             await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+            await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ id: request.id as string, url: request.url });
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
@@ -51,9 +65,9 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                 this.discoveryPatterns,
             );
             if (operationResult.clickAction === 'page-action') {
-                // await this.saveSnapshot(page, request.id as string);
                 await this.enqueueLinks(page);
                 await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+                await this.saveSnapshot(page, request.id as string);
             }
             await this.pushScanData({
                 id: request.id as string,

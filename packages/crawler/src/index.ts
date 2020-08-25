@@ -22,13 +22,16 @@ interface Arguments {
     output: string;
     maxUrls: number;
     restart: boolean;
+    snapshot: boolean;
 }
 
 (async () => {
     dotenv.config();
 
     const args = (yargs
-        .usage('Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart')
+        .usage(
+            'Usage: $0 --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot>',
+        )
         .options({
             url: {
                 type: 'string',
@@ -60,7 +63,13 @@ interface Arguments {
             restart: {
                 type: 'boolean',
                 describe:
-                    'if this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
+                    'If this flag is set, clear the queue of all pending and handled requests before crawling, otherwise resume the crawl from the last request in the queue.',
+                default: false,
+            },
+            snapshot: {
+                type: 'boolean',
+                describe:
+                    'Save snapshot of the crawled page, if value is not provided if simulation is enabled, true will be default, otherwise false is',
                 default: false,
             },
         })
@@ -73,6 +82,7 @@ interface Arguments {
         localOutputDir: args.output,
         maxRequestsPerCrawl: args.maxUrls,
         restartCrawl: args.restart,
+        snapshot: args.snapshot,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));

@@ -35,6 +35,14 @@ export class CrawlerConfiguration {
         this.settingsHandler.setApifySettings({ APIFY_LOCAL_STORAGE_DIR: outputDir });
     }
 
+    public getSnapshot(snapshot: boolean, simulation: boolean): boolean {
+        if (snapshot !== undefined) {
+            return snapshot;
+        }
+
+        return simulation;
+    }
+
     private getDefaultApifySettings(): ApifySettings {
         const currentSettings = this.settingsHandler.getApifySettings();
 

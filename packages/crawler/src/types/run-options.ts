@@ -12,6 +12,7 @@ export interface CrawlerRunOptions {
     localOutputDir?: string;
     maxRequestsPerCrawl?: number;
     restartCrawl?: boolean;
+    snapshot?: boolean;
 }
 
 export interface PageProcessorOptions {
