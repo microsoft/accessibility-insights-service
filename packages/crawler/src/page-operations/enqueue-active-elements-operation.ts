@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
+import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import { ActiveElementsFinder } from '../utility/active-elements-finder';
 import { Operation } from './operation';
@@ -8,8 +10,9 @@ import { Operation } from './operation';
 // tslint:disable: no-var-requires no-submodule-imports no-require-imports no-unsafe-any
 const apifyUtilities = require('apify-shared/utilities');
 
+@injectable()
 export class EnqueueActiveElementsOperation {
-    constructor(private readonly activeElementFinder: ActiveElementsFinder = new ActiveElementsFinder()) {}
+    constructor(@inject(ActiveElementsFinder) private readonly activeElementFinder: ActiveElementsFinder) {}
 
     public async find(page: Page, selectors: string[], requestQueue: Apify.RequestQueue): Promise<void> {
         const url = page.url();

@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { IMock, Mock } from 'typemoq';
+import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerConfiguration } from './crawler-configuration';
 
 class TestableCrawlerConfiguration extends CrawlerConfiguration {
@@ -19,9 +21,11 @@ class TestableCrawlerConfiguration extends CrawlerConfiguration {
 
 describe(CrawlerConfiguration, () => {
     let crawlerConfig: TestableCrawlerConfiguration;
+    let apifySettingsHandlerMock: IMock<ApifySettingsHandler>;
 
     beforeEach(() => {
-        crawlerConfig = new TestableCrawlerConfiguration();
+        apifySettingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
+        crawlerConfig = new TestableCrawlerConfiguration(apifySettingsHandlerMock.object);
     });
 
     describe('getDiscoveryPattern', () => {
@@ -69,20 +73,58 @@ describe(CrawlerConfiguration, () => {
         });
     });
 
-    it('setDefaultApifySettings', () => {
-        process.env.APIFY_HEADLESS = 'apify headless value';
+    describe('apify settings', () => {
+        let existingSettings: ApifySettings;
 
-        crawlerConfig.setDefaultApifySettings();
+        const prevApifyHeadless = 'prev apify headless value';
+        const prevApifyStorageDir = 'prev apify storage dir';
 
-        expect(process.env.APIFY_HEADLESS).toBe('1');
-    });
+        const defaultApifyHeadless = '1';
+        const defaultApifyStorageDir = './crawler_storage';
 
-    it('setLocalOutputDir', () => {
-        process.env.APIFY_LOCAL_STORAGE_DIR = 'previously set local output dir';
-        const localOutputDir = 'new local output dir';
+        beforeEach(() => {
+            existingSettings = {
+                APIFY_HEADLESS: prevApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.getApifySettings()).returns(() => existingSettings);
+        });
 
-        crawlerConfig.setLocalOutputDir(localOutputDir);
+        it('setDefaultApifySettings does not override existing APIFY_LOCAL_STORAGE_DIR', () => {
+            const expectedSettings = {
+                APIFY_HEADLESS: defaultApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
-        expect(process.env.APIFY_LOCAL_STORAGE_DIR).toBe(localOutputDir);
+            crawlerConfig.setDefaultApifySettings();
+
+            apifySettingsHandlerMock.verifyAll();
+        });
+
+        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR if currently empty', () => {
+            const expectedSettings = {
+                APIFY_HEADLESS: defaultApifyHeadless,
+                APIFY_LOCAL_STORAGE_DIR: defaultApifyStorageDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+            existingSettings.APIFY_LOCAL_STORAGE_DIR = undefined;
+
+            crawlerConfig.setDefaultApifySettings();
+
+            apifySettingsHandlerMock.verifyAll();
+        });
+
+        it('setLocalOutputDir', () => {
+            const localOutputDir = 'new local output dir';
+            const expectedSettings = {
+                APIFY_LOCAL_STORAGE_DIR: localOutputDir,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfig.setLocalOutputDir(localOutputDir);
+
+            apifySettingsHandlerMock.verifyAll();
+        });
     });
 });

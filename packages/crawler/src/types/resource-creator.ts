@@ -4,5 +4,5 @@ import Apify from 'apify';
 
 export interface ResourceCreator {
     createRequestList(existingUrls: string[]): Promise<Apify.RequestList>;
-    createRequestQueue(baseUrl: string): Promise<Apify.RequestQueue>;
+    createRequestQueue(baseUrl: string, empty?: boolean): Promise<Apify.RequestQueue>;
 }

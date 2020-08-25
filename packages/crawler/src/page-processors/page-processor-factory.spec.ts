@@ -21,7 +21,7 @@ describe(PageProcessorFactory, () => {
     beforeEach(() => {
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         loggerMock = Mock.ofType<Logger>();
-        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object);
+        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object, loggerMock.object);
     });
 
     it('PageProcessorFactory, classic page processor', async () => {
@@ -38,7 +38,7 @@ describe(PageProcessorFactory, () => {
             .setup((ccm) => ccm.getDiscoveryPattern(baseUrl, undefined))
             .returns(() => [])
             .verifiable();
-        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions, loggerMock.object);
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
         expect(pageProcessor).toBeInstanceOf(ClassicPageProcessor);
     });
 
@@ -60,7 +60,7 @@ describe(PageProcessorFactory, () => {
             .setup((ccm) => ccm.getDefaultSelectors(undefined))
             .returns(() => [])
             .verifiable();
-        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions, loggerMock.object);
+        const pageProcessor = pageProcessorFactory.createPageProcessor(pageProcessorOptions);
         expect(pageProcessor).toBeInstanceOf(SimulatorPageProcessor);
     });
 

@@ -1,8 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import Apify from 'apify';
+import { injectable } from 'inversify';
 import { PageProcessorBase } from './page-processor-base';
 
+@injectable()
 export class ClassicPageProcessor extends PageProcessorBase {
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         this.logger.logInfo(`Crawling page ${page.url()}`);

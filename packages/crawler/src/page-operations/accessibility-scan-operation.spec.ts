@@ -28,7 +28,7 @@ describe(AccessibilityScanOperation, () => {
         blobStoreMock = Mock.ofType();
         scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict);
 
-        accessibilityScanOp = new AccessibilityScanOperation(loggerMock.object, scannerMock.object);
+        accessibilityScanOp = new AccessibilityScanOperation(scannerMock.object, loggerMock.object);
     });
 
     it('Run page scan operation, no violations', async () => {

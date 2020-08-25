@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { ApifySettings, setApifySettings } from './apify-settings';
+import { ApifySettings, apifySettingsHandler } from './apify-settings';
 
 describe('Apify settings', () => {
     const defaultEnv: ApifySettings = {
@@ -25,7 +25,7 @@ describe('Apify settings', () => {
 
         verifyEnvVarsSet(defaultEnv);
 
-        setApifySettings(overrideSettings);
+        apifySettingsHandler.setApifySettings(overrideSettings);
 
         verifyEnvVarsSet(overrideSettings);
     });
@@ -42,7 +42,7 @@ describe('Apify settings', () => {
         process.env.APIFY_LOCAL_STORAGE_DIR = presetLocalStorageDir;
         verifyEnvVarsSet(expectedEnvVars);
 
-        setApifySettings(settings);
+        apifySettingsHandler.setApifySettings(settings);
 
         verifyEnvVarsSet(expectedEnvVars);
     });
