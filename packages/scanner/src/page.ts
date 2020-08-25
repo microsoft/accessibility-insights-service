@@ -3,27 +3,30 @@
 import { AxePuppeteer } from 'axe-puppeteer';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger, LogLevel } from 'logger';
+import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults, ScanError } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
-
-export type PuppeteerBrowserFactory = () => Puppeteer.Browser;
+import { WebDriver } from './web-driver';
 
 @injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
     public browser: Puppeteer.Browser;
 
+    private readonly pageNavigationTimeoutMsecs = 15000;
+    private readonly pageRenderingTimeoutMsecs = 5000;
+
     constructor(
-        @inject('Factory<Browser>') private readonly browserFactory: PuppeteerBrowserFactory,
+        @inject(WebDriver) private readonly webDriver: WebDriver,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async create(): Promise<void> {
-        this.browser = this.browserFactory();
+        this.browser = await this.webDriver.launch();
         this.puppeteerPage = await this.browser.newPage();
+        await this.puppeteerPage.setUserAgent(this.webDriver.userAgent);
     }
 
     public async enableBypassCSP(): Promise<void> {
@@ -37,25 +40,29 @@ export class Page {
             deviceScaleFactor: 1,
         });
 
-        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: ['load'], timeout: 120000 });
-        const networkLoadTimeoutInMilleSec = 15000;
-        const waitForNetworkLoadPromise = this.puppeteerPage.waitForNavigation({
-            waitUntil: ['networkidle0'],
-            timeout: networkLoadTimeoutInMilleSec,
-        });
+        // separate page load and networkidle0 events to bypass network activity error
+        const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: 'load', timeout: this.pageNavigationTimeoutMsecs });
+        try {
+            await this.puppeteerPage.waitForNavigation({
+                waitUntil: 'networkidle0',
+                timeout: this.pageNavigationTimeoutMsecs,
+            }); // tslint:disable-next-line:no-empty
+        } catch {
+            // We ignore error if the page still has network activity after timeout
+            this.logger.logWarn(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds`);
+        }
 
-        let response;
-
+        let response: Puppeteer.Response;
         try {
             response = await gotoUrlPromise;
         } catch (err) {
-            this.log(LogLevel.error, url, 'The URL navigation failed', { scanError: System.serializeError(err) });
+            this.logger.logError('The URL navigation failed', { scanError: System.serializeError(err) });
 
             return { error: this.getScanErrorFromNavigationFailure((err as Error).message), pageResponseCode: undefined };
         }
 
         if (!response.ok()) {
-            this.log(LogLevel.error, url, 'The URL navigation returned an unsuccessful response code', {
+            this.logger.logError('The URL navigation returned an unsuccessful response code', {
                 statusCode: response.status().toString(),
             });
 
@@ -71,26 +78,30 @@ export class Page {
         if (!this.isHtmlPage(response)) {
             const contentType = this.getContentType(response.headers());
 
-            this.log(LogLevel.error, url, 'The URL returned non-HTML content', { contentType: contentType });
+            this.logger.logError('The URL returned non-HTML content', { contentType: contentType });
 
             return {
                 unscannable: true,
                 error: {
                     errorType: 'InvalidContentType',
-                    message: `Content type - ${contentType}`,
+                    message: `Content type: ${contentType}`,
                 },
                 pageResponseCode: response.status(),
             };
         }
 
-        try {
-            // We ignore error if the page still has network activity after 15 sec
-            await waitForNetworkLoadPromise;
-            // tslint:disable-next-line:no-empty
-        } catch {
-            this.log(LogLevel.warn, url, `Page still has network activity after the timeout ${networkLoadTimeoutInMilleSec} milliseconds`);
-        }
+        await this.waitForPageToCompleteRendering(this.puppeteerPage, this.pageRenderingTimeoutMsecs);
 
+        return this.scanPageForIssues(response);
+    }
+
+    public async close(): Promise<void> {
+        if (this.webDriver !== undefined) {
+            await this.webDriver.close();
+        }
+    }
+
+    private async scanPageForIssues(response: Puppeteer.Response): Promise<AxeScanResults> {
         const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
         const axeResults = await axePuppeteer.analyze();
 
@@ -102,41 +113,45 @@ export class Page {
         };
 
         if (response.request().redirectChain().length > 0) {
-            this.log(LogLevel.info, url, `Scanning performed on redirected page - ${axeResults.url}`);
+            this.logger.logWarn(`Scanning performed on redirected page ${axeResults.url}`);
             scanResults.scannedUrl = axeResults.url;
         }
 
         return scanResults;
     }
 
-    public async close(): Promise<void> {
-        if (this.puppeteerPage !== undefined) {
-            await this.puppeteerPage.close();
+    private async waitForPageToCompleteRendering(page: Puppeteer.Page, timeoutMsecs: number): Promise<void> {
+        const checkIntervalMsecs = 200;
+        const maxCheckCount = timeoutMsecs / checkIntervalMsecs;
+        const minCheckBreakCount = 3;
+
+        let checkCount = 0;
+        let continuousStableCheckCount = 0;
+        let lastCheckPageHtmlContentSize = 0;
+        let pageHasStableContent = false;
+
+        while (checkCount < maxCheckCount) {
+            const pageHtmlContentSize = await page.evaluate(() => document.body.innerHTML.length);
+
+            if (lastCheckPageHtmlContentSize !== 0 && pageHtmlContentSize === lastCheckPageHtmlContentSize) {
+                continuousStableCheckCount += 1;
+            } else {
+                continuousStableCheckCount = 0;
+            }
+            lastCheckPageHtmlContentSize = pageHtmlContentSize;
+
+            if (continuousStableCheckCount >= minCheckBreakCount) {
+                pageHasStableContent = true;
+                break;
+            }
+
+            await page.waitFor(checkIntervalMsecs);
+            checkCount += 1;
         }
-    }
 
-    private log(
-        logLevel: LogLevel,
-        url: string,
-        message: string,
-        properties?: {
-            [name: string]: string;
-        },
-    ): void {
-        this.logger.log(message, logLevel, {
-            ...this.getBaseTelemetryProps(url),
-            ...properties,
-        });
-    }
-
-    private getBaseTelemetryProps(
-        url: string,
-    ): {
-        [name: string]: string;
-    } {
-        return {
-            scanUrl: url,
-        };
+        if (pageHasStableContent !== true) {
+            this.logger.logWarn(`Page did not complete full rendering after ${timeoutMsecs} seconds.`);
+        }
     }
 
     private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {
@@ -169,7 +184,7 @@ export class Page {
     }
 
     private getContentType(headers: Record<string, string>): string {
-        // All header names are lower-case, According to puppeteer API doc
+        // All header names are lower-case, according to puppeteer API doc
         return headers['content-type'];
     }
 }

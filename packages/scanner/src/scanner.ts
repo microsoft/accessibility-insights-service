@@ -3,7 +3,6 @@
 import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 
@@ -36,22 +35,22 @@ export class Scanner {
     private async scanWithoutTimeout(url: string): Promise<AxeScanResults> {
         try {
             this.logger.logInfo(`Starting accessibility website page scanning.`, { url });
-
             await this.page.create();
             await this.page.enableBypassCSP();
+            const scanResult = await this.page.scanForA11yIssues(url);
+            this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
 
-            return await this.page.scanForA11yIssues(url);
+            return scanResult;
         } catch (error) {
             this.logger.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(error) });
 
-            return { error: util.inspect(error), pageResponseCode: undefined };
+            return { error: System.serializeError(error), pageResponseCode: undefined };
         } finally {
             try {
                 await this.page.close();
             } catch (error) {
-                this.logger.logError('An error occurred while closing web page.', { url, error: System.serializeError(error) });
+                this.logger.logError('An error occurred while closing web browser.', { url, error: System.serializeError(error) });
             }
-            this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
         }
     }
 }

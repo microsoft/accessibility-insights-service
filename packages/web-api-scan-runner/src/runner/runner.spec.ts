@@ -7,8 +7,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'commo
 import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
-import { Browser } from 'puppeteer';
-import { AxeScanResults } from 'scanner';
+import { AxeScanResults, Scanner } from 'scanner';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     ItemType,
@@ -21,9 +20,7 @@ import {
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { NotificationQueueMessageSender } from '../tasks/notification-queue-message-sender';
-import { ScannerTask } from '../tasks/scanner-task';
-import { WebDriverTask } from '../tasks/web-driver-task';
+import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
@@ -33,10 +30,8 @@ class MockableLogger extends Logger {}
 
 describe(Runner, () => {
     let runner: Runner;
-    let browser: Browser;
-    let webDriverTaskMock: IMock<WebDriverTask>;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let scannerTaskMock: IMock<ScannerTask>;
+    let scannerMock: IMock<Scanner>;
     let scanMetadataConfig: IMock<ScanMetadataConfig>;
     let loggerMock: IMock<MockableLogger>;
     let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
@@ -148,12 +143,10 @@ describe(Runner, () => {
     };
 
     beforeEach(() => {
-        browser = <Browser>{};
-        webDriverTaskMock = Mock.ofType(WebDriverTask);
         loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
-        scannerTaskMock = Mock.ofType<ScannerTask>();
+        scannerMock = Mock.ofType<Scanner>();
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -176,9 +169,8 @@ describe(Runner, () => {
         runner = new Runner(
             guidGeneratorMock.object,
             scanMetadataConfig.object,
-            scannerTaskMock.object,
+            scannerMock.object,
             onDemandPageScanRunResultProviderMock.object,
-            webDriverTaskMock.object,
             loggerMock.object,
             pageScanRunReportServiceMock.object,
             reportGeneratorMock.object,
@@ -189,72 +181,16 @@ describe(Runner, () => {
 
     afterEach(() => {
         MockDate.reset();
-        scannerTaskMock.verifyAll();
-        webDriverTaskMock.verifyAll();
+        scannerMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         notificationQueueMessageSenderMock.verifyAll();
     });
 
-    it('sets state to failed if web driver launch crashes', async () => {
-        const failureMessage = 'failed to launch';
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
-
-        webDriverTaskMock
-            .setup(async (o) => o.launch())
-            .returns(async () => Promise.reject(failureMessage))
-            .verifiable(Times.once());
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
-
-        const timestamps = setupTimeMocks(queueTime, executionTime);
-        // need mock Date.Now() after code throws
-        loggerMock
-            .setup((o) => o.logError(`Web driver failed to scan a page.`, It.isAny()))
-            .returns(() => MockDate.set(timestamps.scanCompleteTime));
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
-
-        await runner.run();
-
-        loggerMock.verifyAll();
-    });
-
-    it('do not crash if web driver close crashes', async () => {
-        webDriverTaskMock
-            .setup(async (o) => o.launch())
-            .returns(async () => Promise.resolve(browser))
-            .verifiable(Times.once());
-
-        webDriverTaskMock
-            .setup(async (o) => o.close())
-            .returns(async () => Promise.reject('failed to close'))
-            .verifiable(Times.once());
-
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
-        scannerTaskMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.resolve(passedAxeScanResults))
-            .verifiable();
-
-        setupGenerateReportsCall(passedAxeScanResults);
-        setupSaveAllReportsCall();
-        setupUpdateScanRunResultCall(getScanResultWithNoViolations());
-
-        await runner.run();
-    });
-
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
-        setupWebDriverCalls();
-
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
 
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(unscannableAxeScanResults))
             .verifiable();
@@ -264,13 +200,12 @@ describe(Runner, () => {
         await runner.run();
     });
 
-    it('sets job state to failed if scanner task throws', async () => {
+    it('sets job state to failed if scanner throws', async () => {
         const failureMessage = 'scanner task failed message';
-        setupWebDriverCalls();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
 
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.reject(failureMessage))
             .verifiable();
@@ -284,7 +219,7 @@ describe(Runner, () => {
         const timestamps = setupTimeMocks(queueTime, executionTime);
         // need mock Date.Now() after code throws
         loggerMock
-            .setup((o) => o.logError(`Web driver failed to scan a page.`, It.isAny()))
+            .setup((o) => o.logError(`The scanner failed to scan a page.`, It.isAny()))
             .returns(() => MockDate.set(timestamps.scanCompleteTime));
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
@@ -295,7 +230,7 @@ describe(Runner, () => {
         loggerMock.verifyAll();
     });
 
-    it('Skip task run when state lock conflict', async () => {
+    it('skip task run when database state lock conflict', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), false);
         serviceConfigurationMock.reset();
         loggerMock
@@ -311,11 +246,9 @@ describe(Runner, () => {
     });
 
     it('sets scan status to pass if violation length = 0', async () => {
-        setupWebDriverCalls();
-
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
 
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(passedAxeScanResults))
             .verifiable();
@@ -328,13 +261,11 @@ describe(Runner, () => {
     });
 
     it('return redirected url', async () => {
-        setupWebDriverCalls();
-
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
 
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(clonedPassedAxeScanResults))
             .verifiable();
@@ -349,11 +280,9 @@ describe(Runner, () => {
     });
 
     it('sets scan status to fail if violation length > 0', async () => {
-        setupWebDriverCalls();
-
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
 
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(axeScanResultsWithViolations))
             .verifiable();
@@ -380,9 +309,8 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
 
-        setupWebDriverCalls();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => {
                 MockDate.set(timestamps.scanCompleteTime);
@@ -411,9 +339,8 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
 
-        setupWebDriverCalls();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerTaskMock
+        scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => {
                 MockDate.set(timestamps.scanCompleteTime);
@@ -441,7 +368,6 @@ describe(Runner, () => {
         beforeEach(() => {
             const featureFlags: FeatureFlags = { sendNotification: true };
             serviceConfigurationMock.reset();
-
             serviceConfigurationMock
                 .setup(async (scm) => scm.getConfigValue('featureFlags'))
                 .returns(async () => Promise.resolve(featureFlags))
@@ -451,8 +377,6 @@ describe(Runner, () => {
         describe('on run completed', () => {
             beforeEach(() => {
                 notificationMessage.runStatus = 'completed';
-                setupWebDriverCalls();
-
                 setupGenerateReportsCall(passedAxeScanResults);
                 setupSaveAllReportsCall();
             });
@@ -461,7 +385,7 @@ describe(Runner, () => {
                 'Do not send notification when url not present, notification = %o',
                 async (notification) => {
                     notificationMessage.scanStatus = 'pass';
-                    scannerTaskMock
+                    scannerMock
                         .setup(async (s) => s.scan(scanMetadata.url))
                         .returns(async () => Promise.resolve(passedAxeScanResults))
                         .verifiable();
@@ -481,7 +405,7 @@ describe(Runner, () => {
                 ['pass', passedAxeScanResults],
             ])('Notification url is not null - scan status - %s', async (scanStatus: ScanState, scanResults) => {
                 notificationMessage.scanStatus = scanStatus;
-                scannerTaskMock
+                scannerMock
                     .setup(async (s) => s.scan(scanMetadata.url))
                     .returns(async () => Promise.resolve(scanResults))
                     .verifiable();
@@ -503,13 +427,13 @@ describe(Runner, () => {
         });
 
         describe('on run failed', () => {
-            it('sets state to failed if web driver launch crashes', async () => {
+            it('set notification state to failed if scanner throw', async () => {
                 notificationMessage.runStatus = 'failed';
                 notificationMessage.scanStatus = undefined;
 
                 const failureMessage = 'failed to launch';
-                webDriverTaskMock
-                    .setup(async (o) => o.launch())
+                scannerMock
+                    .setup(async (o) => o.scan(It.isAny()))
                     .returns(async () => Promise.reject(failureMessage))
                     .verifiable(Times.once());
 
@@ -641,18 +565,6 @@ describe(Runner, () => {
             },
             reports: [onDemandReport1, onDemandReport2],
         };
-    }
-
-    function setupWebDriverCalls(): void {
-        webDriverTaskMock
-            .setup(async (o) => o.launch())
-            .returns(async () => Promise.resolve(browser))
-            .verifiable(Times.once());
-
-        webDriverTaskMock
-            .setup(async (o) => o.close())
-            .returns(async () => Promise.resolve())
-            .verifiable(Times.once());
     }
 
     interface ScanRunTimestamps {

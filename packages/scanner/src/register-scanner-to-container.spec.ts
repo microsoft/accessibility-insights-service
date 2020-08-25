@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
-
 import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
