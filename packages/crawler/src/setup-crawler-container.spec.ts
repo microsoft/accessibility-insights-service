@@ -15,6 +15,7 @@ import { PageProcessorFactory } from './page-processors/page-processor-factory';
 import { PageScanner } from './scanner-operations/page-scanner';
 import { setupCrawlerContainer } from './setup-crawler-container';
 import { ActiveElementsFinder } from './utility/active-elements-finder';
+import { URLProcessor } from './utility/url-processor';
 
 describe(setupCrawlerContainer, () => {
     it('resolves dependencies', () => {
@@ -32,5 +33,6 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(AxePuppeteerFactory)).toBeDefined();
         expect(container.get(ActiveElementsFinder)).toBeDefined();
         expect(container.get(GlobalLogger)).toBeDefined();
+        expect(container.get(URLProcessor)).toBeDefined();
     });
 });

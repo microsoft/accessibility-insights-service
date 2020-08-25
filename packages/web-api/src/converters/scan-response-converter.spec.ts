@@ -165,14 +165,14 @@ describe(ScanResponseConverter, () => {
 
     it('adds error to notification if db has error info', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
-        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true);
 
         expect(scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult)).toEqual(responseExpected);
     });
 
     it('does not add error to notification is db doc has no error', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
-        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+        const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true);
 
         // tslint:disable-next-line: no-null-keyword
         pageScanDbResult.notification.error = null;

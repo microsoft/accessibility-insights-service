@@ -14,14 +14,14 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
 
         this.ensureResponseSuccessStatusCode(response);
-        expect((<ScanRunResultResponse>response.body).reports, 'Expected a valid reports response result').to.not.be.undefined;
-        expect((<ScanRunResultResponse>response.body).reports, 'Expected two reports to be returned').to.have.lengthOf(2);
+        expect(response.body.reports, 'Expected a valid reports response result').to.not.be.undefined;
+        expect(response.body.reports, 'Expected two reports to be returned').to.have.lengthOf(2);
     }
 
     @test(TestEnvironment.all)
     public async testGetReports(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
-        const reportsInfo = (<ScanRunResultResponse>response.body).reports;
+        const reportsInfo = response.body.reports;
         await Promise.all(
             reportsInfo.map(async (reportData: ScanReport) => {
                 const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, reportData.reportId);

@@ -8,17 +8,20 @@ import { IMock, Mock, Times } from 'typemoq';
 import { CrawlerEntryPoint } from './crawler-entry-point';
 import { CrawlerEngine } from './crawler/crawler-engine';
 import { CrawlerRunOptions } from './types/run-options';
+import { URLProcessor } from './utility/url-processor';
 
 describe(CrawlerEntryPoint, () => {
     let testSubject: CrawlerEntryPoint;
     let containerMock: IMock<Container>;
     let crawlerEngineMock: IMock<CrawlerEngine>;
     let loggerMock: IMock<GlobalLogger>;
+    let urlProcessorMock: IMock<URLProcessor>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         crawlerEngineMock = Mock.ofType(CrawlerEngine);
         loggerMock = Mock.ofType(GlobalLogger);
+        urlProcessorMock = Mock.ofType(URLProcessor);
 
         testSubject = new CrawlerEntryPoint(containerMock.object);
     });
@@ -27,6 +30,23 @@ describe(CrawlerEntryPoint, () => {
         const testInput: CrawlerRunOptions = { baseUrl: 'url' };
         containerMock.setup((cm) => cm.get(CrawlerEngine)).returns(() => crawlerEngineMock.object);
         containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(URLProcessor)).returns(() => urlProcessorMock.object);
+        const startCommand = jest.spyOn(crawlerEngineMock.object, 'start').mockImplementationOnce(async () => Promise.resolve());
+
+        loggerMock
+            .setup(async (l) => l.setup())
+            .returns(async () => Promise.resolve())
+            .verifiable(Times.once());
+
+        await testSubject.crawl(testInput);
+        expect(startCommand).toBeCalled();
+    });
+
+    it('crawl invalid url', async () => {
+        const testInput: CrawlerRunOptions = { baseUrl: 'url?' };
+        containerMock.setup((cm) => cm.get(CrawlerEngine)).returns(() => crawlerEngineMock.object);
+        containerMock.setup((c) => c.get(GlobalLogger)).returns(() => loggerMock.object);
+        containerMock.setup((c) => c.get(URLProcessor)).returns(() => urlProcessorMock.object);
         const startCommand = jest.spyOn(crawlerEngineMock.object, 'start').mockImplementationOnce(async () => Promise.resolve());
 
         loggerMock
