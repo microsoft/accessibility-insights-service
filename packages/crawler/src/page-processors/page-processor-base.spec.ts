@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { DirectNavigationOptions, Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -19,7 +18,6 @@ describe(PageProcessorBase, () => {
         public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {};
     }
 
-    let loggerMock: IMock<Logger>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
@@ -37,12 +35,12 @@ describe(PageProcessorBase, () => {
     const error: Error = {
         name: 'error',
         message: 'error message',
+        stack: 'stack',
     };
 
     let pageProcessorBase: PageProcessorBase;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType<Logger>();
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
@@ -65,7 +63,6 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
-            loggerMock.object,
             requestQueueMock.object,
             false,
             discoveryPatterns,
@@ -166,7 +163,6 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
-            loggerMock.object,
             requestQueueMock.object,
             true,
             discoveryPatterns,
@@ -191,8 +187,9 @@ describe(PageProcessorBase, () => {
     }
 
     function setupScanErrorLogging(): void {
-        const expectedId = `${testId}.err`;
-        const expectedErrorMessage = `Error at URL ${testUrl}: ${error.message}`;
-        blobStoreMock.setup((bs) => bs.setValue(expectedId, expectedErrorMessage, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock
+            .setup((bs) => bs.setValue(`${testId}.data`, { id: requestStub.id as string, url: requestStub.url, succeeded: false }))
+            .verifiable();
+        blobStoreMock.setup((bs) => bs.setValue(`${testId}.err`, `${error.stack}`, { contentType: 'text/plain' })).verifiable();
     }
 });

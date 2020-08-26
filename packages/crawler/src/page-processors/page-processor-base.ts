@@ -3,7 +3,6 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
@@ -40,7 +39,6 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
-        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
@@ -53,6 +51,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         try {
             await this.processPage(inputs);
         } catch (err) {
+            await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
@@ -71,6 +70,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 timeout: this.gotoTimeoutSecs * 1000,
             });
         } catch (err) {
+            await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
@@ -91,6 +91,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             requestErrors: request.errorMessages as string[],
         };
         await this.dataStore.pushData(scanData);
+        await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
         await this.logPageError(request, error);
     };
 
@@ -110,20 +111,16 @@ export abstract class PageProcessorBase implements PageProcessor {
             requestQueue: this.requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
-        this.logger.logInfo(`Discovered ${enqueued.length} links on page ${page.url()}`);
+        console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
 
         return enqueued;
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {
-        const mergedScanData: ScanData = {
-            succeeded: true,
-            ...scanData,
-        };
-        await this.blobStore.setValue(`${scanData.id}.data`, mergedScanData);
+        await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 
     protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
-        await this.blobStore.setValue(`${request.id}.err`, `Error at URL ${request.url}: ${error.message}`, { contentType: 'text/plain' });
+        await this.blobStore.setValue(`${request.id}.err`, `${error.stack}`, { contentType: 'text/plain' });
     }
 }

@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -14,7 +13,6 @@ import { PartialScanData } from './page-processor-base';
 // tslint:disable: no-any
 
 describe(ClassicPageProcessor, () => {
-    let loggerMock: IMock<Logger>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
@@ -30,7 +28,6 @@ describe(ClassicPageProcessor, () => {
     let classicPageProcessor: ClassicPageProcessor;
 
     beforeEach(() => {
-        loggerMock = Mock.ofType<Logger>();
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
@@ -50,7 +47,6 @@ describe(ClassicPageProcessor, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
-            loggerMock.object,
             requestQueueMock.object,
             false,
             discoveryPatterns,

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { GlobalLogger } from 'logger';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
@@ -31,6 +30,5 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(PageScanner)).toBeDefined();
         expect(container.get(AxePuppeteerFactory)).toBeDefined();
         expect(container.get(ActiveElementsFinder)).toBeDefined();
-        expect(container.get(GlobalLogger)).toBeDefined();
     });
 });

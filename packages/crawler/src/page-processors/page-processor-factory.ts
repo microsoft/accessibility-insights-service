@@ -3,7 +3,6 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import { Url } from 'common';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger } from 'logger';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -22,17 +21,15 @@ import { SimulatorPageProcessor } from './simulator-page-processor';
 export class PageProcessorFactory {
     constructor(
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly urlObj: typeof Url = Url,
     ) {}
 
     public createPageProcessor(pageProcessorOptions: PageProcessorOptions): PageProcessor {
         if (!pageProcessorOptions.crawlerRunOptions.simulate) {
             return new ClassicPageProcessor(
-                new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory()), this.logger),
+                new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
                 new LocalDataStore(),
                 new LocalBlobStore(),
-                this.logger,
                 pageProcessorOptions.requestQueue,
                 this.crawlerConfiguration.getSnapshot(
                     pageProcessorOptions.crawlerRunOptions.snapshot,
@@ -46,10 +43,9 @@ export class PageProcessorFactory {
         }
 
         return new SimulatorPageProcessor(
-            new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory()), this.logger),
+            new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
             new LocalDataStore(),
             new LocalBlobStore(),
-            this.logger,
             pageProcessorOptions.requestQueue,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),

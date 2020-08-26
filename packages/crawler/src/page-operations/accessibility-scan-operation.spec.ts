@@ -3,7 +3,6 @@
 
 import 'reflect-metadata';
 
-import { Logger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { PageScanner, ScanResult } from '../scanner-operations/page-scanner';
@@ -13,7 +12,6 @@ import { AccessibilityScanOperation } from './accessibility-scan-operation';
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
 describe(AccessibilityScanOperation, () => {
     let accessibilityScanOp: AccessibilityScanOperation;
-    let loggerMock: IMock<Logger>;
     let scannerMock: IMock<PageScanner>;
     let pageMock: IMock<Page>;
     let blobStoreMock: IMock<BlobStore>;
@@ -23,12 +21,11 @@ describe(AccessibilityScanOperation, () => {
     beforeEach(() => {
         // tslint:disable-next-line:no-object-literal-type-assertion
 
-        loggerMock = Mock.ofType<Logger>();
         pageMock = Mock.ofType();
         blobStoreMock = Mock.ofType();
         scannerMock = Mock.ofType(PageScanner, MockBehavior.Strict);
 
-        accessibilityScanOp = new AccessibilityScanOperation(scannerMock.object, loggerMock.object);
+        accessibilityScanOp = new AccessibilityScanOperation(scannerMock.object);
     });
 
     it('Run page scan operation, no violations', async () => {

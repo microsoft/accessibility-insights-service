@@ -3,7 +3,6 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { GlobalLogger } from 'logger';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
@@ -21,7 +20,6 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
-        @inject(GlobalLogger) protected readonly logger: GlobalLogger,
         protected readonly requestQueue: Apify.RequestQueue,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
@@ -36,7 +34,6 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             accessibilityScanOp,
             dataStore,
             blobStore,
-            logger,
             requestQueue,
             snapshot,
             discoveryPatterns,
@@ -49,15 +46,15 @@ export class SimulatorPageProcessor extends PageProcessorBase {
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         const operation = request.userData as Operation;
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
-            this.logger.logInfo(`Crawling page ${page.url()}`);
+            console.log(`Crawling page ${page.url()}`);
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, this.requestQueue);
             await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
             await this.saveSnapshot(page, request.id as string);
-            await this.pushScanData({ id: request.id as string, url: request.url });
+            await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url });
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-            this.logger.logInfo(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
             const operationResult = await this.clickElementOp.click(
                 page,
                 activeElement.selector,
@@ -72,6 +69,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.pushScanData({
                 id: request.id as string,
                 url: request.url,
+                succeeded: true,
                 activatedElement: {
                     ...activeElement,
                     clickAction: operationResult.clickAction,
