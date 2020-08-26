@@ -10,7 +10,9 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { WebDriver } from '../web-driver/web-driver';
 import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
-import { Page, PuppeteerBrowserFactory } from './page';
+import { Page } from './page';
+
+// tslint:disable: no-unsafe-any no-any no-object-literal-type-assertion
 
 class PuppeteerBrowserMock {
     public static readonly browserVersion = 'browser version';
@@ -41,6 +43,7 @@ class PuppeteerPageMock {
         private readonly gotoMock: (url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>,
         private readonly waitForNavigationMock: (options?: Puppeteer.NavigationOptions) => Promise<Puppeteer.Response>,
         private readonly setBypassCSPMock: (enabled: boolean) => Promise<void>,
+        private readonly pageContentMock: () => Promise<string>,
     ) {}
 
     public async goto(url: string, options: Puppeteer.DirectNavigationOptions): Promise<Puppeteer.Response> {
@@ -67,30 +70,41 @@ class PuppeteerPageMock {
     public async title(): Promise<string> {
         return PuppeteerPageMock.pageTitle;
     }
+
+    public async evaluate(): Promise<string> {
+        return this.pageContentMock();
+    }
+
+    public async waitFor(duration: number): Promise<void> {
+        return;
+    }
+
+    public async setUserAgent(userAgent: string): Promise<void> {
+        return;
+    }
 }
 
 describe('Page', () => {
     let gotoMock: IMock<(url: string, options: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>>;
     let waitForNavigationMock: IMock<(options?: Puppeteer.DirectNavigationOptions) => Promise<Puppeteer.Response>>;
     let setBypassCSPMock: IMock<(enabled: boolean) => Promise<void>>;
+    let pageContentMock: IMock<() => Promise<string>>;
     let puppeteerPageMock: PuppeteerPageMock;
     let axePuppeteerFactoryMock: IMock<AxePuppeteerFactory>;
-    let puppeteerBrowserFactory: IMock<PuppeteerBrowserFactory>;
+    let webDriverMock: IMock<WebDriver>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
     let puppeteerBrowserMock: PuppeteerBrowserMock;
     let page: Page;
     let gotoOptions: Puppeteer.DirectNavigationOptions;
     let waitOptions: Puppeteer.DirectNavigationOptions;
-    let webDriverMock: IMock<WebDriver>;
 
     beforeEach(() => {
-        webDriverMock = Mock.ofType<WebDriver>();
         gotoOptions = {
-            waitUntil: ['load' as Puppeteer.LoadEvent],
-            timeout: 120000,
+            waitUntil: 'load' as Puppeteer.LoadEvent,
+            timeout: 15000,
         };
         waitOptions = {
-            waitUntil: ['networkidle0' as Puppeteer.LoadEvent],
+            waitUntil: 'networkidle0' as Puppeteer.LoadEvent,
             timeout: 15000,
         };
         gotoMock = Mock.ofInstance((url: string, options: Puppeteer.DirectNavigationOptions) => {
@@ -102,19 +116,23 @@ describe('Page', () => {
         setBypassCSPMock = Mock.ofInstance((enabled: boolean) => {
             return undefined;
         });
+        pageContentMock = Mock.ofInstance(() => {
+            return undefined;
+        });
 
-        puppeteerPageMock = new PuppeteerPageMock(gotoMock.object, waitForNavigationMock.object, setBypassCSPMock.object);
+        puppeteerPageMock = new PuppeteerPageMock(
+            gotoMock.object,
+            waitForNavigationMock.object,
+            setBypassCSPMock.object,
+            pageContentMock.object,
+        );
         axePuppeteerFactoryMock = Mock.ofType<AxePuppeteerFactory>();
-        puppeteerBrowserFactory = Mock.ofType<PuppeteerBrowserFactory>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
+        webDriverMock = Mock.ofType<WebDriver>();
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
         webDriverMock
-            .setup((wd) => wd.launch(undefined))
+            .setup(async (o) => o.launch(It.isAny()))
             .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
-        puppeteerBrowserFactory
-            .setup((o) => o())
-            .returns(() => <Puppeteer.Browser>(<unknown>puppeteerBrowserMock))
             .verifiable(Times.once());
         page = new Page(axePuppeteerFactoryMock.object, webDriverMock.object);
     });
@@ -125,42 +143,9 @@ describe('Page', () => {
 
         const errorResult: AxeScanResults = {
             error: {
-                errorType: 'InvalidContentType',
-                message: `Content type - ${contentType}`,
-                responseStatusCode: 200,
-            },
-            unscannable: true,
-        };
-        const response: Puppeteer.Response = makeResponse({ contentType: contentType });
-
-        gotoMock
-            .setup(async (goto) => goto(scanUrl, gotoOptions))
-            .returns(async () => Promise.resolve(response))
-            .verifiable(Times.once());
-
-        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
-
-        axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
-        axePuppeteerFactoryMock
-            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
-            .returns(async () => Promise.resolve(axePuppeteerMock.object))
-            .verifiable(Times.once());
-
-        await page.create();
-        const result = await page.scanForA11yIssues(scanUrl);
-
-        expect(result).toEqual(errorResult);
-    });
-
-    it('should check page response before cheking if page is not html', async () => {
-        const scanUrl = 'https://www.non-html-url.com';
-        const contentType = 'text/plain';
-
-        const errorResult: AxeScanResults = {
-            error: {
-                errorType: 'HttpErrorCode',
-                message: 'Page returned an unsuccessful response code',
                 responseStatusCode: 500,
+                errorType: 'HttpErrorCode',
+                message: `Page returned an unsuccessful response code`,
             },
         };
         const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 500 });
@@ -174,7 +159,39 @@ describe('Page', () => {
 
         axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage, It.isAny()))
+            .returns(async () => Promise.resolve(axePuppeteerMock.object))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        expect(result).toEqual(errorResult);
+    });
+
+    it('should check page response before checking if page is not html', async () => {
+        const scanUrl = 'https://www.non-html-url.com';
+        const contentType = 'text/plain';
+
+        const errorResult: AxeScanResults = {
+            error: {
+                responseStatusCode: 500,
+                errorType: 'HttpErrorCode',
+                message: 'Page returned an unsuccessful response code',
+            },
+        };
+        const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 500 });
+
+        gotoMock
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
+        axePuppeteerFactoryMock
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage, It.isAny()))
             .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
@@ -192,7 +209,7 @@ describe('Page', () => {
             pageTitle: PuppeteerPageMock.pageTitle,
             browserSpec: PuppeteerBrowserMock.browserVersion,
         };
-        const response: Puppeteer.Response = makeResponse({});
+        const response: Puppeteer.Response = makeResponse({ statusCode: 200 });
         gotoMock
             .setup(async (goto) => goto(scanUrl, gotoOptions))
             .returns(async () => Promise.resolve(response))
@@ -206,9 +223,7 @@ describe('Page', () => {
             .verifiable(Times.once());
 
         axePuppeteerFactoryMock
-            // tslint:disable-next-line: no-unsafe-any
-            .setup(async (o) => o.createAxePuppeteer(It.isAny(), undefined))
-            // tslint:disable-next-line: no-any
+            .setup(async (o) => o.createAxePuppeteer(It.isAny(), It.isAny()))
             .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
             .verifiable(Times.once());
 
@@ -221,9 +236,53 @@ describe('Page', () => {
         expect(result).toEqual(scanResults);
     });
 
+    it('should wait for page rendering to fully complete', async () => {
+        const scanUrl = 'https://www.example.com';
+        const axeResults: AxeResults = createEmptyAxeResults(scanUrl);
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
+        };
+        const response: Puppeteer.Response = makeResponse({ statusCode: 200 });
+        gotoMock
+            .setup(async (goto) => goto(scanUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
+        axePuppeteerFactoryMock
+            .setup(async (o) => o.createAxePuppeteer(It.isAny(), It.isAny()))
+            .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
+            .verifiable(Times.once());
+
+        const dynamicContentInvocationCount = 4;
+        let content = 'page content ';
+        let i = 0;
+        pageContentMock
+            .setup(async (o) => o())
+            .callback(() => {
+                if (i < dynamicContentInvocationCount) {
+                    content += '+';
+                    i += 1;
+                }
+            })
+            .returns(async () => Promise.resolve(content))
+            .verifiable(Times.exactly(dynamicContentInvocationCount + 3));
+
+        await page.create();
+        const result = await page.scanForA11yIssues(scanUrl);
+
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+        pageContentMock.verifyAll();
+
+        expect(result).toEqual(scanResults);
+    });
+
     it('should create new browser page', async () => {
         await page.create();
         expect(page.puppeteerPage).toEqual(puppeteerBrowserMock.puppeteerPage);
+        webDriverMock.verifyAll();
     });
 
     it('should call setBypassCSP', async () => {
@@ -238,9 +297,9 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: { errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code', responseStatusCode: 500 },
+            error: { responseStatusCode: 404, errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code' },
         };
-        const response: Puppeteer.Response = makeResponse({ statusCode: 500 });
+        const response: Puppeteer.Response = makeResponse({ statusCode: 404 });
 
         gotoMock
             .setup(async (goto) => goto(scanUrl, gotoOptions))
@@ -251,7 +310,7 @@ describe('Page', () => {
 
         axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
         axePuppeteerFactoryMock
-            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
+            .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage, It.isAny()))
             .returns(async () => Promise.resolve(axePuppeteerMock.object))
             .verifiable(Times.once());
 
@@ -259,6 +318,57 @@ describe('Page', () => {
         const result = await page.scanForA11yIssues(scanUrl);
 
         expect(result).toEqual(errorResult);
+    });
+
+    it.skip('validates scanning in dev box', async () => {
+        const webDriver = new WebDriver();
+        page = new Page(new AxePuppeteerFactory(), webDriver);
+
+        await page.create();
+
+        await page.enableBypassCSP();
+
+        const results = await page.scanForA11yIssues('https://www.bing.com');
+
+        let violationCount = 0;
+        results.results.violations.map((v) => {
+            violationCount += v.nodes.length;
+        });
+
+        console.log('violations count >>>', violationCount);
+        console.log(results);
+    }, 50000);
+
+    it('should add the redirected url to results', async () => {
+        const redirectFromUrl = 'https://www.redirect-from.com';
+        const redirectToUrl = 'https://www.redirect-to.com';
+        const axeResults = createEmptyAxeResults(redirectToUrl);
+        const scanResults: AxeScanResults = {
+            results: axeResults,
+            scannedUrl: redirectToUrl,
+            pageTitle: PuppeteerPageMock.pageTitle,
+            browserSpec: PuppeteerBrowserMock.browserVersion,
+        };
+        const response: Puppeteer.Response = makeResponse({ withRedirect: true, statusCode: 200 });
+        gotoMock
+            .setup(async (goto) => goto(redirectFromUrl, gotoOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
+
+        axePuppeteerFactoryMock
+            .setup(async (o) => o.createAxePuppeteer(It.isAny(), It.isAny()))
+            .returns(async () => Promise.resolve({ analyze: async () => Promise.resolve(axeResults) } as any))
+            .verifiable(Times.once());
+
+        await page.create();
+        const result = await page.scanForA11yIssues(redirectFromUrl);
+
+        axePuppeteerFactoryMock.verifyAll();
+        axePuppeteerMock.verifyAll();
+
+        expect(result).toEqual(scanResults);
     });
 
     describe('handles navigation errors', () => {
@@ -318,7 +428,7 @@ describe('Page', () => {
             waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
             axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
             axePuppeteerFactoryMock
-                .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
+                .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage, It.isAny()))
                 .returns(async () => Promise.resolve(axePuppeteerMock.object))
                 .verifiable(Times.once());
 
@@ -349,6 +459,9 @@ function makeResponse(options: ResponseOptions): Puppeteer.Response {
         redirectChain: () => {
             return redirectChain;
         },
+        url: () => {
+            return '';
+        },
     };
 
     return {
@@ -367,11 +480,9 @@ function makeResponse(options: ResponseOptions): Puppeteer.Response {
         request: () => {
             return request;
         },
-        // tslint:disable-next-line: no-any
     } as any;
 }
 
 function createEmptyAxeResults(url: string): AxeResults {
-    // tslint:disable-next-line: no-object-literal-type-assertion
     return { url: url } as AxeResults;
 }
