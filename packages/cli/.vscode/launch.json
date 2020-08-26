@@ -8,12 +8,14 @@
             "name": "Start debugging cli",
             "type": "node",
             "request": "launch",
-            "cwd": "${workspaceFolder}/dist",
-            "program": "${workspaceFolder}/dist/ai-scan-cli.js",
-            "preLaunchTask": "build",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/src/cli.ts",
+            "preLaunchTask": "run",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
-            "args": ["--url=\"https://www.microsoft.com/\""]
+            "smartStep": true,
+            "args": ["--url", "https://www.bing.com/"]
         }
     ]
 }
