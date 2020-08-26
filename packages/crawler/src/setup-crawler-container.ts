@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 
 import { reporterFactory } from 'accessibility-insights-report';
-import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
-import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
@@ -19,8 +17,6 @@ export function setupCrawlerContainer(): inversify.Container {
     container.bind(PageProcessorFactory).toSelf().inSingletonScope();
     container.bind('ReporterFactory').toConstantValue(reporterFactory);
     container.bind<AxePuppeteerFactory>(AxePuppeteerFactory).toSelf().inSingletonScope();
-
-    container.bind(GlobalLogger).toConstantValue(new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process));
 
     return container;
 }

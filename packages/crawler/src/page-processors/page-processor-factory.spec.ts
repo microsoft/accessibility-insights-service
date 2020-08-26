@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import { Url } from 'common';
-import { Logger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { PageProcessorOptions } from '../types/run-options';
@@ -15,16 +14,14 @@ import { SimulatorPageProcessor } from './simulator-page-processor';
 
 describe(PageProcessorFactory, () => {
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-    let loggerMock: IMock<Logger>;
     let pageProcessorFactory: PageProcessorFactory;
     let urlMock: IMock<typeof Url>;
     const baseUrl = 'base url';
 
     beforeEach(() => {
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
-        loggerMock = Mock.ofType<Logger>();
         urlMock = Mock.ofType<typeof Url>();
-        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object, loggerMock.object, urlMock.object);
+        pageProcessorFactory = new PageProcessorFactory(crawlerConfigurationMock.object, urlMock.object);
 
         urlMock
             .setup((um) => um.getRootUrl(baseUrl))
