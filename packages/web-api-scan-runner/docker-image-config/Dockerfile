@@ -21,6 +21,9 @@ COPY runtime-config*.json ./
 COPY package*.json ./
 
 RUN npm install \
+    # Force npm package resolution
+    && npx npm-force-resolutions \
+    && npm install \
     # Add user so we don't need --no-sandbox.
     # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
     && groupadd -r pptruser && useradd -r -g pptruser -G audio,video pptruser \
