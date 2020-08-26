@@ -87,7 +87,10 @@ describe(FileCommandRunner, () => {
                 'pass-url-1': 'pass-url-1-report',
                 'pass-url-2': 'pass-url-2-report',
             };
-            const unscannableUrls = { 'un-scannable-url-1': 'un-scannable-url-1', 'un-scannable-url-2': 'un-scannable-url-2' };
+            const unscannableUrls = {
+                'un-scannable-url-1': 'un-scannable-url-1-report',
+                'un-scannable-url-2': 'un-scannable-url-2-report',
+            };
 
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: failedUrlToReportMap,
@@ -110,7 +113,7 @@ describe(FileCommandRunner, () => {
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: {},
                 passedUrlToReportMap: {},
-                unscannableUrls: { 'un-scannable-url-1': 'un-scannable-url-1', 'un-scannable-url-2': 'un-scannable-url-2' },
+                unscannableUrls: { 'un-scannable-url-1': 'un-scannable-url-1-report', 'un-scannable-url-2': 'un-scannable-url-2-report' },
                 violationCountByRuleMap: {},
             };
 
