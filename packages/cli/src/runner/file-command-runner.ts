@@ -12,7 +12,7 @@ import { HtmlSummaryReportGenerator } from '../report/summary-report/html-summar
 import { JsonSummaryReportGenerator } from '../report/summary-report/json-summary-report-generator';
 import { SummaryReportData } from '../report/summary-report/summary-report-data';
 import { AIScanner } from '../scanner/ai-scanner';
-import { AxeScanResults } from '../scanner/axe-scan-results';
+import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
@@ -23,7 +23,7 @@ export class FileCommandRunner implements CommandRunner {
         violationCountByRuleMap: {},
         failedUrlToReportMap: {},
         passedUrlToReportMap: {},
-        unscannableUrls: [],
+        unscannableUrls: {},
     } as SummaryReportData;
 
     private readonly uniqueUrls = new Set();
@@ -93,7 +93,14 @@ export class FileCommandRunner implements CommandRunner {
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
-            this.summaryReportData.unscannableUrls.push(url);
+            let reportContent = (axeResults.error as ScanError).message;
+            if (isEmpty(reportContent)) {
+                reportContent = axeResults.error.toString();
+            }
+
+            const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', reportContent);
+            this.summaryReportData.unscannableUrls[url] = reportName;
+            console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
         }
     }
 

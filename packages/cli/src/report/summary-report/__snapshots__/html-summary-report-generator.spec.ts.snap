@@ -175,7 +175,7 @@ exports[`HtmlSummaryReportGenerator logs violation summary when has unScannable 
         <ul>
 
           <li>
-            <a href='url'>url</a>
+            <a href='./unscannableUrl1'>https://www.unscannableUrl1.com</a>
           </li>
         </ul>
       </li>

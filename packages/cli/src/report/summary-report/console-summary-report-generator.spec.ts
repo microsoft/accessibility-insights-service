@@ -24,7 +24,7 @@ describe(ConsoleSummaryReportGenerator, () => {
                     rule1WithALongName11111111111111111: 10,
                     rule2: 3,
                 },
-                unscannableUrls: [],
+                unscannableUrls: {},
             } as SummaryReportData,
         ],
         [
@@ -33,7 +33,7 @@ describe(ConsoleSummaryReportGenerator, () => {
                 failedUrlToReportMap: { url1: 'file1' },
                 passedUrlToReportMap: { url1: 'file1' },
                 violationCountByRuleMap: {},
-                unscannableUrls: [],
+                unscannableUrls: {},
             } as SummaryReportData,
         ],
     ])('logs summary when %s', async (testCaseName, testCase) => {
