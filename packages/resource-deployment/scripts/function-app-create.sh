@@ -54,7 +54,7 @@ installAzureFunctionsCoreToolsOnLinux() {
     sudo apt-get update -y
 
     # Install the Core Tools package
-    sudo apt-get install azure-functions-core-tools=2.7.1948-1 -y
+    sudo apt-get install azure-functions-core-tools-3=3.0.2798-1 -y
     echo "Azure Functions Core Tools installed successfully"
 }
 
@@ -199,6 +199,10 @@ while getopts ":r:c:e:d:v:" option; do
     esac
 done
 
+if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion ]] || [[ -z $webApiAdClientId ]]; then
+    exitWithUsageInfo
+fi
+
 echo "Setting up function apps with arguments passed:
     resourceGroupName: $resourceGroupName
     webApiAdClientId: $webApiAdClientId
@@ -210,10 +214,6 @@ echo "Setting up function apps with arguments passed:
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
-
-if [[ -z $resourceGroupName ]] || [[ -z $environment ]] || [[ -z $releaseVersion ]] || [[ -z $webApiAdClientId ]]; then
-    exitWithUsageInfo
-fi
 
 # Login to Azure if required
 if ! az account show 1>/dev/null; then
