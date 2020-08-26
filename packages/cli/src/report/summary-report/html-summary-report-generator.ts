@@ -18,7 +18,7 @@ type HtmlSummaryLink = {
 type HtmlSummaryData = {
     passedLinks: HtmlSummaryLink[];
     failedLinks: HtmlSummaryLink[];
-    unscannableUrls: string[];
+    unscannableUrls: HtmlSummaryLink[];
 };
 
 @injectable()
@@ -32,7 +32,7 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
 
         htmlSummaryData.failedLinks = this.getHtmlLinkData(summaryReportData.failedUrlToReportMap);
         htmlSummaryData.passedLinks = this.getHtmlLinkData(summaryReportData.passedUrlToReportMap);
-        htmlSummaryData.unscannableUrls = summaryReportData.unscannableUrls;
+        htmlSummaryData.unscannableUrls = this.getHtmlLinkData(summaryReportData.unscannableUrls);
 
         return pretty(`
         <!DOCTYPE html>
@@ -93,14 +93,7 @@ export class HtmlSummaryReportGenerator implements SummaryReportGenerator {
             return '';
         }
 
-        const htmlLinks: HtmlSummaryLink[] = htmlSummaryData.unscannableUrls.map((url) => {
-            return {
-                fileName: url,
-                link: url,
-            };
-        });
-
-        return this.getLinksSection('UnScannable Urls', htmlLinks);
+        return this.getLinksSection('UnScannable Urls', htmlSummaryData.unscannableUrls);
     }
 
     private getLinksSection(sectionName: string, links: HtmlSummaryLink[]): string {

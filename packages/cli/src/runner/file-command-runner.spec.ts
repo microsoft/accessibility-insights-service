@@ -87,7 +87,10 @@ describe(FileCommandRunner, () => {
                 'pass-url-1': 'pass-url-1-report',
                 'pass-url-2': 'pass-url-2-report',
             };
-            const unscannableUrls = ['un-scannable-url-1', 'un-scannable-url-2'];
+            const unscannableUrls = {
+                'un-scannable-url-1': 'un-scannable-url-1-report',
+                'un-scannable-url-2': 'un-scannable-url-2-report',
+            };
 
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: failedUrlToReportMap,
@@ -110,7 +113,7 @@ describe(FileCommandRunner, () => {
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: {},
                 passedUrlToReportMap: {},
-                unscannableUrls: ['un-scannable-url-1', 'un-scannable-url-2'],
+                unscannableUrls: { 'un-scannable-url-1': 'un-scannable-url-1-report', 'un-scannable-url-2': 'un-scannable-url-2-report' },
                 violationCountByRuleMap: {},
             };
 
@@ -127,7 +130,7 @@ describe(FileCommandRunner, () => {
             const expectedSummaryData: SummaryReportData = {
                 failedUrlToReportMap: {},
                 passedUrlToReportMap: {},
-                unscannableUrls: [],
+                unscannableUrls: {},
                 violationCountByRuleMap: {},
             };
 
@@ -167,7 +170,7 @@ describe(FileCommandRunner, () => {
                 passedUrlToReportMap: {
                     'pass-url-1': 'pass-url-1-report',
                 },
-                unscannableUrls: [],
+                unscannableUrls: {},
                 violationCountByRuleMap: {},
             };
 
@@ -267,13 +270,21 @@ describe(FileCommandRunner, () => {
 
         scannerMock
             .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable'))))
-            .returns((url) =>
-                Promise.resolve({
+            .returns(async (url: string) => {
+                const result = {
+                    results: {
+                        passes: [],
+                        violations: [],
+                    },
                     error: {
                         message: 'unable to scan',
                     },
-                } as AxeScanResults),
-            )
+                } as AxeScanResults;
+
+                setupErrorReportCreationCalls(url);
+
+                return result;
+            })
             .verifiable(Times.atLeast(0));
     }
 
@@ -285,6 +296,13 @@ describe(FileCommandRunner, () => {
 
         reportDiskWriterMock
             .setup((r) => r.writeToDirectory(testInput.output, url, 'html', 'report-content'))
+            .returns(() => `${url}-report`)
+            .verifiable(Times.once());
+    }
+
+    function setupErrorReportCreationCalls(url: string): void {
+        reportDiskWriterMock
+            .setup((r) => r.writeToDirectory(testInput.output, url, 'txt', 'unable to scan'))
             .returns(() => `${url}-report`)
             .verifiable(Times.once());
     }
