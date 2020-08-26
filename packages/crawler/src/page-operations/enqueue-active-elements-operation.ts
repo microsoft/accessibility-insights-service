@@ -4,7 +4,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { ActiveElementsFinder } from '../utility/active-elements-finder';
+import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { Operation } from './operation';
 
 // tslint:disable: no-var-requires no-submodule-imports no-require-imports no-unsafe-any

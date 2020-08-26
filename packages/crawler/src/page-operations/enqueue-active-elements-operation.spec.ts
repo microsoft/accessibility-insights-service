@@ -6,7 +6,7 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { ActiveElementsFinder } from '../utility/active-elements-finder';
+import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { EnqueueActiveElementsOperation } from './enqueue-active-elements-operation';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty

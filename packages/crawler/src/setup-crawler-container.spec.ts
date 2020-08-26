@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { AxePuppeteerFactory } from './axe-puppeteer/axe-puppeteer-factory';
+import { ActiveElementsFinder } from './browser-components/active-elements-finder';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { CrawlerEngine } from './crawler/crawler-engine';
 import { CrawlerFactory } from './crawler/crawler-factory';
@@ -11,9 +12,8 @@ import { AccessibilityScanOperation } from './page-operations/accessibility-scan
 import { ClickElementOperation } from './page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from './page-operations/enqueue-active-elements-operation';
 import { PageProcessorFactory } from './page-processors/page-processor-factory';
-import { PageScanner } from './scanner-operations/page-scanner';
+import { PageScanner } from './scanners/page-scanner';
 import { setupCrawlerContainer } from './setup-crawler-container';
-import { ActiveElementsFinder } from './utility/active-elements-finder';
 
 describe(setupCrawlerContainer, () => {
     it('resolves dependencies', () => {

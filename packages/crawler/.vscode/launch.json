@@ -5,11 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "chrome",
+            "name": "Start debugging crawler",
+            "type": "node",
             "request": "launch",
-            "name": "Launch Chrome against localhost",
-            "url": "http://localhost:8080",
-            "webRoot": "${workspaceFolder}"
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/src/index.ts",
+            "preLaunchTask": "run",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "smartStep": true,
+            "args": ["--url", "https://beta.support.xbox.com/"]
         }
     ]
 }

@@ -32,3 +32,15 @@ moduleRef.prototype.require = new Proxy(moduleRef.prototype.require, {
         return overrideExports(moduleName, exports);
     },
 });
+
+moduleRef._resolveFilename = new Proxy(moduleRef._resolveFilename, {
+    apply(target: any, thisArg: any, argumentsList: any): any {
+        const moduleName = argumentsList[0] as string;
+        let path = Reflect.apply(target, thisArg, argumentsList) as string;
+        if (moduleName.startsWith('@uifabric/styling')) {
+            path = path.replace('/lib/', '/lib-commonjs/');
+        }
+
+        return path;
+    },
+});
