@@ -8072,6 +8072,11 @@ json-buffer@3.0.1:
   resolved "https://registry.yarnpkg.com/json-buffer/-/json-buffer-3.0.1.tgz#9338802a30d3b6605fbe0613e094008ca8c05a13"
   integrity sha512-4bV5BfR2mqfQTJm+V5tPPdf+ZpuhiIvTuAB5g8kcrXOZpTT/QwwVRWBywX1ozr6lEuPdbHxwaJlm9G6mI2sfSQ==
 
+json-format@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/json-format/-/json-format-1.0.1.tgz#143f67e62af129d6bffed288a46265ea23d0df0c"
+  integrity sha1-FD9n5irxKda//tKIpGJl6iPQ3ww=
+
 json-parse-better-errors@^1.0.0, json-parse-better-errors@^1.0.1, json-parse-better-errors@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/json-parse-better-errors/-/json-parse-better-errors-1.0.2.tgz#bb867cfb3450e69107c131d1c514bab3dc8bcaa9"
@@ -9188,6 +9193,14 @@ npm-bundled@^1.0.1:
   integrity sha512-gqkfgGePhTpAEgUsGEgcq1rqPXA+tv/aVBlgEzfXwA1yiUJF7xtEt3CtVwOjNYQOVknDk0F20w58Fnm3EtG0fA==
   dependencies:
     npm-normalize-package-bin "^1.0.1"
+
+npm-force-resolutions@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/npm-force-resolutions/-/npm-force-resolutions-0.0.3.tgz#955c8cb476cd949e94b19a2e5828b589397cdb24"
+  integrity sha512-xbIPAGzD3nrJHDLtnRFt/O83teTA8ju5pWTf8W6OKL4D0XD9EjdRNJhzg4bSXWuucE+l1HGdTpOJR/l1Mi1Ycg==
+  dependencies:
+    json-format "^1.0.1"
+    source-map-support "^0.5.5"
 
 npm-lifecycle@^3.1.2:
   version "3.1.5"
@@ -11237,7 +11250,7 @@ source-map-resolve@^0.5.0:
     source-map-url "^0.4.0"
     urix "^0.1.0"
 
-source-map-support@^0.5.6, source-map-support@~0.5.12:
+source-map-support@^0.5.5, source-map-support@^0.5.6, source-map-support@~0.5.12:
   version "0.5.19"
   resolved "https://registry.yarnpkg.com/source-map-support/-/source-map-support-0.5.19.tgz#a98b62f86dcaf4f67399648c085291ab9e8fed61"
   integrity sha512-Wonm7zOCIJzBGQdB+thsPar0kYuCIzYvxZwlBa87yi/Mdjv7Tip2cyVbLj5o0cFPN4EVkuTwb3GDDyUx2DGnGw==
