@@ -1,0 +1,36 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "shell",
+            "label": "run",
+            "dependsOn": "imports",
+            "windows": {
+                "command": "xcopy .env ./dist /y /c /q"
+            },
+            "osx": {
+                "command": "cp .env ./dist 2>/dev/null || :"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "imports",
+            "dependsOn": "tsc",
+            "command": "rollup -c"
+        },
+        {
+            "type": "shell",
+            "label": "tsc",
+            "dependsOn": "clean",
+            "command": "tsc",
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "type": "shell",
+            "label": "clean",
+            "command": "npx rimraf dist"
+        }
+    ]
+}

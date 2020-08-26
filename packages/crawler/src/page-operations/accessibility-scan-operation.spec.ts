@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { PageScanner, ScanResult } from '../scanner-operations/page-scanner';
+import { PageScanner, ScanResult } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { AccessibilityScanOperation } from './accessibility-scan-operation';
 

@@ -5,6 +5,7 @@ dist/
 drop/
 test-results/
 out/
+crawler_storage/
 
 **/.secrets
 **/dev.DockerFile

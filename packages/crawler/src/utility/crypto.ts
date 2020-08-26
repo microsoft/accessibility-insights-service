@@ -1,11 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import Apify from 'apify';
 import SHA from 'sha.js';
-
-export function toApifyInstance(requestQueue: Apify.RequestQueue): Apify.RequestQueue {
-    return <Apify.RequestQueue>(<unknown>requestQueue);
-}
 
 export function generateHash(...values: string[]): string {
     const hashSeed: string = values.join('|').toLowerCase();

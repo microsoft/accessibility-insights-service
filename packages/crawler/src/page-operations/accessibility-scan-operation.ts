@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { PageScanner } from '../scanner-operations/page-scanner';
+import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 
 @injectable()

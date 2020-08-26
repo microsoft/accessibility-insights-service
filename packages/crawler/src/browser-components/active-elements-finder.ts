@@ -3,7 +3,7 @@
 import { injectable } from 'inversify';
 import * as path from 'path';
 import { Page } from 'puppeteer';
-import * as utilities from './utilities';
+import * as utilities from '../utility/crypto';
 
 // tslint:disable: no-unsafe-any
 
