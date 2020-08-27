@@ -13,7 +13,7 @@ import { JsonSummaryReportGenerator } from '../report/summary-report/json-summar
 import { SummaryReportData } from '../report/summary-report/summary-report-data';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../types/scan-arguments';
 import { CommandRunner } from './command-runner';
 
 @injectable()

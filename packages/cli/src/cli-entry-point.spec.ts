@@ -7,7 +7,7 @@ import { IMock, Mock } from 'typemoq';
 import { CliEntryPoint } from './cli-entry-point';
 import { FileCommandRunner } from './runner/file-command-runner';
 import { URLCommandRunner } from './runner/url-command-runner';
-import { ScanArguments } from './scanner/scan-arguments';
+import { ScanArguments } from './types/scan-arguments';
 
 describe(CliEntryPoint, () => {
     let testSubject: CliEntryPoint;

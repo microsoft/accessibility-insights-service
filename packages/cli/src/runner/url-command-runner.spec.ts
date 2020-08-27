@@ -9,7 +9,7 @@ import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../types/scan-arguments';
 import { URLCommandRunner } from './url-command-runner';
 // tslint:disable: no-empty
 describe('URLCommandRunner', () => {

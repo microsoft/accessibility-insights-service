@@ -13,7 +13,7 @@ import { JsonSummaryReportGenerator } from '../report/summary-report/json-summar
 import { SummaryReportData, UrlToReportMap, ViolationCountMap } from '../report/summary-report/summary-report-data';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../types/scan-arguments';
 import { FileCommandRunner } from './file-command-runner';
 
 // tslint:disable: no-object-literal-type-assertion non-literal-fs-path
