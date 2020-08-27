@@ -3,12 +3,18 @@
 
 // tslint:disable: no-var-requires no-require-imports no-unsafe-any no-any
 const moduleRef = require('module');
+const os = require('os');
+
 moduleRef._resolveFilename = new Proxy(moduleRef._resolveFilename, {
     apply(target: any, thisArg: any, argumentsList: any): any {
         const moduleName = argumentsList[0] as string;
         let path = Reflect.apply(target, thisArg, argumentsList) as string;
         if (moduleName.startsWith('@uifabric/styling')) {
-            path = path.replace('/lib/', '/lib-commonjs/');
+            if (os.type() === 'Windows_NT') {
+                path = path.replace('\\lib\\', '\\lib-commonjs\\');
+            } else {
+                path = path.replace('/lib/', '/lib-commonjs/');
+            }
         }
 
         return path;
