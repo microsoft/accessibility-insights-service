@@ -28,7 +28,7 @@ export class HealthMonitorTimerController extends WebController {
         this.logger.logInfo(`Executing '${this.context.executionContext.functionName}' function.`, {
             funcName: this.context.executionContext.functionName,
             invocationId: this.context.executionContext.invocationId,
-            isPastDue: funcTimer.IsPastDue.toString(),
+            isPastDue: `${funcTimer.isPastDue.toString()}`,
         });
 
         const startArgs = [
@@ -43,7 +43,7 @@ export class HealthMonitorTimerController extends WebController {
     }
 
     protected validateRequest(...args: any[]): boolean {
-        if ((<FunctionTimer>args[0]).IsPastDue) {
+        if ((<FunctionTimer>args[0]).isPastDue) {
             this.logger.logWarn(`The '${this.context.executionContext.functionName}' function trigger is past due.`);
         }
 

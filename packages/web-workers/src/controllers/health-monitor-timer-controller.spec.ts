@@ -38,7 +38,7 @@ describe('HealthMonitorTimerController', () => {
 
     describe('invoke', () => {
         it('handles request', async () => {
-            const funcTimer: FunctionTimer = { IsPastDue: false };
+            const funcTimer: FunctionTimer = { isPastDue: false };
             const expectedBindings = [
                 {
                     FunctionName: 'health-monitor-orchestration-func',
@@ -50,13 +50,13 @@ describe('HealthMonitorTimerController', () => {
         });
 
         it('warns if timer past due', async () => {
-            const funcTimer: FunctionTimer = { IsPastDue: true };
+            const funcTimer: FunctionTimer = { isPastDue: true };
             await testSubject.invoke(context, funcTimer);
             loggerMock.verify((l) => l.logWarn(It.isAny()), Times.once());
         });
 
         it('does not warns if timer not past due', async () => {
-            const funcTimer: FunctionTimer = { IsPastDue: false };
+            const funcTimer: FunctionTimer = { isPastDue: false };
             await testSubject.invoke(context, funcTimer);
 
             loggerMock.verify((l) => l.logWarn(It.isAny()), Times.never());
