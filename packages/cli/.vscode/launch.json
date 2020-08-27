@@ -15,7 +15,7 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
-            "args": ["--url", "https://www.bing.com/"]
+            "args": ["--crawl", "--url", "https://www.bing.com/", "--maxUrls", "3", "--restart", "--simulate"]
         }
     ]
 }
