@@ -23,8 +23,8 @@ function overrideExports(moduleName: string, exports: any): any {
     return exports;
 }
 
-const moduleRef = require('module');
-moduleRef.prototype.require = new Proxy(moduleRef.prototype.require, {
+const moduleRefCrawler = require('module');
+moduleRefCrawler.prototype.require = new Proxy(moduleRefCrawler.prototype.require, {
     apply(target: any, thisArg: any, argumentsList: any): any {
         const moduleName = argumentsList[0];
         const exports = Reflect.apply(target, thisArg, argumentsList);
@@ -33,13 +33,13 @@ moduleRef.prototype.require = new Proxy(moduleRef.prototype.require, {
     },
 });
 
-const os = require('os');
-moduleRef._resolveFilename = new Proxy(moduleRef._resolveFilename, {
+const osCrawler = require('os');
+moduleRefCrawler._resolveFilename = new Proxy(moduleRefCrawler._resolveFilename, {
     apply(target: any, thisArg: any, argumentsList: any): any {
         const moduleName = argumentsList[0] as string;
         let path = Reflect.apply(target, thisArg, argumentsList) as string;
         if (moduleName.startsWith('@uifabric/styling')) {
-            if (os.type() === 'Windows_NT') {
+            if (osCrawler.type() === 'Windows_NT') {
                 path = path.replace('\\lib\\', '\\lib-commonjs\\');
             } else {
                 path = path.replace('/lib/', '/lib-commonjs/');
