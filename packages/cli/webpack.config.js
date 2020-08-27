@@ -4,10 +4,12 @@ const path = require('path');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const copyFilesPlugin = require('copy-webpack-plugin');
 
 function getCommonConfig(version, generateTypings) {
     return {
         devtool: 'cheap-source-map',
+        externals: ['apify', 'apify-shared', 'axe-core', 'axe-puppeteer', 'puppeteer', 'yargs'],
         mode: 'development',
         module: {
             rules: [
@@ -46,6 +48,7 @@ function getCommonConfig(version, generateTypings) {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
+            new copyFilesPlugin([{ from: './../crawler/dist/browser-imports.js', to: '.' }]),
         ].concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],
@@ -70,7 +73,6 @@ module.exports = (env) => {
         {
             ...getCommonConfig(version, false),
             name: 'ai-scan-cli',
-            externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer'],
             entry: {
                 ['ai-scan-cli']: path.resolve('./src/cli.ts'),
             },

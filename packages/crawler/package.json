@@ -1,5 +1,5 @@
 {
-    "name": "crawler",
+    "name": "accessibility-insights-crawler",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
@@ -27,7 +27,7 @@
     "devDependencies": {
         "@rollup/plugin-commonjs": "^15.0.0",
         "@rollup/plugin-node-resolve": "^7.1.3",
-        "@types/cheerio": "^0.22.17",
+        "@types/cheerio": "^0.22.21",
         "@types/jest": "^26.0.9",
         "@types/node": "^12.12.54",
         "jest": "^26.4.2",
