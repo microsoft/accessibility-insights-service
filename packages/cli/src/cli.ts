@@ -83,7 +83,7 @@ import { setupCliContainer } from './setup-cli-container';
             },
         })
         .check((args) => {
-            if (args.crawl) {
+            if (!args.crawl) {
                 if ((isEmpty(args.url) && isEmpty(args.inputFile)) || (!isEmpty(args.url) && !isEmpty(args.inputFile))) {
                     throw new Error('Provide either --url or --inputFile option.');
                 }
