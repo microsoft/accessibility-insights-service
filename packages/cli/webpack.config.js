@@ -73,7 +73,6 @@ module.exports = (env) => {
         {
             ...getCommonConfig(version, false),
             name: 'ai-scan-cli',
-            externals: ['puppeteer', 'yargs', 'axe-core', 'axe-puppeteer'],
             entry: {
                 ['ai-scan-cli']: path.resolve('./src/cli.ts'),
             },

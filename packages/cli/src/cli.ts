@@ -2,6 +2,7 @@
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 // tslint:disable-next-line: no-import-side-effect
 import './global-overrides';
@@ -15,6 +16,7 @@ import { CliEntryPoint } from './cli-entry-point';
 import { setupCliContainer } from './setup-cli-container';
 import { ScanArguments } from './types/scan-arguments';
 
+// tslint:disable-next-line:max-func-body-length
 (async () => {
     const scanArguments = (yargs
         .wrap(yargs.terminalWidth())
@@ -102,8 +104,8 @@ import { ScanArguments } from './types/scan-arguments';
         })
         .describe('help', 'Show help').argv as unknown) as ScanArguments;
 
-    const cliEntryPoint = new CliEntryPoint(setupCliContainer());
-    await cliEntryPoint.runScan(scanArguments);
+        const cliEntryPoint = new CliEntryPoint(setupCliContainer());
+        await cliEntryPoint.runScan(scanArguments);
 })().catch((error) => {
     console.log('Exception occurred while running the tool: ', error);
     process.exit(1);

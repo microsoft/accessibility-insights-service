@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+export {};
+
 // tslint:disable: no-var-requires no-require-imports no-unsafe-any no-any
 const moduleRefmapper = require('module');
 const osMapper = require('os');
