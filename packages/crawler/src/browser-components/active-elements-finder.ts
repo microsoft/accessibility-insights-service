@@ -40,17 +40,27 @@ export class ActiveElementsFinder {
                 return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
             }
 
+            function getElementSelector(element: HTMLElement): string {
+                try {
+                    // @ts-ignore
+                    return finder(element);
+                } catch {
+                    return undefined;
+                }
+            }
+
             function findElements(document: Document): void {
                 document.querySelectorAll(elementSelector).forEach((element: HTMLElement) => {
                     if (visible(element) === true) {
-                        const end = element.outerHTML.search(/>/);
-                        const html = element.outerHTML.substr(0, end + 1);
-                        // @ts-ignore
-                        const uniqueSelector = finder(element);
-                        activeElements.push({
-                            html,
-                            selector: uniqueSelector,
-                        });
+                        const uniqueSelector = getElementSelector(element);
+                        if (uniqueSelector !== undefined) {
+                            const end = element.outerHTML.search(/>/);
+                            const html = element.outerHTML.substr(0, end + 1);
+                            activeElements.push({
+                                html,
+                                selector: uniqueSelector,
+                            });
+                        }
                     }
                 });
 
