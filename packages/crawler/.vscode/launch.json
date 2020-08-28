@@ -10,12 +10,12 @@
             "request": "launch",
             "outFiles": ["${workspaceFolder}/dist/**/*.js"],
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/src/index.ts",
+            "program": "${workspaceFolder}/src/main.ts",
             "preLaunchTask": "run",
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
-            "args": ["--url", "https://beta.support.xbox.com/"]
+            "args": ["--crawl", "--url", "https://beta.support.xbox.com/", "--maxUrls", "10", "--restart", "--simulate"]
         }
     ]
 }

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import Apify from 'apify';
@@ -10,12 +11,13 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-unsafe-any
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
-        // tslint:disable-next-line: no-empty
-        public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {};
+        public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
+            return;
+        };
     }
 
     let requestQueueMock: IMock<Apify.RequestQueue>;
@@ -57,6 +59,9 @@ describe(PageProcessorBase, () => {
         } as any;
         pageStub = {
             url: () => testUrl,
+            setBypassCSP: (op: boolean) => {
+                return;
+            },
         } as any;
 
         pageProcessorBase = new TestablePageProcessor(
@@ -101,7 +106,6 @@ describe(PageProcessorBase, () => {
             page: pageStub,
             request: requestStub,
         } as any;
-        // tslint:disable-next-line: no-unsafe-any
         gotoExtendedMock.setup((gte) => gte(It.isAny(), It.isAny(), It.isAny())).throws(error);
         setupScanErrorLogging();
 

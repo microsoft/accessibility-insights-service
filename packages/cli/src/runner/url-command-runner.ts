@@ -19,7 +19,7 @@ export class URLCommandRunner implements CommandRunner {
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
-        const spinner = new Spinner('Running scanner...');
+        const spinner = new Spinner(`Running scanner... %s \t`);
         let axeResults: AxeScanResults;
 
         try {
