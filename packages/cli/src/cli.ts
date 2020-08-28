@@ -28,7 +28,7 @@ import { setupCliContainer } from './setup-cli-container';
             },
             url: {
                 type: 'string',
-                describe: '<url> The URL to scan (and crawl if --crawl option is selected) for accessibility issues.',
+                describe: 'The URL to scan (and crawl if --crawl option is selected) for accessibility issues.',
             },
             simulate: {
                 type: 'boolean',
