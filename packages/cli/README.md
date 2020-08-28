@@ -7,7 +7,6 @@ Licensed under the MIT License.
 
 AI-Scan is a Command Line Interface (CLI) tool that implements automated web accessibility checks in a local environment. The tool currently runs automated checks against one URL at a time to save results to the local file storage system. AI-Scan presents the shortest path to get results from crawler (using Apify) and scanner in front of users to gather feedback.
 
-
 ## Installation
 
 This package is available on [npm](http://npmjs.com) as `ai-scan`.
