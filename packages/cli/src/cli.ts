@@ -28,7 +28,7 @@ import { setupCliContainer } from './setup-cli-container';
             },
             url: {
                 type: 'string',
-                describe: '<url> The URL to scan (and crawl if --crawl option is selected) for accessibility issues.',
+                describe: 'The URL to scan (and crawl if --crawl option is selected) for accessibility issues.',
             },
             simulate: {
                 type: 'boolean',
@@ -43,6 +43,7 @@ import { setupCliContainer } from './setup-cli-container';
             output: {
                 type: 'string',
                 describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./crawler_storage, if not.`,
+                default: 'ai_scan_cli_output',
             },
             maxUrls: {
                 type: 'number',

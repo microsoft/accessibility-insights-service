@@ -57,7 +57,7 @@ export class CrawlerConfiguration {
         return {
             APIFY_HEADLESS: '1',
             APIFY_LOCAL_STORAGE_DIR: isEmpty(currentSettings.APIFY_LOCAL_STORAGE_DIR)
-                ? './crawler_storage'
+                ? './ai_scan_cli_output'
                 : currentSettings.APIFY_LOCAL_STORAGE_DIR,
         };
     }

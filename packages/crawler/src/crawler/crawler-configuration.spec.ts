@@ -80,7 +80,7 @@ describe(CrawlerConfiguration, () => {
         const prevApifyStorageDir = 'prev apify storage dir';
 
         const defaultApifyHeadless = '1';
-        const defaultApifyStorageDir = './crawler_storage';
+        const defaultApifyStorageDir = './ai_scan_cli_output';
 
         beforeEach(() => {
             existingSettings = {
