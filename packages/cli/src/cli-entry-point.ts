@@ -22,7 +22,7 @@ export class CliEntryPoint {
         } else if (!isEmpty(scanArguments.inputFile)) {
             return this.container.get(FileCommandRunner);
         } else {
-            throw new Error('You should provide either url or inputFile parameter only!');
+            throw new Error('You should provide either url or inputFile parameter only.');
         }
     }
 }

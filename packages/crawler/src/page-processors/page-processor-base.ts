@@ -47,6 +47,9 @@ export abstract class PageProcessorBase implements PageProcessor {
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {}
 
+    /**
+     * Function that is called to process each request.
+     */
     public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
         try {
             await this.processPage(inputs);
@@ -65,6 +68,8 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
         try {
+            await inputs.page.setBypassCSP(true);
+
             return await this.gotoExtended(inputs.page, inputs.request, {
                 waitUntil: 'networkidle0',
                 timeout: this.gotoTimeoutSecs * 1000,

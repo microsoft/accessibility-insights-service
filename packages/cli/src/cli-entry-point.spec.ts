@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Container } from 'inversify';
@@ -42,7 +43,7 @@ describe(CliEntryPoint, () => {
         it('returns null', async () => {
             const testInput: ScanArguments = { output: '/users/xyz' };
             await expect(testSubject.runScan(testInput)).rejects.toThrow(
-                new Error('You should provide either url or inputFile parameter only!'),
+                new Error('You should provide either url or inputFile parameter only.'),
             );
         });
     });

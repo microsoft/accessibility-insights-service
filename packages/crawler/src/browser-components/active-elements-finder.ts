@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { injectable } from 'inversify';
 import * as path from 'path';
 import { Page } from 'puppeteer';
@@ -22,6 +23,8 @@ interface ElementData {
 export class ActiveElementsFinder {
     public async getActiveElements(page: Page, selectors: string[]): Promise<ActiveElement[]> {
         const selector = selectors.join(',');
+
+        await this.importLibToPage(page);
         const elements = await this.getPageActiveElements(page, selector);
 
         return elements.map((e) => {
@@ -30,8 +33,6 @@ export class ActiveElementsFinder {
     }
 
     private async getPageActiveElements(page: Page, selector: string): Promise<ElementData[]> {
-        await this.importLibToPage(page);
-
         return page.evaluate((elementSelector) => {
             const activeElements: ElementData[] = [];
             function visible(element: HTMLElement): boolean {
@@ -39,23 +40,43 @@ export class ActiveElementsFinder {
                 return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
             }
 
+            function getElementSelector(element: HTMLElement): string {
+                try {
+                    // @ts-ignore
+                    return finder(element);
+                } catch {
+                    return undefined;
+                }
+            }
+
             function findElements(document: Document): void {
                 document.querySelectorAll(elementSelector).forEach((element: HTMLElement) => {
                     if (visible(element) === true) {
-                        const end = element.outerHTML.search(/>/);
-                        const html = element.outerHTML.substr(0, end + 1);
-                        // @ts-ignore
-                        const uniqueSelector = finder(element);
-                        activeElements.push({
-                            html,
-                            selector: uniqueSelector,
-                        });
+                        const uniqueSelector = getElementSelector(element);
+                        if (uniqueSelector !== undefined) {
+                            const end = element.outerHTML.search(/>/);
+                            const html = element.outerHTML.substr(0, end + 1);
+                            activeElements.push({
+                                html,
+                                selector: uniqueSelector,
+                            });
+                        }
                     }
                 });
 
                 document.querySelectorAll('iframe,frame').forEach((frame: HTMLFrameElement) => {
-                    if (frame.contentDocument !== undefined) {
-                        findElements(frame.contentDocument);
+                    if (frame.contentWindow !== undefined) {
+                        let frameDocument: Document;
+
+                        // Skipping cross-origin frame
+                        try {
+                            frameDocument = frame.contentWindow.document;
+                            // tslint:disable-next-line: no-empty
+                        } catch {}
+
+                        if (frameDocument !== undefined) {
+                            findElements(frame.contentWindow.document);
+                        }
                     }
                 });
             }
