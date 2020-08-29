@@ -7,9 +7,9 @@ Licensed under the MIT License.
 
 AI-Scan is a Command Line Interface (CLI) tool that implements automated web accessibility checks in a local environment. The tool currently provides the following capabilities:
 
--   Run automated checks against one URL.
--   Run automated checks against a file that has list of URLs separated by new line.
--   Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
+- Run automated checks against one URL.
+- Run automated checks against a file that has list of URLs separated by new line.
+- Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
 
 ## Installation
 
@@ -82,7 +82,8 @@ default: ['button']
 
 ```sh
 type: string
-describe: Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./crawler_storage, if not.
+describe: Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./ai_scan_cli_output, if not, if you use the same output for different runs, an existing result might be overwritten.
+default: './ai_scan_cli_output'
 ```
 
 ### maxUrls: --maxUrls
@@ -90,7 +91,6 @@ describe: Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if
 ```sh
 type: number
 describe: Maximum number of pages that the crawler will open. The crawl will stop when this limit is reached.
-Default is 100.
 Note that in cases of parallel crawling, the actual number of pages visited might be slightly higher than this value.
 default: 100,
 ```

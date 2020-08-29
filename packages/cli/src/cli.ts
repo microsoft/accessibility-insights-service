@@ -43,6 +43,7 @@ import { setupCliContainer } from './setup-cli-container';
             output: {
                 type: 'string',
                 describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./crawler_storage, if not.`,
+                default: 'ai_scan_cli_output',
             },
             maxUrls: {
                 type: 'number',
