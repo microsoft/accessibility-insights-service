@@ -37,14 +37,6 @@ if crawling is not enabled, you should provide either --url or --inputFile optio
   ai-scan --crawl true --url https://www.microsoft.com/
 ```
 
-## Usage
-
-As a prelude, see the help:
-
-```sh
-  Usage: ai-scan --crawl <crawl> --url <url> --simulate <simulate> [--selectors <selector1 ...>] --output <output> --maxUrls <maxUrls> --restart <restart> --snapshot <snapshot> --memoryMBytes <memoryMBytes> --silentMode <silentMode> [--existingUrls <url1 ...>] [--discoveryPatterns <pattern1 ...>]
-```
-
 ## Options
 
 ### crawl: --crawl
