@@ -7,9 +7,9 @@ Licensed under the MIT License.
 
 AI-Scan is a Command Line Interface (CLI) tool that implements automated web accessibility checks in a local environment. The tool currently provides the following capabilities:
 
-- Run automated checks against one URL.
-- Run automated checks against a file that has list of URLs separated by new line.
-- Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
+-   Run automated checks against one URL.
+-   Run automated checks against a file that has list of URLs separated by new line.
+-   Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
 
 ## Installation
 
