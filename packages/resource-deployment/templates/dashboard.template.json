@@ -320,9 +320,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/pendingScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "pendingScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "pendingScanRequests"
                                                             }
@@ -331,9 +331,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/acceptedScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "acceptedScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "acceptedScanRequests"
                                                             }
@@ -342,9 +342,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/queuedScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "queuedScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "queuedScanRequests"
                                                             }
@@ -353,9 +353,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/runningScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "runningScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "runningScanRequests"
                                                             }
@@ -364,9 +364,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/completedScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "completedScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "completedScanRequests"
                                                             }
@@ -375,9 +375,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/failedScanRequests",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "failedScanRequests",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "failedScanRequests"
                                                             }
@@ -386,9 +386,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/scanRequestNotificationsStarted",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "scanRequestNotificationsStarted",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "scanRequestNotificationsStarted"
                                                             }
@@ -397,9 +397,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/scanRequestNotificationsCompleted",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "scanRequestNotificationsCompleted",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "scanRequestNotificationsCompleted"
                                                             }
@@ -408,9 +408,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/scanRequestNotificationsFailed",
-                                                            "aggregationType": 4,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "name": "scanRequestNotificationsFailed",
+                                                            "aggregationType": 1,
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "scanRequestNotificationsFailed"
                                                             }
@@ -461,9 +461,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/totalScanRequests",
+                                                            "name": "totalScanRequests",
                                                             "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "totalScanRequests(Sum)"
                                                             }
@@ -472,9 +472,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/pendingScanRequests",
+                                                            "name": "pendingScanRequests",
                                                             "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "pendingScanRequests(Sum)",
                                                                 "color": "#2dc004"
@@ -484,9 +484,9 @@
                                                             "resourceMetadata": {
                                                                 "id": "[variables('appInsightsResourceId')]"
                                                             },
-                                                            "name": "customEvents/custom/rejectedScanRequests",
+                                                            "name": "rejectedScanRequests",
                                                             "aggregationType": 1,
-                                                            "namespace": "microsoft.insights/components/kusto",
+                                                            "namespace": "azure.applicationinsights",
                                                             "metricVisualization": {
                                                                 "displayName": "rejectedScanRequests(Sum)",
                                                                 "color": "#f71a21"
