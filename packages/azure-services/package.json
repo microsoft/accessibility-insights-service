@@ -23,7 +23,7 @@
     "homepage": "https://github.com/manishsat/accessibility-insights-service#readme",
     "devDependencies": {
         "@types/jest": "^26.0.9",
-        "@types/lodash": "^4.14.159",
+        "@types/lodash": "^4.14.161",
         "@types/request": "^2.48.5",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
