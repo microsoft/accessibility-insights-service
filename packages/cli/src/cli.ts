@@ -7,7 +7,6 @@ import 'reflect-metadata';
 // tslint:disable-next-line: no-import-side-effect
 import './module-name-mapper';
 
-import { CrawlerEntryPoint, setupCrawlerContainer } from 'accessibility-insights-crawler';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
@@ -18,7 +17,17 @@ import { setupCliContainer } from './setup-cli-container';
 
 // tslint:disable-next-line:max-func-body-length
 (async () => {
-    const scanArguments = (yargs
+    const scanArguments = readScanArguments();
+
+    const cliEntryPoint = new CliEntryPoint(setupCliContainer());
+    await cliEntryPoint.runScan(scanArguments);
+})().catch((error) => {
+    console.log('Exception occurred while running the tool: ', error);
+    process.exit(1);
+});
+
+function readScanArguments(): ScanArguments {
+    return (yargs
         .wrap(yargs.terminalWidth())
         .options({
             crawl: {
@@ -97,27 +106,4 @@ import { setupCliContainer } from './setup-cli-container';
             return true;
         })
         .describe('help', 'Show help').argv as unknown) as ScanArguments;
-
-    if (!scanArguments.crawl) {
-        const cliEntryPoint = new CliEntryPoint(setupCliContainer());
-        await cliEntryPoint.runScan(scanArguments);
-    } else {
-        await new CrawlerEntryPoint(setupCrawlerContainer()).crawl({
-            baseUrl: scanArguments.url,
-            simulate: scanArguments.simulate,
-            selectors: scanArguments.selectors,
-            localOutputDir: scanArguments.output,
-            maxRequestsPerCrawl: scanArguments.maxUrls,
-            restartCrawl: scanArguments.restart,
-            snapshot: scanArguments.snapshot,
-            memoryMBytes: scanArguments.memoryMBytes,
-            silentMode: scanArguments.silentMode,
-            inputFile: scanArguments.inputFile,
-            existingUrls: scanArguments.existingUrls,
-            discoveryPatterns: scanArguments.discoveryPatterns,
-        });
-    }
-})().catch((error) => {
-    console.log('Exception occurred while running the tool: ', error);
-    process.exit(1);
-});
+}

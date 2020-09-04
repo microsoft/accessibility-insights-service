@@ -35,7 +35,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.mkdirSync('.'))
+            .setup((fsm) => fsm.mkdirSync('.', { recursive: true }))
             .returns(() => {})
             .verifiable(Times.never());
 
@@ -61,7 +61,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.mkdirSync('.'))
+            .setup((fsm) => fsm.mkdirSync('.', { recursive: true }))
             .returns(() => {})
             .verifiable(Times.once());
 
@@ -88,7 +88,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.mkdirSync('.'))
+            .setup((fsm) => fsm.mkdirSync('.', { recursive: true }))
             .returns(() => {})
             .verifiable(Times.once());
 
