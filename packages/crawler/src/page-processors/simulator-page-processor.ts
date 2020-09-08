@@ -4,6 +4,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { ActiveElement } from '../browser-components/active-elements-finder';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
@@ -12,7 +13,6 @@ import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { PageProcessorBase } from './page-processor-base';
-import { DataBase } from '../level-storage/data-base';
 
 @injectable()
 // tslint:disable: no-unsafe-any

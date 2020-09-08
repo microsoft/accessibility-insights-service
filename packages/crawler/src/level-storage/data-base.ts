@@ -14,10 +14,7 @@ import leveldown from 'leveldown';
 export class DataBase {
     private db: LevelUp;
 
-    public constructor(
-        protected readonly levelupObj: typeof levelup = levelup,
-        protected readonly leveldownObj: typeof leveldown = leveldown,
-    ) {}
+    constructor(protected readonly levelupObj: typeof levelup = levelup, protected readonly leveldownObj: typeof leveldown = leveldown) {}
 
     public async addFail(key: string, value: SummaryScanResult): Promise<void> {
         await this.open();
