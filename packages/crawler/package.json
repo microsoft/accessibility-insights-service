@@ -30,6 +30,7 @@
         "@types/cheerio": "^0.22.21",
         "@types/jest": "^26.0.9",
         "@types/node": "^12.12.54",
+        "@types/levelup": "0.0.30",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -57,6 +58,9 @@
         "puppeteer": "^4.0.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
-        "yargs": "^15.3.1"
+        "yargs": "^15.3.1",
+        "temp-accessibility-insights-report": "C:/Users/ahmohame.REDMOND/Downloads/temp-report-package.tar/temp-report-package",
+        "levelup": "4.4.0",
+        "leveldown": "5.6.0"
     }
 }

@@ -10,6 +10,10 @@ import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 
+import levelup from 'levelup';
+
+// import leveldown from 'leveldown';
+
 export type PartialScanData = {
     url: string;
     id: string;
@@ -35,6 +39,9 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
+    // tslint:disable-next-line: member-access
+    const db = levelup(leveldown('db'));
+
     public constructor(
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
@@ -45,6 +52,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
+        protected readonly levelupObj: typeof levelup = typeof levelup,
+        // protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {}
 
     /**
