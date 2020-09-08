@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-
 import { injectable } from 'inversify';
 import { SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
 
@@ -15,7 +14,10 @@ import leveldown from 'leveldown';
 export class DataBase {
     private db: LevelUp;
 
-    constructor(protected readonly levelupObj: typeof levelup = levelup, protected readonly leveldownObj: typeof leveldown = leveldown) {}
+    public constructor(
+        protected readonly levelupObj: typeof levelup = levelup,
+        protected readonly leveldownObj: typeof leveldown = leveldown,
+    ) {}
 
     public async addFail(key: string, value: SummaryScanResult): Promise<void> {
         await this.open();
