@@ -4,6 +4,7 @@
 export interface ScanData {
     id: string;
     url: string;
+    issueCount: number;
     succeeded: boolean;
     activatedElement?: {
         html: string;

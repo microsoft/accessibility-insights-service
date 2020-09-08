@@ -4,15 +4,13 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
+import { SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
-
-import levelup from 'levelup';
-
-// import leveldown from 'leveldown';
 
 export type PartialScanData = {
     url: string;
@@ -40,20 +38,18 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
     // tslint:disable-next-line: member-access
-    const db = levelup(leveldown('db'));
 
     public constructor(
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+        @inject(DataBase) protected readonly dataBase: DataBase,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
-        protected readonly levelupObj: typeof levelup = typeof levelup,
-        // protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {}
 
     /**
@@ -103,6 +99,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             context: request.userData,
             error: JSON.stringify(error),
             requestErrors: request.errorMessages as string[],
+            issueCount: 0,
         };
         await this.dataStore.pushData(scanData);
         await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
@@ -131,6 +128,28 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {
+        if (scanData.succeeded) {
+            const summaryScanResult: SummaryScanResult = {
+                numFailures: scanData.issueCount === undefined ? 0 : scanData.issueCount,
+                url: scanData.url,
+                reportLocation: `${scanData.id}.report`,
+            };
+
+            if (summaryScanResult.numFailures === 0) {
+                await this.dataBase.addPass(scanData.id, summaryScanResult);
+            } else {
+                await this.dataBase.addFail(scanData.id, summaryScanResult);
+            }
+        } else {
+            const summaryScanError: SummaryScanError = {
+                url: scanData.url,
+                errorDescription: `${scanData.id}.error`,
+                errorType: 'error',
+            };
+
+            await this.dataBase.addError(scanData.id, summaryScanError);
+        }
+
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 

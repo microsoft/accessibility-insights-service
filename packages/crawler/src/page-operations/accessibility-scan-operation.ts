@@ -9,7 +9,7 @@ import { BlobStore } from '../storage/store-types';
 export class AccessibilityScanOperation {
     constructor(@inject(PageScanner) private readonly scanner: PageScanner) {}
 
-    public async run(page: Page, id: string, keyValueStore: BlobStore): Promise<void> {
+    public async run(page: Page, id: string, keyValueStore: BlobStore): Promise<number> {
         const scanResult = await this.scanner.scan(page);
 
         await keyValueStore.setValue(`${id}.axe`, scanResult.axeResults);
@@ -17,6 +17,10 @@ export class AccessibilityScanOperation {
 
         if (scanResult.axeResults.violations.length > 0) {
             console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on page ${page.url()}`);
+
+            return scanResult.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0);
         }
+
+        return 0;
     }
 }

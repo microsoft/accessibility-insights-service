@@ -12,6 +12,7 @@ import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { PageProcessorBase } from './page-processor-base';
+import { DataBase } from '../level-storage/data-base';
 
 @injectable()
 // tslint:disable: no-unsafe-any
@@ -20,6 +21,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+        @inject(DataBase) protected readonly dataBase: DataBase,
         protected readonly requestQueue: Apify.RequestQueue,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
@@ -34,6 +36,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             accessibilityScanOp,
             dataStore,
             blobStore,
+            dataBase,
             requestQueue,
             snapshot,
             discoveryPatterns,
@@ -49,9 +52,9 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             console.log(`Crawling page ${page.url()}`);
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, this.requestQueue);
-            await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+            const issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
             await this.saveSnapshot(page, request.id as string);
-            await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url });
+            await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
@@ -61,9 +64,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                 this.requestQueue,
                 this.discoveryPatterns,
             );
+            let issueCount;
             if (operationResult.clickAction === 'page-action') {
                 await this.enqueueLinks(page);
-                await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+                issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
                 await this.saveSnapshot(page, request.id as string);
             }
             await this.pushScanData({
@@ -75,6 +79,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                     clickAction: operationResult.clickAction,
                     navigationUrl: operationResult.navigationUrl,
                 },
+                issueCount: issueCount,
             });
         }
     };

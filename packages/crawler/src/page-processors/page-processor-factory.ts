@@ -16,6 +16,7 @@ import { PageProcessorOptions } from '../types/run-options';
 import { ClassicPageProcessor } from './classic-page-processor';
 import { PageProcessor } from './page-processor-base';
 import { SimulatorPageProcessor } from './simulator-page-processor';
+import { DataBase } from '../level-storage/data-base';
 
 @injectable()
 export class PageProcessorFactory {
@@ -30,6 +31,7 @@ export class PageProcessorFactory {
                 new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
                 new LocalDataStore(),
                 new LocalBlobStore(),
+                new DataBase(),
                 pageProcessorOptions.requestQueue,
                 this.crawlerConfiguration.getSnapshot(
                     pageProcessorOptions.crawlerRunOptions.snapshot,
@@ -46,6 +48,7 @@ export class PageProcessorFactory {
             new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
             new LocalDataStore(),
             new LocalBlobStore(),
+            new DataBase(),
             pageProcessorOptions.requestQueue,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),

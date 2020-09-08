@@ -10,6 +10,7 @@ import { AccessibilityScanOperation } from '../page-operations/accessibility-sca
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
+import { DataBase } from '../level-storage/data-base';
 
 // tslint:disable: no-any no-unsafe-any
 
@@ -24,6 +25,7 @@ describe(PageProcessorBase, () => {
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
+    let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
@@ -47,6 +49,7 @@ describe(PageProcessorBase, () => {
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
+        dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
@@ -68,6 +71,7 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            dataBaseMock.object,
             requestQueueMock.object,
             false,
             discoveryPatterns,
@@ -125,6 +129,7 @@ describe(PageProcessorBase, () => {
             context: requestStub.userData,
             error: JSON.stringify(error),
             requestErrors: requestStub.errorMessages as string[],
+            issueCount: 0,
         };
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();
@@ -167,6 +172,7 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            dataBaseMock.object,
             requestQueueMock.object,
             true,
             discoveryPatterns,
