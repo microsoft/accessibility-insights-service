@@ -77,11 +77,15 @@ describe(SimulatorPageProcessor, () => {
 
     it('pageProcessor, no-op', async () => {
         setupEnqueueLinks(pageStub);
-        accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId, blobStoreMock.object)).verifiable();
+        accessibilityScanOpMock
+            .setup((aso) => aso.run(pageStub, testId, blobStoreMock.object))
+            .returns(async () => Promise.resolve(0))
+            .verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
+            issueCount: 0,
         };
         blobStoreMock.setup((bs) => bs.setValue(`${expectedScanData.id}.data`, expectedScanData)).verifiable();
 

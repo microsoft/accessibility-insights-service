@@ -66,11 +66,15 @@ describe(ClassicPageProcessor, () => {
 
     it('pageProcessor', async () => {
         setupEnqueueLinks(pageStub);
-        accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId, blobStoreMock.object)).verifiable();
+        accessibilityScanOpMock
+            .setup((aso) => aso.run(pageStub, testId, blobStoreMock.object))
+            .returns(async () => Promise.resolve(0))
+            .verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
+            issueCount: 0,
         };
         setupPushScanData(expectedScanData);
 
