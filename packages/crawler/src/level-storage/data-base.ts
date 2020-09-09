@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { SummaryScanError, SummaryScanResult, SummaryReportResults } from 'temp-accessibility-insights-report';
+import { SummaryReportResults, SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
 
 // tslint:disable-next-line: match-default-export-name
 import levelup, { LevelUp } from 'levelup';
@@ -60,15 +60,15 @@ export class DataBase {
         await this.open();
         DataBase.db.createReadStream().on('data', (data) => {
             const key: DataBaseKey = data.key as DataBaseKey;
-            console.log(`${key.type} ${key.key}`);
+            // console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
                 const value: SummaryScanError = data.value as SummaryScanError;
                 unscannable.push(value);
-                console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
+                // console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
             } else {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
-                console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
+                // console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
                 if (value.numFailures === 0) {
                     passed.push(value);
                 } else {

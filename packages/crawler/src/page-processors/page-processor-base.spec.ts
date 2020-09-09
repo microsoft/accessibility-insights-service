@@ -6,11 +6,11 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { DirectNavigationOptions, Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
-import { DataBase } from '../level-storage/data-base';
 
 // tslint:disable: no-any no-unsafe-any
 

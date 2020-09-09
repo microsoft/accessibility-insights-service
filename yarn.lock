@@ -11890,7 +11890,7 @@ teeny-request@6.0.1:
     stream-events "^1.0.5"
     uuid "^3.3.2"
 
-"temp-accessibility-insights-report@file:../../../Downloads/temp-report-package.tar/temp-report-package":
+temp-accessibility-insights-report@./packages/temp-report-package:
   version "0.1.0"
   dependencies:
     axe-core "4.0.1"
