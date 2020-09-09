@@ -38,13 +38,7 @@ class TestableWorker extends Worker {
     public onTasksAddedCallback: (tasks: JobTask[]) => Promise<void>;
     public excludeCompletedScansCallback: (scanMessages: ScanMessage[]) => Promise<ScanMessage[]>;
     public handleFailedTasksCallback: (failedTasks: BatchTask[]) => Promise<void>;
-
-    public get activeScanMessages(): ScanMessage[] {
-        return super.activeScanMessages;
-    }
-    public set activeScanMessages(messages: ScanMessage[]) {
-        super.activeScanMessages = messages;
-    }
+    public activeScanMessages: ScanMessage[];
 
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         return super.getMessagesForTaskCreation();
