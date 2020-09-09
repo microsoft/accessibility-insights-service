@@ -28,7 +28,7 @@ export class ReportDiskWriter {
         if (!this.fileSystemObj.existsSync(directory)) {
             console.log('output directory does not exists.');
             console.log(`creating output directory - ${directory}`);
-            this.fileSystemObj.mkdirSync(directory);
+            this.fileSystemObj.mkdirSync(directory, { recursive: true });
         }
 
         this.fileSystemObj.writeFileSync(`${directory}/${reportFileName}`, content);
