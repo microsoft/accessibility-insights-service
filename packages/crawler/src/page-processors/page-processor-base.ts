@@ -132,7 +132,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             const summaryScanResult: SummaryScanResult = {
                 numFailures: scanData.issueCount === undefined ? 0 : scanData.issueCount,
                 url: scanData.url,
-                reportLocation: `${scanData.id}.report`,
+                reportLocation: `key_value_stores/${scanResultStorageName}/${scanData.id}.report.html`,
             };
 
             if (summaryScanResult.numFailures === 0) {
@@ -143,7 +143,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         } else {
             const summaryScanError: SummaryScanError = {
                 url: scanData.url,
-                errorDescription: `${scanData.id}.error`,
+                errorDescription: `key_value_stores/${scanResultStorageName}/${scanData.id}.error.txt`,
                 errorType: 'error',
             };
 

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
+import { SummaryScanError, SummaryScanResult, SummaryReportResults } from 'temp-accessibility-insights-report';
 
 // tslint:disable-next-line: match-default-export-name
 import levelup, { LevelUp } from 'levelup';
@@ -52,24 +52,32 @@ export class DataBase {
     }
 
     // tslint:disable: no-unsafe-any
-    public async createReadStream(): Promise<void> {
+    public async createReadStream(): Promise<SummaryReportResults> {
+        const failed: SummaryScanResult[] = [];
+        const passed: SummaryScanResult[] = [];
+        const unscannable: SummaryScanError[] = [];
+
         await this.open();
         DataBase.db.createReadStream().on('data', (data) => {
-            console.log(`start scanning data base`);
             const key: DataBaseKey = data.key as DataBaseKey;
             console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
                 const value: SummaryScanError = data.value as SummaryScanError;
+                unscannable.push(value);
                 console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
             } else {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
                 console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
+                if (value.numFailures === 0) {
+                    passed.push(value);
+                } else {
+                    failed.push(value);
+                }
             }
-
-            console.log(`Done scanning data base`);
         });
-        console.log(`Done running the tool`);
+
+        return { failed, passed, unscannable };
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {
