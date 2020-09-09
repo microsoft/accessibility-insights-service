@@ -7,6 +7,7 @@ import Apify from 'apify';
 import * as cheerio from 'cheerio';
 import { inject, injectable } from 'inversify';
 import { ApifyResourceCreator } from '../apify/apify-resource-creator';
+import { DataBase } from '../level-storage/data-base';
 import { PageProcessorFactory } from '../page-processors/page-processor-factory';
 import { ResourceCreator } from '../types/resource-creator';
 import { CrawlerRunOptions } from '../types/run-options';
@@ -51,7 +52,19 @@ export class CrawlerEngine {
                 handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
                 maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
             });
-            await crawler.run();
+
+            const dataBase = new DataBase();
+
+            let promise = Promise.resolve();
+            await promise;
+
+            promise = crawler.run();
+            await promise;
+
+            console.log(`Done crawling`);
+            promise = dataBase.createReadStream();
+            await promise;
+            console.log(`Done reading`);
         });
     }
 }
