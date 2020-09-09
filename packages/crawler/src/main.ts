@@ -29,8 +29,10 @@ interface ScanArguments {
     inputFile: string;
     existingUrls: string[];
     discoveryPatterns: string[];
+    debugging: boolean;
 }
 
+// tslint:disable-next-line: max-func-body-length
 (async () => {
     dotenv.config();
 
@@ -85,6 +87,11 @@ interface ScanArguments {
                 describe: 'Open browser window while crawling when set to true.',
                 default: true,
             },
+            debugging: {
+                type: 'boolean',
+                describe: 'Disable crawler timeouts and open browser window for debugging.',
+                default: false,
+            },
             inputFile: {
                 type: 'string',
                 describe: 'List of URLs to crawl in addition to URLs discovered from crawling the provided URL.',
@@ -126,6 +133,7 @@ interface ScanArguments {
         inputFile: scanArguments.inputFile,
         existingUrls: scanArguments.existingUrls,
         discoveryPatterns: scanArguments.discoveryPatterns,
+        debugging: scanArguments.debugging,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
