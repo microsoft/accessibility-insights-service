@@ -39,17 +39,8 @@ class TestableBatchTaskCreator extends BatchTaskCreator {
     public validateTasksCallback: () => Promise<void>;
     public getJobPendingTasksCountCallback: () => Promise<void>;
     public deleteScanQueueMessagesForSucceededTasksCallback: (scanMessages: ScanMessage[]) => Promise<void>;
-
-    public get activeScanMessages(): ScanMessage[] {
-        return super.activeScanMessages;
-    }
-    public set activeScanMessages(messages: ScanMessage[]) {
-        super.activeScanMessages = messages;
-    }
-
-    public set jobId(value: string) {
-        super.jobId = value;
-    }
+    public activeScanMessages: ScanMessage[];
+    public jobId: string;
 
     public getQueueName(): string {
         return 'queue-name';

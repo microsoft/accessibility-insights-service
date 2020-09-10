@@ -43,7 +43,7 @@ export class ActiveElementsFinder {
             function getElementSelector(element: HTMLElement): string {
                 try {
                     // @ts-ignore
-                    return finder(element);
+                    return finder.getCssSelector(element);
                 } catch {
                     return undefined;
                 }

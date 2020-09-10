@@ -6,6 +6,7 @@ drop/
 test-results/
 out/
 crawler_storage/
+ai_scan_cli_output/
 
 **/.secrets
 **/dev.DockerFile

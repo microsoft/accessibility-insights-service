@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import Apify from 'apify';
+
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { inject, injectable } from 'inversify';
@@ -38,14 +40,28 @@ export class CrawlerEngine {
             crawlerRunOptions,
         });
 
-        const crawler = this.crawlerFactory.createPuppeteerCrawler({
+        const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
             requestQueue,
             handlePageFunction: pageProcessor.pageHandler,
             gotoFunction: pageProcessor.gotoFunction,
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
-        });
+        };
 
+        if (crawlerRunOptions.debugging === true) {
+            this.crawlerConfiguration.setSilentMode(false);
+
+            puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
+            // tslint:disable-next-line: no-object-literal-type-assertion
+            puppeteerCrawlerOptions.launchPuppeteerOptions = { args: ['--auto-open-devtools-for-tabs'] } as Apify.LaunchPuppeteerOptions;
+            puppeteerCrawlerOptions.puppeteerPoolOptions = {
+                puppeteerOperationTimeoutSecs: 3600,
+                instanceKillerIntervalSecs: 3600,
+                killInstanceAfterSecs: 3600,
+            };
+        }
+
+        const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
         await crawler.run();
     }
 }
