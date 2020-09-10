@@ -218,20 +218,20 @@
     "@azure/ms-rest-js" "^1.8.6"
     adal-node "^0.1.28"
 
-"@azure/storage-blob@12.1.2":
-  version "12.1.2"
-  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.1.2.tgz#046d146a3bd2622b61d6bdc5708955893a5b4f04"
-  integrity sha512-PCHgG4r3xLt5FaFj+uiMqrRpuzD3TD17cvxCeA1JKK2bJEf8b07H3QRLQVf0DM1MmvYY8FgQagkWZTp+jr9yew==
+"@azure/storage-blob@12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.2.0.tgz#73a3c7322d83f140193d9419b679f8c1e3402b3b"
+  integrity sha512-riCI7GndZc6XGr2vL0mfaK/aLaKKDOUtGZLnN0yGw+Fn+vmNvSNzv85a5dxGtIAbx2vyzfhOUV/qtGJbiVO5dQ==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
-    "@azure/core-http" "^1.1.1"
+    "@azure/core-http" "^1.1.6"
     "@azure/core-lro" "^1.0.2"
     "@azure/core-paging" "^1.1.1"
-    "@azure/core-tracing" "1.0.0-preview.8"
+    "@azure/core-tracing" "1.0.0-preview.9"
     "@azure/logger" "^1.0.0"
-    "@opentelemetry/api" "^0.6.1"
+    "@opentelemetry/api" "^0.10.2"
     events "^3.0.0"
-    tslib "^1.10.0"
+    tslib "^2.0.0"
 
 "@azure/storage-queue@^10.1.0":
   version "10.3.0"
