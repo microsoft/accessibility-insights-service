@@ -46,7 +46,7 @@
         "storage-documents": "1.0.0",
         "chai": "^4.2.0",
         "yargs": "^15.3.1",
-        "@azure/cosmos": "^3.9.0",
+        "@azure/cosmos": "^3.9.1",
         "dotenv": "^8.2.0"
     }
 }

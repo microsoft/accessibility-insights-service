@@ -50,7 +50,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@azure/cosmos": "^3.9.0",
+        "@azure/cosmos": "^3.9.1",
         "accessibility-insights-report": "2.0.0",
         "applicationinsights": "^1.8.0",
         "axe-core": "4.0.1",

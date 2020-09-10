@@ -110,10 +110,10 @@
     "@opentelemetry/api" "^0.10.2"
     tslib "^2.0.0"
 
-"@azure/cosmos@^3.9.0":
-  version "3.9.0"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.9.0.tgz#e205a26361a68da3cc613dceb1e035181f023f0b"
-  integrity sha512-SA+QB54I8Dvg/ZolHpsEDLK/sbSB9sFmSU1ElnMTFw88TVik+LYHq4o/srU2TY6Gr1BketjPmgLVEqrmnRvjkw==
+"@azure/cosmos@^3.9.1":
+  version "3.9.1"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.9.1.tgz#4fc0790a965dc38806d6f85b6d91cfc79062338e"
+  integrity sha512-+XUNzgQdmfWJL3ofkBtpBfbE6s56DsRCg8HSE1cDEwHdxU40LO40YCaxNHnlNbj1cbAiBJH/65DCUybthGcjGA==
   dependencies:
     "@types/debug" "^4.1.4"
     debug "^4.1.1"
