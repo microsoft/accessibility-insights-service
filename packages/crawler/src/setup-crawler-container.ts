@@ -4,9 +4,11 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
+import { dataBase, DataBase } from './level-storage/data-base';
 
 export function setupCrawlerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
+    container.bind(DataBase).toConstantValue(dataBase);
     container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind('ReporterFactory').toConstantValue(reporterFactory);
 

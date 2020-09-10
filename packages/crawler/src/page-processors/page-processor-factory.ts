@@ -7,7 +7,7 @@ import { inject, injectable } from 'inversify';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
-import { DataBase } from '../level-storage/data-base';
+import { dataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
@@ -32,7 +32,7 @@ export class PageProcessorFactory {
                 new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
                 new LocalDataStore(),
                 new LocalBlobStore(),
-                new DataBase(),
+                dataBase,
                 pageProcessorOptions.requestQueue,
                 this.crawlerConfiguration.getSnapshot(
                     pageProcessorOptions.crawlerRunOptions.snapshot,
@@ -49,7 +49,7 @@ export class PageProcessorFactory {
             new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
             new LocalDataStore(),
             new LocalBlobStore(),
-            new DataBase(),
+            dataBase,
             pageProcessorOptions.requestQueue,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),

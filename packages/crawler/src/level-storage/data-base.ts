@@ -23,9 +23,9 @@ export interface DataBaseKey {
 
 @injectable()
 export class DataBase {
-    private static db: LevelUp;
 
     constructor(
+        protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
         protected readonly leveldownObj: typeof leveldown = leveldown,
         protected readonly encodeObj: typeof encode = encode,
@@ -48,7 +48,7 @@ export class DataBase {
 
     public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult): Promise<void> {
         await this.open();
-        await DataBase.db.put(key, value);
+        await this.db.put(key, value);
     }
 
     // tslint:disable: no-unsafe-any
@@ -58,17 +58,17 @@ export class DataBase {
         const unscannable: SummaryScanError[] = [];
 
         await this.open();
-        DataBase.db.createReadStream().on('data', (data) => {
+        this.db.createReadStream().on('data', (data) => {
             const key: DataBaseKey = data.key as DataBaseKey;
-            // console.log(`${key.type} ${key.key}`);
+            console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
                 const value: SummaryScanError = data.value as SummaryScanError;
                 unscannable.push(value);
-                // console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
+                console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
             } else {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
-                // console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
+                console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
                 if (value.numFailures === 0) {
                     passed.push(value);
                 } else {
@@ -81,14 +81,16 @@ export class DataBase {
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {
-        if (DataBase.db === undefined) {
-            DataBase.db = this.levelupObj(
+        if (this.db === undefined) {
+            this.db = this.levelupObj(
                 this.encodeObj(this.leveldownObj(`${outputDir}/database`), { valueEncoding: 'json', keyEncoding: 'json' }),
             );
         }
 
-        if (DataBase.db.isClosed()) {
-            await DataBase.db.open();
+        if (this.db.isClosed()) {
+            await this.db.open();
         }
     }
 }
+
+export const dataBase = new DataBase();
