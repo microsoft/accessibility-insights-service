@@ -23,7 +23,6 @@ export interface DataBaseKey {
 
 @injectable()
 export class DataBase {
-
     constructor(
         protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
