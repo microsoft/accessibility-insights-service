@@ -7,10 +7,6 @@ import * as fs from 'fs';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
-import { ConsoleSummaryReportGenerator } from '../report/summary-report/console-summary-report-generator';
-import { HtmlSummaryReportGenerator } from '../report/summary-report/html-summary-report-generator';
-import { JsonSummaryReportGenerator } from '../report/summary-report/json-summary-report-generator';
-import { SummaryReportData, UrlToReportMap, ViolationCountMap } from '../report/summary-report/summary-report-data';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
@@ -23,9 +19,6 @@ describe(FileCommandRunner, () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let fsMock: IMock<typeof fs>;
-    let jsonSummaryReportGeneratorMock: IMock<JsonSummaryReportGenerator>;
-    let htmlSummaryReportGeneratorMock: IMock<HtmlSummaryReportGenerator>;
-    let consoleSummaryReportGeneratorMock: IMock<ConsoleSummaryReportGenerator>;
     let testSubject: FileCommandRunner;
     const testInputFile = 'input file';
     const testInput: ScanArguments = { inputFile: testInputFile, output: '/users/xyz' };
@@ -34,20 +27,9 @@ describe(FileCommandRunner, () => {
         scannerMock = Mock.ofType(AIScanner, MockBehavior.Strict);
         reportGeneratorMock = Mock.ofType(ReportGenerator, MockBehavior.Strict);
         reportDiskWriterMock = Mock.ofType(ReportDiskWriter, MockBehavior.Strict);
-        jsonSummaryReportGeneratorMock = Mock.ofType(JsonSummaryReportGenerator, MockBehavior.Strict);
-        htmlSummaryReportGeneratorMock = Mock.ofType(HtmlSummaryReportGenerator, MockBehavior.Strict);
-        consoleSummaryReportGeneratorMock = Mock.ofType(ConsoleSummaryReportGenerator, MockBehavior.Strict);
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
 
-        testSubject = new FileCommandRunner(
-            scannerMock.object,
-            reportGeneratorMock.object,
-            reportDiskWriterMock.object,
-            jsonSummaryReportGeneratorMock.object,
-            htmlSummaryReportGeneratorMock.object,
-            consoleSummaryReportGeneratorMock.object,
-            fsMock.object,
-        );
+        testSubject = new FileCommandRunner(scannerMock.object, reportGeneratorMock.object, reportDiskWriterMock.object, fsMock.object);
     });
 
     describe('runCommand', () => {
@@ -71,35 +53,6 @@ describe(FileCommandRunner, () => {
             fail-url-2
             un-scannable-url-2
         `;
-            const allViolationsCountRuleMap: ViolationCountMap = {
-                'fail-url-1-rule-1': 1,
-                'fail-url-1-rule-2': 2,
-                'fail-url-2-rule-1': 1,
-                'fail-url-2-rule-2': 2,
-                'common-fail-rule1': 2,
-            };
-            const failedUrlToReportMap: UrlToReportMap = {
-                'fail-url-1': 'fail-url-1-report',
-                'fail-url-2': 'fail-url-2-report',
-            };
-
-            const passedUrlToReportMap: UrlToReportMap = {
-                'pass-url-1': 'pass-url-1-report',
-                'pass-url-2': 'pass-url-2-report',
-            };
-            const unscannableUrls = {
-                'un-scannable-url-1': 'un-scannable-url-1-report',
-                'un-scannable-url-2': 'un-scannable-url-2-report',
-            };
-
-            const expectedSummaryData: SummaryReportData = {
-                failedUrlToReportMap: failedUrlToReportMap,
-                passedUrlToReportMap: passedUrlToReportMap,
-                unscannableUrls: unscannableUrls,
-                violationCountByRuleMap: allViolationsCountRuleMap,
-            };
-
-            setupSummaryFileCreationCall(expectedSummaryData);
 
             await testSubject.runCommand(testInput);
         });
@@ -110,15 +63,6 @@ describe(FileCommandRunner, () => {
             un-scannable-url-2
             `;
 
-            const expectedSummaryData: SummaryReportData = {
-                failedUrlToReportMap: {},
-                passedUrlToReportMap: {},
-                unscannableUrls: { 'un-scannable-url-1': 'un-scannable-url-1-report', 'un-scannable-url-2': 'un-scannable-url-2-report' },
-                violationCountByRuleMap: {},
-            };
-
-            setupSummaryFileCreationCall(expectedSummaryData);
-
             await testSubject.runCommand(testInput);
         });
 
@@ -126,15 +70,6 @@ describe(FileCommandRunner, () => {
             fileContent = `
             \r\n
         `;
-
-            const expectedSummaryData: SummaryReportData = {
-                failedUrlToReportMap: {},
-                passedUrlToReportMap: {},
-                unscannableUrls: {},
-                violationCountByRuleMap: {},
-            };
-
-            setupSummaryFileCreationCall(expectedSummaryData);
 
             await testSubject.runCommand(testInput);
         });
@@ -165,17 +100,6 @@ describe(FileCommandRunner, () => {
                 })
                 .verifiable(Times.atLeast(0));
 
-            const expectedSummaryData: SummaryReportData = {
-                failedUrlToReportMap: {},
-                passedUrlToReportMap: {
-                    'pass-url-1': 'pass-url-1-report',
-                },
-                unscannableUrls: {},
-                violationCountByRuleMap: {},
-            };
-
-            setupSummaryFileCreationCall(expectedSummaryData);
-
             await testSubject.runCommand(testInput);
         });
     });
@@ -184,33 +108,7 @@ describe(FileCommandRunner, () => {
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
         reportDiskWriterMock.verifyAll();
-        jsonSummaryReportGeneratorMock.verifyAll();
-        htmlSummaryReportGeneratorMock.verifyAll();
-        consoleSummaryReportGeneratorMock.verifyAll();
     });
-
-    function setupSummaryFileCreationCall(expectedSummaryData: SummaryReportData): void {
-        consoleSummaryReportGeneratorMock.setup((c) => c.generateReport(It.isValue(expectedSummaryData))).verifiable(Times.once());
-
-        jsonSummaryReportGeneratorMock
-            .setup((c) => c.generateReport(It.isValue(expectedSummaryData)))
-            .returns(() => 'json-summary-data')
-            .verifiable(Times.once());
-        htmlSummaryReportGeneratorMock
-            .setup((c) => c.generateReport(It.isValue(expectedSummaryData)))
-            .returns(() => 'html-summary-data')
-            .verifiable(Times.once());
-
-        reportDiskWriterMock
-            .setup((r) => r.writeToDirectory(testInput.output, 'scan-summary', 'json', 'json-summary-data'))
-            .returns(() => 'json-summary-data.json')
-            .verifiable(Times.once());
-
-        reportDiskWriterMock
-            .setup((r) => r.writeToDirectory(testInput.output, 'scan-summary', 'html', 'html-summary-data'))
-            .returns(() => 'html-summary-data.html')
-            .verifiable(Times.once());
-    }
 
     function setupScanAndReportWriteCalls(): void {
         scannerMock

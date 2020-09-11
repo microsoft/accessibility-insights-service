@@ -11744,6 +11744,19 @@ temp-dir@^1.0.0:
   resolved "https://registry.yarnpkg.com/temp-dir/-/temp-dir-1.0.0.tgz#0a7c0ea26d3a39afa7e0ebea9c1fc0bc4daa011d"
   integrity sha1-CnwOom06Oa+n4OvqnB/AvE2qAR0=
 
+temp-report-package@./packages/temp-report-package:
+  version "0.1.0"
+  dependencies:
+    axe-core "4.0.1"
+    classnames "^2.2.6"
+    lodash "^4.17.20"
+    moment "^2.27.0"
+    office-ui-fabric-react "7.98.0"
+    react "^16.13.1"
+    react-dom "^16.13.1"
+    react-helmet "^6.1.0"
+    uuid "^8.3.0"
+
 temp-write@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/temp-write/-/temp-write-3.4.0.tgz#8cff630fb7e9da05f047c74ce4ce4d685457d492"
