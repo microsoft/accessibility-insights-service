@@ -5,7 +5,7 @@ Licensed under the MIT License.
 
 # accessibility-insights-report
 
-Publish [axe-core](https://github.com/dequelabs/axe-core) accessibility scan results as 
+Publish [axe-core](https://github.com/dequelabs/axe-core) accessibility scan results as
 self-contained HTML files in the same format as
 [accessibility-insights-web](https://github.com/microsoft/accessibility-insights-web).
 
