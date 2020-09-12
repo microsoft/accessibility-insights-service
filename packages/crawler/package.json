@@ -50,6 +50,7 @@
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",
         "common": "1.0.0",
+        "scanner-global-library": "1.0.0",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",

@@ -14,19 +14,19 @@ import { ContextAwareLogger } from './context-aware-logger';
 import { GlobalLogger } from './global-logger';
 import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
-import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from './register-logger-to-container';
+import { registerContextAwareLoggerToContainer, registerLoggerToContainer } from './register-logger-to-container';
 
 // tslint:disable: no-unsafe-any no-any
 
 let container: Container;
 
-describe(registerGlobalLoggerToContainer, () => {
+describe('registerGlobalLoggerToContainer', () => {
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
     });
 
     it('verify logger dependency resolution', () => {
-        registerGlobalLoggerToContainer(container);
+        registerLoggerToContainer(container);
 
         expect(container.get(loggerTypes.AppInsights)).toStrictEqual(appInsights);
         expect(container.get(loggerTypes.Process)).toStrictEqual(process);
@@ -40,7 +40,7 @@ describe(registerGlobalLoggerToContainer, () => {
     });
 
     it('verify GlobalLogger resolution', () => {
-        registerGlobalLoggerToContainer(container);
+        registerLoggerToContainer(container);
 
         const logger = container.get(GlobalLogger);
 
@@ -50,28 +50,31 @@ describe(registerGlobalLoggerToContainer, () => {
     });
 });
 
-describe(registerContextAwareLoggerToContainer, () => {
+describe('registerContextAwareLoggerToContainer', () => {
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
     });
 
     it('verify logger dependency resolution', () => {
-        registerGlobalLoggerToContainer(container);
-        registerContextAwareLoggerToContainer(container);
+        registerLoggerToContainer(container);
 
         verifySingletonDependencyResolution(ContextAwareAppInsightsLoggerClient);
         verifySingletonDependencyResolution(ContextAwareConsoleLoggerClient);
     });
 
-    it('throws without global logger setup', () => {
-        registerContextAwareLoggerToContainer(container);
+    it('verify context container logger resolution', () => {
+        registerLoggerToContainer(container);
 
-        expect(() => container.get(ContextAwareLogger)).toThrowError();
+        const contextContainer = new Container({ autoBindInjectable: true });
+        contextContainer.parent = container;
+        registerContextAwareLoggerToContainer(contextContainer);
+
+        verifySingletonDependencyResolution(ContextAwareLogger);
+        verifySingletonDependencyResolution(ContextAwareLogger, contextContainer);
     });
 
     it('verify context logger resolution', () => {
-        registerGlobalLoggerToContainer(container);
-        registerContextAwareLoggerToContainer(container);
+        registerLoggerToContainer(container);
 
         const logger = container.get(ContextAwareLogger);
 
@@ -81,7 +84,7 @@ describe(registerContextAwareLoggerToContainer, () => {
     });
 });
 
-function verifySingletonDependencyResolution(key: any): void {
-    expect(container.get(key)).toBeDefined();
-    expect(container.get(key)).toBe(container.get(key));
+function verifySingletonDependencyResolution(key: any, testContainer: Container = container): void {
+    expect(testContainer.get(key)).toBeDefined();
+    expect(testContainer.get(key)).toBe(testContainer.get(key));
 }

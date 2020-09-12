@@ -15,6 +15,8 @@ import { CrawlerFactory } from './crawler-factory';
 
 export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
 
+// tslint:disable: no-object-literal-type-assertion
+
 @injectable()
 export class CrawlerEngine {
     public constructor(
@@ -49,13 +51,19 @@ export class CrawlerEngine {
             gotoFunction: pageProcessor.gotoFunction,
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.getMaxRequestsPerCrawl(crawlerRunOptions.maxRequestsPerCrawl),
+            launchPuppeteerOptions: {
+                defaultViewport: {
+                    width: 1920,
+                    height: 1080,
+                    deviceScaleFactor: 1,
+                },
+            } as Apify.LaunchPuppeteerOptions,
         };
 
         if (crawlerRunOptions.debugging === true) {
             this.crawlerConfiguration.setSilentMode(false);
 
             puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
-            // tslint:disable-next-line: no-object-literal-type-assertion
             puppeteerCrawlerOptions.launchPuppeteerOptions = { args: ['--auto-open-devtools-for-tabs'] } as Apify.LaunchPuppeteerOptions;
             puppeteerCrawlerOptions.puppeteerPoolOptions = {
                 puppeteerOperationTimeoutSecs: 3600,

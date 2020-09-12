@@ -7,7 +7,6 @@ import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { registerScannerToContainer } from './register-scanner-to-container';
-import { Scanner } from './scanner';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
 // tslint:disable: no-unsafe-any no-any
@@ -21,15 +20,6 @@ describe(registerScannerToContainer, () => {
         loggerMock = Mock.ofType(MockableLogger);
 
         container.bind(GlobalLogger).toConstantValue(loggerMock.object);
-    });
-
-    it('should verify scanner resolution', () => {
-        registerScannerToContainer(container);
-
-        const scanner = container.get(Scanner);
-
-        expect(scanner).toBeDefined();
-        expect(scanner).toBeInstanceOf(Scanner);
     });
 
     it('should verify singleton resolution', () => {
