@@ -48,10 +48,10 @@ describe(FileCommandRunner, () => {
             fileContent = `
             pass-url-1\r\n
             fail-url-1
-            un-scannable-url-1
+            un-scannable-internal-error
             pass-url-2\n
             fail-url-2
-            un-scannable-url-2
+            un-scannable-browser-error
         `;
 
             await testSubject.runCommand(testInput);
@@ -59,8 +59,8 @@ describe(FileCommandRunner, () => {
 
         it('with un scannable urls only', async () => {
             fileContent = `
-            un-scannable-url-1
-            un-scannable-url-2
+            un-scannable-internal-error
+            un-scannable-browser-error
             `;
 
             await testSubject.runCommand(testInput);
@@ -167,9 +167,31 @@ describe(FileCommandRunner, () => {
             .verifiable(Times.atLeast(0));
 
         scannerMock
-            .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable'))))
+            .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable-browser-error'))))
             .returns(async (url: string) => {
                 const result = {
+                    results: {
+                        passes: [],
+                        violations: [],
+                    },
+                    error: {
+                        errorType: 'InvalidUrl',
+                        responseStatusCode: 500,
+                        message: 'invalid url',
+                        stack: 'unable to scan',
+                    },
+                } as AxeScanResults;
+
+                setupErrorReportCreationCalls(url);
+
+                return result;
+            })
+            .verifiable(Times.atLeast(0));
+
+        scannerMock
+            .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable-internal-error'))))
+            .returns(async (url: string) => {
+                return {
                     results: {
                         passes: [],
                         violations: [],
@@ -178,10 +200,6 @@ describe(FileCommandRunner, () => {
                         message: 'unable to scan',
                     },
                 } as AxeScanResults;
-
-                setupErrorReportCreationCalls(url);
-
-                return result;
             })
             .verifiable(Times.atLeast(0));
     }

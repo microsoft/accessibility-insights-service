@@ -146,6 +146,7 @@ describe('Page', () => {
                 responseStatusCode: 500,
                 errorType: 'HttpErrorCode',
                 message: `Page returned an unsuccessful response code`,
+                stack: `Page returned an unsuccessful response code 500`,
             },
         };
         const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 500 });
@@ -178,6 +179,7 @@ describe('Page', () => {
                 responseStatusCode: 500,
                 errorType: 'HttpErrorCode',
                 message: 'Page returned an unsuccessful response code',
+                stack: 'Page returned an unsuccessful response code 500',
             },
         };
         const response: Puppeteer.Response = makeResponse({ contentType: contentType, statusCode: 500 });
@@ -297,7 +299,12 @@ describe('Page', () => {
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
-            error: { responseStatusCode: 404, errorType: 'HttpErrorCode', message: 'Page returned an unsuccessful response code' },
+            error: {
+                responseStatusCode: 404,
+                errorType: 'HttpErrorCode',
+                message: 'Page returned an unsuccessful response code',
+                stack: 'Page returned an unsuccessful response code 404',
+            },
         };
         const response: Puppeteer.Response = makeResponse({ statusCode: 404 });
 
@@ -409,19 +416,21 @@ describe('Page', () => {
         ];
 
         test.each(testCaseMappings)('should identify errors thrown by goto - %o', async (testCase: NavigationErrorTestCase) => {
+            const testCaseError = new Error(testCase.errorMessage);
             const scanUrl = 'https://www.problem-url.com';
 
             const errorResult: AxeScanResults = {
                 error: {
                     errorType: testCase.expectedScanErrorType,
                     message: testCase.errorMessage,
+                    stack: testCaseError.stack,
                 },
             };
 
             gotoMock
                 .setup(async (goto) => goto(scanUrl, gotoOptions))
                 .returns(async () => {
-                    throw new Error(testCase.errorMessage);
+                    throw testCaseError;
                 })
                 .verifiable(Times.once());
 

@@ -13,6 +13,12 @@ import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
+export interface PageError {
+    // tslint:disable-next-line:no-reserved-keywords
+    url: string;
+    error: string;
+}
+
 @injectable()
 export class FileCommandRunner implements CommandRunner {
     // tslint:disable-next-line: no-object-literal-type-assertion
@@ -21,6 +27,8 @@ export class FileCommandRunner implements CommandRunner {
         passed: [],
         unscannable: [],
     };
+
+    private readonly errors: PageError[] = [];
 
     private readonly uniqueUrls = new Set();
 
@@ -53,11 +61,7 @@ export class FileCommandRunner implements CommandRunner {
         }
 
         await promise;
-
-        await this.generateSummaryReport(scanArguments);
     }
-
-    private async generateSummaryReport(scanArguments: ScanArguments): Promise<void> {}
 
     private async processUrl(url: string, scanArguments: ScanArguments): Promise<void> {
         const axeResults = await this.scanner.scan(url);
@@ -68,22 +72,23 @@ export class FileCommandRunner implements CommandRunner {
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
-            let reportContent = (axeResults.error as ScanError).message;
-            if (isEmpty(reportContent)) {
-                reportContent = axeResults.error.toString();
+            const error = axeResults.error as ScanError;
+
+            if (error?.errorType !== undefined) {
+                const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', error.stack);
+
+                const summaryScanError: SummaryScanError = {
+                    url: url,
+                    errorType: error.errorType,
+                    errorDescription: error.message,
+                    errorLogLocation: reportName,
+                };
+
+                this.summaryReportResults.unscannable.push(summaryScanError);
+                console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
+            } else {
+                this.errors.push({ url, error: axeResults.error.toString() });
             }
-
-            const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', reportContent);
-
-            const summaryScanError: SummaryScanError = {
-                url: url,
-                errorType: (axeResults.error as ScanError).errorType,
-                errorDescription: reportName,
-                errorLogLocation: reportName,
-            };
-
-            this.summaryReportResults.unscannable.push(summaryScanError);
-            console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
         }
     }
 
