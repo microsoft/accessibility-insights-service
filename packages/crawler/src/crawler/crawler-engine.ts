@@ -13,6 +13,7 @@ import { CrawlerRunOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
+// tslint:disable:no-object-literal-type-assertion
 @injectable()
 export class CrawlerEngine {
     public constructor(

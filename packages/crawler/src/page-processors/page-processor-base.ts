@@ -1,8 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import Apify from 'apify';
+
+import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
 // tslint:disable-next-line:no-duplicate-imports
 import { Page, Response } from 'puppeteer';
