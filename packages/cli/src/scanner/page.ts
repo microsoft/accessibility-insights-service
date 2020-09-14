@@ -61,7 +61,7 @@ export class Page {
         } catch (error) {
             console.log('The URL navigation failed.', url, { scanError: serializeError(error) });
 
-            return { error: this.getScanErrorFromNavigationFailure((error as Error).message) };
+            return { error: this.getScanErrorFromNavigationFailure(error as Error) };
         }
 
         if (!response.ok()) {
@@ -72,6 +72,7 @@ export class Page {
                     errorType: 'HttpErrorCode',
                     responseStatusCode: response.status(),
                     message: 'Page returned an unsuccessful response code',
+                    stack: `Page returned an unsuccessful response code ${response.status()}`,
                 },
             };
         }
@@ -87,6 +88,7 @@ export class Page {
                     errorType: 'InvalidContentType',
                     responseStatusCode: response.status(),
                     message: `Content type: ${contentType}`,
+                    stack: `Invalid content type: ${contentType}`,
                 },
             };
         }
@@ -154,23 +156,24 @@ export class Page {
         }
     }
 
-    private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {
+    private getScanErrorFromNavigationFailure(error: Error): ScanError {
         const scanError: ScanError = {
             errorType: 'NavigationError',
-            message: errorMessage,
+            message: error.message,
+            stack: error.stack,
         };
 
-        if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {
+        if (/TimeoutError: Navigation Timeout Exceeded:/i.test(error.message)) {
             scanError.errorType = 'UrlNavigationTimeout';
-        } else if (errorMessage.includes('net::ERR_CERT_AUTHORITY_INVALID') || errorMessage.includes('SSL_ERROR_UNKNOWN')) {
+        } else if (error.message.includes('net::ERR_CERT_AUTHORITY_INVALID') || error.message.includes('SSL_ERROR_UNKNOWN')) {
             scanError.errorType = 'SslError';
-        } else if (errorMessage.includes('net::ERR_CONNECTION_REFUSED') || errorMessage.includes('NS_ERROR_CONNECTION_REFUSED')) {
+        } else if (error.message.includes('net::ERR_CONNECTION_REFUSED') || error.message.includes('NS_ERROR_CONNECTION_REFUSED')) {
             scanError.errorType = 'ResourceLoadFailure';
-        } else if (errorMessage.includes('Cannot navigate to invalid URL') || errorMessage.includes('Invalid url')) {
+        } else if (error.message.includes('Cannot navigate to invalid URL') || error.message.includes('Invalid url')) {
             scanError.errorType = 'InvalidUrl';
-        } else if (errorMessage.includes('net::ERR_ABORTED') || errorMessage.includes('NS_BINDING_ABORTED')) {
+        } else if (error.message.includes('net::ERR_ABORTED') || error.message.includes('NS_BINDING_ABORTED')) {
             scanError.errorType = 'EmptyPage';
-        } else if (errorMessage.includes('net::ERR_NAME_NOT_RESOLVED')) {
+        } else if (error.message.includes('net::ERR_NAME_NOT_RESOLVED')) {
             scanError.errorType = 'UrlNotResolved';
         }
 

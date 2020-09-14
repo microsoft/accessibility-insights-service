@@ -1,30 +1,34 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { Spinner } from 'cli-spinner';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
-import { ConsoleSummaryReportGenerator } from '../report/summary-report/console-summary-report-generator';
-import { HtmlSummaryReportGenerator } from '../report/summary-report/html-summary-report-generator';
-import { JsonSummaryReportGenerator } from '../report/summary-report/json-summary-report-generator';
-import { SummaryReportData } from '../report/summary-report/summary-report-data';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
+export interface PageError {
+    // tslint:disable-next-line:no-reserved-keywords
+    url: string;
+    error: string;
+}
+
 @injectable()
 export class FileCommandRunner implements CommandRunner {
     // tslint:disable-next-line: no-object-literal-type-assertion
-    private readonly summaryReportData = {
-        violationCountByRuleMap: {},
-        failedUrlToReportMap: {},
-        passedUrlToReportMap: {},
-        unscannableUrls: {},
-    } as SummaryReportData;
+    private readonly summaryReportResults: SummaryScanResults = {
+        failed: [],
+        passed: [],
+        unscannable: [],
+    };
+
+    private readonly errors: PageError[] = [];
 
     private readonly uniqueUrls = new Set();
 
@@ -32,9 +36,6 @@ export class FileCommandRunner implements CommandRunner {
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
-        @inject(JsonSummaryReportGenerator) private readonly jsonSummaryReportGenerator: JsonSummaryReportGenerator,
-        @inject(HtmlSummaryReportGenerator) private readonly htmlSummaryReportGenerator: HtmlSummaryReportGenerator,
-        @inject(ConsoleSummaryReportGenerator) private readonly consoleSummaryReportGenerator: ConsoleSummaryReportGenerator,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -60,28 +61,6 @@ export class FileCommandRunner implements CommandRunner {
         }
 
         await promise;
-
-        await this.generateSummaryReport(scanArguments);
-    }
-
-    private async generateSummaryReport(scanArguments: ScanArguments): Promise<void> {
-        console.log(this.consoleSummaryReportGenerator.generateReport(this.summaryReportData));
-
-        const jsonSummaryReportName = this.reportDiskWriter.writeToDirectory(
-            scanArguments.output,
-            `scan-summary`,
-            'json',
-            this.jsonSummaryReportGenerator.generateReport(this.summaryReportData),
-        );
-        console.log(`scan summary json was saved in file ${jsonSummaryReportName}`);
-
-        const htmlSummaryReportName = this.reportDiskWriter.writeToDirectory(
-            scanArguments.output,
-            `scan-summary`,
-            'html',
-            this.htmlSummaryReportGenerator.generateReport(this.summaryReportData),
-        );
-        console.log(`scan summary html was saved in file ${htmlSummaryReportName}`);
     }
 
     private async processUrl(url: string, scanArguments: ScanArguments): Promise<void> {
@@ -93,30 +72,45 @@ export class FileCommandRunner implements CommandRunner {
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
-            let reportContent = (axeResults.error as ScanError).message;
-            if (isEmpty(reportContent)) {
-                reportContent = axeResults.error.toString();
-            }
+            const error = axeResults.error as ScanError;
 
-            const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', reportContent);
-            this.summaryReportData.unscannableUrls[url] = reportName;
-            console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
+            if (error?.errorType !== undefined) {
+                const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', error.stack);
+
+                const summaryScanError: SummaryScanError = {
+                    url: url,
+                    errorType: error.errorType,
+                    errorDescription: error.message,
+                    errorLogLocation: reportName,
+                };
+
+                this.summaryReportResults.unscannable.push(summaryScanError);
+                console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
+            } else {
+                this.errors.push({ url, error: axeResults.error.toString() });
+            }
         }
     }
 
     private processURLScanResult(url: string, reportName: string, axeResults: AxeScanResults): void {
         if (axeResults.results.violations?.length > 0) {
-            axeResults.results.violations.forEach((violation) => {
-                this.summaryReportData.violationCountByRuleMap[violation.id] =
-                    // tslint:disable-next-line: strict-boolean-expressions
-                    (this.summaryReportData.violationCountByRuleMap[violation.id]
-                        ? this.summaryReportData.violationCountByRuleMap[violation.id]
-                        : 0) + violation.nodes.length;
-            });
-
-            this.summaryReportData.failedUrlToReportMap[url] = reportName;
+            // tslint:disable-next-line: strict-boolean-expressions
+            const issueCount = axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0);
+            const summaryScanError: SummaryScanResult = {
+                url: url,
+                reportLocation: reportName,
+                numFailures: issueCount,
+            };
+            this.summaryReportResults.failed.push(summaryScanError);
         } else {
-            this.summaryReportData.passedUrlToReportMap[url] = reportName;
+            const issueCount = 0;
+
+            const summaryScanError: SummaryScanResult = {
+                url: url,
+                reportLocation: reportName,
+                numFailures: issueCount,
+            };
+            this.summaryReportResults.passed.push(summaryScanError);
         }
     }
 }
