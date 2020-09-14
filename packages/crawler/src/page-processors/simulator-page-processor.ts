@@ -60,6 +60,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             const issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
             await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
+            await this.saveScanResultToDataBase(request, issueCount);
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
@@ -86,6 +87,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                 },
                 issueCount: issueCount,
             });
+            await this.saveScanResultToDataBase(request, issueCount);
         }
     };
 }

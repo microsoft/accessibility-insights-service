@@ -21,7 +21,7 @@ export interface DataBaseKey {
     key: string;
 }
 
-export interface ScanError {
+export interface PageError {
     // tslint:disable-next-line:no-reserved-keywords
     url: string;
     error: string;
@@ -29,7 +29,7 @@ export interface ScanError {
 
 export interface ScanResults {
     summaryScanResults: SummaryScanResults;
-    errors: ScanError[];
+    errors: PageError[];
 }
 
 @injectable()
@@ -51,7 +51,7 @@ export class DataBase {
         await this.add(dbKey, value);
     }
 
-    public async addError(key: string, value: ScanError): Promise<void> {
+    public async addError(key: string, value: PageError): Promise<void> {
         const dbKey: DataBaseKey = { type: 'error', key: key };
         await this.add(dbKey, value);
     }
@@ -61,7 +61,7 @@ export class DataBase {
         await this.add(dbKey, value);
     }
 
-    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult | ScanError): Promise<void> {
+    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult | PageError): Promise<void> {
         await this.open();
         await this.db.put(key, value);
     }
@@ -71,7 +71,7 @@ export class DataBase {
         const failed: SummaryScanResult[] = [];
         const passed: SummaryScanResult[] = [];
         const browserErrors: SummaryScanError[] = [];
-        const errors: ScanError[] = [];
+        const errors: PageError[] = [];
 
         await this.open();
         this.db.createReadStream().on('data', (data) => {
@@ -79,7 +79,7 @@ export class DataBase {
             console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
-                const value: ScanError = data.value as ScanError;
+                const value: PageError = data.value as PageError;
                 errors.push(value);
                 console.log(`${value.url} ${value.error}`);
             } else if (key.type === 'browserError') {

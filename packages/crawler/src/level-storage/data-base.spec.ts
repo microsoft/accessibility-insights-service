@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import { LevelUp } from 'levelup';
 import { IMock, Mock } from 'typemoq';
-import { DataBase, DataBaseKey, ScanError } from './data-base';
+import { DataBase, DataBaseKey, PageError } from './data-base';
 
 describe(DataBase, () => {
     let dbMock: IMock<LevelUp>;
@@ -35,7 +35,7 @@ describe(DataBase, () => {
 
     it('add error', async () => {
         const key: DataBaseKey = { type: 'error', key: 'id' };
-        const value: ScanError = {
+        const value: PageError = {
             url: 'url',
             error: 'error',
         };
