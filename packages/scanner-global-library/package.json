@@ -1,23 +1,20 @@
 {
-    "name": "accessibility-insights-crawler",
+    "name": "scanner-global-library",
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
+    "main": "dist/index.js",
     "scripts": {
-        "clean": "rimraf dist test-results",
-        "build": "npm-run-all --serial build:ts build:imports",
-        "build:ts": "tsc && echo",
-        "build:imports": "rollup -c",
+        "build": "tsc && echo",
         "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
-        "test": "jest --coverage --colors",
-        "start": "node ./dist/index.js"
+        "test": "jest --coverage --colors"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/Microsoft/accessibility-insights-service.git"
     },
-    "main": "dist/index.js",
     "author": "Microsoft",
     "license": "MIT",
     "bugs": {
@@ -25,19 +22,14 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^15.0.0",
-        "@rollup/plugin-node-resolve": "^7.1.3",
-        "@types/cheerio": "^0.22.21",
         "@types/jest": "^26.0.9",
+        "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
-        "@types/leveldown": "^4.0.2",
-        "@types/encoding-down": "^5.0.0",
-        "@types/levelup": "^4.3.0",
+        "@types/puppeteer": "^3.0.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
         "rimraf": "^3.0.2",
-        "rollup": "^2.26.5",
         "ts-jest": "^26.1.3",
         "tslint": "^6.1.2",
         "tslint-microsoft-contrib": "^6.0.0",
@@ -45,25 +37,12 @@
         "typescript": "^4.0.2"
     },
     "dependencies": {
-        "@medv/finder": "^2.0.0",
-        "accessibility-insights-report": "2.1.0",
-        "apify": "^0.21.4",
-        "apify-shared": "^0.2.12",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
-        "cheerio": "^1.0.0-rc.3",
-        "common": "1.0.0",
-        "scanner-global-library": "1.0.0",
-        "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
         "logger": "1.0.0",
         "puppeteer": "^4.0.0",
-        "reflect-metadata": "^0.1.13",
-        "sha.js": "^2.4.11",
-        "yargs": "^15.3.1",
-        "leveldown": "^5.6.0",
-        "levelup": "^4.4.0",
-        "encoding-down": "^6.3.0"
+        "reflect-metadata": "^0.1.13"
     }
 }

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as inversify from 'inversify';
-import { ContextAwareLogger, registerGlobalLoggerToContainer } from 'logger';
+import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { setupRequestContextIocContainer } from './setup-request-context-ioc-container';
 
 @inversify.injectable()
@@ -13,6 +13,7 @@ class TestAutoInjectable {}
 describe(setupRequestContextIocContainer, () => {
     let parentContainer: inversify.Container;
     let testSubject: inversify.Container;
+
     beforeEach(() => {
         parentContainer = new inversify.Container();
         parentContainer.bind('parentBind1').toConstantValue('parentBind1Instance');
@@ -32,7 +33,7 @@ describe(setupRequestContextIocContainer, () => {
         });
 
         it('resolves context aware logger', () => {
-            registerGlobalLoggerToContainer(parentContainer);
+            registerLoggerToContainer(parentContainer);
 
             expect(testSubject.get(ContextAwareLogger)).toBeDefined();
         });

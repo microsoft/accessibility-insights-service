@@ -4,7 +4,9 @@
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+// tslint:disable-next-line:no-duplicate-imports
+import { Page, Response } from 'puppeteer';
+import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { DataBase, ScanError } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
@@ -44,6 +46,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
+        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
@@ -61,7 +65,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
-            await this.saveScanErrorToDataBase(inputs.request, err as Error);
+            await this.saveScanPageErrorToDataBase(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -74,12 +78,32 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
         try {
-            await inputs.page.setBypassCSP(true);
+            // Configure browser's page settings before navigating to URL
+            await this.pageConfigurator.configurePage(inputs.page);
 
-            return await this.gotoExtended(inputs.page, inputs.request, {
-                waitUntil: 'networkidle0',
-                timeout: this.gotoTimeoutSecs * 1000,
-            });
+            let response: Response;
+            try {
+                response = await this.gotoExtended(inputs.page, inputs.request, {
+                    waitUntil: 'networkidle0',
+                    timeout: this.gotoTimeoutSecs * 1000,
+                });
+                // Catch only URL navigation error here
+            } catch (err) {
+                const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
+                await this.logBrowserFailure(inputs.request, navigationError);
+
+                throw err;
+            }
+
+            // Validate web service response
+            const responseError = this.pageResponseProcessor.getResponseError(response);
+            if (responseError !== undefined) {
+                await this.logBrowserFailure(inputs.request, responseError);
+
+                throw new Error(`Page response error: ${JSON.stringify(responseError)}`);
+            }
+
+            return response;
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
@@ -106,7 +130,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.dataStore.pushData(scanData);
         await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
         await this.logPageError(request, error);
-        await this.saveScanErrorToDataBase(request, error);
+        await this.saveScanPageErrorToDataBase(request, error);
     };
 
     public async saveSnapshot(page: Page, id: string): Promise<void> {
@@ -145,7 +169,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.dataBase.addBrowserError(request.id as string, summaryScanError);
     }
 
-    protected async saveScanErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
+    protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
         const summaryScanError: ScanError = {
             url: request.url,
             error: JSON.stringify(error),
@@ -166,6 +190,10 @@ export abstract class PageProcessorBase implements PageProcessor {
         } else {
             await this.dataBase.addFail(request.id as string, summaryScanResult);
         }
+    }
+
+    protected async logBrowserFailure(request: Apify.Request, browserError: BrowserError): Promise<void> {
+        await this.blobStore.setValue(`${request.id}.browser.err`, `${browserError}`, { contentType: 'text/plain' });
     }
 
     protected async logPageError(request: Apify.Request, error: Error): Promise<void> {

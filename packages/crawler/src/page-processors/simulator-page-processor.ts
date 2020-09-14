@@ -3,6 +3,7 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
+import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -22,9 +23,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        protected readonly requestQueue: Apify.RequestQueue,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
+        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
+        protected readonly requestQueue: Apify.RequestQueue,
         protected readonly selectors: string[],
         protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
@@ -37,6 +40,8 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             dataStore,
             blobStore,
             dataBase,
+            pageResponseProcessor,
+            pageConfigurator,
             requestQueue,
             snapshot,
             discoveryPatterns,

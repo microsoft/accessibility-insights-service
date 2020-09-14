@@ -13,7 +13,7 @@ import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty no-object-literal-type-assertion
 describe(CrawlerEngine, () => {
     let pageProcessorFactoryMock: IMock<PageProcessorFactory>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
@@ -53,6 +53,13 @@ describe(CrawlerEngine, () => {
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
+            launchPuppeteerOptions: {
+                defaultViewport: {
+                    width: 1920,
+                    height: 1080,
+                    deviceScaleFactor: 1,
+                },
+            } as Apify.LaunchPuppeteerOptions,
         };
         resourceCreatorMock = Mock.ofType<ResourceCreator>();
 

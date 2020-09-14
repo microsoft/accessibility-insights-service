@@ -3,13 +3,12 @@
 import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
-import { registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
+import { registerLoggerToContainer } from 'logger';
 
 export function setupWebApiNotificationSenderContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);
-    registerGlobalLoggerToContainer(container);
-    registerContextAwareLoggerToContainer(container);
+    registerLoggerToContainer(container);
     registerAzureServicesToContainer(container);
 
     return container;
