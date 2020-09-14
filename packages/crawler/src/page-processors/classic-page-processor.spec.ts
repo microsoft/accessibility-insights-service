@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
+import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
@@ -18,6 +19,8 @@ describe(ClassicPageProcessor, () => {
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
+    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
+    let pageConfiguratorMock: IMock<PageConfigurator>;
 
     const testUrl = 'test url';
     const testId = 'test id';
@@ -33,6 +36,8 @@ describe(ClassicPageProcessor, () => {
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
+        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
+        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         requestStub = {
             id: testId,
             url: testUrl,
@@ -47,6 +52,8 @@ describe(ClassicPageProcessor, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            pageResponseProcessorMock.object,
+            pageConfiguratorMock.object,
             requestQueueMock.object,
             false,
             discoveryPatterns,

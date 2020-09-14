@@ -4,7 +4,7 @@ import { CredentialType, registerAzureServicesToContainer, SecretProvider } from
 import { IoC, setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { isNil } from 'lodash';
-import { GlobalLogger, registerGlobalLoggerToContainer } from 'logger';
+import { GlobalLogger, registerLoggerToContainer } from 'logger';
 import { A11yServiceClient, a11yServiceClientTypeNames, A11yServiceCredential } from 'web-api-client';
 
 let processLifeCycleContainer: inversify.Container;
@@ -13,7 +13,7 @@ export function getProcessLifeCycleContainer(): inversify.Container {
     if (isNil(processLifeCycleContainer)) {
         processLifeCycleContainer = new inversify.Container({ autoBindInjectable: true });
         setupRuntimeConfigContainer(processLifeCycleContainer);
-        registerGlobalLoggerToContainer(processLifeCycleContainer);
+        registerLoggerToContainer(processLifeCycleContainer);
         registerAzureServicesToContainer(processLifeCycleContainer, CredentialType.AppService);
 
         IoC.setupSingletonProvider<A11yServiceClient>(

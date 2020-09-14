@@ -3,7 +3,8 @@
 
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { Page } from 'puppeteer';
+import { Page, Response } from 'puppeteer';
+import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
@@ -39,6 +40,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
+        @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly snapshot: boolean,
         protected readonly discoveryPatterns?: string[],
@@ -55,7 +58,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             await this.processPage(inputs);
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
-            await this.logPageError(inputs.request, err as Error);
+            await this.logError(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -68,15 +71,35 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
         try {
-            await inputs.page.setBypassCSP(true);
+            // Configure browser's page settings before navigating to URL
+            await this.pageConfigurator.configurePage(inputs.page);
 
-            return await this.gotoExtended(inputs.page, inputs.request, {
-                waitUntil: 'networkidle0',
-                timeout: this.gotoTimeoutSecs * 1000,
-            });
+            let response: Response;
+            try {
+                response = await this.gotoExtended(inputs.page, inputs.request, {
+                    waitUntil: 'networkidle0',
+                    timeout: this.gotoTimeoutSecs * 1000,
+                });
+                // Catch only URL navigation error here
+            } catch (err) {
+                const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
+                await this.logBrowserFailure(inputs.request, navigationError);
+
+                throw err;
+            }
+
+            // Validate web service response
+            const responseError = this.pageResponseProcessor.getResponseError(response);
+            if (responseError !== undefined) {
+                await this.logBrowserFailure(inputs.request, responseError);
+
+                throw new Error(`Page response error: ${JSON.stringify(responseError)}`);
+            }
+
+            return response;
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
-            await this.logPageError(inputs.request, err as Error);
+            await this.logError(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -97,7 +120,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         };
         await this.dataStore.pushData(scanData);
         await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
-        await this.logPageError(request, error);
+        await this.logError(request, error);
     };
 
     public async saveSnapshot(page: Page, id: string): Promise<void> {
@@ -125,7 +148,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 
-    protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
+    protected async logBrowserFailure(request: Apify.Request, browserError: BrowserError): Promise<void> {
+        await this.blobStore.setValue(`${request.id}.browser.err`, `${browserError}`, { contentType: 'text/plain' });
+    }
+
+    protected async logError(request: Apify.Request, error: Error): Promise<void> {
         await this.blobStore.setValue(`${request.id}.err`, `${error.stack}`, { contentType: 'text/plain' });
     }
 }

@@ -4,7 +4,7 @@ export { Logger, LogLevel } from './logger';
 export { GlobalLogger } from './global-logger';
 export { ContextAwareLogger } from './context-aware-logger';
 export { loggerTypes } from './logger-types';
-export { registerGlobalLoggerToContainer, registerContextAwareLoggerToContainer } from './register-logger-to-container';
+export { registerLoggerToContainer, registerContextAwareLoggerToContainer } from './register-logger-to-container';
 export { BaseTelemetryProperties } from './base-telemetry-properties';
 export {
     BaseTelemetryMeasurements,

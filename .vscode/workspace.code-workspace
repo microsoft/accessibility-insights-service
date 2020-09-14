@@ -3,6 +3,9 @@
         {
             "name": "scanner",
             "path": "../packages/scanner"
+        },        {
+            "name": "scanner-global-library",
+            "path": "../packages/scanner-global-library"
         },
         {
             "name": "web-api-scan-request-sender",
@@ -106,6 +109,7 @@
             "**/test-results": true
         },
         "cSpell.words": [
+            "Configurator",
             "Finalizer",
             "Newable",
             "Rescan",

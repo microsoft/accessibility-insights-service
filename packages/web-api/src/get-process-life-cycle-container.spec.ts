@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { AzureServicesIocTypes, CredentialsProvider, CredentialType, SecretProvider } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import * as inversify from 'inversify';
-import { ContextAwareLogger, GlobalLogger, Logger } from 'logger';
+import { GlobalLogger } from 'logger';
 import { IMock, Mock } from 'typemoq';
 import { getProcessLifeCycleContainer } from './get-process-life-cycle-container';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from './web-api-types';
@@ -35,10 +34,6 @@ describe(getProcessLifeCycleContainer, () => {
         expect(testSubject.get(CredentialsProvider)).toBeDefined();
         expect(testSubject.get(SecretProvider)).toBeDefined();
         expect(testSubject.get(CredentialsProvider)).toBeDefined();
-    });
-
-    test.each([Logger, ContextAwareLogger])('verifies not resolved for - %p', (testCase) => {
-        expect(() => testSubject.get(testCase)).toThrowError();
     });
 
     it('should not create more than one instance of container', () => {
