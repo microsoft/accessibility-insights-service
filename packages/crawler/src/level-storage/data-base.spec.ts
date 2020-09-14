@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import { LevelUp } from 'levelup';
-import { SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
 import { IMock, Mock } from 'typemoq';
-import { DataBase, DataBaseKey } from './data-base';
+import { DataBase, DataBaseKey, ScanError } from './data-base';
 
 describe(DataBase, () => {
     let dbMock: IMock<LevelUp>;
@@ -35,10 +35,26 @@ describe(DataBase, () => {
 
     it('add error', async () => {
         const key: DataBaseKey = { type: 'error', key: 'id' };
-        const value: SummaryScanError = { url: 'url', errorType: 'error type', errorDescription: 'error description' };
+        const value: ScanError = {
+            url: 'url',
+            error: 'error',
+        };
         dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
 
         await testSubject.addError('id', value);
+    });
+
+    it('add browser error', async () => {
+        const key: DataBaseKey = { type: 'browserError', key: 'id' };
+        const value: SummaryScanError = {
+            url: 'url',
+            errorType: 'error type',
+            errorDescription: 'error description',
+            errorLogLocation: 'error log location',
+        };
+        dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
+
+        await testSubject.addBrowserError('id', value);
     });
 
     afterEach(() => {

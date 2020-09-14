@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { injectable } from 'inversify';
-import { SummaryReportResults, SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
 
 // tslint:disable-next-line: match-default-export-name
 import levelup, { LevelUp } from 'levelup';
@@ -13,12 +13,23 @@ import leveldown from 'leveldown';
 // tslint:disable-next-line:import-name match-default-export-name
 import encode from 'encoding-down';
 
-export type ResultType = 'fail' | 'error' | 'pass';
+export type ResultType = 'fail' | 'error' | 'pass' | 'browserError';
 
 export interface DataBaseKey {
     // tslint:disable-next-line:no-reserved-keywords
     type: ResultType;
     key: string;
+}
+
+export interface ScanError {
+    // tslint:disable-next-line:no-reserved-keywords
+    url: string;
+    error: string;
+}
+
+export interface ScanResults {
+    summaryScanResults: SummaryScanResults;
+    errors: ScanError[];
 }
 
 @injectable()
@@ -40,21 +51,27 @@ export class DataBase {
         await this.add(dbKey, value);
     }
 
-    public async addError(key: string, value: SummaryScanError): Promise<void> {
+    public async addError(key: string, value: ScanError): Promise<void> {
         const dbKey: DataBaseKey = { type: 'error', key: key };
         await this.add(dbKey, value);
     }
 
-    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult): Promise<void> {
+    public async addBrowserError(key: string, value: SummaryScanError): Promise<void> {
+        const dbKey: DataBaseKey = { type: 'browserError', key: key };
+        await this.add(dbKey, value);
+    }
+
+    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult | ScanError): Promise<void> {
         await this.open();
         await this.db.put(key, value);
     }
 
     // tslint:disable: no-unsafe-any
-    public async createReadStream(): Promise<SummaryReportResults> {
+    public async getScanResult(): Promise<ScanResults> {
         const failed: SummaryScanResult[] = [];
         const passed: SummaryScanResult[] = [];
-        const unscannable: SummaryScanError[] = [];
+        const browserErrors: SummaryScanError[] = [];
+        const errors: ScanError[] = [];
 
         await this.open();
         this.db.createReadStream().on('data', (data) => {
@@ -62,8 +79,12 @@ export class DataBase {
             console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
+                const value: ScanError = data.value as ScanError;
+                errors.push(value);
+                console.log(`${value.url} ${value.error}`);
+            } else if (key.type === 'browserError') {
                 const value: SummaryScanError = data.value as SummaryScanError;
-                unscannable.push(value);
+                browserErrors.push(value);
                 console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
             } else {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
@@ -76,7 +97,7 @@ export class DataBase {
             }
         });
 
-        return { failed, passed, unscannable };
+        return { errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } };
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {

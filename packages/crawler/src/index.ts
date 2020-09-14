@@ -7,3 +7,4 @@ import './global-overrides';
 export { CrawlerRunOptions } from './types/run-options';
 export { CrawlerEntryPoint } from './crawler-entry-point';
 export { setupCrawlerContainer } from './setup-crawler-container';
+export { ScanResults } from './level-storage/data-base';

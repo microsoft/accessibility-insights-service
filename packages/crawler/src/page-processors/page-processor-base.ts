@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { SummaryScanError, SummaryScanResult } from 'temp-accessibility-insights-report';
-import { DataBase } from '../level-storage/data-base';
+import { DataBase, ScanError } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
@@ -61,6 +61,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
+            await this.saveScanErrorToDataBase(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -82,6 +83,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
+            await this.saveScanBrowserErrorToDataBase(inputs.request, err as Error);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -104,6 +106,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.dataStore.pushData(scanData);
         await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
         await this.logPageError(request, error);
+        await this.saveScanErrorToDataBase(request, error);
     };
 
     public async saveSnapshot(page: Page, id: string): Promise<void> {
@@ -128,29 +131,41 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async pushScanData(scanData: PartialScanData): Promise<void> {
-        if (scanData.succeeded) {
-            const summaryScanResult: SummaryScanResult = {
-                numFailures: scanData.issueCount === undefined ? 0 : scanData.issueCount,
-                url: scanData.url,
-                reportLocation: `key_value_stores/${scanResultStorageName}/${scanData.id}.report.html`,
-            };
-
-            if (summaryScanResult.numFailures === 0) {
-                await this.dataBase.addPass(scanData.id, summaryScanResult);
-            } else {
-                await this.dataBase.addFail(scanData.id, summaryScanResult);
-            }
-        } else {
-            const summaryScanError: SummaryScanError = {
-                url: scanData.url,
-                errorDescription: `key_value_stores/${scanResultStorageName}/${scanData.id}.error.txt`,
-                errorType: 'error',
-            };
-
-            await this.dataBase.addError(scanData.id, summaryScanError);
-        }
-
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
+    }
+
+    protected async saveScanBrowserErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
+        const summaryScanError: SummaryScanError = {
+            url: request.url,
+            errorDescription: error.message,
+            errorType: error.name,
+            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.error.txt`,
+        };
+
+        await this.dataBase.addBrowserError(request.id as string, summaryScanError);
+    }
+
+    protected async saveScanErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
+        const summaryScanError: ScanError = {
+            url: request.url,
+            error: JSON.stringify(error),
+        };
+
+        await this.dataBase.addError(request.id as string, summaryScanError);
+    }
+
+    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number): Promise<void> {
+        const summaryScanResult: SummaryScanResult = {
+            numFailures: issueCount,
+            url: request.url,
+            reportLocation: `key_value_stores/${scanResultStorageName}/${request.id}.report.html`,
+        };
+
+        if (summaryScanResult.numFailures === 0) {
+            await this.dataBase.addPass(request.id as string, summaryScanResult);
+        } else {
+            await this.dataBase.addFail(request.id as string, summaryScanResult);
+        }
     }
 
     protected async logPageError(request: Apify.Request, error: Error): Promise<void> {
