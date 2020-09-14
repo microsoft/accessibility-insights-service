@@ -143,7 +143,9 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
             .verifiable();
-        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${browserError}`, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock
+            .setup((o) => o.setValue(`${testId}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' }))
+            .verifiable();
 
         try {
             await pageProcessorBase.gotoFunction(inputs);
@@ -168,13 +170,16 @@ describe(PageProcessorBase, () => {
         const responseError = {
             errorType: 'InvalidContentType',
             message: 'Content type: text/plain',
+            stack: 'stack',
         } as BrowserError;
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => responseError)
             .verifiable();
 
-        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${responseError}`, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock
+            .setup((o) => o.setValue(`${testId}.browser.err`, `${responseError.stack}`, { contentType: 'text/plain' }))
+            .verifiable();
         const expectedError = new Error(`Page response error: ${JSON.stringify(responseError)}`);
 
         try {
