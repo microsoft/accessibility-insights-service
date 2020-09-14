@@ -133,9 +133,10 @@ describe(PageProcessorBase, () => {
         const browserError = {
             errorType: 'NavigationError',
             message: error.message,
+            stack: 'stack',
         } as BrowserError;
         pageResponseProcessorMock
-            .setup((o) => o.getNavigationError(error.message))
+            .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
             .verifiable();
         blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${browserError}`, { contentType: 'text/plain' })).verifiable();

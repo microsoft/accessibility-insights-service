@@ -18,4 +18,5 @@ export interface BrowserError {
     statusCode?: number;
     statusText?: string;
     message: string;
+    stack: string;
 }

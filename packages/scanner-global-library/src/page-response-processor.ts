@@ -6,13 +6,14 @@ import { BrowserError } from './browser-error';
 
 @injectable()
 export class PageResponseProcessor {
-    public getResponseError(response: Response): BrowserError {
+    public getResponseError(response: Response, error: Error = new Error()): BrowserError {
         if (!response.ok()) {
             return {
                 errorType: 'HttpErrorCode',
                 statusCode: response.status(),
                 statusText: response.statusText(),
                 message: 'Page returned an unsuccessful response code',
+                stack: error.stack,
             };
         }
 
@@ -22,16 +23,19 @@ export class PageResponseProcessor {
             return {
                 errorType: 'InvalidContentType',
                 message: `Content type: ${contentType}`,
+                stack: error.stack,
             };
         }
 
         return undefined;
     }
 
-    public getNavigationError(errorMessage: string): BrowserError {
+    public getNavigationError(error: Error): BrowserError {
+        const errorMessage = error.message;
         const browserError: BrowserError = {
             errorType: 'NavigationError',
             message: errorMessage,
+            stack: error.stack,
         };
 
         if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {

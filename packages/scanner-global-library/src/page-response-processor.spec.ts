@@ -7,6 +7,8 @@ import { IMock, Mock, Times } from 'typemoq';
 import { BrowserErrorTypes } from './browser-error';
 import { PageResponseProcessor } from './page-response-processor';
 
+// tslint:disable: no-object-literal-type-assertion
+
 describe(PageResponseProcessor, () => {
     let pageResponseProcessor: PageResponseProcessor;
     let responseMock: IMock<Response>;
@@ -39,9 +41,10 @@ describe(PageResponseProcessor, () => {
             statusCode: 404,
             statusText: 'Not Found',
             message: 'Page returned an unsuccessful response code',
+            stack: 'stack',
         };
 
-        const actualError = pageResponseProcessor.getResponseError(responseMock.object);
+        const actualError = pageResponseProcessor.getResponseError(responseMock.object, { stack: 'stack' } as Error);
 
         expect(actualError).toEqual(expectedError);
     });
@@ -61,9 +64,10 @@ describe(PageResponseProcessor, () => {
         const expectedError = {
             errorType: 'InvalidContentType',
             message: 'Content type: text/plain',
+            stack: 'stack',
         };
 
-        const actualError = pageResponseProcessor.getResponseError(responseMock.object);
+        const actualError = pageResponseProcessor.getResponseError(responseMock.object, { stack: 'stack' } as Error);
 
         expect(actualError).toEqual(expectedError);
     });
@@ -88,49 +92,59 @@ describe(PageResponseProcessor, () => {
 
 describe('handles navigation errors', () => {
     interface NavigationErrorTestCase {
-        errorMessage: string;
         errorType: BrowserErrorTypes;
+        message: string;
+        stack: string;
+        name?: string;
     }
 
     const testCaseMappings: NavigationErrorTestCase[] = [
         {
-            errorMessage: 'TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
+            message: 'TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
             errorType: 'UrlNavigationTimeout',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation failed: net::ERR_CERT_AUTHORITY_INVALID',
+            message: 'Puppeteer navigation failed: net::ERR_CERT_AUTHORITY_INVALID',
             errorType: 'SslError',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation failed: net::ERR_CONNECTION_REFUSED',
+            message: 'Puppeteer navigation failed: net::ERR_CONNECTION_REFUSED',
             errorType: 'ResourceLoadFailure',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation  failed: Cannot navigate to invalid URL',
+            message: 'Puppeteer navigation  failed: Cannot navigate to invalid URL',
             errorType: 'InvalidUrl',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation  failed: Cannot navigate to Invalid url',
+            message: 'Puppeteer navigation  failed: Cannot navigate to Invalid url',
             errorType: 'InvalidUrl',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation  failed: net::ERR_ABORTED',
+            message: 'Puppeteer navigation  failed: net::ERR_ABORTED',
             errorType: 'EmptyPage',
+            stack: 'stack',
         },
         {
-            errorMessage: 'Puppeteer navigation  failed: net::ERR_NAME_NOT_RESOLVED',
+            message: 'Puppeteer navigation  failed: net::ERR_NAME_NOT_RESOLVED',
             errorType: 'UrlNotResolved',
+            stack: 'stack',
         },
     ];
 
     test.each(testCaseMappings)('should parse navigation error: %o', async (testCase: NavigationErrorTestCase) => {
         const expectedError = {
             errorType: testCase.errorType,
-            message: testCase.errorMessage,
+            message: testCase.message,
+            stack: 'stack',
         };
         const pageResponseProcessor = new PageResponseProcessor();
 
-        const actualError = pageResponseProcessor.getNavigationError(testCase.errorMessage);
+        const actualError = pageResponseProcessor.getNavigationError(testCase as Error);
 
         expect(actualError).toEqual(expectedError);
     });

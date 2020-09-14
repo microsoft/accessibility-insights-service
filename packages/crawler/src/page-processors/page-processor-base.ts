@@ -82,7 +82,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 });
                 // Catch only URL navigation error here
             } catch (err) {
-                const navigationError = this.pageResponseProcessor.getNavigationError((err as Error).message);
+                const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
                 await this.logBrowserFailure(inputs.request, navigationError);
 
                 throw err;
