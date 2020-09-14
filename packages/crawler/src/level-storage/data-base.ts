@@ -4,13 +4,11 @@
 import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { injectable } from 'inversify';
 
-// tslint:disable-next-line: match-default-export-name
+// tslint:disable: match-default-export-name import-name
 import levelup, { LevelUp } from 'levelup';
 
-// tslint:disable-next-line: match-default-export-name
 import leveldown from 'leveldown';
 
-// tslint:disable-next-line:import-name match-default-export-name
 import encode from 'encoding-down';
 
 export type ResultType = 'fail' | 'error' | 'pass' | 'browserError';
@@ -76,19 +74,15 @@ export class DataBase {
         await this.open();
         this.db.createReadStream().on('data', (data) => {
             const key: DataBaseKey = data.key as DataBaseKey;
-            console.log(`${key.type} ${key.key}`);
 
             if (key.type === 'error') {
                 const value: PageError = data.value as PageError;
                 errors.push(value);
-                console.log(`${value.url} ${value.error}`);
             } else if (key.type === 'browserError') {
                 const value: SummaryScanError = data.value as SummaryScanError;
                 browserErrors.push(value);
-                console.log(`${value.url} ${value.errorType} ${value.errorDescription}`);
             } else {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
-                console.log(`${value.url} ${value.numFailures} ${value.reportLocation}`);
                 if (value.numFailures === 0) {
                     passed.push(value);
                 } else {
