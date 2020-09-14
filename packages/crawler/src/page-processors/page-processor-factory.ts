@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { reporterFactory } from 'accessibility-insights-report';
 import { Url } from 'common';
 import { inject, injectable } from 'inversify';
@@ -7,6 +8,7 @@ import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library'
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
+import { dataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
@@ -31,6 +33,7 @@ export class PageProcessorFactory {
                 new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
                 new LocalDataStore(),
                 new LocalBlobStore(),
+                dataBase,
                 new PageResponseProcessor(),
                 new PageConfigurator(),
                 pageProcessorOptions.requestQueue,
@@ -49,6 +52,7 @@ export class PageProcessorFactory {
             new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
             new LocalDataStore(),
             new LocalBlobStore(),
+            dataBase,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),
             new PageResponseProcessor(),

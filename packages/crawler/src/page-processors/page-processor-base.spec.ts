@@ -7,6 +7,7 @@ import Apify from 'apify';
 import { DirectNavigationOptions, Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
@@ -26,6 +27,7 @@ describe(PageProcessorBase, () => {
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
+    let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
@@ -51,6 +53,7 @@ describe(PageProcessorBase, () => {
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
+        dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
@@ -74,6 +77,7 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
             requestQueueMock.object,
@@ -139,7 +143,9 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
             .verifiable();
-        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${browserError}`, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock
+            .setup((o) => o.setValue(`${testId}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' }))
+            .verifiable();
 
         try {
             await pageProcessorBase.gotoFunction(inputs);
@@ -164,13 +170,16 @@ describe(PageProcessorBase, () => {
         const responseError = {
             errorType: 'InvalidContentType',
             message: 'Content type: text/plain',
+            stack: 'stack',
         } as BrowserError;
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => responseError)
             .verifiable();
 
-        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${responseError}`, { contentType: 'text/plain' })).verifiable();
+        blobStoreMock
+            .setup((o) => o.setValue(`${testId}.browser.err`, `${responseError.stack}`, { contentType: 'text/plain' }))
+            .verifiable();
         const expectedError = new Error(`Page response error: ${JSON.stringify(responseError)}`);
 
         try {
@@ -189,6 +198,7 @@ describe(PageProcessorBase, () => {
             context: requestStub.userData,
             error: JSON.stringify(error),
             requestErrors: requestStub.errorMessages as string[],
+            issueCount: 0,
         };
         dataStoreMock.setup((ds) => ds.pushData(expectedScanData)).verifiable();
         setupScanErrorLogging();

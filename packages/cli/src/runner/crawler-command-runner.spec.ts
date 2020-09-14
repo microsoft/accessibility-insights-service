@@ -41,7 +41,7 @@ describe('CrawlerCommandRunner', () => {
         crawlerEntryPointMock
             // tslint:disable-next-line:no-object-literal-type-assertion
             .setup((cem) => cem.crawl(crawlerOption))
-            .returns(async () => Promise.resolve())
+            .returns(async () => Promise.resolve(undefined))
             .verifiable(Times.once());
 
         await testSubject.runCommand(testInput);

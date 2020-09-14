@@ -54,7 +54,7 @@ describe(AccessibilityScanOperation, () => {
             axeResults: {
                 url: 'url',
                 passes: [],
-                violations: [{}],
+                violations: [{ nodes: [] }],
                 incomplete: [],
                 inapplicable: [],
             },

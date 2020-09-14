@@ -30,6 +30,9 @@
         "@types/cheerio": "^0.22.21",
         "@types/jest": "^26.0.9",
         "@types/node": "^12.12.54",
+        "@types/leveldown": "^4.0.2",
+        "@types/encoding-down": "^5.0.0",
+        "@types/levelup": "^4.3.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -43,7 +46,7 @@
     },
     "dependencies": {
         "@medv/finder": "^2.0.0",
-        "accessibility-insights-report": "2.0.0",
+        "accessibility-insights-report": "2.1.0",
         "apify": "^0.21.4",
         "apify-shared": "^0.2.12",
         "axe-core": "4.0.1",
@@ -58,6 +61,9 @@
         "puppeteer": "^4.0.0",
         "reflect-metadata": "^0.1.13",
         "sha.js": "^2.4.11",
-        "yargs": "^15.3.1"
+        "yargs": "^15.3.1",
+        "leveldown": "^5.6.0",
+        "levelup": "^4.4.0",
+        "encoding-down": "^6.3.0"
     }
 }

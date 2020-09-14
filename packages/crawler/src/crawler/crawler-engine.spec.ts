@@ -10,14 +10,13 @@ import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { ResourceCreator } from '../types/resource-creator';
 import { PageProcessorOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
-import { ApifyMainFunc, CrawlerEngine } from './crawler-engine';
+import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
 // tslint:disable: no-null-keyword no-unsafe-any no-any no-empty no-object-literal-type-assertion
 describe(CrawlerEngine, () => {
     let pageProcessorFactoryMock: IMock<PageProcessorFactory>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
-    let runApifyMock: IMock<ApifyMainFunc>;
     let requestQueueMock: IMock<Apify.RequestQueue>;
     let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
     let resourceCreatorMock: IMock<ResourceCreator>;
@@ -39,7 +38,6 @@ describe(CrawlerEngine, () => {
     beforeEach(() => {
         pageProcessorFactoryMock = Mock.ofType<PageProcessorFactory>();
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
-        runApifyMock = Mock.ofType<ApifyMainFunc>();
         requestQueueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
@@ -70,7 +68,6 @@ describe(CrawlerEngine, () => {
             crawlerFactoryMock.object,
             resourceCreatorMock.object,
             crawlerConfigurationMock.object,
-            runApifyMock.object,
         );
     });
 
@@ -130,7 +127,6 @@ describe(CrawlerEngine, () => {
         pageProcessorFactoryMock.verifyAll();
         crawlerFactoryMock.verifyAll();
         puppeteerCrawlerMock.verifyAll();
-        runApifyMock.verifyAll();
         resourceCreatorMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
@@ -162,10 +158,6 @@ describe(CrawlerEngine, () => {
     }
 
     function setupRunCrawler(): void {
-        runApifyMock
-            .setup((ra) => ra(It.isAny()))
-            .callback((userFunc) => userFunc())
-            .verifiable();
         puppeteerCrawlerMock.setup((pc) => pc.run()).verifiable();
     }
 

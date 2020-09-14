@@ -54,7 +54,7 @@
     },
     "dependencies": {
         "@types/escape-html": "^0.0.20",
-        "accessibility-insights-report": "2.0.0",
+        "accessibility-insights-report": "2.1.0",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",

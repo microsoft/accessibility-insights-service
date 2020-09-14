@@ -6,6 +6,7 @@ import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ClassicPageProcessor } from './classic-page-processor';
@@ -18,6 +19,7 @@ describe(ClassicPageProcessor, () => {
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
+    let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
@@ -35,6 +37,7 @@ describe(ClassicPageProcessor, () => {
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
+        dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
@@ -52,6 +55,7 @@ describe(ClassicPageProcessor, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
             requestQueueMock.object,
@@ -69,11 +73,15 @@ describe(ClassicPageProcessor, () => {
 
     it('pageProcessor', async () => {
         setupEnqueueLinks(pageStub);
-        accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId, blobStoreMock.object)).verifiable();
+        accessibilityScanOpMock
+            .setup((aso) => aso.run(pageStub, testId, blobStoreMock.object))
+            .returns(async () => Promise.resolve(0))
+            .verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
+            issueCount: 0,
         };
         setupPushScanData(expectedScanData);
 

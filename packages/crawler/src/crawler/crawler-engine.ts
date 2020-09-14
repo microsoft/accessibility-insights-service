@@ -13,10 +13,7 @@ import { CrawlerRunOptions } from '../types/run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
-export type ApifyMainFunc = (userFunc: Apify.UserFunc) => void;
-
-// tslint:disable: no-object-literal-type-assertion
-
+// tslint:disable:no-object-literal-type-assertion
 @injectable()
 export class CrawlerEngine {
     public constructor(
@@ -24,7 +21,6 @@ export class CrawlerEngine {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(ApifyResourceCreator) private readonly resourceCreator: ResourceCreator,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        private readonly runApify: ApifyMainFunc = Apify.main,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<void> {
@@ -72,9 +68,7 @@ export class CrawlerEngine {
             };
         }
 
-        this.runApify(async () => {
-            const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
-            await crawler.run();
-        });
+        const crawler = this.crawlerFactory.createPuppeteerCrawler(puppeteerCrawlerOptions);
+        await crawler.run();
     }
 }
