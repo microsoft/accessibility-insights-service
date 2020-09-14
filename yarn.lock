@@ -3097,6 +3097,21 @@ accessibility-insights-report@2.0.0:
     react-helmet "^6.1.0"
     uuid "^8.3.0"
 
+accessibility-insights-report@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/accessibility-insights-report/-/accessibility-insights-report-2.1.0.tgz#8a250f6cca216b4e8624caade0442d854922a0f5"
+  integrity sha512-aItALwBDR2v4cCATrbxLFmFD6Qwg1a0axHyMvLkqAOnMOHnKCcFsrYLphG4RxKuTLloA1dOg0p6z/tZV8FgZAA==
+  dependencies:
+    axe-core "4.0.1"
+    classnames "^2.2.6"
+    lodash "^4.17.20"
+    moment "^2.27.0"
+    office-ui-fabric-react "7.98.0"
+    react "^16.13.1"
+    react-dom "^16.13.1"
+    react-helmet "^6.1.0"
+    uuid "^8.3.0"
+
 acorn-globals@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/acorn-globals/-/acorn-globals-6.0.0.tgz#46cdd39f0f8ff08a876619b55f5ac8a6dc770b45"
@@ -11743,19 +11758,6 @@ temp-dir@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/temp-dir/-/temp-dir-1.0.0.tgz#0a7c0ea26d3a39afa7e0ebea9c1fc0bc4daa011d"
   integrity sha1-CnwOom06Oa+n4OvqnB/AvE2qAR0=
-
-temp-report-package@./packages/temp-report-package:
-  version "0.1.0"
-  dependencies:
-    axe-core "4.0.1"
-    classnames "^2.2.6"
-    lodash "^4.17.20"
-    moment "^2.27.0"
-    office-ui-fabric-react "7.98.0"
-    react "^16.13.1"
-    react-dom "^16.13.1"
-    react-helmet "^6.1.0"
-    uuid "^8.3.0"
 
 temp-write@^3.4.0:
   version "3.4.0"

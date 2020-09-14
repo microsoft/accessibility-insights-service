@@ -61,7 +61,7 @@ export class Page {
         } catch (error) {
             console.log('The URL navigation failed.', url, { scanError: serializeError(error) });
 
-            return { error: this.getScanErrorFromNavigationFailure((error as Error).message) };
+            return { error: this.getScanErrorFromNavigationFailure(error as Error) };
         }
 
         if (!response.ok()) {
@@ -154,10 +154,11 @@ export class Page {
         }
     }
 
-    private getScanErrorFromNavigationFailure(errorMessage: string): ScanError {
+    private getScanErrorFromNavigationFailure(error: Error): ScanError {
         const scanError: ScanError = {
             errorType: 'NavigationError',
-            message: errorMessage,
+            message: error.message,
+            stack: error.stack,
         };
 
         if (/TimeoutError: Navigation Timeout Exceeded:/i.test(errorMessage)) {

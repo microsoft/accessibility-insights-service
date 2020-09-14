@@ -54,7 +54,7 @@
     },
     "dependencies": {
         "@types/escape-html": "^0.0.20",
-        "accessibility-insights-report": "2.0.0",
+        "accessibility-insights-report": "2.1.0",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",
@@ -72,8 +72,7 @@
         "serialize-error": "^7.0.1",
         "table": "^5.4.6",
         "yargs": "^15.3.1",
-        "accessibility-insights-crawler": "1.0.0",
-        "temp-report-package": "./packages/temp-report-package"
+        "accessibility-insights-crawler": "1.0.0"
     },
     "bin": {
         "ai-scan": "dist/ai-scan-cli.js"

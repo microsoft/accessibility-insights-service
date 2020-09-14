@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { Spinner } from 'cli-spinner';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { SummaryReportResults, SummaryScanError, SummaryScanResult } from 'temp-report-package';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
@@ -16,7 +16,7 @@ import { CommandRunner } from './command-runner';
 @injectable()
 export class FileCommandRunner implements CommandRunner {
     // tslint:disable-next-line: no-object-literal-type-assertion
-    private readonly summaryReportResults: SummaryReportResults = {
+    private readonly summaryReportResults: SummaryScanResults = {
         failed: [],
         passed: [],
         unscannable: [],
@@ -79,6 +79,7 @@ export class FileCommandRunner implements CommandRunner {
                 url: url,
                 errorType: (axeResults.error as ScanError).errorType,
                 errorDescription: reportName,
+                errorLogLocation: reportName,
             };
 
             this.summaryReportResults.unscannable.push(summaryScanError);

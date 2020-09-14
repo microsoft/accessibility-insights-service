@@ -17,6 +17,7 @@ export interface ScanError {
     errorType: ScanErrorTypes;
     responseStatusCode?: number;
     message: string;
+    stack: string;
 }
 
 export interface AxeScanResults {
