@@ -15,7 +15,7 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "smartStep": true,
-            "args": ["--crawl", "--url", "https://support.xbox.com/", "--maxUrls", "1", "--restart", "--simulate"]
+            "args": ["--crawl", "--url", "https://support.xbox.com/", "--maxUrls", "3", "--restart", "--simulate"]
         }
     ]
 }

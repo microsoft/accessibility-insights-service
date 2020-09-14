@@ -3,6 +3,7 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import { Url } from 'common';
 import { inject, injectable } from 'inversify';
+import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -30,6 +31,8 @@ export class PageProcessorFactory {
                 new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
                 new LocalDataStore(),
                 new LocalBlobStore(),
+                new PageResponseProcessor(),
+                new PageConfigurator(),
                 pageProcessorOptions.requestQueue,
                 this.crawlerConfiguration.getSnapshot(
                     pageProcessorOptions.crawlerRunOptions.snapshot,
@@ -46,9 +49,11 @@ export class PageProcessorFactory {
             new AccessibilityScanOperation(new PageScanner(reporterFactory(), new AxePuppeteerFactory())),
             new LocalDataStore(),
             new LocalBlobStore(),
-            pageProcessorOptions.requestQueue,
             new EnqueueActiveElementsOperation(new ActiveElementsFinder()),
             new ClickElementOperation(),
+            new PageResponseProcessor(),
+            new PageConfigurator(),
+            pageProcessorOptions.requestQueue,
             this.crawlerConfiguration.getDefaultSelectors(pageProcessorOptions.crawlerRunOptions.selectors),
             this.crawlerConfiguration.getSnapshot(
                 pageProcessorOptions.crawlerRunOptions.snapshot,

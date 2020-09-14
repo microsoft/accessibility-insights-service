@@ -4,17 +4,19 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { DirectNavigationOptions, Page } from 'puppeteer';
+import { DirectNavigationOptions, Page, Response } from 'puppeteer';
+import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
-// tslint:disable: no-any no-unsafe-any
+// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
+        public snapshot: boolean;
         public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
             return;
         };
@@ -28,6 +30,8 @@ describe(PageProcessorBase, () => {
     let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
+    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
+    let pageConfiguratorMock: IMock<PageConfigurator>;
 
     const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
     const testUrl = 'url';
@@ -40,7 +44,7 @@ describe(PageProcessorBase, () => {
         stack: 'stack',
     };
 
-    let pageProcessorBase: PageProcessorBase;
+    let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
         requestQueueMock = Mock.ofType<Apify.RequestQueue>();
@@ -51,6 +55,8 @@ describe(PageProcessorBase, () => {
         gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
+        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
+        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         requestStub = {
             id: testId,
             url: testUrl,
@@ -68,6 +74,8 @@ describe(PageProcessorBase, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
+            pageResponseProcessorMock.object,
+            pageConfiguratorMock.object,
             requestQueueMock.object,
             false,
             discoveryPatterns,
@@ -75,7 +83,7 @@ describe(PageProcessorBase, () => {
             gotoExtendedMock.object,
             saveSnapshotMock.object,
         );
-        (pageProcessorBase as TestablePageProcessor).processPage = processPageMock.object;
+        pageProcessorBase.processPage = processPageMock.object;
     });
 
     afterEach(() => {
@@ -84,6 +92,8 @@ describe(PageProcessorBase, () => {
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
         saveSnapshotMock.verifyAll();
+        pageResponseProcessorMock.verifyAll();
+        pageConfiguratorMock.verifyAll();
     });
 
     it('gotoFunction', async () => {
@@ -95,8 +105,19 @@ describe(PageProcessorBase, () => {
             waitUntil: 'networkidle0',
             timeout: pageProcessorBase.gotoTimeoutSecs * 1000,
         };
-
-        gotoExtendedMock.setup((gte) => gte(pageStub, requestStub, expectedGotoOptions)).verifiable();
+        const response = {} as Response;
+        pageConfiguratorMock
+            .setup(async (o) => o.configurePage(inputs.page))
+            .returns(() => Promise.resolve())
+            .verifiable();
+        pageResponseProcessorMock
+            .setup((o) => o.getResponseError(response))
+            .returns(() => undefined)
+            .verifiable();
+        gotoExtendedMock
+            .setup(async (gte) => gte(pageStub, requestStub, expectedGotoOptions))
+            .returns(() => Promise.resolve(response))
+            .verifiable();
 
         await pageProcessorBase.gotoFunction(inputs);
     });
@@ -109,11 +130,54 @@ describe(PageProcessorBase, () => {
         gotoExtendedMock.setup((gte) => gte(It.isAny(), It.isAny(), It.isAny())).throws(error);
         setupScanErrorLogging();
 
+        const browserError = {
+            errorType: 'NavigationError',
+            message: error.message,
+            stack: 'stack',
+        } as BrowserError;
+        pageResponseProcessorMock
+            .setup((o) => o.getNavigationError(error))
+            .returns(() => browserError)
+            .verifiable();
+        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${browserError}`, { contentType: 'text/plain' })).verifiable();
+
         try {
             await pageProcessorBase.gotoFunction(inputs);
             fail('gotoFunction should have thrown an error');
         } catch (err) {
             expect(err).toBe(error);
+        }
+    });
+
+    it('gotoFunction logs page response errors', async () => {
+        const response = {} as Response;
+        const inputs: Apify.PuppeteerGotoInputs = {
+            page: pageStub,
+            request: requestStub,
+        } as any;
+
+        gotoExtendedMock
+            .setup(async (gte) => gte(pageStub, requestStub, It.isAny()))
+            .returns(() => Promise.resolve(response))
+            .verifiable();
+
+        const responseError = {
+            errorType: 'InvalidContentType',
+            message: 'Content type: text/plain',
+        } as BrowserError;
+        pageResponseProcessorMock
+            .setup((o) => o.getResponseError(response))
+            .returns(() => responseError)
+            .verifiable();
+
+        blobStoreMock.setup((o) => o.setValue(`${testId}.browser.err`, `${responseError}`, { contentType: 'text/plain' })).verifiable();
+        const expectedError = new Error(`Page response error: ${JSON.stringify(responseError)}`);
+
+        try {
+            await pageProcessorBase.gotoFunction(inputs);
+            fail('gotoFunction should have thrown an error');
+        } catch (err) {
+            expect(err).toEqual(expectedError);
         }
     });
 
@@ -163,22 +227,14 @@ describe(PageProcessorBase, () => {
 
     it('saveSnapshot', async () => {
         setupSaveSnapshot();
-        pageProcessorBase = new TestablePageProcessor(
-            accessibilityScanOpMock.object,
-            dataStoreMock.object,
-            blobStoreMock.object,
-            requestQueueMock.object,
-            true,
-            discoveryPatterns,
-            enqueueLinksExtMock.object,
-            gotoExtendedMock.object,
-            saveSnapshotMock.object,
-        );
-        (pageProcessorBase as TestablePageProcessor).processPage = processPageMock.object;
+        pageProcessorBase.snapshot = true;
+
+        pageProcessorBase.processPage = processPageMock.object;
         await pageProcessorBase.saveSnapshot(pageStub, testId);
     });
 
     function setupSaveSnapshot(): void {
+        saveSnapshotMock.reset();
         saveSnapshotMock
             .setup((ssm) =>
                 ssm(pageStub, {

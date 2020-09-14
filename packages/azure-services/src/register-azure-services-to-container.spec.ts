@@ -10,7 +10,7 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
-import { ContextAwareLogger, registerContextAwareLoggerToContainer, registerGlobalLoggerToContainer } from 'logger';
+import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
@@ -83,8 +83,7 @@ describe(registerAzureServicesToContainer, () => {
 
     beforeEach(() => {
         container = new Container({ autoBindInjectable: true });
-        registerGlobalLoggerToContainer(container);
-        registerContextAwareLoggerToContainer(container);
+        registerLoggerToContainer(container);
     });
 
     it('verify singleton resolution', async () => {

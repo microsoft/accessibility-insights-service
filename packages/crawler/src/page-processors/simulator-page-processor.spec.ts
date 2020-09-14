@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
+import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
@@ -21,6 +22,8 @@ describe(SimulatorPageProcessor, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let clickElementOpMock: IMock<ClickElementOperation>;
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
+    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
+    let pageConfiguratorMock: IMock<PageConfigurator>;
 
     const testUrl = 'test url';
     const testId = 'test id';
@@ -39,6 +42,8 @@ describe(SimulatorPageProcessor, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
+        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
+        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         requestStub = {
             id: testId,
             url: testUrl,
@@ -53,9 +58,11 @@ describe(SimulatorPageProcessor, () => {
             accessibilityScanOpMock.object,
             dataStoreMock.object,
             blobStoreMock.object,
-            requestQueueMock.object,
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
+            pageResponseProcessorMock.object,
+            pageConfiguratorMock.object,
+            requestQueueMock.object,
             selectors,
             false,
             discoveryPatterns,
