@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { CrawlerEntryPoint, CrawlerRunOptions } from 'accessibility-insights-crawler';
+import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility-insights-crawler';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
@@ -44,10 +44,19 @@ describe('CrawlerCommandRunner', () => {
             inputFile: undefined,
         };
 
+        const scanResult: ScanResults = {
+            summaryScanResults: {
+                failed: [],
+                passed: [],
+                unscannable: [],
+            },
+            errors: [],
+        };
+
         crawlerEntryPointMock
             // tslint:disable-next-line:no-object-literal-type-assertion
             .setup((cem) => cem.crawl(crawlerOption))
-            .returns(async () => Promise.resolve(undefined))
+            .returns(async () => Promise.resolve(scanResult))
             .verifiable(Times.once());
 
         await testSubject.runCommand(testInput);
