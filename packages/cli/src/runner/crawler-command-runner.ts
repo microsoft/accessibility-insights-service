@@ -21,6 +21,8 @@ export class CrawlerCommandRunner implements CommandRunner {
         const startDate = new Date();
         const startDatNumber = Date.now();
 
+        console.log(`Crawling and scanning page ${scanArguments.url}`);
+
         const scanResult = await this.crawlerEntryPoint.crawl({
             baseUrl: scanArguments.url,
             simulate: scanArguments.simulate,
@@ -38,17 +40,27 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         const endDateNumber = Date.now();
+        const durationSeconds = (endDateNumber - startDatNumber) / 1000;
+        console.log(`Done in ${durationSeconds}s`);
+
+        const scannedPagesCount = scanResult.summaryScanResults.failed.length + scanResult.summaryScanResults.passed.length;
+        const discoveredPagesCount = scannedPagesCount + scanResult.summaryScanResults.unscannable.length;
+        console.log(`Scanned ${discoveredPagesCount} of ${scannedPagesCount} pages discovered​`);
+
+        const issueCount = scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
+        console.log(`Found ${issueCount} accessibility issues`);
 
         const crawlDetails: CrawlSummaryDetails = {
             baseUrl: scanArguments.url,
-            basePageTitle: 'title',
+            basePageTitle: '',
             scanStart: startDate,
             scanComplete: endDate,
-            durationSeconds: (endDateNumber - startDatNumber) / 1000,
+            durationSeconds: durationSeconds,
         };
 
         const reportContent = await this.reportGenerator.generateSummaryReport(crawlDetails, scanResult.summaryScanResults);
 
-        this.reportDiskWriter.writeToDirectory(scanArguments.output, scanArguments.url, 'html', reportContent);
+        const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
+        console.log(`Summary report was saved as ${scanArguments.output}\\${reportLocation}`);
     }
 }

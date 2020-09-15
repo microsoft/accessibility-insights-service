@@ -75,8 +75,6 @@ export class DataBase {
         const stream = this.db.createReadStream();
         stream.on('data', (data) => {
             const key: DataBaseKey = data.key as DataBaseKey;
-            console.log(JSON.stringify(key));
-            console.log(JSON.stringify(data.value));
 
             if (key.type === 'error') {
                 const value: PageError = data.value as PageError;
