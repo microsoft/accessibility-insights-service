@@ -44,6 +44,10 @@ export function setupCrawlerContainer(): inversify.Container {
     return container;
 }
 
+export function registerCrawlerRunOptions(container: inversify.Container, crawlerRunOptions: CrawlerRunOptions): void {
+    container.bind(iocTypes.CrawlerRunOptions).toConstantValue(crawlerRunOptions);
+}
+
 function setupSingletonProvider<T>(
     key: string,
     container: inversify.interfaces.Container,
