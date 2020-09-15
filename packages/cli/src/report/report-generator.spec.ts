@@ -7,12 +7,16 @@ import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeScanResults } from '../scanner/axe-scan-results';
+import { AxeInfo } from '../tool-data/axe-info';
+import { UserAgentInfo } from '../tool-data/user-agent-info';
 import { ReportGenerator } from './report-generator';
 
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     const htmlReportString = 'html report';
     let reporterMock: IMock<Reporter>;
+    let axeInfoMock: IMock<AxeInfo>;
+    let userAgentInfoMock: IMock<UserAgentInfo>;
     let htmlReport: Report;
     let axeResults: AxeResults;
     let axeScanResults: AxeScanResults;
@@ -21,8 +25,10 @@ describe('ReportGenerator', () => {
 
     beforeEach(() => {
         reporterMock = Mock.ofType<Reporter>();
+        axeInfoMock = Mock.ofType<AxeInfo>();
+        userAgentInfoMock = Mock.ofType<UserAgentInfo>();
         const reporterFactory: ReporterFactory = () => reporterMock.object;
-        reportGenerator = new ReportGenerator(reporterFactory);
+        reportGenerator = new ReportGenerator(reporterFactory, axeInfoMock.object, userAgentInfoMock.object);
         htmlReport = {
             asHTML: () => htmlReportString,
         };
