@@ -13,7 +13,7 @@ import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { PageProcessorBase } from './page-processor-base';
 
 // tslint:disable: no-unsafe-any
@@ -31,7 +31,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        @inject(iocTypes.ApifyRequestQueue) public readonly requestQueue: Apify.RequestQueue,
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
@@ -44,7 +44,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             dataBase,
             pageResponseProcessor,
             pageConfigurator,
-            requestQueue,
+            requestQueueProvider,
             crawlerConfiguration,
             enqueueLinksExt,
             gotoExtended,
@@ -55,10 +55,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
 
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
         const operation = request.userData as Operation;
+        const requestQueue = await this.requestQueueProvider();
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
             console.log(`Crawling page ${page.url()}`);
             await this.enqueueLinks(page);
-            await this.enqueueActiveElementsOp.find(page, this.selectors, this.requestQueue);
+            await this.enqueueActiveElementsOp.find(page, this.selectors, requestQueue);
             const issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
             await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
@@ -66,12 +67,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         } else if ((request.userData as Operation).operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
-            const operationResult = await this.clickElementOp.click(
-                page,
-                activeElement.selector,
-                this.requestQueue,
-                this.discoveryPatterns,
-            );
+            const operationResult = await this.clickElementOp.click(page, activeElement.selector, requestQueue, this.discoveryPatterns);
             let issueCount;
             if (operationResult.clickAction === 'page-action') {
                 await this.enqueueLinks(page);

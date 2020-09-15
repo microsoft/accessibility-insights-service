@@ -15,7 +15,7 @@ export function setupCrawlerContainer(): inversify.Container {
     container.bind(DataBase).toConstantValue(dataBase);
     container.bind(iocTypes.ReporterFactory).toConstantValue(reporterFactory);
 
-    container.bind(iocTypes.ApifyRequestQueue).toDynamicValue(async (context: inversify.interfaces.Context) => {
+    setupSingletonProvider(iocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
         const crawlerRunOptions = context.container.get<CrawlerRunOptions>(iocTypes.CrawlerRunOptions);
 
@@ -42,4 +42,21 @@ export function setupCrawlerContainer(): inversify.Container {
         });
 
     return container;
+}
+
+function setupSingletonProvider<T>(
+    key: string,
+    container: inversify.interfaces.Container,
+    factory: (context: inversify.interfaces.Context) => Promise<T>,
+): void {
+    let singletonInstancePromise: Promise<T>;
+    container.bind(key).toProvider((context: inversify.interfaces.Context) => {
+        return async () => {
+            if (singletonInstancePromise === undefined) {
+                singletonInstancePromise = factory(context);
+            }
+
+            return singletonInstancePromise;
+        };
+    });
 }

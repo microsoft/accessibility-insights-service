@@ -1,15 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
-import { injectable } from 'inversify';
-
 // tslint:disable: match-default-export-name import-name
-import levelup, { LevelUp } from 'levelup';
-
-import leveldown from 'leveldown';
-
 import encode from 'encoding-down';
+import { inject, injectable, optional } from 'inversify';
+import leveldown from 'leveldown';
+import levelup, { LevelUp } from 'levelup';
+import { iocTypes } from '../types/ioc-types';
 
 export type ResultType = 'fail' | 'error' | 'pass' | 'browserError';
 
@@ -33,7 +30,7 @@ export interface ScanResults {
 @injectable()
 export class DataBase {
     constructor(
-        protected db?: LevelUp,
+        @inject(iocTypes.LevelUp) @optional() protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
         protected readonly leveldownObj: typeof leveldown = leveldown,
         protected readonly encodeObj: typeof encode = encode,

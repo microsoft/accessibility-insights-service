@@ -121,6 +121,7 @@
             "etag",
             "injectable",
             "inversify",
+            "leveldown",
             "serializable",
             "typemoq",
             "unscannable",

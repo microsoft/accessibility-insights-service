@@ -11,6 +11,7 @@ import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
@@ -28,7 +29,16 @@ describe(PageProcessorBase, () => {
         }
     }
 
-    let requestQueueMock: IMock<Apify.RequestQueue>;
+    const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
+    const testUrl = 'url';
+    const testId = 'id';
+    const error: Error = {
+        name: 'error',
+        message: 'error message',
+        stack: 'stack',
+    };
+
+    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
@@ -40,22 +50,13 @@ describe(PageProcessorBase, () => {
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-
-    const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
-    const testUrl = 'url';
-    const testId = 'id';
+    let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
-    const error: Error = {
-        name: 'error',
-        message: 'error message',
-        stack: 'stack',
-    };
-
     let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
-        requestQueueMock = Mock.ofType<Apify.RequestQueue>();
+        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
@@ -90,6 +91,7 @@ describe(PageProcessorBase, () => {
             },
         } as any;
 
+        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorBase = new TestablePageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
@@ -97,7 +99,7 @@ describe(PageProcessorBase, () => {
             dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
-            requestQueueMock.object,
+            requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,

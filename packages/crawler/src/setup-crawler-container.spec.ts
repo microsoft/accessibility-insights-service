@@ -26,7 +26,7 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(CrawlerConfiguration)).toBeDefined();
         expect(container.get(DataBase)).toBeDefined();
         expect(container.get(iocTypes.ReporterFactory)).toBeDefined();
-        expect(container.get(iocTypes.ApifyRequestQueue)).toBeDefined();
+        expect(container.get(iocTypes.ApifyRequestQueueProvider)).toBeDefined();
         expect(container.get(iocTypes.PageProcessorFactory)).toBeDefined();
     });
 });

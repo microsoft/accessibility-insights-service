@@ -10,13 +10,18 @@ import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ClassicPageProcessor } from './classic-page-processor';
 import { PartialScanData } from './page-processor-base';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-object-literal-type-assertion
 
 describe(ClassicPageProcessor, () => {
-    let requestQueueMock: IMock<Apify.RequestQueue>;
+    const testUrl = 'test url';
+    const testId = 'test id';
+    const discoveryPatterns = ['pattern1', 'pattern2'];
+
+    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
@@ -25,17 +30,13 @@ describe(ClassicPageProcessor, () => {
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
-
-    const testUrl = 'test url';
-    const testId = 'test id';
-    const discoveryPatterns = ['pattern1', 'pattern2'];
     let requestStub: Apify.Request;
     let pageStub: Page;
-
     let classicPageProcessor: ClassicPageProcessor;
+    let requestQueueProvider: ApifyRequestQueueProvider;
 
     beforeEach(() => {
-        requestQueueMock = Mock.ofType<Apify.RequestQueue>();
+        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
@@ -64,6 +65,7 @@ describe(ClassicPageProcessor, () => {
             url: () => testUrl,
         } as any;
 
+        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         classicPageProcessor = new ClassicPageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
@@ -71,7 +73,7 @@ describe(ClassicPageProcessor, () => {
             dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
-            requestQueueMock.object,
+            requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
         );
@@ -97,7 +99,6 @@ describe(ClassicPageProcessor, () => {
         };
         setupPushScanData(expectedScanData);
 
-        // tslint:disable-next-line: no-any
         const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
         await classicPageProcessor.pageHandler(inputs);
     });
@@ -105,7 +106,7 @@ describe(ClassicPageProcessor, () => {
     function setupEnqueueLinks(page: Page): void {
         const options = {
             page: pageStub,
-            requestQueue: requestQueueMock.object,
+            requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
         enqueueLinksExtMock

@@ -5,8 +5,8 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { IMock, Mock } from 'typemoq';
 import { PageProcessor, PageProcessorBase } from '../page-processors/page-processor-base';
-import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
+import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
@@ -15,7 +15,6 @@ import { CrawlerFactory } from './crawler-factory';
 describe(CrawlerEngine, () => {
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {
-        requestQueue: undefined,
         pageHandler: () => null,
         gotoFunction: () => null,
         pageErrorProcessor: () => null,
@@ -24,15 +23,16 @@ describe(CrawlerEngine, () => {
     let pageProcessorFactoryStub: () => PageProcessorBase;
     let crawlerRunOptions: CrawlerRunOptions;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
-    let requestQueueMock: IMock<Apify.RequestQueue>;
+    let requestQueueStub: Apify.RequestQueue;
     let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let baseCrawlerOptions: Apify.PuppeteerCrawlerOptions;
     let crawlerEngine: CrawlerEngine;
+    let requestQueueProvider: ApifyRequestQueueProvider;
 
     beforeEach(() => {
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
-        requestQueueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
+        requestQueueStub = {} as Apify.RequestQueue;
         puppeteerCrawlerMock = Mock.ofType<Apify.PuppeteerCrawler>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
 
@@ -53,7 +53,7 @@ describe(CrawlerEngine, () => {
         crawlerConfigurationMock.setup((o) => o.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
 
         baseCrawlerOptions = {
-            requestQueue: requestQueueMock.object,
+            requestQueue: requestQueueStub,
             handlePageFunction: pageProcessorStub.pageHandler,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
@@ -67,15 +67,20 @@ describe(CrawlerEngine, () => {
             } as Apify.LaunchPuppeteerOptions,
         };
 
+        puppeteerCrawlerMock.setup((o) => o.run()).verifiable();
         crawlerFactoryMock
             .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
             .returns(() => puppeteerCrawlerMock.object)
             .verifiable();
-        puppeteerCrawlerMock.setup((o) => o.run()).verifiable();
 
-        pageProcessorStub.requestQueue = requestQueueMock.object;
+        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
-        crawlerEngine = new CrawlerEngine(pageProcessorFactoryStub, crawlerFactoryMock.object, crawlerConfigurationMock.object);
+        crawlerEngine = new CrawlerEngine(
+            pageProcessorFactoryStub,
+            requestQueueProvider,
+            crawlerFactoryMock.object,
+            crawlerConfigurationMock.object,
+        );
     });
 
     it('Run crawler with settings validation', async () => {

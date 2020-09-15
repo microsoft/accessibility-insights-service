@@ -2,9 +2,8 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { PageProcessorBase } from '../page-processors/page-processor-base';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, iocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
@@ -16,7 +15,8 @@ import * as cheerio from 'cheerio';
 @injectable()
 export class CrawlerEngine {
     public constructor(
-        @inject(iocTypes.PageProcessorFactory) private readonly pageProcessorFactory: () => PageProcessorBase,
+        @inject(iocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
     ) {}
@@ -28,9 +28,8 @@ export class CrawlerEngine {
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
         const pageProcessor = this.pageProcessorFactory();
-
         const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
-            requestQueue: pageProcessor.requestQueue,
+            requestQueue: await this.requestQueueProvider(),
             handlePageFunction: pageProcessor.pageHandler,
             gotoFunction: pageProcessor.gotoFunction,
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,

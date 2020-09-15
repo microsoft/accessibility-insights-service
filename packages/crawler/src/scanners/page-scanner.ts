@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Report, Reporter } from 'accessibility-insights-report';
+import { Report, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
@@ -16,7 +16,7 @@ export interface ScanResult {
 @injectable()
 export class PageScanner {
     public constructor(
-        @inject(iocTypes.ReporterFactory) private readonly reporter: Reporter,
+        @inject(iocTypes.ReporterFactory) private readonly reporterFactory: ReporterFactory,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
     ) {}
 
@@ -33,7 +33,9 @@ export class PageScanner {
     }
 
     private createReport(axeResults: AxeResults, url: string, title: string): Report {
-        return this.reporter.fromAxeResult({
+        const reporter = this.reporterFactory();
+
+        return reporter.fromAxeResult({
             results: axeResults,
             serviceName: 'Accessibility Insights CLI',
             description: `Automated report for accessibility scan of URL ${url}`,

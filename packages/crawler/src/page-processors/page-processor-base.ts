@@ -11,7 +11,7 @@ import { AccessibilityScanOperation } from '../page-operations/accessibility-sca
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
-import { iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -20,7 +20,6 @@ export type PartialScanData = {
 } & Partial<ScanData>;
 
 export interface PageProcessor {
-    requestQueue: Apify.RequestQueue;
     pageHandler: Apify.PuppeteerHandlePage;
     gotoFunction: Apify.PuppeteerGoto;
     pageErrorProcessor: Apify.HandleFailedRequest;
@@ -52,7 +51,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        @inject(iocTypes.ApifyRequestQueue) public readonly requestQueue: Apify.RequestQueue,
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
@@ -152,9 +151,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+        const requestQueue = await this.requestQueueProvider();
         const enqueued = await this.enqueueLinksExt({
             page,
-            requestQueue: this.requestQueue,
+            requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
         console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
