@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-import Apify from 'apify';
-
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
+import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-// tslint:disable-next-line:no-duplicate-imports
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase, PageError } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { iocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -21,6 +20,7 @@ export type PartialScanData = {
 } & Partial<ScanData>;
 
 export interface PageProcessor {
+    requestQueue: Apify.RequestQueue;
     pageHandler: Apify.PuppeteerHandlePage;
     gotoFunction: Apify.PuppeteerGoto;
     pageErrorProcessor: Apify.HandleFailedRequest;
@@ -32,6 +32,9 @@ export abstract class PageProcessorBase implements PageProcessor {
      * Timeout in which page navigation needs to finish, in seconds.
      */
     public gotoTimeoutSecs = 30;
+
+    protected readonly snapshot: boolean;
+    protected readonly discoveryPatterns: string[];
 
     /**
      * This function is called to extract data from a single web page
@@ -49,13 +52,15 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        protected readonly requestQueue: Apify.RequestQueue,
-        protected readonly snapshot: boolean,
-        protected readonly discoveryPatterns?: string[],
+        @inject(iocTypes.ApifyRequestQueue) public readonly requestQueue: Apify.RequestQueue,
+        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
-    ) {}
+    ) {
+        this.snapshot = this.crawlerConfiguration.snapshot();
+        this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
+    }
 
     /**
      * Function that is called to process each request.
@@ -92,6 +97,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             } catch (err) {
                 const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
                 await this.logBrowserFailure(inputs.request, navigationError);
+                await this.saveScanBrowserErrorToDataBase(inputs.request, navigationError);
 
                 throw err;
             }
@@ -135,7 +141,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.saveScanPageErrorToDataBase(request, error);
     };
 
-    public async saveSnapshot(page: Page, id: string): Promise<void> {
+    protected async saveSnapshot(page: Page, id: string): Promise<void> {
         if (this.snapshot) {
             await this.saveSnapshotExt(page, {
                 key: `${id}.screenshot`,

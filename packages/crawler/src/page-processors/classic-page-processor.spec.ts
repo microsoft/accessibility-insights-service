@@ -6,6 +6,7 @@ import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
@@ -23,6 +24,7 @@ describe(ClassicPageProcessor, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
 
     const testUrl = 'test url';
     const testId = 'test id';
@@ -41,12 +43,23 @@ describe(ClassicPageProcessor, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
+        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        crawlerConfigurationMock
+            .setup((o) => o.discoveryPatterns())
+            .returns(() => discoveryPatterns)
+            .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.snapshot())
+            .returns(() => false)
+            .verifiable();
+
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
         } as any;
+
         pageStub = {
             url: () => testUrl,
         } as any;
@@ -59,8 +72,7 @@ describe(ClassicPageProcessor, () => {
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
             requestQueueMock.object,
-            false,
-            discoveryPatterns,
+            crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
         );
     });

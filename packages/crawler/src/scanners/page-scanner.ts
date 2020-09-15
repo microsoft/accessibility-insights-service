@@ -6,6 +6,7 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
+import { iocTypes } from '../types/ioc-types';
 
 export interface ScanResult {
     axeResults: AxeResults;
@@ -15,7 +16,7 @@ export interface ScanResult {
 @injectable()
 export class PageScanner {
     public constructor(
-        @inject('ReporterFactory') private readonly reporter: Reporter,
+        @inject(iocTypes.ReporterFactory) private readonly reporter: Reporter,
         @inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory,
     ) {}
 

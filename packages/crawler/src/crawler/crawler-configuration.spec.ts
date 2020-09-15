@@ -4,28 +4,23 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
+import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 
-class TestableCrawlerConfiguration extends CrawlerConfiguration {
-    public createPageProcessor(): CrawlerConfiguration {
-        return undefined;
-    }
-
-    // Override to access protected method
-
-    // tslint:disable-next-line: no-unnecessary-override
-    public getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
-        return super.getDiscoveryPattern(baseUrl, discoveryPatterns);
-    }
-}
-
 describe(CrawlerConfiguration, () => {
-    let crawlerConfig: TestableCrawlerConfiguration;
     let apifySettingsHandlerMock: IMock<ApifySettingsHandler>;
+    let crawlerRunOptionsMock: IMock<CrawlerRunOptions>;
+    let crawlerConfiguration: CrawlerConfiguration;
 
     beforeEach(() => {
         apifySettingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
-        crawlerConfig = new TestableCrawlerConfiguration(apifySettingsHandlerMock.object);
+        crawlerRunOptionsMock = Mock.ofType<CrawlerRunOptions>();
+        crawlerConfiguration = new CrawlerConfiguration(crawlerRunOptionsMock.object, apifySettingsHandlerMock.object);
+    });
+
+    afterEach(() => {
+        crawlerRunOptionsMock.verifyAll();
+        apifySettingsHandlerMock.verifyAll();
     });
 
     describe('getDiscoveryPattern', () => {
@@ -38,38 +33,126 @@ describe(CrawlerConfiguration, () => {
         });
 
         it('with no list provided', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.baseUrl)
+                .returns(() => baseUrl)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.discoveryPatterns)
+                .returns(() => undefined)
+                .verifiable();
             const expectedPattern = `http[s?]://${host}${path}[.*]`;
 
-            const discoveryPatterns = crawlerConfig.getDiscoveryPattern(baseUrl, undefined);
+            const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 
-            expect(discoveryPatterns.length).toBe(1);
-            expect(discoveryPatterns[0]).toBe(expectedPattern);
+            expect(discoveryPatterns).toEqual([expectedPattern]);
         });
 
         it('with list provided', () => {
             const expectedDiscoveryPatterns = ['pattern1', 'pattern2'];
+            crawlerRunOptionsMock
+                .setup((o) => o.baseUrl)
+                .returns(() => baseUrl)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.discoveryPatterns)
+                .returns(() => expectedDiscoveryPatterns)
+                .verifiable();
 
-            const discoveryPatterns = crawlerConfig.getDiscoveryPattern(baseUrl, expectedDiscoveryPatterns);
+            const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 
             expect(discoveryPatterns).toBe(expectedDiscoveryPatterns);
         });
     });
 
+    describe('getDefaultSelectors', () => {
+        it('with no selectors provided', () => {
+            expect(crawlerConfiguration.selectors()).toEqual(['button']);
+        });
+
+        it('with selectors provided', () => {
+            const expectedSelectors = ['selector1', 'selector2'];
+            crawlerRunOptionsMock
+                .setup((o) => o.selectors)
+                .returns(() => expectedSelectors)
+                .verifiable();
+
+            expect(crawlerConfiguration.selectors()).toEqual(expectedSelectors);
+        });
+    });
+
+    describe('getSnapshot', () => {
+        it('default snapshot state', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.snapshot)
+                .returns(() => undefined)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.simulate)
+                .returns(() => undefined)
+                .verifiable();
+
+            expect(crawlerConfiguration.snapshot()).toEqual(false);
+        });
+
+        it('explicitly set snapshot state', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.snapshot)
+                .returns(() => true)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.simulate)
+                .returns(() => undefined)
+                .verifiable();
+
+            expect(crawlerConfiguration.snapshot()).toEqual(true);
+        });
+
+        it('implicitly set snapshot state when simulate option selected', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.snapshot)
+                .returns(() => undefined)
+                .verifiable();
+            crawlerRunOptionsMock
+                .setup((o) => o.simulate)
+                .returns(() => true)
+                .verifiable();
+
+            expect(crawlerConfiguration.snapshot()).toEqual(true);
+        });
+    });
+
     describe('getMaxRequestsPerCrawl', () => {
         it('with no value provided', () => {
-            expect(crawlerConfig.getMaxRequestsPerCrawl(undefined)).toBe(100);
+            crawlerRunOptionsMock
+                .setup((o) => o.maxRequestsPerCrawl)
+                .returns(() => undefined)
+                .verifiable();
+            expect(crawlerConfiguration.maxRequestsPerCrawl()).toBe(100);
         });
 
         it('with +ve value provided', () => {
-            expect(crawlerConfig.getMaxRequestsPerCrawl(10)).toBe(10);
+            crawlerRunOptionsMock
+                .setup((o) => o.maxRequestsPerCrawl)
+                .returns(() => 10)
+                .verifiable();
+            expect(crawlerConfiguration.maxRequestsPerCrawl()).toBe(10);
         });
 
         it('with -ve value provided', () => {
-            expect(crawlerConfig.getMaxRequestsPerCrawl(-10)).toBe(100);
+            crawlerRunOptionsMock
+                .setup((o) => o.maxRequestsPerCrawl)
+                .returns(() => -10)
+                .verifiable();
+            expect(crawlerConfiguration.maxRequestsPerCrawl()).toBe(100);
         });
 
         it('with zero value provided', () => {
-            expect(crawlerConfig.getMaxRequestsPerCrawl(0)).toBe(100);
+            crawlerRunOptionsMock
+                .setup((o) => o.maxRequestsPerCrawl)
+                .returns(() => 0)
+                .verifiable();
+            expect(crawlerConfiguration.maxRequestsPerCrawl()).toBe(100);
         });
     });
 
@@ -97,9 +180,7 @@ describe(CrawlerConfiguration, () => {
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
-            crawlerConfig.setDefaultApifySettings();
-
-            apifySettingsHandlerMock.verifyAll();
+            crawlerConfiguration.setDefaultApifySettings();
         });
 
         it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR and APIFY_HEADLESS', () => {
@@ -111,9 +192,7 @@ describe(CrawlerConfiguration, () => {
             existingSettings.APIFY_LOCAL_STORAGE_DIR = undefined;
             existingSettings.APIFY_HEADLESS = undefined;
 
-            crawlerConfig.setDefaultApifySettings();
-
-            apifySettingsHandlerMock.verifyAll();
+            crawlerConfiguration.setDefaultApifySettings();
         });
 
         it('setLocalOutputDir', () => {
@@ -123,9 +202,7 @@ describe(CrawlerConfiguration, () => {
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
-            crawlerConfig.setLocalOutputDir(localOutputDir);
-
-            apifySettingsHandlerMock.verifyAll();
+            crawlerConfiguration.setLocalOutputDir(localOutputDir);
         });
 
         it('setSilentMode', () => {
@@ -135,9 +212,7 @@ describe(CrawlerConfiguration, () => {
             };
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
-            crawlerConfig.setSilentMode(silentMode);
-
-            apifySettingsHandlerMock.verifyAll();
+            crawlerConfiguration.setSilentMode(silentMode);
         });
     });
 });

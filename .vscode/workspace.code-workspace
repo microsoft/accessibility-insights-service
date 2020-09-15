@@ -123,6 +123,7 @@
             "inversify",
             "serializable",
             "typemoq",
+            "unscannable",
             "upsert"
         ],
         "csharp.suppressDotnetRestoreNotification": true
