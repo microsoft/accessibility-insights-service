@@ -6,6 +6,7 @@ import { CrawlSummaryDetails } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
@@ -15,6 +16,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(CrawlerEntryPoint) private readonly crawlerEntryPoint: CrawlerEntryPoint,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
+        @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
@@ -45,7 +47,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const scannedPagesCount = scanResult.summaryScanResults.failed.length + scanResult.summaryScanResults.passed.length;
         const discoveredPagesCount = scannedPagesCount + scanResult.summaryScanResults.unscannable.length;
-        console.log(`Scanned ${discoveredPagesCount} of ${scannedPagesCount} pages discovered​`);
+        console.log(`Scanned ${scannedPagesCount} of ${discoveredPagesCount} pages discovered `);
 
         const issueCount = scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
         console.log(`Found ${issueCount} accessibility issues`);
@@ -62,5 +64,9 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${scanArguments.output}\\${reportLocation}`);
+
+        const errorLogLocation = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
+        this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogLocation, scanResult.errors);
+        console.log(`Error log was saved as ${scanArguments.output}\\${reportLocation}`);
     }
 }

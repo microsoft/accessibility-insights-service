@@ -92,6 +92,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             } catch (err) {
                 const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
                 await this.logBrowserFailure(inputs.request, navigationError);
+                await this.saveScanBrowserErrorToDataBase(inputs.request, navigationError);
 
                 throw err;
             }
@@ -165,7 +166,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             url: request.url,
             errorDescription: error.message,
             errorType: error.errorType,
-            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.error.txt`,
+            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.err.txt`,
         };
 
         await this.dataBase.addBrowserError(request.id as string, summaryScanError);
@@ -174,7 +175,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
         const summaryScanError: PageError = {
             url: request.url,
-            error: JSON.stringify(error),
+            error: error.stack,
         };
 
         await this.dataBase.addError(request.id as string, summaryScanError);

@@ -7,6 +7,7 @@ import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
@@ -15,6 +16,7 @@ describe('CrawlerCommandRunner', () => {
     let crawlerEntryPointMock: IMock<CrawlerEntryPoint>;
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
+    let reportNameGeneratorMock: IMock<ReportNameGenerator>;
     let testSubject: CrawlerCommandRunner;
     // tslint:disable-next-line: no-http-string
     const testUrl = 'http://www.bing.com';
@@ -24,8 +26,14 @@ describe('CrawlerCommandRunner', () => {
         crawlerEntryPointMock = Mock.ofType<CrawlerEntryPoint>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
+        reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
 
-        testSubject = new CrawlerCommandRunner(crawlerEntryPointMock.object, reportGeneratorMock.object, reportDiskWriterMock.object);
+        testSubject = new CrawlerCommandRunner(
+            crawlerEntryPointMock.object,
+            reportGeneratorMock.object,
+            reportDiskWriterMock.object,
+            reportNameGeneratorMock.object,
+        );
     });
 
     it('Run Command', async () => {
@@ -62,5 +70,8 @@ describe('CrawlerCommandRunner', () => {
         await testSubject.runCommand(testInput);
 
         crawlerEntryPointMock.verifyAll();
+        reportGeneratorMock.verifyAll();
+        reportDiskWriterMock.verifyAll();
+        reportNameGeneratorMock.verifyAll();
     });
 });
