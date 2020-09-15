@@ -3,7 +3,6 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
-// import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { dataBase, DataBase } from './level-storage/data-base';
 import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
@@ -14,7 +13,6 @@ import { iocTypes } from './types/ioc-types';
 export function setupCrawlerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     container.bind(DataBase).toConstantValue(dataBase);
-    // container.bind(CrawlerConfiguration).toSelf().inSingletonScope();
     container.bind(iocTypes.ReporterFactory).toConstantValue(reporterFactory);
 
     container.bind(iocTypes.ApifyRequestQueue).toDynamicValue(async (context: inversify.interfaces.Context) => {
