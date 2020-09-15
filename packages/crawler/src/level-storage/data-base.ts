@@ -72,8 +72,11 @@ export class DataBase {
         const errors: PageError[] = [];
 
         await this.open();
-        this.db.createReadStream().on('data', (data) => {
+        const stream = this.db.createReadStream();
+        stream.on('data', (data) => {
             const key: DataBaseKey = data.key as DataBaseKey;
+            console.log(JSON.stringify(key));
+            console.log(JSON.stringify(data.value));
 
             if (key.type === 'error') {
                 const value: PageError = data.value as PageError;
@@ -91,7 +94,15 @@ export class DataBase {
             }
         });
 
-        return { errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } };
+        let promise = Promise.resolve(undefined);
+        await promise;
+
+        promise = new Promise((fulfill) => stream.on('end', fulfill));
+        await promise;
+
+        promise = Promise.resolve({ errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } });
+
+        return promise;
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {
