@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
+import { SummaryScanError } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { DirectNavigationOptions, Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
@@ -21,9 +23,22 @@ describe(PageProcessorBase, () => {
         public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
             return;
         };
+
+        public async saveSnapshot(page: Page, id: string): Promise<void> {
+            await super.saveSnapshot(page, id);
+        }
     }
 
-    let requestQueueMock: IMock<Apify.RequestQueue>;
+    const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
+    const testUrl = 'url';
+    const testId = 'id';
+    const error: Error = {
+        name: 'error',
+        message: 'error message',
+        stack: 'stack',
+    };
+
+    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
@@ -34,22 +49,14 @@ describe(PageProcessorBase, () => {
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
-
-    const discoveryPatterns: string[] = ['pattern1', 'pattern2'];
-    const testUrl = 'url';
-    const testId = 'id';
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+    let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
-    const error: Error = {
-        name: 'error',
-        message: 'error message',
-        stack: 'stack',
-    };
-
     let pageProcessorBase: TestablePageProcessor;
 
     beforeEach(() => {
-        requestQueueMock = Mock.ofType<Apify.RequestQueue>();
+        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
@@ -60,12 +67,23 @@ describe(PageProcessorBase, () => {
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
+        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        crawlerConfigurationMock
+            .setup((o) => o.discoveryPatterns())
+            .returns(() => discoveryPatterns)
+            .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.snapshot())
+            .returns(() => false)
+            .verifiable();
+
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
         } as any;
+
         pageStub = {
             url: () => testUrl,
             setBypassCSP: (op: boolean) => {
@@ -74,6 +92,7 @@ describe(PageProcessorBase, () => {
             title: () => 'title',
         } as any;
 
+        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorBase = new TestablePageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
@@ -81,10 +100,8 @@ describe(PageProcessorBase, () => {
             dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
-            requestQueueMock.object,
-            false,
-            testUrl,
-            discoveryPatterns,
+            requestQueueProvider,
+            crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,
             saveSnapshotMock.object,
@@ -100,6 +117,8 @@ describe(PageProcessorBase, () => {
         saveSnapshotMock.verifyAll();
         pageResponseProcessorMock.verifyAll();
         pageConfiguratorMock.verifyAll();
+        dataBaseMock.verifyAll();
+        crawlerConfigurationMock.verifyAll();
     });
 
     it('gotoFunction', async () => {
@@ -145,9 +164,18 @@ describe(PageProcessorBase, () => {
             .setup((o) => o.getNavigationError(error))
             .returns(() => browserError)
             .verifiable();
+
         blobStoreMock
             .setup((o) => o.setValue(`${testId}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' }))
             .verifiable();
+
+        const summaryScanError = {
+            url: 'url',
+            errorDescription: 'error message',
+            errorType: 'NavigationError',
+            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
+        } as SummaryScanError;
+        dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
 
         try {
             await pageProcessorBase.gotoFunction(inputs);
@@ -182,6 +210,15 @@ describe(PageProcessorBase, () => {
         blobStoreMock
             .setup((o) => o.setValue(`${testId}.browser.err`, `${responseError.stack}`, { contentType: 'text/plain' }))
             .verifiable();
+
+        const summaryScanError = {
+            url: 'url',
+            errorDescription: 'Content type: text/plain',
+            errorType: 'InvalidContentType',
+            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
+        } as SummaryScanError;
+        dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
+
         const expectedError = new Error(`Page response error: ${JSON.stringify(responseError)}`);
 
         try {

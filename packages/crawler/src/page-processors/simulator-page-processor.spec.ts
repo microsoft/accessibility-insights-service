@@ -6,17 +6,24 @@ import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { ClickElementOperation } from '../page-operations/click-element-operation';
 import { EnqueueActiveElementsOperation } from '../page-operations/enqueue-active-elements-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
+import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { SimulatorPageProcessor } from './simulator-page-processor';
 
-// tslint:disable: no-any
+// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
 
 describe(SimulatorPageProcessor, () => {
-    let requestQueueMock: IMock<Apify.RequestQueue>;
+    const testUrl = 'test url';
+    const testId = 'test id';
+    const discoveryPatterns = ['pattern1', 'pattern2'];
+    const selectors = ['button'];
+
+    let requestQueueStub: Apify.RequestQueue;
     let accessibilityScanOpMock: IMock<AccessibilityScanOperation>;
     let dataStoreMock: IMock<DataStore>;
     let blobStoreMock: IMock<BlobStore>;
@@ -26,18 +33,14 @@ describe(SimulatorPageProcessor, () => {
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
     let pageResponseProcessorMock: IMock<PageResponseProcessor>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
-
-    const testUrl = 'test url';
-    const testId = 'test id';
-    const discoveryPatterns = ['pattern1', 'pattern2'];
-    const selectors = ['button'];
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
+    let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
-
     let simulatorPageProcessor: SimulatorPageProcessor;
 
     beforeEach(() => {
-        requestQueueMock = Mock.ofType<Apify.RequestQueue>();
+        requestQueueStub = {} as Apify.RequestQueue;
         accessibilityScanOpMock = Mock.ofType<AccessibilityScanOperation>();
         dataStoreMock = Mock.ofType<DataStore>();
         blobStoreMock = Mock.ofType<BlobStore>();
@@ -47,16 +50,32 @@ describe(SimulatorPageProcessor, () => {
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
+        crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        crawlerConfigurationMock
+            .setup((o) => o.discoveryPatterns())
+            .returns(() => discoveryPatterns)
+            .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.snapshot())
+            .returns(() => false)
+            .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.selectors())
+            .returns(() => selectors)
+            .verifiable();
+
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
         } as any;
+
         pageStub = {
             url: () => testUrl,
         } as any;
 
+        requestQueueProvider = () => Promise.resolve(requestQueueStub);
         simulatorPageProcessor = new SimulatorPageProcessor(
             accessibilityScanOpMock.object,
             dataStoreMock.object,
@@ -66,11 +85,8 @@ describe(SimulatorPageProcessor, () => {
             clickElementOpMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
-            requestQueueMock.object,
-            selectors,
-            false,
-            testUrl,
-            discoveryPatterns,
+            requestQueueProvider,
+            crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
         );
     });
@@ -118,11 +134,10 @@ describe(SimulatorPageProcessor, () => {
             succeeded: true,
             activatedElement: activeElement,
         };
-        // tslint:disable-next-line: no-unsafe-any
         blobStoreMock.setup((bs) => bs.setValue(`${expectedScanData.id}.data`, expectedScanData));
 
         clickElementOpMock
-            .setup((cem) => cem.click(pageStub, 'button', requestQueueMock.object, discoveryPatterns))
+            .setup((cem) => cem.click(pageStub, 'button', requestQueueStub, discoveryPatterns))
             .returns(async () => Promise.resolve({ clickAction: 'page-action' }))
             .verifiable();
 
@@ -133,7 +148,7 @@ describe(SimulatorPageProcessor, () => {
     function setupEnqueueLinks(page: Page): void {
         const options = {
             page: page,
-            requestQueue: requestQueueMock.object,
+            requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
         enqueueLinksExtMock

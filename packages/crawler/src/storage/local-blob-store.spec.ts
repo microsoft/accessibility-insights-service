@@ -3,7 +3,6 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { LocalBlobStore } from './local-blob-store';
 import { scanResultStorageName } from './store-types';

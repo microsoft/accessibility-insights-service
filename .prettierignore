@@ -28,3 +28,5 @@ copyright-header.txt
 **/.DS_Store
 **/.funcignore
 **/extensions.csproj
+**/crawler_storage/
+**/ai_scan_cli_output/

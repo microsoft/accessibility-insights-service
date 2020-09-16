@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-import Apify from 'apify';
-
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
+import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-// tslint:disable-next-line:no-duplicate-imports
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase, PageError } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -33,6 +32,10 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoTimeoutSecs = 30;
 
+    protected readonly baseUrl: string;
+    protected readonly snapshot: boolean;
+    protected readonly discoveryPatterns: string[];
+
     /**
      * This function is called to extract data from a single web page
      * 'page' is an instance of Puppeteer.Page with page.goto(request.url) already called
@@ -49,14 +52,16 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        protected readonly requestQueue: Apify.RequestQueue,
-        protected readonly snapshot: boolean,
-        protected readonly baseUrl: string,
-        protected readonly discoveryPatterns?: string[],
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
-    ) {}
+    ) {
+        this.baseUrl = this.crawlerConfiguration.baseUrl();
+        this.snapshot = this.crawlerConfiguration.snapshot();
+        this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
+    }
 
     /**
      * Function that is called to process each request.
@@ -143,7 +148,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.saveScanPageErrorToDataBase(request, error);
     };
 
-    public async saveSnapshot(page: Page, id: string): Promise<void> {
+    protected async saveSnapshot(page: Page, id: string): Promise<void> {
         if (this.snapshot) {
             await this.saveSnapshotExt(page, {
                 key: `${id}.screenshot`,
@@ -154,9 +159,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+        const requestQueue = await this.requestQueueProvider();
         const enqueued = await this.enqueueLinksExt({
             page,
-            requestQueue: this.requestQueue,
+            requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
         console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
