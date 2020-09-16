@@ -89,6 +89,7 @@ describe(PageProcessorBase, () => {
             setBypassCSP: (op: boolean) => {
                 return;
             },
+            title: () => 'title',
         } as any;
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);

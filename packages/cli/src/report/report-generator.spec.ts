@@ -2,17 +2,19 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { AxeReportParameters, Report, Reporter, ReporterFactory } from 'accessibility-insights-report';
+import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeScanResults } from '../scanner/axe-scan-results';
+import { AxeInfo } from '../tool-data/axe-info';
 import { ReportGenerator } from './report-generator';
 
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     const htmlReportString = 'html report';
     let reporterMock: IMock<Reporter>;
+    let axeInfoMock: IMock<AxeInfo>;
     let htmlReport: Report;
     let axeResults: AxeResults;
     let axeScanResults: AxeScanResults;
@@ -21,8 +23,9 @@ describe('ReportGenerator', () => {
 
     beforeEach(() => {
         reporterMock = Mock.ofType<Reporter>();
+        axeInfoMock = Mock.ofType<AxeInfo>();
         const reporterFactory: ReporterFactory = () => reporterMock.object;
-        reportGenerator = new ReportGenerator(reporterFactory);
+        reportGenerator = new ReportGenerator(reporterFactory, axeInfoMock.object);
         htmlReport = {
             asHTML: () => htmlReportString,
         };
@@ -44,7 +47,7 @@ describe('ReportGenerator', () => {
             description: `Automated report for accessibility scan of url ${
                 axeScanResults.results.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
-            serviceName: 'Accessibility Insights Service',
+            serviceName: 'Accessibility Insights',
             scanContext: {
                 pageTitle: params.pageTitle,
             },
@@ -56,7 +59,46 @@ describe('ReportGenerator', () => {
 
         const report = reportGenerator.generateReport(axeScanResults);
 
-        reporterMock.verifyAll();
         expect(report).toEqual(htmlReportString);
+    });
+
+    it('generate summary report ', async () => {
+        const crawlDetails = {
+            baseUrl: 'base url',
+            basePageTitle: 'base page title',
+            scanStart: reportGenerationTime,
+            scanComplete: reportGenerationTime,
+            durationSeconds: 10000,
+        };
+
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        const results = { failed: [], passed: [], unscannable: [] } as SummaryScanResults;
+
+        const parameters = {
+            serviceName: 'Accessibility Insights',
+            axeVersion: 'axe version',
+            userAgent: 'user agent',
+            crawlDetails: crawlDetails,
+            results: results,
+        };
+
+        axeInfoMock
+            .setup((aim) => aim.version)
+            .returns(() => 'axe version')
+            .verifiable(Times.once());
+
+        reporterMock
+            .setup((rm) => rm.fromSummaryResults(parameters))
+            .returns(() => htmlReport)
+            .verifiable(Times.once());
+
+        const report = await reportGenerator.generateSummaryReport(crawlDetails, results, 'user agent');
+
+        expect(report).toEqual(htmlReportString);
+    });
+
+    afterEach(() => {
+        reporterMock.verifyAll();
+        axeInfoMock.verifyAll();
     });
 });

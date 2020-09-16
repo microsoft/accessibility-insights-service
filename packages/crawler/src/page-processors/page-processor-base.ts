@@ -53,6 +53,8 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
@@ -118,6 +120,12 @@ export abstract class PageProcessorBase implements PageProcessor {
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
+        } finally {
+            if (inputs.request.url === this.baseUrl) {
+                await this.dataBase.setUserAgent(this.pageConfigurator.getUserAgent());
+                const basePageTitle = await inputs.page.title();
+                await this.dataBase.setBasePageTitle(basePageTitle);
+            }
         }
     };
 
@@ -171,7 +179,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             url: request.url,
             errorDescription: error.message,
             errorType: error.errorType,
-            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.error.txt`,
+            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.err.txt`,
         };
 
         await this.dataBase.addBrowserError(request.id as string, summaryScanError);
@@ -180,7 +188,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
         const summaryScanError: PageError = {
             url: request.url,
-            error: JSON.stringify(error),
+            error: error.stack, FIX the merge - JSON.stringify(error)
         };
 
         await this.dataBase.addError(request.id as string, summaryScanError);
