@@ -27,5 +27,4 @@ export class PageConfigurator {
         this.userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
         await page.setUserAgent(this.userAgent);
     }
-
 }

@@ -16,7 +16,6 @@ import { CrawlerFactory } from './crawler-factory';
 // tslint:disable:no-object-literal-type-assertion
 @injectable()
 export class CrawlerEngine {
-
     public constructor(
         @inject(PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
