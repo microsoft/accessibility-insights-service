@@ -71,6 +71,7 @@ describe(PageProcessorBase, () => {
             setBypassCSP: (op: boolean) => {
                 return;
             },
+            title: () => 'title',
         } as any;
 
         pageProcessorBase = new TestablePageProcessor(
@@ -82,6 +83,7 @@ describe(PageProcessorBase, () => {
             pageConfiguratorMock.object,
             requestQueueMock.object,
             false,
+            testUrl,
             discoveryPatterns,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,

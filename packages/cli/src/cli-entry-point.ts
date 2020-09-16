@@ -22,12 +22,20 @@ export class CliEntryPoint {
             const reportDiskWriter = this.container.get(ReportDiskWriter);
             const reportNameGenerator = this.container.get(ReportNameGenerator);
 
-            reportDiskWriter.writeToDirectory(
+            console.log(`Crawling and scanning page ${scanArguments.url} aborted`);
+
+            console.log(
+                `Something went wrong. Please try again later. If this persists, search for a known issue or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.`,
+            );
+
+            const errorLog = reportDiskWriter.writeToDirectory(
                 scanArguments.output,
                 reportNameGenerator.generateName('ai-cli-errors', new Date()),
                 'log',
                 `${error}`,
             );
+
+            console.log(`Error log was saved as ${scanArguments.output}\\${errorLog}`);
         }
     }
 
