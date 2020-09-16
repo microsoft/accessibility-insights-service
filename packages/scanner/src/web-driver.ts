@@ -7,17 +7,19 @@ import Puppeteer from 'puppeteer';
 @injectable()
 export class WebDriver {
     public browser: Puppeteer.Browser;
-    public userAgent: string;
 
     constructor(@inject(GlobalLogger) private readonly logger: Logger, private readonly puppeteer: typeof Puppeteer = Puppeteer) {}
 
     public async launch(): Promise<Puppeteer.Browser> {
         this.browser = await this.puppeteer.launch({
             headless: true,
-            args: ['--disable-dev-shm-usage'],
+            args: ['--disable-dev-shm-usage', '--disable-infobars'],
+            defaultViewport: {
+                width: 1920,
+                height: 1080,
+                deviceScaleFactor: 1,
+            },
         });
-        // convert to headful user agent to prevent web site from blocking an access
-        this.userAgent = (await this.browser.userAgent()).replace('HeadlessChrome', 'Chrome');
         this.logger.logInfo('Chromium browser instance started.');
 
         return this.browser;

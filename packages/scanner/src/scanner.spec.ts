@@ -5,10 +5,10 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { AxePuppeteerFactory } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
 import { Scanner } from './scanner';
 import { MockableLogger } from './test-utilities/mockable-logger';
@@ -124,7 +124,6 @@ describe('Scanner', () => {
 
     function setupNewPageCall(url: string): void {
         pageMock.setup(async (p) => p.create()).verifiable(Times.once());
-        pageMock.setup(async (p) => p.enableBypassCSP()).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {

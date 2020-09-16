@@ -7,9 +7,9 @@ import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { ServiceConfiguration } from 'common';
 import * as Puppeteer from 'puppeteer';
+import { AxePuppeteerFactory } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { AxeScanResults, ScanErrorTypes } from './axe-scan-results';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
@@ -293,15 +293,6 @@ describe('Page', () => {
         webDriverMock.verifyAll();
     });
 
-    it('should call setBypassCSP', async () => {
-        setBypassCSPMock.setup(async (setBypassCSP) => setBypassCSP(true)).verifiable(Times.once());
-
-        await page.create();
-        await page.enableBypassCSP();
-        expect(page.puppeteerPage).toEqual(puppeteerBrowserMock.puppeteerPage);
-        setBypassCSPMock.verifyAll();
-    });
-
     it('should return error info for non-successful status code', async () => {
         const scanUrl = 'https://www.error-url.com';
         const errorResult: AxeScanResults = {
@@ -379,75 +370,6 @@ describe('Page', () => {
         axePuppeteerMock.verifyAll();
 
         expect(result).toEqual(scanResults);
-    });
-
-    describe('handles navigation errors', () => {
-        interface NavigationErrorTestCase {
-            errorMessage: string;
-            expectedScanErrorType: ScanErrorTypes;
-        }
-
-        const testCaseMappings: NavigationErrorTestCase[] = [
-            {
-                errorMessage: 'TimeoutError: Navigation Timeout Exceeded: 30000ms exceeded\n    at Promise.then (',
-                expectedScanErrorType: 'UrlNavigationTimeout',
-            },
-            {
-                errorMessage: 'Puppeteer navigation failed: net::ERR_CERT_AUTHORITY_INVALID',
-                expectedScanErrorType: 'SslError',
-            },
-            {
-                errorMessage: 'Puppeteer navigation failed: net::ERR_CONNECTION_REFUSED',
-                expectedScanErrorType: 'ResourceLoadFailure',
-            },
-            {
-                errorMessage: 'Puppeteer navigation  failed: Cannot navigate to invalid URL',
-                expectedScanErrorType: 'InvalidUrl',
-            },
-            {
-                errorMessage: 'Puppeteer navigation  failed: Cannot navigate to Invalid url',
-                expectedScanErrorType: 'InvalidUrl',
-            },
-            {
-                errorMessage: 'Puppeteer navigation  failed: net::ERR_ABORTED',
-                expectedScanErrorType: 'EmptyPage',
-            },
-            {
-                errorMessage: 'Puppeteer navigation  failed: net::ERR_NAME_NOT_RESOLVED',
-                expectedScanErrorType: 'UrlNotResolved',
-            },
-        ];
-
-        test.each(testCaseMappings)('should identify errors thrown by goto - %o', async (testCase: NavigationErrorTestCase) => {
-            const scanUrl = 'https://www.problem-url.com';
-
-            const errorResult: AxeScanResults = {
-                error: {
-                    errorType: testCase.expectedScanErrorType,
-                    message: testCase.errorMessage,
-                },
-                pageResponseCode: undefined,
-            };
-
-            gotoMock
-                .setup(async (goto) => goto(scanUrl, gotoOptions))
-                .returns(async () => {
-                    throw new Error(testCase.errorMessage);
-                })
-                .verifiable(Times.once());
-
-            waitForNavigationMock.setup(async (wait) => wait(waitOptions)).verifiable(Times.once());
-            axePuppeteerMock.setup(async (o) => o.analyze()).verifiable(Times.never());
-            axePuppeteerFactoryMock
-                .setup(async (apfm) => apfm.createAxePuppeteer(page.puppeteerPage))
-                .returns(async () => Promise.resolve(axePuppeteerMock.object))
-                .verifiable(Times.once());
-
-            await page.create();
-            const result = await page.scanForA11yIssues(scanUrl);
-
-            expect(result).toEqual(errorResult);
-        });
     });
 });
 

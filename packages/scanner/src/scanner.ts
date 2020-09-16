@@ -26,8 +26,8 @@ export class Scanner {
                 error: {
                     errorType: 'ScanTimeout',
                     message: `Scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
+                    stack: new Error().stack,
                 },
-                pageResponseCode: undefined,
             } as AxeScanResults),
         );
     }
@@ -36,7 +36,6 @@ export class Scanner {
         try {
             this.logger.logInfo(`Starting accessibility website page scanning.`, { url });
             await this.page.create();
-            await this.page.enableBypassCSP();
             const scanResult = await this.page.scanForA11yIssues(url);
             this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
 
@@ -44,7 +43,7 @@ export class Scanner {
         } catch (error) {
             this.logger.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(error) });
 
-            return { error: System.serializeError(error), pageResponseCode: undefined };
+            return { error: System.serializeError(error) };
         } finally {
             try {
                 await this.page.close();

@@ -6,3 +6,4 @@ export { BrowserError, BrowserErrorTypes } from './browser-error';
 export { PageConfigurator } from './page-configurator';
 export { PageHandler } from './page-handler';
 export { PageResponseProcessor } from './page-response-processor';
+export { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
