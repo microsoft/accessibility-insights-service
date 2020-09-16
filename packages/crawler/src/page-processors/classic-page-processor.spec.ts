@@ -60,6 +60,7 @@ describe(ClassicPageProcessor, () => {
             pageConfiguratorMock.object,
             requestQueueMock.object,
             false,
+            testUrl,
             discoveryPatterns,
             enqueueLinksExtMock.object,
         );

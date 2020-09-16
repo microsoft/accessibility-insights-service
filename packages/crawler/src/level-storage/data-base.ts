@@ -11,7 +11,7 @@ import leveldown from 'leveldown';
 
 import encode from 'encoding-down';
 
-export type ResultType = 'fail' | 'error' | 'pass' | 'browserError';
+export type ResultType = 'fail' | 'error' | 'pass' | 'browserError' | 'other';
 
 export interface DataBaseKey {
     // tslint:disable-next-line:no-reserved-keywords
@@ -28,10 +28,15 @@ export interface PageError {
 export interface ScanResults {
     summaryScanResults: SummaryScanResults;
     errors: PageError[];
+    userAgent: string;
+    basePageTitle: string;
 }
 
 @injectable()
 export class DataBase {
+    private readonly userAgentKey = 'userAgentKey';
+    private readonly basePageTitleKey = 'basePageTitleKey';
+
     constructor(
         protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
@@ -59,9 +64,19 @@ export class DataBase {
         await this.add(dbKey, value);
     }
 
-    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult | PageError): Promise<void> {
+    public async add(key: DataBaseKey, value: SummaryScanError | SummaryScanResult | PageError | string): Promise<void> {
         await this.open();
         await this.db.put(key, value);
+    }
+
+    public async setUserAgent(userAgent: string): Promise<void> {
+        const dbKey: DataBaseKey = { type: 'other', key: this.userAgentKey };
+        await this.add(dbKey, userAgent);
+    }
+
+    public async setBasePageTitle(basePageTitle: string): Promise<void> {
+        const dbKey: DataBaseKey = { type: 'other', key: this.basePageTitleKey };
+        await this.add(dbKey, basePageTitle);
     }
 
     // tslint:disable: no-unsafe-any
@@ -70,6 +85,8 @@ export class DataBase {
         const passed: SummaryScanResult[] = [];
         const browserErrors: SummaryScanError[] = [];
         const errors: PageError[] = [];
+        let userAgent: string = '';
+        let basePageTitle: string = '';
 
         await this.open();
         const stream = this.db.createReadStream();
@@ -82,19 +99,30 @@ export class DataBase {
             } else if (key.type === 'browserError') {
                 const value: SummaryScanError = data.value as SummaryScanError;
                 browserErrors.push(value);
-            } else {
+            } else if (key.type === 'pass' || key.type === 'fail') {
                 const value: SummaryScanResult = data.value as SummaryScanResult;
                 if (value.numFailures === 0) {
                     passed.push(value);
                 } else {
                     failed.push(value);
                 }
+            } else {
+                if (key.key === this.userAgentKey) {
+                    userAgent = data.value as string;
+                } else if (key.key === this.basePageTitleKey) {
+                    basePageTitle = data.value as string;
+                }
             }
         });
 
         await new Promise((fulfill) => stream.on('end', fulfill));
 
-        return { errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } };
+        return {
+            errors: errors,
+            summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors },
+            userAgent: userAgent,
+            basePageTitle: basePageTitle,
+        };
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {

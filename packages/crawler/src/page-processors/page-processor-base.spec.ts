@@ -82,6 +82,7 @@ describe(PageProcessorBase, () => {
             pageConfiguratorMock.object,
             requestQueueMock.object,
             false,
+            testUrl,
             discoveryPatterns,
             enqueueLinksExtMock.object,
             gotoExtendedMock.object,

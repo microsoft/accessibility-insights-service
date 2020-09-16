@@ -8,7 +8,6 @@ import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
-import { UserAgentInfo } from '../tool-data/user-agent-info';
 import { ReportGenerator } from './report-generator';
 
 describe('ReportGenerator', () => {
@@ -16,7 +15,6 @@ describe('ReportGenerator', () => {
     const htmlReportString = 'html report';
     let reporterMock: IMock<Reporter>;
     let axeInfoMock: IMock<AxeInfo>;
-    let userAgentInfoMock: IMock<UserAgentInfo>;
     let htmlReport: Report;
     let axeResults: AxeResults;
     let axeScanResults: AxeScanResults;
@@ -26,9 +24,8 @@ describe('ReportGenerator', () => {
     beforeEach(() => {
         reporterMock = Mock.ofType<Reporter>();
         axeInfoMock = Mock.ofType<AxeInfo>();
-        userAgentInfoMock = Mock.ofType<UserAgentInfo>();
         const reporterFactory: ReporterFactory = () => reporterMock.object;
-        reportGenerator = new ReportGenerator(reporterFactory, axeInfoMock.object, userAgentInfoMock.object);
+        reportGenerator = new ReportGenerator(reporterFactory, axeInfoMock.object);
         htmlReport = {
             asHTML: () => htmlReportString,
         };
@@ -90,17 +87,12 @@ describe('ReportGenerator', () => {
             .returns(() => 'axe version')
             .verifiable(Times.once());
 
-        userAgentInfoMock
-            .setup(async (uam) => uam.getInfo())
-            .returns(async () => 'user agent')
-            .verifiable(Times.once());
-
         reporterMock
             .setup((rm) => rm.fromSummaryResults(parameters))
             .returns(() => htmlReport)
             .verifiable(Times.once());
 
-        const report = await reportGenerator.generateSummaryReport(crawlDetails, results);
+        const report = await reportGenerator.generateSummaryReport(crawlDetails, results, 'user agent');
 
         expect(report).toEqual(htmlReportString);
     });
@@ -108,6 +100,5 @@ describe('ReportGenerator', () => {
     afterEach(() => {
         reporterMock.verifyAll();
         axeInfoMock.verifyAll();
-        userAgentInfoMock.verifyAll();
     });
 });

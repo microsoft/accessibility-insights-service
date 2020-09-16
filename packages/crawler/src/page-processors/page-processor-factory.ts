@@ -41,6 +41,7 @@ export class PageProcessorFactory {
                     pageProcessorOptions.crawlerRunOptions.snapshot,
                     pageProcessorOptions.crawlerRunOptions.simulate,
                 ),
+                pageProcessorOptions.crawlerRunOptions.baseUrl,
                 this.crawlerConfiguration.getDiscoveryPattern(
                     this.urlObj.getRootUrl(pageProcessorOptions.crawlerRunOptions.baseUrl),
                     pageProcessorOptions.crawlerRunOptions.discoveryPatterns,
@@ -63,6 +64,7 @@ export class PageProcessorFactory {
                 pageProcessorOptions.crawlerRunOptions.snapshot,
                 pageProcessorOptions.crawlerRunOptions.simulate,
             ),
+            pageProcessorOptions.crawlerRunOptions.baseUrl,
             this.crawlerConfiguration.getDiscoveryPattern(
                 this.urlObj.getRootUrl(pageProcessorOptions.crawlerRunOptions.baseUrl),
                 pageProcessorOptions.crawlerRunOptions.discoveryPatterns,

@@ -54,16 +54,20 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const crawlDetails: CrawlSummaryDetails = {
             baseUrl: scanArguments.url,
-            basePageTitle: '',
+            basePageTitle: scanResult.basePageTitle,
             scanStart: startDate,
             scanComplete: endDate,
             durationSeconds: durationSeconds,
         };
 
-        const reportContent = await this.reportGenerator.generateSummaryReport(crawlDetails, scanResult.summaryScanResults);
+        const reportContent = await this.reportGenerator.generateSummaryReport(
+            crawlDetails,
+            scanResult.summaryScanResults,
+            scanResult.userAgent,
+        );
 
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
-        console.log(`Summary report was saved as ${scanArguments.output}\\${reportLocation}`);
+        console.log(`Summary report was saved as ${reportLocation}`);
 
         const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
         const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, scanResult.errors);

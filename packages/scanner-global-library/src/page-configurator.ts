@@ -5,6 +5,12 @@ import { Page } from 'puppeteer';
 
 @injectable()
 export class PageConfigurator {
+    private userAgent: string;
+
+    public getUserAgent(): string {
+        return this.userAgent;
+    }
+
     public async configurePage(page: Page): Promise<void> {
         await page.setBypassCSP(true);
         await page.setViewport({
@@ -18,7 +24,8 @@ export class PageConfigurator {
 
     private async setUserAgent(page: Page): Promise<void> {
         const browser = page.browser();
-        const userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
-        await page.setUserAgent(userAgent);
+        this.userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
+        await page.setUserAgent(this.userAgent);
     }
+
 }

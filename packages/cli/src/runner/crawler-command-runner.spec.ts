@@ -59,6 +59,8 @@ describe('CrawlerCommandRunner', () => {
                 unscannable: [],
             },
             errors: [],
+            basePageTitle: '',
+            userAgent: '',
         };
 
         crawlerEntryPointMock

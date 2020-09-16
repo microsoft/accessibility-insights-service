@@ -69,6 +69,7 @@ describe(SimulatorPageProcessor, () => {
             requestQueueMock.object,
             selectors,
             false,
+            testUrl,
             discoveryPatterns,
             enqueueLinksExtMock.object,
         );

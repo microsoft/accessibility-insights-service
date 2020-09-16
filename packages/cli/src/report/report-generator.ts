@@ -4,14 +4,12 @@ import { AxeReportParameters, CrawlSummaryDetails, ReporterFactory, SummaryScanR
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
-import { UserAgentInfo } from '../tool-data/user-agent-info';
 
 @injectable()
 export class ReportGenerator {
     constructor(
         @inject('ReporterFactory') private readonly reporterFactoryFunc: ReporterFactory,
         @inject(AxeInfo) private readonly axeInfo: AxeInfo,
-        @inject(UserAgentInfo) private readonly userAgentInfo: UserAgentInfo,
     ) {}
 
     public generateReport(axeResults: AxeScanResults): string {
@@ -36,8 +34,7 @@ export class ReportGenerator {
         return reporter.fromAxeResult(htmlReportParams).asHTML();
     }
 
-    public async generateSummaryReport(crawlDetails: CrawlSummaryDetails, results: SummaryScanResults): Promise<string> {
-        const userAgent = await this.userAgentInfo.getInfo();
+    public async generateSummaryReport(crawlDetails: CrawlSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
         // tslint:disable-next-line:one-variable-per-declaration
         const parameters = {
             serviceName: 'Accessibility Insights',

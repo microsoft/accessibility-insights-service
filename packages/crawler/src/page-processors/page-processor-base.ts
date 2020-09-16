@@ -51,6 +51,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
         protected readonly requestQueue: Apify.RequestQueue,
         protected readonly snapshot: boolean,
+        protected readonly baseUrl: string,
         protected readonly discoveryPatterns?: string[],
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
@@ -114,6 +115,12 @@ export abstract class PageProcessorBase implements PageProcessor {
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
+        } finally {
+            if (inputs.request.url === this.baseUrl) {
+                await this.dataBase.setUserAgent(this.pageConfigurator.getUserAgent());
+                const basePageTitle = await inputs.page.title();
+                await this.dataBase.setBasePageTitle(basePageTitle);
+            }
         }
     };
 
