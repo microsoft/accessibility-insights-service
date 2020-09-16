@@ -15,7 +15,7 @@ export class CrawlerEntryPoint {
         if (this.isBaseUrlValid(crawlerRunOptions.baseUrl)) {
             console.log('Base URL should not have query parameters');
 
-            return Promise.resolve({ errors: [], summaryScanResults: { failed: [], passed: [], unscannable: [] } });
+            return { errors: [], summaryScanResults: { failed: [], passed: [], unscannable: [] } };
         }
 
         await this.container.get(CrawlerEngine).start(crawlerRunOptions);
