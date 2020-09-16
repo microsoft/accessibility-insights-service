@@ -173,7 +173,7 @@ describe(PageProcessorBase, () => {
             url: 'url',
             errorDescription: 'error message',
             errorType: 'NavigationError',
-            errorLogLocation: 'key_value_stores/scan-results/id.browser.error.txt',
+            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
         } as SummaryScanError;
         dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
 
@@ -215,7 +215,7 @@ describe(PageProcessorBase, () => {
             url: 'url',
             errorDescription: 'Content type: text/plain',
             errorType: 'InvalidContentType',
-            errorLogLocation: 'key_value_stores/scan-results/id.browser.error.txt',
+            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
         } as SummaryScanError;
         dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
 

@@ -32,6 +32,7 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoTimeoutSecs = 30;
 
+    protected readonly baseUrl: string;
     protected readonly snapshot: boolean;
     protected readonly discoveryPatterns: string[];
 
@@ -53,12 +54,11 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
-        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
+        this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
         this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
     }
@@ -188,7 +188,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
         const summaryScanError: PageError = {
             url: request.url,
-            error: error.stack, FIX the merge - JSON.stringify(error)
+            error: error.stack,
         };
 
         await this.dataBase.addError(request.id as string, summaryScanError);

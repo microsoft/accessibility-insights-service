@@ -23,6 +23,14 @@ describe(CrawlerConfiguration, () => {
         apifySettingsHandlerMock.verifyAll();
     });
 
+    it('baseUrl', () => {
+        crawlerRunOptionsMock
+            .setup((o) => o.baseUrl)
+            .returns(() => 'baseUrl')
+            .verifiable();
+        expect(crawlerConfiguration.baseUrl()).toEqual('baseUrl');
+    });
+
     describe('getDiscoveryPattern', () => {
         const host = 'hostname.com';
         const path = '/path/to/page';

@@ -14,6 +14,10 @@ export class CrawlerConfiguration {
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
     ) {}
 
+    public baseUrl(): string {
+        return this.crawlerRunOptions.baseUrl;
+    }
+
     public discoveryPatterns(): string[] {
         return this.getDiscoveryPattern(this.crawlerRunOptions.baseUrl, this.crawlerRunOptions.discoveryPatterns);
     }
