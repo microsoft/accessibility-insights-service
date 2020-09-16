@@ -62,7 +62,6 @@ describe('ReportGenerator', () => {
 
         const report = reportGenerator.generateReport(axeScanResults);
 
-        reporterMock.verifyAll();
         expect(report).toEqual(htmlReportString);
     });
 
@@ -103,7 +102,12 @@ describe('ReportGenerator', () => {
 
         const report = await reportGenerator.generateSummaryReport(crawlDetails, results);
 
-        reporterMock.verifyAll();
         expect(report).toEqual(htmlReportString);
+    });
+
+    afterEach(() => {
+        reporterMock.verifyAll();
+        axeInfoMock.verifyAll();
+        userAgentInfoMock.verifyAll();
     });
 });

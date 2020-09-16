@@ -92,15 +92,9 @@ export class DataBase {
             }
         });
 
-        let promise = Promise.resolve(undefined);
-        await promise;
+        await new Promise((fulfill) => stream.on('end', fulfill));
 
-        promise = new Promise((fulfill) => stream.on('end', fulfill));
-        await promise;
-
-        promise = Promise.resolve({ errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } });
-
-        return promise;
+        return { errors: errors, summaryScanResults: { failed: failed, passed: passed, unscannable: browserErrors } };
     }
 
     public async open(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {

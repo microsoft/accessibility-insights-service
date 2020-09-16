@@ -21,7 +21,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
         const startDate = new Date();
-        const startDatNumber = Date.now();
+        const startDateNumber = Date.now();
 
         console.log(`Crawling and scanning page ${scanArguments.url}`);
 
@@ -42,7 +42,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         const endDateNumber = Date.now();
-        const durationSeconds = (endDateNumber - startDatNumber) / 1000;
+        const durationSeconds = (endDateNumber - startDateNumber) / 1000;
         console.log(`Done in ${durationSeconds}s`);
 
         const scannedPagesCount = scanResult.summaryScanResults.failed.length + scanResult.summaryScanResults.passed.length;
@@ -65,8 +65,8 @@ export class CrawlerCommandRunner implements CommandRunner {
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${scanArguments.output}\\${reportLocation}`);
 
-        const errorLogLocation = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
-        this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogLocation, scanResult.errors);
-        console.log(`Error log was saved as ${scanArguments.output}\\${reportLocation}`);
+        const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
+        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, scanResult.errors);
+        console.log(`Error log was saved as ${errorLogLocation}`);
     }
 }
