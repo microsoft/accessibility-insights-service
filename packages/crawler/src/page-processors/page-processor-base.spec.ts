@@ -71,6 +71,7 @@ describe(PageProcessorBase, () => {
             setBypassCSP: (op: boolean) => {
                 return;
             },
+            title: () => 'title',
         } as any;
 
         pageProcessorBase = new TestablePageProcessor(
