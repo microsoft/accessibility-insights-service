@@ -27,4 +27,8 @@ export class AIScanner {
             console.log(`Accessibility scanning of URL ${url} completed.`);
         }
     }
+
+    public getUserAgent(): string {
+        return this.page.getUserAgent();
+    }
 }

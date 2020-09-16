@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
@@ -19,6 +20,7 @@ describe(FileCommandRunner, () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let fsMock: IMock<typeof fs>;
+    let reportNameGeneratorMock: IMock<ReportNameGenerator>;
     let testSubject: FileCommandRunner;
     const testInputFile = 'input file';
     const testInput: ScanArguments = { inputFile: testInputFile, output: '/users/xyz' };
@@ -27,9 +29,16 @@ describe(FileCommandRunner, () => {
         scannerMock = Mock.ofType(AIScanner, MockBehavior.Strict);
         reportGeneratorMock = Mock.ofType(ReportGenerator, MockBehavior.Strict);
         reportDiskWriterMock = Mock.ofType(ReportDiskWriter, MockBehavior.Strict);
+        reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
 
-        testSubject = new FileCommandRunner(scannerMock.object, reportGeneratorMock.object, reportDiskWriterMock.object, fsMock.object);
+        testSubject = new FileCommandRunner(
+            scannerMock.object,
+            reportGeneratorMock.object,
+            reportDiskWriterMock.object,
+            reportNameGeneratorMock.object,
+            fsMock.object,
+        );
     });
 
     describe('runCommand', () => {
@@ -108,6 +117,7 @@ describe(FileCommandRunner, () => {
         scannerMock.verifyAll();
         reportGeneratorMock.verifyAll();
         reportDiskWriterMock.verifyAll();
+        reportNameGeneratorMock.verifyAll();
     });
 
     function setupScanAndReportWriteCalls(): void {
@@ -201,6 +211,11 @@ describe(FileCommandRunner, () => {
                     },
                 } as AxeScanResults;
             })
+            .verifiable(Times.atLeast(0));
+
+        scannerMock
+            .setup((s) => s.getUserAgent())
+            .returns(() => 'user agent')
             .verifiable(Times.atLeast(0));
     }
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CrawlerEntryPoint } from 'accessibility-insights-crawler';
+import { CrawlerEntryPoint, ScanResults } from 'accessibility-insights-crawler';
 import { CrawlSummaryDetails } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
@@ -12,6 +12,8 @@ import { CommandRunner } from './command-runner';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
+    private scanResult: ScanResults;
+
     constructor(
         @inject(CrawlerEntryPoint) private readonly crawlerEntryPoint: CrawlerEntryPoint,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
@@ -25,7 +27,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         console.log(`Crawling and scanning page ${scanArguments.url}`);
 
-        const scanResult = await this.crawlerEntryPoint.crawl({
+        this.scanResult = await this.crawlerEntryPoint.crawl({
             baseUrl: scanArguments.url,
             simulate: scanArguments.simulate,
             selectors: scanArguments.selectors,
@@ -42,19 +44,30 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         const endDateNumber = Date.now();
+
+        await this.generateSummaryReports(scanArguments, startDate, startDateNumber, endDate, endDateNumber);
+    }
+
+    private async generateSummaryReports(
+        scanArguments: ScanArguments,
+        startDate: Date,
+        startDateNumber: number,
+        endDate: Date,
+        endDateNumber: number,
+    ): Promise<void> {
         const durationSeconds = (endDateNumber - startDateNumber) / 1000;
         console.log(`Done in ${durationSeconds}s`);
 
-        const scannedPagesCount = scanResult.summaryScanResults.failed.length + scanResult.summaryScanResults.passed.length;
-        const discoveredPagesCount = scannedPagesCount + scanResult.summaryScanResults.unscannable.length;
+        const scannedPagesCount = this.scanResult.summaryScanResults.failed.length + this.scanResult.summaryScanResults.passed.length;
+        const discoveredPagesCount = scannedPagesCount + this.scanResult.summaryScanResults.unscannable.length;
         console.log(`Scanned ${scannedPagesCount} of ${discoveredPagesCount} pages discovered `);
 
-        const issueCount = scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
+        const issueCount = this.scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
         console.log(`Found ${issueCount} accessibility issues`);
 
         const crawlDetails: CrawlSummaryDetails = {
             baseUrl: scanArguments.url,
-            basePageTitle: scanResult.basePageTitle,
+            basePageTitle: this.scanResult.basePageTitle,
             scanStart: startDate,
             scanComplete: endDate,
             durationSeconds: durationSeconds,
@@ -62,15 +75,15 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const reportContent = await this.reportGenerator.generateSummaryReport(
             crawlDetails,
-            scanResult.summaryScanResults,
-            scanResult.userAgent,
+            this.scanResult.summaryScanResults,
+            this.scanResult.userAgent,
         );
 
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${reportLocation}`);
 
         const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
-        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, scanResult.errors);
+        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.scanResult.errors);
         console.log(`Error log was saved as ${errorLogLocation}`);
     }
 }

@@ -32,6 +32,10 @@ export class Page {
         await this.puppeteerPage.setUserAgent(this.webDriver.userAgent);
     }
 
+    public getUserAgent(): string {
+        return this.webDriver.userAgent;
+    }
+
     public async enableBypassCSP(): Promise<void> {
         return this.puppeteerPage.setBypassCSP(true);
     }

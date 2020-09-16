@@ -35,7 +35,7 @@ export class CliEntryPoint {
                 `${error}`,
             );
 
-            console.log(`Error log was saved as ${scanArguments.output}\\${errorLog}`);
+            console.log(`Error log was saved as ${errorLog}`);
         }
     }
 
