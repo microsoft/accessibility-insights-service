@@ -26,10 +26,10 @@ describe(FileCommandRunner, () => {
     const testInput: ScanArguments = { inputFile: testInputFile, output: '/users/xyz' };
 
     beforeEach(() => {
-        scannerMock = Mock.ofType(AIScanner, MockBehavior.Strict);
-        reportGeneratorMock = Mock.ofType(ReportGenerator, MockBehavior.Strict);
-        reportDiskWriterMock = Mock.ofType(ReportDiskWriter, MockBehavior.Strict);
+        reportGeneratorMock = Mock.ofType<ReportGenerator>();
+        reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
+        scannerMock = Mock.ofType<AIScanner>();
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
 
         testSubject = new FileCommandRunner(
@@ -226,14 +226,14 @@ describe(FileCommandRunner, () => {
             .verifiable(Times.once());
 
         reportDiskWriterMock
-            .setup((r) => r.writeToDirectory(testInput.output, url, 'html', 'report-content'))
+            .setup((r) => r.writeToDirectory(`${testInput.output}\\data`, url, 'html', 'report-content'))
             .returns(() => `${url}-report`)
             .verifiable(Times.once());
     }
 
     function setupErrorReportCreationCalls(url: string): void {
         reportDiskWriterMock
-            .setup((r) => r.writeToDirectory(testInput.output, url, 'txt', 'unable to scan'))
+            .setup((r) => r.writeToDirectory(`${testInput.output}\\data`, url, 'txt', 'unable to scan'))
             .returns(() => `${url}-report`)
             .verifiable(Times.once());
     }

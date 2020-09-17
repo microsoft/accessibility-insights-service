@@ -8,7 +8,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
-// import { ReportNameGenerator } from '../report/report-name-generator';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
@@ -37,7 +37,7 @@ export class FileCommandRunner implements CommandRunner {
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
-        // @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
+        @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -91,24 +91,25 @@ export class FileCommandRunner implements CommandRunner {
         console.log(`Found ${issueCount} accessibility issues`);
 
         const crawlDetails: CrawlSummaryDetails = {
-            baseUrl: scanArguments.url,
-            basePageTitle: 'Batch Scanning',
+            baseUrl: '',
+            basePageTitle: '',
             scanStart: startDate,
             scanComplete: endDate,
             durationSeconds: durationSeconds,
         };
 
-        const userAgent = this.scanner.getUserAgent();
+        const reportContent = await this.reportGenerator.generateSummaryReport(
+            crawlDetails,
+            this.summaryScanResults,
+            this.scanner.getUserAgent(),
+        );
 
-        // const reportContent =
-        await this.reportGenerator.generateSummaryReport(crawlDetails, this.summaryScanResults, userAgent);
+        const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
+        console.log(`Summary report was saved as ${reportLocation}`);
 
-        // const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
-        // console.log(`Summary report was saved as ${reportLocation}`);
-
-        // const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
-        // const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.errors);
-        // console.log(`Error log was saved as ${errorLogLocation}`);
+        const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
+        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.errors);
+        console.log(`Error log was saved as ${errorLogLocation}`);
     }
 
     private async processUrl(url: string, scanArguments: ScanArguments): Promise<void> {
@@ -116,14 +117,14 @@ export class FileCommandRunner implements CommandRunner {
 
         if (isNil(axeResults.error)) {
             const reportContent = this.reportGenerator.generateReport(axeResults);
-            const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'html', reportContent);
+            const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'html', reportContent);
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
             const error = axeResults.error as ScanError;
 
             if (error?.errorType !== undefined) {
-                const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', error.stack);
+                const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'txt', error.stack);
 
                 const summaryScanError: SummaryScanError = {
                     url: url,
@@ -134,9 +135,10 @@ export class FileCommandRunner implements CommandRunner {
 
                 this.summaryScanResults.unscannable.push(summaryScanError);
                 this.errors.push({ url, error: error.stack });
-                console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
+                console.log(`Couldn't scan ${url}, ${error.message}`);
             } else {
                 this.errors.push({ url, error: axeResults.error.toString() });
+                console.log(`Couldn't scan ${url}, ${axeResults.error.toString()}`);
             }
         }
     }

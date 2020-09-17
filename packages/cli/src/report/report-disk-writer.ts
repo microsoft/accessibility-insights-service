@@ -19,31 +19,19 @@ export class ReportDiskWriter {
             directory = __dirname;
         }
 
-        console.log(1);
-
         let reportFileName;
 
         try {
-            console.log(2);
             reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
-            console.log(3);
         } catch {
-            console.log(4);
             reportFileName = `${filenamify(fileName, { replacement: '_' })}.${format}`;
-            console.log(5);
         }
-
-        console.log(6);
 
         if (!this.fileSystemObj.existsSync(directory)) {
             this.fileSystemObj.mkdirSync(directory, { recursive: true });
         }
 
-        console.log(reportFileName);
-
         const filePath = this.pathObj.resolve(directory, reportFileName);
-
-        console.log(filePath);
 
         this.fileSystemObj.writeFileSync(filePath, content);
 
