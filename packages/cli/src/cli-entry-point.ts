@@ -22,7 +22,9 @@ export class CliEntryPoint {
             const reportDiskWriter = this.container.get(ReportDiskWriter);
             const reportNameGenerator = this.container.get(ReportNameGenerator);
 
-            console.log(`Crawling and scanning page ${scanArguments.url} aborted`);
+            if (scanArguments.crawl) {
+                console.log(`Crawling and scanning page ${scanArguments.url} aborted`);
+            }
 
             console.log(
                 `Something went wrong. Please try again later. If this persists, search for a known issue or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.`,
@@ -35,7 +37,7 @@ export class CliEntryPoint {
                 `${error}`,
             );
 
-            console.log(`Error log was saved as ${scanArguments.output}\\${errorLog}`);
+            console.log(`Error log was saved as ${errorLog}`);
         }
     }
 

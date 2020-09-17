@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
+import { CrawlSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { Spinner } from 'cli-spinner';
 import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
+import { ReportNameGenerator } from '../report/report-name-generator';
 import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
@@ -22,7 +23,7 @@ export interface PageError {
 @injectable()
 export class FileCommandRunner implements CommandRunner {
     // tslint:disable-next-line: no-object-literal-type-assertion
-    private readonly summaryReportResults: SummaryScanResults = {
+    private readonly summaryScanResults: SummaryScanResults = {
         failed: [],
         passed: [],
         unscannable: [],
@@ -36,6 +37,7 @@ export class FileCommandRunner implements CommandRunner {
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
+        @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -44,6 +46,9 @@ export class FileCommandRunner implements CommandRunner {
         spinner.start();
         // tslint:disable-next-line: no-any
         let promise = Promise.resolve();
+
+        const startDate = new Date();
+        const startDateNumber = Date.now();
 
         try {
             const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'utf-8').split(/\r?\n/);
@@ -61,6 +66,50 @@ export class FileCommandRunner implements CommandRunner {
         }
 
         await promise;
+
+        const endDate = new Date();
+        const endDateNumber = Date.now();
+
+        await this.generateSummaryReports(scanArguments, startDate, startDateNumber, endDate, endDateNumber);
+    }
+
+    private async generateSummaryReports(
+        scanArguments: ScanArguments,
+        startDate: Date,
+        startDateNumber: number,
+        endDate: Date,
+        endDateNumber: number,
+    ): Promise<void> {
+        const durationSeconds = (endDateNumber - startDateNumber) / 1000;
+        console.log(`Done in ${durationSeconds}s`);
+
+        const scannedPagesCount = this.summaryScanResults.failed.length + this.summaryScanResults.passed.length;
+        const discoveredPagesCount = scannedPagesCount + this.summaryScanResults.unscannable.length;
+        console.log(`Scanned ${scannedPagesCount} of ${discoveredPagesCount} pages discovered `);
+
+        const issueCount = this.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
+        console.log(`Found ${issueCount} accessibility issues`);
+
+        const crawlDetails: CrawlSummaryDetails = {
+            baseUrl: '',
+            basePageTitle: '',
+            scanStart: startDate,
+            scanComplete: endDate,
+            durationSeconds: durationSeconds,
+        };
+
+        const reportContent = await this.reportGenerator.generateSummaryReport(
+            crawlDetails,
+            this.summaryScanResults,
+            this.scanner.getUserAgent(),
+        );
+
+        const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
+        console.log(`Summary report was saved as ${reportLocation}`);
+
+        const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
+        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.errors);
+        console.log(`Error log was saved as ${errorLogLocation}`);
     }
 
     private async processUrl(url: string, scanArguments: ScanArguments): Promise<void> {
@@ -68,14 +117,14 @@ export class FileCommandRunner implements CommandRunner {
 
         if (isNil(axeResults.error)) {
             const reportContent = this.reportGenerator.generateReport(axeResults);
-            const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'html', reportContent);
+            const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'html', reportContent);
 
             this.processURLScanResult(url, reportName, axeResults);
         } else {
             const error = axeResults.error as ScanError;
 
             if (error?.errorType !== undefined) {
-                const reportName = this.reportDiskWriter.writeToDirectory(scanArguments.output, url, 'txt', error.stack);
+                const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'txt', error.stack);
 
                 const summaryScanError: SummaryScanError = {
                     url: url,
@@ -84,10 +133,12 @@ export class FileCommandRunner implements CommandRunner {
                     errorLogLocation: reportName,
                 };
 
-                this.summaryReportResults.unscannable.push(summaryScanError);
-                console.log(`Couldn't scan ${url}, error details saved in file ${reportName}`);
+                this.summaryScanResults.unscannable.push(summaryScanError);
+                this.errors.push({ url, error: error.stack });
+                console.log(`Couldn't scan ${url}, ${error.message}`);
             } else {
                 this.errors.push({ url, error: axeResults.error.toString() });
+                console.log(`Couldn't scan ${url}, ${axeResults.error.toString()}`);
             }
         }
     }
@@ -101,7 +152,7 @@ export class FileCommandRunner implements CommandRunner {
                 reportLocation: reportName,
                 numFailures: issueCount,
             };
-            this.summaryReportResults.failed.push(summaryScanError);
+            this.summaryScanResults.failed.push(summaryScanError);
         } else {
             const issueCount = 0;
 
@@ -110,7 +161,7 @@ export class FileCommandRunner implements CommandRunner {
                 reportLocation: reportName,
                 numFailures: issueCount,
             };
-            this.summaryReportResults.passed.push(summaryScanError);
+            this.summaryScanResults.passed.push(summaryScanError);
         }
     }
 }

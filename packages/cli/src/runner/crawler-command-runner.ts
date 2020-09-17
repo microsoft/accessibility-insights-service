@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { CrawlerEntryPoint } from 'accessibility-insights-crawler';
+import { CrawlerEntryPoint, ScanResults } from 'accessibility-insights-crawler';
 import { CrawlSummaryDetails } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
@@ -42,6 +42,18 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         const endDateNumber = Date.now();
+
+        await this.generateSummaryReports(scanArguments, scanResult, startDate, startDateNumber, endDate, endDateNumber);
+    }
+
+    private async generateSummaryReports(
+        scanArguments: ScanArguments,
+        scanResult: ScanResults,
+        startDate: Date,
+        startDateNumber: number,
+        endDate: Date,
+        endDateNumber: number,
+    ): Promise<void> {
         const durationSeconds = (endDateNumber - startDateNumber) / 1000;
         console.log(`Done in ${durationSeconds}s`);
 
