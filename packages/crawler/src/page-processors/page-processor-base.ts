@@ -4,7 +4,7 @@ import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-repo
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page, Response } from 'puppeteer';
-import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase, PageError } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -30,7 +30,8 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Timeout in which page navigation needs to finish, in seconds.
      */
-    public gotoTimeoutSecs = 30;
+    public readonly gotoTimeoutSecs = 30;
+    public readonly pageRenderingTimeoutMsecs = 5000;
 
     protected readonly baseUrl: string;
     protected readonly snapshot: boolean;
@@ -52,6 +53,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
+        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -111,6 +113,8 @@ export abstract class PageProcessorBase implements PageProcessor {
 
                 throw new Error(`Page response error: ${JSON.stringify(responseError)}`);
             }
+
+            await this.pageRenderingHandler.waitForPageToCompleteRendering(inputs.page, this.pageRenderingTimeoutMsecs);
 
             return response;
         } catch (err) {
@@ -194,10 +198,12 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.dataBase.addError(request.id as string, summaryScanError);
     }
 
-    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number): Promise<void> {
+    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
+        // add element selector to URL as bookmark
+        const url = selector === undefined ? request.url : `${request.url}#selector|${selector}`;
         const summaryScanResult: SummaryScanResult = {
             numFailures: issueCount,
-            url: request.url,
+            url,
             reportLocation: `key_value_stores/${scanResultStorageName}/${request.id}.report.html`,
         };
 

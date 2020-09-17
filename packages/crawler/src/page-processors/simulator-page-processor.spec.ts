@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -38,6 +38,7 @@ describe(SimulatorPageProcessor, () => {
     let requestStub: Apify.Request;
     let pageStub: Page;
     let simulatorPageProcessor: SimulatorPageProcessor;
+    let pageRenderingHandlerMock: IMock<PageHandler>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -51,6 +52,8 @@ describe(SimulatorPageProcessor, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        pageRenderingHandlerMock = Mock.ofType(PageHandler);
+
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -85,6 +88,7 @@ describe(SimulatorPageProcessor, () => {
             clickElementOpMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
+            pageRenderingHandlerMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,

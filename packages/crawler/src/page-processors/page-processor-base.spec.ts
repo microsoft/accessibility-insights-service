@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { SummaryScanError } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { DirectNavigationOptions, Page, Response } from 'puppeteer';
-import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -54,6 +54,7 @@ describe(PageProcessorBase, () => {
     let requestStub: Apify.Request;
     let pageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
+    let pageRenderingHandlerMock: IMock<PageHandler>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -68,6 +69,7 @@ describe(PageProcessorBase, () => {
         pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
+        pageRenderingHandlerMock = Mock.ofType(PageHandler);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -100,6 +102,7 @@ describe(PageProcessorBase, () => {
             dataBaseMock.object,
             pageResponseProcessorMock.object,
             pageConfiguratorMock.object,
+            pageRenderingHandlerMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
@@ -142,6 +145,10 @@ describe(PageProcessorBase, () => {
         gotoExtendedMock
             .setup(async (gte) => gte(pageStub, requestStub, expectedGotoOptions))
             .returns(() => Promise.resolve(response))
+            .verifiable();
+        pageRenderingHandlerMock
+            .setup(async (o) => o.waitForPageToCompleteRendering(pageStub, pageProcessorBase.pageRenderingTimeoutMsecs))
+            .returns(() => Promise.resolve())
             .verifiable();
 
         await pageProcessorBase.gotoFunction(inputs);
