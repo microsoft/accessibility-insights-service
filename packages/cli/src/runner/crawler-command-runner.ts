@@ -12,7 +12,6 @@ import { CommandRunner } from './command-runner';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
-    private scanResult: ScanResults;
 
     constructor(
         @inject(CrawlerEntryPoint) private readonly crawlerEntryPoint: CrawlerEntryPoint,
@@ -27,7 +26,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         console.log(`Crawling and scanning page ${scanArguments.url}`);
 
-        this.scanResult = await this.crawlerEntryPoint.crawl({
+        const scanResult = await this.crawlerEntryPoint.crawl({
             baseUrl: scanArguments.url,
             simulate: scanArguments.simulate,
             selectors: scanArguments.selectors,
@@ -45,11 +44,12 @@ export class CrawlerCommandRunner implements CommandRunner {
         const endDate = new Date();
         const endDateNumber = Date.now();
 
-        await this.generateSummaryReports(scanArguments, startDate, startDateNumber, endDate, endDateNumber);
+        await this.generateSummaryReports(scanArguments, scanResult, startDate, startDateNumber, endDate, endDateNumber);
     }
 
     private async generateSummaryReports(
         scanArguments: ScanArguments,
+        scanResult: ScanResults,
         startDate: Date,
         startDateNumber: number,
         endDate: Date,
@@ -58,16 +58,16 @@ export class CrawlerCommandRunner implements CommandRunner {
         const durationSeconds = (endDateNumber - startDateNumber) / 1000;
         console.log(`Done in ${durationSeconds}s`);
 
-        const scannedPagesCount = this.scanResult.summaryScanResults.failed.length + this.scanResult.summaryScanResults.passed.length;
-        const discoveredPagesCount = scannedPagesCount + this.scanResult.summaryScanResults.unscannable.length;
+        const scannedPagesCount = scanResult.summaryScanResults.failed.length + scanResult.summaryScanResults.passed.length;
+        const discoveredPagesCount = scannedPagesCount + scanResult.summaryScanResults.unscannable.length;
         console.log(`Scanned ${scannedPagesCount} of ${discoveredPagesCount} pages discovered `);
 
-        const issueCount = this.scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
+        const issueCount = scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
         console.log(`Found ${issueCount} accessibility issues`);
 
         const crawlDetails: CrawlSummaryDetails = {
             baseUrl: scanArguments.url,
-            basePageTitle: this.scanResult.basePageTitle,
+            basePageTitle: scanResult.basePageTitle,
             scanStart: startDate,
             scanComplete: endDate,
             durationSeconds: durationSeconds,
@@ -75,15 +75,15 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const reportContent = await this.reportGenerator.generateSummaryReport(
             crawlDetails,
-            this.scanResult.summaryScanResults,
-            this.scanResult.userAgent,
+            scanResult.summaryScanResults,
+            scanResult.userAgent,
         );
 
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${reportLocation}`);
 
         const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
-        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.scanResult.errors);
+        const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, scanResult.errors);
         console.log(`Error log was saved as ${errorLogLocation}`);
     }
 }
