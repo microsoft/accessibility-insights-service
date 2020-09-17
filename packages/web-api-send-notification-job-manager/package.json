@@ -57,6 +57,6 @@
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
         "yargs": "^15.3.1",
-        "applicationinsights": "^1.8.0"
+        "applicationinsights": "^1.8.7"
     }
 }
