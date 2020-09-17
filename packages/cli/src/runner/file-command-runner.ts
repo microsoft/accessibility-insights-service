@@ -109,7 +109,9 @@ export class FileCommandRunner implements CommandRunner {
 
         const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
         const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, this.errors);
-        console.log(`Error log was saved as ${errorLogLocation}`);
+        if (this.errors?.length > 0) {
+            console.log(`Error log was saved as ${errorLogLocation}`);
+        }
     }
 
     private async processUrl(url: string, scanArguments: ScanArguments): Promise<void> {

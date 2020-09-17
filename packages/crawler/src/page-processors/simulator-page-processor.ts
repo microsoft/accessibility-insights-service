@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
+import { PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -31,6 +31,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
+        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -44,6 +45,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             dataBase,
             pageResponseProcessor,
             pageConfigurator,
+            pageRenderingHandler,
             requestQueueProvider,
             crawlerConfiguration,
             enqueueLinksExt,
@@ -64,7 +66,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
             await this.saveScanResultToDataBase(request, issueCount);
-        } else if ((request.userData as Operation).operationType === 'click') {
+        } else if (operation.operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
             const operationResult = await this.clickElementOp.click(page, activeElement.selector, requestQueue, this.discoveryPatterns);
@@ -73,6 +75,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                 await this.enqueueLinks(page);
                 issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
                 await this.saveSnapshot(page, request.id as string);
+                await this.saveScanResultToDataBase(request, issueCount, activeElement.selector);
             }
             await this.pushScanData({
                 id: request.id as string,
@@ -85,7 +88,6 @@ export class SimulatorPageProcessor extends PageProcessorBase {
                 },
                 issueCount: issueCount,
             });
-            await this.saveScanResultToDataBase(request, issueCount);
         }
     };
 }

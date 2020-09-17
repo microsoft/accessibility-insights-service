@@ -83,6 +83,8 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const errorLogName = `${this.reportNameGenerator.generateName('ai-cli-errors', endDate)}.log`;
         const errorLogLocation = this.reportDiskWriter.writeErrorLogToDirectory(scanArguments.output, errorLogName, scanResult.errors);
-        console.log(`Error log was saved as ${errorLogLocation}`);
+        if (scanResult.errors?.length > 0) {
+            console.log(`Error log was saved as ${errorLogLocation}`);
+        }
     }
 }

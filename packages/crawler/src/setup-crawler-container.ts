@@ -12,6 +12,7 @@ import { iocTypes } from './types/ioc-types';
 
 export function setupCrawlerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
+
     container.bind(DataBase).toConstantValue(dataBase);
     container.bind(iocTypes.ReporterFactory).toConstantValue(reporterFactory);
 

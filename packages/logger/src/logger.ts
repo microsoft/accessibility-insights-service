@@ -33,6 +33,10 @@ export abstract class Logger {
         this.initialized = true;
     }
 
+    public setCommonProperties(properties: LoggerProperties): void {
+        this.invokeLoggerClient((client) => client.setCommonProperties(properties));
+    }
+
     public trackMetric(name: string, value: number = 1): void {
         this.ensureInitialized();
 
@@ -45,6 +49,16 @@ export abstract class Logger {
         this.invokeLoggerClient((client) => client.trackEvent(name, properties, measurements));
     }
 
+    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
+        this.ensureInitialized();
+        this.invokeLoggerClient((client) => client.trackAvailability(name, telemetry));
+    }
+
+    public trackException(error: Error): void {
+        this.ensureInitialized();
+        this.invokeLoggerClient((client) => client.trackException(error));
+    }
+
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
         this.ensureInitialized();
 
@@ -53,11 +67,6 @@ export abstract class Logger {
 
     public logInfo(message: string, properties?: { [name: string]: string }): void {
         this.log(message, LogLevel.info, properties);
-    }
-
-    public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {
-        this.ensureInitialized();
-        this.invokeLoggerClient((client) => client.trackAvailability(name, telemetry));
     }
 
     public logVerbose(message: string, properties?: { [name: string]: string }): void {
@@ -74,11 +83,6 @@ export abstract class Logger {
         this.log(message, LogLevel.error, properties);
     }
 
-    public trackException(error: Error): void {
-        this.ensureInitialized();
-        this.invokeLoggerClient((client) => client.trackException(error));
-    }
-
     // tslint:disable-next-line: no-any
     public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
         const parsedErrorObject =
@@ -92,10 +96,6 @@ export abstract class Logger {
 
         const promises = this.invokeLoggerClient((client) => client.flush());
         await Promise.all(promises);
-    }
-
-    public setCommonProperties(properties: LoggerProperties): void {
-        this.invokeLoggerClient((client) => client.setCommonProperties(properties));
     }
 
     private invokeLoggerClient<T>(action: (loggerClient: LoggerClient) => T): T[] {
