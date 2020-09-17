@@ -59,7 +59,7 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "moment": "^2.27.0",
+        "moment": "^2.28.0",
         "request": "^2.88.2",
         "functional-tests": "1.0.0"
     }
