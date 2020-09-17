@@ -12,7 +12,6 @@ import { CommandRunner } from './command-runner';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
-
     constructor(
         @inject(CrawlerEntryPoint) private readonly crawlerEntryPoint: CrawlerEntryPoint,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
