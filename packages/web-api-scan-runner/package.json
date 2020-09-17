@@ -69,7 +69,7 @@
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",
         "verror": "^1.10.0",
-        "yargs": "^16.0.3"
+        "yargs": "^15.3.1"
     },
     "resolutions": {
         "axe-core": "4.0.1"
