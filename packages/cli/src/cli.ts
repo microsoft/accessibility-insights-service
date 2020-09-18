@@ -30,8 +30,6 @@ function readScanArguments(): ScanArguments {
 
     return (yargs
         .wrap(yargs.terminalWidth())
-        .implies('crawl', 'url')
-        .implies('selectors', 'simulate')
         .options({
             crawl: {
                 type: 'boolean',
