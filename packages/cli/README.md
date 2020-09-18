@@ -7,9 +7,9 @@ Licensed under the MIT License.
 
 AI-Scan is a Command Line Interface (CLI) tool that implements automated web accessibility checks in a local environment. The tool currently provides the following capabilities:
 
--   Run automated checks against one URL.
--   Run automated checks against a file that has list of URLs separated by new line.
--   Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
+-   Single URL Scan: Run automated checks against one URL.
+-   Batch Scan: Run automated checks against a file that has list of URLs separated by new line.
+-   Scan & Crawl : Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
 
 ## Installation
 
@@ -19,27 +19,85 @@ This package is available on [npm](http://npmjs.com) as `ai-scan`.
   npm install -g accessibility-insights-scan
 ```
 
-## Example usage
+## Example Usage
 
-if crawling is not enabled (disabled by default), you should provide either --url or --inputFile option, if you provide both, -url only will be used.
+## Single URL Scan
+
+-   You should provide either --url.
+-   An HTML report will be generated in the output folder, previous result for same url will be overwritten.
 
 ```sh
   ai-scan --url https://www.microsoft.com/
 ```
 
+### Options
+
+-   url: --url
+
+```sh
+type: boolean
+describe: The URL to scan for accessibility issues.
+```
+
+-   output: --output
+
+```sh
+type: string
+describe: Output directory. If not set, default is ./ai_scan_cli_output, if you use the same output for different runs, an existing result might be overwritten.
+default: './ai_scan_cli_output'
+```
+
+</br></br>
+
+## Batch Scan
+
+-   You should provide --inputFile option, if you provide both --url and --inputFile, single url scan will be run to scan --url.
+-   Summary HTML report will be generated in the output folder, previous result will be overwritten.
+-   Also an error log will be generated in case if any error.
+
 ```sh
   ai-scan --inputFile 'input file path'
 ```
 
-if crawling is not enabled, you should provide either --url or --inputFile option, if you provide both, -url only will be used.
+### Options
+
+-   inputFile: --inputFile
+
+```sh
+type: string
+describe: File path that contains list of URLs (each separated by a new line) to scan for accessibility issues.
+```
+
+-   output: --output
+
+```sh
+type: string
+describe: Output directory. If not set, default is ./ai_scan_cli_output, if you use the same output for different runs, an existing result might be overwritten.
+default: './ai_scan_cli_output'
+```
+
+</br></br>
+
+## Scan & Crawl
+
+-   if crawling is enabled (disabled by default), you should provide --url to be scanned/crawled.
+-   Summary HTML report will be generated in the output folder, previous result will be overwritten if --restart is true.
+-   Also an error log will be generated in case if any error.
+-   The crawler will start with the base URL specified in the command line and progressively discover links (URLs) to be crawled and scanned.
+-   A base URL to crawl is defined as URL host and should not have query and parameters.
+-   Only URLs that located within the base URL folder would be considered for crawling and scanning.
+-   The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
+
+    -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
+    -   But if base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
 ```sh
   ai-scan --crawl true --url https://www.microsoft.com/
 ```
 
-## Options
+### Options
 
-### crawl: --crawl
+-   crawl: --crawl
 
 ```sh
 type: boolean
@@ -47,14 +105,14 @@ describe: Crawl web site under the provided URL.
 default: false
 ```
 
-### url: --url
+-   url: --url
 
 ```sh
 type: boolean
-describe: The URL to scan (and crawl if --crawl option is selected) for accessibility issues.
+describe: The URL to scan/crawl for accessibility issues.
 ```
 
-### simulate: --simulate
+-   simulate: --simulate
 
 ```sh
 type: boolean
@@ -62,7 +120,7 @@ describe: Simulate user click on elements that match to the specified selectors.
 default: false
 ```
 
-### selectors: ---selectors
+-   selectors: --selectors
 
 ```sh
 type: array
@@ -70,7 +128,7 @@ describe: List of CSS selectors to match against, separated by space. Default se
 default: ['button']
 ```
 
-### output: --output
+-   output: --output
 
 ```sh
 type: string
@@ -78,7 +136,7 @@ describe: Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if
 default: './ai_scan_cli_output'
 ```
 
-### maxUrls: --maxUrls
+-   maxUrls: --maxUrls
 
 ```sh
 type: number
@@ -87,7 +145,7 @@ Note that in cases of parallel crawling, the actual number of pages visited migh
 default: 100,
 ```
 
-### restart: --restart
+-   restart: --restart
 
 ```sh
 type: boolean
@@ -95,43 +153,43 @@ describe: Clear the pending crawl queue and start crawl from the provided URL wh
 default: false
 ```
 
-### snapshot: --snapshot
+-   snapshot: --snapshot
 
 ```sh
 type: boolean
 describe: Save snapshot of the crawled page. Enabled by default if simulation option is selected, otherwise false.
 ```
 
-### memoryMBytes: --memoryMBytes
+-   memoryMBytes: --memoryMBytes
 
 ```sh
 type: number
 describe: The maximum number of megabytes to be used by the crawler.
 ```
 
-### silentMode: --silentMode
+-   silentMode: --silentMode
 
 ```sh
 type: boolean
-describe: Open browser window while crawling when set to true.
+describe: Open browser window while crawling when set to false.
 default: true
 ```
 
-### inputFile: --inputFile
+-   inputFile: --inputFile
 
 ```sh
 type: string
-describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL.
+describe: File path that contains list of URLs (each separated by a new line) to scan in addition to URLs discovered from crawling the provided URL.
 ```
 
-### existingUrls: --existingUrls
+-   existingUrls: --existingUrls
 
 ```sh
 type: array
 describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.
 ```
 
-### discoveryPatterns: --discoveryPatterns
+-   discoveryPatterns: --discoveryPatterns
 
 ```sh
 type: array
