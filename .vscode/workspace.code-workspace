@@ -119,6 +119,7 @@
             "cout",
             "coutd",
             "etag",
+            "filenamify",
             "injectable",
             "inversify",
             "leveldown",
