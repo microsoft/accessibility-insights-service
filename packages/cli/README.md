@@ -65,7 +65,7 @@ default: './ai_scan_cli_output'
 
 ```sh
 type: string
-describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL.
+describe: File path that contains list of URLs (each separated by a new line) to scan for accessibility issues.
 ```
 
 -   output: --output
@@ -102,7 +102,7 @@ default: false
 
 ```sh
 type: boolean
-describe: The URL to scan (and crawl if --crawl option is selected) for accessibility issues.
+describe: The URL to scan/crawl for accessibility issues.
 ```
 
 -   simulate: --simulate
@@ -172,7 +172,7 @@ default: true
 
 ```sh
 type: string
-describe: List of URLs to crawl in addition to URLs discovered from crawling the provided URL.
+describe: File path that contains list of URLs (each separated by a new line) to scan/crawl in addition to URLs discovered from crawling the provided URL.
 ```
 
 -   existingUrls: --existingUrls
