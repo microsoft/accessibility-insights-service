@@ -52,8 +52,8 @@ default: './ai_scan_cli_output'
 ## Batch Scan
 
 -   You should provide --inputFile option, if you provide both --url and --inputFile, single url scan will be run to scan --url.
--   A summary HTML report will be generated in the output folder, previous result will be overwritten.
--   An error log will be generated.
+-   Summary HTML report will be generated in the output folder, previous result will be overwritten.
+-   Also an error log will be generated in case if any error.
 
 ```sh
   ai-scan --inputFile 'input file path'
@@ -81,8 +81,15 @@ default: './ai_scan_cli_output'
 ## Scan & Crawl
 
 -   if crawling is enabled (disabled by default), you should provide --url to be scanned/crawled.
--   A summary HTML report will be generated in the output folder, previous result will be overwritten if --restart is true.
--   An error log will be generated.
+-   Summary HTML report will be generated in the output folder, previous result will be overwritten if --restart is true.
+-   Also an error log will be generated in case if any error.
+-   The crawler will start with the base URL specified in the command line and progressively discover links (URLs) to be crawled and scanned.
+-   A base URL to crawl is defined as URL host and should not have query and parameters.
+-   Only URLs that located within the base URL folder would be considered for crawling and scanning.
+-   The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
+
+    -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
+    -   But if base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
 ```sh
   ai-scan --crawl true --url https://www.microsoft.com/
@@ -172,7 +179,7 @@ default: true
 
 ```sh
 type: string
-describe: File path that contains list of URLs (each separated by a new line) to scan/crawl in addition to URLs discovered from crawling the provided URL.
+describe: File path that contains list of URLs (each separated by a new line) to scan in addition to URLs discovered from crawling the provided URL.
 ```
 
 -   existingUrls: --existingUrls
