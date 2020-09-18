@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { CrawlerEntryPoint, ScanResults } from 'accessibility-insights-crawler';
 import { CrawlSummaryDetails } from 'accessibility-insights-report';
+import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
@@ -17,9 +17,14 @@ export class CrawlerCommandRunner implements CommandRunner {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
+        private readonly filesystem: typeof fs = fs,
     ) {}
 
     public async runCommand(scanArguments: ScanArguments): Promise<void> {
+        if (this.canRun(scanArguments) !== true) {
+            return;
+        }
+
         const startDate = new Date();
         const startDateNumber = Date.now();
 
@@ -46,6 +51,18 @@ export class CrawlerCommandRunner implements CommandRunner {
         await this.generateSummaryReports(scanArguments, scanResult, startDate, startDateNumber, endDate, endDateNumber);
     }
 
+    private canRun(scanArguments: ScanArguments): boolean {
+        if (this.filesystem.existsSync(scanArguments.output) && scanArguments.restart === false && scanArguments.continue === false) {
+            console.log(
+                'The last scan result was found on a disk. Use --continue option to continue scan, or --restart option to delete last scan result.',
+            );
+
+            return false;
+        }
+
+        return true;
+    }
+
     private async generateSummaryReports(
         scanArguments: ScanArguments,
         scanResult: ScanResults,
@@ -66,7 +83,7 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const crawlDetails: CrawlSummaryDetails = {
             baseUrl: scanArguments.url,
-            basePageTitle: scanResult.basePageTitle,
+            basePageTitle: scanResult.scanMetadata.basePageTitle,
             scanStart: startDate,
             scanComplete: endDate,
             durationSeconds: durationSeconds,
@@ -75,7 +92,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         const reportContent = await this.reportGenerator.generateSummaryReport(
             crawlDetails,
             scanResult.summaryScanResults,
-            scanResult.userAgent,
+            scanResult.scanMetadata.userAgent,
         );
 
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);

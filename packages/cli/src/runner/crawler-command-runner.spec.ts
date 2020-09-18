@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility-insights-crawler';
@@ -59,8 +58,11 @@ describe('CrawlerCommandRunner', () => {
                 unscannable: [],
             },
             errors: [],
-            basePageTitle: '',
-            userAgent: '',
+            scanMetadata: {
+                baseUrl: '',
+                basePageTitle: '',
+                userAgent: '',
+            },
         };
 
         crawlerEntryPointMock

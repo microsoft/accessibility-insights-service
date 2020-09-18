@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ReportDiskWriter } from './report/report-disk-writer';
@@ -43,18 +42,14 @@ export class CliEntryPoint {
 
     private getCommandRunner(scanArguments: ScanArguments): CommandRunner {
         if (scanArguments.crawl) {
-            if (!isEmpty(scanArguments.url)) {
-                return this.container.get(CrawlerCommandRunner);
-            } else {
-                throw new Error('You should provide a bse url to crawl.');
-            }
+            return this.container.get(CrawlerCommandRunner);
         } else {
             if (!isEmpty(scanArguments.url)) {
                 return this.container.get(URLCommandRunner);
             } else if (!isEmpty(scanArguments.inputFile)) {
                 return this.container.get(FileCommandRunner);
             } else {
-                throw new Error('You should provide either url or inputFile parameter only.');
+                throw new Error('Provide either --url or --inputFile option.');
             }
         }
     }

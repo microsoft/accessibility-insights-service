@@ -5,7 +5,9 @@ import 'reflect-metadata';
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import { LevelUp } from 'levelup';
 import { IMock, Mock } from 'typemoq';
-import { DataBase, DataBaseKey, PageError } from './data-base';
+import { generateHash } from '../utility/crypto';
+import { DataBase } from './data-base';
+import { DataBaseKey, PageError, ScanMetadata } from './storage-documents';
 
 describe(DataBase, () => {
     let dbMock: IMock<LevelUp>;
@@ -13,28 +15,39 @@ describe(DataBase, () => {
 
     beforeEach(() => {
         dbMock = Mock.ofType<LevelUp>();
-
         testSubject = new DataBase(dbMock.object);
     });
 
-    it('add pass', async () => {
-        const key: DataBaseKey = { type: 'pass', key: 'id' };
+    afterEach(() => {
+        dbMock.verifyAll();
+    });
+
+    it('add passed scan result', async () => {
+        const key: DataBaseKey = { type: 'passedScanResult', key: 'id' };
         const value: SummaryScanResult = { url: 'url', numFailures: 0, reportLocation: 'report location' };
         dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
 
-        await testSubject.addPass('id', value);
+        await testSubject.addPassedScanResult('id', value);
     });
 
-    it('add fail', async () => {
-        const key: DataBaseKey = { type: 'fail', key: 'id' };
+    it('add failed scan result', async () => {
+        const key: DataBaseKey = { type: 'failedScanResult', key: 'id' };
         const value: SummaryScanResult = { url: 'url', numFailures: 0, reportLocation: 'report location' };
         dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
 
-        await testSubject.addFail('id', value);
+        await testSubject.addFailedScanResult('id', value);
     });
 
-    it('add error', async () => {
-        const key: DataBaseKey = { type: 'error', key: 'id' };
+    it('add scan metadata', async () => {
+        const key: DataBaseKey = { type: 'scanMetadata', key: generateHash('baseUrl') };
+        const value: ScanMetadata = { baseUrl: 'baseUrl', basePageTitle: 'basePageTitle' };
+        dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
+
+        await testSubject.addScanMetadata(value);
+    });
+
+    it('add run error', async () => {
+        const key: DataBaseKey = { type: 'runError', key: 'id' };
         const value: PageError = {
             url: 'url',
             error: 'error',
@@ -55,9 +68,5 @@ describe(DataBase, () => {
         dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
 
         await testSubject.addBrowserError('id', value);
-    });
-
-    afterEach(() => {
-        dbMock.verifyAll();
     });
 });

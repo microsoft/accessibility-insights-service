@@ -3,7 +3,8 @@
 import { Url } from 'common';
 import { Container } from 'inversify';
 import { CrawlerEngine } from './crawler/crawler-engine';
-import { DataBase, ScanResults } from './level-storage/data-base';
+import { DataBase } from './level-storage/data-base';
+import { ScanResults } from './level-storage/storage-documents';
 import { registerCrawlerRunOptions } from './setup-crawler-container';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 
@@ -18,8 +19,11 @@ export class CrawlerEntryPoint {
             return {
                 errors: [],
                 summaryScanResults: { failed: [], passed: [], unscannable: [] },
-                userAgent: '',
-                basePageTitle: '',
+                scanMetadata: {
+                    baseUrl: crawlerRunOptions.baseUrl,
+                    basePageTitle: '',
+                    userAgent: '',
+                },
             };
         }
 

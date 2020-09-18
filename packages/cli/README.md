@@ -153,6 +153,14 @@ describe: Clear the pending crawl queue and start crawl from the provided URL wh
 default: false
 ```
 
+-   continue: --continue
+
+```sh
+type: boolean
+describe: Continue to crawl using the pending crawl queue. Use this option to continue when previous scan was terminated.
+default: false
+```
+
 -   snapshot: --snapshot
 
 ```sh
