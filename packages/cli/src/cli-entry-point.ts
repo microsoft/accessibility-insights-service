@@ -49,7 +49,7 @@ export class CliEntryPoint {
             } else if (!isEmpty(scanArguments.inputFile)) {
                 return this.container.get(FileCommandRunner);
             } else {
-                throw new Error('Provide either --url or --inputFile option.');
+                throw new Error('The specified scan options combination is not supported.');
             }
         }
     }
