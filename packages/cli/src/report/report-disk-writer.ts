@@ -10,8 +10,6 @@ import normalizePath from 'normalize-path';
 import * as path from 'path';
 import { ReportFormats } from './report-formats';
 
-// tslint:disable: no-parameter-reassignment
-
 @injectable()
 export class ReportDiskWriter {
     constructor(private readonly fileSystemObj: typeof fs = fs, private readonly pathObj: typeof path = path) {}
