@@ -2,7 +2,6 @@
 
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 // tslint:disable-next-line: no-import-side-effect
 import './module-name-mapper';
@@ -27,6 +26,8 @@ import { setupCliContainer } from './setup-cli-container';
 });
 
 function readScanArguments(): ScanArguments {
+    const defaultOutputDir = 'ai_scan_cli_output';
+
     return (yargs
         .wrap(yargs.terminalWidth())
         .options({
@@ -51,8 +52,8 @@ function readScanArguments(): ScanArguments {
             },
             output: {
                 type: 'string',
-                describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./crawler_storage, if not.`,
-                default: 'ai_scan_cli_output',
+                describe: `Output directory. Defaults to the value of APIFY_LOCAL_STORAGE_DIR, if set, or ./${defaultOutputDir}, if not.`,
+                default: defaultOutputDir,
             },
             maxUrls: {
                 type: 'number',
@@ -64,6 +65,11 @@ function readScanArguments(): ScanArguments {
                 type: 'boolean',
                 describe:
                     'Clear the pending crawl queue and start crawl from the provided URL when set to true, otherwise resume the crawl from the last request in the queue.',
+                default: false,
+            },
+            continue: {
+                type: 'boolean',
+                describe: 'Continue to crawl using the pending crawl queue. Use this option to continue when previous scan was terminated.',
                 default: false,
             },
             snapshot: {
@@ -100,6 +106,10 @@ function readScanArguments(): ScanArguments {
             } else {
                 if (isEmpty(args.url)) {
                     throw new Error('The --url option is required.');
+                }
+
+                if (args.restart === true && args.continue === true) {
+                    throw new Error('Options --restart and --continue are mutually exclusive.');
                 }
             }
 

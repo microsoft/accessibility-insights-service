@@ -20,6 +20,7 @@ import { PageProcessorBase } from './page-processor-base';
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {
         public snapshot: boolean;
+        public baseUrl: string;
         public processPage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
             return;
         };
@@ -125,6 +126,7 @@ describe(PageProcessorBase, () => {
     });
 
     it('gotoFunction', async () => {
+        pageProcessorBase.baseUrl = testUrl;
         const inputs: Apify.PuppeteerGotoInputs = {
             page: pageStub,
             request: requestStub,
@@ -138,6 +140,10 @@ describe(PageProcessorBase, () => {
             .setup(async (o) => o.configurePage(inputs.page))
             .returns(() => Promise.resolve())
             .verifiable();
+        pageConfiguratorMock
+            .setup((o) => o.getUserAgent())
+            .returns(() => 'userAgent')
+            .verifiable();
         pageResponseProcessorMock
             .setup((o) => o.getResponseError(response))
             .returns(() => undefined)
@@ -150,6 +156,7 @@ describe(PageProcessorBase, () => {
             .setup(async (o) => o.waitForPageToCompleteRendering(pageStub, pageProcessorBase.pageRenderingTimeoutMsecs))
             .returns(() => Promise.resolve())
             .verifiable();
+        dataBaseMock.setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent: 'userAgent' })).verifiable();
 
         await pageProcessorBase.gotoFunction(inputs);
     });

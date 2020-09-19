@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
-import { DataBase, PageError } from '../level-storage/data-base';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
@@ -125,11 +125,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
-            if (inputs.request.url === this.baseUrl) {
-                await this.dataBase.setUserAgent(this.pageConfigurator.getUserAgent());
-                const basePageTitle = await inputs.page.title();
-                await this.dataBase.setBasePageTitle(basePageTitle);
-            }
+            await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
         }
     };
 
@@ -190,7 +186,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
-        const summaryScanError: PageError = {
+        const summaryScanError = {
             url: request.url,
             error: error.stack,
         };
@@ -208,9 +204,20 @@ export abstract class PageProcessorBase implements PageProcessor {
         };
 
         if (summaryScanResult.numFailures === 0) {
-            await this.dataBase.addPass(request.id as string, summaryScanResult);
+            await this.dataBase.addPassedScanResult(request.id as string, summaryScanResult);
         } else {
-            await this.dataBase.addFail(request.id as string, summaryScanResult);
+            await this.dataBase.addFailedScanResult(request.id as string, summaryScanResult);
+        }
+    }
+
+    protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
+        if (url === this.baseUrl) {
+            // save base page metadata
+            await this.dataBase.addScanMetadata({
+                baseUrl: this.baseUrl,
+                basePageTitle: pageTitle,
+                userAgent: this.pageConfigurator.getUserAgent(),
+            });
         }
     }
 
