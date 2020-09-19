@@ -103,20 +103,7 @@ describe('CrawlerCommandRunner', () => {
 
     it('continue run with --restart when last scan data persisted', async () => {
         testInput = { url: testUrl, output: './dir', restart: true };
-        crawlerOption = {
-            baseUrl: testInput.url,
-            localOutputDir: testInput.output,
-            existingUrls: undefined,
-            discoveryPatterns: undefined,
-            simulate: undefined,
-            selectors: undefined,
-            maxRequestsPerCrawl: undefined,
-            restartCrawl: true,
-            snapshot: undefined,
-            memoryMBytes: undefined,
-            silentMode: undefined,
-            inputFile: undefined,
-        };
+        crawlerOption.restartCrawl = true;
 
         fsMock.reset();
         fsMock
