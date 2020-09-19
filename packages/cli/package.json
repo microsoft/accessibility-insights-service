@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
@@ -55,7 +55,7 @@
     },
     "dependencies": {
         "@types/escape-html": "^0.0.20",
-        "accessibility-insights-report": "2.1.0",
+        "accessibility-insights-report": "2.1.1",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",
