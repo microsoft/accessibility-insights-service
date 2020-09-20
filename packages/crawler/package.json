@@ -3,11 +3,11 @@
     "version": "1.0.0",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "clean": "rimraf dist test-results",
         "build": "npm-run-all --serial build:ts build:imports",
         "build:ts": "tsc && echo",
         "build:imports": "rollup -c",
         "cbuild": "npm-run-all --serial clean build",
+        "clean": "rimraf dist test-results",
         "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
         "test": "jest --coverage --colors",
@@ -33,6 +33,9 @@
         "@types/leveldown": "^4.0.2",
         "@types/encoding-down": "^5.0.0",
         "@types/levelup": "^4.3.0",
+        "copy-webpack-plugin": "^5.1.1",
+        "fork-ts-checker-webpack-plugin": "^5.1.0",
+        "npm-dts-webpack-plugin": "^1.3.5",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -42,7 +45,9 @@
         "tslint": "^6.1.2",
         "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
-        "typescript": "^4.0.2"
+        "typescript": "^4.0.2",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12"
     },
     "dependencies": {
         "@medv/finder": "^2.0.0",
