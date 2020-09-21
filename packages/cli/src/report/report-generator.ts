@@ -5,6 +5,8 @@ import { inject, injectable } from 'inversify';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
 
+export const serviceName = 'Accessibility Insights Service';
+
 @injectable()
 export class ReportGenerator {
     constructor(
@@ -25,7 +27,7 @@ export class ReportGenerator {
             description: `Automated report for accessibility scan of url ${
                 axeResults.results.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
-            serviceName: 'Accessibility Insights',
+            serviceName: serviceName,
             scanContext: {
                 pageTitle: params.pageTitle,
             },
@@ -37,7 +39,7 @@ export class ReportGenerator {
     public async generateSummaryReport(crawlDetails: CrawlSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
         // tslint:disable-next-line:one-variable-per-declaration
         const parameters = {
-            serviceName: 'Accessibility Insights',
+            serviceName: serviceName,
             axeVersion: this.axeInfo.version,
             userAgent: userAgent,
             crawlDetails: crawlDetails,

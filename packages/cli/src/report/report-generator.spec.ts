@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import 'reflect-metadata';
-
 import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
+import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
-import { ReportGenerator } from './report-generator';
+import { ReportGenerator, serviceName } from './report-generator';
+
 
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
@@ -47,7 +47,7 @@ describe('ReportGenerator', () => {
             description: `Automated report for accessibility scan of url ${
                 axeScanResults.results.url
             } completed at ${reportGenerationTime.toUTCString()}.`,
-            serviceName: 'Accessibility Insights',
+            serviceName: serviceName,
             scanContext: {
                 pageTitle: params.pageTitle,
             },
@@ -75,7 +75,7 @@ describe('ReportGenerator', () => {
         const results = { failed: [], passed: [], unscannable: [] } as SummaryScanResults;
 
         const parameters = {
-            serviceName: 'Accessibility Insights',
+            serviceName: serviceName,
             axeVersion: 'axe version',
             userAgent: 'user agent',
             crawlDetails: crawlDetails,
