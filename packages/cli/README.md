@@ -82,7 +82,7 @@ default: './ai_scan_cli_output'
 
 -   Required --crawl and --url options with URL to be crawled and scanned.
 -   Summary HTML report will be generated in the output folder; previous result will be overwritten if --restart is true.
--   The error log will be generated in case if any error.
+-   The error log will be generated in case of any error.
 -   The crawler will start with the base URL specified in the command line and progressively discover links (URLs) to be crawled and scanned.
 -   A base URL to crawl is defined as URL host and should not have query and parameters.
 -   Only URLs that located within the base URL folder would be considered for crawling and scanning. The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
