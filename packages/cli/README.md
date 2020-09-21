@@ -23,7 +23,7 @@ This package is available on [npm](http://npmjs.com) as `accessibility-insights-
 
 ## Single URL Scan
 
--   Required the –url parameter with URL to scan.
+-   Required --url parameter with URL to scan.
 -   An HTML report will be generated in the output folder, previous result for same URL will be overwritten.
 
 ```sh
