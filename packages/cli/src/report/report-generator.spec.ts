@@ -10,7 +10,6 @@ import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
 import { ReportGenerator, serviceName } from './report-generator';
 
-
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     const htmlReportString = 'html report';
