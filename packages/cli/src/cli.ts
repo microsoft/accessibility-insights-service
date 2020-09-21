@@ -69,7 +69,8 @@ function readScanArguments(): ScanArguments {
             },
             continue: {
                 type: 'boolean',
-                describe: 'Continue to crawl using the pending crawl queue. Use this option to continue when previous scan was terminated.',
+                describe: `Continue to crawl using the pending crawl queue. Use this option to continue when previous scan was terminated.
+                           Note that --url option will be ignored and previous value be used instead.`,
                 default: false,
             },
             snapshot: {
