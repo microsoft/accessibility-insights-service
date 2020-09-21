@@ -51,7 +51,7 @@
     },
     "dependencies": {
         "@azure/cosmos": "^3.9.1",
-        "accessibility-insights-report": "2.1.1",
+        "accessibility-insights-report": "2.1.2",
         "applicationinsights": "^1.8.7",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",

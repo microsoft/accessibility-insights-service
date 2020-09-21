@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
@@ -56,7 +56,7 @@
         "accessibility-insights-crawler": "1.0.0"
     },
     "dependencies": {
-        "accessibility-insights-report": "2.1.1",
+        "accessibility-insights-report": "2.1.2",
         "apify": "^0.21.4",
         "apify-shared": "^0.2.12",
         "axe-core": "4.0.1",
