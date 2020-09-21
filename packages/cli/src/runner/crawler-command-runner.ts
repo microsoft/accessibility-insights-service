@@ -64,7 +64,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         console.log(`Found ${issueCount} accessibility issues`);
 
         const crawlDetails: CrawlSummaryDetails = {
-            baseUrl: scanArguments.url,
+            baseUrl: scanResult.scanMetadata.baseUrl,
             basePageTitle: scanResult.scanMetadata.basePageTitle,
             scanStart: startDate,
             scanComplete: endDate,
@@ -90,7 +90,7 @@ export class CrawlerCommandRunner implements CommandRunner {
     private canRun(scanArguments: ScanArguments): boolean {
         if (this.filesystem.existsSync(scanArguments.output) && !scanArguments.restart && !scanArguments.continue) {
             console.log(
-                'The last scan result was found on a disk. Use --continue option to continue scan, or --restart option to delete last scan result.',
+                'The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.',
             );
 
             return false;

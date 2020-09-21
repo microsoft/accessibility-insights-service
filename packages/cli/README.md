@@ -7,13 +7,13 @@ Licensed under the MIT License.
 
 AI-Scan is a Command Line Interface (CLI) tool that implements automated web accessibility checks in a local environment. The tool currently provides the following capabilities:
 
--   Single URL Scan: Run automated checks against one URL.
--   Batch Scan: Run automated checks against a file that has list of URLs separated by new line.
--   Scan & Crawl : Run automated checks against one URL, crawl that URL and run automated checks against the crawled URLs.
+-   Single URL scan: Run automated checks against one URL.
+-   Batch Scan: Run automated checks against a file that has list of URLs separated by a new line.
+-   Scan & Crawl : Run automated checks against one URL, crawl that URL and run automated checks against all discovered URLs.
 
 ## Installation
 
-This package is available on [npm](http://npmjs.com) as `ai-scan`.
+This package is available on [npm](http://npmjs.com) as `accessibility-insights-scan`.
 
 ```sh
   npm install -g accessibility-insights-scan
@@ -23,11 +23,11 @@ This package is available on [npm](http://npmjs.com) as `ai-scan`.
 
 ## Single URL Scan
 
--   You should provide either --url.
--   An HTML report will be generated in the output folder, previous result for same url will be overwritten.
+-   Required --url parameter with URL to scan.
+-   An HTML report will be generated in the output folder, previous result for same URL will be overwritten.
 
 ```sh
-  ai-scan --url https://www.microsoft.com/
+  ai-scan --url https://www.example.com/
 ```
 
 ### Options
@@ -51,9 +51,9 @@ default: './ai_scan_cli_output'
 
 ## Batch Scan
 
--   You should provide --inputFile option, if you provide both --url and --inputFile, single url scan will be run to scan --url.
--   Summary HTML report will be generated in the output folder, previous result will be overwritten.
--   Also an error log will be generated in case if any error.
+-   Required --inputFile option with list of URLs to scan, separated by a new line.
+-   Summary HTML report will be generated in the output folder; previous result will be overwritten.
+-   The error log will be generated in case of any error.
 
 ```sh
   ai-scan --inputFile 'input file path'
@@ -80,16 +80,14 @@ default: './ai_scan_cli_output'
 
 ## Scan & Crawl
 
--   if crawling is enabled (disabled by default), you should provide --url to be scanned/crawled.
--   Summary HTML report will be generated in the output folder, previous result will be overwritten if --restart is true.
--   Also an error log will be generated in case if any error.
+-   Required --crawl and --url options with URL to be crawled and scanned.
+-   Summary HTML report will be generated in the output folder; previous result will be overwritten if --restart is true.
+-   The error log will be generated in case of any error.
 -   The crawler will start with the base URL specified in the command line and progressively discover links (URLs) to be crawled and scanned.
 -   A base URL to crawl is defined as URL host and should not have query and parameters.
--   Only URLs that located within the base URL folder would be considered for crawling and scanning.
--   The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
-
+-   Only URLs that located within the base URL folder would be considered for crawling and scanning. The URL folder is a resource location equal to base URL up-to the last forward slash in the specified base URL, or e.g:
     -   If base URL is specified as https://www.example.com/bar/foo , URLs that are in https://www.example.com/bar/ folder will be considered for crawling and scanning.
-    -   But if base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
+    -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
 ```sh
   ai-scan --crawl true --url https://www.microsoft.com/
@@ -158,6 +156,7 @@ default: false
 ```sh
 type: boolean
 describe: Continue to crawl using the pending crawl queue. Use this option to continue when previous scan was terminated.
+Note that --url option will be ignored and previous value will be used instead.
 default: false
 ```
 
