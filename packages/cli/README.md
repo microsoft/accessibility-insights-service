@@ -53,7 +53,7 @@ default: './ai_scan_cli_output'
 
 -   Required --inputFile option with list or URLs to scan, separated by a new line.
 -   Summary HTML report will be generated in the output folder; previous result will be overwritten.
--   The error log will be generated in case if any error.
+-   The error log will be generated in case of any error.
 
 ```sh
   ai-scan --inputFile 'input file path'
