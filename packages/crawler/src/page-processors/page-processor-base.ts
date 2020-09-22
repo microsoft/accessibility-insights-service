@@ -1,18 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-import Apify from 'apify';
-
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
+import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-// tslint:disable-next-line:no-duplicate-imports
 import { Page, Response } from 'puppeteer';
-import { BrowserError, PageConfigurator, PageResponseProcessor } from 'scanner-global-library';
-import { DataBase, PageError } from '../level-storage/data-base';
+import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { CrawlerConfiguration } from '../crawler/crawler-configuration';
+import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
+import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 export type PartialScanData = {
@@ -31,7 +30,12 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Timeout in which page navigation needs to finish, in seconds.
      */
-    public gotoTimeoutSecs = 30;
+    public readonly gotoTimeoutSecs = 30;
+    public readonly pageRenderingTimeoutMsecs = 5000;
+
+    protected readonly baseUrl: string;
+    protected readonly snapshot: boolean;
+    protected readonly discoveryPatterns: string[];
 
     /**
      * This function is called to extract data from a single web page
@@ -49,13 +53,17 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        protected readonly requestQueue: Apify.RequestQueue,
-        protected readonly snapshot: boolean,
-        protected readonly discoveryPatterns?: string[],
+        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
+        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
-    ) {}
+    ) {
+        this.baseUrl = this.crawlerConfiguration.baseUrl();
+        this.snapshot = this.crawlerConfiguration.snapshot();
+        this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
+    }
 
     /**
      * Function that is called to process each request.
@@ -92,6 +100,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             } catch (err) {
                 const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
                 await this.logBrowserFailure(inputs.request, navigationError);
+                await this.saveScanBrowserErrorToDataBase(inputs.request, navigationError);
 
                 throw err;
             }
@@ -105,6 +114,8 @@ export abstract class PageProcessorBase implements PageProcessor {
                 throw new Error(`Page response error: ${JSON.stringify(responseError)}`);
             }
 
+            await this.pageRenderingHandler.waitForPageToCompleteRendering(inputs.page, this.pageRenderingTimeoutMsecs);
+
             return response;
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
@@ -113,6 +124,8 @@ export abstract class PageProcessorBase implements PageProcessor {
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
+        } finally {
+            await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
         }
     };
 
@@ -135,7 +148,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.saveScanPageErrorToDataBase(request, error);
     };
 
-    public async saveSnapshot(page: Page, id: string): Promise<void> {
+    protected async saveSnapshot(page: Page, id: string): Promise<void> {
         if (this.snapshot) {
             await this.saveSnapshotExt(page, {
                 key: `${id}.screenshot`,
@@ -146,9 +159,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+        const requestQueue = await this.requestQueueProvider();
         const enqueued = await this.enqueueLinksExt({
             page,
-            requestQueue: this.requestQueue,
+            requestQueue,
             pseudoUrls: this.discoveryPatterns,
         });
         console.log(`Discovered ${enqueued.length} links on page ${page.url()}`);
@@ -165,32 +179,45 @@ export abstract class PageProcessorBase implements PageProcessor {
             url: request.url,
             errorDescription: error.message,
             errorType: error.errorType,
-            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.error.txt`,
+            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.err.txt`,
         };
 
         await this.dataBase.addBrowserError(request.id as string, summaryScanError);
     }
 
     protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
-        const summaryScanError: PageError = {
+        const summaryScanError = {
             url: request.url,
-            error: JSON.stringify(error),
+            error: error.stack,
         };
 
         await this.dataBase.addError(request.id as string, summaryScanError);
     }
 
-    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number): Promise<void> {
+    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
+        // add element selector to URL as bookmark
+        const url = selector === undefined ? request.url : `${request.url}#selector|${selector}`;
         const summaryScanResult: SummaryScanResult = {
             numFailures: issueCount,
-            url: request.url,
+            url,
             reportLocation: `key_value_stores/${scanResultStorageName}/${request.id}.report.html`,
         };
 
         if (summaryScanResult.numFailures === 0) {
-            await this.dataBase.addPass(request.id as string, summaryScanResult);
+            await this.dataBase.addPassedScanResult(request.id as string, summaryScanResult);
         } else {
-            await this.dataBase.addFail(request.id as string, summaryScanResult);
+            await this.dataBase.addFailedScanResult(request.id as string, summaryScanResult);
+        }
+    }
+
+    protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
+        if (url === this.baseUrl) {
+            // save base page metadata
+            await this.dataBase.addScanMetadata({
+                baseUrl: this.baseUrl,
+                basePageTitle: pageTitle,
+                userAgent: this.pageConfigurator.getUserAgent(),
+            });
         }
     }
 

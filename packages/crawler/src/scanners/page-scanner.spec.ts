@@ -8,20 +8,20 @@ import { AxePuppeteer } from 'axe-puppeteer';
 import { Page } from 'puppeteer';
 import { IMock, Mock } from 'typemoq';
 import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
+import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageScanner } from './page-scanner';
 
 // tslint:disable: no-any
 
 describe(PageScanner, () => {
+    const pageUrl = 'test url';
+    const pageTitle = 'page title';
+
     let reporterMock: IMock<Reporter>;
     let createAxePuppeteerMock: IMock<AxePuppeteerFactory>;
     let axePuppeteerMock: IMock<AxePuppeteer>;
-
-    const pageUrl = 'test url';
-    const pageTitle = 'page title';
     let pageStub: Page;
     let axeResults: AxeResults;
-
     let pageScanner: PageScanner;
 
     beforeEach(() => {
@@ -33,17 +33,18 @@ describe(PageScanner, () => {
             results: 'axe results',
         } as any;
 
-        reporterMock = Mock.ofType<Reporter>();
+        reporterMock = getPromisableDynamicMock(Mock.ofType<Reporter>());
         createAxePuppeteerMock = Mock.ofType<AxePuppeteerFactory>();
         axePuppeteerMock = Mock.ofType<AxePuppeteer>();
         createAxePuppeteerMock.setup((cap) => cap.createAxePuppeteer(pageStub)).returns(() => axePuppeteerMock.object);
 
-        pageScanner = new PageScanner(reporterMock.object, createAxePuppeteerMock.object);
+        pageScanner = new PageScanner(() => reporterMock.object, createAxePuppeteerMock.object);
     });
 
     afterEach(() => {
         axePuppeteerMock.verifyAll();
         reporterMock.verifyAll();
+        createAxePuppeteerMock.verifyAll();
     });
 
     it('returns axe results', async () => {

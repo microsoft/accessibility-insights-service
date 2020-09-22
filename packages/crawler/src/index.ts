@@ -4,7 +4,7 @@
 // tslint:disable-next-line: no-import-side-effect
 import './global-overrides';
 
-export { CrawlerRunOptions } from './types/run-options';
+export { CrawlerRunOptions } from './types/crawler-run-options';
 export { CrawlerEntryPoint } from './crawler-entry-point';
 export { setupCrawlerContainer } from './setup-crawler-container';
-export { ScanResults } from './level-storage/data-base';
+export { ScanResults, PageError } from './level-storage/storage-documents';

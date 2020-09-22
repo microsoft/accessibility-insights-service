@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Container } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ReportDiskWriter } from './report/report-disk-writer';
@@ -22,29 +21,35 @@ export class CliEntryPoint {
             const reportDiskWriter = this.container.get(ReportDiskWriter);
             const reportNameGenerator = this.container.get(ReportNameGenerator);
 
-            reportDiskWriter.writeToDirectory(
+            if (scanArguments.crawl) {
+                console.log(`Crawling and scanning page ${scanArguments.url} aborted`);
+            }
+
+            console.log(
+                `Something went wrong. Please try again later. If this persists, search for a known issue or file a new one at https://github.com/microsoft/accessibility-insights-service/issues.`,
+            );
+
+            const errorLog = reportDiskWriter.writeToDirectory(
                 scanArguments.output,
                 reportNameGenerator.generateName('ai-cli-errors', new Date()),
                 'log',
                 `${error}`,
             );
+
+            console.log(`Error log was saved as ${errorLog}`);
         }
     }
 
     private getCommandRunner(scanArguments: ScanArguments): CommandRunner {
         if (scanArguments.crawl) {
-            if (!isEmpty(scanArguments.url)) {
-                return this.container.get(CrawlerCommandRunner);
-            } else {
-                throw new Error('You should provide a bse url to crawl.');
-            }
+            return this.container.get(CrawlerCommandRunner);
         } else {
             if (!isEmpty(scanArguments.url)) {
                 return this.container.get(URLCommandRunner);
             } else if (!isEmpty(scanArguments.inputFile)) {
                 return this.container.get(FileCommandRunner);
             } else {
-                throw new Error('You should provide either url or inputFile parameter only.');
+                throw new Error('The specified scan options combination is not supported.');
             }
         }
     }

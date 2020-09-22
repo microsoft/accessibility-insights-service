@@ -12,10 +12,6 @@ import * as yargs from 'yargs';
 import { CrawlerEntryPoint } from './crawler-entry-point';
 import { setupCrawlerContainer } from './setup-crawler-container';
 
-export { CrawlerRunOptions } from './types/run-options';
-export { CrawlerEntryPoint } from './crawler-entry-point';
-export { setupCrawlerContainer } from './setup-crawler-container';
-
 interface ScanArguments {
     url: string;
     simulate: boolean;

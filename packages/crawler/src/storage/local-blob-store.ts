@@ -1,12 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import Apify from 'apify';
-import { injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
+import { iocTypes } from '../types/ioc-types';
 import { BlobStore, scanResultStorageName } from './store-types';
 
 @injectable()
 export class LocalBlobStore implements BlobStore {
-    constructor(private keyValueStore?: Apify.KeyValueStore, private readonly apifyObj: typeof Apify = Apify) {}
+    constructor(
+        @inject(iocTypes.ApifyKeyValueStore) @optional() private keyValueStore?: Apify.KeyValueStore,
+        private readonly apifyObj: typeof Apify = Apify,
+    ) {}
 
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
         await this.open();

@@ -97,33 +97,6 @@ describe(ApifyResourceCreator, () => {
         });
     });
 
-    describe('createRequestList', () => {
-        it('with undefined list', async () => {
-            const listMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestList>());
-            apifyMock
-                .setup((a) => a.openRequestList('existingUrls', []))
-                .returns(async () => Promise.resolve(listMock.object))
-                .verifiable();
-
-            const list = await apifyResourceCreator.createRequestList(undefined);
-
-            expect(list).toBe(listMock.object);
-        });
-
-        it('with defined list', async () => {
-            const existingUrls = [url];
-            const listMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestList>());
-            apifyMock
-                .setup((a) => a.openRequestList('existingUrls', existingUrls))
-                .returns(async () => Promise.resolve(listMock.object))
-                .verifiable();
-
-            const list = await apifyResourceCreator.createRequestList(existingUrls);
-
-            expect(list).toBe(listMock.object);
-        });
-    });
-
     function setupClearRequestQueue(dirExists: boolean): void {
         const localStorageDir = 'storage dir';
         settingsHandlerMock

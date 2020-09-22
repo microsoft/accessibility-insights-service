@@ -119,10 +119,13 @@
             "cout",
             "coutd",
             "etag",
+            "filenamify",
             "injectable",
             "inversify",
+            "leveldown",
             "serializable",
             "typemoq",
+            "unscannable",
             "upsert"
         ],
         "csharp.suppressDotnetRestoreNotification": true

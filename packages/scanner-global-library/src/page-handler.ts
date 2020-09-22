@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 
 @injectable()
 export class PageHandler {
-    constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger) {}
+    constructor(@inject(GlobalLogger) @optional() private readonly logger: GlobalLogger) {}
 
     public async waitForPageToCompleteRendering(page: Page, timeoutMsecs: number, checkIntervalMsecs: number = 200): Promise<void> {
         const maxCheckCount = timeoutMsecs / checkIntervalMsecs;
@@ -37,7 +37,7 @@ export class PageHandler {
         }
 
         if (pageHasStableContent !== true) {
-            this.logger.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
+            this.logger?.logWarn(`Page did not complete full rendering after ${timeoutMsecs / 1000} seconds.`);
         }
     }
 }

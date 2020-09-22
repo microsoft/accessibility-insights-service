@@ -41,7 +41,7 @@
         "npm-run-all": "^4.1.5",
         "raw-body": "^2.4.1",
         "rimraf": "^3.0.2",
-        "ts-jest": "^26.1.3",
+        "ts-jest": "^26.3.0",
         "ts-loader": "^8.0.0",
         "tslint": "^6.1.2",
         "tslint-microsoft-contrib": "^6.0.0",
@@ -59,7 +59,7 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "moment": "^2.27.0",
+        "moment": "^2.28.0",
         "request": "^2.88.2",
         "functional-tests": "1.0.0"
     }

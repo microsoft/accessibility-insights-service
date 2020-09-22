@@ -7,6 +7,8 @@ import { isEmpty } from 'lodash';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { ResourceCreator } from '../types/resource-creator';
 
+// tslint:disable: non-literal-fs-path
+
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
@@ -31,13 +33,9 @@ export class ApifyResourceCreator implements ResourceCreator {
         await requestQueue.addRequest({ url: baseUrl.trim() });
 
         await this.addUrlsFromFile(requestQueue, inputFile);
-        await this.addUrlsFromExistingUrls(requestQueue, existingUrls);
+        await this.addUrlsFromList(requestQueue, existingUrls);
 
         return requestQueue;
-    }
-
-    public async createRequestList(existingUrls: string[]): Promise<Apify.RequestList> {
-        return this.apify.openRequestList('existingUrls', existingUrls === undefined ? [] : existingUrls);
     }
 
     private async addUrlsFromFile(requestQueue: Apify.RequestQueue, inputFile?: string): Promise<void> {
@@ -51,10 +49,10 @@ export class ApifyResourceCreator implements ResourceCreator {
 
         const lines = this.filesystem.readFileSync(inputFile, 'utf-8').split(/\r?\n/);
 
-        await this.addUrlsFromExistingUrls(requestQueue, lines);
+        await this.addUrlsFromList(requestQueue, lines);
     }
 
-    private async addUrlsFromExistingUrls(requestQueue: Apify.RequestQueue, existingUrls?: string[]): Promise<void> {
+    private async addUrlsFromList(requestQueue: Apify.RequestQueue, existingUrls?: string[]): Promise<void> {
         if (existingUrls === undefined) {
             return Promise.resolve();
         }
@@ -69,9 +67,7 @@ export class ApifyResourceCreator implements ResourceCreator {
 
     private clearRequestQueue(): void {
         const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
-        // tslint:disable-next-line: non-literal-fs-path
         if (this.filesystem.existsSync(outputDir)) {
-            // tslint:disable-next-line: non-literal-fs-path
             this.filesystem.rmdirSync(outputDir, { recursive: true });
         }
     }
