@@ -90,7 +90,7 @@ default: './ai_scan_cli_output'
     -   If base URL is specified as https://www.example.com/bar/foo/ , only URLs that are in https://www.example.com/bar/foo/ folder will be considered for crawling and scanning.
 
 ```sh
-  ai-scan --crawl true --url https://www.microsoft.com/
+  ai-scan --crawl --url https://www.example.com/
 ```
 
 ### Options
