@@ -48,7 +48,7 @@
         "@medv/finder": "^2.0.0",
         "accessibility-insights-report": "2.1.1",
         "apify": "^0.21.4",
-        "apify-shared": "^0.4.5",
+        "apify-shared": "^0.2.12",
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
         "cheerio": "^1.0.0-rc.3",
