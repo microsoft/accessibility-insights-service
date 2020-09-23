@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
+
 import { ReportNameGeneratorBuilder } from './report-name-generator-builder';
 
 describe('ReportNameGeneratorBuilder', () => {
@@ -55,7 +57,7 @@ describe('ReportNameGeneratorBuilder', () => {
     });
 
     it('excludes invalid title characters', () => {
-        const theTitle = '^Tit%le&';
+        const theTitle = '^Ti%tle&';
 
         const actual = testObject.getTitleSegment(theTitle);
 
