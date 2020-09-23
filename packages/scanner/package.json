@@ -7,7 +7,7 @@
         "build": "tsc && echo",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
-        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
         "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
         "test": "jest --coverage --colors"
     },
@@ -26,6 +26,9 @@
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
         "@types/puppeteer": "^3.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.2.0",
+        "@typescript-eslint/parser": "^4.2.0",
+        "eslint": "^7.9.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
