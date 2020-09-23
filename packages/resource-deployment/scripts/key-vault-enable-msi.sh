@@ -29,5 +29,5 @@ fi
 
 # Grant permissions to the managed identity
 echo "Granting '$principalId' service principal permissions to '$keyVault' key vault"
-az keyvault set-policy --name "$keyVault" --object-id "$principalId" --secret-permissions get list 1>/dev/null
+az keyvault set-policy --name "$keyVault" --object-id "$principalId" --secret-permissions get list --certificate-permissions get list 1>/dev/null
 echo "  Permission successfully granted."
