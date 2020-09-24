@@ -193,22 +193,6 @@
     uuid "^3.2.1"
     xml2js "^0.4.19"
 
-"@azure/ms-rest-js@^2.0.0":
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-2.0.8.tgz#f84304fba29e699fc7a391ce47af2824af4f585e"
-  integrity sha512-PO4pnYaF66IAB/RWbhrTprGyhOzDzsgcbT7z8k3O38JKlwifbrhW+8M0fzx0ScZnaacP8rZyBazYMUF9P12c0g==
-  dependencies:
-    "@types/node-fetch" "^2.3.7"
-    "@types/tunnel" "0.0.1"
-    abort-controller "^3.0.0"
-    form-data "^2.5.0"
-    node-fetch "^2.6.0"
-    tough-cookie "^3.0.1"
-    tslib "^1.10.0"
-    tunnel "0.0.6"
-    uuid "^3.3.2"
-    xml2js "^0.4.19"
-
 "@azure/ms-rest-nodeauth@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-nodeauth/-/ms-rest-nodeauth-1.1.1.tgz#b77a20dcf59b405cac62f6d1f86c2a061aa6bed9"
@@ -233,13 +217,18 @@
     events "^3.0.0"
     tslib "^2.0.0"
 
-"@azure/storage-queue@^10.1.0":
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-10.3.0.tgz#b4466838e967b49e14601180d1c2e2d04987b29f"
-  integrity sha512-9njyI/63Wvfnsm4eaP0QIdw7CAWjsServb+P0twMnGaG17guEND32IgU0YtzkYhczxoSnDNZM9UNGThAPskvWA==
+"@azure/storage-queue@^12.1.0":
+  version "12.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.1.0.tgz#bd86014e09e78991be69c9ecb23ae619ee3b309e"
+  integrity sha512-y00oDeVX5f4uiwCOdt5w3uo8gvKCrZe9WLIYdW0L5QhJaHSCpsNDlHxFjOVhW+prVGTNmDxbpNC70kEUiEzDfQ==
   dependencies:
-    "@azure/ms-rest-js" "^2.0.0"
-    tslib "^1.9.3"
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-http" "^1.1.6"
+    "@azure/core-paging" "^1.1.1"
+    "@azure/core-tracing" "1.0.0-preview.9"
+    "@azure/logger" "^1.0.0"
+    "@opentelemetry/api" "^0.10.2"
+    tslib "^2.0.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.8.3":
   version "7.10.4"
@@ -2678,7 +2667,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/node-fetch@^2.3.7", "@types/node-fetch@^2.5.0":
+"@types/node-fetch@^2.5.0":
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.7.tgz#20a2afffa882ab04d44ca786449a276f9f6bbf3c"
   integrity sha512-o2WVNf5UhWRkxlf6eq+jMZDu7kjgpgJfl4xVNlvryc95O/6F2ld8ztKX+qu+Rjyet93WAWm5LjeX9H5FGkODvw==
@@ -2807,7 +2796,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/tunnel@0.0.1", "@types/tunnel@^0.0.1":
+"@types/tunnel@^0.0.1":
   version "0.0.1"
   resolved "https://registry.yarnpkg.com/@types/tunnel/-/tunnel-0.0.1.tgz#0d72774768b73df26f25df9184273a42da72b19c"
   integrity sha512-AOqu6bQu5MSWwYvehMXLukFHnupHrpZ8nvgae5Ggie9UwzDR1CCwoXgSSWNZJuyOlCdfdsWMA5F2LlmvyoTv8A==
@@ -3106,13 +3095,6 @@ abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
   integrity sha512-nne9/IiQ/hzIhY6pdDnbBtz7DjPTKrY00P/zvPSm5pOFkl6xuGrGnXn/VtTNNfNtAfZ9/1RtehkszU9qcTii0Q==
-
-abort-controller@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/abort-controller/-/abort-controller-3.0.0.tgz#eaf54d53b62bae4138e809ca225c8439a6efb392"
-  integrity sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==
-  dependencies:
-    event-target-shim "^5.0.0"
 
 abstract-leveldown@^6.2.1:
   version "6.3.0"
@@ -5794,11 +5776,6 @@ event-stream@3.3.4:
     split "0.3"
     stream-combiner "~0.0.4"
     through "~2.3.1"
-
-event-target-shim@^5.0.0:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/event-target-shim/-/event-target-shim-5.0.1.tgz#5d4d3ebdf9583d63a5333ce2deb7480ab2b05789"
-  integrity sha512-i/2XbnSz/uxRCU6+NdVJgKWDTM427+MqYbkQzD321DuCQJUqOuJKIA0IM2+W2xtYHdKOmZ4dR6fExsd4SXL+WQ==
 
 eventemitter3@^3.1.0:
   version "3.1.2"
