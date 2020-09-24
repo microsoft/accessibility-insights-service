@@ -52,6 +52,7 @@
     },
     "resolutions": {
         "axe-core": "4.0.1",
-        "serialize-javascript": "^3.0.0"
+        "serialize-javascript": "^3.0.0",
+        "marked": "1.1.1"
     }
 }
