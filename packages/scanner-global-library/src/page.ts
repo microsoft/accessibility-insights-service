@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { System } from 'common';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import { AxeScanResults } from './axe-scan-results';
@@ -26,7 +26,7 @@ export class Page {
         @inject(PageConfigurator) private readonly pageConfigurator: PageConfigurator,
         @inject(PageResponseProcessor) private readonly pageResponseProcessor: PageResponseProcessor,
         @inject(PageHandler) private readonly pageHandler: PageHandler,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
     public async create(browserExecutablePath?: string): Promise<void> {
@@ -46,14 +46,14 @@ export class Page {
             }); // tslint:disable-next-line:no-empty
         } catch {
             // We ignore error if the page still has network activity after timeout
-            this.logger.logWarn(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds`);
+            this.logger?.logWarn(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds`);
         }
 
         let response: Puppeteer.Response;
         try {
             response = await gotoUrlPromise;
         } catch (err) {
-            this.logger.logError('The URL navigation failed', { browserError: System.serializeError(err) });
+            this.logger?.logError('The URL navigation failed', { browserError: System.serializeError(err) });
             const browserError = this.pageResponseProcessor.getNavigationError(err as Error);
 
             return { error: browserError };
@@ -62,7 +62,7 @@ export class Page {
         // Validate web service response
         const responseError = this.pageResponseProcessor.getResponseError(response);
         if (responseError !== undefined) {
-            this.logger.logError('The URL navigation was unsuccessful', {
+            this.logger?.logError('The URL navigation was unsuccessful', {
                 browserError: JSON.stringify(responseError),
             });
 
@@ -92,7 +92,7 @@ export class Page {
         };
 
         if (response.request().redirectChain().length > 0) {
-            this.logger.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
+            this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
             scanResults.scannedUrl = axeResults.url;
         }
 
