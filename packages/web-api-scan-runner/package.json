@@ -64,7 +64,7 @@
         "logger": "1.0.0",
         "puppeteer": "^4.0.0",
         "reflect-metadata": "^0.1.13",
-        "scanner": "1.0.0",
+        "scanner-global-library": "1.0.0",
         "service-library": "1.0.0",
         "sha.js": "^2.4.11",
         "storage-documents": "1.0.0",

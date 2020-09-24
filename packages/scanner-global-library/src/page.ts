@@ -1,18 +1,21 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AxePuppeteer } from 'axe-puppeteer';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
-import { AxePuppeteerFactory, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
 import { AxeScanResults } from './axe-scan-results';
+import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
+import { PageConfigurator } from './page-configurator';
+import { PageHandler } from './page-handler';
+import { PageResponseProcessor } from './page-response-processor';
 import { WebDriver } from './web-driver';
 
 @injectable()
 export class Page {
     public puppeteerPage: Puppeteer.Page;
     public browser: Puppeteer.Browser;
+    public userAgent: string;
 
     private readonly pageNavigationTimeoutMsecs = 15000;
     private readonly pageRenderingTimeoutMsecs = 5000;
@@ -26,13 +29,14 @@ export class Page {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async create(): Promise<void> {
-        this.browser = await this.webDriver.launch();
+    public async create(browserExecutablePath?: string): Promise<void> {
+        this.browser = await this.webDriver.launch(browserExecutablePath);
         this.puppeteerPage = await this.browser.newPage();
         await this.pageConfigurator.configurePage(this.puppeteerPage);
+        this.userAgent = this.pageConfigurator.getUserAgent();
     }
 
-    public async scanForA11yIssues(url: string): Promise<AxeScanResults> {
+    public async scanForA11yIssues(url: string, contentSourcePath?: string): Promise<AxeScanResults> {
         // separate page load and networkidle0 events to bypass network activity error
         const gotoUrlPromise = this.puppeteerPage.goto(url, { waitUntil: 'load', timeout: this.pageNavigationTimeoutMsecs });
         try {
@@ -67,7 +71,7 @@ export class Page {
 
         await this.pageHandler.waitForPageToCompleteRendering(this.puppeteerPage, this.pageRenderingTimeoutMsecs);
 
-        return this.scanPageForIssues(response);
+        return this.scanPageForIssues(response, contentSourcePath);
     }
 
     public async close(): Promise<void> {
@@ -76,8 +80,8 @@ export class Page {
         }
     }
 
-    private async scanPageForIssues(response: Puppeteer.Response): Promise<AxeScanResults> {
-        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage);
+    private async scanPageForIssues(response: Puppeteer.Response, contentSourcePath?: string): Promise<AxeScanResults> {
+        const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.puppeteerPage, contentSourcePath);
         const axeResults = await axePuppeteer.analyze();
 
         const scanResults: AxeScanResults = {

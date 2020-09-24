@@ -53,7 +53,8 @@
         "webpack": "^4.44.1",
         "webpack-cli": "^3.3.12",
         "webpack-node-externals": "^2.5.1",
-        "accessibility-insights-crawler": "1.0.0"
+        "accessibility-insights-crawler": "1.0.0",
+        "scanner-global-library": "1.0.0"
     },
     "dependencies": {
         "accessibility-insights-report": "2.1.2",

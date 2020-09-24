@@ -10,8 +10,9 @@ export class WebDriver {
 
     constructor(@inject(GlobalLogger) private readonly logger: Logger, private readonly puppeteer: typeof Puppeteer = Puppeteer) {}
 
-    public async launch(): Promise<Puppeteer.Browser> {
+    public async launch(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
         this.browser = await this.puppeteer.launch({
+            executablePath: browserExecutablePath,
             headless: true,
             args: ['--disable-dev-shm-usage', '--disable-infobars'],
             defaultViewport: {

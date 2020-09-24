@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import * as fs from 'fs';
+import { AxeScanResults } from 'scanner-global-library';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { ReportNameGenerator } from '../report/report-name-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { FileCommandRunner } from './file-command-runner';
 
@@ -186,7 +185,7 @@ describe(FileCommandRunner, () => {
                     },
                     error: {
                         errorType: 'InvalidUrl',
-                        responseStatusCode: 500,
+                        statusCode: 500,
                         message: 'invalid url',
                         stack: 'unable to scan',
                     },

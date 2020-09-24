@@ -5,8 +5,8 @@ import 'reflect-metadata';
 import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
+import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
 import { ReportGenerator, serviceName } from './report-generator';
 
