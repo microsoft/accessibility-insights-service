@@ -46,7 +46,7 @@ export class Page {
             await this.puppeteerPage.waitForNavigation({
                 waitUntil: 'networkidle0',
                 timeout: this.pageNavigationTimeoutMsecs,
-            }); // tslint:disable-next-line:no-empty
+            }); // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
         } catch {
             // We ignore error if the page still has network activity after timeout
             this.logger.logWarn(`Page still has network activity after the timeout ${this.pageNavigationTimeoutMsecs} milliseconds`);

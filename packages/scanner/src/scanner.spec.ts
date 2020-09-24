@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
 
+import * as util from 'util';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { IMock, It, Mock, Times } from 'typemoq';
-import * as util from 'util';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { Page } from './page';
 import { Scanner } from './scanner';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable: no-object-literal-type-assertion no-unsafe-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe('Scanner', () => {
     let pageMock: IMock<Page>;
@@ -44,7 +43,7 @@ describe('Scanner', () => {
 
     describe('scan', () => {
         beforeEach(() => {
-            serviceConfigMock.setup((s) => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
+            serviceConfigMock.setup(async (s) => s.getConfigValue('scanConfig')).returns(async () => Promise.resolve(scanConfig));
         });
 
         it('should launch browser page with given url and scan the page with axe-core', async () => {
@@ -105,7 +104,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromisetoReturnOriginalPromise(): void {
             promiseUtilsMock
-                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup(async (s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return scanPromiseObj;
                 })
@@ -114,7 +113,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromiseToReturnTimeoutPromise(): void {
             promiseUtilsMock
-                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup(async (s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return timeoutCb();
                 })

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable:no-import-side-effect no-unnecessary-class
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
@@ -14,7 +13,10 @@ import { Page } from './page';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
-// tslint:disable: no-unsafe-any no-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions,
+   @typescript-eslint/no-explicit-any,
+   @typescript-eslint/no-unsafe-member-access
+*/
 
 class PuppeteerBrowserMock {
     public static readonly browserVersion = 'browser version';
@@ -137,7 +139,7 @@ describe('Page', () => {
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
         webDriverMock
             .setup(async (o) => o.launch())
-            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
         page = new Page(webDriverMock.object, axePuppeteerFactoryMock.object, loggerMock.object);
     });
