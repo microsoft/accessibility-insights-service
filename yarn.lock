@@ -218,10 +218,10 @@
     "@azure/ms-rest-js" "^1.8.6"
     adal-node "^0.1.28"
 
-"@azure/storage-blob@12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.2.0.tgz#73a3c7322d83f140193d9419b679f8c1e3402b3b"
-  integrity sha512-riCI7GndZc6XGr2vL0mfaK/aLaKKDOUtGZLnN0yGw+Fn+vmNvSNzv85a5dxGtIAbx2vyzfhOUV/qtGJbiVO5dQ==
+"@azure/storage-blob@12.2.1":
+  version "12.2.1"
+  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.2.1.tgz#8397a492b44f0771d671880a841a8c8c0cd45b60"
+  integrity sha512-erqCSmDL8b/AHZi94nq+nCE+2whQmvBDkAv4N9uic0MRac/gRyZqnsqkfrun/gr2rZo+qVtnMenwkkE3roXn8Q==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^1.1.6"
