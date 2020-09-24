@@ -140,7 +140,7 @@ default: './ai_scan_cli_output'
 type: number
 describe: Maximum number of pages that the crawler will open. The crawl will stop when this limit is reached.
 Note that in cases of parallel crawling, the actual number of pages visited might be slightly higher than this value.
-default: 100,
+default: 100
 ```
 
 -   restart: --restart
