@@ -1,15 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { AxePuppeteerFactory, AxeScanResults, Page } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
-
-import { AxePuppeteerFactory } from '../factories/axe-puppeteer-factory';
 import { AIScanner } from './ai-scanner';
-import { AxeScanResults } from './axe-scan-results';
-import { Page } from './page';
+
+// tslint:disable: no-any
 
 describe('AIScanner', () => {
     let pageMock: IMock<Page>;
@@ -48,7 +46,6 @@ describe('AIScanner', () => {
 
     function setupNewPageCall(url: string): void {
         pageMock.setup(async (p) => p.create(undefined)).verifiable(Times.once());
-        pageMock.setup(async (p) => p.enableBypassCSP()).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {

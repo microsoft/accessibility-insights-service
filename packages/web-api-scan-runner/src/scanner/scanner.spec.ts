@@ -1,19 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable:no-import-side-effect no-any
 import 'reflect-metadata';
 
+import { fail } from 'assert';
 import { AxeResults } from 'axe-core';
 import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
+import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import * as util from 'util';
-import { AxeScanResults } from './axe-scan-results';
-import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
-import { Page } from './page';
+import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Scanner } from './scanner';
-import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable: no-object-literal-type-assertion no-unsafe-any
+// tslint:disable: no-object-literal-type-assertion no-unsafe-any no-any
 
 describe('Scanner', () => {
     let pageMock: IMock<Page>;
@@ -50,10 +47,11 @@ describe('Scanner', () => {
         it('should launch browser page with given url and scan the page with axe-core', async () => {
             const url = 'some url';
             const axeResultsStub = ('axe results' as any) as AxeResults;
+
             setupNewPageCall(url);
             setupPageScanCall(url, axeResultsStub);
-
             setupWaitForPromisetoReturnOriginalPromise();
+
             await scanner.scan(url);
 
             verifyMocks();
@@ -62,21 +60,23 @@ describe('Scanner', () => {
         it('should close browser if exception occurs', async () => {
             const url = 'some url';
             const errorMessage: string = `An error occurred while scanning website page ${url}.`;
-            setupNewPageCall(url);
             const axeScanResults = setupPageErrorScanCall(url, errorMessage);
+
+            setupNewPageCall(url);
             setupPageCloseCall();
             setupWaitForPromisetoReturnOriginalPromise();
-
             loggerMock
                 .setup((o) => {
                     o.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(axeScanResults) });
                 })
                 .verifiable();
 
-            const expectedResult = util.inspect(axeScanResults);
-
-            const scanResult: AxeScanResults = await scanner.scan(url);
-            expect(scanResult.error).toEqual(expectedResult);
+            try {
+                await scanner.scan(url);
+                fail('should throw');
+            } catch (err) {
+                expect(err).toEqual({ error: 'An error occurred while scanning website page some url.', pageResponseCode: 101 });
+            }
 
             verifyMocks();
             loggerMock.verifyAll();
@@ -85,18 +85,22 @@ describe('Scanner', () => {
         it('should return timeout promise', async () => {
             const url = 'some url';
             const errorMessage: string = `An error occurred while scanning website page ${url}.`;
+
             setupNewPageCall(url);
             setupPageErrorScanCall(url, errorMessage);
             setupPageCloseCall();
             setupWaitForPromiseToReturnTimeoutPromise();
 
-            const scanResult: AxeScanResults = await scanner.scan(url);
+            const scanResult = await scanner.scan(url);
+
+            expect((scanResult.error as BrowserError).stack).toBeTruthy();
+            (scanResult.error as BrowserError).stack = 'stack';
             expect(scanResult).toEqual({
                 error: {
                     errorType: 'ScanTimeout',
                     message: `Scan timed out after ${scanConfig.scanTimeoutInMin} minutes`,
+                    stack: 'stack',
                 },
-                pageResponseCode: undefined,
             } as AxeScanResults);
 
             pageMock.reset();
@@ -124,7 +128,6 @@ describe('Scanner', () => {
 
     function setupNewPageCall(url: string): void {
         pageMock.setup(async (p) => p.create()).verifiable(Times.once());
-        pageMock.setup(async (p) => p.enableBypassCSP()).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {

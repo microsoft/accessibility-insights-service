@@ -5,7 +5,7 @@ import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
+import { AxePuppeteerFactory } from 'scanner-global-library';
 import { iocTypes } from '../types/ioc-types';
 
 export interface ScanResult {
@@ -21,7 +21,7 @@ export class PageScanner {
     ) {}
 
     public async scan(page: Page): Promise<ScanResult> {
-        const axePuppeteer: AxePuppeteer = this.axePuppeteerFactory.createAxePuppeteer(page);
+        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page);
         const axeResults = await axePuppeteer.analyze();
 
         const report = this.createReport(axeResults, page.url(), await page.title());

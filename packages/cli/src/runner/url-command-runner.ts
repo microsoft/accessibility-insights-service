@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
+import { AxeScanResults } from 'scanner-global-library';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
@@ -31,7 +30,6 @@ export class URLCommandRunner implements CommandRunner {
         }
 
         const reportContent = this.reportGenerator.generateReport(axeResults);
-
         this.reportDiskWriter.writeToDirectory(scanArguments.output, scanArguments.url, 'html', reportContent);
     }
 }

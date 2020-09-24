@@ -3,13 +3,12 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { GeneratedReport, ReportGenerator } from './report-generator';
-
 import { GuidGenerator } from 'common';
-import { AxeScanResults } from 'scanner';
+import { AxeScanResults } from 'scanner-global-library';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
+import { GeneratedReport, ReportGenerator } from './report-generator';
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;

@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
+import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { URLCommandRunner } from './url-command-runner';
+
 // tslint:disable: no-empty
 describe('URLCommandRunner', () => {
     let scannerMock: IMock<AIScanner>;
@@ -22,6 +22,7 @@ describe('URLCommandRunner', () => {
     const testUrl = 'http://www.bing.com';
     const htmlReportString = 'html report';
     const testInput: ScanArguments = { url: testUrl, output: '/users/xyz' };
+
     // tslint:disable-next-line: mocha-no-side-effect-code
     beforeEach(() => {
         scannerMock = Mock.ofType<AIScanner>();

@@ -1,9 +1,6 @@
 {
     "folders": [
         {
-            "name": "scanner",
-            "path": "../packages/scanner"
-        },        {
             "name": "scanner-global-library",
             "path": "../packages/scanner-global-library"
         },

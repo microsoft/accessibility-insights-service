@@ -65,7 +65,6 @@ describe(NotificationSender, () => {
             maxSendNotificationRetryCount: 5,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
-            accessibilityRuleExclusionList: [],
             scanTimeoutInMin: 1,
         };
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);

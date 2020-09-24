@@ -1,10 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { inject, injectable } from 'inversify';
+import { AxeScanResults, Page } from 'scanner-global-library';
 import * as util from 'util';
-import { AxeScanResults } from './axe-scan-results';
-import { Page } from './page';
 
 @injectable()
 export class AIScanner {
@@ -13,9 +11,7 @@ export class AIScanner {
     public async scan(url: string, chromePath?: string, sourcePath?: string): Promise<AxeScanResults> {
         try {
             console.log(`Starting accessibility scanning of URL ${url}.`);
-
             await this.page.create(chromePath);
-            await this.page.enableBypassCSP();
 
             return await this.page.scanForA11yIssues(url, sourcePath);
         } catch (error) {
@@ -29,6 +25,6 @@ export class AIScanner {
     }
 
     public getUserAgent(): string {
-        return this.page.getUserAgent();
+        return this.page.userAgent;
     }
 }

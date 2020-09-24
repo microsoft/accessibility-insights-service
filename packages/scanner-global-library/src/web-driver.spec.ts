@@ -5,6 +5,7 @@ import 'reflect-metadata';
 
 import * as Puppeteer from 'puppeteer';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
@@ -25,6 +26,7 @@ class PuppeteerBrowserMock {
 
 let testSubject: WebDriver;
 let puppeteer: typeof Puppeteer;
+let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 
@@ -38,11 +40,8 @@ beforeEach(() => {
 
     puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
-    testSubject = new WebDriver(puppeteer);
-});
-
-afterEach(() => {
-    puppeteerLaunchMock.verifyAll();
+    loggerMock = Mock.ofType(MockableLogger);
+    testSubject = new WebDriver(loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
@@ -57,18 +56,6 @@ describe('WebDriver', () => {
         const browser = await testSubject.launch();
 
         expect(browser).toEqual(puppeteerBrowserMock);
-    });
-
-    it('chrome path is not null', async () => {
-        const chromePath = 'path';
-        const browser = await testSubject.launch(chromePath);
-
-        expect(browser).toEqual(puppeteerBrowserMock);
-    });
-
-    it('should update user agent string', async () => {
-        await testSubject.launch();
-
-        expect(testSubject.userAgent).toEqual('Chrome user agent string');
+        puppeteerLaunchMock.verifyAll();
     });
 });

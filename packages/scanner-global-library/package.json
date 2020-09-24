@@ -39,6 +39,7 @@
     "dependencies": {
         "axe-core": "4.0.1",
         "axe-puppeteer": "^1.1.0",
+        "common": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
         "logger": "1.0.0",

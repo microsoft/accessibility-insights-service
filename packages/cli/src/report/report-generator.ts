@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { AxeReportParameters, CrawlSummaryDetails, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
-import { AxeScanResults } from '../scanner/axe-scan-results';
+import { AxeScanResults } from 'scanner-global-library';
 import { AxeInfo } from '../tool-data/axe-info';
 
 export const serviceName = 'Accessibility Insights Service';
