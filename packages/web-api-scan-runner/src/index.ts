@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-// tslint:disable-next-line: no-import-side-effect
+// eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
 import { System } from 'common';

@@ -6,7 +6,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { Argv } from 'yargs';
 import { ScanMetadataConfig } from './scan-metadata-config';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(ScanMetadataConfig, () => {
     let testSubject: ScanMetadataConfig;

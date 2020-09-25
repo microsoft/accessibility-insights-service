@@ -3,12 +3,12 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { GeneratedReport, ReportGenerator } from './report-generator';
 
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
+import { GeneratedReport, ReportGenerator } from './report-generator';
 import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 
 class AxeResultConverterStub implements AxeResultConverter {
@@ -66,7 +66,7 @@ describe('ReportGenerator', () => {
     it('calls convert on all axeResultConverters', () => {
         reportGenerator.generateReports(axeResults);
 
-        // tslint:disable-next-line:prefer-const
+        // eslint-disable-next-line prefer-const
         axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
             expect(axeResultConverter.convertCallCount).toBe(1);
         });

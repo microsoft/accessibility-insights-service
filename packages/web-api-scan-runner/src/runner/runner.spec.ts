@@ -24,7 +24,7 @@ import { NotificationQueueMessageSender } from '../sender/notification-queue-mes
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
 
-// tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
 

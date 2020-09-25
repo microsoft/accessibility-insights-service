@@ -19,7 +19,7 @@ import {
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { NotificationQueueMessageSender } from './notification-queue-message-sender';
 
-// tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
 

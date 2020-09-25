@@ -13,7 +13,7 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 
-// tslint:disable: no-null-keyword no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class NotificationQueueMessageSender {

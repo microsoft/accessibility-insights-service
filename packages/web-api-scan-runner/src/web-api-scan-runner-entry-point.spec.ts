@@ -8,7 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { Runner } from './runner/runner';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(WebApiScanRunnerEntryPoint, () => {
     class TestWebApiScanRunnerEntryPoint extends WebApiScanRunnerEntryPoint {
