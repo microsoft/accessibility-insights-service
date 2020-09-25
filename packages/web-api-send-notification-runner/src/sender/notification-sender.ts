@@ -10,7 +10,7 @@ import { NotificationSenderConfig } from '../notification-sender-config';
 import { NotificationSenderWebAPIClient } from '../tasks/notification-sender-web-api-client';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 
-// tslint:disable: no-null-keyword no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class NotificationSender {
@@ -84,7 +84,6 @@ export class NotificationSender {
                     this.logger.logInfo(
                         `Scan result notification request failed. Retry count ${numberOfRetries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
-                    // tslint:disable-next-line: no-unsafe-any
                     error = { errorType: 'HttpErrorCode', message: response.body };
                 }
 

@@ -21,7 +21,7 @@ import { NotificationSenderWebAPIClient } from '../tasks/notification-sender-web
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 import { NotificationSender } from './notification-sender';
 
-// tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
 

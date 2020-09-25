@@ -6,7 +6,9 @@ import { ResponseAsJSON } from 'request';
 import * as requestPromise from 'request-promise';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 
-// tslint:disable: no-null-keyword no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface ResponseWithBodyType<T = {}> extends ResponseAsJSON {
     body: T;
 }
@@ -24,7 +26,6 @@ export class NotificationSenderWebAPIClient {
     };
 
     constructor(private readonly throwOnRequestFailure: boolean = false, httpRequest: any = requestPromise) {
-        // tslint:disable-next-line: no-unsafe-any
         this.defaultRequestObject = httpRequest.defaults({
             ...this.defaultOptions,
             simple: this.throwOnRequestFailure,

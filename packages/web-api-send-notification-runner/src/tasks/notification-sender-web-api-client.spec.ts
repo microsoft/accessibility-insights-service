@@ -9,11 +9,12 @@ import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 import { NotificationSenderWebAPIClient } from './notification-sender-web-api-client';
 
-// tslint:disable: no-any mocha-no-side-effect-code no-object-literal-type-assertion no-unsafe-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(NotificationSenderWebAPIClient, () => {
     let testSubject: NotificationSenderWebAPIClient;
     let requestStub: any;
+    // eslint-disable-next-line @typescript-eslint/ban-types
     let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
 
     const sharedOption = {
@@ -39,7 +40,7 @@ describe(NotificationSenderWebAPIClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            // tslint:disable-next-line: no-empty
+            // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
             const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
             requestStub.defaults = defaultsMock.object;
 

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { ServiceConfiguration } from 'common';
 import { NotificationSender } from './sender/notification-sender';
 import { setupWebApiNotificationSenderContainer } from './setup-web-api-notification-sender-container';
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(setupWebApiNotificationSenderContainer, () => {
     it('resolves runner dependencies', () => {
