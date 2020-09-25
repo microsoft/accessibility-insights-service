@@ -6,8 +6,8 @@
         "build": "webpack --config ./webpack.config.js --colors && node ../../create-docker-image-package-json.js",
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
-        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
-        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
+        "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
     },
     "repository": {
