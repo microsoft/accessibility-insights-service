@@ -8,7 +8,7 @@ import { TestRunResult } from 'service-library';
 import { A11yServiceClient, A11yServiceCredential } from 'web-api-client';
 import * as yargs from 'yargs';
 
-// tslint:disable: radix no-any strict-boolean-expressions
+/* eslint-disable radix, @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
 type Argv = {
     clientId: string;
     clientSecret: string;
