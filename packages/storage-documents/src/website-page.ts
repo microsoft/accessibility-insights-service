@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RunResult } from '.';
 import { StorageDocument } from './storage-document';
+import { RunResult } from '.';
 
 /**
  * Defines core part of the page storage document.
