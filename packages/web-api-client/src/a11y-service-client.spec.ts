@@ -9,14 +9,16 @@ import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(A11yServiceClient, () => {
     let testSubject: A11yServiceClient;
     const baseUrl = 'base-url';
     const apiVersion = '1.0';
     let credMock: IMock<A11yServiceCredential>;
     let requestStub: any;
+    // eslint-disable-next-line @typescript-eslint/ban-types
     let getMock: IMock<(url: string) => {}>;
+    // eslint-disable-next-line @typescript-eslint/ban-types
     let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
     let retryHelperMock: IMock<RetryHelper<unknown>>;
     let loggerMock: IMock<MockableLogger>;
