@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import filenamifyUrl from 'filenamify-url';
 import * as fs from 'fs';
 import path, { ParsedPath } from 'path';
+import filenamifyUrl from 'filenamify-url';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { ReportDiskWriter } from './report-disk-writer';
 
@@ -13,13 +13,13 @@ class WriteStreamMock {
         return;
     }
 
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public write(chunk: any, cb?: (error: Error | null | undefined) => void): boolean {
         return true;
     }
 }
 
-// tslint:disable: no-empty no-http-string no-object-literal-type-assertion
+/* eslint-disable no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/consistent-type-assertions */
 
 describe('ReportDiskWriter', () => {
     let fsMock: IMock<typeof fs>;

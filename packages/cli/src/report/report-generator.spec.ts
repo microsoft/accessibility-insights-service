@@ -71,7 +71,7 @@ describe('ReportGenerator', () => {
             durationSeconds: 10000,
         };
 
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const results = { failed: [], passed: [], unscannable: [] } as SummaryScanResults;
 
         const parameters = {

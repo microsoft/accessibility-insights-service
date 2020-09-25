@@ -10,7 +10,7 @@ describe(setupCliContainer, () => {
     it('resolves dependencies', () => {
         const container = setupCliContainer();
 
-        // tslint:disable-next-line: no-backbone-get-set-outside-model
+        // eslint-disable-next-line
         expect(container.get('ReporterFactory')).toBeDefined();
         expect(container.get(CrawlerEntryPoint)).toBeDefined();
     });

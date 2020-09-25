@@ -11,25 +11,23 @@ import { AIScanner } from '../scanner/ai-scanner';
 import { AxeScanResults } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { URLCommandRunner } from './url-command-runner';
-// tslint:disable: no-empty
+/* eslint-disable no-empty, @typescript-eslint/no-empty-function */
 describe('URLCommandRunner', () => {
     let scannerMock: IMock<AIScanner>;
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let scanResults: AxeScanResults;
     let testSubject: URLCommandRunner;
-    // tslint:disable-next-line: no-http-string
     const testUrl = 'http://www.bing.com';
     const htmlReportString = 'html report';
     const testInput: ScanArguments = { url: testUrl, output: '/users/xyz' };
-    // tslint:disable-next-line: mocha-no-side-effect-code
     beforeEach(() => {
         scannerMock = Mock.ofType<AIScanner>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
 
         scanResults = {
-            // tslint:disable-next-line: no-object-literal-type-assertion
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             results: { url: testUrl } as AxeResults,
             pageTitle: 'page title',
             browserSpec: 'browser version',
@@ -39,7 +37,7 @@ describe('URLCommandRunner', () => {
 
     it('Run Command', async () => {
         scannerMock
-            .setup((sm) => sm.scan(testInput.url))
+            .setup(async (sm) => sm.scan(testInput.url))
             .returns(async () => Promise.resolve(scanResults))
             .verifiable(Times.once());
         reportGeneratorMock

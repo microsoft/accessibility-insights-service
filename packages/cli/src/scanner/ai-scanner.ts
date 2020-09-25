@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { inject, injectable } from 'inversify';
 import * as util from 'util';
+import { inject, injectable } from 'inversify';
 import { AxeScanResults } from './axe-scan-results';
 import { Page } from './page';
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AxePuppeteer } from 'axe-puppeteer';
 import * as fs from 'fs';
+import { AxePuppeteer } from 'axe-puppeteer';
 import * as Puppeteer from 'puppeteer';
 import 'reflect-metadata';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
@@ -28,11 +28,11 @@ describe('AxePuppeteerFactory', () => {
     });
     it('create axe puppeteer instance, sourcePath is not empty', async () => {
         const path = 'path';
-        // tslint:disable-next-line:no-shadowed-variable
+        // eslint-disable-next-line no-shadow
         const content = 'content';
         fsMock
             .setup((fsm) => fsm.readFileSync(path))
-            // tslint:disable-next-line: no-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .returns(() => content as any)
             .verifiable(Times.once());
         const axePuppeteer = await testSubject.createAxePuppeteer(page.object, path);

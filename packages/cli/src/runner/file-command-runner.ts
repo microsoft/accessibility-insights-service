@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as fs from 'fs';
 import { CrawlSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { Spinner } from 'cli-spinner';
-import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ReportDiskWriter } from '../report/report-disk-writer';
@@ -124,7 +124,7 @@ export class FileCommandRunner implements CommandRunner {
 
     private processURLScanResult(url: string, reportName: string, axeResults: AxeScanResults): void {
         if (axeResults.results.violations?.length > 0) {
-            // tslint:disable-next-line: strict-boolean-expressions
+            // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
             const issueCount = axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0);
             const summaryScanError: SummaryScanResult = {
                 url,

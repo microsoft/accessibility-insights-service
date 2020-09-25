@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { ConsoleSummaryReportGenerator } from './console-summary-report-generator';
 import { SummaryReportData } from './summary-report-data';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(ConsoleSummaryReportGenerator, () => {
     let testSubject: ConsoleSummaryReportGenerator;

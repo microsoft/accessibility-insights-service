@@ -3,9 +3,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-// tslint:disable-next-line: no-import-side-effect
+// eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
@@ -14,7 +15,6 @@ import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scanner/scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
 
-// tslint:disable-next-line:max-func-body-length
 (async () => {
     const scanArguments = readScanArguments();
 

@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AxePuppeteer } from 'axe-puppeteer';
 import * as fs from 'fs';
+import { AxePuppeteer } from 'axe-puppeteer';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import * as Puppeteer from 'puppeteer';
@@ -15,7 +15,6 @@ export class AxePuppeteerFactory {
         const ruleExclusionList = new RuleExclusion();
 
         if (!isEmpty(sourcePath)) {
-            // tslint:disable-next-line: non-literal-fs-path
             const content = this.fileSystemObj.readFileSync(sourcePath);
 
             return new AxePuppeteer(page, content.toString()).disableRules(ruleExclusionList.accessibilityRuleExclusionList);
