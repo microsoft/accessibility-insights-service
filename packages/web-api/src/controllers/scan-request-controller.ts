@@ -83,7 +83,6 @@ export class ScanRequestController extends ApiController {
             rejectedScanRequests: invalidUrls,
         };
 
-        // tslint:disable-next-line: no-null-keyword
         this.logger.trackEvent('ScanRequestReceived', null, measurements);
     }
 

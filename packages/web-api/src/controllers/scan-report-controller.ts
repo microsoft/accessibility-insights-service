@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { Readable } from 'stream';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
-import { Readable } from 'stream';
 import { BodyParser } from './../utils/body-parser';
 
 @injectable()

@@ -7,7 +7,7 @@ import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { setupRequestContextIocContainer } from './setup-request-context-ioc-container';
 
 @inversify.injectable()
-// tslint:disable-next-line: no-unnecessary-class
+// eslint-disable-next-line @typescript-eslint/no-extraneous-class
 class TestAutoInjectable {}
 
 describe(setupRequestContextIocContainer, () => {
@@ -23,7 +23,6 @@ describe(setupRequestContextIocContainer, () => {
 
     it('verifies dependencies resolution', () => {
         expect(testSubject.get(TestAutoInjectable)).toBeInstanceOf(TestAutoInjectable);
-        // tslint:disable-next-line: no-backbone-get-set-outside-model
         expect(testSubject.get('parentBind1')).toBe('parentBind1Instance');
     });
 

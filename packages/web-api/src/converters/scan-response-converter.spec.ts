@@ -21,7 +21,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
 import { ScanResponseConverter } from './scan-response-converter';
 
-// tslint:disable: no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const apiVersion = '1.0';
 const baseUrl = 'https://localhost/api/';
@@ -174,7 +174,6 @@ describe(ScanResponseConverter, () => {
         const pageScanDbResult = getPageScanResult('completed', true);
         const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
 
-        // tslint:disable-next-line: no-null-keyword
         pageScanDbResult.notification.error = null;
         const expectedNotificationResponse = responseExpected.notification;
         delete expectedNotificationResponse.error;

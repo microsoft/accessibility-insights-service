@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import getRawBody from 'raw-body';
 import { Readable } from 'stream';
+import getRawBody from 'raw-body';
 
 export class BodyParser {
     public async getRawBody(stream: Readable, options?: getRawBody.Options): Promise<Buffer> {
