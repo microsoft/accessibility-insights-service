@@ -7,7 +7,7 @@ import { GuidGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
 import { PageScanRunReportService } from './page-scan-run-report-service';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(PageScanRunReportService, () => {
     let testSubject: PageScanRunReportService;
@@ -15,7 +15,6 @@ describe(PageScanRunReportService, () => {
     let guidGeneratorMock: IMock<GuidGenerator>;
     const time = new Date(2019, 2, 1, 10, 20, 30);
     const guid = 'some guid';
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const expectedSarifBlobFilePath = `${time.getUTCFullYear()}/${
         time.getUTCMonth() + 1
     }/${time.getUTCDate()}/${time.getUTCHours()}/${guid}`;

@@ -10,14 +10,12 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
 describe('PageScanRequestProvider.Db', () => {
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const dbHelper = new DbMockHelper();
 
     it('no-op', () => {
         // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
     });
 
-    // tslint:disable-next-line: mocha-no-side-effect-code
     if (dbHelper.isDbTestSupported()) {
         let testSubject: PageScanRequestProvider;
 

@@ -7,8 +7,6 @@ import { BatchPoolLoadSnapshot, ItemType, PartitionKey } from 'storage-documents
 import { IMock, Mock, Times } from 'typemoq';
 import { BatchPoolLoadSnapshotProvider } from './batch-pool-load-snapshot-provider';
 
-// tslint:disable: no-unsafe-any
-
 let batchPoolLoadSnapshotProvider: BatchPoolLoadSnapshotProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 

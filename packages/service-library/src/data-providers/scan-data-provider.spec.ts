@@ -7,8 +7,6 @@ import { ItemType, OnDemandPageScanBatchRequest, PartitionKey, ScanRunBatchReque
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanDataProvider } from './scan-data-provider';
 
-// tslint:disable: no-unsafe-any
-
 let scanDataProvider: ScanDataProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
 

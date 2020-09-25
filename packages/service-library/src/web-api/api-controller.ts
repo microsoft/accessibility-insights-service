@@ -7,7 +7,7 @@ import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 import { WebController } from './web-controller';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export abstract class ApiController extends WebController {

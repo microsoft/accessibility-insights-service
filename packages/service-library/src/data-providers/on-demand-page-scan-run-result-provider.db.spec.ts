@@ -12,17 +12,15 @@ import { DbMockHelper } from '../test-utilities/db-mock-helpers';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe('OnDemandPageScanRunResultProvider.Db', () => {
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const dbHelper = new DbMockHelper();
 
     it('no-op', () => {
         // this test exists to have at least 1 test in the test suite to avoid jest failure, when db test run is not supported.
     });
 
-    // tslint:disable-next-line: mocha-no-side-effect-code
     if (dbHelper.isDbTestSupported()) {
         let testSubject: OnDemandPageScanRunResultProvider;
 
@@ -139,7 +137,7 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
                 const systemProperties = Object.keys(result).filter((key) => key.startsWith('_'));
 
                 systemProperties.forEach((key) => {
-                    // tslint:disable-next-line: no-dynamic-delete
+                    // eslint-disable-next-line @typescript-eslint/tslint/config
                     delete (result as any)[key];
                 });
             });

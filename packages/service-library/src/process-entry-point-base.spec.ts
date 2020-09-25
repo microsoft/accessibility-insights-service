@@ -11,7 +11,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ProcessEntryPointBase } from './process-entry-point-base';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable: no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 class TestEntryPoint extends ProcessEntryPointBase {
     public baseTelemetryProperties: BaseTelemetryProperties = { source: 'test-source', someOtherProps: 'foo' };

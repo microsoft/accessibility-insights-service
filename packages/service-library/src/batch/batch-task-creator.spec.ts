@@ -12,7 +12,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { BatchTaskCreator, ScanMessage } from './batch-task-creator';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any no-null-keyword no-unnecessary-override no-bitwise
+/* eslint-disable no-invalid-this, @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-bitwise */
 
 enum EnableBaseWorkflow {
     none,

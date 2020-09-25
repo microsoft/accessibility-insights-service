@@ -10,7 +10,7 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
 import { WebControllerDispatcher } from './web-controller-dispatcher';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class TestableWebController extends WebController {
     public static readonly handleRequestResult = 'handle-request-result';
@@ -75,8 +75,7 @@ describe(WebControllerDispatcher, () => {
     });
 
     it('should set base telemetry properties', async () => {
-        let processStub: typeof process;
-        processStub = {
+        const processStub: typeof process = {
             env: {
                 WEBSITE_INSTANCE_ID: 'server_id',
             },

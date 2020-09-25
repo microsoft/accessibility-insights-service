@@ -7,7 +7,7 @@ import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documen
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
-// tslint:disable: no-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(PageScanRequestProvider, () => {
     let testSubject: PageScanRequestProvider;

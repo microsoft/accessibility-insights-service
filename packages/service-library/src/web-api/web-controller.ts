@@ -5,7 +5,7 @@ import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 @injectable()
 export abstract class WebController {

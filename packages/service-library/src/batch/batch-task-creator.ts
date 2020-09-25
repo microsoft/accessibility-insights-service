@@ -6,18 +6,10 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import moment from 'moment';
 
-// tslint:disable: no-unsafe-any
-
 export interface ScanMessage {
     scanId: string;
     messageId: string;
     message: Message;
-}
-
-export interface BatchTaskCreator {
-    onTasksAdded?(tasks: JobTask[]): Promise<void>;
-    handleFailedTasks?(failedTasks: BatchTask[]): Promise<void>;
-    onExit?(): Promise<void>;
 }
 
 @injectable()
@@ -49,7 +41,7 @@ export abstract class BatchTaskCreator {
         this.activeScanMessages = [];
         const restartAfterTime = moment().add(this.jobManagerConfig.maxWallClockTimeInHours, 'hour').toDate();
 
-        // tslint:disable-next-line: no-constant-condition
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             const messages = await this.getMessagesForTaskCreation();
             if (messages.length === 0 && (await this.getJobPendingTasksCount()) === 0) {
@@ -104,7 +96,7 @@ export abstract class BatchTaskCreator {
 
     protected async waitForChildTasks(): Promise<void> {
         this.logger.logInfo('Waiting for job tasks to complete.');
-        // tslint:disable-next-line: no-constant-condition
+        // eslint-disable-next-line no-constant-condition
         while (true) {
             const pendingTasks = await this.getJobPendingTasksCount();
             if (pendingTasks > 0) {
