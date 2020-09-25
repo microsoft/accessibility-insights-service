@@ -11,7 +11,10 @@ import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty no-object-literal-type-assertion
+/* eslint-disable
+   @typescript-eslint/no-explicit-any,
+   no-empty,@typescript-eslint/no-empty-function,
+   @typescript-eslint/consistent-type-assertions */
 describe(CrawlerEngine, () => {
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {

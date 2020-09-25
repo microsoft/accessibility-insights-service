@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import Apify from 'apify';
 import * as fs from 'fs';
+import Apify from 'apify';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
@@ -37,7 +37,6 @@ describe(ApifyResourceCreator, () => {
     describe('createRequestQueue', () => {
         it('with empty=false', async () => {
             setupCreateRequestQueue();
-            // tslint:disable-next-line: no-unsafe-any
             fsMock.setup((fsm) => fsm.rmdirSync(It.isAny(), It.isAny())).verifiable(Times.never());
 
             const queue = await apifyResourceCreator.createRequestQueue(url);
@@ -110,7 +109,6 @@ describe(ApifyResourceCreator, () => {
 
     function setupCreateRequestQueue(): void {
         apifyMock
-            // tslint:disable-next-line: no-unsafe-any
             .setup((a) => a.openRequestQueue(requestQueueName))
             .returns(async () => Promise.resolve(queueMock.object))
             .verifiable();

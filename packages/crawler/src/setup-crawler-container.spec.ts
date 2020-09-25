@@ -8,7 +8,7 @@ import { setupCrawlerContainer } from './setup-crawler-container';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(setupCrawlerContainer, () => {
     it('resolves dependencies', () => {

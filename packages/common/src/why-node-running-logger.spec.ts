@@ -3,7 +3,10 @@
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { WhyNodeRunningLogger } from './why-node-running-logger';
 
-/* eslint-disable , @typescript-eslint/consistent-type-assertions, no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any */
+/* eslint-disable
+   @typescript-eslint/consistent-type-assertions,
+   no-empty,@typescript-eslint/no-empty-function,
+   @typescript-eslint/no-explicit-any */
 
 type VoidFunction = () => void;
 

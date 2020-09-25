@@ -83,7 +83,7 @@ module.exports = {
         '@typescript-eslint/prefer-function-type': 'error',
         '@typescript-eslint/prefer-namespace-keyword': 'off',
         '@typescript-eslint/prefer-readonly': 'error',
-        '@typescript-eslint/promise-function-async': 'error',
+        '@typescript-eslint/promise-function-async': ['error', { checkArrowFunctions: false }],
         '@typescript-eslint/quotes': [
             'error',
             'single',

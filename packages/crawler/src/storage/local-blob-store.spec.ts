@@ -7,7 +7,7 @@ import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { LocalBlobStore } from './local-blob-store';
 import { scanResultStorageName } from './store-types';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(LocalBlobStore, () => {
     let keyValueStoreMock: IMock<Apify.KeyValueStore>;
     let store: LocalBlobStore;
@@ -39,10 +39,10 @@ describe(LocalBlobStore, () => {
     it('setValue while store is not open', async () => {
         let isKeyValueStoreOpen = false;
 
-        // tslint:disable: no-shadowed-variable
+        /* eslint-disable no-shadow */
         const keyValueStoreStub: any = {
-            // tslint:disable-next-line: promise-function-async
-            setValue: async (key: string, value: string): Promise<void> => {},
+            // eslint-disable-next-line @typescript-eslint/promise-function-async
+            setValue: async (k: string, v: string): Promise<void> => {},
         };
 
         const apifyStub: any = {

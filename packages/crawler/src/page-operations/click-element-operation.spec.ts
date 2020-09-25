@@ -8,14 +8,14 @@ import { Page } from 'puppeteer';
 import { IMock, It, Mock } from 'typemoq';
 import { ClickElementOperation } from './click-element-operation';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(ClickElementOperation, () => {
     let clickElementOp: ClickElementOperation;
     let enqueueLinksByClickingElementsExtMock: IMock<typeof Apify.utils.puppeteer.enqueueLinksByClickingElements>;
     let pageStub: Page;
 
     beforeEach(() => {
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         pageStub = {
             url: () => 'pageUrl',
         } as any;

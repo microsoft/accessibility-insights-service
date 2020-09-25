@@ -16,7 +16,7 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { PageProcessorBase } from './page-processor-base';
 
-// tslint:disable: no-unsafe-any
+/* eslint-disable no-invalid-this */
 
 @injectable()
 export class SimulatorPageProcessor extends PageProcessorBase {

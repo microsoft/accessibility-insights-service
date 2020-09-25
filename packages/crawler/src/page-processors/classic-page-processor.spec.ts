@@ -14,7 +14,7 @@ import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ClassicPageProcessor } from './classic-page-processor';
 import { PartialScanData } from './page-processor-base';
 
-// tslint:disable: no-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(ClassicPageProcessor, () => {
     const testUrl = 'test url';

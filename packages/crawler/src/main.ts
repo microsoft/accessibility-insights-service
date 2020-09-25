@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
-// tslint:disable-next-line: no-import-side-effect
+// eslint-disable-next-line import/no-unassigned-import
 import './global-overrides';
 
 import { System } from 'common';
@@ -28,7 +28,6 @@ interface ScanArguments {
     debugging: boolean;
 }
 
-// tslint:disable-next-line: max-func-body-length
 (async () => {
     dotenv.config();
 

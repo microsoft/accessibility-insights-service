@@ -12,6 +12,7 @@ export class LocalBlobStore implements BlobStore {
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
         await this.open();
         await this.keyValueStore.setValue(key, value, options);

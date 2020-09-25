@@ -10,6 +10,7 @@ export interface DataStore {
 export interface BlobStore {
     setValue(
         key: string,
+        // eslint-disable-next-line @typescript-eslint/ban-types
         value: string | Object,
         options?:
             | {
