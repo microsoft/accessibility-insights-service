@@ -33,7 +33,7 @@ describe('Scan request sender', () => {
         dateNow = new Date();
         MockDate.set(dateNow);
 
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         storageConfigStub = {
             scanQueue: 'test-scan-queue',
         } as StorageConfig;

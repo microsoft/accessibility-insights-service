@@ -8,14 +8,13 @@ import { IMock, Mock, Times } from 'typemoq';
 import { OnDemandDispatcher } from './sender/on-demand-dispatcher';
 import { WebApiScanRequestSenderEntryPoint } from './web-api-scan-request-sender-entry-point';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 class TestableWebApiScanRequestSenderEntryPoint extends WebApiScanRequestSenderEntryPoint {
     public invokeGetTelemetryBaseProperties(): BaseTelemetryProperties {
         return this.getTelemetryBaseProperties();
     }
 
-    // tslint:disable-next-line: no-unnecessary-override
     public async runCustomAction(container: Container): Promise<void> {
         return super.runCustomAction(container);
     }
