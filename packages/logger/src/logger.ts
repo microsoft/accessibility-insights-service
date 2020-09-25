@@ -83,7 +83,7 @@ export abstract class Logger {
         this.log(message, LogLevel.error, properties);
     }
 
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     public trackExceptionAny(underlyingErrorData: any | Error, message: string): void {
         const parsedErrorObject =
             underlyingErrorData instanceof Error ? underlyingErrorData : new Error(System.serializeError(underlyingErrorData));

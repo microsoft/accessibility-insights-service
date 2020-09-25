@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as utils from 'util';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import moment from 'moment';
-import * as utils from 'util';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
@@ -46,7 +46,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    // tslint:disable-next-line: no-empty
+    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
     public trackAvailability(name: string, telemetry: AvailabilityTelemetry): void {}
 
     public log(message: string, logLevel: LogLevel, properties?: { [name: string]: string }): void {
@@ -61,7 +61,7 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         });
     }
 
-    // tslint:disable-next-line: no-empty
+    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
     public async flush(): Promise<void> {}
 
     public setCommonProperties(properties: LoggerProperties): void {
@@ -90,9 +90,8 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
         }
     }
 
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private getPrintableString(obj: any): string {
-        // tslint:disable-next-line: no-null-keyword
         return utils.inspect(obj, { depth: null });
     }
 

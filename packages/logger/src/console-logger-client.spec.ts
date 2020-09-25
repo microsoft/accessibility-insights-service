@@ -8,7 +8,6 @@ import { Mock } from 'typemoq';
 import { ConsoleLoggerClient } from './console-logger-client';
 
 class TestableRootConsoleLoggerClient extends ConsoleLoggerClient {
-    // tslint:disable-next-line: no-unnecessary-override
     public getPropertiesToAddToEvent(): { [name: string]: string } {
         return super.getPropertiesToAddToEvent();
     }

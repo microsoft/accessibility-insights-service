@@ -13,7 +13,7 @@ import { GlobalLogger } from './global-logger';
 import { LogLevel } from './logger';
 import { LoggerClient } from './logger-client';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void */
 
 describe(GlobalLogger, () => {
     let loggerClient1Mock: IMock<LoggerClient>;
@@ -129,7 +129,6 @@ describe(GlobalLogger, () => {
     });
 
     describe('trackAvailability', () => {
-        // tslint:disable-next-line: mocha-no-side-effect-code
         const availabilityTelemetryData: AvailabilityTelemetry = 'test data' as any;
         const name = 'test availability name';
 

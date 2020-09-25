@@ -9,7 +9,6 @@ import { ConsoleLoggerClient } from './console-logger-client';
 import { ContextAwareConsoleLoggerClient } from './context-aware-console-logger-client';
 
 class TestableContextAwareConsoleLoggerClient extends ContextAwareConsoleLoggerClient {
-    // tslint:disable-next-line: no-unnecessary-override
     public getPropertiesToAddToEvent(): { [name: string]: string } {
         return super.getPropertiesToAddToEvent();
     }

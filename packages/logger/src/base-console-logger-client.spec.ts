@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import * as util from 'util';
 import { ServiceConfiguration, System } from 'common';
 import moment from 'moment';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
-import * as util from 'util';
 import { BaseConsoleLoggerClient } from './base-console-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 import { ScanTaskFailedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty no-unsafe-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void, no-empty,@typescript-eslint/no-empty-function */
 
 class TestableBaseConsoleLoggerClient extends BaseConsoleLoggerClient {
     public propertiesToAddToEvent: { [name: string]: string };

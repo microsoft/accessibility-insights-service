@@ -6,7 +6,7 @@ import * as appInsights from 'applicationinsights';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void, no-empty,@typescript-eslint/no-empty-function */
 
 describe(AppInsightsLoggerClient, () => {
     let appInsightsMock: IMock<typeof appInsights>;
