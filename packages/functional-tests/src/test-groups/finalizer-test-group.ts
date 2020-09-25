@@ -4,7 +4,7 @@ import { TestEnvironment } from '../common-types';
 import { test } from '../test-decorator';
 import { FunctionalTestGroup } from './functional-test-group';
 
-// tslint:disable: no-unused-expression
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 export class FinalizerTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)

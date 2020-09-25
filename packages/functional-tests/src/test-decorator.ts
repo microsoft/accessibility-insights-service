@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { TestDefinition, TestEnvironment } from './common-types';
 
-// tslint:disable: no-unsafe-any
+/* eslint-disable @typescript-eslint/ban-types */
 
 export const definedTestsMetadataKey = Symbol('definedTests');
 

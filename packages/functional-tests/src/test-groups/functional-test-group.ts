@@ -7,7 +7,7 @@ import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-libr
 import { A11yServiceClient } from 'web-api-client';
 import { SerializableResponse, TestContextData } from '../test-group-data';
 
-// tslint:disable: no-unused-expression
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 
 export abstract class FunctionalTestGroup {
     public testContextData: TestContextData;

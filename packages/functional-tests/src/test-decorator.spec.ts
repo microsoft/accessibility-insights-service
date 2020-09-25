@@ -5,8 +5,6 @@ import 'reflect-metadata';
 import { TestDefinition, TestEnvironment } from './common-types';
 import { definedTestsMetadataKey, test } from './test-decorator';
 
-// tslint:disable: no-unsafe-any
-
 class TestGroupStub {
     public testA(): void {
         console.log('Invoked test A');

@@ -9,7 +9,7 @@ import { A11yServiceClient } from 'web-api-client';
 import { TestContextData } from '../test-group-data';
 import { FunctionalTestGroup } from './functional-test-group';
 
-// tslint:disable:  no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {}
 
