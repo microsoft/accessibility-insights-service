@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { Url } from 'url';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
-import { Url } from 'url';
 
 export interface ActivityRequestData {
     activityName: string;
@@ -41,6 +41,7 @@ interface SerializableRequest {
     headers: { [key: string]: unknown };
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface SerializableResponse<T = {}> {
     statusCode: number;
     body: T;

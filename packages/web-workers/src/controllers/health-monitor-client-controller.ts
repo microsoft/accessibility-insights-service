@@ -17,7 +17,7 @@ import {
     TrackAvailabilityData,
 } from './activity-request-data';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any, no-invalid-this */
 
 @injectable()
 export class HealthMonitorClientController extends WebController {

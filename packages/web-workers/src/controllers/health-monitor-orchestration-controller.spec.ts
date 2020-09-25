@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-submodule-imports no-any
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
+// eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { Logger } from 'logger';
@@ -17,7 +17,7 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
-// tslint:disable: no-empty no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable no-empty, @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestrationController {
     public orchestrationStepsCreated: boolean = false;

@@ -16,7 +16,6 @@ let context: Context;
 let guidGeneratorMock: IMock<GuidGenerator>;
 const orchestrationInstanceId = 'instance-id';
 
-// tslint:disable: no-unsafe-any
 describe('HealthMonitorTimerController', () => {
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);

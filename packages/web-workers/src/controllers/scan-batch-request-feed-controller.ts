@@ -160,7 +160,7 @@ export class ScanBatchRequestFeedController extends WebController {
         return {
             scanRequests: JSON.stringify(
                 requests.map((r) => {
-                    // tslint:disable-next-line: no-object-literal-type-assertion
+                    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                     return {
                         scanId: r.scanId,
                         scanUrl: r.url,
