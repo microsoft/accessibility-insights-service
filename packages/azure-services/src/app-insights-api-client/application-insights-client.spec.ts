@@ -8,7 +8,10 @@ import { IMock, Mock, Times } from 'typemoq';
 import { ApplicationInsightsClient } from './application-insights-client';
 import { EventsQueryOptions } from './events-query-options';
 
-// tslint:disable: no-any no-unsafe-any no-null-keyword no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any,
+   no-empty,
+   @typescript-eslint/no-empty-function,
+   @typescript-eslint/ban-types */
 
 describe(ApplicationInsightsClient, () => {
     let testSubject: ApplicationInsightsClient;

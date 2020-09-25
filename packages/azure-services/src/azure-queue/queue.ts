@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as util from 'util';
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL } from '@azure/storage-queue';
 import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import * as util from 'util';
 import { iocTypeNames, MessageIdURLProvider, MessagesURLProvider, QueueServiceURLProvider, QueueURLProvider } from '../ioc-types';
 import { Message } from './message';
 
@@ -41,7 +41,6 @@ export class Queue {
                 await this.moveToDeadQueue(queueURL, deadQueueURL, serverMessage);
 
                 this.logger.logWarn(
-                    // tslint:disable-next-line:max-line-length
                     `Storage queue message ${serverMessage.messageId} exceeded dequeue threshold of ${maxDequeueCount} and moved to the ${queue}-dead queue.`,
                 );
             } else {

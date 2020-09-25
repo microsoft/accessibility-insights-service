@@ -7,8 +7,6 @@ import { EnvironmentSettings, ServiceConfiguration, TaskRuntimeConfig } from 'co
 import { IMock, It, Mock } from 'typemoq';
 import { BatchTaskConfigGenerator, BatchTaskPropertyProvider } from './batch-task-config-generator';
 
-// tslint:disable: no-unsafe-any
-
 class BatchTaskPropertyProviderStub extends BatchTaskPropertyProvider {
     public async getImageName(): Promise<string> {
         return 'imageNameValue';
@@ -114,7 +112,7 @@ describe(BatchTaskConfigGenerator, () => {
         expect(actualTaskConfig).toEqual(expectedTaskConfig);
     });
 
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     function getEnvironmentSettings(taskArgsString: string): any[] {
         return [
             {

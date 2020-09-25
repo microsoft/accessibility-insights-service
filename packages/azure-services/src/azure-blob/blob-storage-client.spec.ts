@@ -8,7 +8,7 @@ import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { BlobContentDownloadResponse, BlobStorageClient } from './blob-storage-client';
 
-// tslint:disable: no-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(BlobStorageClient, () => {
     let blobServiceClientMock: IMock<BlobServiceClient>;
@@ -62,7 +62,6 @@ describe(BlobStorageClient, () => {
         it('throws if unknown error occurred', async () => {
             blobClientMock
                 .setup(async (b) => b.download(0, undefined))
-                // tslint:disable-next-line:
                 .returns(async () => Promise.reject('test error 1'))
                 .verifiable();
 

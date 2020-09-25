@@ -8,7 +8,7 @@
         "cbuild": "npm-run-all --serial clean build",
         "clean": "rimraf dist test-results",
         "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
-        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
     },
     "repository": {

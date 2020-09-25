@@ -6,11 +6,6 @@ import { inject, injectable } from 'inversify';
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
 
-export interface BatchTaskPropertyProvider {
-    getResourceFiles?(): BatchServiceModels.ResourceFile[];
-    getAdditionalContainerRunOptions?(): string;
-}
-
 @injectable()
 export abstract class BatchTaskPropertyProvider {
     public abstract async getImageName(): Promise<string>;

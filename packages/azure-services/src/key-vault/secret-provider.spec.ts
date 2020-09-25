@@ -9,7 +9,7 @@ import { AzureKeyVaultClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { SecretProvider } from './secret-provider';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(SecretProvider, () => {
     let azureKeyVaultClient: IMock<KeyVaultClient>;

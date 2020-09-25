@@ -11,7 +11,7 @@ import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-respon
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { CosmosContainerClient } from './cosmos-container-client';
 
-// tslint:disable: no-import-side-effect no-any no-unsafe-any no-null-keyword
+/* eslint-disable import/no-unassigned-import, @typescript-eslint/no-explicit-any */
 
 type OperationCallback = (...args: any[]) => Promise<CosmosOperationResponse<any>>;
 
@@ -46,7 +46,7 @@ beforeEach(() => {
     );
     MockDate.set(startTime);
     systemUtilsMock
-        .setup((s) => s.wait(retryOptions.intervalMilliseconds))
+        .setup(async (s) => s.wait(retryOptions.intervalMilliseconds))
         .callback((millis: number) => {
             MockDate.set(Date.now() + millis);
         });

@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-import-side-effect no-any no-unsafe-any
+/* eslint-disable import/no-unassigned-import, @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 
 import * as cosmos from '@azure/cosmos';

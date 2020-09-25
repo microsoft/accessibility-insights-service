@@ -13,7 +13,6 @@ export class CredentialsProvider {
     }
 
     public async getCredentialsForBatch(): Promise<Credentials> {
-        // tslint:disable-next-line: max-line-length
         // referred https://docs.microsoft.com/en-us/rest/api/batchservice/authenticate-requests-to-the-azure-batch-service#authentication-via-azure-ad
         return this.getCredentialsForResource('https://batch.core.windows.net/');
     }

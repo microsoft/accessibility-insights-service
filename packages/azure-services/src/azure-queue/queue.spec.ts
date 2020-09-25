@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-empty no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions, no-empty,@typescript-eslint/no-empty-function */
 import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
@@ -165,12 +165,12 @@ describe(Queue, () => {
 
         it('makes multiple calls to get all results', async () => {
             getMessagesMock
-                .setup((s) => s(queue, 32))
+                .setup(async (s) => s(queue, 32))
                 .returns(async () => generateMessages(32))
                 .verifiable(Times.once());
 
             getMessagesMock
-                .setup((s) => s(queue, 3))
+                .setup(async (s) => s(queue, 3))
                 .returns(async () => generateMessages(3))
                 .verifiable(Times.once());
 
@@ -181,7 +181,7 @@ describe(Queue, () => {
 
         it('makes single call if count is within limits of single call', async () => {
             getMessagesMock
-                .setup((s) => s(queue, 31))
+                .setup(async (s) => s(queue, 31))
                 .returns(async () => generateMessages(31))
                 .verifiable(Times.once());
 
@@ -192,7 +192,7 @@ describe(Queue, () => {
 
         it('returns empty array if no messages found', async () => {
             getMessagesMock
-                .setup((s) => s(queue, 32))
+                .setup(async (s) => s(queue, 32))
                 .returns(async () => [])
                 .verifiable(Times.once());
 
@@ -313,7 +313,7 @@ describe(Queue, () => {
 
         messageIdUrlMock
             .setup(async (m) => m.delete(Aborter.none, message.popReceipt))
-            .returns((async) => null)
+            .returns(async () => null)
             .verifiable(Times.once());
     }
 
@@ -325,7 +325,7 @@ describe(Queue, () => {
 
     function setupRetryHelperMock(): void {
         retryHelperMock
-            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
+            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 await errorHandler(null);
 

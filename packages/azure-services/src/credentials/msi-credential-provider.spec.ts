@@ -7,7 +7,7 @@ import { RetryHelper, System } from 'common';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AuthenticationMethod, Credentials, CredentialType, MSICredentialsProvider } from './msi-credential-provider';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 describe(MSICredentialsProvider, () => {
     let testSubject: MSICredentialsProvider;
@@ -31,7 +31,7 @@ describe(MSICredentialsProvider, () => {
         retryHelperMock = Mock.ofType<RetryHelper<Credentials>>();
 
         retryHelperMock
-            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, msBetweenRetries))
+            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, msBetweenRetries))
             .returns(retryHelperStub)
             .verifiable();
     });
@@ -123,7 +123,7 @@ describe(MSICredentialsProvider, () => {
 
         retryHelperMock.reset();
         retryHelperMock
-            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
+            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
             .throws(error)
             .verifiable();
 

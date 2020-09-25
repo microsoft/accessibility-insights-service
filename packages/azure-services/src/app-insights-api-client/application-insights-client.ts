@@ -8,8 +8,9 @@ import { EventsQueryOptions } from './events-query-options';
 import { ApplicationInsightsEventsResponse } from './events-query-response';
 import { ApplicationInsightsQueryResponse } from './query-response';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface ResponseWithBodyType<T = {}> extends ResponseAsJSON {
     body: T;
 }

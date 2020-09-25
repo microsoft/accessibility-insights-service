@@ -36,7 +36,6 @@
         "eslint": "^7.9.0",
         "eslint-plugin-import": "^2.22.0",
         "eslint-plugin-jsdoc": "^30.5.1",
-        "eslint-plugin-no-null": "^1.0.2",
         "eslint-plugin-prefer-arrow": "^1.2.2",
         "eslint-plugin-unicorn": "^22.0.0",
         "jest": "^26.4.2",
