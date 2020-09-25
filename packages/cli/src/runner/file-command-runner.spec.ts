@@ -90,7 +90,7 @@ describe(FileCommandRunner, () => {
 
             scannerMock.reset();
             scannerMock
-                .setup(async (s) => s.scan('pass-url-1'))
+                .setup((s) => s.scan('pass-url-1'))
                 .returns(async (url: string) => {
                     const result = {
                         results: {
@@ -122,7 +122,7 @@ describe(FileCommandRunner, () => {
 
     function setupScanAndReportWriteCalls(): void {
         scannerMock
-            .setup(async (s) => s.scan(It.is((url) => url.startsWith('pass'))))
+            .setup((s) => s.scan(It.is((url) => url.startsWith('pass'))))
             .returns(async (url: string) => {
                 const result = {
                     results: {
@@ -143,7 +143,7 @@ describe(FileCommandRunner, () => {
             .verifiable(Times.atLeast(0));
 
         scannerMock
-            .setup(async (s) => s.scan(It.is((url) => url.startsWith('fail'))))
+            .setup((s) => s.scan(It.is((url) => url.startsWith('fail'))))
             .returns(async (url: string) => {
                 const result = {
                     results: {
@@ -177,7 +177,7 @@ describe(FileCommandRunner, () => {
             .verifiable(Times.atLeast(0));
 
         scannerMock
-            .setup(async (s) => s.scan(It.is((url) => url.startsWith('un-scannable-browser-error'))))
+            .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable-browser-error'))))
             .returns(async (url: string) => {
                 const result = {
                     results: {
@@ -199,7 +199,7 @@ describe(FileCommandRunner, () => {
             .verifiable(Times.atLeast(0));
 
         scannerMock
-            .setup(async (s) => s.scan(It.is((url) => url.startsWith('un-scannable-internal-error'))))
+            .setup((s) => s.scan(It.is((url) => url.startsWith('un-scannable-internal-error'))))
             .returns(async (url: string) => {
                 return {
                     results: {

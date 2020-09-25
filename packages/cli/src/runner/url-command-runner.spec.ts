@@ -37,7 +37,7 @@ describe('URLCommandRunner', () => {
 
     it('Run Command', async () => {
         scannerMock
-            .setup(async (sm) => sm.scan(testInput.url))
+            .setup((sm) => sm.scan(testInput.url))
             .returns(async () => Promise.resolve(scanResults))
             .verifiable(Times.once());
         reportGeneratorMock

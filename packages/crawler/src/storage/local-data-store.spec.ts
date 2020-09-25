@@ -41,7 +41,7 @@ describe(LocalDataStore, () => {
 
         /* eslint-disable no-shadow */
         const datasetStub: any = {
-            // eslint-disable-next-line @typescript-eslint/promise-function-async, @typescript-eslint/ban-types
+            // eslint-disable-next-line @typescript-eslint/ban-types
             pushData: async (d: object | object[]): Promise<void> => {},
         };
 

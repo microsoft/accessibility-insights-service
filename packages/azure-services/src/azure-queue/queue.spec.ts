@@ -165,12 +165,12 @@ describe(Queue, () => {
 
         it('makes multiple calls to get all results', async () => {
             getMessagesMock
-                .setup(async (s) => s(queue, 32))
+                .setup((s) => s(queue, 32))
                 .returns(async () => generateMessages(32))
                 .verifiable(Times.once());
 
             getMessagesMock
-                .setup(async (s) => s(queue, 3))
+                .setup((s) => s(queue, 3))
                 .returns(async () => generateMessages(3))
                 .verifiable(Times.once());
 
@@ -181,7 +181,7 @@ describe(Queue, () => {
 
         it('makes single call if count is within limits of single call', async () => {
             getMessagesMock
-                .setup(async (s) => s(queue, 31))
+                .setup((s) => s(queue, 31))
                 .returns(async () => generateMessages(31))
                 .verifiable(Times.once());
 
@@ -192,7 +192,7 @@ describe(Queue, () => {
 
         it('returns empty array if no messages found', async () => {
             getMessagesMock
-                .setup(async (s) => s(queue, 32))
+                .setup((s) => s(queue, 32))
                 .returns(async () => [])
                 .verifiable(Times.once());
 
@@ -325,7 +325,7 @@ describe(Queue, () => {
 
     function setupRetryHelperMock(): void {
         retryHelperMock
-            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, 0))
             .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, _: number) => {
                 await errorHandler(null);
 

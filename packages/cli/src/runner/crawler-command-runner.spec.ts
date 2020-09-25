@@ -67,7 +67,7 @@ describe('CrawlerCommandRunner', () => {
             .verifiable();
 
         crawlerEntryPointMock
-            .setup(async (o) => o.crawl(crawlerOption))
+            .setup((o) => o.crawl(crawlerOption))
             .returns(async () => Promise.resolve(scanResult))
             .verifiable();
 
@@ -96,7 +96,7 @@ describe('CrawlerCommandRunner', () => {
             .verifiable();
 
         crawlerEntryPointMock.reset();
-        crawlerEntryPointMock.setup(async (o) => o.crawl(It.isAny())).verifiable(Times.never());
+        crawlerEntryPointMock.setup((o) => o.crawl(It.isAny())).verifiable(Times.never());
 
         await testSubject.runCommand(testInput);
     });
@@ -113,7 +113,7 @@ describe('CrawlerCommandRunner', () => {
 
         crawlerEntryPointMock.reset();
         crawlerEntryPointMock
-            .setup(async (o) => o.crawl(crawlerOption))
+            .setup((o) => o.crawl(crawlerOption))
             .returns(async () => Promise.resolve(scanResult))
             .verifiable();
         await testSubject.runCommand(testInput);

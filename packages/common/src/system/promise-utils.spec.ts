@@ -19,7 +19,7 @@ describe(PromiseUtils, () => {
             });
 
             const startTime = +new Date();
-            const result = await testSubject.waitFor(promise, 10000, async () => Promise.resolve('timed out value'));
+            const result = await testSubject.waitFor(promise, 10000, () => Promise.resolve('timed out value'));
 
             expect(result).toBe(resolvedValue);
             expect(+new Date() - startTime).toBeLessThan(1000);
@@ -35,7 +35,7 @@ describe(PromiseUtils, () => {
 
             const startTime = +new Date();
             try {
-                await testSubject.waitFor(promise, 10000, async () => Promise.resolve('timed out value'));
+                await testSubject.waitFor(promise, 10000, () => Promise.resolve('timed out value'));
             } catch (error) {
                 exceptionThrown = true;
                 expect(error).toBe(rejectedValue);
@@ -51,7 +51,7 @@ describe(PromiseUtils, () => {
             // eslint-disable-next-line , no-empty,@typescript-eslint/no-empty-function
             const promise = new Promise<string>(() => {});
 
-            const result = await testSubject.waitFor(promise, 10, async () => Promise.resolve(timeoutValue));
+            const result = await testSubject.waitFor(promise, 10, () => Promise.resolve(timeoutValue));
 
             expect(result).toBe(timeoutValue);
         });
@@ -66,7 +66,7 @@ describe(PromiseUtils, () => {
             });
 
             try {
-                await testSubject.waitFor(promise, 10, async () => Promise.reject(timeoutValue));
+                await testSubject.waitFor(promise, 10, () => Promise.reject(timeoutValue));
             } catch (error) {
                 exceptionThrown = true;
                 resolvePromise();

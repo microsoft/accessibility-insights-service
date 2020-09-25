@@ -31,7 +31,7 @@ describe(MSICredentialsProvider, () => {
         retryHelperMock = Mock.ofType<RetryHelper<Credentials>>();
 
         retryHelperMock
-            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, msBetweenRetries))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), maxAttempts, msBetweenRetries))
             .returns(retryHelperStub)
             .verifiable();
     });
@@ -123,7 +123,7 @@ describe(MSICredentialsProvider, () => {
 
         retryHelperMock.reset();
         retryHelperMock
-            .setup(async (r) => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
+            .setup((r) => r.executeWithRetries(It.isAny(), It.isAny(), It.isAny(), It.isAny()))
             .throws(error)
             .verifiable();
 

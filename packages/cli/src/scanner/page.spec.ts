@@ -132,7 +132,7 @@ describe('Page', () => {
         puppeteerBrowserMock = new PuppeteerBrowserMock(puppeteerPageMock);
         webDriverMock
             .setup(async (o) => o.launch(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .returns(() => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
         page = new Page(axePuppeteerFactoryMock.object, webDriverMock.object);
     });

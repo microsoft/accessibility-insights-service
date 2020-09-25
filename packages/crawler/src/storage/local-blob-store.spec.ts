@@ -41,7 +41,6 @@ describe(LocalBlobStore, () => {
 
         /* eslint-disable no-shadow */
         const keyValueStoreStub: any = {
-            // eslint-disable-next-line @typescript-eslint/promise-function-async
             setValue: async (k: string, v: string): Promise<void> => {},
         };
 

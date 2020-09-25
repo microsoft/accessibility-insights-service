@@ -43,7 +43,7 @@ describe('Scanner', () => {
 
     describe('scan', () => {
         beforeEach(() => {
-            serviceConfigMock.setup(async (s) => s.getConfigValue('scanConfig')).returns(async () => Promise.resolve(scanConfig));
+            serviceConfigMock.setup((s) => s.getConfigValue('scanConfig')).returns(() => Promise.resolve(scanConfig));
         });
 
         it('should launch browser page with given url and scan the page with axe-core', async () => {
@@ -104,7 +104,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromisetoReturnOriginalPromise(): void {
             promiseUtilsMock
-                .setup(async (s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return scanPromiseObj;
                 })
@@ -113,7 +113,7 @@ describe('Scanner', () => {
 
         function setupWaitForPromiseToReturnTimeoutPromise(): void {
             promiseUtilsMock
-                .setup(async (s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
+                .setup((s) => s.waitFor(It.isAny(), scanConfig.scanTimeoutInMin * 60000, It.isAny()))
                 .returns(async (scanPromiseObj, timeout, timeoutCb) => {
                     return timeoutCb();
                 })
