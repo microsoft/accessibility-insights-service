@@ -6,7 +6,6 @@ import 'reflect-metadata';
 // eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';

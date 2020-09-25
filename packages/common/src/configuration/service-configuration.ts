@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import convict from 'convict';
 import * as fs from 'fs';
+import convict from 'convict';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 
@@ -117,7 +117,6 @@ export class ServiceConfiguration {
         return this.loadConfigPromise;
     }
 
-    // tslint:disable-next-line: max-func-body-length
     private getRuntimeConfigSchema(): convict.Schema<RuntimeConfig> {
         return {
             featureFlags: {
@@ -174,7 +173,7 @@ export class ServiceConfiguration {
                 activeToRunningTasksRatio: {
                     format: Number,
                     default: 3,
-                    // tslint:disable-next-line: max-line-length
+                    // eslint-disable-next-line max-len
                     doc: `The target overload ratio of queued to running tasks. Higher ratio value will result higher queued tasks count.`,
                 },
                 addTasksIntervalInSeconds: {

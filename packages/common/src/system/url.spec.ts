@@ -4,8 +4,6 @@ import 'reflect-metadata';
 
 import { Url } from './url';
 
-// tslint:disable: no-http-string
-
 describe('tryParseUrlString()', () => {
     it('validate url string', () => {
         let url = Url.tryParseUrlString('abc/path/');

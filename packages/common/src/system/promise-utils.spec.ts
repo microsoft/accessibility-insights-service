@@ -19,7 +19,7 @@ describe(PromiseUtils, () => {
             });
 
             const startTime = +new Date();
-            const result = await testSubject.waitFor(promise, 10000, () => Promise.resolve('timed out value'));
+            const result = await testSubject.waitFor(promise, 10000, async () => Promise.resolve('timed out value'));
 
             expect(result).toBe(resolvedValue);
             expect(+new Date() - startTime).toBeLessThan(1000);
@@ -35,7 +35,7 @@ describe(PromiseUtils, () => {
 
             const startTime = +new Date();
             try {
-                await testSubject.waitFor(promise, 10000, () => Promise.resolve('timed out value'));
+                await testSubject.waitFor(promise, 10000, async () => Promise.resolve('timed out value'));
             } catch (error) {
                 exceptionThrown = true;
                 expect(error).toBe(rejectedValue);
@@ -48,26 +48,25 @@ describe(PromiseUtils, () => {
         it('returns resolved timed out promise', async () => {
             const timeoutValue = 'timed out value';
 
-            // tslint:disable-next-line: promise-must-complete no-empty
+            // eslint-disable-next-line , no-empty,@typescript-eslint/no-empty-function
             const promise = new Promise<string>(() => {});
 
-            const result = await testSubject.waitFor(promise, 10, () => Promise.resolve(timeoutValue));
+            const result = await testSubject.waitFor(promise, 10, async () => Promise.resolve(timeoutValue));
 
             expect(result).toBe(timeoutValue);
         });
 
         it('returns rejected timed out promise', async () => {
-            let resolvePromise: Function;
+            let resolvePromise: () => void;
             const timeoutValue = 'timed out value';
             let exceptionThrown = false;
 
-            // tslint:disable-next-line: promise-must-complete
             const promise = new Promise<string>((resolve) => {
                 resolvePromise = resolve;
             });
 
             try {
-                await testSubject.waitFor(promise, 10, () => Promise.reject(timeoutValue));
+                await testSubject.waitFor(promise, 10, async () => Promise.reject(timeoutValue));
             } catch (error) {
                 exceptionThrown = true;
                 resolvePromise();

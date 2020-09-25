@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as crypto from 'crypto';
+import * as utils from 'util';
 import { isNil } from 'lodash';
 import { serializeError as serializeErrorExt } from 'serialize-error';
-import * as utils from 'util';
 
-// tslint:disable: no-null-keyword no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export namespace System {
     export function createInstanceIfNil<T>(instance: T, factory: () => T): T {
@@ -30,7 +30,6 @@ export namespace System {
     }
 
     export async function wait(timeoutMillisecond: number): Promise<void> {
-        // tslint:disable-next-line: no-string-based-set-timeout
         await new Promise((resolve) => setTimeout(resolve, timeoutMillisecond));
     }
 
@@ -40,6 +39,7 @@ export namespace System {
         return crypto.randomBytes(bytes).toString('hex').substr(0, length);
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     export function serializeError(error: any): string {
         return utils.inspect(serializeErrorExt(error), false, null);
     }

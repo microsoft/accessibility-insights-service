@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import { EnvironmentSettings } from './environment-settings';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(EnvironmentSettings, () => {
     let testSubject: EnvironmentSettings;

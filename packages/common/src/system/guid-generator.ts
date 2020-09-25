@@ -6,8 +6,6 @@ import { injectable } from 'inversify';
 // @ts-ignore
 import * as uuid from 'uuid-with-v6';
 
-// tslint:disable: no-unsafe-any
-
 /**
  * UUID RFC 4122 https://tools.ietf.org/html/rfc4122
  */
