@@ -8,14 +8,13 @@ import { IMock, Mock, Times } from 'typemoq';
 import { WebApiScanJobManagerEntryPoint } from './web-api-scan-job-manager-entry-point';
 import { Worker } from './worker/worker';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 class TestableWebApiScanJobManagerEntryPoint extends WebApiScanJobManagerEntryPoint {
     public invokeGetTelemetryBaseProperties(): BaseTelemetryProperties {
         return this.getTelemetryBaseProperties();
     }
 
-    // tslint:disable-next-line: no-unnecessary-override
     public async runCustomAction(container: Container): Promise<void> {
         return super.runCustomAction(container);
     }

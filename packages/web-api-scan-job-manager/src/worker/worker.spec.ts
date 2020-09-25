@@ -23,7 +23,7 @@ import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Worker } from './worker';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any no-null-keyword no-unnecessary-override no-bitwise
+/* eslint-disable no-invalid-this, @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-bitwise */
 
 enum EnableBaseWorkflow {
     none,
@@ -223,7 +223,7 @@ describe(Worker, () => {
             .setup((o) =>
                 o.writeBatchPoolLoadSnapshot(
                     It.isValue({
-                        // tslint:disable-next-line: no-object-literal-type-assertion
+                        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                         ...({} as StorageDocument),
                         batchAccountName: batchConfig.accountName,
                         ...poolLoadSnapshot,
@@ -263,7 +263,7 @@ describe(Worker, () => {
             .setup((o) =>
                 o.writeBatchPoolLoadSnapshot(
                     It.isValue({
-                        // tslint:disable-next-line: no-object-literal-type-assertion
+                        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                         ...({} as StorageDocument),
                         batchAccountName: batchConfig.accountName,
                         ...poolLoadSnapshot,

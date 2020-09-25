@@ -7,7 +7,7 @@ import { ServiceConfiguration } from 'common';
 import { Container } from 'inversify';
 import { setupWebApiScanJobManagerContainer } from './setup-web-api-scan-job-manager-container';
 
-// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(setupWebApiScanJobManagerContainer, () => {
     const batchAccountUrl = 'test-batch-account-url';

@@ -6,7 +6,7 @@ import { JobManagerConfig, ServiceConfiguration } from 'common';
 import { IMock, Mock } from 'typemoq';
 import { ScannerBatchTaskPropertyProvider } from './scanner-batch-task-property-provider';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(ScannerBatchTaskPropertyProvider, () => {
     let testSubject: ScannerBatchTaskPropertyProvider;

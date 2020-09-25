@@ -9,7 +9,7 @@ import moment from 'moment';
 import { BatchPoolLoadSnapshotProvider, BatchTaskCreator, OnDemandPageScanRunResultProvider, ScanMessage } from 'service-library';
 import { OnDemandPageScanResult, OnDemandScanRequestMessage, StorageDocument } from 'storage-documents';
 
-// tslint:disable: no-unsafe-any no-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class Worker extends BatchTaskCreator {
@@ -78,7 +78,7 @@ export class Worker extends BatchTaskCreator {
                     let error = `Task was terminated unexpectedly. Exit code: ${failedTask.exitCode}`;
                     error =
                         failedTask.failureInfo !== undefined
-                            ? // tslint:disable-next-line:max-line-length
+                            ? // eslint-disable-next-line max-len
                               `${error}, Error category: ${failedTask.failureInfo.category}, Error details: ${failedTask.failureInfo.message}`
                             : error;
 
@@ -160,7 +160,7 @@ export class Worker extends BatchTaskCreator {
 
     private async writePoolLoadSnapshot(poolLoadSnapshot: PoolLoadSnapshot): Promise<void> {
         await this.batchPoolLoadSnapshotProvider.writeBatchPoolLoadSnapshot({
-            // tslint:disable-next-line: no-object-literal-type-assertion
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             ...({} as StorageDocument),
             batchAccountName: this.batchConfig.accountName,
             ...poolLoadSnapshot,
