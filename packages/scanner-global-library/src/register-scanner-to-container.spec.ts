@@ -9,7 +9,7 @@ import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { registerScannerToContainer } from './register-scanner-to-container';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable: no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(registerScannerToContainer, () => {
     let container: Container;

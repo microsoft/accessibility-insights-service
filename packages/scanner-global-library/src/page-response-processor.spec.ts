@@ -7,7 +7,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { BrowserErrorTypes } from './browser-error';
 import { PageResponseProcessor } from './page-response-processor';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(PageResponseProcessor, () => {
     let pageResponseProcessor: PageResponseProcessor;
