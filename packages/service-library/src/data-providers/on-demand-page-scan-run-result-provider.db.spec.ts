@@ -131,16 +131,16 @@ describe('OnDemandPageScanRunResultProvider.Db', () => {
             maskSystemProperties([itemsInDb]);
             expect(itemsInDb).toEqual(expectedSavedResult);
         });
+    }
 
-        function maskSystemProperties(results: OnDemandPageScanResult[]): void {
-            results.forEach((result) => {
-                const systemProperties = Object.keys(result).filter((key) => key.startsWith('_'));
+    function maskSystemProperties(results: OnDemandPageScanResult[]): void {
+        results.forEach((result) => {
+            const systemProperties = Object.keys(result).filter((key) => key.startsWith('_'));
 
-                systemProperties.forEach((key) => {
-                    // eslint-disable-next-line @typescript-eslint/tslint/config
-                    delete (result as any)[key];
-                });
+            systemProperties.forEach((key) => {
+                // eslint-disable-next-line @typescript-eslint/tslint/config
+                delete (result as any)[key];
             });
-        }
+        });
     }
 });

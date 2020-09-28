@@ -12,7 +12,7 @@ import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-respon
 import { client } from './client';
 import { RetryOptions } from './retry-options';
 
-/* eslint-disable @typescript-eslint/no-explicit-any,  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class CosmosContainerClient {
     constructor(
@@ -154,47 +154,41 @@ export class CosmosContainerClient {
         },
         ...args: any[]
     ): Promise<CosmosOperationResponse<T>> {
-        return new Promise(async (resolve, reject) => {
-            const transientStatusCodes = [
-                429 /* TooManyRequests */,
-                449 /* RetryWith */,
-                500 /* InternalServerError */,
-                503 /* ServiceUnavailable */,
-                ...retryOptions.retryingOnStatusCodes,
-            ];
-            const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
-            // eslint-disable-next-line no-constant-condition
-            while (true) {
-                try {
-                    const operationResponse = await operation(...args);
+        const transientStatusCodes = [
+            429 /* TooManyRequests */,
+            449 /* RetryWith */,
+            500 /* InternalServerError */,
+            503 /* ServiceUnavailable */,
+            ...retryOptions.retryingOnStatusCodes,
+        ];
+        const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            try {
+                const operationResponse = await operation(...args);
 
-                    if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
-                        this.logger.logInfo(`Cosmos storage operation completed. Response status code ${operationResponse.statusCode}.`);
-                        resolve(operationResponse);
+                if (operationResponse.statusCode <= 399 || transientStatusCodes.indexOf(operationResponse.statusCode) < 0) {
+                    this.logger.logInfo(`Cosmos storage operation completed. Response status code ${operationResponse.statusCode}.`);
 
-                        break;
-                    } else if (Date.now() > timeoutTimestamp) {
-                        this.logger.logWarn(`Cosmos storage operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
-                        reject(operationResponse);
+                    return operationResponse;
+                } else if (Date.now() > timeoutTimestamp) {
+                    this.logger.logWarn(`Cosmos storage operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
 
-                        break;
-                    } else {
-                        this.logger.logInfo(
-                            `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
-                        );
-                    }
-                } catch (error) {
-                    const customErrorMessage = 'An error occurred while executing storage operation';
-                    const customError = error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)}`;
-
-                    reject(customError);
-
-                    break;
+                    throw operationResponse;
+                } else {
+                    this.logger.logInfo(
+                        `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
+                    );
                 }
+            } catch (error) {
+                const customErrorMessage = 'An error occurred while executing storage operation';
+                const customError = error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)}`;
 
-                await this.systemUtils.wait(retryOptions.intervalMilliseconds);
+                throw customError;
             }
-        });
+
+            await this.systemUtils.wait(retryOptions.intervalMilliseconds);
+        }
     }
 
     public async executeQueryWithContinuationToken<T>(execute: (token?: string) => Promise<CosmosOperationResponse<T[]>>): Promise<T[]> {
