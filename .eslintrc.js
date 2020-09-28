@@ -17,10 +17,11 @@ module.exports = {
         'eslint-plugin-prefer-arrow',
         '@typescript-eslint',
         '@typescript-eslint/tslint',
+        'eslint-plugin-security',
         'jest',
     ],
     ignorePatterns: ['**/dist/*', '**/node_modules/*'],
-    extends: ['plugin:@typescript-eslint/recommended'],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
     rules: {
         '@typescript-eslint/array-type': [
             'error',
@@ -199,4 +200,19 @@ module.exports = {
             },
         ],
     },
+    overrides: [
+        {
+            files: ['*.spec.ts'],
+            rules: {
+                // Disable those errors and warnings which are not a threat to test code
+                // because the code is not run in production environments
+                'security/detect-non-literal-regexp': 'off',
+                'security/detect-object-injection': 'off',
+                'security/detect-non-literal-fs-filename': 'off',
+                'security/detect-unsafe-regex': 'off',
+                'security/detect-child-process': 'off',
+                'security/detect-eval-with-expression': 'off',
+            },
+        },
+    ],
 };
