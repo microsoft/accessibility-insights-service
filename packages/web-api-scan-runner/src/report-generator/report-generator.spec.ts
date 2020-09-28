@@ -3,9 +3,8 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-
 import { GuidGenerator } from 'common';
-import { AxeScanResults } from 'scanner';
+import { AxeScanResults } from 'scanner-global-library';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from './report-generator';

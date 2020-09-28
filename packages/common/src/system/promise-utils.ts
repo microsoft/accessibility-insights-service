@@ -1,13 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { injectable } from 'inversify';
 
 @injectable()
 export class PromiseUtils {
     constructor(private readonly globalObj = global) {}
 
-    public async waitFor<T, Y>(promise: Promise<T>, timeoutInMilliSec: number, onTimeoutCallback: () => Promise<Y>): Promise<T | Y> {
+    public async waitFor<T, Y>(fn: Promise<T>, timeoutInMSec: number, onTimeoutCallback: () => Promise<Y>): Promise<T | Y> {
         let timeoutHandle: NodeJS.Timeout;
         let hasTimedOut = false;
 
@@ -15,10 +14,10 @@ export class PromiseUtils {
             timeoutHandle = this.globalObj.setTimeout(() => {
                 hasTimedOut = true;
                 resolve();
-            }, timeoutInMilliSec);
+            }, timeoutInMSec);
         });
 
-        const racePromise = Promise.race([promise, timeoutPromise]);
+        const racePromise = Promise.race([fn, timeoutPromise]);
 
         try {
             await racePromise;
@@ -30,6 +29,6 @@ export class PromiseUtils {
             return onTimeoutCallback();
         }
 
-        return promise;
+        return fn;
     }
 }

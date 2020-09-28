@@ -1,8 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { AxeReportParameters, CrawlSummaryDetails, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
+import {
+    AxeReportParameters,
+    CrawlSummaryDetails,
+    ReporterFactory,
+    SummaryScanResult,
+    SummaryScanResults,
+} from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
-import { AxeScanResults } from '../scanner/axe-scan-results';
+import { AxeScanResults } from 'scanner-global-library';
 import { AxeInfo } from '../tool-data/axe-info';
 
 export const serviceName = 'Accessibility Insights Service';
@@ -19,9 +25,7 @@ export class ReportGenerator {
             pageTitle: axeResults.pageTitle,
         };
         const reportGenerationTime = new Date();
-
         const reporter = this.reporterFactoryFunc();
-
         const htmlReportParams: AxeReportParameters = {
             results: axeResults.results,
             description: `Automated report for accessibility scan of url ${
@@ -43,10 +47,29 @@ export class ReportGenerator {
             axeVersion: this.axeInfo.version,
             userAgent: userAgent,
             crawlDetails: crawlDetails,
-            results: results,
+            results: this.sortScanResults(results),
         };
         const reporter = this.reporterFactoryFunc();
 
         return reporter.fromSummaryResults(parameters).asHTML();
+    }
+
+    private sortScanResults(scanResults: SummaryScanResults): SummaryScanResults {
+        return {
+            ...scanResults,
+            failed: scanResults.failed.sort(this.compareScanResult),
+        };
+    }
+
+    private compareScanResult(result1: SummaryScanResult, result2: SummaryScanResult): number {
+        if (result1.numFailures < result2.numFailures) {
+            return 1;
+        }
+
+        if (result1.numFailures > result2.numFailures) {
+            return -1;
+        }
+
+        return 0;
     }
 }

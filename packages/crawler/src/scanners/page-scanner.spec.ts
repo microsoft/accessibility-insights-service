@@ -6,8 +6,8 @@ import { Report, Reporter } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { AxePuppeteer } from 'axe-puppeteer';
 import { Page } from 'puppeteer';
+import { AxePuppeteerFactory } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
-import { AxePuppeteerFactory } from '../axe-puppeteer/axe-puppeteer-factory';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageScanner } from './page-scanner';
 
@@ -35,8 +35,10 @@ describe(PageScanner, () => {
 
         reporterMock = getPromisableDynamicMock(Mock.ofType<Reporter>());
         createAxePuppeteerMock = Mock.ofType<AxePuppeteerFactory>();
-        axePuppeteerMock = Mock.ofType<AxePuppeteer>();
-        createAxePuppeteerMock.setup((cap) => cap.createAxePuppeteer(pageStub)).returns(() => axePuppeteerMock.object);
+        axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
+        createAxePuppeteerMock
+            .setup(async (cap) => cap.createAxePuppeteer(pageStub))
+            .returns(() => Promise.resolve(axePuppeteerMock.object));
 
         pageScanner = new PageScanner(() => reporterMock.object, createAxePuppeteerMock.object);
     });

@@ -5,8 +5,8 @@ import 'reflect-metadata';
 import { AxeReportParameters, Report, Reporter, ReporterFactory, SummaryScanResults } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
+import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeScanResults } from '../scanner/axe-scan-results';
 import { AxeInfo } from '../tool-data/axe-info';
 import { ReportGenerator, serviceName } from './report-generator';
 
@@ -36,6 +36,11 @@ describe('ReportGenerator', () => {
         axeScanResults = { results: axeResults, pageTitle: 'page title', browserSpec: 'browser version' };
         reportGenerationTime = new Date(2019, 2, 3);
         MockDate.set(reportGenerationTime);
+    });
+
+    afterEach(() => {
+        reporterMock.verifyAll();
+        axeInfoMock.verifyAll();
     });
 
     it('generate report ', () => {
@@ -71,15 +76,66 @@ describe('ReportGenerator', () => {
             durationSeconds: 10000,
         };
 
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const results = { failed: [], passed: [], unscannable: [] } as SummaryScanResults;
+        const results = {
+            failed: [
+                {
+                    url: 'url',
+                    numFailures: 1,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 13,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 7,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 22,
+                    reportLocation: 'reportLocation',
+                },
+            ],
+            passed: [],
+            unscannable: [],
+        } as SummaryScanResults;
+
+        const sortedResults = {
+            failed: [
+                {
+                    url: 'url',
+                    numFailures: 22,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 13,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 7,
+                    reportLocation: 'reportLocation',
+                },
+                {
+                    url: 'url',
+                    numFailures: 1,
+                    reportLocation: 'reportLocation',
+                },
+            ],
+            passed: [],
+            unscannable: [],
+        } as SummaryScanResults;
 
         const parameters = {
             serviceName: serviceName,
             axeVersion: 'axe version',
             userAgent: 'user agent',
             crawlDetails: crawlDetails,
-            results: results,
+            results: sortedResults,
         };
 
         axeInfoMock
@@ -95,10 +151,5 @@ describe('ReportGenerator', () => {
         const report = await reportGenerator.generateSummaryReport(crawlDetails, results, 'user agent');
 
         expect(report).toEqual(htmlReportString);
-    });
-
-    afterEach(() => {
-        reporterMock.verifyAll();
-        axeInfoMock.verifyAll();
     });
 });

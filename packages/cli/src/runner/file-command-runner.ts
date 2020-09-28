@@ -5,11 +5,11 @@ import { CrawlSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanRe
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
+import { AxeScanResults, BrowserError } from 'scanner-global-library';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { ReportNameGenerator } from '../report/report-name-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { AxeScanResults, ScanError } from '../scanner/axe-scan-results';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CommandRunner } from './command-runner';
 
@@ -102,7 +102,7 @@ export class FileCommandRunner implements CommandRunner {
             const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'html', reportContent);
             this.processURLScanResult(url, reportName, axeResults);
         } else {
-            const error = axeResults.error as ScanError;
+            const error = axeResults.error as BrowserError;
             if (error?.errorType !== undefined) {
                 const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'txt', error.stack);
                 const summaryScanError: SummaryScanError = {

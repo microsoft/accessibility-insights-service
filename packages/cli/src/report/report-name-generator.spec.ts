@@ -1,5 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
+
 import { IMock, Mock, Times } from 'typemoq';
 import { ReportNameGenerator } from './report-name-generator';
 import { ReportNameGeneratorBuilder } from './report-name-generator-builder';

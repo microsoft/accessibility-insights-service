@@ -62,7 +62,6 @@ describe(NotificationQueueMessageSender, () => {
             maxSendNotificationRetryCount: 4,
             minLastReferenceSeenInDays: 5,
             pageRescanIntervalInDays: 6,
-            accessibilityRuleExclusionList: [],
             scanTimeoutInMin: 1,
         };
 

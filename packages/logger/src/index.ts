@@ -15,6 +15,7 @@ export {
     TelemetryMeasurements,
     ScanRequestAcceptedMeasurements,
     ScanRequestQueuedMeasurements,
+    BrowserScanFailedMeasurements,
 } from './logger-event-measurements';
 export { AvailabilityTelemetry } from './availability-telemetry';
 export { LoggerProperties } from './logger-properties';

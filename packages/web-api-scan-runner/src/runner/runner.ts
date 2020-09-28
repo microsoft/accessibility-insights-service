@@ -4,7 +4,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'commo
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
-import { AxeScanResults, Scanner } from 'scanner';
+import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     OnDemandNotificationRequestMessage,
@@ -18,6 +18,7 @@ import {
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
+import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -70,16 +71,17 @@ export class Runner {
             startedScanTasks: 1,
         });
 
-        let scanSucceeded: boolean;
         try {
             this.logger.logInfo('Starting the page scanner.');
-            scanSucceeded = await this.scan(pageScanResult, scanMetadata.url);
+            await this.scan(pageScanResult, scanMetadata.url);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
-            scanSucceeded = false;
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
+
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
+            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
+            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         } finally {
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
@@ -89,11 +91,6 @@ export class Runner {
             };
             this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
-        }
-
-        if (!scanSucceeded) {
-            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         }
 
         const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -115,28 +112,24 @@ export class Runner {
         return isEmpty(notification?.scanNotifyUrl);
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<boolean> {
-        this.logger.logInfo(`Running page scan on web driver.`);
-
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
         const axeScanResults = await this.scanner.scan(url);
-
-        if (!isNil(axeScanResults.error)) {
-            this.logger.logInfo(`Updating page scan run result state to 'failed'.`);
-            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
-        } else {
-            this.logger.logInfo(`Updating page scan run result state to 'completed'.`);
+        if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
+        } else {
+            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
+
+            this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+            this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
         }
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
-
-        return isNil(axeScanResults.error);
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {

@@ -4,7 +4,7 @@ import { registerAzureServicesToContainer } from 'azure-services';
 import { setupRuntimeConfigContainer } from 'common';
 import * as inversify from 'inversify';
 import { registerLoggerToContainer } from 'logger';
-import { registerScannerToContainer } from 'scanner';
+import { registerScannerToContainer } from 'scanner-global-library';
 import { registerReportGeneratorToContainer } from './report-generator/register-report-generator-to-container';
 
 export function setupWebApiScanRequestSenderContainer(): inversify.Container {

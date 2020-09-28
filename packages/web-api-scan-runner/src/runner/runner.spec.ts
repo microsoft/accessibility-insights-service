@@ -7,7 +7,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'commo
 import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
-import { AxeScanResults, Scanner } from 'scanner';
+import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
 import {
     ItemType,
@@ -20,6 +20,7 @@ import {
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
+import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
 import { Runner } from './runner';
@@ -333,11 +334,13 @@ describe(Runner, () => {
 
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
 
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
+        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
+
+        loggerMock.setup((lm) => lm.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 })).verifiable();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         scannerMock

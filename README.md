@@ -52,7 +52,7 @@ This project can be run in an Azure environment and can be set up easily using t
 
 ### 6. Commands to run before check in
 
--   Run the below command to build, test, check file format styling & tslint issues
+-   Run the below command to build, test, check file format styling & eslint issues
     ```bash
     yarn precheckin
     ```
