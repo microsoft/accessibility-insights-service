@@ -13,6 +13,7 @@ export class AxePuppeteerFactory {
 
     public async createAxePuppeteer(page: Puppeteer.Page, contentSourcePath?: string): Promise<AxePuppeteer> {
         if (!isEmpty(contentSourcePath)) {
+            // eslint-disable-next-line security/detect-non-literal-fs-filename
             const content = this.fileSystemObj.readFileSync(contentSourcePath);
 
             return new AxePuppeteer(page, content.toString()).disableRules(this.ruleExclusion.accessibilityRuleExclusionList);

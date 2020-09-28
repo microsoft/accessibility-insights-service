@@ -4,10 +4,9 @@ import * as nodeUrl from 'url';
 
 export namespace Url {
     export function tryParseUrlString(url: string, absoluteUrlOnly: boolean = true): nodeUrl.Url {
-        const absoluteUrlRegEx = /^(?:[a-z]+:)?\/\//i;
         try {
             const urlParsed = nodeUrl.parse(url);
-            if (absoluteUrlOnly && urlParsed.href.match(absoluteUrlRegEx) === null) {
+            if (absoluteUrlOnly && urlParsed.protocol !== undefined) {
                 return undefined;
             }
 

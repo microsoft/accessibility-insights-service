@@ -88,6 +88,7 @@ export class CrawlerCommandRunner implements CommandRunner {
     }
 
     private canRun(scanArguments: ScanArguments): boolean {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(scanArguments.output) && !scanArguments.restart && !scanArguments.continue) {
             console.log(
                 'The last scan result was found on a disk. Use --continue option to continue scan for the last URL provided, or --restart option to delete the last scan result.',

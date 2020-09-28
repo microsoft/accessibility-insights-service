@@ -163,6 +163,7 @@ module.exports = {
         'prefer-template': 'error',
         'quote-props': ['error', 'as-needed'],
         radix: 'error',
+        'security/detect-object-injection': 'off',
         'space-before-function-paren': 'off',
         'space-in-parens': ['error', 'never'],
         'unicorn/filename-case': 'error',
@@ -194,7 +195,6 @@ module.exports = {
                 // Disable those errors and warnings which are not a threat to test code
                 // because the code is not run in production environments
                 'security/detect-non-literal-regexp': 'off',
-                'security/detect-object-injection': 'off',
                 'security/detect-non-literal-fs-filename': 'off',
                 'security/detect-unsafe-regex': 'off',
                 'security/detect-child-process': 'off',

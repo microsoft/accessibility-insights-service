@@ -101,6 +101,7 @@ export class ServiceConfiguration {
             this.loadConfigPromise = new Promise((resolve, reject) => {
                 const config = this.convictModule<RuntimeConfig>(this.getRuntimeConfigSchema());
 
+                // eslint-disable-next-line security/detect-non-literal-fs-filename
                 this.fileSystem.exists(ServiceConfiguration.profilePath, (exists) => {
                     if (exists === true) {
                         config.loadFile(ServiceConfiguration.profilePath);
