@@ -12,7 +12,13 @@ import { LogLevel } from './logger';
 import { ScanTaskFailedMeasurements } from './logger-event-measurements';
 import { LoggerProperties } from './logger-properties';
 
-/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void, no-empty,@typescript-eslint/no-empty-function */
+/* eslint-disable
+   @typescript-eslint/consistent-type-assertions,
+   @typescript-eslint/no-explicit-any,
+   no-void,
+   no-empty,
+   @typescript-eslint/no-empty-function
+*/
 
 class TestableBaseConsoleLoggerClient extends BaseConsoleLoggerClient {
     public propertiesToAddToEvent: { [name: string]: string };

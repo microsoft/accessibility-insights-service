@@ -115,6 +115,7 @@ module.exports = {
         'jsdoc/check-indentation': 'error',
         'jsdoc/no-types': 'error',
         'linebreak-style': 'error',
+        'max-len': ['error', { code: 140, ignoreTemplateLiterals: true, ignoreStrings: true }],
         'new-parens': 'error',
         'newline-per-chained-call': 'off',
         'no-bitwise': 'error',

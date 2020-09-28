@@ -9,7 +9,13 @@ import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
-/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any, no-void, no-empty,@typescript-eslint/no-empty-function,  */
+/* eslint-disable
+   @typescript-eslint/consistent-type-assertions,
+   @typescript-eslint/no-explicit-any,
+   no-void,
+   no-empty,
+   @typescript-eslint/no-empty-function
+*/
 
 interface TrackTraceTestCase {
     logLevel: LogLevel;

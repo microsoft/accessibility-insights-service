@@ -17,7 +17,12 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
-/* eslint-disable no-empty, @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
+/* eslint-disable
+  no-empty,
+  @typescript-eslint/no-empty-function,
+  @typescript-eslint/no-explicit-any,
+  @typescript-eslint/consistent-type-assertions
+*/
 
 class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestrationController {
     public orchestrationStepsCreated: boolean = false;
