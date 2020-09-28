@@ -9,7 +9,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { EnqueueActiveElementsOperation } from './enqueue-active-elements-operation';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(EnqueueActiveElementsOperation, () => {
     let enqueueActiveElementsOp: EnqueueActiveElementsOperation;
     let activeElementFinderMock: IMock<ActiveElementsFinder>;

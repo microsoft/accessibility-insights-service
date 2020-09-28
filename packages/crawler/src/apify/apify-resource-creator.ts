@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import Apify from 'apify';
 import * as fs from 'fs';
+import Apify from 'apify';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { ResourceCreator } from '../types/resource-creator';
 
-// tslint:disable: non-literal-fs-path
+/* eslint-disable */
 
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {

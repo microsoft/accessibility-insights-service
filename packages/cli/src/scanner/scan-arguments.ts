@@ -14,6 +14,6 @@ export interface ScanArguments {
     silentMode?: boolean;
     existingUrls?: string[];
     discoveryPatterns?: string[];
-    // tslint:disable-next-line: no-reserved-keywords
+    // eslint-disable-next-line
     continue?: boolean;
 }

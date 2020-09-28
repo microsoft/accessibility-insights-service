@@ -6,7 +6,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { Argv } from 'yargs';
 import { NotificationSenderConfig } from './notification-sender-config';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(NotificationSenderConfig, () => {
     let testSubject: NotificationSenderConfig;

@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { serializeError as serializeErrorExt } from 'serialize-error';
 import * as utils from 'util';
+import { serializeError as serializeErrorExt } from 'serialize-error';
 import { System } from './system';
 
-// tslint:disable: no-null-keyword no-floating-promises
+/* eslint-disable @typescript-eslint/no-floating-promises */
 
 describe('create instance if nil', () => {
     test.each([null, undefined])('creates instance when nil - %o', (testCase) => {

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { isString } from 'util';
 import { injectable } from 'inversify';
 import { isNil } from 'lodash';
 import {
@@ -12,7 +13,6 @@ import {
 } from 'service-library';
 
 import { NotificationError, ScanError } from 'storage-documents';
-import { isString } from 'util';
 
 @injectable()
 export class ScanErrorConverter {

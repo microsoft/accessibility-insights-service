@@ -11,4 +11,4 @@ export class BatchConfig {
     public readonly jobId: string = process.env.AZ_BATCH_JOB_ID;
 }
 
-export let batchConfig = new BatchConfig();
+export const batchConfig = new BatchConfig();

@@ -18,7 +18,6 @@ export class Scanner {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
 
         return this.promiseUtils.waitFor(this.scanImpl(url), scanConfig.scanTimeoutInMin * 60000, () =>
-            // tslint:disable-next-line: no-object-literal-type-assertion
             Promise.resolve({
                 error: {
                     errorType: 'ScanTimeout',

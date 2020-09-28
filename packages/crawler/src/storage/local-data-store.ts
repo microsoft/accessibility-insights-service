@@ -12,6 +12,7 @@ export class LocalDataStore implements DataStore {
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     public async pushData(data: object | object[]): Promise<void> {
         await this.open();
         await this.datasetStore.pushData(data);

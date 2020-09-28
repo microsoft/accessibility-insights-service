@@ -14,6 +14,8 @@ import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-ty
 import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
+/* eslint-disable no-invalid-this */
+
 export type PartialScanData = {
     url: string;
     id: string;
@@ -44,7 +46,7 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
-    // tslint:disable-next-line: member-access
+    // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
 
     public constructor(
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,

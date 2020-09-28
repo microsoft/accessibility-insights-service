@@ -10,7 +10,7 @@ import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthCheckController, HealthTarget } from './health-check-controller';
 
-// tslint:disable: no-unsafe-any no-any max-line-length max-func-body-length
+/* eslint-disable @typescript-eslint/no-explicit-any, max-len */
 
 describe(HealthCheckController, () => {
     const releaseTarget: HealthTarget = 'release';

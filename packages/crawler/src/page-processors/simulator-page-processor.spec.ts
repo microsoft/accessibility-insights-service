@@ -15,7 +15,7 @@ import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { SimulatorPageProcessor } from './simulator-page-processor';
 
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions,  */
 
 describe(SimulatorPageProcessor, () => {
     const testUrl = 'test url';

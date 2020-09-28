@@ -90,9 +90,10 @@
         "files.eol": "\n",
         "files.insertFinalNewline": true,
         "prettier.requireConfig": true,
-        "tslint.jsEnable": true,
+        "eslint.validate": ["typescript", "javascript"],
+        "eslint.enable": true,
         "editor.codeActionsOnSave": {
-            "source.fixAll.tslint": true
+            "source.fixAll.eslint": true
         },
         "shellformat.effectLanguages": [
             "shellscript"
@@ -129,7 +130,7 @@
     },
     "extensions": {
         "recommendations": [
-            "ms-vscode.vscode-typescript-tslint-plugin",
+            "dbaeumer.vscode-eslint",
             "ms-dotnettools.csharp",
             "esbenp.prettier-vscode",
             "rbbit.typescript-hero",

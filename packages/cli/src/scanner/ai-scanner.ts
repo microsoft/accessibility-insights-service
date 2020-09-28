@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as util from 'util';
 import { inject, injectable } from 'inversify';
 import { AxeScanResults, Page } from 'scanner-global-library';
-import * as util from 'util';
 
 @injectable()
 export class AIScanner {

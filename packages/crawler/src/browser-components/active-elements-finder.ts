@@ -1,12 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import { injectable } from 'inversify';
 import * as path from 'path';
+import { injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import * as utilities from '../utility/crypto';
-
-// tslint:disable: no-unsafe-any
 
 export interface ActiveElement {
     html: string;
@@ -36,7 +34,7 @@ export class ActiveElementsFinder {
         return page.evaluate((elementSelector) => {
             const activeElements: ElementData[] = [];
             function visible(element: HTMLElement): boolean {
-                // tslint:disable-next-line: strict-boolean-expressions
+                // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
                 return !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
             }
 
@@ -71,7 +69,7 @@ export class ActiveElementsFinder {
                         // Skipping cross-origin frame
                         try {
                             frameDocument = frame.contentWindow.document;
-                            // tslint:disable-next-line: no-empty
+                            // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
                         } catch {}
 
                         if (frameDocument !== undefined) {
@@ -88,7 +86,7 @@ export class ActiveElementsFinder {
     }
 
     private async importLibToPage(page: Page): Promise<void> {
-        // tslint:disable-next-line: strict-boolean-expressions
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         const rootDir = path.dirname(require.main.filename || process.mainModule.filename);
         await page.addScriptTag({ path: path.resolve(rootDir, 'browser-imports.js') });
     }

@@ -12,7 +12,7 @@ import { AIScanner } from '../scanner/ai-scanner';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { FileCommandRunner } from './file-command-runner';
 
-// tslint:disable: no-object-literal-type-assertion non-literal-fs-path
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(FileCommandRunner, () => {
     let scannerMock: IMock<AIScanner>;

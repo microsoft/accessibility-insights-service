@@ -65,7 +65,6 @@ describe(BatchScanResultController, () => {
         context.req.headers['content-type'] = 'application/json';
         onDemandPageScanRunResultProviderMock = Mock.ofType<OnDemandPageScanRunResultProvider>();
         onDemandPageScanRunResultProviderMock
-            // tslint:disable-next-line: no-unsafe-any
             .setup(async (o) => o.readScanRuns(It.isAny()))
             .returns(async () => Promise.resolve([scanFetchedResponse]));
 
@@ -80,7 +79,7 @@ describe(BatchScanResultController, () => {
         serviceConfigurationMock
             .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
-                // tslint:disable-next-line: no-object-literal-type-assertion
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 return {
                     maxScanRequestBatchCount: 2,
                     scanRequestProcessingDelayInSeconds: 120,

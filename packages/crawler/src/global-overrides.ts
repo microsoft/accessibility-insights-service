@@ -3,7 +3,7 @@
 
 export {};
 
-// tslint:disable: no-any no-unsafe-any no-require-imports no-var-requires no-function-expression
+/* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires */
 function overrideCheckPrototypeUtilsFunc(exports: any): any {
     const originalFunc = exports.checkParamPrototypeOrThrow;
     exports.checkParamPrototypeOrThrow = function (...args: any): any {

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-empty no-null-keyword
 import 'reflect-metadata';
 
 import { Aborter, MessageIdURL, MessagesURL, Models, QueueURL, ServiceURL } from '@azure/storage-queue';
@@ -11,6 +10,12 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { Message } from './message';
 import { Queue } from './queue';
+
+/* eslint-disable @typescript-eslint/no-explicit-any,
+   @typescript-eslint/consistent-type-assertions,
+   no-empty,
+   @typescript-eslint/no-empty-function
+*/
 
 describe(Queue, () => {
     const messageVisibilityTimeout = 30;
@@ -313,7 +318,7 @@ describe(Queue, () => {
 
         messageIdUrlMock
             .setup(async (m) => m.delete(Aborter.none, message.popReceipt))
-            .returns((async) => null)
+            .returns(async () => null)
             .verifiable(Times.once());
     }
 

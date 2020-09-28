@@ -8,7 +8,7 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
 
-// tslint:disable: no-object-literal-type-assertion no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any,  */
 
 describe(OnDemandPageScanRunResultProvider, () => {
     let testSubject: OnDemandPageScanRunResultProvider;

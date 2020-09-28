@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import { TestContainerLogProperties, TestDefinition, TestEnvironment, TestRunLogProperties } from '../common-types';
 import { getDefinedTestsMetadata } from '../test-decorator';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class TestRunner {
@@ -17,17 +17,19 @@ export class TestRunner {
         this.logger = logger;
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     public async runAll(testContainers: object[], env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
         await Promise.all(testContainers.map(async (testContainer) => this.run(testContainer, env, releaseId, runId)));
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     public async run(testContainer: object, env: TestEnvironment, releaseId: string, runId: string): Promise<void> {
         if (this.logger === undefined) {
             throw new Error('The logger instance is undefined. Use setLogger() to initialize the logger instance.');
         }
 
         const definedTests = getDefinedTestsMetadata(testContainer);
-        // tslint:disable-next-line: no-bitwise
+        // eslint-disable-next-line no-bitwise
         const targetedTests = definedTests.filter((definedTest) => definedTest.environments & env);
         let containerPass = true;
         await Promise.all(
@@ -52,6 +54,7 @@ export class TestRunner {
     private async runTest(
         testDefinition: TestDefinition,
         env: TestEnvironment,
+        // eslint-disable-next-line @typescript-eslint/ban-types
         testContainer: object,
         releaseId: string,
         runId: string,

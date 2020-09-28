@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility-insights-crawler';
 import * as fs from 'fs';
+import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
@@ -11,7 +11,7 @@ import { ReportNameGenerator } from '../report/report-name-generator';
 import { ScanArguments } from '../scanner/scan-arguments';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
-// tslint:disable: no-object-literal-type-assertion  no-unsafe-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe('CrawlerCommandRunner', () => {
     const testUrl = 'http://localhost/';

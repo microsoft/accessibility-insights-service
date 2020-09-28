@@ -9,8 +9,8 @@
         "pack-to-drop-dir": "yarn pack --filename drop/cli.tgz",
         "create-drop-dir": "npx mkdirp drop",
         "clean": "rimraf dist drop test-results",
-        "lint": "tslint -c ../../tslint.json -p ./tsconfig.json",
-        "lint:fix": "tslint --fix -c ../../tslint.json -p ./tsconfig.json --force",
+        "lint": "eslint -c ../../.eslintrc.js --ext .ts ./",
+        "lint:fix": "eslint --fix -c ../../.eslintrc.js --ext .ts ./",
         "test": "jest --coverage --colors"
     },
     "files": [

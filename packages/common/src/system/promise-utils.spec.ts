@@ -48,7 +48,7 @@ describe(PromiseUtils, () => {
         it('returns resolved timed out promise', async () => {
             const timeoutValue = 'timed out value';
 
-            // tslint:disable-next-line: promise-must-complete no-empty
+            // eslint-disable-next-line , no-empty,@typescript-eslint/no-empty-function
             const promise = new Promise<string>(() => {});
 
             const result = await testSubject.waitFor(promise, 10, () => Promise.resolve(timeoutValue));
@@ -57,11 +57,10 @@ describe(PromiseUtils, () => {
         });
 
         it('returns rejected timed out promise', async () => {
-            let resolvePromise: Function;
+            let resolvePromise: () => void;
             const timeoutValue = 'timed out value';
             let exceptionThrown = false;
 
-            // tslint:disable-next-line: promise-must-complete
             const promise = new Promise<string>((resolve) => {
                 resolvePromise = resolve;
             });

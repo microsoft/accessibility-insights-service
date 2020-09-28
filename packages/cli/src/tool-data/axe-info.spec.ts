@@ -7,7 +7,7 @@ const VERSION = 'axe.core.version';
 
 describe(AxeInfo, () => {
     const axe = { version: VERSION };
-    // tslint:disable-next-line: mocha-no-side-effect-code no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const axeInfo = new AxeInfo(axe as any);
 
     it('has a default', () => {

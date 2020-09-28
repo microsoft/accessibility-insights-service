@@ -16,7 +16,7 @@ import { TestRunner } from './runner/test-runner';
 import { TestContextData } from './test-group-data';
 import { FunctionalTestGroup } from './test-groups/functional-test-group';
 
-// tslint:disable: mocha-no-side-effect-code no-any no-unsafe-any mocha-unneeded-done strict-boolean-expressions
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/strict-boolean-expressions */
 
 describe('functional tests', () => {
     dotenv.config({ path: `${__dirname}/.env` });
@@ -106,7 +106,6 @@ describe('functional tests', () => {
         let scanResultResponse: ScanResultResponse;
         while (scanRunState !== 'completed' && scanRunState !== 'failed') {
             console.log('waiting 10 seconds before sending the next request...');
-            // tslint:disable-next-line: no-empty
             await System.wait(10000);
             scanResultResponse = (await a11yServiceClient.getScanStatus(testContextData.scanId)).body;
             scanRunState = (<ScanRunResultResponse>scanResultResponse).run.state;

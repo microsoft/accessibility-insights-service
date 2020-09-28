@@ -8,7 +8,7 @@ import { TestContainerLogProperties, TestEnvironment, TestRunLogProperties } fro
 import { test } from '../test-decorator';
 import { TestRunner } from './test-runner';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 class TestGroupWithContext {
     public var1: string = 'some value';

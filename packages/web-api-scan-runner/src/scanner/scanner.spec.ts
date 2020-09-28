@@ -10,7 +10,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { Scanner } from './scanner';
 
-// tslint:disable: no-object-literal-type-assertion no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 describe('Scanner', () => {
     let pageMock: IMock<Page>;

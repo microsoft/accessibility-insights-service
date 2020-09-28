@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// tslint:disable: restrict-plus-operands no-bitwise
+/* eslint-disable @typescript-eslint/restrict-plus-operands, no-bitwise */
 
 /**
  * Based on whitepaper 'A Fast, Minimal Memory, Consistent Hash Algorithm' https://arxiv.org/abs/1406.2294

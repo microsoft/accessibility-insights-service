@@ -10,8 +10,6 @@ import { IMock, Mock, Times } from 'typemoq';
 import { AxeInfo } from '../tool-data/axe-info';
 import { ReportGenerator, serviceName } from './report-generator';
 
-// tslint:disable:no-object-literal-type-assertion
-
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;
     const htmlReportString = 'html report';

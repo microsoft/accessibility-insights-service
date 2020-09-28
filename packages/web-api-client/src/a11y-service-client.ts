@@ -8,8 +8,9 @@ import requestPromise from 'request-promise';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export interface ResponseWithBodyType<T = {}> extends Response {
     body: T;
 }
@@ -20,6 +21,7 @@ export class A11yServiceClient {
     private readonly defaultOptions: requestPromise.RequestPromiseOptions = {
         forever: true,
         qs: {
+            // eslint-disable-next-line no-invalid-this
             'api-version': this.apiVersion,
         },
         headers: {

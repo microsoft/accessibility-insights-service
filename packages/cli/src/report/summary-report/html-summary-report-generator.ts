@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import escapeHTML from 'escape-html';
 import { link } from 'fs';
+import escapeHTML from 'escape-html';
 import { injectable } from 'inversify';
 import { SummaryReportData, UrlToReportMap } from './summary-report-data';
 import { SummaryReportGenerator } from './summary-report-generator';
 
-// tslint:disable-next-line: no-var-requires no-require-imports no-unsafe-any
+// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
 const pretty: (html: string) => string = require('pretty');
 
 type HtmlSummaryLink = {

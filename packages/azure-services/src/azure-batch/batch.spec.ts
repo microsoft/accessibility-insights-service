@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-object-literal-type-assertion no-unsafe-any no-submodule-imports no-increment-decrement max-func-body-length max-line-length
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions, import/no-internal-modules*/
 import 'reflect-metadata';
 
 import { BatchServiceClient, BatchServiceModels, Job, Pool, Task } from '@azure/batch';

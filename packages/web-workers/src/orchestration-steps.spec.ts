@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-// tslint:disable:no-submodule-imports
+/* eslint-disable import/no-internal-modules */
 import { AvailabilityTestConfig } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
@@ -22,13 +22,13 @@ import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orch
 import { GeneratorExecutor } from './test-utilities/generator-executor';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
-// tslint:disable:no-object-literal-type-assertion no-unsafe-any no-any no-null-keyword
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 class MockableDurableOrchestrationContext extends DurableOrchestrationContext {
     public readonly instanceId: string = null;
     public readonly isReplaying: boolean = null;
     public readonly currentUtcDateTime: Date = null;
-    // tslint:disable-next-line:variable-name
+    // eslint-disable-next-line @typescript-eslint/naming-convention,no-underscore-dangle,id-blacklist,id-match
     public readonly Task: ITaskMethods = null;
 }
 
@@ -533,7 +533,7 @@ describe(OrchestrationStepsImpl, () => {
         });
     });
 
-    function setupCreateTimer(fireTime: moment.Moment, callback?: Function): void {
+    function setupCreateTimer(fireTime: moment.Moment, callback?: () => void): void {
         orchestrationContext
             .setup((oc) => oc.createTimer(fireTime.toDate()))
             .returns(() => {
@@ -576,7 +576,7 @@ describe(OrchestrationStepsImpl, () => {
         };
     }
 
-    function setupVerifyTrackActivityCall(success: Boolean, properties?: OrchestrationTelemetryProperties): void {
+    function setupVerifyTrackActivityCall(success: boolean, properties?: OrchestrationTelemetryProperties): void {
         const trackAvailabilityRequestData = getTrackAvailabilityRequestData(success, properties);
 
         orchestrationContext
@@ -585,7 +585,7 @@ describe(OrchestrationStepsImpl, () => {
             .verifiable(Times.once());
     }
 
-    function getTrackAvailabilityRequestData(success: Boolean, properties?: OrchestrationTelemetryProperties): ActivityRequestData {
+    function getTrackAvailabilityRequestData(success: boolean, properties?: OrchestrationTelemetryProperties): ActivityRequestData {
         return {
             activityName: ActivityAction.trackAvailability,
             data: {

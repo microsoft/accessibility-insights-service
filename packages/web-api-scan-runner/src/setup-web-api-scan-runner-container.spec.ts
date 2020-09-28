@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { ServiceConfiguration } from 'common';
 import { Runner } from './runner/runner';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(setupWebApiScanRequestSenderContainer, () => {
     it('resolves runner dependencies', () => {

@@ -2,15 +2,14 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
+// @ts-ignore
+import * as cheerio from 'cheerio';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, iocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
-// @ts-ignore
-import * as cheerio from 'cheerio';
-
-// tslint:disable:no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 @injectable()
 export class CrawlerEngine {

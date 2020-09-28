@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-submodule-imports
+/* eslint-disable import/no-internal-modules */
+import * as crypto from 'crypto';
 import { BatchServiceModels } from '@azure/batch';
 import { CloudJob, CloudTask, JobListOptions, OutputFile, TaskListOptions } from '@azure/batch/esm/models';
 import { System } from 'common';
-import * as crypto from 'crypto';
 import { inject, injectable, optional } from 'inversify';
 import * as _ from 'lodash';
 import { GlobalLogger } from 'logger';

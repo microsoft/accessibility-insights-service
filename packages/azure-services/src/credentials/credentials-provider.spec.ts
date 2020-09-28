@@ -6,12 +6,11 @@ import { IMock, Mock, Times } from 'typemoq';
 import { CredentialsProvider } from './credentials-provider';
 import { MSICredentialsProvider } from './msi-credential-provider';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(CredentialsProvider, () => {
     let testSubject: CredentialsProvider;
     let msiCredProviderMock: IMock<MSICredentialsProvider>;
-    // tslint:disable-next-line: mocha-no-side-effect-code
     const credentialsStub = 'test credentials' as any;
 
     beforeEach(() => {

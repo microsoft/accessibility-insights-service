@@ -3,7 +3,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-// tslint:disable-next-line: no-import-side-effect
+// eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
 // @ts-ignore
@@ -14,7 +14,6 @@ import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scanner/scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
 
-// tslint:disable-next-line:max-func-body-length
 (async () => {
     const scanArguments = readScanArguments();
 

@@ -44,7 +44,6 @@ export class OnDemandDispatcher {
             if (itemCount > 0) {
                 await this.sender.sendRequestToScan(response.item);
                 this.logger.logInfo(`Queued ${itemCount} scan requests to the task scan queue.`);
-                // tslint:disable-next-line: no-null-keyword
                 this.logger.trackEvent('ScanRequestQueued', null, { queuedScanRequests: itemCount });
             }
 

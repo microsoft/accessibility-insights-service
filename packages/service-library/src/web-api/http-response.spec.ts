@@ -3,8 +3,6 @@
 import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 
-// tslint:disable: no-unsafe-any
-
 describe(HttpResponse, () => {
     it('create HTTP error response from web API code', () => {
         const webApiCode = WebApiErrorCodes.invalidResourceId;

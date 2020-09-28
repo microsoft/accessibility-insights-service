@@ -15,7 +15,7 @@ import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 import { PageProcessorBase } from './page-processor-base';
 
-// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
 
 describe(PageProcessorBase, () => {
     class TestablePageProcessor extends PageProcessorBase {

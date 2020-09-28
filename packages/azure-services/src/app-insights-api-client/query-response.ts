@@ -3,7 +3,6 @@
 
 export type Column = {
     name: string;
-    // tslint:disable-next-line:no-reserved-keywords
     type: string;
 };
 

@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/tslint/config */
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
+/* eslint-disable @typescript-eslint/tslint/config */
+
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
-// tslint:disable: match-default-export-name import-name
 import encode from 'encoding-down';
 import { inject, injectable, optional } from 'inversify';
 import leveldown from 'leveldown';
@@ -9,6 +12,8 @@ import levelup, { LevelUp } from 'levelup';
 import { iocTypes } from '../types/ioc-types';
 import { generateHash } from '../utility/crypto';
 import { DataBaseKey, PageError, ScanMetadata, ScanResults } from './storage-documents';
+
+/* eslint-enable @typescript-eslint/tslint/config */
 
 @injectable()
 export class DataBase {
@@ -44,7 +49,6 @@ export class DataBase {
         await this.addItem(dbKey, scanMetadata);
     }
 
-    // tslint:disable: no-unsafe-any
     public async getScanResult(): Promise<ScanResults> {
         const failed: SummaryScanResult[] = [];
         const passed: SummaryScanResult[] = [];

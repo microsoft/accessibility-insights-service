@@ -7,7 +7,7 @@ import { RetryHelper, System } from 'common';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AuthenticationMethod, Credentials, CredentialType, MSICredentialsProvider } from './msi-credential-provider';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 describe(MSICredentialsProvider, () => {
     let testSubject: MSICredentialsProvider;

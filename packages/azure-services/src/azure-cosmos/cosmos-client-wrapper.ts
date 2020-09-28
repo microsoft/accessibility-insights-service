@@ -10,7 +10,7 @@ import { client } from '../storage/client';
 import { CosmosDocument } from './cosmos-document';
 import { CosmosOperationResponse } from './cosmos-operation-response';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export declare type CosmosOperation = 'upsertItem' | 'upsertItems' | 'readAllItems' | 'queryItems' | 'readItem' | 'deleteItem';
 

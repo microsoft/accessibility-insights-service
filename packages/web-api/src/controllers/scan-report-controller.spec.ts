@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Readable } from 'stream';
 import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
-import { Readable } from 'stream';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 

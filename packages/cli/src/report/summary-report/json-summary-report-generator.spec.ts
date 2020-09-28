@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { cloneDeep } from 'lodash';
 import { JsonSummaryReportGenerator } from './json-summary-report-generator';
 import { SummaryReportData } from './summary-report-data';
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(JsonSummaryReportGenerator, () => {
     let testSubject: JsonSummaryReportGenerator;

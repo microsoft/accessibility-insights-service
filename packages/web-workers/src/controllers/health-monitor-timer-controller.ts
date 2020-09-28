@@ -6,7 +6,7 @@ import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { FunctionTimer } from '../contracts/function-timer';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class HealthMonitorTimerController extends WebController {

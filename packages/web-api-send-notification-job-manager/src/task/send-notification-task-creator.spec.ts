@@ -9,12 +9,11 @@ import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { SendNotificationTaskCreator } from './send-notification-task-creator';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-any mocha-no-side-effect-code no-null-keyword
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 class TestableSendNotificationTaskCreator extends SendNotificationTaskCreator {
     public jobManagerConfig: JobManagerConfig;
 
-    // tslint:disable-next-line: no-unnecessary-override
     public async getMessagesForTaskCreation(): Promise<ScanMessage[]> {
         return super.getMessagesForTaskCreation();
     }

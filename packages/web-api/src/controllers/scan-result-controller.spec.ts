@@ -13,8 +13,6 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { ScanResultController } from './scan-result-controller';
 
-// tslint:disable: no-unsafe-any
-
 describe(ScanResultController, () => {
     let scanResultController: ScanResultController;
     let context: Context;
@@ -86,7 +84,7 @@ describe(ScanResultController, () => {
         serviceConfigurationMock
             .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
-                // tslint:disable-next-line: no-object-literal-type-assertion
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
                 return {
                     maxScanRequestBatchCount: 2,
                     scanRequestProcessingDelayInSeconds: 120,

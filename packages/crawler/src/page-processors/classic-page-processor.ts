@@ -5,6 +5,8 @@ import Apify from 'apify';
 import { injectable } from 'inversify';
 import { PageProcessorBase } from './page-processor-base';
 
+/* eslint-disable no-invalid-this */
+
 @injectable()
 export class ClassicPageProcessor extends PageProcessorBase {
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {

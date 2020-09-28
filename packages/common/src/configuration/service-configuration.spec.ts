@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import convict from 'convict';
 import * as fs from 'fs';
+import convict from 'convict';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { RuntimeConfig, ServiceConfiguration } from './service-configuration';
 
-// tslint:disable: non-literal-fs-path no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(ServiceConfiguration, () => {
     let testSubject: ServiceConfiguration;

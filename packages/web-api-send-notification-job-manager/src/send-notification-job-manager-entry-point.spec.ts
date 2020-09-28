@@ -8,14 +8,13 @@ import { IMock, Mock, Times } from 'typemoq';
 import { SendNotificationJobManagerEntryPoint } from './send-notification-job-manager-entry-point';
 import { SendNotificationTaskCreator } from './task/send-notification-task-creator';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 class TestableSendNotificationJobManagerEntryPoint extends SendNotificationJobManagerEntryPoint {
     public invokeGetTelemetryBaseProperties(): BaseTelemetryProperties {
         return this.getTelemetryBaseProperties();
     }
 
-    // tslint:disable-next-line: no-unnecessary-override
     public async runCustomAction(container: Container): Promise<void> {
         return super.runCustomAction(container);
     }

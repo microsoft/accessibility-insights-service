@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as util from 'util';
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import * as _ from 'lodash';
 import { Logger } from 'logger';
-import * as util from 'util';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
 import { CosmosDocument } from '../azure-cosmos/cosmos-document';
@@ -12,7 +12,7 @@ import { CosmosOperationResponse } from '../azure-cosmos/cosmos-operation-respon
 import { client } from './client';
 import { RetryOptions } from './retry-options';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 export class CosmosContainerClient {
     constructor(
@@ -163,7 +163,7 @@ export class CosmosContainerClient {
                 ...retryOptions.retryingOnStatusCodes,
             ];
             const timeoutTimestamp = Date.now() + retryOptions.timeoutMilliseconds;
-            // tslint:disable-next-line: no-constant-condition
+            // eslint-disable-next-line no-constant-condition
             while (true) {
                 try {
                     const operationResponse = await operation(...args);
@@ -180,7 +180,6 @@ export class CosmosContainerClient {
                         break;
                     } else {
                         this.logger.logInfo(
-                            // tslint:disable-next-line:max-line-length
                             `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
                         );
                     }

@@ -12,7 +12,7 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 
 import { ScanRequestController } from './scan-request-controller';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 interface DataItem {
     url: string;
@@ -167,7 +167,6 @@ describe(ScanRequestController, () => {
                 rejectedScanRequests: 2,
             };
 
-            // tslint:disable-next-line: no-null-keyword
             loggerMock.setup((lm) => lm.trackEvent('ScanRequestReceived', null, expectedMeasurements)).verifiable();
 
             scanRequestController = createScanRequestController(context);

@@ -8,7 +8,7 @@ import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { LocalDataStore } from './local-data-store';
 import { scanResultStorageName } from './store-types';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty,@typescript-eslint/no-empty-function */
 describe(LocalDataStore, () => {
     let datasetMock: IMock<Apify.Dataset>;
     let store: LocalDataStore;
@@ -39,10 +39,10 @@ describe(LocalDataStore, () => {
     it('push while store is not open', async () => {
         let isDatasetOpen = false;
 
-        // tslint:disable: no-shadowed-variable
+        /* eslint-disable no-shadow */
         const datasetStub: any = {
-            // tslint:disable-next-line: promise-function-async
-            pushData: async (data: object | object[]): Promise<void> => {},
+            // eslint-disable-next-line @typescript-eslint/ban-types
+            pushData: async (d: object | object[]): Promise<void> => {},
         };
 
         const apifyStub: any = {

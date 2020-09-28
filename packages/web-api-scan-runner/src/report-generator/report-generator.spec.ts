@@ -7,8 +7,8 @@ import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { ReportFormat } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
-import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 import { GeneratedReport, ReportGenerator } from './report-generator';
+import { AxeResultConverter, ReportGenerationParams } from './axe-result-converter';
 
 class AxeResultConverterStub implements AxeResultConverter {
     public convertCallCount = 0;
@@ -65,7 +65,7 @@ describe('ReportGenerator', () => {
     it('calls convert on all axeResultConverters', () => {
         reportGenerator.generateReports(axeResults);
 
-        // tslint:disable-next-line:prefer-const
+        // eslint-disable-next-line prefer-const
         axeResultConverters.forEach((axeResultConverter: AxeResultConverterStub) => {
             expect(axeResultConverter.convertCallCount).toBe(1);
         });

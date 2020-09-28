@@ -9,7 +9,13 @@ import { BaseAppInsightsLoggerClient } from './base-app-insights-logger-client';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
 import { LogLevel } from './logger';
 
-// tslint:disable: no-null-keyword no-object-literal-type-assertion no-any no-void-expression no-empty no-unsafe-any
+/* eslint-disable
+   @typescript-eslint/consistent-type-assertions,
+   @typescript-eslint/no-explicit-any,
+   no-void,
+   no-empty,
+   @typescript-eslint/no-empty-function
+*/
 
 interface TrackTraceTestCase {
     logLevel: LogLevel;
@@ -21,7 +27,7 @@ class TestableBaseAppInsightsLoggerClient extends BaseAppInsightsLoggerClient {
     public telemetryClientMock: IMock<appInsights.TelemetryClient>;
     public appInsightsConfigMock: IMock<typeof appInsights.Configuration>;
 
-    // tslint:disable-next-line: no-empty
+    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.telemetryClientMock = Mock.ofInstance<appInsights.TelemetryClient>(
             {
@@ -236,7 +242,7 @@ describe(BaseAppInsightsLoggerClient, () => {
         it('sends availability telemetry', async () => {
             await testSubject.setup();
 
-            // tslint:disable-next-line: no-empty
+            // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
 
             const telemetryName = 'test';
             const availabilityData: AvailabilityTelemetry = {
@@ -289,7 +295,7 @@ describe(BaseAppInsightsLoggerClient, () => {
         });
 
         it('flushes events', async () => {
-            let flushCb: Function;
+            let flushCb: () => void;
             testSubject.telemetryClientMock
                 .setup((t) => t.flush(It.isAny()))
                 .returns((options) => {

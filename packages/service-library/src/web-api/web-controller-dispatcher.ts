@@ -26,7 +26,7 @@ export class WebControllerDispatcher extends ProcessEntryPointBase {
         return controller.invoke(context, ...args);
     }
 
-    // tslint:disable-next-line: no-empty no-any
+    // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
     protected async runCustomAction(container: Container, ...args: unknown[]): Promise<void> {}
 
     protected getTelemetryBaseProperties(): BaseTelemetryProperties {

@@ -41,6 +41,7 @@ export class ReportGenerator {
     }
 
     public async generateSummaryReport(crawlDetails: CrawlSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
+        // eslint-disable-next-line one-var
         const parameters = {
             serviceName: serviceName,
             axeVersion: this.axeInfo.version,

@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 import { VError } from 'verror';
 
-// tslint:disable: no-any no-unsafe-any
-
 export interface ErrorResponse {
     statusCode: number;
     response: unknown;
@@ -25,6 +23,7 @@ export namespace client {
         }
     }
 
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types, @typescript-eslint/no-explicit-any
     export function getErrorResponse(error: any): ErrorResponse {
         if (error.code !== undefined) {
             return {

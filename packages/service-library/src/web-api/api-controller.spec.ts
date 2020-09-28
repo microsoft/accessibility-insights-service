@@ -11,7 +11,7 @@ import { ApiController } from './api-controller';
 import { HttpResponse } from './http-response';
 import { WebApiErrorCodes } from './web-api-error-codes';
 
-// tslint:disable: no-any no-unnecessary-override no-null-keyword no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 class TestableApiController extends ApiController {
     public readonly apiVersion = '1.0';

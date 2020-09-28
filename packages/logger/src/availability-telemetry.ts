@@ -7,8 +7,8 @@ export type AvailabilityTelemetry = {
     success: boolean;
     runLocation?: string;
     message?: string;
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     measurements?: { [key: string]: number };
-    // tslint:disable-next-line: no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     properties?: { [key: string]: string };
 };

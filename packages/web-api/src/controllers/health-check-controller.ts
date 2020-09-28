@@ -7,7 +7,7 @@ import { ContextAwareLogger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
 import { ApplicationInsightsClientProvider, webApiTypeNames } from '../web-api-types';
 
-// tslint:disable: max-line-length
+/* eslint-disable max-len */
 
 export declare type HealthTarget = 'release';
 

@@ -84,6 +84,7 @@ export class ScanResponseConverter {
         });
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     private getRunCompleteNotificationResponse(notification: NotificationDb): { [notification: string]: NotificationResponse } | {} {
         if (isNil(notification)) {
             return {};

@@ -13,7 +13,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any,  */
 
 let scanBatchRequestFeedController: ScanBatchRequestFeedController;
 let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
@@ -125,7 +125,6 @@ describe(ScanBatchRequestFeedController, () => {
         setupOnDemandPageScanRunResultProviderMock(documents);
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
-        // tslint:disable-next-line: no-null-keyword
         loggerMock
             .setup((lm) => lm.trackEvent('ScanRequestAccepted', { batchRequestId: documents[0].id }, { acceptedScanRequests: 2 }))
             .verifiable(Times.once());

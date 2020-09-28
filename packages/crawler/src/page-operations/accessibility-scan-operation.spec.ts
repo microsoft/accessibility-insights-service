@@ -9,7 +9,7 @@ import { PageScanner, ScanResult } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
 import { AccessibilityScanOperation } from './accessibility-scan-operation';
 
-// tslint:disable: no-null-keyword no-unsafe-any no-any no-empty
+/* eslint-disable @typescript-eslint/no-explicit-any, no-empty, @typescript-eslint/no-empty-function */
 describe(AccessibilityScanOperation, () => {
     let accessibilityScanOp: AccessibilityScanOperation;
     let scannerMock: IMock<PageScanner>;
@@ -19,7 +19,7 @@ describe(AccessibilityScanOperation, () => {
     let scanResult: ScanResult;
 
     beforeEach(() => {
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 
         pageMock = Mock.ofType();
         blobStoreMock = Mock.ofType();
@@ -29,7 +29,7 @@ describe(AccessibilityScanOperation, () => {
     });
 
     it('Run page scan operation, no violations', async () => {
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         scanResult = {
             axeResults: {
                 url: 'url',
@@ -49,7 +49,7 @@ describe(AccessibilityScanOperation, () => {
     });
 
     it('Run page scan operation, with violations', async () => {
-        // tslint:disable-next-line:no-object-literal-type-assertion
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         scanResult = {
             axeResults: {
                 url: 'url',

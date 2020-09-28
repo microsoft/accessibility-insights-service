@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { isNullOrUndefined } from 'util';
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
 import { Logger } from 'logger';
 import requestPromise from 'request-promise';
-import { isNullOrUndefined } from 'util';
 
 export class A11yServiceCredential {
     private readonly authContext: AuthenticationContext;
@@ -20,7 +20,7 @@ export class A11yServiceCredential {
         private readonly msecBetweenRetries: number = 1000,
         private readonly retryHelper: RetryHelper<TokenResponse> = new RetryHelper(),
     ) {
-        // tslint:disable-next-line: no-any no-unsafe-any strict-boolean-expressions
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, , @typescript-eslint/strict-boolean-expressions
         this.authContext = context || new (<any>AuthenticationContext)(authorityUrl, undefined, undefined, '');
     }
 

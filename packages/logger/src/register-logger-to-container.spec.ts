@@ -16,7 +16,7 @@ import { LoggerClient } from './logger-client';
 import { loggerTypes } from './logger-types';
 import { registerContextAwareLoggerToContainer, registerLoggerToContainer } from './register-logger-to-container';
 
-// tslint:disable: no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 let container: Container;
 

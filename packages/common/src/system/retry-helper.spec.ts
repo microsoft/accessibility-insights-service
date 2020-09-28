@@ -5,8 +5,6 @@ import 'reflect-metadata';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ErrorHandler, RetryHelper } from './retry-helper';
 
-// tslint:disable: no-unsafe-any
-
 describe(RetryHelper, () => {
     let testSubject: RetryHelper<number>;
     let errorHandlerMock: IMock<ErrorHandler>;

@@ -21,7 +21,7 @@ import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 
-// tslint:disable: no-null-keyword no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
 export class Runner {
@@ -108,7 +108,7 @@ export class Runner {
     }
 
     private isScanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
-        // tslint:disable-next-line: strict-boolean-expressions whitespace
+        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
         return isEmpty(notification?.scanNotifyUrl);
     }
 

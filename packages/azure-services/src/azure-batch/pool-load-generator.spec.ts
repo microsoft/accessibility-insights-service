@@ -7,7 +7,7 @@ import moment from 'moment';
 import { IMock, Mock } from 'typemoq';
 import { PoolLoadGenerator, PoolMetricsInfo } from './pool-load-generator';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 let poolMetricsInfo: PoolMetricsInfo;
 let poolLoadGenerator: PoolLoadGenerator;

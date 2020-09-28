@@ -18,8 +18,6 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { WebDriver } from './web-driver';
 
-// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
-
 const url = 'url';
 const userAgent = 'user agent';
 const pageNavigationTimeoutMsecs = 15000;

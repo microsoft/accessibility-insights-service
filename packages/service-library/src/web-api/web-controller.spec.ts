@@ -8,7 +8,7 @@ import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { WebController } from './web-controller';
 
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export class TestableWebController extends WebController {
     public static readonly handleRequestResponse = 'handle-request-response';
@@ -18,7 +18,6 @@ export class TestableWebController extends WebController {
     public handleRequestInvoked = false;
     public requestArgs: any[];
 
-    // tslint:disable-next-line: no-unnecessary-override
     public getBaseTelemetryProperties(): { [name: string]: string } {
         return super.getBaseTelemetryProperties();
     }

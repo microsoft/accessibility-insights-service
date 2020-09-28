@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import 'reflect-metadata';
 
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
@@ -175,7 +175,6 @@ describe(registerAzureServicesToContainer, () => {
 
     describe('QueueServiceURLProvider', () => {
         const storageAccountName = 'test-storage-account-name';
-        // tslint:disable-next-line: mocha-no-side-effect-code
         const storageAccountKey = Buffer.from('test-storage-account-key').toString('base64');
         let secretProviderMock: IMock<SecretProvider>;
 
@@ -234,10 +233,8 @@ describe(registerAzureServicesToContainer, () => {
         });
 
         it('gets KeyVaultClient', async () => {
-            let keyVaultClient: KeyVaultClient;
-
             const keyVaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
-            keyVaultClient = await keyVaultClientProvider();
+            const keyVaultClient = await keyVaultClientProvider();
 
             expect(keyVaultClient).toBeInstanceOf(KeyVaultClient);
             credentialsProviderMock.verifyAll();

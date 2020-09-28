@@ -7,7 +7,7 @@ import { Page } from 'puppeteer';
 import { ActiveElementsFinder } from '../browser-components/active-elements-finder';
 import { Operation } from './operation';
 
-// tslint:disable: no-var-requires no-submodule-imports no-require-imports no-unsafe-any
+/* eslint-disable @typescript-eslint/no-var-requires, import/no-internal-modules, @typescript-eslint/no-require-imports,  */
 const apifyUtilities = require('apify-shared/utilities');
 
 @injectable()

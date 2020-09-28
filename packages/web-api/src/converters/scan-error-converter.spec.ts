@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { ScanNotificationErrorCodes, ScanRunErrorCodes } from 'service-library';
 import { ScanErrorConverter } from './scan-error-converter';
 
-// tslint:disable: no-unsafe-any no-any no-null-keyword
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(ScanErrorConverter, () => {
     let testSubject: ScanErrorConverter;

@@ -3,9 +3,14 @@
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { WhyNodeRunningLogger } from './why-node-running-logger';
 
-// tslint:disable: no-unsafe-any no-object-literal-type-assertion no-empty no-any
+/* eslint-disable
+   @typescript-eslint/consistent-type-assertions,
+   no-empty,@typescript-eslint/no-empty-function,
+   @typescript-eslint/no-explicit-any */
 
-let wtfDumpMock: IMock<Function>;
+type VoidFunction = () => void;
+
+let wtfDumpMock: IMock<VoidFunction>;
 jest.mock('wtfnode', () => {
     return {
         dump: () => {
@@ -16,11 +21,11 @@ jest.mock('wtfnode', () => {
 
 describe(WhyNodeRunningLogger, () => {
     let testSubject: WhyNodeRunningLogger;
-    let setTimeoutMock: IMock<(callback: Function, ms: number) => void>;
+    let setTimeoutMock: IMock<(callback: VoidFunction, ms: number) => void>;
 
     beforeEach(() => {
         wtfDumpMock = Mock.ofInstance(() => {}, MockBehavior.Strict);
-        setTimeoutMock = Mock.ofInstance((callback: Function, ms: number) => {}, MockBehavior.Strict);
+        setTimeoutMock = Mock.ofInstance((callback: VoidFunction, ms: number) => {}, MockBehavior.Strict);
 
         const globalObjectStub = {
             setTimeout: setTimeoutMock.object,
@@ -51,7 +56,7 @@ describe(WhyNodeRunningLogger, () => {
 
         it('invoke log after timeout', async () => {
             const timeoutInSeconds = 5;
-            let timeoutCallback: Function;
+            let timeoutCallback: VoidFunction;
 
             setTimeoutMock
                 .setup((s) => s(It.isAny(), timeoutInSeconds * 1000))

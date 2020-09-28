@@ -5,7 +5,7 @@ import { DotenvConfigOutput } from 'dotenv';
 import { Container } from 'inversify';
 import { BaseTelemetryProperties, GlobalLogger, loggerTypes } from 'logger';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export abstract class ProcessEntryPointBase {
     constructor(private readonly container: Container) {}

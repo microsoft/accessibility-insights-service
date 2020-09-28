@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { TestRunResult } from 'service-library';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export declare type LogSource = 'TestContainer' | 'TestRun';
 

@@ -13,7 +13,7 @@ import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
 import { HealthMonitorClientController } from './health-monitor-client-controller';
 
-// tslint:disable:no-object-literal-type-assertion no-any no-unsafe-any
+/* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
 class FunctionalTestGroupStub extends FunctionalTestGroup {
     public testContextData: TestContextData;
@@ -26,7 +26,7 @@ class FunctionalTestGroupStub extends FunctionalTestGroup {
         this.testContextData = testContextData;
     }
 
-    // tslint:disable-next-line:no-empty
+    // eslint-disable-next-line no-empty, @typescript-eslint/no-empty-function
     protected registerTestCases(env: TestEnvironment): void {}
 }
 

@@ -8,7 +8,7 @@ import { IMock, Mock, Times } from 'typemoq';
 import { NotificationSender } from './sender/notification-sender';
 import { WebApiNotificationSenderEntryPoint } from './web-api-notification-sender-entry-point';
 
-// tslint:disable: no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(WebApiNotificationSenderEntryPoint, () => {
     class TestWebApiSendNotificationRunnerEntryPoint extends WebApiNotificationSenderEntryPoint {

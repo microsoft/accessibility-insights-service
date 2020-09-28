@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { WebApiErrorCode } from './web-api-error-codes';
 
-// tslint:disable: no-any function-name
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 /**
  * HTTP response object. Provided to function app context.

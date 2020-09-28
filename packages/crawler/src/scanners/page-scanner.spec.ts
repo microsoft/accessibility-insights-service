@@ -11,7 +11,7 @@ import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageScanner } from './page-scanner';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(PageScanner, () => {
     const pageUrl = 'test url';

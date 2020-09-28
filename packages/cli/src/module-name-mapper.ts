@@ -3,7 +3,7 @@
 
 export {};
 
-// tslint:disable: no-var-requires no-require-imports no-unsafe-any no-any
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any */
 const moduleRef = require('module');
 
 moduleRef._resolveFilename = new Proxy(moduleRef._resolveFilename, {

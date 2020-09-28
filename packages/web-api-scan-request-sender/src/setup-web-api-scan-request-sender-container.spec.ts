@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { ServiceConfiguration } from 'common';
 import { OnDemandScanRequestSender } from './sender/on-demand-scan-request-sender';
 import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-request-sender-container';
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(setupWebApiScanRequestSenderContainer, () => {
     it('verify scan request sender dependencies resolution', () => {

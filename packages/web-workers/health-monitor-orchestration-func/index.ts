@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-// tslint:disable: no-submodule-imports
+/* eslint-disable import/no-internal-modules */
 import { Context } from '@azure/functions';
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
 import { HealthMonitorOrchestrationController } from '../src/controllers/health-monitor-orchestration-controller';

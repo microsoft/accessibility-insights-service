@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import * as fs from 'fs';
 import { CrawlerEntryPoint, ScanResults } from 'accessibility-insights-crawler';
 import { CrawlSummaryDetails } from 'accessibility-insights-report';
-import * as fs from 'fs';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';

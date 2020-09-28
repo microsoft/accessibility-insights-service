@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-// tslint:disable: no-null-keyword mocha-no-side-effect-code no-any no-unsafe-any
 import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
@@ -9,6 +8,8 @@ import requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(A11yServiceCredential, () => {
     let authenticationContextMock: IMock<AuthenticationContext>;

@@ -7,7 +7,7 @@ import { AxePuppeteerFactory, AxeScanResults, Page } from 'scanner-global-librar
 import { IMock, Mock, Times } from 'typemoq';
 import { AIScanner } from './ai-scanner';
 
-// tslint:disable: no-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe('AIScanner', () => {
     let pageMock: IMock<Page>;

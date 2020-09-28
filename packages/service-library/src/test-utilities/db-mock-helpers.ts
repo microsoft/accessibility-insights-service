@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-// tslint:disable: no-unsafe-any no-any align no-constant-condition
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/indent, no-constant-condition */
+import * as crypto from 'crypto';
 import * as cosmos from '@azure/cosmos';
 import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
 import { HashGenerator } from 'common';
-import * as crypto from 'crypto';
 import * as _ from 'lodash';
 import { ItemType, StorageDocument, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { Mock } from 'typemoq';

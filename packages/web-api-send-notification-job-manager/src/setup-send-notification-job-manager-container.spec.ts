@@ -7,7 +7,7 @@ import { ServiceConfiguration } from 'common';
 import { Container } from 'inversify';
 import { setupSendNotificationJobManagerContainer } from './setup-send-notification-job-manager-container';
 
-// tslint:disable: no-any no-unsafe-any no-object-literal-type-assertion
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 describe(setupSendNotificationJobManagerContainer, () => {
     const batchAccountUrl = 'test-batch-account-url';
