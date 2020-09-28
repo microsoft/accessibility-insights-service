@@ -12,6 +12,12 @@ export interface ScanMessage {
     message: Message;
 }
 
+export interface BatchTaskCreator {
+    onTasksAdded?(tasks: JobTask[]): Promise<void>;
+    handleFailedTasks?(failedTasks: BatchTask[]): Promise<void>;
+    onExit?(): Promise<void>;
+}
+
 @injectable()
 export abstract class BatchTaskCreator {
     protected jobManagerConfig: JobManagerConfig;
