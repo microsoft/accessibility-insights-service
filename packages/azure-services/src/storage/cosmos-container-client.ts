@@ -174,7 +174,7 @@ export class CosmosContainerClient {
                 } else if (Date.now() > timeoutTimestamp) {
                     this.logger.logWarn(`Cosmos storage operation has timed out after ${retryOptions.timeoutMilliseconds} ms.`);
 
-                    throw operationResponse;
+                    return Promise.reject(operationResponse);
                 } else {
                     this.logger.logInfo(
                         `Retrying Cosmos storage operation in ${retryOptions.intervalMilliseconds} ms... Response status code ${operationResponse.statusCode}.`,
@@ -184,7 +184,7 @@ export class CosmosContainerClient {
                 const customErrorMessage = 'An error occurred while executing storage operation';
                 const customError = error instanceof Error ? new VError(error, customErrorMessage) : `${util.inspect(error)}`;
 
-                throw customError;
+                return Promise.reject(customError);
             }
 
             await this.systemUtils.wait(retryOptions.intervalMilliseconds);

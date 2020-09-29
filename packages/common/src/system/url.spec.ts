@@ -9,6 +9,9 @@ describe('tryParseUrlString()', () => {
         let url = Url.tryParseUrlString('abc/path/');
         expect(url).toEqual(undefined);
 
+        url = Url.tryParseUrlString('/abc/path/');
+        expect(url).toEqual(undefined);
+
         url = Url.tryParseUrlString('abc/path/', false);
         expect(url.href).toEqual('abc/path/');
 
