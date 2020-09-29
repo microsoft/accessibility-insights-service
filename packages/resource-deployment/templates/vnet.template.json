@@ -29,9 +29,27 @@
         "enableDdosProtection": {
             "type": "bool",
             "defaultValue": false
+        },
+        "securityGroupName": {
+            "type": "string",
+            "defaultValue": "[concat('network-security-group-a11y',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The name of the Virtual Network's security group"
+            }
         }
     },
     "resources": [
+        {
+            "name": "[parameters('securityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "securityRules": []
+            },
+            "resources": []
+        },
         {
             "apiVersion": "2019-04-01",
             "name": "[parameters('name')]",
@@ -46,12 +64,16 @@
                         "name": "[parameters('subnetName')]",
                         "properties": {
                             "addressPrefix": "[parameters('subnetAddressPrefix')]",
-                            "addressPrefixes": []
+                            "addressPrefixes": [],
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"
+                            }
                         }
                     }
                 ],
                 "enableDdosProtection": "[parameters('enableDdosProtection')]"
-            }
+            },
+            "dependsOn": ["[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"]
         }
     ]
 }
