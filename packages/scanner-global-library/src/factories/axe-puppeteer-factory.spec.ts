@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as fs from 'fs';
+import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
