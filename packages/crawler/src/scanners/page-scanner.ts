@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { AxePuppeteer } from '@axe-core/puppeteer';
 import { Report, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
-import { AxePuppeteer } from 'axe-puppeteer';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import { AxePuppeteerFactory } from 'scanner-global-library';

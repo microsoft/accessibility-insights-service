@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as fs from 'fs';
-import { AxePuppeteer } from 'axe-puppeteer';
+import { AxePuppeteer } from '@axe-core/puppeteer';
 import * as Puppeteer from 'puppeteer';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
 import { AxePuppeteerFactory } from './axe-puppeteer-factory';
