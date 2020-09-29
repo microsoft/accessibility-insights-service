@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { AxePuppeteer } from '@axe-core/puppeteer';
 import { Report, Reporter } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
-import { AxePuppeteer } from 'axe-puppeteer';
 import { Page } from 'puppeteer';
 import { AxePuppeteerFactory } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';

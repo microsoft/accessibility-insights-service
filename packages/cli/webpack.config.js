@@ -9,7 +9,7 @@ const copyFilesPlugin = require('copy-webpack-plugin');
 function getCommonConfig(version, generateTypings) {
     return {
         devtool: 'cheap-source-map',
-        externals: ['apify', 'apify-shared', 'axe-core', 'axe-puppeteer', 'puppeteer', 'yargs', 'levelup', 'leveldown'],
+        externals: ['apify', 'apify-shared', 'axe-core', '@axe-core/puppeteer', 'puppeteer', 'yargs', 'levelup', 'leveldown'],
         mode: 'development',
         module: {
             rules: [
