@@ -19,50 +19,66 @@ export class ScanResponseConverter {
             case 'queued':
             case 'running':
             default:
-                return {
-                    scanId: pageScanResultDocument.id,
-                    url: pageScanResultDocument.url,
-                    run: {
-                        state: pageScanResultDocument.run.state,
-                    },
-                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-                };
+                return this.createIncompleteScanResponse(pageScanResultDocument);
             case 'failed':
-                return {
-                    scanId: pageScanResultDocument.id,
-                    url: pageScanResultDocument.url,
-                    run: {
-                        state: pageScanResultDocument.run.state,
-                        timestamp: pageScanResultDocument.run.timestamp,
-                        error: this.scanErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
-                        pageResponseCode: pageScanResultDocument.run.pageResponseCode,
-                        pageTitle: pageScanResultDocument.run.pageTitle,
-                    },
-                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-                };
+                return this.createFailedScanResponse(pageScanResultDocument);
             case 'completed':
-                const scanResultResponse: ScanResultResponse = {
-                    scanId: pageScanResultDocument.id,
-                    url: pageScanResultDocument.url,
-                    scanResult: {
-                        state: pageScanResultDocument.scanResult.state,
-                        issueCount: pageScanResultDocument.scanResult.issueCount,
-                    },
-                    reports: this.getScanReports(baseUrl, apiVersion, pageScanResultDocument),
-                    run: {
-                        state: pageScanResultDocument.run.state,
-                        timestamp: pageScanResultDocument.run.timestamp,
-                        pageResponseCode: pageScanResultDocument.run.pageResponseCode,
-                        pageTitle: pageScanResultDocument.run.pageTitle,
-                    },
-                    ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-                };
-                if (pageScanResultDocument.scannedUrl !== undefined) {
-                    scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
-                }
-
-                return scanResultResponse;
+                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResultDocument);
         }
+    }
+
+    private createIncompleteScanResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
+        return {
+            scanId: pageScanResultDocument.id,
+            url: pageScanResultDocument.url,
+            run: {
+                state: pageScanResultDocument.run.state,
+            },
+            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+        };
+    }
+
+    private createFailedScanResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
+        return {
+            scanId: pageScanResultDocument.id,
+            url: pageScanResultDocument.url,
+            run: {
+                state: pageScanResultDocument.run.state,
+                timestamp: pageScanResultDocument.run.timestamp,
+                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
+                pageResponseCode: pageScanResultDocument.run.pageResponseCode,
+                pageTitle: pageScanResultDocument.run.pageTitle,
+            },
+            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+        };
+    }
+
+    private createCompletedScanResponse(
+        baseUrl: string,
+        apiVersion: string,
+        pageScanResultDocument: OnDemandPageScanResult,
+    ): ScanResultResponse {
+        const scanResultResponse: ScanResultResponse = {
+            scanId: pageScanResultDocument.id,
+            url: pageScanResultDocument.url,
+            scanResult: {
+                state: pageScanResultDocument.scanResult.state,
+                issueCount: pageScanResultDocument.scanResult.issueCount,
+            },
+            reports: this.getScanReports(baseUrl, apiVersion, pageScanResultDocument),
+            run: {
+                state: pageScanResultDocument.run.state,
+                timestamp: pageScanResultDocument.run.timestamp,
+                pageResponseCode: pageScanResultDocument.run.pageResponseCode,
+                pageTitle: pageScanResultDocument.run.pageTitle,
+            },
+            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+        };
+        if (pageScanResultDocument.scannedUrl !== undefined) {
+            scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
+        }
+
+        return scanResultResponse;
     }
 
     private getScanReports(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanReport[] {

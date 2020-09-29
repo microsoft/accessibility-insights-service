@@ -10,6 +10,8 @@ import { isEmpty } from 'lodash';
 import normalizePath from 'normalize-path';
 import { ReportFormats } from './report-formats';
 
+/* eslint-disable security/detect-non-literal-fs-filename */
+
 @injectable()
 export class ReportDiskWriter {
     constructor(private readonly fileSystemObj: typeof fs = fs, private readonly pathObj: typeof path = path) {}

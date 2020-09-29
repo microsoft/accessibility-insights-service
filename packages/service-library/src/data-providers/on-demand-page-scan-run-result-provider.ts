@@ -102,7 +102,7 @@ export class OnDemandPageScanRunResultProvider {
     }
 
     private getReadScanQueryForScanIds(scanIds: string[], partitionKey: string): string {
-        return `select * from c where c.partitionKey = "${partitionKey}" and c.id in (\"${scanIds.join('", "')}\")`;
+        return `select * from c where c.partitionKey = "${partitionKey}" and c.id in ("${scanIds.join('", "')}")`;
     }
 
     private setSystemProperties(pageScanResult: OnDemandPageScanResult): void {

@@ -42,6 +42,7 @@ export class FileCommandRunner implements CommandRunner {
 
         const startDate = new Date();
         try {
+            // eslint-disable-next-line security/detect-non-literal-fs-filename
             const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'utf-8').split(/\r?\n/);
             for (let line of lines) {
                 line = line.trim();
