@@ -50,7 +50,7 @@
         "accessibility-insights-report": "2.1.2",
         "apify": "^0.21.4",
         "apify-shared": "^0.2.12",
-        "axe-core": "4.0.1",
+        "axe-core": "4.0.2",
         "cheerio": "^1.0.0-rc.3",
         "common": "1.0.0",
         "dotenv": "^8.2.0",
