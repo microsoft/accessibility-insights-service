@@ -29,9 +29,64 @@
         "enableDdosProtection": {
             "type": "bool",
             "defaultValue": false
+        },
+        "securityGroupName": {
+            "type": "string",
+            "defaultValue": "[concat('network-security-group-a11y',toLower(uniqueString(resourceGroup().id)))]",
+            "metadata": {
+                "description": "The name of the Virtual Network's security group"
+            }
         }
     },
     "resources": [
+        {
+            "name": "[parameters('securityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-05-01",
+            "location": "[parameters('location')]",
+            "tags": {},
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "AllowBatchPortsInbound",
+                        "properties": {
+                            "description": "Allow inbound traffic on ports needed by azure batch",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "29876-29877",
+                            "sourceAddressPrefix": "BatchNodeManagement",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "AllowStoragePortOutBound",
+                        "properties": {
+                            "description": "Allow outbound traffic from port used by azure storage",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "Storage",
+                            "access": "Allow",
+                            "priority": 200,
+                            "direction": "Outbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            },
+            "resources": []
+        },
         {
             "apiVersion": "2019-04-01",
             "name": "[parameters('name')]",
@@ -46,12 +101,16 @@
                         "name": "[parameters('subnetName')]",
                         "properties": {
                             "addressPrefix": "[parameters('subnetAddressPrefix')]",
-                            "addressPrefixes": []
+                            "addressPrefixes": [],
+                            "networkSecurityGroup": {
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"
+                            }
                         }
                     }
                 ],
                 "enableDdosProtection": "[parameters('enableDdosProtection')]"
-            }
+            },
+            "dependsOn": ["[resourceId('Microsoft.Network/networkSecurityGroups', parameters('securityGroupName'))]"]
         }
     ]
 }
