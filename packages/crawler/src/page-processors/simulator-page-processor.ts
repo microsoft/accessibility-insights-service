@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { ActiveElement } from '../browser-components/active-elements-finder';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -29,13 +29,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
-        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
-        @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
         super(
@@ -43,13 +40,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             dataStore,
             blobStore,
             dataBase,
-            pageResponseProcessor,
-            pageConfigurator,
-            pageRenderingHandler,
+            pageNavigator,
             requestQueueProvider,
             crawlerConfiguration,
             enqueueLinksExt,
-            gotoExtended,
             saveSnapshotExt,
         );
         this.selectors = this.crawlerConfiguration.selectors();

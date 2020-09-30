@@ -15,7 +15,9 @@ import { CrawlerFactory } from './crawler-factory';
    @typescript-eslint/no-explicit-any,
    no-empty,@typescript-eslint/no-empty-function,
    @typescript-eslint/consistent-type-assertions */
+
 describe(CrawlerEngine, () => {
+    const puppeteerDefaultOptions = ['--disable-dev-shm-usage'];
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {
         pageHandler: () => null,
@@ -43,7 +45,7 @@ describe(CrawlerEngine, () => {
             localOutputDir: 'localOutputDir',
             memoryMBytes: 100,
             silentMode: true,
-            debugging: false,
+            debug: false,
         } as CrawlerRunOptions;
 
         crawlerConfigurationMock
@@ -56,12 +58,14 @@ describe(CrawlerEngine, () => {
         crawlerConfigurationMock.setup((o) => o.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
 
         baseCrawlerOptions = {
+            handlePageTimeoutSecs: 300,
             requestQueue: requestQueueStub,
             handlePageFunction: pageProcessorStub.pageHandler,
             gotoFunction: pageProcessorStub.gotoFunction,
             handleFailedRequestFunction: pageProcessorStub.pageErrorProcessor,
             maxRequestsPerCrawl: maxRequestsPerCrawl,
             launchPuppeteerOptions: {
+                args: puppeteerDefaultOptions,
                 defaultViewport: {
                     width: 1920,
                     height: 1080,

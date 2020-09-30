@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -31,14 +31,12 @@ describe(SimulatorPageProcessor, () => {
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
     let clickElementOpMock: IMock<ClickElementOperation>;
     let enqueueActiveElementsOpExtMock: IMock<EnqueueActiveElementsOperation>;
-    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
-    let pageConfiguratorMock: IMock<PageConfigurator>;
+    let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
     let simulatorPageProcessor: SimulatorPageProcessor;
-    let pageRenderingHandlerMock: IMock<PageHandler>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -49,10 +47,8 @@ describe(SimulatorPageProcessor, () => {
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
         clickElementOpMock = Mock.ofType<ClickElementOperation>();
         enqueueActiveElementsOpExtMock = Mock.ofType<EnqueueActiveElementsOperation>();
-        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
-        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
-        pageRenderingHandlerMock = Mock.ofType(PageHandler);
 
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
@@ -86,9 +82,7 @@ describe(SimulatorPageProcessor, () => {
             dataBaseMock.object,
             enqueueActiveElementsOpExtMock.object,
             clickElementOpMock.object,
-            pageResponseProcessorMock.object,
-            pageConfiguratorMock.object,
-            pageRenderingHandlerMock.object,
+            pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
