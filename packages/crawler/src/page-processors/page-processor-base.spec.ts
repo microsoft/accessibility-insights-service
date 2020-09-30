@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { SummaryScanError } from 'accessibility-insights-report';
 import Apify from 'apify';
-import { DirectNavigationOptions, Page, Response } from 'puppeteer';
-import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { Page, Response } from 'puppeteer';
+import { BrowserError, PageNavigator, PageConfigurator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -45,17 +45,15 @@ describe(PageProcessorBase, () => {
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let gotoExtendedMock: IMock<typeof Apify.utils.puppeteer.gotoExtended>;
     let saveSnapshotMock: IMock<typeof Apify.utils.puppeteer.saveSnapshot>;
     let processPageMock: IMock<Apify.PuppeteerHandlePage>;
-    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
+    let pageNavigatorMock: IMock<PageNavigator>;
     let pageConfiguratorMock: IMock<PageConfigurator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueProvider: ApifyRequestQueueProvider;
     let requestStub: Apify.Request;
     let pageStub: Page;
     let pageProcessorBase: TestablePageProcessor;
-    let pageRenderingHandlerMock: IMock<PageHandler>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -64,13 +62,11 @@ describe(PageProcessorBase, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        gotoExtendedMock = Mock.ofType<typeof Apify.utils.puppeteer.gotoExtended>();
         saveSnapshotMock = Mock.ofType<typeof Apify.utils.puppeteer.saveSnapshot>();
         processPageMock = Mock.ofType<Apify.PuppeteerHandlePage>();
-        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         pageConfiguratorMock = Mock.ofType<PageConfigurator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
-        pageRenderingHandlerMock = Mock.ofType(PageHandler);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -101,26 +97,21 @@ describe(PageProcessorBase, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageResponseProcessorMock.object,
-            pageConfiguratorMock.object,
-            pageRenderingHandlerMock.object,
+            pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
-            gotoExtendedMock.object,
             saveSnapshotMock.object,
         );
         pageProcessorBase.processPage = processPageMock.object;
     });
 
     afterEach(() => {
-        gotoExtendedMock.verifyAll();
         blobStoreMock.verifyAll();
         dataStoreMock.verifyAll();
         processPageMock.verifyAll();
         saveSnapshotMock.verifyAll();
-        pageResponseProcessorMock.verifyAll();
-        pageConfiguratorMock.verifyAll();
+        pageNavigatorMock.verifyAll();
         dataBaseMock.verifyAll();
         crawlerConfigurationMock.verifyAll();
     });
@@ -131,30 +122,18 @@ describe(PageProcessorBase, () => {
             page: pageStub,
             request: requestStub,
         } as any;
-        const expectedGotoOptions: DirectNavigationOptions = {
-            waitUntil: 'networkidle0',
-            timeout: pageProcessorBase.gotoTimeoutSecs * 1000,
-        };
         const response = {} as Response;
-        pageConfiguratorMock
-            .setup(async (o) => o.configurePage(inputs.page))
-            .returns(() => Promise.resolve())
-            .verifiable();
         pageConfiguratorMock
             .setup((o) => o.getUserAgent())
             .returns(() => 'userAgent')
             .verifiable();
-        pageResponseProcessorMock
-            .setup((o) => o.getResponseError(response))
-            .returns(() => undefined)
+        pageNavigatorMock
+            .setup((o) => o.pageConfigurator)
+            .returns(() => pageConfiguratorMock.object)
             .verifiable();
-        gotoExtendedMock
-            .setup(async (gte) => gte(pageStub, requestStub, expectedGotoOptions))
+        pageNavigatorMock
+            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
             .returns(() => Promise.resolve(response))
-            .verifiable();
-        pageRenderingHandlerMock
-            .setup(async (o) => o.waitForPageToCompleteRendering(pageStub, pageProcessorBase.pageRenderingTimeoutMsecs))
-            .returns(() => Promise.resolve())
             .verifiable();
         dataBaseMock.setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent: 'userAgent' })).verifiable();
 
@@ -166,7 +145,6 @@ describe(PageProcessorBase, () => {
             page: pageStub,
             request: requestStub,
         } as any;
-        gotoExtendedMock.setup((gte) => gte(It.isAny(), It.isAny(), It.isAny())).throws(error);
         setupScanErrorLogging();
 
         const browserError = {
@@ -174,9 +152,12 @@ describe(PageProcessorBase, () => {
             message: error.message,
             stack: 'stack',
         } as BrowserError;
-        pageResponseProcessorMock
-            .setup((o) => o.getNavigationError(error))
-            .returns(() => browserError)
+        pageNavigatorMock
+            .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
+            .callback(async (url, page, fn) => {
+                await fn(browserError, error);
+            })
+            .returns(() => Promise.reject(error))
             .verifiable();
 
         blobStoreMock
@@ -193,53 +174,9 @@ describe(PageProcessorBase, () => {
 
         try {
             await pageProcessorBase.gotoFunction(inputs);
-            fail('gotoFunction should have thrown an error');
+            expect('').toBe('gotoFunction() should throw an error');
         } catch (err) {
             expect(err).toBe(error);
-        }
-    });
-
-    it('gotoFunction logs page response errors', async () => {
-        const response = {} as Response;
-        const inputs: Apify.PuppeteerGotoInputs = {
-            page: pageStub,
-            request: requestStub,
-        } as any;
-
-        gotoExtendedMock
-            .setup(async (gte) => gte(pageStub, requestStub, It.isAny()))
-            .returns(() => Promise.resolve(response))
-            .verifiable();
-
-        const responseError = {
-            errorType: 'InvalidContentType',
-            message: 'Content type: text/plain',
-            stack: 'stack',
-        } as BrowserError;
-        pageResponseProcessorMock
-            .setup((o) => o.getResponseError(response))
-            .returns(() => responseError)
-            .verifiable();
-
-        blobStoreMock
-            .setup((o) => o.setValue(`${testId}.browser.err`, `${responseError.stack}`, { contentType: 'text/plain' }))
-            .verifiable();
-
-        const summaryScanError = {
-            url: 'url',
-            errorDescription: 'Content type: text/plain',
-            errorType: 'InvalidContentType',
-            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
-        } as SummaryScanError;
-        dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
-
-        const expectedError = new Error(`Page response error: ${JSON.stringify(responseError)}`);
-
-        try {
-            await pageProcessorBase.gotoFunction(inputs);
-            fail('gotoFunction should have thrown an error');
-        } catch (err) {
-            expect(err).toEqual(expectedError);
         }
     });
 

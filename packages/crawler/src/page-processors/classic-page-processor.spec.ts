@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { PageNavigator } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -27,14 +27,12 @@ describe(ClassicPageProcessor, () => {
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let pageResponseProcessorMock: IMock<PageResponseProcessor>;
-    let pageConfiguratorMock: IMock<PageConfigurator>;
+    let pageNavigatorMock: IMock<PageNavigator>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Apify.Request;
     let pageStub: Page;
     let classicPageProcessor: ClassicPageProcessor;
     let requestQueueProvider: ApifyRequestQueueProvider;
-    let pageRenderingHandlerMock: IMock<PageHandler>;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -43,10 +41,8 @@ describe(ClassicPageProcessor, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        pageResponseProcessorMock = Mock.ofType<PageResponseProcessor>();
-        pageConfiguratorMock = Mock.ofType<PageConfigurator>();
+        pageNavigatorMock = Mock.ofType<PageNavigator>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
-        pageRenderingHandlerMock = Mock.ofType(PageHandler);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
             .returns(() => discoveryPatterns)
@@ -73,9 +69,7 @@ describe(ClassicPageProcessor, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageResponseProcessorMock.object,
-            pageConfiguratorMock.object,
-            pageRenderingHandlerMock.object,
+            pageNavigatorMock.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,

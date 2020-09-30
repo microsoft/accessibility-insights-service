@@ -26,14 +26,17 @@ export class CrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
+        const puppeteerDefaultOptions = ['--disable-dev-shm-usage'];
         const pageProcessor = this.pageProcessorFactory();
         const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
+            handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
             requestQueue: await this.requestQueueProvider(),
             handlePageFunction: pageProcessor.pageHandler,
             gotoFunction: pageProcessor.gotoFunction,
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
             launchPuppeteerOptions: {
+                args: puppeteerDefaultOptions,
                 defaultViewport: {
                     width: 1920,
                     height: 1080,
@@ -42,15 +45,27 @@ export class CrawlerEngine {
             } as Apify.LaunchPuppeteerOptions,
         };
 
-        if (crawlerRunOptions.debugging === true) {
+        if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);
 
             puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
-            puppeteerCrawlerOptions.launchPuppeteerOptions = { args: ['--auto-open-devtools-for-tabs'] } as Apify.LaunchPuppeteerOptions;
+            puppeteerCrawlerOptions.gotoTimeoutSecs = 3600;
+            puppeteerCrawlerOptions.maxConcurrency = 1;
+            puppeteerCrawlerOptions.sessionPoolOptions = {
+                sessionOptions: {
+                    ...puppeteerCrawlerOptions.sessionPoolOptions?.sessionOptions,
+                    maxAgeSecs: 3600,
+                },
+            };
+            puppeteerCrawlerOptions.launchPuppeteerOptions = {
+                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
+                args: ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions],
+            } as Apify.LaunchPuppeteerOptions;
             puppeteerCrawlerOptions.puppeteerPoolOptions = {
                 puppeteerOperationTimeoutSecs: 3600,
                 instanceKillerIntervalSecs: 3600,
                 killInstanceAfterSecs: 3600,
+                maxOpenPagesPerInstance: 1,
             };
         }
 

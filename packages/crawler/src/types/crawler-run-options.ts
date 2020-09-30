@@ -14,5 +14,5 @@ export interface CrawlerRunOptions {
     memoryMBytes?: number;
     silentMode?: boolean;
     inputFile?: string;
-    debugging?: boolean;
+    debug?: boolean;
 }

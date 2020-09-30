@@ -3,8 +3,8 @@
 import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
-import { Page, Response } from 'puppeteer';
-import { BrowserError, PageConfigurator, PageHandler, PageResponseProcessor } from 'scanner-global-library';
+import { Page } from 'puppeteer';
+import { BrowserError, PageNavigator } from 'scanner-global-library';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -32,7 +32,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Timeout in which page navigation needs to finish, in seconds.
      */
-    public readonly gotoTimeoutSecs = 30;
+    public readonly gotoTimeoutMsecs = 30000;
     public readonly pageRenderingTimeoutMsecs = 5000;
 
     protected readonly baseUrl: string;
@@ -53,13 +53,10 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(PageResponseProcessor) protected readonly pageResponseProcessor: PageResponseProcessor,
-        @inject(PageConfigurator) protected readonly pageConfigurator: PageConfigurator,
-        @inject(PageHandler) protected readonly pageRenderingHandler: PageHandler,
+        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
-        protected readonly gotoExtended: typeof Apify.utils.puppeteer.gotoExtended = Apify.utils.puppeteer.gotoExtended,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
@@ -89,36 +86,16 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
         try {
-            // Configure browser's page settings before navigating to URL
-            await this.pageConfigurator.configurePage(inputs.page);
+            return await this.pageNavigator.navigate(inputs.request.url, inputs.page, async (browserError, error) => {
+                await this.logBrowserFailure(inputs.request, browserError);
+                await this.saveScanBrowserErrorToDataBase(inputs.request, browserError);
 
-            let response: Response;
-            try {
-                response = await this.gotoExtended(inputs.page, inputs.request, {
-                    waitUntil: 'networkidle0',
-                    timeout: this.gotoTimeoutSecs * 1000,
-                });
-                // Catch only URL navigation error here
-            } catch (err) {
-                const navigationError = this.pageResponseProcessor.getNavigationError(err as Error);
-                await this.logBrowserFailure(inputs.request, navigationError);
-                await this.saveScanBrowserErrorToDataBase(inputs.request, navigationError);
-
-                throw err;
-            }
-
-            // Validate web service response
-            const responseError = this.pageResponseProcessor.getResponseError(response);
-            if (responseError !== undefined) {
-                await this.logBrowserFailure(inputs.request, responseError);
-                await this.saveScanBrowserErrorToDataBase(inputs.request, responseError);
-
-                throw new Error(`Page response error: ${JSON.stringify(responseError)}`);
-            }
-
-            await this.pageRenderingHandler.waitForPageToCompleteRendering(inputs.page, this.pageRenderingTimeoutMsecs);
-
-            return response;
+                if (error !== undefined) {
+                    throw error;
+                } else {
+                    new Error(`Navigation error: ${JSON.stringify(browserError)}`);
+                }
+            });
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
@@ -218,7 +195,7 @@ export abstract class PageProcessorBase implements PageProcessor {
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
                 basePageTitle: pageTitle,
-                userAgent: this.pageConfigurator.getUserAgent(),
+                userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
             });
         }
     }

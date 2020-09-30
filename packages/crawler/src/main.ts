@@ -25,7 +25,7 @@ interface ScanArguments {
     inputFile: string;
     existingUrls: string[];
     discoveryPatterns: string[];
-    debugging: boolean;
+    debug: boolean;
 }
 
 (async () => {
@@ -82,9 +82,9 @@ interface ScanArguments {
                 describe: 'Open browser window while crawling when set to true.',
                 default: true,
             },
-            debugging: {
+            debug: {
                 type: 'boolean',
-                describe: 'Disable crawler timeouts and open browser window for debugging.',
+                describe: 'Disable crawler timeouts and open browser window for interactive debugging.',
                 default: false,
             },
             inputFile: {
@@ -128,7 +128,7 @@ interface ScanArguments {
         inputFile: scanArguments.inputFile,
         existingUrls: scanArguments.existingUrls,
         discoveryPatterns: scanArguments.discoveryPatterns,
-        debugging: scanArguments.debugging,
+        debug: scanArguments.debug,
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
