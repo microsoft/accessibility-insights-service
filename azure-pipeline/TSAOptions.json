@@ -1,0 +1,10 @@
+{
+    "codebaseName": "accessibility-insights-service_master",
+    "notificationAliases": ["a11y-services-dev@microsoft.com"],
+    "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
+    "instanceUrl": "https://mseng.visualstudio.com/",
+    "projectName": "AzureDevOps",
+    "areaPath": "AzureDevOps\\VSTS\\enSPIRe\\Keros",
+    "iterationPath": "AzureDevOps\\OneVS",
+    "tools": ["ARMory", "CredScan", "PoliCheck"]
+}
