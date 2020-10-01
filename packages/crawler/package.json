@@ -47,7 +47,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "^4.0.0",
         "@medv/finder": "^2.0.0",
-        "accessibility-insights-report": "2.1.2",
+        "accessibility-insights-report": "2.2.0",
         "apify": "^0.21.4",
         "apify-shared": "^0.2.12",
         "axe-core": "4.0.2",
