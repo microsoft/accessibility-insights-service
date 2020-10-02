@@ -32,12 +32,12 @@ export class MSICredentialsProvider {
         let getCredentialsFunction: () => Promise<Credentials>;
 
         if (this.authenticationMethod === AuthenticationMethod.servicePrincipal) {
-            const clientId = process.env.SP_CLIENT_ID;
-            const password = process.env.SP_PASSWORD;
-            const tenant = process.env.SP_TENANT;
+            const tenant = process.env.AZURE_TENANT_ID;
+            const clientId = process.env.AZURE_CLIENT_ID;
+            const secret = process.env.AZURE_CLIENT_SECRET;
 
             getCredentialsFunction = async () =>
-                this.msrestAzureObj.loginWithServicePrincipalSecret(clientId, password, tenant, { tokenAudience: resource });
+                this.msrestAzureObj.loginWithServicePrincipalSecret(clientId, secret, tenant, { tokenAudience: resource });
         } else if (this.credentialType === CredentialType.VM) {
             getCredentialsFunction = async () => this.msrestAzureObj.loginWithVmMSI({ resource });
         } else {

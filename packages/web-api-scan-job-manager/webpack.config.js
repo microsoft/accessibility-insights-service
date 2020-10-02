@@ -32,6 +32,14 @@ module.exports = (env) => {
                     ],
                     exclude: ['/node_modules/', /\.(spec|e2e)\.ts$/],
                 },
+                {
+                    test: /\.node$/,
+                    use: [
+                        {
+                            loader: 'node-loader',
+                        },
+                    ],
+                },
             ],
         },
         name: 'web-api-scan-job-manager',

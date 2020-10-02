@@ -4,11 +4,12 @@ import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
-import { BlobServiceClient, StorageSharedKeyCredential as SharedKeyCredentialBlob } from '@azure/storage-blob';
+import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
+import { DefaultAzureCredential } from '@azure/identity';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
@@ -101,12 +102,22 @@ async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
     }
 }
 
+// DefaultAzureCredential will first look for Azure Active Directory (AAD)
+// client secret credentials in the following environment variables:
+//
+// - AZURE_TENANT_ID: The ID of your AAD tenant
+// - AZURE_CLIENT_ID: The ID of your AAD app registration (client)
+// - AZURE_CLIENT_SECRET: The client secret for your AAD app registration
+//
+// If those environment variables aren't found and your application is deployed
+// to an Azure VM or App Service instance, the managed service identity endpoint
+// will be used as a fallback authentication source.
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
         const storageKey = await getStorageKey(context);
-        const sharedKeyCredential = new SharedKeyCredentialBlob(storageKey.accountName, storageKey.accountKey);
+        const defaultAzureCredential = new DefaultAzureCredential();
 
-        return new BlobServiceClient(`https://${storageKey.accountName}.blob.core.windows.net`, sharedKeyCredential);
+        return new BlobServiceClient(`https://${storageKey.accountName}.blob.core.windows.net`, defaultAzureCredential);
     });
 }
 

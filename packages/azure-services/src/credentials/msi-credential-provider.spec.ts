@@ -82,9 +82,9 @@ describe(MSICredentialsProvider, () => {
     });
 
     it('creates credentials with service principal', async () => {
-        process.env.SP_CLIENT_ID = 'appId';
-        process.env.SP_PASSWORD = 'password';
-        process.env.SP_TENANT = 'tenant';
+        process.env.AZURE_TENANT_ID = 'tenant';
+        process.env.AZURE_CLIENT_ID = 'appId';
+        process.env.AZURE_CLIENT_SECRET = 'password';
 
         testSubject = new MSICredentialsProvider(
             mockMsRestNodeAuth.object,
@@ -97,9 +97,14 @@ describe(MSICredentialsProvider, () => {
 
         mockMsRestNodeAuth
             .setup(async (m) =>
-                m.loginWithServicePrincipalSecret(process.env.SP_CLIENT_ID, process.env.SP_PASSWORD, process.env.SP_TENANT, {
-                    tokenAudience: 'r1',
-                }),
+                m.loginWithServicePrincipalSecret(
+                    process.env.AZURE_CLIENT_ID,
+                    process.env.AZURE_CLIENT_SECRET,
+                    process.env.AZURE_TENANT_ID,
+                    {
+                        tokenAudience: 'r1',
+                    },
+                ),
             )
             .returns(async () => Promise.resolve(expectedCredentials))
             .verifiable(Times.once());

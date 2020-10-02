@@ -7,11 +7,9 @@ set -eo pipefail
 
 # The script will create a new role assignment for a service principal
 
-role="Contributor"
-
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <service principal id> -o <role name or id (optional), defaults to the '$role' role>
+Usage: $0 -r <resource group> -p <service principal id>
 "
     exit 1
 }
@@ -21,23 +19,23 @@ while getopts ":r:p:o:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     p) principalId=${OPTARG} ;;
-    o) role=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $principalId ]] || [[ -z $role ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $principalId ]]; then
     exitWithUsageInfo
 fi
 
 grantRoleToResource() {
-    local scope=$1
+    local role=$1
+    local scope=$2
     local end=$((SECONDS + 300))
 
     echo "Create '$role' role assignment for service principal $principalId in $scope"
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
-        response=$(az role assignment create --role "$role" --assignee-object-id "$principalId" --assignee-principal-type ServicePrincipal --$scope --query "roleDefinitionId") || true
+        response=$(az role assignment create --role "$role" --assignee-object-id "$principalId" --assignee-principal-type ServicePrincipal $scope --query "roleDefinitionId") || true
         if [[ -n $response ]]; then
             break
         else
@@ -56,6 +54,12 @@ grantRoleToResource() {
     echo "Successfully granted '$role' role for service principal $principalId in $scope"
 }
 
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
+
 . "${0%/*}/get-resource-names.sh"
 
-grantRoleToResource "resource-group $resourceGroupName"
+grantRoleToResource "Contributor" "--resource-group $resourceGroupName"
+
+blob="/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+grantRoleToResource "Storage Blob Data Contributor" "--scope $blob"

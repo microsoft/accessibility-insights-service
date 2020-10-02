@@ -110,7 +110,7 @@ COSMOS_DB_KEY=$cosmosDbAccessKey
 AZURE_STORAGE_NAME=$storageAccountName
 AZURE_STORAGE_KEY=$storageAccountKey
 
-SP_CLIENT_ID=$clientId
-SP_TENANT=$tenant
-SP_PASSWORD=$password
+AZURE_TENANT_ID=$tenant
+AZURE_CLIENT_ID=$clientId
+AZURE_CLIENT_SECRET=$password
 "

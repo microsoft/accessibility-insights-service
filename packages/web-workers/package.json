@@ -38,6 +38,7 @@
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
         "mockdate": "^3.0.2",
+        "node-loader": "^1.0.1",
         "npm-run-all": "^4.1.5",
         "rimraf": "^3.0.2",
         "ts-jest": "^26.3.0",
@@ -51,6 +52,7 @@
         "azure-services": "^1.0.0",
         "common": "1.0.0",
         "durable-functions": "^1.4.3",
+        "functional-tests": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
         "logger": "1.0.0",
@@ -58,7 +60,6 @@
         "reflect-metadata": "^0.1.13",
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
-        "web-api-client": "1.0.0",
-        "functional-tests": "1.0.0"
+        "web-api-client": "1.0.0"
     }
 }
