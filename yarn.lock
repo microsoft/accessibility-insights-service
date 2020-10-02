@@ -3591,23 +3591,6 @@ apify-shared@^0.1.45:
     underscore "^1.9.1"
     url "^0.11.0"
 
-apify-shared@^0.2.12:
-  version "0.2.17"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.2.17.tgz#985cb613da94e026f6354dbc24b8204cef54bc14"
-  integrity sha512-zz892mS/MC2PR2M+8FO/jO/Np33gwVpfiD4KrBIbjZ/kmSz5IKmq3U7iV7tvwQMwBG0TlVvf1X2d8CdKXxizOg==
-  dependencies:
-    bluebird "^3.7.2"
-    chalk "^4.0.0"
-    cherow "^1.6.9"
-    clone "^2.1.1"
-    countries-list "^2.5.1"
-    is-buffer "^2.0.3"
-    marked "^1.0.0"
-    request "^2.88.0"
-    slugg "^1.2.1"
-    underscore "^1.9.1"
-    url "^0.11.0"
-
 apify-shared@^0.4.0:
   version "0.4.3"
   resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.4.3.tgz#ab959395b9ab47361130b20752a018cfa19aecb8"
@@ -3624,6 +3607,24 @@ apify-shared@^0.4.0:
     moment "^2.27.0"
     request "^2.88.0"
     slugg "^1.2.1"
+    underscore "^1.9.1"
+    url "^0.11.0"
+
+apify-shared@^0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.0.tgz#b3263428a30abf427dbf4f7da59340f9d90e2bf4"
+  integrity sha512-Hjax9+8kkYIH7dpdG7wam6H2VTquiGKiryQKSx0IsDZ1sXzpLExT/n+gZXxgIbkjCCtQxFyudrbl+lf31zBZFQ==
+  dependencies:
+    axios "^0.19.2"
+    chalk "^4.0.0"
+    cherow "^1.6.9"
+    clone "^2.1.1"
+    countries-list "^2.5.1"
+    is-buffer "^2.0.3"
+    marked "^1.1.0"
+    match-all "^1.2.6"
+    moment "^2.27.0"
+    request "^2.88.0"
     underscore "^1.9.1"
     url "^0.11.0"
 
@@ -9259,10 +9260,15 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marked@1.0.0, marked@1.1.1, marked@^1.0.0:
+marked@1.0.0, marked@1.1.1, marked@^1.0.0, marked@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/marked/-/marked-1.1.1.tgz#e5d61b69842210d5df57b05856e0c91572703e6a"
   integrity sha512-mJzT8D2yPxoPh7h0UXkB+dBj4FykPJ2OIfxAWeIHrvoHDkFxukV/29QxoFQoPM6RLEwhIFdJpmKBlqVM3s2ZIw==
+
+match-all@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/match-all/-/match-all-1.2.6.tgz#66d276ad6b49655551e63d3a6ee53e8be0566f8d"
+  integrity sha512-0EESkXiTkWzrQQntBu2uzKvLu6vVkUGz40nGPbSZuegcfE5UuSzNjLaIu76zJWuaT/2I3Z/8M06OlUOZLGwLlQ==
 
 md5.js@^1.3.4:
   version "1.3.5"
