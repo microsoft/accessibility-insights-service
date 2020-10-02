@@ -68,7 +68,7 @@ echo "
 Service principal was created successfully.
 Copy below output into .env file to enable service principal authentication method:
 
-SP_CLIENT_ID=$clientId
-SP_TENANT=$tenant
-SP_PASSWORD=$password
+AZURE_TENANT_ID=$tenant
+AZURE_CLIENT_ID=$clientId
+AZURE_CLIENT_SECRET=$password
 "
