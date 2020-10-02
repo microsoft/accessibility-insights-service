@@ -48,8 +48,6 @@
         "scanner-global-library": "1.0.0",
         "shebang-loader": "^0.0.1",
         "ts-jest": "^26.3.0",
-        "tslint": "^6.1.2",
-        "tslint-microsoft-contrib": "^6.0.0",
         "typemoq": "^2.1.0",
         "typescript": "^4.0.2",
         "webpack": "^4.44.2",
