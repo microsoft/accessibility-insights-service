@@ -3578,39 +3578,7 @@ apify-client@^0.6.0:
     type-check "^0.3.2"
     underscore "^1.9.1"
 
-apify-shared@^0.1.45:
-  version "0.1.72"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.1.72.tgz#d7ce18c8020462c5cee2c1962c367798c98ee31d"
-  integrity sha512-zpuh+S9XUvwQOG3A+IVZAZowplefmSKoZDXINqlShO84BDVVY6LdwmEMSwC7QyELYAMP+Dg9OvY8lgK9g1yMKA==
-  dependencies:
-    bluebird "^3.7.2"
-    clone "^2.1.1"
-    is-buffer "^2.0.3"
-    request "^2.88.0"
-    slugg "^1.2.1"
-    underscore "^1.9.1"
-    url "^0.11.0"
-
-apify-shared@^0.4.0:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.4.3.tgz#ab959395b9ab47361130b20752a018cfa19aecb8"
-  integrity sha512-o/9oXp7h09DIfQKNBYAJlVjAUbPEN5caEQfVegWQjtscdIytLP/7l2XaFvxxecfrS4hI2wbW9GFI0gF9llVE1A==
-  dependencies:
-    axios "^0.19.2"
-    bluebird "^3.7.2"
-    chalk "^4.0.0"
-    cherow "^1.6.9"
-    clone "^2.1.1"
-    countries-list "^2.5.1"
-    is-buffer "^2.0.3"
-    marked "^1.0.0"
-    moment "^2.27.0"
-    request "^2.88.0"
-    slugg "^1.2.1"
-    underscore "^1.9.1"
-    url "^0.11.0"
-
-apify-shared@^0.5.0:
+apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.0.tgz#b3263428a30abf427dbf4f7da59340f9d90e2bf4"
   integrity sha512-Hjax9+8kkYIH7dpdG7wam6H2VTquiGKiryQKSx0IsDZ1sXzpLExT/n+gZXxgIbkjCCtQxFyudrbl+lf31zBZFQ==
@@ -4105,7 +4073,7 @@ bluebird@^2.9.34:
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-2.11.0.tgz#534b9033c022c9579c56ba3b3e5a5caafbb650e1"
   integrity sha1-U0uQM8AiyVecVro7Plpcqvu2UOE=
 
-bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.3, bluebird@^3.5.5, bluebird@^3.7.2:
+bluebird@^3.5.0, bluebird@^3.5.1, bluebird@^3.5.3, bluebird@^3.5.5:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha512-XpNj6GDQzdfW+r2Wnn7xiSAd7TM3jzkxGXBGTtWKuSXv1xUV+azxAm8jdWZN06QTQk+2N2XB9jRDkvbmQmcRtg==
@@ -9260,7 +9228,7 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-marked@1.0.0, marked@1.1.1, marked@^1.0.0, marked@^1.1.0:
+marked@1.0.0, marked@1.1.1, marked@^1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/marked/-/marked-1.1.1.tgz#e5d61b69842210d5df57b05856e0c91572703e6a"
   integrity sha512-mJzT8D2yPxoPh7h0UXkB+dBj4FykPJ2OIfxAWeIHrvoHDkFxukV/29QxoFQoPM6RLEwhIFdJpmKBlqVM3s2ZIw==
@@ -11931,11 +11899,6 @@ slide@^1.1.6:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/slide/-/slide-1.1.6.tgz#56eb027d65b4d2dce6cb2e2d32c4d4afc9e1d707"
   integrity sha1-VusCfWW00tzmyy4tMsTUr8nh1wc=
-
-slugg@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/slugg/-/slugg-1.2.1.tgz#e752af2241af3f2714463c5de225cea47608740a"
-  integrity sha1-51KvIkGvPycURjxd4iXOpHYIdAo=
 
 smart-buffer@^4.1.0:
   version "4.1.0"

@@ -63,6 +63,7 @@
     "resolutions": {
         "axe-core": "4.0.2",
         "serialize-javascript": "^3.0.0",
-        "marked": "1.1.1"
+        "marked": "1.1.1",
+        "apify-shared": ">=0.5.0"
     }
 }
