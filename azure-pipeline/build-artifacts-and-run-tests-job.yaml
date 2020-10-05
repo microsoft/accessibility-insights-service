@@ -20,6 +20,20 @@ steps:
     - template: ./test-steps.yaml
       parameters: { totalTestSlices: '${{ parameters.totalTestSlices }}', testSlicesToRun: '${{ parameters.testSlicesToRun }}' }
 
+    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
+      displayName: 'Component Detection'
+      inputs:
+          failOnAlert: true
+      condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual')
+
+    - task: msospo.ospo-extension.8d7f9abb-6896-461d-9e25-4f74ed65ddb2.notice@0
+      displayName: 'generate NOTICE.html file'
+      condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual')
+      inputs:
+          outputfile: '$(Build.DefaultWorkingDirectory)/cli/dist/NOTICE.html'
+          outputformat: html
+      timeoutInMinutes: 5
+
     - script: |
           yarn run pack
       displayName: create npm package zips
@@ -44,20 +58,6 @@ steps:
               !**/*.md
           TargetFolder: '$(Build.ArtifactStagingDirectory)'
       displayName: 'Copy files to staging directory'
-
-    - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
-      displayName: 'Component Detection'
-      inputs:
-          failOnAlert: true
-      condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual')
-
-    - task: msospo.ospo-extension.8d7f9abb-6896-461d-9e25-4f74ed65ddb2.notice@0
-      displayName: 'generate NOTICE.html file'
-      condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual')
-      inputs:
-          outputfile: '$(Build.ArtifactStagingDirectory)/cli/drop/NOTICE.html'
-          outputformat: html
-      timeoutInMinutes: 5
 
     - task: PublishBuildArtifacts@1
       inputs:
