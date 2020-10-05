@@ -3,7 +3,8 @@
     "version": "0.4.6",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "build": "webpack --config ./webpack.config.js --colors",
+        "bundle-dts": "dts-bundle-generator --project tsconfig.json src/index.ts -o dist/index.d.ts",
+        "build": "webpack --config ./webpack.config.js --colors && yarn bundle-dts",
         "cbuild": "npm-run-all --serial clean build",
         "pack": "npm-run-all --serial create-drop-dir pack-to-drop-dir",
         "pack-to-drop-dir": "yarn pack --filename drop/cli.tgz",
@@ -38,6 +39,7 @@
         "@types/table": "^5.0.0",
         "accessibility-insights-crawler": "1.0.0",
         "copy-webpack-plugin": "^5.1.1",
+        "dts-bundle-generator": "^5.4.0",
         "fork-ts-checker-webpack-plugin": "^5.2.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
