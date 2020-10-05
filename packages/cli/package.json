@@ -17,7 +17,7 @@
         "dist/",
         "../../LICENSE",
         "README.md",
-        "NOTICE.html"
+        "NOTICES.html"
     ],
     "repository": "git+https://github.com/Microsoft/accessibility-insights-service.git",
     "main": "dist/index.js",

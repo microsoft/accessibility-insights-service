@@ -30,7 +30,7 @@ steps:
       displayName: 'generate NOTICE.html file'
       condition: in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual')
       inputs:
-          outputfile: $(Build.DefaultWorkingDirectory)/packages/cli/NOTICE.html
+          outputfile: $(System.DefaultWorkingDirectory)/packages/cli/NOTICES.html
           outputformat: html
       timeoutInMinutes: 5
 
