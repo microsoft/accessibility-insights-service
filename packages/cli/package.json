@@ -3,8 +3,7 @@
     "version": "0.4.7",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
-        "bundle-dts": "dts-bundle-generator --project tsconfig.json src/index.ts -o dist/index.d.ts",
-        "build": "webpack --config ./webpack.config.js --colors && yarn bundle-dts",
+        "build": "webpack --config ./webpack.config.js --colors",
         "cbuild": "npm-run-all --serial clean build",
         "pack": "npm-run-all --serial create-drop-dir pack-to-drop-dir",
         "pack-to-drop-dir": "yarn pack --filename drop/cli.tgz",
