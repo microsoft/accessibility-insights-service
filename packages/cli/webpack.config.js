@@ -1,10 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports */
 const path = require('path');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
+const dtsWebpackPlugin = require('npm-dts-webpack-plugin');
 
 function getCommonConfig(version, generateTypings) {
     return {
@@ -48,6 +50,10 @@ function getCommonConfig(version, generateTypings) {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
+            new dtsWebpackPlugin({
+                logLevel: 'debug',
+                output: './dist/index.d.ts',
+            }),
             new copyFilesPlugin([{ from: './../crawler/dist/browser-imports.js', to: '.' }]),
         ].concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
@@ -69,6 +75,7 @@ function getCommonConfig(version, generateTypings) {
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
+
     return [
         {
             ...getCommonConfig(version, false),

@@ -44,6 +44,7 @@
         "jest-junit": "^11.1.0",
         "mkdirp": "^1.0.4",
         "mockdate": "^3.0.2",
+        "npm-dts-webpack-plugin": "^1.3.5",
         "rimraf": "^3.0.2",
         "scanner-global-library": "1.0.0",
         "shebang-loader": "^0.0.1",

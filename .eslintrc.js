@@ -21,7 +21,7 @@ module.exports = {
         'security',
     ],
     ignorePatterns: ['**/dist/*', '**/node_modules/*'],
-    extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
+    extends: ['eslint:recommended', 'plugin:node/recommended', 'plugin:@typescript-eslint/recommended', 'plugin:security/recommended'],
     rules: {
         '@typescript-eslint/array-type': [
             'error',
