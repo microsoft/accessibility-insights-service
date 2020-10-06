@@ -6,7 +6,6 @@ const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
 const { exec } = require('child_process');
-const { isPropertyAccessChain } = require('typescript');
 
 function getCommonConfig(version, generateTypings) {
     return {
