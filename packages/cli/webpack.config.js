@@ -51,17 +51,25 @@ function getCommonConfig(version, generateTypings) {
             }),
             new copyFilesPlugin([{ from: './../crawler/dist/browser-imports.js', to: '.' }]),
         ]
-        .concat(generateTypings ? { // only bundle dts if generating typings
-            apply: compiler => {
-                compiler.hooks.afterEmit.tap('BundleDtsFiles', _ => {
-                    exec('dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts', (_, out, err) => { 
-                        if (out) process.stdout.write(out);
-                        if (err) process.stderr.write(err);
-                    });
-                })
-            }
-        } : [])
-        .concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
+            .concat(
+                generateTypings
+                    ? {
+                          // only bundle dts if generating typings
+                          apply: (compiler) => {
+                              compiler.hooks.afterEmit.tap('BundleDtsFiles', (_) => {
+                                  exec(
+                                      'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
+                                      (_, out, err) => {
+                                          if (out) process.stdout.write(out);
+                                          if (err) process.stderr.write(err);
+                                      },
+                                  );
+                              });
+                          },
+                      }
+                    : [],
+            )
+            .concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397
