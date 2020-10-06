@@ -54,7 +54,6 @@ function getCommonConfig(version, generateTypings) {
             .concat(
                 generateTypings
                     ? {
-                          // only bundle dts if generating typings
                           apply: (compiler) => {
                               compiler.hooks.afterEmit.tap('BundleDtsFiles', (_) => {
                                   exec(
