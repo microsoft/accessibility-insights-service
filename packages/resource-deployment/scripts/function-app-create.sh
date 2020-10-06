@@ -150,20 +150,22 @@ function deployWebWorkersFunction() {
     deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
 }
 
+function enableStorageAccess() {
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
 function enableManagedIdentityOnFunctions() {
     getFunctionAppPrincipalId $webApiFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    role="Storage Blob Data Contributor"
-    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/role-assign-for-sp.sh"
+    enableStorageAccess
 
     getFunctionAppPrincipalId $webWorkersFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    role="Storage Blob Data Contributor"
-    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/role-assign-for-sp.sh"
+    enableStorageAccess
 }
 
 function publishWebApiScripts() {
