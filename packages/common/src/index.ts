@@ -12,3 +12,4 @@ export { EnvironmentSettings } from './system/environment-settings';
 export { commonIocTypes } from './common-ioc-types';
 export { PromiseUtils } from './system/promise-utils';
 export { RetryHelper } from './system/retry-helper';
+export { getForeverAgents } from './system/forever-agents';

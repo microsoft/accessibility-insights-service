@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RetryHelper, System } from 'common';
+import { RetryHelper, System, getForeverAgents } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
 import { Response } from 'request';
-import requestPromise from 'request-promise';
+import got, { Got, ExtendOptions, Options, Agents } from 'got';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -17,18 +17,16 @@ export interface ResponseWithBodyType<T = {}> extends Response {
 
 @injectable()
 export class A11yServiceClient {
-    private readonly defaultRequestObject: typeof requestPromise;
-    private readonly defaultOptions: requestPromise.RequestPromiseOptions = {
-        forever: true,
-        qs: {
+    private readonly defaultRequestObject: Got;
+    private readonly defaultOptions: ExtendOptions = {
+        searchParams: {
             // eslint-disable-next-line no-invalid-this
             'api-version': this.apiVersion,
         },
         headers: {
             'Content-Type': 'application/json',
         },
-        resolveWithFullResponse: true,
-        json: true,
+        responseType: 'json',
     };
 
     constructor(
@@ -37,21 +35,23 @@ export class A11yServiceClient {
         private readonly logger: Logger,
         private readonly apiVersion = '1.0',
         private readonly throwOnRequestFailure: boolean = false,
-        private readonly httpRequest: any = requestPromise,
+        private readonly gotRequest: Got = got,
         private readonly retryHelper: RetryHelper<unknown> = new RetryHelper(),
         private readonly maxRetryCount: number = 5,
         private readonly msecBetweenRetries: number = 1000,
+        getAgents: () => Agents = getForeverAgents,
     ) {
-        this.defaultRequestObject = this.httpRequest.defaults({
+        this.defaultRequestObject = this.gotRequest.extend({
             ...this.defaultOptions,
-            simple: this.throwOnRequestFailure,
+            throwHttpErrors: this.throwOnRequestFailure,
+            agent: getAgents(),
         });
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: requestPromise.RequestPromiseOptions = { body: requestBody };
+        const options: Options = { json: requestBody };
 
         return (await this.retryHelper.executeWithRetries(
             async () => (await this.signRequest()).post(requestUrl, options),
@@ -110,7 +110,7 @@ export class A11yServiceClient {
         )) as ResponseWithBodyType<HealthReport>;
     }
 
-    private async signRequest(): Promise<typeof requestPromise> {
+    private async signRequest(): Promise<Got> {
         return this.credential.signRequest(this.defaultRequestObject);
     }
 }
