@@ -9,7 +9,7 @@ set -eo pipefail
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -p <service principal id>
+Usage: $0 -r <resource group> -p <service principal id> -g <Azure role name or id> -s <scope at which the role assignment applies to>
 "
     exit 1
 }
@@ -19,17 +19,17 @@ while getopts ":r:p:o:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     p) principalId=${OPTARG} ;;
+    g) role=${OPTARG} ;;
+    s) scope=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $resourceGroupName ]] || [[ -z $principalId ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $principalId ]] || [[ -z $role ]] || [[ -z $scope ]]; then
     exitWithUsageInfo
 fi
 
 grantRoleToResource() {
-    local role=$1
-    local scope=$2
     local end=$((SECONDS + 300))
 
     echo "Create '$role' role assignment for service principal $principalId in $scope"
@@ -54,12 +54,4 @@ grantRoleToResource() {
     echo "Successfully granted '$role' role for service principal $principalId in $scope"
 }
 
-# Get the default subscription
-subscription=$(az account show --query "id" -o tsv)
-
-. "${0%/*}/get-resource-names.sh"
-
-grantRoleToResource "Contributor" "--resource-group $resourceGroupName"
-
-blob="/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-grantRoleToResource "Storage Blob Data Contributor" "--scope $blob"
+grantRoleToResource

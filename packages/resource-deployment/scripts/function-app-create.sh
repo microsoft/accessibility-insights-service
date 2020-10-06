@@ -46,7 +46,7 @@ installAzureFunctionsCoreToolsOnLinux() {
 
     echo "Installing Azure Functions Core Tools..."
     # Install the Microsoft package repository GPG key, to validate package integrity
-    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+    curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor >microsoft.gpg
     sudo mv microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg
 
     # Verify your Ubuntu server is running one of the appropriate versions from the table below. To add the apt source, run
@@ -117,9 +117,8 @@ waitForFunctionAppServiceDeploymentCompletion() {
 getFunctionAppPrincipalId() {
     local functionAppName=$1
 
-    echo "Fetching principal ID of the Azure Function App..."
     principalId=$(az functionapp identity show --name $functionAppName --resource-group $resourceGroupName --query "principalId" -o tsv)
-    echo "  Successfully fetched principal ID $principalId."
+    echo "Azure Function App $functionAppName has assigned principal ID $principalId."
 }
 
 deployFunctionApp() {
@@ -143,31 +142,39 @@ deployFunctionApp() {
     echo "Successfully deployed Azure Function App '$myFunctionAppName'"
 }
 
-function deployWebApiFunction {
+function deployWebApiFunction() {
     deployFunctionApp "web-api-allyfuncapp" "${0%/*}/../templates/function-web-api-app-template.json" "$webApiFuncAppName" "clientId=$webApiAdClientId"
 }
 
-function deployWebWorkersFunction {
+function deployWebWorkersFunction() {
     deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
 }
 
-function enableManagedIdentityOnFunctions {
+function enableManagedIdentityOnFunctions() {
     getFunctionAppPrincipalId $webApiFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
 
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+    . "${0%/*}/role-assign-for-sp.sh"
+
     getFunctionAppPrincipalId $webWorkersFuncAppName
     . "${0%/*}/key-vault-enable-msi.sh"
+
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+    . "${0%/*}/role-assign-for-sp.sh"
 }
 
-function publishWebApiScripts {
+function publishWebApiScripts() {
     publishFunctionAppScripts "web-api" $webApiFuncAppName
 }
 
-function publishWebWorkerScripts {
+function publishWebWorkerScripts() {
     publishFunctionAppScripts "web-workers" $webWorkersFuncAppName
 }
 
-function setupAzureFunctions {
+function setupAzureFunctions() {
     installAzureFunctionsCoreTools
 
     local functionSetupProcesses=(
@@ -184,7 +191,7 @@ function setupAzureFunctions {
     )
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
-    echo "Successfully published setup all Azure Functions."
+    echo "Successfully published Azure Functions."
 }
 
 # Read script arguments
@@ -194,7 +201,7 @@ while getopts ":r:c:e:d:v:" option; do
     c) webApiAdClientId=${OPTARG} ;;
     e) environment=${OPTARG} ;;
     d) dropFolder=${OPTARG} ;;
-    v) releaseVersion=${OPTARG};;
+    v) releaseVersion=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -214,10 +221,12 @@ echo "Setting up function apps with arguments passed:
 . "${0%/*}/process-utilities.sh"
 . "${0%/*}/get-resource-names.sh"
 
-
 # Login to Azure if required
 if ! az account show 1>/dev/null; then
     az login
 fi
+
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
 
 setupAzureFunctions

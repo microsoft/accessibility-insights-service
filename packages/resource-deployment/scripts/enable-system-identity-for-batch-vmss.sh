@@ -5,6 +5,10 @@
 
 set -eo pipefail
 
+export principalId
+export role
+export scope
+
 # The script will enable system-assigned managed identity on Batch pool VMSS
 
 exitWithUsageInfo() {
@@ -25,6 +29,13 @@ assignSystemIdentity() {
   System-assigned identity: $principalId
   "
     . "${0%/*}/key-vault-enable-msi.sh"
+
+    role="Contributor"
+    scope="--resource-group $resourceGroupName"
+    . "${0%/*}/role-assign-for-sp.sh"
+
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
     . "${0%/*}/role-assign-for-sp.sh"
 }
 
@@ -38,10 +49,13 @@ while getopts ":v:r:p:" option; do
     esac
 done
 
-. "${0%/*}/get-resource-names.sh"
-
 if [[ -z $vmssName ]] || [[ -z $vmssResourceGroup ]] || [[ -z $pool ]]; then
     exitWithUsageInfo
 fi
+
+. "${0%/*}/get-resource-names.sh"
+
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
 
 assignSystemIdentity
