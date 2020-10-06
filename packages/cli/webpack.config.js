@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
+const { exec } = require('child_process');
 
 function getCommonConfig(version, generateTypings) {
     return {
@@ -49,7 +50,25 @@ function getCommonConfig(version, generateTypings) {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new copyFilesPlugin([{ from: './../crawler/dist/browser-imports.js', to: '.' }]),
-        ].concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
+        ]
+            .concat(
+                generateTypings
+                    ? {
+                          apply: (compiler) => {
+                              compiler.hooks.afterEmit.tap('BundleDtsFiles', (_) => {
+                                  exec(
+                                      'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
+                                      (_, out, err) => {
+                                          if (out) process.stdout.write(out);
+                                          if (err) process.stderr.write(err);
+                                      },
+                                  );
+                              });
+                          },
+                      }
+                    : [],
+            )
+            .concat(generateTypings ? [] : new ForkTsCheckerWebpackPlugin()), // only add if transpileOnly is true
         resolve: {
             extensions: ['.ts', '.js', '.json'],
             mainFields: ['main'], //This is fix for this issue https://www.gitmemory.com/issue/bitinn/node-fetch/450/494475397
