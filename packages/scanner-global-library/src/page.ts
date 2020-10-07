@@ -9,6 +9,8 @@ import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 @injectable()
 export class Page {
     public page: Puppeteer.Page;
@@ -16,6 +18,10 @@ export class Page {
     public get userAgent(): string {
         return this.pageNavigator.pageConfigurator.getUserAgent();
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
+    private readonly puppeteerHar = require('puppeteer-har');
+    private har: any;
 
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
@@ -27,6 +33,9 @@ export class Page {
     public async create(browserExecutablePath?: string): Promise<void> {
         this.browser = await this.webDriver.launch(browserExecutablePath);
         this.page = await this.browser.newPage();
+
+        this.har = new this.puppeteerHar(this.page);
+        await this.har.start({ path: `${__dirname}/trace-har.json` });
     }
 
     public async scanForA11yIssues(url: string, contentSourcePath?: string): Promise<AxeScanResults> {
@@ -45,6 +54,10 @@ export class Page {
     }
 
     public async close(): Promise<void> {
+        if (this.har !== undefined) {
+            await this.har.stop();
+        }
+
         if (this.webDriver !== undefined) {
             await this.webDriver.close();
         }

@@ -42,6 +42,7 @@
         "lodash": "^4.17.20",
         "logger": "1.0.0",
         "puppeteer": "^4.0.0",
+        "puppeteer-har": "^1.1.2",
         "reflect-metadata": "^0.1.13"
     }
 }
