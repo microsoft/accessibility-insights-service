@@ -1,6 +1,6 @@
 {
     "name": "accessibility-insights-scan",
-    "version": "0.4.6",
+    "version": "0.4.7",
     "description": "This project welcomes contributions and suggestions.  Most contributions require you to agree to a Contributor License Agreement (CLA) declaring that you have the right to, and actually do, grant us the rights to use your contribution. For details, visit https://cla.microsoft.com.",
     "scripts": {
         "build": "webpack --config ./webpack.config.js --colors",
@@ -38,6 +38,7 @@
         "@types/table": "^5.0.0",
         "accessibility-insights-crawler": "1.0.0",
         "copy-webpack-plugin": "^5.1.1",
+        "dts-bundle-generator": "^5.4.0",
         "fork-ts-checker-webpack-plugin": "^5.2.0",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",

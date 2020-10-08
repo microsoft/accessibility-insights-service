@@ -7,6 +7,10 @@
         },
         "functionName": {
             "type": "string"
+        },
+        "maxCallsPerMinute": {
+            "type": "int",
+            "defaultValue": 1000
         }
     },
     "resources": [
@@ -453,6 +457,18 @@
             "dependsOn": [
                 "[resourceId('Microsoft.ApiManagement/service/apis/operations', parameters('apimServiceName'), 'accessibility-insight-service-scan-api','health')]"
             ]
+        },
+        {
+            "type": "Microsoft.ApiManagement/service/apis/policies",
+            "apiVersion": "2019-12-01",
+            "name": "[concat(parameters('apimServiceName'), '/accessibility-insight-service-scan-api/policy')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.ApiManagement/service/apis', parameters('apimServiceName'), 'accessibility-insight-service-scan-api')]"
+            ],
+            "properties": {
+                "value": "[concat('<policies>\r\n  <inbound>\r\n    <base />\r\n    <rate-limit-by-key calls=\"', parameters('maxCallsPerMinute'), '\" renewal-period=\"60\" counter-key=\"@(context.Subscription?.Key ?? &quot;anonymous&quot;)\" />\r\n  </inbound>\r\n  <backend>\r\n    <base />\r\n  </backend>\r\n  <outbound>\r\n    <base />\r\n  </outbound>\r\n  <on-error>\r\n    <base />\r\n  </on-error>\r\n</policies>')]",
+                "format": "xml"
+            }
         }
     ]
 }
