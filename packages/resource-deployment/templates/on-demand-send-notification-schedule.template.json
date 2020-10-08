@@ -13,7 +13,7 @@
             "id": "on-demand-send-notification-job-manager-task",
             "commandLine": "",
             "containerSettings": {
-                "containerRunOptions": "--rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_NOTIFICATION_QUEUE -e KEY_VAULT_URL",
+                "containerRunOptions": "--init --rm --workdir / -e APPINSIGHTS_INSTRUMENTATIONKEY -e AZURE_STORAGE_NOTIFICATION_QUEUE -e KEY_VAULT_URL",
                 "imageName": "%CONTAINER_REGISTRY_TOKEN%.azurecr.io/batch-scan-notification-manager"
             },
             "constraints": {
