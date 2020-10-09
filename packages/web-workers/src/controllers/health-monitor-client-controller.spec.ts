@@ -47,6 +47,7 @@ describe(HealthMonitorClientController, () => {
     };
     const releaseId = 'release id';
     const runId = 'run id';
+    const serializeResponseStub = (response: ResponseWithBodyType) => jsonResponse;
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -60,9 +61,6 @@ describe(HealthMonitorClientController, () => {
         jsonResponse = { testResponse: true } as any;
         expectedResponse = {
             body: 'some body content',
-            toJSON: () => {
-                return jsonResponse;
-            },
         } as ResponseWithBodyType<any>;
 
         process.env.RELEASE_VERSION = releaseId;
@@ -75,6 +73,7 @@ describe(HealthMonitorClientController, () => {
             guidGeneratorMock.object,
             testRunnerMock.object,
             testGroupTypes,
+            serializeResponseStub,
         );
     });
 

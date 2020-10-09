@@ -8,6 +8,7 @@ import { isNil } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import moment from 'moment';
 import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
+import { SerializableResponse } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
@@ -15,7 +16,6 @@ import {
     GetScanReportData,
     GetScanResultData,
     RunFunctionalTestGroupData,
-    SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { getAllTestGroupClassNames } from './e2e-test-group-names';

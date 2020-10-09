@@ -5,10 +5,10 @@ import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData } from 'functional-tests';
-import { SerializableResponse } from 'functional-tests/dist/test-group-data';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
+import { SerializableResponse } from 'web-api-client';
 import { e2eTestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
 

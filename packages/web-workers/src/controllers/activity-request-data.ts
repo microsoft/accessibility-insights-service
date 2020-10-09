@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Url } from 'url';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { AvailabilityTelemetry } from 'logger';
 
@@ -33,18 +32,4 @@ export interface RunFunctionalTestGroupData {
     testGroupName: TestGroupName;
     testContextData: TestContextData;
     environment: TestEnvironment;
-}
-
-interface SerializableRequest {
-    uri: Url;
-    method: string;
-    headers: { [key: string]: unknown };
-}
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface SerializableResponse<T = {}> {
-    statusCode: number;
-    body: T;
-    headers: { [key: string]: unknown };
-    request: SerializableRequest;
 }

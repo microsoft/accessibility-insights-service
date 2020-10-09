@@ -4,8 +4,8 @@ import { expect } from 'chai';
 import { GuidGenerator } from 'common';
 import { inject } from 'inversify';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
-import { A11yServiceClient } from 'web-api-client';
-import { SerializableResponse, TestContextData } from '../test-group-data';
+import { A11yServiceClient, getSerializableResponse, ResponseWithBodyType } from 'web-api-client';
+import { TestContextData } from '../test-group-data';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
@@ -22,13 +22,13 @@ export abstract class FunctionalTestGroup {
         this.testContextData = testContextData;
     }
 
-    public ensureResponseSuccessStatusCode(response: SerializableResponse, message?: string): void {
-        expect(response.statusCode >= 200 && response.statusCode <= 300, `${message} ${JSON.stringify(response)}`).to.be.true;
+    public ensureResponseSuccessStatusCode(response: ResponseWithBodyType<unknown>, message?: string): void {
+        const serializedResponse = JSON.stringify(getSerializableResponse(response));
+        expect(response.statusCode >= 200 && response.statusCode <= 300, `${message} ${serializedResponse}`).to.be.true;
     }
 
-    public expectWebApiErrorResponse(webApiErrorCode: WebApiErrorCode, response: SerializableResponse): void {
-        expect(response.statusCode, `Unexpected Web API response code. ${JSON.stringify(response)}`).to.be.equal(
-            webApiErrorCode.statusCode,
-        );
+    public expectWebApiErrorResponse(webApiErrorCode: WebApiErrorCode, response: ResponseWithBodyType<unknown>): void {
+        const serializedResponse = JSON.stringify(getSerializableResponse(response));
+        expect(response.statusCode, `Unexpected Web API response code. ${serializedResponse}`).to.be.equal(webApiErrorCode.statusCode);
     }
 }

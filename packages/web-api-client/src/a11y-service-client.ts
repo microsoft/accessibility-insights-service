@@ -3,8 +3,7 @@
 import { RetryHelper, System, getForeverAgents } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
-import { Response } from 'request';
-import got, { Got, ExtendOptions, Options, Agents } from 'got';
+import got, { Got, ExtendOptions, Options, Agents, Response } from 'got';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 

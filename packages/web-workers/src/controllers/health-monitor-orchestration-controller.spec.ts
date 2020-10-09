@@ -11,10 +11,10 @@ import { TestContextData, TestEnvironment, TestGroupName } from 'functional-test
 import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { SerializableResponse } from 'web-api-client';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { SerializableResponse } from './activity-request-data';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
 /* eslint-disable

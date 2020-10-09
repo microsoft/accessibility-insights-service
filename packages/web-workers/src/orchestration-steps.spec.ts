@@ -10,12 +10,12 @@ import { isNil } from 'lodash';
 import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { SerializableResponse } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,
     CreateScanRequestData,
     RunFunctionalTestGroupData,
-    SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
