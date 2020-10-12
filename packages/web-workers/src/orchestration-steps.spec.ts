@@ -3,14 +3,13 @@
 import 'reflect-metadata';
 
 /* eslint-disable import/no-internal-modules */
-import { AvailabilityTestConfig } from 'common';
+import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
 import moment from 'moment';
 import { ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse, WebApiError } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { SerializableResponse } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,

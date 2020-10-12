@@ -2,18 +2,13 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import got, { Agents, Response, Got, ExtendOptions, Options } from 'got';
-import { getForeverAgents } from 'common';
+import got, { Agents, Got, ExtendOptions, Options } from 'got';
+import { getForeverAgents, ResponseWithBodyType } from 'common';
 import { EventsQueryOptions } from './events-query-options';
 import { ApplicationInsightsEventsResponse } from './events-query-response';
 import { ApplicationInsightsQueryResponse } from './query-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ResponseWithBodyType<T = {}> extends Response {
-    body: T;
-}
 
 @injectable()
 export class ApplicationInsightsClient {

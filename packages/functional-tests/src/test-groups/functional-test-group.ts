@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { expect } from 'chai';
-import { GuidGenerator } from 'common';
+import { getSerializableResponse, GuidGenerator, ResponseWithBodyType } from 'common';
 import { inject } from 'inversify';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
-import { A11yServiceClient, getSerializableResponse, ResponseWithBodyType } from 'web-api-client';
+import { A11yServiceClient } from 'web-api-client';
 import { TestContextData } from '../test-group-data';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 // eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
@@ -11,7 +11,6 @@ import { TestContextData, TestEnvironment, TestGroupName } from 'functional-test
 import { Logger } from 'logger';
 import { ScanRunResultResponse } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { SerializableResponse } from 'web-api-client';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';

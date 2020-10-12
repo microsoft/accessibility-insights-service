@@ -1,17 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration, getSerializableResponse, ResponseSerializer, SerializableResponse } from 'common';
 import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { HealthReport, OnDemandPageScanRunResultProvider, ScanResultResponse, ScanRunResponse, WebController } from 'service-library';
-import {
-    A11yServiceClientProvider,
-    a11yServiceClientTypeNames,
-    getSerializableResponse,
-    ResponseSerializer,
-    SerializableResponse,
-} from 'web-api-client';
+import { A11yServiceClientProvider, a11yServiceClientTypeNames } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import {
     ActivityRequestData,

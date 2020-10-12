@@ -1,18 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { RetryHelper, System, getForeverAgents } from 'common';
+import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'common';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
-import got, { Got, ExtendOptions, Options, Agents, Response } from 'got';
+import got, { Got, ExtendOptions, Options, Agents } from 'got';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ResponseWithBodyType<T = {}> extends Response {
-    body: T;
-}
 
 @injectable()
 export class A11yServiceClient {

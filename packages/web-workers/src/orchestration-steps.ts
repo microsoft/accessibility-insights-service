@@ -1,14 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 /* eslint-disable import/no-internal-modules,  */
-import { AvailabilityTestConfig } from 'common';
+import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
 import { Logger, LogLevel } from 'logger';
 import moment from 'moment';
 import { RunState, ScanRunErrorResponse, ScanRunResponse, ScanRunResultResponse } from 'service-library';
-import { SerializableResponse } from 'web-api-client';
 import { ActivityAction } from './contracts/activity-actions';
 import {
     ActivityRequestData,

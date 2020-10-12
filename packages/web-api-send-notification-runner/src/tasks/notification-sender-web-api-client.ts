@@ -1,17 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { getForeverAgents } from 'common';
-import got, { Agents, Got, Options, Response } from 'got';
+import { getForeverAgents, ResponseWithBodyType } from 'common';
+import got, { Agents, Got, Options } from 'got';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ResponseWithBodyType<T = {}> extends Response {
-    body: T;
-}
 
 @injectable()
 export class NotificationSenderWebAPIClient {

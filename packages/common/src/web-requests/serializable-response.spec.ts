@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 // eslint-disable-next-line import/no-internal-modules
 import Request, { NormalizedOptions } from 'got/dist/source/core';
-import { ResponseWithBodyType } from './a11y-service-client';
+import { ResponseWithBodyType } from './response-with-body-type';
 import { getSerializableResponse } from './serializable-response';
 
 describe('SerializableResponse', () => {

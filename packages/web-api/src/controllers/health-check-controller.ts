@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ApplicationInsightsQueryResponse, Column, ResponseWithBodyType } from 'azure-services';
-import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
+import { ApplicationInsightsQueryResponse, Column } from 'azure-services';
+import { AvailabilityTestConfig, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
