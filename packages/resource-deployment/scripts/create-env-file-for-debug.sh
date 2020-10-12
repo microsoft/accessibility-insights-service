@@ -73,7 +73,7 @@ if ! az account show 1>/dev/null; then
 fi
 
 . "${0%/*}/get-resource-names.sh"
-. "${0%/*}/create-sp-for-key-vault.sh" 1>/dev/null
+. "${0%/*}/create-sp-for-debug.sh"
 
 getCosmosDbUrl
 getCosmosDbAccessKey

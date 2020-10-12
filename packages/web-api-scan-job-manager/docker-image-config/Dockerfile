@@ -2,14 +2,10 @@
 # Licensed under the MIT License.
 FROM node:12-slim
 
-# Copy configuration
-COPY runtime-config*.json ./
-
-# Install app dependencies
-COPY package*.json ./
-RUN npm install
-
 # Bundle app source
 COPY . .
+
+# Install app dependencies
+RUN npm install
 
 ENTRYPOINT [ "node", "./web-api-scan-job-manager.js" ]

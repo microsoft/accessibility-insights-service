@@ -63,12 +63,6 @@ az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret
 tenant=$(az ad sp show --id "$servicePrincipalName" --query "appOwnerTenantId" -o tsv)
 clientId=$(az ad sp show --id "$servicePrincipalName" --query "appId" -o tsv)
 
-# Generate environment variable file template
-echo "
-Service principal was created successfully.
-Copy below output into .env file to enable service principal authentication method:
-
-AZURE_TENANT_ID=$tenant
-AZURE_CLIENT_ID=$clientId
-AZURE_CLIENT_SECRET=$password
-"
+# Granting access to storage account
+echo "Granting service principal permissions to the '$storageAccountName' Blob storage"
+az role assignment create --role "Storage Blob Data Contributor" --assignee "$clientId" --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
