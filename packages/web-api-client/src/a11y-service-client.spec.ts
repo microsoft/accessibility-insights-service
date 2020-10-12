@@ -17,7 +17,7 @@ describe(A11yServiceClient, () => {
     let credMock: IMock<A11yServiceCredential>;
     let gotStub: any;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    let getMock: IMock<(url: string) => {}>;
+    let getMock: IMock<(url: string, options?: Options) => {}>;
     // eslint-disable-next-line @typescript-eslint/ban-types
     let postMock: IMock<(url: string, options?: Options) => {}>;
     let retryHelperMock: IMock<RetryHelper<unknown>>;
@@ -211,10 +211,11 @@ describe(A11yServiceClient, () => {
     it('getScanReport', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
+        const options: Options = { responseType: 'text'};
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         getMock
-            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -226,10 +227,11 @@ describe(A11yServiceClient, () => {
     it('getScanReport with retry', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
+        const options: Options = { responseType: 'text'};
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(true);
         getMock
-            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
