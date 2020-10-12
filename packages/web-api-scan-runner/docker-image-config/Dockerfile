@@ -14,11 +14,8 @@ RUN apt-get update \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy configuration
-COPY runtime-config*.json ./
-
 # Install app dependencies
-COPY package*.json ./
+COPY package.json ./
 
 RUN npm install \
     # Force npm package resolution
@@ -33,8 +30,6 @@ RUN npm install \
 
 # Run everything after as non-privileged user.
 USER pptruser
-
-CMD ["google-chrome-stable"]
 
 # Bundle app source
 COPY . .
