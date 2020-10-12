@@ -84,7 +84,7 @@ export class NotificationSender {
                     this.logger.logInfo(
                         `Scan result notification request failed. Retry count ${numberOfRetries}, statusCode: ${response.statusCode}, body: ${response.body}`,
                     );
-                    error = { errorType: 'HttpErrorCode', message: JSON.stringify(response.body) };
+                    error = { errorType: 'HttpErrorCode', message: `${response.body}` };
                 }
 
                 runFailed = false; // reset run state if retry succeeded

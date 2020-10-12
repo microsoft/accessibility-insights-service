@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ApplicationInsightsQueryResponse, Column } from 'azure-services';
-import { AvailabilityTestConfig, ResponseWithBodyType, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig, getSerializableResponse, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HealthReport, HttpResponse, TestEnvironment, TestRun, TestRunResult, WebApiErrorCodes } from 'service-library';
@@ -87,13 +87,13 @@ export class HealthCheckController extends ApiController {
             this.logger.logInfo('App Insights query succeeded.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
-                response: JSON.stringify(queryResponse),
+                response: JSON.stringify(getSerializableResponse(queryResponse)),
             });
         } else {
             this.logger.logError('App Insights query failed.', {
                 query: queryString,
                 statusCode: queryResponse.statusCode.toString(),
-                response: JSON.stringify(queryResponse),
+                response: JSON.stringify(getSerializableResponse(queryResponse)),
             });
         }
 
