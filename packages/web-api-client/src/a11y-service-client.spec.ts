@@ -211,7 +211,7 @@ describe(A11yServiceClient, () => {
     it('getScanReport', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
-        const options: Options = { responseType: 'text'};
+        const options: Options = { responseType: 'text' };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         getMock
@@ -227,7 +227,7 @@ describe(A11yServiceClient, () => {
     it('getScanReport with retry', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
-        const options: Options = { responseType: 'text'};
+        const options: Options = { responseType: 'text' };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(true);
         getMock

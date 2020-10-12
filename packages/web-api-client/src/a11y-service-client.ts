@@ -83,7 +83,7 @@ export class A11yServiceClient {
         const requestUrl: string = `${this.requestBaseUrl}/scans/${scanId}/reports/${reportId}`;
 
         return (await this.retryHelper.executeWithRetries(
-            async () => (await this.signRequest()).get(requestUrl, {responseType: 'text'}),
+            async () => (await this.signRequest()).get(requestUrl, { responseType: 'text' }),
             async (e) =>
                 this.logger.logError('GET scan report REST API request fail. Retrying on error.', {
                     url: requestUrl,

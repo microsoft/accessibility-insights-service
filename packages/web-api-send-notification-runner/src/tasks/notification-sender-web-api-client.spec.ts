@@ -2,10 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import http from 'http';
 import { isEmpty } from 'lodash';
-import { ResponseAsJSON } from 'request';
-import * as requestPromise from 'request-promise';
 import { IMock, Mock, Times } from 'typemoq';
+import { Agents, ExtendOptions, Options, Response } from 'got';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 import { NotificationSenderWebAPIClient } from './notification-sender-web-api-client';
 
@@ -13,45 +13,46 @@ import { NotificationSenderWebAPIClient } from './notification-sender-web-api-cl
 
 describe(NotificationSenderWebAPIClient, () => {
     let testSubject: NotificationSenderWebAPIClient;
-    let requestStub: any;
+    let gotStub: any;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
+    let postMock: IMock<(url: string, options?: Options) => {}>;
 
-    const sharedOption = {
-        forever: true,
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        resolveWithFullResponse: true,
-        json: true,
-        simple: false,
-    };
+    const agents: Agents = { http: {} as http.Agent };
+    const getAgentsStub = () => agents;
 
     beforeEach(() => {
         postMock = Mock.ofInstance(() => {
             return null;
         });
-        requestStub = {
-            defaults: (options: requestPromise.RequestPromiseOptions) => requestStub,
+        gotStub = {
+            extend: (options: ExtendOptions) => gotStub,
             post: postMock.object,
         };
-        testSubject = new NotificationSenderWebAPIClient(false, requestStub);
+        testSubject = new NotificationSenderWebAPIClient(false, gotStub, getAgentsStub);
     });
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
             // eslint-disable-next-line no-empty,@typescript-eslint/no-empty-function
-            const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
-            requestStub.defaults = defaultsMock.object;
+            const extendsMock = Mock.ofInstance((options: ExtendOptions): any => {});
+            gotStub.extend = extendsMock.object;
 
-            defaultsMock
-                .setup((d) => d({ ...sharedOption, simple: throwOnFailure }))
+            const sharedOption = {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                throwHttpErrors: throwOnFailure,
+                agent: agents,
+            };
+
+            extendsMock
+                .setup((e) => e(sharedOption))
                 .returns(() => 'some object' as any)
                 .verifiable(Times.once());
 
-            testSubject = new NotificationSenderWebAPIClient(throwOnFailure, requestStub);
+            testSubject = new NotificationSenderWebAPIClient(throwOnFailure, gotStub, getAgentsStub);
 
-            defaultsMock.verifyAll();
+            extendsMock.verifyAll();
         });
     });
 
@@ -67,10 +68,10 @@ describe(NotificationSenderWebAPIClient, () => {
                 scanStatus: scanStatus,
                 runStatus: runStatus,
             };
-            const response = { statusCode: 200 } as ResponseAsJSON;
+            const response = { statusCode: 200 } as Response;
             const requestBody = { scanId: scanId, runStatus: runStatus, scanStatus: isEmpty(scanStatus) ? undefined : scanStatus };
             const options = {
-                body: requestBody,
+                json: requestBody,
                 timeout: 30000,
             };
 

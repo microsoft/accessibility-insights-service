@@ -5,7 +5,6 @@ import 'reflect-metadata';
 import { client } from 'azure-services';
 import { ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { Logger } from 'logger';
-import { ResponseAsJSON } from 'request';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import {
     ItemType,
@@ -16,6 +15,7 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import { Response } from 'got';
 import { NotificationSenderConfig } from '../notification-sender-config';
 import { NotificationSenderWebAPIClient } from '../tasks/notification-sender-web-api-client';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
@@ -112,7 +112,7 @@ describe(NotificationSender, () => {
         const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'sent', null, 200);
         setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
 
-        const response = { statusCode: 200 } as ResponseAsJSON;
+        const response = { statusCode: 200 } as Response;
 
         clientMock
             .setup((c) => c.isSuccessStatusCode(response))
@@ -169,7 +169,7 @@ describe(NotificationSender, () => {
             .returns(async () => Promise.resolve())
             .verifiable(Times.exactly(scanConfig.maxSendNotificationRetryCount - 1));
 
-        const response = { statusCode: 400, body: 'Bad Request' } as ResponseAsJSON;
+        const response = { statusCode: 400, body: 'Bad Request' } as Response;
 
         webAPIMock
             .setup((wam) => wam.sendNotification(notificationSenderMetadata))
