@@ -23,7 +23,6 @@
         "@types/jest": "^26.0.9",
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
-        "@types/request": "^2.48.5",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -41,7 +40,6 @@
         "lodash": "^4.17.20",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
-        "request": "^2.88.2",
         "service-library": "1.0.0"
     }
 }

@@ -32,7 +32,6 @@
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
         "@types/yargs": "^15.0.5",
-        "@types/request": "^2.48.5",
         "copy-webpack-plugin": "^5.1.1",
         "fork-ts-checker-webpack-plugin": "^5.2.0",
         "jest": "^26.4.2",
@@ -59,7 +58,6 @@
         "service-library": "1.0.0",
         "storage-documents": "1.0.0",
         "moment": "^2.29.0",
-        "request": "^2.88.2",
         "functional-tests": "1.0.0"
     }
 }

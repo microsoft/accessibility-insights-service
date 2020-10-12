@@ -3,8 +3,9 @@
 
 import 'reflect-metadata';
 
-import * as requestPromise from 'request-promise';
+import http from 'http';
 import { IMock, Mock, Times } from 'typemoq';
+import { Agents, ExtendOptions, Options } from 'got';
 import { ApplicationInsightsClient } from './application-insights-client';
 import { EventsQueryOptions } from './events-query-options';
 
@@ -19,8 +20,10 @@ describe(ApplicationInsightsClient, () => {
     const apiKey = 'apiKey';
     let baseUrl: string;
     let requestStub: any;
-    let getMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
-    let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
+    let getMock: IMock<(url: string, options?: Options) => {}>;
+    let postMock: IMock<(url: string, options?: Options) => {}>;
+    const agents: Agents = { http: {} as http.Agent };
+    const getAgentsStub = () => agents;
 
     beforeEach(() => {
         baseUrl = `https://api.applicationinsights.io/v1/apps/${appId}`;
@@ -31,11 +34,11 @@ describe(ApplicationInsightsClient, () => {
             return undefined;
         });
         requestStub = {
-            defaults: (options: requestPromise.RequestPromiseOptions) => requestStub,
+            extend: (options: ExtendOptions) => requestStub,
             get: getMock.object,
             post: postMock.object,
         };
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub);
+        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
     });
 
     afterEach(() => {
@@ -44,26 +47,25 @@ describe(ApplicationInsightsClient, () => {
     });
 
     it('verify default options', () => {
-        const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
-        requestStub.defaults = defaultsMock.object;
+        const extendsMock = Mock.ofInstance((options: ExtendOptions): any => {});
+        requestStub.extend = extendsMock.object;
 
-        defaultsMock
+        extendsMock
             .setup((d) =>
                 d({
-                    forever: true,
-                    resolveWithFullResponse: true,
-                    json: true,
                     headers: {
                         'X-Api-Key': apiKey,
                     },
+                    responseType: 'json',
+                    agent: agents,
                 }),
             )
             .returns(() => 'some object' as any)
             .verifiable(Times.once());
 
-        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub);
+        testSubject = new ApplicationInsightsClient(appId, apiKey, requestStub, getAgentsStub);
 
-        defaultsMock.verifyAll();
+        extendsMock.verifyAll();
     });
 
     describe('executeQuery', () => {
@@ -76,9 +78,8 @@ describe(ApplicationInsightsClient, () => {
             timespan,
         };
         const options = {
-            body: requestBody,
-            simple: false,
-            json: true,
+            json: requestBody,
+            throwHttpErrors: false,
         };
         let requestUrl: string;
 
@@ -87,7 +88,7 @@ describe(ApplicationInsightsClient, () => {
         });
 
         it('executeQuery', async () => {
-            options.simple = testSubject.throwOnRequestFailure;
+            options.throwHttpErrors = testSubject.throwOnRequestFailure;
 
             postMock
                 .setup((req) => req(requestUrl, options))
@@ -101,7 +102,7 @@ describe(ApplicationInsightsClient, () => {
 
         test.each([true, false])('executeQuery when throwOnFailure is %o', async (throwOnFailure: boolean) => {
             testSubject.throwOnRequestFailure = throwOnFailure;
-            options.simple = throwOnFailure;
+            options.throwHttpErrors = throwOnFailure;
 
             postMock
                 .setup((req) => req(requestUrl, options))
@@ -125,9 +126,8 @@ describe(ApplicationInsightsClient, () => {
 
         it('queryEvents without query parameters', async () => {
             const options = {
-                qs: undefined as EventsQueryOptions,
-                simple: testSubject.throwOnRequestFailure,
-                json: true,
+                searchParams: undefined as EventsQueryOptions,
+                throwHttpErrors: testSubject.throwOnRequestFailure,
             };
             getMock
                 .setup((req) => req(eventsUrl, options))
@@ -145,9 +145,8 @@ describe(ApplicationInsightsClient, () => {
                 $filter: 'filter',
             };
             const options = {
-                qs: eventsQueryOptions,
-                simple: testSubject.throwOnRequestFailure,
-                json: true,
+                searchParams: eventsQueryOptions,
+                throwHttpErrors: testSubject.throwOnRequestFailure,
             };
 
             getMock
@@ -163,9 +162,8 @@ describe(ApplicationInsightsClient, () => {
         test.each([true, false])('queryEvents when throwOnFailure is %o', async (throwOnFailure: boolean) => {
             testSubject.throwOnRequestFailure = throwOnFailure;
             const options = {
-                qs: undefined as EventsQueryOptions,
-                simple: throwOnFailure,
-                json: true,
+                searchParams: undefined as EventsQueryOptions,
+                throwHttpErrors: throwOnFailure,
             };
 
             getMock
