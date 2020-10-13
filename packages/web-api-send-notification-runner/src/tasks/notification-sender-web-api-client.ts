@@ -20,11 +20,11 @@ export class NotificationSenderWebAPIClient {
     constructor(
         private readonly throwOnRequestFailure: boolean = false,
         requestObject: any = got,
-        getAgents: () => Agents = getForeverAgents,
+        getAgentsFn: () => Agents = getForeverAgents,
     ) {
         this.defaultRequestObject = requestObject.extend({
             ...this.defaultOptions,
-            agent: getAgents(),
+            agent: getAgentsFn(),
             throwHttpErrors: this.throwOnRequestFailure,
         });
     }

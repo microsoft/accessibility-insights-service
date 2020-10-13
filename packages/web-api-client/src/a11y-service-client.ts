@@ -28,17 +28,17 @@ export class A11yServiceClient {
         private readonly requestBaseUrl: string,
         private readonly logger: Logger,
         private readonly apiVersion = '1.0',
-        private readonly throwOnRequestFailure: boolean = false,
-        private readonly gotRequest: Got = got,
+        throwOnRequestFailure: boolean = false,
+        request: Got = got,
         private readonly retryHelper: RetryHelper<unknown> = new RetryHelper(),
         private readonly maxRetryCount: number = 5,
         private readonly msecBetweenRetries: number = 1000,
-        getAgents: () => Agents = getForeverAgents,
+        getAgentsFn: () => Agents = getForeverAgents,
     ) {
-        this.defaultRequestObject = this.gotRequest.extend({
+        this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
-            throwHttpErrors: this.throwOnRequestFailure,
-            agent: getAgents(),
+            throwHttpErrors: throwOnRequestFailure,
+            agent: getAgentsFn(),
         });
     }
 

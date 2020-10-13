@@ -23,15 +23,15 @@ export class ApplicationInsightsClient {
     constructor(
         private readonly appId: string,
         private readonly apiKey: string,
-        gotRequest: any = got,
-        getAgents: () => Agents = getForeverAgents,
+        request: Got = got,
+        getAgentsFn: () => Agents = getForeverAgents,
     ) {
-        this.defaultRequestObject = gotRequest.extend({
+        this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
             headers: {
                 'X-Api-Key': this.apiKey,
             },
-            agent: getAgents(),
+            agent: getAgentsFn(),
         });
     }
 
