@@ -5,12 +5,12 @@ import 'reflect-metadata';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { IMock, Mock } from 'typemoq';
-import { PageScanRunReportService } from './page-scan-run-report-service';
+import { PageScanRunReportProvider } from './page-scan-run-report-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-describe(PageScanRunReportService, () => {
-    let testSubject: PageScanRunReportService;
+describe(PageScanRunReportProvider, () => {
+    let testSubject: PageScanRunReportProvider;
     let blobStorageClientMock: IMock<BlobStorageClient>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     const time = new Date(2019, 2, 1, 10, 20, 30);
@@ -22,7 +22,7 @@ describe(PageScanRunReportService, () => {
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        testSubject = new PageScanRunReportService(blobStorageClientMock.object, guidGeneratorMock.object);
+        testSubject = new PageScanRunReportProvider(blobStorageClientMock.object, guidGeneratorMock.object);
     });
 
     it('saves report', async () => {
@@ -34,7 +34,7 @@ describe(PageScanRunReportService, () => {
             .verifiable();
 
         blobStorageClientMock
-            .setup(async (b) => b.uploadBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath, blobContent))
+            .setup(async (b) => b.uploadBlobContent(PageScanRunReportProvider.blobContainerName, expectedSarifBlobFilePath, blobContent))
             .returns(async () => Promise.resolve(undefined))
             .verifiable();
 
@@ -51,7 +51,7 @@ describe(PageScanRunReportService, () => {
             .verifiable();
 
         blobStorageClientMock
-            .setup(async (b) => b.getBlobContent(PageScanRunReportService.blobContainerName, expectedSarifBlobFilePath))
+            .setup(async (b) => b.getBlobContent(PageScanRunReportProvider.blobContainerName, expectedSarifBlobFilePath))
             .returns(async () => Promise.resolve(expectedResponse))
             .verifiable();
 

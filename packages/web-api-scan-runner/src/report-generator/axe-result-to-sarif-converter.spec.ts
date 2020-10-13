@@ -5,7 +5,6 @@ import 'reflect-metadata';
 import { AxeResults } from 'axe-core';
 import { SarifLog } from 'axe-sarif-converter';
 import { IMock, Mock, Times } from 'typemoq';
-import { ReportGenerationParams } from './axe-result-converter';
 import { AxeResultToSarifConverter } from './axe-result-to-sarif-converter';
 
 describe('AxeResultToSarifConverter', () => {
@@ -13,9 +12,6 @@ describe('AxeResultToSarifConverter', () => {
     let sarifReport: SarifLog;
     let convertAxeToSarifFuncMock: IMock<(axeResults: AxeResults) => SarifLog>;
     let axeResults: AxeResults;
-    const params: ReportGenerationParams = {
-        pageTitle: 'page title',
-    };
 
     beforeEach(() => {
         sarifReport = ({ sarifLog: true } as unknown) as SarifLog;
@@ -36,7 +32,7 @@ describe('AxeResultToSarifConverter', () => {
             .returns(() => sarifReport)
             .verifiable(Times.once());
 
-        const report = axeSarifResultConverter.convert(axeResults, params);
+        const report = axeSarifResultConverter.convert(axeResults);
 
         convertAxeToSarifFuncMock.verifyAll();
         expect(report).toEqual(JSON.stringify(sarifReport));

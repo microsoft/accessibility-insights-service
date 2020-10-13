@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
 import {
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
@@ -13,7 +13,6 @@ import {
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
-    ScanCompletedNotification,
     ScanError,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -31,7 +30,7 @@ export class Runner {
         @inject(Scanner) private readonly scanner: Scanner,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
+        @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
@@ -94,22 +93,9 @@ export class Runner {
         }
 
         const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
-
-        const featureFlags = await this.getDefaultFeatureFlags();
-        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
-        if (featureFlags.sendNotification && !this.isScanNotifyUrlEmpty(fullPageScanResult.notification)) {
-            this.logger.logInfo(`Queuing scan completion notification message.`, {
-                scanNotifyUrl: fullPageScanResult.notification.scanNotifyUrl,
-            });
-            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
-        }
+        await this.queueScanCompletionNotification(fullPageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
-    }
-
-    private isScanNotifyUrlEmpty(notification: ScanCompletedNotification): boolean {
-        // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-        return isEmpty(notification?.scanNotifyUrl);
     }
 
     private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
@@ -130,6 +116,17 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+    }
+
+    private async queueScanCompletionNotification(fullPageScanResult: OnDemandPageScanResult): Promise<void> {
+        const featureFlags = await this.getDefaultFeatureFlags();
+        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
+        if (featureFlags.sendNotification && !isEmpty(fullPageScanResult?.notification?.scanNotifyUrl)) {
+            this.logger.logInfo(`Queuing scan completion notification queue message.`, {
+                scanNotifyUrl: fullPageScanResult.notification.scanNotifyUrl,
+            });
+            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
+        }
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
@@ -161,7 +158,7 @@ export class Runner {
     }
 
     private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
-        const href = await this.pageScanRunReportService.saveReport(report.id, report.content);
+        const href = await this.pageScanRunReportProvider.saveReport(report.id, report.content);
         this.logger.logInfo(`The '${report.format}' report saved to a blob storage.`, { reportId: report.id, blobUrl: href });
 
         return {

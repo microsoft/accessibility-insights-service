@@ -1,12 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 
 @injectable()
-export class PageScanRunReportService {
+export class PageScanRunReportProvider {
     public static readonly blobContainerName = 'page-scan-run-reports';
 
     constructor(
@@ -16,22 +15,16 @@ export class PageScanRunReportService {
 
     public async saveReport(fileId: string, content: string): Promise<string> {
         const filePath = this.getBlobFilePath(fileId);
-        await this.blobStorageClient.uploadBlobContent(PageScanRunReportService.blobContainerName, filePath, content);
+        await this.blobStorageClient.uploadBlobContent(PageScanRunReportProvider.blobContainerName, filePath, content);
 
         return filePath;
     }
 
     public async readReport(fileId: string): Promise<BlobContentDownloadResponse> {
-        let downloadResponse = this.blobStorageClient.getBlobContent(
-            PageScanRunReportService.blobContainerName,
+        const downloadResponse = await this.blobStorageClient.getBlobContent(
+            PageScanRunReportProvider.blobContainerName,
             this.getBlobFilePath(fileId),
         );
-        if ((await downloadResponse).notFound) {
-            downloadResponse = this.blobStorageClient.getBlobContent(
-                PageScanRunReportService.blobContainerName,
-                `${this.getBlobFilePath(fileId)}.sarif`,
-            );
-        }
 
         return downloadResponse;
     }

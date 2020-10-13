@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
-import { ApiController, HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
+import { ApiController, HttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
 import { BodyParser } from './../utils/body-parser';
 
 @injectable()
@@ -13,7 +13,7 @@ export class ScanReportController extends ApiController {
     public readonly apiName = 'web-api-get-report';
 
     public constructor(
-        @inject(PageScanRunReportService) private readonly pageScanRunReportService: PageScanRunReportService,
+        @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
@@ -34,7 +34,7 @@ export class ScanReportController extends ApiController {
             return;
         }
 
-        const blobContentDownloadResponse = await this.pageScanRunReportService.readReport(reportId);
+        const blobContentDownloadResponse = await this.pageScanRunReportProvider.readReport(reportId);
         if (blobContentDownloadResponse.notFound === true) {
             this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
             this.logger.logError('The report is not found.');

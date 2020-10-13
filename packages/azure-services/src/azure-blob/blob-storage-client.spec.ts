@@ -1,9 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
-import { BlobClient, BlobDownloadResponseModel, BlobServiceClient, BlockBlobClient, ContainerClient, RestError } from '@azure/storage-blob';
+import {
+    BlobClient,
+    BlobDownloadResponseModel,
+    BlobServiceClient,
+    BlockBlobClient,
+    ContainerClient,
+    RestError,
+    BlockBlobUploadResponse,
+} from '@azure/storage-blob';
 import { IMock, Mock } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { BlobContentDownloadResponse, BlobStorageClient } from './blob-storage-client';
@@ -81,11 +88,23 @@ describe(BlobStorageClient, () => {
 
         it('uploads content', async () => {
             blockBlobClientMock
-                .setup(async (b) => b.upload(content, content.length))
-                .returns(async () => Promise.resolve(undefined))
+                .setup(async (b) => b.upload(content, content.length, undefined))
+                .returns(async () => Promise.resolve({} as BlockBlobUploadResponse))
                 .verifiable();
 
             await testSubject.uploadBlobContent(containerName, blobName, content);
+
+            blockBlobClientMock.verifyAll();
+        });
+
+        it('uploads content with etag', async () => {
+            const etag = 'etag';
+            blockBlobClientMock
+                .setup(async (b) => b.upload(content, content.length, { conditions: { ifMatch: etag } }))
+                .returns(async () => Promise.resolve({} as BlockBlobUploadResponse))
+                .verifiable();
+
+            await testSubject.uploadBlobContent(containerName, blobName, content, etag);
 
             blockBlobClientMock.verifyAll();
         });

@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
-import { BlobClient, RestError } from '@azure/storage-blob';
+import { BlobClient, RestError, BlockBlobUploadResponse } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
@@ -39,11 +38,17 @@ export class BlobStorageClient {
         }
     }
 
-    public async uploadBlobContent(containerName: string, blobName: string, content: string): Promise<void> {
+    public async uploadBlobContent(
+        containerName: string,
+        blobName: string,
+        content: string,
+        etag?: string,
+    ): Promise<BlockBlobUploadResponse> {
         const blobClient = await this.getBlobClient(containerName, blobName);
-
         const blockBlobClient = blobClient.getBlockBlobClient();
-        await blockBlobClient.upload(content, content.length);
+        const options = etag !== undefined ? { conditions: { ifMatch: etag } } : undefined;
+
+        return blockBlobClient.upload(content, content.length, options);
     }
 
     private async getBlobClient(containerName: string, blobName: string): Promise<BlobClient> {

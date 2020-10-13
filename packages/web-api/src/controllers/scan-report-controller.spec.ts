@@ -6,7 +6,7 @@ import { Readable } from 'stream';
 import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
 import { GuidGenerator, ServiceConfiguration } from 'common';
-import { HttpResponse, PageScanRunReportService, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
@@ -16,7 +16,7 @@ import { ScanReportController } from './scan-report-controller';
 describe(ScanReportController, () => {
     let scanReportController: ScanReportController;
     let context: Context;
-    let reportServiceMock: IMock<PageScanRunReportService>;
+    let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
@@ -52,12 +52,12 @@ describe(ScanReportController, () => {
             .verifiable(Times.once());
         context.req.query['api-version'] = '1.0';
         context.req.headers['content-type'] = 'application/json';
-        reportServiceMock = Mock.ofType<PageScanRunReportService>();
+        pageScanRunReportProviderMock = Mock.ofType<PageScanRunReportProvider>();
         downloadResponse = {
             notFound: false,
             content: contentMock.object,
         };
-        reportServiceMock
+        pageScanRunReportProviderMock
             .setup(async (rm) => rm.readReport(It.isAnyString()))
             .returns(async (id) => {
                 return id === validId ? downloadResponse : notFoundDownloadResponse;
@@ -76,7 +76,7 @@ describe(ScanReportController, () => {
 
     function createScanResultController(contextReq: Context): ScanReportController {
         const controller = new ScanReportController(
-            reportServiceMock.object,
+            pageScanRunReportProviderMock.object,
             guidGeneratorMock.object,
             serviceConfigurationMock.object,
             loggerMock.object,
