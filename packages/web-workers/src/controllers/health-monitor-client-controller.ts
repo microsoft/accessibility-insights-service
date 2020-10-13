@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration, getSerializableResponse, ResponseSerializer, SerializableResponse } from 'common';
 import { functionalTestGroupTypes, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -13,7 +13,6 @@ import {
     GetScanReportData,
     GetScanResultData,
     RunFunctionalTestGroupData,
-    SerializableResponse,
     TrackAvailabilityData,
 } from './activity-request-data';
 
@@ -34,6 +33,7 @@ export class HealthMonitorClientController extends WebController {
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(TestRunner) protected readonly testRunner: TestRunner,
         protected readonly testGroupTypes: { [key: string]: TestGroupConstructor } = functionalTestGroupTypes,
+        protected readonly serializeResponse: ResponseSerializer = getSerializableResponse,
     ) {
         super(logger);
 
@@ -67,33 +67,33 @@ export class HealthMonitorClientController extends WebController {
         return true;
     }
 
-    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse>> => {
+    private readonly createScanRequest = async (data: CreateScanRequestData): Promise<SerializableResponse<ScanRunResponse[]>> => {
         const webApiClient = await this.webApiClientProvider();
         const response = await webApiClient.postScanUrl(data.scanUrl, data.priority);
 
-        return response.toJSON();
+        return this.serializeResponse(response);
     };
 
     private readonly getScanResult = async (data: GetScanResultData): Promise<SerializableResponse<ScanResultResponse>> => {
         const webApiClient = await this.webApiClientProvider();
         const response = await webApiClient.getScanStatus(data.scanId);
 
-        return response.toJSON();
+        return this.serializeResponse(response);
     };
 
-    private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse> => {
+    private readonly getScanReport = async (data: GetScanReportData): Promise<SerializableResponse<Buffer>> => {
         const webApiClient = await this.webApiClientProvider();
         const response = await webApiClient.getScanReport(data.scanId, data.reportId);
         response.body = undefined;
 
-        return response.toJSON();
+        return this.serializeResponse(response);
     };
 
     private readonly getHealthStatus = async (): Promise<SerializableResponse<HealthReport>> => {
         const webApiClient = await this.webApiClientProvider();
         const response = await webApiClient.checkHealth();
 
-        return response.toJSON();
+        return this.serializeResponse(response);
     };
 
     private readonly trackAvailability = async (data: TrackAvailabilityData): Promise<void> => {

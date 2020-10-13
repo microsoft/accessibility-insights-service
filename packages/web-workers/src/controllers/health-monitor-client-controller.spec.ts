@@ -3,11 +3,11 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { FunctionalTestGroup, TestContextData, TestEnvironment, TestGroupConstructor, TestRunner } from 'functional-tests';
 import { OnDemandPageScanRunResultProvider } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import { A11yServiceClient, ResponseWithBodyType } from 'web-api-client';
+import { A11yServiceClient } from 'web-api-client';
 import { ActivityAction } from '../contracts/activity-actions';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ActivityRequestData, RunFunctionalTestGroupData, TrackAvailabilityData } from './activity-request-data';
@@ -47,6 +47,7 @@ describe(HealthMonitorClientController, () => {
     };
     const releaseId = 'release id';
     const runId = 'run id';
+    const serializeResponseStub = (response: ResponseWithBodyType) => jsonResponse;
 
     beforeEach(() => {
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -60,9 +61,6 @@ describe(HealthMonitorClientController, () => {
         jsonResponse = { testResponse: true } as any;
         expectedResponse = {
             body: 'some body content',
-            toJSON: () => {
-                return jsonResponse;
-            },
         } as ResponseWithBodyType<any>;
 
         process.env.RELEASE_VERSION = releaseId;
@@ -75,6 +73,7 @@ describe(HealthMonitorClientController, () => {
             guidGeneratorMock.object,
             testRunnerMock.object,
             testGroupTypes,
+            serializeResponseStub,
         );
     });
 

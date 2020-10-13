@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { isNullOrUndefined } from 'util';
+import { isNil } from 'lodash';
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
 import { Logger } from 'logger';
-import requestPromise from 'request-promise';
+import { ExtendOptions, Got } from 'got';
 
 export class A11yServiceCredential {
     private readonly authContext: AuthenticationContext;
@@ -37,21 +37,27 @@ export class A11yServiceCredential {
         }
     }
 
-    public async signRequest(request: typeof requestPromise): Promise<typeof requestPromise> {
+    public async getHeaders(): Promise<Record<string, string | string[]>> {
         const accessToken = await this.getToken();
-        const authOptions: requestPromise.RequestPromiseOptions = {
+
+        return { authorization: `${accessToken.tokenType} ${accessToken.accessToken}` };
+    }
+
+    public async signRequest(gotRequest: Got): Promise<Got> {
+        const accessToken = await this.getToken();
+        const authOptions: ExtendOptions = {
             headers: {
                 authorization: `${accessToken.tokenType} ${accessToken.accessToken}`,
             },
         };
 
-        return request.defaults(authOptions);
+        return gotRequest.extend(authOptions);
     }
 
     private async tryGetToken(): Promise<TokenResponse> {
         return new Promise((resolve, reject) => {
             this.authContext.acquireTokenWithClientCredentials(this.resourceId, this.clientId, this.clientSecret, (err, tokenResponse) => {
-                if (!isNullOrUndefined(err)) {
+                if (!isNil(err)) {
                     reject(err);
                 } else {
                     resolve(tokenResponse as TokenResponse);

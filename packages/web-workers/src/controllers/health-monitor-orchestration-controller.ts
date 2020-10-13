@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 /* eslint-disable import/no-internal-modules */
-import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
+import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData } from 'functional-tests';
-import { SerializableResponse } from 'functional-tests/dist/test-group-data';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';

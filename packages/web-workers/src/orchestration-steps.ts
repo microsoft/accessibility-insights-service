@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 /* eslint-disable import/no-internal-modules,  */
-import { AvailabilityTestConfig } from 'common';
+import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
@@ -15,7 +15,6 @@ import {
     GetScanReportData,
     GetScanResultData,
     RunFunctionalTestGroupData,
-    SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { getAllTestGroupClassNames } from './e2e-test-group-names';

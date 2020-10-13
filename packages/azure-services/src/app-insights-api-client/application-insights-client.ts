@@ -2,37 +2,36 @@
 // Licensed under the MIT License.
 
 import { injectable } from 'inversify';
-import { ResponseAsJSON } from 'request';
-import * as requestPromise from 'request-promise';
+import got, { Agents, Got, ExtendOptions, Options } from 'got';
+import { getForeverAgents, ResponseWithBodyType } from 'common';
 import { EventsQueryOptions } from './events-query-options';
 import { ApplicationInsightsEventsResponse } from './events-query-response';
 import { ApplicationInsightsQueryResponse } from './query-response';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ResponseWithBodyType<T = {}> extends ResponseAsJSON {
-    body: T;
-}
-
 @injectable()
 export class ApplicationInsightsClient {
     public throwOnRequestFailure: boolean = false;
 
     private readonly baseUrl = 'https://api.applicationinsights.io/v1/apps';
-    private readonly defaultRequestObject: typeof requestPromise;
-    private readonly defaultOptions: requestPromise.RequestPromiseOptions = {
-        forever: true,
-        resolveWithFullResponse: true,
-        json: true,
+    private readonly defaultRequestObject: Got;
+    private readonly defaultOptions: ExtendOptions = {
+        responseType: 'json',
     };
 
-    constructor(private readonly appId: string, private readonly apiKey: string, httpRequest: any = requestPromise) {
-        this.defaultRequestObject = httpRequest.defaults({
+    constructor(
+        private readonly appId: string,
+        private readonly apiKey: string,
+        request: Got = got,
+        getAgentsFn: () => Agents = getForeverAgents,
+    ) {
+        this.defaultRequestObject = request.extend({
             ...this.defaultOptions,
             headers: {
                 'X-Api-Key': this.apiKey,
             },
+            agent: getAgentsFn(),
         });
     }
 
@@ -42,13 +41,12 @@ export class ApplicationInsightsClient {
             query,
             timespan: queryTimeRange,
         };
-        const options: requestPromise.RequestPromiseOptions = {
-            body: requestBody,
-            simple: this.throwOnRequestFailure,
-            json: true,
+        const options: Options = {
+            json: requestBody,
+            throwHttpErrors: this.throwOnRequestFailure,
         };
 
-        return this.defaultRequestObject.post(requestUrl, options);
+        return (await this.defaultRequestObject.post(requestUrl, options)) as ResponseWithBodyType<ApplicationInsightsQueryResponse>;
     }
 
     public async queryEvents(
@@ -56,12 +54,13 @@ export class ApplicationInsightsClient {
         eventsOptions?: EventsQueryOptions,
     ): Promise<ResponseWithBodyType<ApplicationInsightsEventsResponse>> {
         const requestUrl = `${this.baseUrl}/${this.appId}/events/${eventType}`;
-        const options: requestPromise.RequestPromiseOptions = {
-            qs: eventsOptions,
-            simple: this.throwOnRequestFailure,
-            json: true,
+        const options: Options = {
+            searchParams: eventsOptions,
+            throwHttpErrors: this.throwOnRequestFailure,
         };
 
-        return this.defaultRequestObject.get(requestUrl, options);
+        return (await this.defaultRequestObject.get(requestUrl, options)) as Promise<
+            ResponseWithBodyType<ApplicationInsightsEventsResponse>
+        >;
     }
 }

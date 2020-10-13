@@ -19,11 +19,10 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
+        "@types/got": "^9.6.11",
         "@types/jest": "^26.0.9",
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
-        "@types/request-promise": "^4.1.46",
-        "@types/request": "^2.48.5",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
         "jest-junit": "^11.1.0",
@@ -33,14 +32,14 @@
         "typescript": "^4.0.2"
     },
     "dependencies": {
+        "adal-node": "0.2.1",
         "common": "1.0.0",
+        "forever-agent": "^0.6.1",
+        "got": "^11.7.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
+        "logger": "1.0.0",
         "reflect-metadata": "^0.1.13",
-        "service-library": "1.0.0",
-        "request-promise": "^4.2.6",
-        "adal-node": "0.2.1",
-        "request": "^2.88.2",
-        "logger": "1.0.0"
+        "service-library": "1.0.0"
     }
 }

@@ -1,45 +1,42 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { getForeverAgents, ResponseWithBodyType } from 'common';
+import got, { Agents, Got, Options } from 'got';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
-import { ResponseAsJSON } from 'request';
-import * as requestPromise from 'request-promise';
 import { NotificationSenderMetadata } from '../types/notification-sender-metadata';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export interface ResponseWithBodyType<T = {}> extends ResponseAsJSON {
-    body: T;
-}
-
 @injectable()
 export class NotificationSenderWebAPIClient {
-    private readonly defaultRequestObject: typeof requestPromise;
-    private readonly defaultOptions: requestPromise.RequestPromiseOptions = {
-        forever: true,
+    private readonly defaultRequestObject: Got;
+    private readonly defaultOptions: Options = {
         headers: {
             'Content-Type': 'application/json',
         },
-        resolveWithFullResponse: true,
-        json: true,
     };
 
-    constructor(private readonly throwOnRequestFailure: boolean = false, httpRequest: any = requestPromise) {
-        this.defaultRequestObject = httpRequest.defaults({
+    constructor(
+        private readonly throwOnRequestFailure: boolean = false,
+        requestObject: any = got,
+        getAgentsFn: () => Agents = getForeverAgents,
+    ) {
+        this.defaultRequestObject = requestObject.extend({
             ...this.defaultOptions,
-            simple: this.throwOnRequestFailure,
+            agent: getAgentsFn(),
+            throwHttpErrors: this.throwOnRequestFailure,
         });
     }
 
-    public async sendNotification(notificationSenderConfigData: NotificationSenderMetadata): Promise<ResponseAsJSON> {
+    public async sendNotification(notificationSenderConfigData: NotificationSenderMetadata): Promise<ResponseWithBodyType> {
         const requestBody = {
             scanId: notificationSenderConfigData.scanId,
             runStatus: notificationSenderConfigData.runStatus,
             scanStatus: isEmpty(notificationSenderConfigData.scanStatus) ? undefined : notificationSenderConfigData.scanStatus,
         };
-        const options: requestPromise.RequestPromiseOptions = { body: requestBody, timeout: 30000 };
+        const options: Options = { json: requestBody, timeout: 30000 };
 
-        return this.defaultRequestObject.post(notificationSenderConfigData.scanNotifyUrl, options);
+        return (await this.defaultRequestObject.post(notificationSenderConfigData.scanNotifyUrl, options)) as ResponseWithBodyType;
     }
 }

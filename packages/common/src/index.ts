@@ -12,3 +12,6 @@ export { EnvironmentSettings } from './system/environment-settings';
 export { commonIocTypes } from './common-ioc-types';
 export { PromiseUtils } from './system/promise-utils';
 export { RetryHelper } from './system/retry-helper';
+export { getForeverAgents } from './web-requests/forever-agents';
+export { ResponseWithBodyType } from './web-requests/response-with-body-type';
+export { SerializableResponse, ResponseSerializer, getSerializableResponse } from './web-requests/serializable-response';

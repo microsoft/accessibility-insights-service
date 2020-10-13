@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 /* eslint-disable import/no-internal-modules */
-import { AvailabilityTestConfig } from 'common';
+import { AvailabilityTestConfig, SerializableResponse } from 'common';
 import { DurableOrchestrationContext, IOrchestrationFunctionContext, ITaskMethods, Task } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestGroupName } from 'functional-tests';
 import { isNil } from 'lodash';
@@ -15,7 +15,6 @@ import {
     ActivityRequestData,
     CreateScanRequestData,
     RunFunctionalTestGroupData,
-    SerializableResponse,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';

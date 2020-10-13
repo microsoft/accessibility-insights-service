@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { AuthenticationContext, TokenResponse } from 'adal-node';
 import { RetryHelper, System } from 'common';
-import requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { Got } from 'got';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
 
@@ -14,7 +14,7 @@ import { MockableLogger } from './test-utilities/mockable-logger';
 describe(A11yServiceCredential, () => {
     let authenticationContextMock: IMock<AuthenticationContext>;
     let testSubject: A11yServiceCredential;
-    let requestMock: IMock<typeof requestPromise>;
+    let gotMock: IMock<Got>;
     const clientId = 'client-id';
     const clientMockSec = 'random-string';
     const authorityUrl = 'authorityUrl';
@@ -30,7 +30,7 @@ describe(A11yServiceCredential, () => {
 
     beforeEach(() => {
         error = null;
-        requestMock = Mock.ofType<typeof requestPromise>(null);
+        gotMock = Mock.ofType<Got>(null);
         authenticationContextMock = Mock.ofType<AuthenticationContext>();
         loggerMock = Mock.ofType<MockableLogger>();
         retryHelperMock = Mock.ofType<RetryHelper<TokenResponse>>();
@@ -74,9 +74,9 @@ describe(A11yServiceCredential, () => {
             },
         };
 
-        await testSubject.signRequest(requestMock.object);
+        await testSubject.signRequest(gotMock.object);
 
-        requestMock.verify((rm) => rm.defaults(It.isValue(expectedHeaders)), Times.once());
+        gotMock.verify((rm) => rm.extend(It.isValue(expectedHeaders)), Times.once());
     });
 
     it('should reject when acquireTokenWithClientCredentials fails', async () => {

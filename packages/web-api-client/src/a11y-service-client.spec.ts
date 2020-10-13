@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { RetryHelper } from 'common';
-import * as requestPromise from 'request-promise';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { Agents, ExtendOptions, Options } from 'got';
 import { A11yServiceClient } from './a11y-service-client';
 import { A11yServiceCredential } from './a11y-service-credential';
 import { MockableLogger } from './test-utilities/mockable-logger';
@@ -15,13 +15,14 @@ describe(A11yServiceClient, () => {
     const baseUrl = 'base-url';
     const apiVersion = '1.0';
     let credMock: IMock<A11yServiceCredential>;
-    let requestStub: any;
+    let gotStub: any;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    let getMock: IMock<(url: string) => {}>;
+    let getMock: IMock<(url: string, options?: Options) => {}>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    let postMock: IMock<(url: string, options?: requestPromise.RequestPromiseOptions) => {}>;
+    let postMock: IMock<(url: string, options?: Options) => {}>;
     let retryHelperMock: IMock<RetryHelper<unknown>>;
     let loggerMock: IMock<MockableLogger>;
+    let getAgentsMock: IMock<() => Agents>;
     const maxRetryCount = 5;
     const msecBetweenRetries = 10;
     let error: Error;
@@ -30,12 +31,13 @@ describe(A11yServiceClient, () => {
     let response: unknown;
     let requestBody: unknown;
     let requestOptions: unknown;
+    const agentsStub = {};
 
     beforeEach(() => {
         error = new Error('HTTP 500 Server Error');
         response = { statusCode: 200 };
         requestBody = [{ url: scanUrl, priority }];
-        requestOptions = { body: requestBody };
+        requestOptions = { json: requestBody };
 
         getMock = Mock.ofInstance(() => {
             return null;
@@ -43,14 +45,16 @@ describe(A11yServiceClient, () => {
         postMock = Mock.ofInstance(() => {
             return null;
         });
-        requestStub = {
-            defaults: (options: requestPromise.RequestPromiseOptions) => requestStub,
+        gotStub = {
+            extend: (options: ExtendOptions) => gotStub,
             get: getMock.object,
             post: postMock.object,
         };
         credMock = Mock.ofType<A11yServiceCredential>(null);
         loggerMock = Mock.ofType<MockableLogger>();
         retryHelperMock = Mock.ofType<RetryHelper<unknown>>();
+        getAgentsMock = Mock.ofType<() => Agents>();
+        getAgentsMock.setup((ga) => ga()).returns(() => agentsStub);
 
         testSubject = new A11yServiceClient(
             credMock.object,
@@ -58,10 +62,11 @@ describe(A11yServiceClient, () => {
             loggerMock.object,
             apiVersion,
             false,
-            requestStub,
+            gotStub,
             retryHelperMock.object,
             maxRetryCount,
             msecBetweenRetries,
+            getAgentsMock.object,
         );
     });
 
@@ -75,8 +80,8 @@ describe(A11yServiceClient, () => {
 
     function setupVerifiableSignRequestCall(): void {
         credMock
-            .setup((cm) => cm.signRequest(requestStub))
-            .returns(async () => Promise.resolve(requestStub))
+            .setup((cm) => cm.signRequest(gotStub))
+            .returns(async () => Promise.resolve(gotStub))
             .verifiable();
     }
 
@@ -101,21 +106,20 @@ describe(A11yServiceClient, () => {
 
     describe('verify default options', () => {
         test.each([true, false])('verifies when throwOnFailure is %o', (throwOnFailure: boolean) => {
-            const defaultsMock = Mock.ofInstance((options: requestPromise.RequestPromiseOptions): any => {});
-            requestStub.defaults = defaultsMock.object;
-            defaultsMock
+            const extendMock = Mock.ofInstance((options: ExtendOptions): any => {});
+            gotStub.extend = extendMock.object;
+            extendMock
                 .setup((d) =>
                     d({
-                        forever: true,
-                        qs: {
+                        searchParams: {
                             'api-version': '1.0',
                         },
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        resolveWithFullResponse: true,
-                        json: true,
-                        simple: throwOnFailure,
+                        responseType: 'json',
+                        throwHttpErrors: throwOnFailure,
+                        agent: agentsStub,
                     }),
                 )
                 .returns(() => 'some object' as any)
@@ -127,11 +131,14 @@ describe(A11yServiceClient, () => {
                 loggerMock.object,
                 apiVersion,
                 throwOnFailure,
-                requestStub,
+                gotStub,
                 retryHelperMock.object,
+                maxRetryCount,
+                msecBetweenRetries,
+                getAgentsMock.object,
             );
 
-            defaultsMock.verifyAll();
+            extendMock.verifyAll();
         });
     });
 
@@ -162,7 +169,7 @@ describe(A11yServiceClient, () => {
 
     it('postScanUrl, priority not set', async () => {
         requestBody = [{ url: scanUrl, priority: 0 }];
-        requestOptions = { body: requestBody };
+        requestOptions = { json: requestBody };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         postMock
@@ -204,10 +211,11 @@ describe(A11yServiceClient, () => {
     it('getScanReport', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
+        const options: Options = { responseType: 'text' };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         getMock
-            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
@@ -219,10 +227,11 @@ describe(A11yServiceClient, () => {
     it('getScanReport with retry', async () => {
         const scanId = 'scanId';
         const reportId = 'reportId';
+        const options: Options = { responseType: 'text' };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(true);
         getMock
-            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`))
+            .setup((req) => req(`${baseUrl}/scans/${scanId}/reports/${reportId}`, options))
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 

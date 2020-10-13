@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
-import { ApplicationInsightsClient, ApplicationInsightsQueryResponse, ResponseWithBodyType } from 'azure-services';
-import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
+import { ApplicationInsightsClient, ApplicationInsightsQueryResponse } from 'azure-services';
+import { AvailabilityTestConfig, ResponseWithBodyType, ServiceConfiguration } from 'common';
 import { HealthReport, HttpResponse, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
