@@ -69,7 +69,9 @@ describe(ScanBatchRequestFeedController, () => {
 
     it('should skip processing on other document type', async () => {
         setupMocksWithTimesNever();
-        await scanBatchRequestFeedController.invoke(context, <OnDemandPageScanBatchRequest[]>(<unknown>[{ ItemType: ItemType.page }]));
+        await scanBatchRequestFeedController.invoke(context, <OnDemandPageScanBatchRequest[]>(
+            (<unknown>[{ ItemType: ItemType.onDemandPageScanRequest }])
+        ));
     });
 
     it('should skip processing if request has no valid accepted scans', async () => {
