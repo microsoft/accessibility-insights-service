@@ -1,18 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { ItemType, StorageDocument } from '.';
+import { StorageDocument } from './storage-document';
+import { ItemType } from './item-type';
 
 /**
  * The client page scan run batch request document.
  */
 export interface OnDemandPageScanBatchRequest extends StorageDocument {
-    scanRunBatchRequest: ScanRunBatchRequest[];
     itemType: ItemType.scanRunBatchRequest;
+    scanRunBatchRequest: ScanRunBatchRequest[];
+}
+
+export interface WebsiteRequest {
+    baseUrl: string;
+}
+
+export interface ReportGroupRequest {
+    consolidatedId: string;
 }
 
 export interface ScanRunBatchRequest {
     scanId: string;
-    priority: number;
     url: string;
+    site?: WebsiteRequest;
+    priority: number;
+    reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
 }

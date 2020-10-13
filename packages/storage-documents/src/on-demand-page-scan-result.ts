@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { ItemType } from './item-type';
-import { StorageDocument } from '.';
+import { StorageDocument } from './storage-document';
 
-export declare type ReportFormat = 'sarif' | 'html';
+export declare type ReportFormat = 'sarif' | 'html' | 'consolidated-html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
 export declare type OnDemandPageScanRunState = 'pending' | 'accepted' | 'queued' | 'running' | 'completed' | 'failed';
 export declare type NotificationState = 'pending' | 'queued' | 'queueFailed' | 'sending' | 'sent' | 'sendFailed';
@@ -32,14 +32,17 @@ export type NotificationErrorTypes = 'InternalError' | 'HttpErrorCode';
  * The web page scan run result document.
  */
 export interface OnDemandPageScanResult extends StorageDocument {
+    itemType: ItemType.onDemandPageScanRunResult;
+    batchRequestId?: string;
     url: string;
+    site?: Website;
+    priority: number;
     scannedUrl?: string;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
+    reportGroups?: ReportGroup[];
     run: OnDemandPageScanRunResult;
-    priority: number;
-    itemType: ItemType.onDemandPageScanRunResult;
-    batchRequestId?: string;
+    scanNotifyUrl?: string;
     notification?: ScanCompletedNotification;
 }
 
@@ -72,4 +75,13 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
+}
+
+export interface Website {
+    baseUrl: string;
+}
+
+export interface ReportGroup {
+    consolidatedId: string;
+    reportId: string;
 }

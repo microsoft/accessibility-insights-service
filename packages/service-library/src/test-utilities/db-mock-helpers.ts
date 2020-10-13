@@ -5,11 +5,8 @@
 import * as crypto from 'crypto';
 import * as cosmos from '@azure/cosmos';
 import { CosmosClientWrapper, CosmosOperationResponse } from 'azure-services';
-import { HashGenerator } from 'common';
 import * as _ from 'lodash';
-import { ItemType, StorageDocument, Website, WebsitePage, WebsitePageExtra } from 'storage-documents';
 import { Mock } from 'typemoq';
-import { PageObjectFactory } from '../factories/page-object-factory';
 import { MockableLogger } from './mockable-logger';
 
 export interface DbContainer {
@@ -25,7 +22,6 @@ const cosmosDbKey: string = undefined;
 export class DbMockHelper {
     public dbContainer: DbContainer;
     public cosmosClient: CosmosClientWrapper;
-    private readonly pageFactory = new PageObjectFactory(new HashGenerator());
     private azureCosmosClient: cosmos.CosmosClient;
 
     public isDbTestSupported(): boolean {
@@ -51,59 +47,6 @@ export class DbMockHelper {
         await this.createDbContainer(this.dbContainer);
 
         return true;
-    }
-
-    public createPageDocument(options?: {
-        label?: string;
-        extra?: WebsitePageExtra;
-        websiteId?: string;
-        baseUrl?: string;
-        url?: string;
-    }): WebsitePage {
-        const websiteId =
-            options === undefined || options.websiteId === undefined ? this.createRandomString('websiteId') : options.websiteId;
-        const baseUrl = options === undefined || options.baseUrl === undefined ? this.createBaseUrl() : options.baseUrl;
-        const url = options === undefined || options.url === undefined ? this.createUrl(baseUrl) : options.url;
-        const page = this.pageFactory.createImmutableInstance(websiteId, baseUrl, url);
-        (<any>page).label = options === undefined || options.label === undefined ? undefined : options.label;
-
-        if (options.extra !== undefined) {
-            _.merge(page, options.extra);
-        }
-
-        return page;
-    }
-
-    public createWebsiteDocument(options?: {
-        label?: string;
-        websiteId?: string;
-        baseUrl?: string;
-        deepScanningEnabled?: boolean;
-    }): Website {
-        const website = {
-            id: this.createRandomString('id'),
-            itemType: ItemType.website,
-            partitionKey: 'website',
-            websiteId: options === undefined || options.websiteId === undefined ? this.createRandomString('websiteId') : options.websiteId,
-            name: this.createRandomString('name'),
-            baseUrl: options === undefined || options.baseUrl === undefined ? this.createBaseUrl() : options.baseUrl,
-            serviceTreeId: this.createRandomString('serviceTreeId'),
-        };
-        (<any>website).label = options === undefined || options.label === undefined ? undefined : options.label;
-
-        if (options !== undefined && options.deepScanningEnabled) {
-            (<any>website).deepScanningEnabled = options.deepScanningEnabled;
-        }
-
-        return website;
-    }
-
-    public createDocument(itemType: ItemType = ItemType.website, id?: string, partitionKey?: string): StorageDocument {
-        return {
-            id: id === undefined ? this.createRandomString('id') : id,
-            itemType: itemType,
-            partitionKey: partitionKey === undefined ? this.createRandomString('pk') : partitionKey,
-        };
     }
 
     public createRandomString(prefix: string = ''): string {
