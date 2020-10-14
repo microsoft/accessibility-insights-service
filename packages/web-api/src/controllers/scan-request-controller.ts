@@ -128,6 +128,8 @@ export class ScanRequestController extends ApiController {
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
                     ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
+                    ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
+                    ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
                 });
 
                 scanResponses.push({

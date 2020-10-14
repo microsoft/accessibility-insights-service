@@ -99,7 +99,13 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' }, // valid request
+                {
+                    url: 'https://abs/path/',
+                    priority: 1,
+                    scanNotifyUrl: 'https://notify/path/',
+                    site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
             ]);
@@ -109,7 +115,14 @@ describe(ScanRequestController, () => {
                 { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
             ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [
-                { scanId: guid2, url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' },
+                {
+                    scanId: guid2,
+                    url: 'https://abs/path/',
+                    priority: 1,
+                    scanNotifyUrl: 'https://notify/path/',
+                    site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
