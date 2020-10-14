@@ -9,7 +9,7 @@ certificateName="azSecPackCert"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -k <key vault> [-n <key vault certificate name>] [-s <subscription name or id>]
+Usage: $0 -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>]
 "
     exit 1
 }
@@ -50,21 +50,26 @@ revokeUserAccessToKeyVault() {
 }
 
 # Read script arguments
-while getopts ":k:n:s:" option; do
+while getopts ":s:r:k:n:" option; do
     case $option in
     s) subscription=${OPTARG} ;;
+    r) resourceGroupName=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     n) certificateName=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
 
-if [[ -z $keyVault ]] || [[ -z $certificateName ]]; then
+if [[ -z $resourceGroupName ]] || [[ -z $certificateName ]]; then
     exitWithUsageInfo
 fi
 
 if [[ ! -z $subscription ]]; then
     az account set --subscription "$subscription"
+fi
+
+if [[ -z $keyVault ]]; then
+    . "${0%/*}/get-resource-names.sh"
 fi
 
 getCurrentUserDetails
