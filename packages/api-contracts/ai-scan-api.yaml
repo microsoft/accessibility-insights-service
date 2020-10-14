@@ -143,6 +143,23 @@ components:
                         value is 0.
                     default: 0
                     type: integer
+                site:
+                    type: object
+                    required:
+                        - baseUrl
+                    properties:
+                        baseUrl:
+                            description: The web site root URL to be displayed in 'Scan Details' report section
+                            type: string
+                reportGroups:
+                    type: array
+                    items:
+                        required:
+                            - consolidatedId
+                        properties:
+                            consolidatedId:
+                                description: The unique report ID for the given reporting period
+                                type: string
         ScanRunResponse:
             type: object
             required:
