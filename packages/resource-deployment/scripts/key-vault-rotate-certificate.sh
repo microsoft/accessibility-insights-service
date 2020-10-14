@@ -15,12 +15,9 @@ Usage: $0 -r <resource group> [-k <key vault>] [-n <key vault certificate name>]
 }
 
 loginToAzure() {
-    if [[ $userType == "user" ]]; then
-        if ! az account show 1>/dev/null; then
-            az login
-        fi
-    else
-        az login --identity 1>/dev/null
+    # Login to Azure if required
+    if ! az account show 1>/dev/null; then
+        az login
     fi
 }
 
@@ -31,7 +28,7 @@ getCurrentUserDetails() {
     if [[ $userType == "user" ]]; then
         echo "Running script using current user credentials"
     else
-        echo "Running script using system managed identity"
+        echo "Running script using service principal identity"
     fi
 }
 
@@ -39,6 +36,9 @@ grantUserAccessToKeyVault() {
     if [[ $userType == "user" ]]; then
         echo "Granting access to key vault for current user account"
         az keyvault set-policy --name "$keyVault" --upn "$principalName" --certificate-permissions get list create 1>/dev/null
+    else
+        echo "Granting access to key vault for service principal account"
+        az keyvault set-policy --name "$keyVault" --spn "$principalName" --certificate-permissions get list create 1>/dev/null
     fi
 }
 
@@ -46,6 +46,9 @@ revokeUserAccessToKeyVault() {
     if [[ $userType == "user" ]]; then
         echo "Revoking access to key vault for current user account"
         az keyvault delete-policy --name "$keyVault" --upn "$principalName" 1>/dev/null || true
+    else
+        echo "Revoking access to key vault for service principal account"
+        az keyvault delete-policy --name "$keyVault" --spn "$principalName" 1>/dev/null || true
     fi
 }
 
