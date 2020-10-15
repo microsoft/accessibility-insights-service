@@ -17,6 +17,7 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
+    ReportGroup,
     ScanRunBatchRequest,
 } from 'storage-documents';
 
@@ -118,6 +119,14 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
+                ...(isEmpty(request.site) ? {} : { site: request.site }),
+                ...(isEmpty(request.reportGroups)
+                    ? {}
+                    : {
+                          reportGroups: request.reportGroups.map<ReportGroup>((reportGroup) => {
+                              return { consolidatedId: reportGroup.consolidatedId } as ReportGroup;
+                          }),
+                      }),
             };
         });
 
@@ -143,6 +152,8 @@ export class ScanBatchRequestFeedController extends WebController {
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...scanNotifyUrl,
+                ...(isEmpty(request.site) ? {} : { site: request.site }),
+                ...(isEmpty(request.reportGroups) ? {} : { reportGroups: request.reportGroups }),
             };
         });
 
