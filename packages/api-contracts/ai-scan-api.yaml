@@ -143,6 +143,8 @@ components:
                         value is 0.
                     default: 0
                     type: integer
+                scanNotifyUrl:
+                    type: string
                 site:
                     type: object
                     required:
