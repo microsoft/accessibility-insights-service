@@ -30,7 +30,7 @@
         "@types/cheerio": "^0.22.21",
         "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^0.0.20",
-        "@types/jest": "^26.0.9",
+        "@types/jest": "^26.0.14",
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
         "@types/normalize-path": "^3.0.0",

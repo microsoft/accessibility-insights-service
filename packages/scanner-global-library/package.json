@@ -22,7 +22,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/jest": "^26.0.9",
+        "@types/jest": "^26.0.14",
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
         "@types/puppeteer": "^3.0.0",
