@@ -97,14 +97,26 @@ describe(BlobStorageClient, () => {
             blockBlobClientMock.verifyAll();
         });
 
-        it('uploads content with etag', async () => {
+        it('uploads content with match to etag', async () => {
             const etag = 'etag';
             blockBlobClientMock
                 .setup(async (b) => b.upload(content, content.length, { conditions: { ifMatch: etag } }))
                 .returns(async () => Promise.resolve({} as BlockBlobUploadResponse))
                 .verifiable();
 
-            await testSubject.uploadBlobContent(containerName, blobName, content, etag);
+            await testSubject.uploadBlobContent(containerName, blobName, content, { ifMatchEtag: etag });
+
+            blockBlobClientMock.verifyAll();
+        });
+
+        it('uploads content with none match to etag', async () => {
+            const etag = 'etag';
+            blockBlobClientMock
+                .setup(async (b) => b.upload(content, content.length, { conditions: { ifNoneMatch: etag } }))
+                .returns(async () => Promise.resolve({} as BlockBlobUploadResponse))
+                .verifiable();
+
+            await testSubject.uploadBlobContent(containerName, blobName, content, { ifNoneMatchEtag: etag });
 
             blockBlobClientMock.verifyAll();
         });
