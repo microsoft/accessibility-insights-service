@@ -92,6 +92,34 @@ describe(ScanRequestController, () => {
             expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
         });
 
+        it('rejects request with only one of \'site\' or \'reportGroups\' property', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    url: 'https://abs/path/',
+                    site: { baseUrl: 'https://base/path' },
+                },
+                {
+                    url: 'https://cde/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+            ]);
+
+            const expectedResponse = [
+                { url: 'https://abs/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://cde/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+            ];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            // normalize random result order
+            const expectedResponseSorted = sortData(expectedResponse);
+            const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
+
+            expect(responseSorted).toEqual(expectedResponseSorted);
+        })
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
