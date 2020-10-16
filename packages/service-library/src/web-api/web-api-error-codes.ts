@@ -17,7 +17,8 @@ export declare type WebApiErrorCodeName =
     | 'OutOfRangePriority'
     | 'MalformedBody'
     | 'MissingReleaseVersion'
-    | 'InvalidScanNotifyUrl';
+    | 'InvalidScanNotifyUrl'
+    | 'MissingSiteOrReportGroups';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -139,6 +140,15 @@ export class WebApiErrorCodes {
             code: 'InvalidScanNotifyUrl',
             codeId: 4012,
             message: 'The reply URL is not valid.',
+        },
+    };
+
+    public static missingSiteOrReportGroups: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'MissingSiteOrReportGroups',
+            codeId: 4013,
+            message: 'The request is missing either the site or report groups property.',
         },
     };
 
