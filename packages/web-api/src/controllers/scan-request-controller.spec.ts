@@ -92,7 +92,7 @@ describe(ScanRequestController, () => {
             expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
         });
 
-        it('rejects request with only one of \'site\' or \'reportGroups\' property', async () => {
+        it("rejects request with only one of 'site' or 'reportGroups' property", async () => {
             context.req.rawBody = JSON.stringify([
                 {
                     url: 'https://abs/path/',
@@ -118,7 +118,7 @@ describe(ScanRequestController, () => {
             const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
 
             expect(responseSorted).toEqual(expectedResponseSorted);
-        })
+        });
 
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
