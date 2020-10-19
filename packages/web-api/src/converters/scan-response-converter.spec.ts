@@ -76,8 +76,18 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): On
         },
         reports: [
             {
-                reportId: 'reportId',
+                reportId: 'reportIdSarif',
                 format: 'sarif',
+                href: 'href',
+            },
+            {
+                reportId: 'reportIdHtml',
+                format: 'html',
+                href: 'href',
+            },
+            {
+                reportId: 'reportIdConsolidatedHtml',
+                format: 'consolidated-html',
                 href: 'href',
             },
         ],
@@ -102,11 +112,19 @@ function getScanResultClientResponseFull(state: RunStateRestApi, isNotificationE
         },
         reports: [
             {
-                reportId: 'reportId',
+                reportId: 'reportIdSarif',
                 format: 'sarif',
                 links: {
                     rel: 'self',
-                    href: 'https://localhost/api/scans/id/reports/reportId?api-version=1.0',
+                    href: 'https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0',
+                },
+            },
+            {
+                reportId: 'reportIdHtml',
+                format: 'html',
+                links: {
+                    rel: 'self',
+                    href: 'https://localhost/api/scans/id/reports/reportIdHtml?api-version=1.0',
                 },
             },
         ],
@@ -170,7 +188,7 @@ describe(ScanResponseConverter, () => {
         expect(scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult)).toEqual(responseExpected);
     });
 
-    it('does not add error to notification is db doc has no error', () => {
+    it('does not add error to notification if db doc has no error', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
         const responseExpected: ScanRunResultResponse = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
 
@@ -183,6 +201,25 @@ describe(ScanResponseConverter, () => {
     it('create full canonical REST Get Report URL', () => {
         const pageScanDbResult = getPageScanResult('completed');
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
-        expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportId?api-version=1.0');
+        expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0');
+    });
+
+    it('includes consolidated-html report in response when consolidatedId is present', () => {
+        let pageScanDbResult = getPageScanResult('completed', true);
+        pageScanDbResult.reportGroups = [{ consolidatedId: 'consolidatedId', reportId: 'reportId' }];
+
+        let responseExpected = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+        responseExpected.reports.push({
+            reportId: 'reportIdConsolidatedHtml',
+            format: 'consolidated-html',
+            links: {
+                rel: 'self',
+                href: 'https://localhost/api/scans/id/reports/reportIdConsolidatedHtml?api-version=1.0',
+            },
+        });
+
+        const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
+
+        expect(response).toEqual(responseExpected);
     });
 });
