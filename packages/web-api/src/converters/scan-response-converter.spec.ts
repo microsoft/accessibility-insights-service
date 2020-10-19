@@ -205,10 +205,10 @@ describe(ScanResponseConverter, () => {
     });
 
     it('includes consolidated-html report in response when consolidatedId is present', () => {
-        let pageScanDbResult = getPageScanResult('completed', true);
+        const pageScanDbResult = getPageScanResult('completed', true);
         pageScanDbResult.reportGroups = [{ consolidatedId: 'consolidatedId', reportId: 'reportId' }];
 
-        let responseExpected = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
+        const responseExpected = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
         responseExpected.reports.push({
             reportId: 'reportIdConsolidatedHtml',
             format: 'consolidated-html',
