@@ -54,11 +54,21 @@ revokeUserAccessToKeyVault() {
 
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
+
     certificatePolicyFile="${0%/*}/../templates/certificate-policy-$environment.json"
+    echo "Certificate policy file $certificatePolicyFile"
+
+    thumbprintCurrent=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
+    echo "Current certificate thumbprint $thumbprintCurrent"
     az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "@$certificatePolicyFile" 1>/dev/null
 
-    thumbprint=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
-    echo "Created new version of $certificateName certificate with thumbprint $thumbprint"
+    thumbprintNew=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
+    if [[ $thumbprintCurrent == $thumbprintNew ]]; then
+        echo "Error: Certificate thumbprint did not change after renewal request"
+        exit 1
+    else
+        echo "Created new version of $certificateName certificate with thumbprint $thumbprintNew"
+    fi
 }
 
 # Read script arguments
@@ -90,8 +100,8 @@ if [[ -z $environment ]]; then
 fi
 
 getCurrentUserDetails
-trap 'revokeUserAccessToKeyVault' EXIT
+# trap 'revokeUserAccessToKeyVault' EXIT
 
 loginToAzure
-grantUserAccessToKeyVault
+# grantUserAccessToKeyVault
 createNewCertificateVersion
