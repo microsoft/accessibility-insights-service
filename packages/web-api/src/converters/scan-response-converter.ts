@@ -4,7 +4,6 @@ import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
 import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification as NotificationDb } from 'storage-documents';
-
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
@@ -88,7 +87,15 @@ export class ScanResponseConverter {
 
         const baseUrlFixed = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-        return pageScanResultDocument.reports.map((report) => {
+        let scanReports = pageScanResultDocument.reports;
+
+        if (isEmpty(pageScanResultDocument.reportGroups)) {
+            scanReports = pageScanResultDocument.reports.filter((report) => {
+                return report.format !== 'consolidated-html';
+            });
+        }
+
+        return scanReports.map((report) => {
             return {
                 reportId: report.reportId,
                 format: report.format,
