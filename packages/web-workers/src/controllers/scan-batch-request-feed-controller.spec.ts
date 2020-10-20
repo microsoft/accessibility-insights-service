@@ -4,10 +4,17 @@ import 'reflect-metadata';
 
 import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
-import { isNil } from 'lodash';
+import { isEmpty, isNil } from 'lodash';
 import * as MockDate from 'mockdate';
 import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
-import { ItemType, OnDemandPageScanBatchRequest, OnDemandPageScanRequest, OnDemandPageScanResult, PartitionKey } from 'storage-documents';
+import {
+    ItemType,
+    OnDemandPageScanBatchRequest,
+    OnDemandPageScanRequest,
+    OnDemandPageScanResult,
+    PartitionKey,
+    ReportGroup,
+} from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -93,6 +100,10 @@ describe(ScanBatchRequestFeedController, () => {
                         url: 'url-1',
                         priority: 1,
                         scanNotifyUrl: 'reply-url-1',
+                        site: {
+                            baseUrl: 'base-url-1',
+                        },
+                        reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                     },
                     {
                         scanId: 'scan-2',
@@ -161,6 +172,16 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                         scanNotifyUrl: request.scanNotifyUrl,
                     };
                 }
+                if (request.site !== undefined) {
+                    res.site = request.site;
+                }
+                if (!isEmpty(request.reportGroups)) {
+                    res.reportGroups = request.reportGroups.map<ReportGroup>((reportGroup) => {
+                        return {
+                            consolidatedId: reportGroup.consolidatedId,
+                        } as ReportGroup;
+                    });
+                }
 
                 return res;
             });
@@ -183,6 +204,13 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
 
                 if (!isNil(request.scanNotifyUrl)) {
                     res.scanNotifyUrl = request.scanNotifyUrl;
+                }
+                if (!isNil(request.site)) {
+                    res.site = request.site;
+                }
+
+                if (!isEmpty(request.reportGroups)) {
+                    res.reportGroups = request.reportGroups;
                 }
 
                 return res;

@@ -1,0 +1,38 @@
+{
+    "issuerParameters": {
+        "certificateTransparency": null,
+        "name": "OneCert"
+    },
+    "keyProperties": {
+        "curve": null,
+        "exportable": true,
+        "keySize": 2048,
+        "keyType": "RSA",
+        "reuseKey": true
+    },
+    "lifetimeActions": [
+        {
+            "action": {
+                "actionType": "AutoRenew"
+            },
+            "trigger": {
+                "daysBeforeExpiry": null,
+                "lifetimePercentage": 24
+            }
+        }
+    ],
+    "secretProperties": {
+        "contentType": "application/x-pkcs12"
+    },
+    "x509CertificateProperties": {
+        "ekus": ["1.3.6.1.5.5.7.3.1", "1.3.6.1.5.5.7.3.2"],
+        "keyUsage": ["cRLSign", "dataEncipherment", "digitalSignature", "keyAgreement", "keyCertSign", "keyEncipherment"],
+        "subject": "CN=a11yserviceci.geneva.keyvault.accessibilityinsights.com",
+        "subjectAlternativeNames": {
+            "dnsNames": ["a11yserviceci.geneva.keyvault.accessibilityinsights.com"],
+            "emails": null,
+            "upns": null
+        },
+        "validityInMonths": 12
+    }
+}

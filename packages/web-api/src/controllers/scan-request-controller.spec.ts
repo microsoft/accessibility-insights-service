@@ -92,6 +92,34 @@ describe(ScanRequestController, () => {
             expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
         });
 
+        it("rejects request with only one of 'site' or 'reportGroups' property", async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    url: 'https://abs/path/',
+                    site: { baseUrl: 'https://base/path' },
+                },
+                {
+                    url: 'https://cde/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+            ]);
+
+            const expectedResponse = [
+                { url: 'https://abs/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://cde/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+            ];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            // normalize random result order
+            const expectedResponseSorted = sortData(expectedResponse);
+            const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
+
+            expect(responseSorted).toEqual(expectedResponseSorted);
+        });
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
@@ -99,7 +127,13 @@ describe(ScanRequestController, () => {
             guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
 
             context.req.rawBody = JSON.stringify([
-                { url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' }, // valid request
+                {
+                    url: 'https://abs/path/',
+                    priority: 1,
+                    scanNotifyUrl: 'https://notify/path/',
+                    site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
             ]);
@@ -109,7 +143,14 @@ describe(ScanRequestController, () => {
                 { url: 'https://cde/path/', error: WebApiErrorCodes.outOfRangePriority.error },
             ];
             const expectedSavedRequest: ScanRunBatchRequest[] = [
-                { scanId: guid2, url: 'https://abs/path/', priority: 1, scanNotifyUrl: 'https://notify/path/' },
+                {
+                    scanId: guid2,
+                    url: 'https://abs/path/',
+                    priority: 1,
+                    scanNotifyUrl: 'https://notify/path/',
+                    site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
 
