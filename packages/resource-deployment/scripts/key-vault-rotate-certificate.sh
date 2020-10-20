@@ -100,8 +100,8 @@ if [[ -z $environment ]]; then
 fi
 
 getCurrentUserDetails
-# trap 'revokeUserAccessToKeyVault' EXIT
+trap 'revokeUserAccessToKeyVault' EXIT
 
 loginToAzure
-# grantUserAccessToKeyVault
+grantUserAccessToKeyVault
 createNewCertificateVersion
