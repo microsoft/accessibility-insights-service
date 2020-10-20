@@ -9,7 +9,7 @@ certificateName="azSecPackCert"
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>]
+Usage: $0 -r <resource group> [-k <key vault>] [-n <key vault certificate name>] [-s <subscription name or id>] [-e <environment: dev, ci, ppe, prod or selftest>]
 "
     exit 1
 }
@@ -52,13 +52,23 @@ revokeUserAccessToKeyVault() {
     fi
 }
 
+createNewCertificateVersion() {
+    echo "Creating new version of certificate..."
+    certificatePolicyFile="${0%/*}/../templates/certificate-policy-$environment.json"
+    az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "@$certificatePolicyFile" 1>/dev/null
+
+    thumbprint=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
+    echo "Created new version of $certificateName certificate with thumbprint $thumbprint"
+}
+
 # Read script arguments
-while getopts ":s:r:k:n:" option; do
+while getopts ":s:r:k:n:e:" option; do
     case $option in
     s) subscription=${OPTARG} ;;
     r) resourceGroupName=${OPTARG} ;;
     k) keyVault=${OPTARG} ;;
     n) certificateName=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -75,14 +85,13 @@ if [[ -z $keyVault ]]; then
     . "${0%/*}/get-resource-names.sh"
 fi
 
+if [[ -z $environment ]]; then
+    environment="dev"
+fi
+
 getCurrentUserDetails
 trap 'revokeUserAccessToKeyVault' EXIT
 
 loginToAzure
 grantUserAccessToKeyVault
-
-echo "Creating new version of certificate..."
-az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "$(az keyvault certificate get-default-policy)" 1>/dev/null
-
-thumbprint=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
-echo "Created new version of $certificateName certificate with thumbprint $thumbprint"
+createNewCertificateVersion
