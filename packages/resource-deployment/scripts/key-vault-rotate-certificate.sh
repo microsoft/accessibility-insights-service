@@ -54,11 +54,8 @@ revokeUserAccessToKeyVault() {
 
 createNewCertificateVersion() {
     echo "Creating new version of certificate..."
-
-    certificatePolicyFile="${0%/*}/../templates/certificate-policy-$environment.json"
-    echo "Certificate policy file $certificatePolicyFile"
-
     thumbprintCurrent=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
+    certificatePolicyFile="${0%/*}/../templates/certificate-policy-$environment.json"
     az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "@$certificatePolicyFile"
     thumbprintNew=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
     if [[ $thumbprintCurrent == $thumbprintNew ]]; then
