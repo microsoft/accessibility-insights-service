@@ -60,11 +60,11 @@ createNewCertificateVersion() {
 
     thumbprintCurrent=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
     echo "Current certificate thumbprint $thumbprintCurrent"
-    az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "@$certificatePolicyFile" 1>/dev/null
+    az keyvault certificate create --vault-name "$keyVault" --name "$certificateName" --policy "@$certificatePolicyFile"
 
     thumbprintNew=$(az keyvault certificate show --name "$certificateName" --vault-name "$keyVault" --query "x509ThumbprintHex" -o tsv)
     if [[ $thumbprintCurrent == $thumbprintNew ]]; then
-        echo "Error: Certificate thumbprint did not change after renewal request"
+        echo "Error: Certificate thumbprint did not change. Validate az keyvault certificate create command output for details"
         exit 1
     else
         echo "Created new version of $certificateName certificate with thumbprint $thumbprintNew"
