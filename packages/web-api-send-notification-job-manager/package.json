@@ -42,7 +42,7 @@
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
-        "@azure/batch": "^7.0.0",
+        "@azure/batch": "^8.0.0",
         "@azure/ms-rest-nodeauth": "^1.1.1",
         "azure-services": "^1.0.0",
         "common": "1.0.0",
