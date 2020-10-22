@@ -34,7 +34,7 @@
         "@types/lodash": "^4.14.161",
         "@types/node": "^12.12.54",
         "@types/normalize-path": "^3.0.0",
-        "@types/table": "^5.0.0",
+        "@types/table": "^6.0.0",
         "accessibility-insights-crawler": "1.0.0",
         "copy-webpack-plugin": "^5.1.1",
         "dts-bundle-generator": "^5.4.0",
