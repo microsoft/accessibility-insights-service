@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 export interface StorageDocument {
     /** Required.
      * Unique name that identifies the item, that is, no two items share the same ID within a database.

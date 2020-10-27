@@ -23,3 +23,4 @@ export * from './web-api/api-contracts/health-report';
 export { BatchPoolLoadSnapshotProvider } from './data-providers/batch-pool-load-snapshot-provider';
 export { BatchTaskCreator, ScanMessage } from './batch/batch-task-creator';
 export { OperationResult } from './data-providers/operation-result';
+export { WebsiteScanResultProvider } from './data-providers/website-scan-result-provider';
