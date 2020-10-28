@@ -166,7 +166,11 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.outOfRangePriority.error };
         }
 
-        if (isEmpty(scanRunRequest.site) !== isEmpty(scanRunRequest.reportGroups)) {
+        if (
+            isEmpty(scanRunRequest.site?.baseUrl) !==
+            (isEmpty(scanRunRequest.reportGroups) ||
+                (scanRunRequest.reportGroups?.length > 0 ? scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId)) : true))
+        ) {
             return { valid: false, error: WebApiErrorCodes.missingSiteOrReportGroups.error };
         }
 

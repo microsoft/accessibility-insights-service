@@ -48,7 +48,7 @@ describe(ScanRequestController, () => {
             .setup(async (s) => s.getConfigValue('restApiConfig'))
             .returns(async () => {
                 return {
-                    maxScanRequestBatchCount: 3,
+                    maxScanRequestBatchCount: 4,
                     minScanPriorityValue: -10,
                     maxScanPriorityValue: 10,
                 } as RestApiConfig;
@@ -75,7 +75,7 @@ describe(ScanRequestController, () => {
 
     describe(ScanRequestController, () => {
         it('rejects request with large payload', async () => {
-            context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }, { url: '' }]);
+            context.req.rawBody = JSON.stringify([{ url: '' }, { url: '' }, { url: '' }, { url: '' }, { url: '' }]);
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
@@ -92,21 +92,35 @@ describe(ScanRequestController, () => {
             expect(context.res.body[0].error).toEqual(WebApiErrorCodes.invalidScanNotifyUrl.error);
         });
 
-        it("rejects request with only one of 'site' or 'reportGroups' property", async () => {
+        it("rejects request with incomplete 'site' or 'reportGroups' property", async () => {
             context.req.rawBody = JSON.stringify([
                 {
-                    url: 'https://abs/path/',
+                    url: 'https://abc/path/',
                     site: { baseUrl: 'https://base/path' },
+                    reportGroups: [{ consolidatedId: undefined }, { consolidatedId: 'reportGroupId' }], // empty id
                 },
                 {
-                    url: 'https://cde/path/',
+                    url: 'https://def/path/',
+                    site: 'https://base/path', // invalid site object
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+                {
+                    // missing site
+                    url: 'https://hij/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+                {
+                    // missing reportGroups
+                    url: 'https://klm/path/',
+                    site: { baseUrl: 'https://base/path' },
                 },
             ]);
 
             const expectedResponse = [
-                { url: 'https://abs/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
-                { url: 'https://cde/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://abc/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://def/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://hij/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
+                { url: 'https://klm/path/', error: WebApiErrorCodes.missingSiteOrReportGroups.error },
             ];
 
             scanRequestController = createScanRequestController(context);
