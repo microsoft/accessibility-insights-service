@@ -3,7 +3,7 @@
 import * as util from 'util';
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { Logger } from 'logger';
 import { VError } from 'verror';
 import { CosmosClientWrapper } from '../azure-cosmos/cosmos-client-wrapper';
@@ -23,8 +23,12 @@ export class CosmosContainerClient {
         private readonly systemUtils: typeof System = System,
     ) {}
 
-    public async readDocument<T>(documentId: string, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
-        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey);
+    public async readDocument<T>(
+        documentId: string,
+        partitionKey?: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
+        return this.cosmosClientWrapper.readItem<T>(documentId, this.dbName, this.collectionName, partitionKey, throwIfNotSuccess);
     }
 
     public async readAllDocument<T>(): Promise<CosmosOperationResponse<T[]>> {
@@ -47,12 +51,17 @@ export class CosmosContainerClient {
      * @param document Document to write to a storage
      * @param partitionKey The storage partition key
      */
-    public async writeDocument<T extends CosmosDocument>(document: T, partitionKey?: string): Promise<CosmosOperationResponse<T>> {
+    public async writeDocument<T extends CosmosDocument>(
+        document: T,
+        partitionKey?: string,
+        throwIfNotSuccess: boolean = true,
+    ): Promise<CosmosOperationResponse<T>> {
         return this.cosmosClientWrapper.upsertItem<T>(
             document,
             this.dbName,
             this.collectionName,
             this.getEffectivePartitionKey(document, partitionKey),
+            throwIfNotSuccess,
         );
     }
 
@@ -61,7 +70,7 @@ export class CosmosContainerClient {
      *
      * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
      * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
-     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     * Plain object properties are merged recursively. Array object merged by item index. Other objects and value types are overridden.
      *
      * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *
@@ -122,10 +131,11 @@ export class CosmosContainerClient {
     /**
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
-     * Source document properties that resolve to undefined are skipped if a destination document value exists.
-     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
+     * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
+     * Plain object properties are merged recursively. Array object merged by item index. Other objects and value types are overridden.
      *
-     * Use document partitionKey property if defined; otherwise, the partitionKey parameter.
+     * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *
      * @param documents Documents to merge with the current corresponding storage documents
      * @param partitionKey The storage partition key

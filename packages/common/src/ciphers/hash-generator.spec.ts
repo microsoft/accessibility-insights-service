@@ -34,31 +34,10 @@ describe('HashGenerator', () => {
         expect(bucket).toEqual('bucket-425');
     });
 
-    it('generate WebsitePageDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsitePageDocumentId('baseUrl', 'url');
-        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'url');
-        expect(id).toEqual(expectedId);
-    });
-
     it('generate WebsiteDocumentId', () => {
         hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getWebsiteDocumentId('baseUrl');
-        const expectedId = hashGenerator.generateBase64Hash('baseUrl');
-        expect(id).toEqual(expectedId);
-    });
-
-    it('generate ScanResultDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getScanResultDocumentId('scanUrl', 'selector', 'html', 'resultId');
-        const expectedId = hashGenerator.generateBase64Hash('scanUrl', 'selector', 'html', 'resultId');
-        expect(id).toEqual(expectedId);
-    });
-
-    it('generate PageScanResultDocumentId', () => {
-        hashGenerator = new HashGenerator(SHA);
-        const id = hashGenerator.getPageScanResultDocumentId('baseUrl', 'url', 123456789);
-        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'url', '123456789');
+        const id = hashGenerator.getWebsiteScanResultDocumentId('baseUrl', 'scanGroupId');
+        const expectedId = hashGenerator.generateBase64Hash('baseUrl', 'scanGroupId');
         expect(id).toEqual(expectedId);
     });
 

@@ -11,3 +11,4 @@ export * from './on-demand-page-scan-request';
 export * from './on-demand-scan-request-message';
 export * from './on-demand-notification-request-message';
 export * from './batch-pool-load-snapshot';
+export * from './website-scan-result';

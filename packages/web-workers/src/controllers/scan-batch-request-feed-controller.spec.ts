@@ -6,17 +6,22 @@ import { Context } from '@azure/functions';
 import { ServiceConfiguration } from 'common';
 import { isEmpty, isNil } from 'lodash';
 import * as MockDate from 'mockdate';
-import { OnDemandPageScanRunResultProvider, PageScanRequestProvider, PartitionKeyFactory, ScanDataProvider } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    PageScanRequestProvider,
+    PartitionKeyFactory,
+    ScanDataProvider,
+    WebsiteScanResultProvider,
+} from 'service-library';
 import {
     ItemType,
     OnDemandPageScanBatchRequest,
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
-    ReportGroup,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { ScanBatchRequestFeedController } from './scan-batch-request-feed-controller';
 
@@ -29,6 +34,7 @@ let scanDataProviderMock: IMock<ScanDataProvider>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let serviceConfigurationMock: IMock<ServiceConfiguration>;
 let loggerMock: IMock<MockableLogger>;
+let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
 let context: Context;
 let dateNow: Date;
 
@@ -42,12 +48,14 @@ beforeEach(() => {
     partitionKeyFactoryMock = Mock.ofType(PartitionKeyFactory);
     serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
     loggerMock = Mock.ofType(MockableLogger);
+    websiteScanResultProviderMock = Mock.ofType(WebsiteScanResultProvider);
     context = <Context>(<unknown>{ bindingDefinitions: {} });
 
     scanBatchRequestFeedController = new ScanBatchRequestFeedController(
         onDemandPageScanRunResultProviderMock.object,
         pageScanRequestProviderMock.object,
         scanDataProviderMock.object,
+        websiteScanResultProviderMock.object,
         partitionKeyFactoryMock.object,
         serviceConfigurationMock.object,
         loggerMock.object,
@@ -56,9 +64,11 @@ beforeEach(() => {
 
 afterEach(() => {
     MockDate.reset();
+
     onDemandPageScanRunResultProviderMock.verifyAll();
     pageScanRequestProviderMock.verifyAll();
     scanDataProviderMock.verifyAll();
+    websiteScanResultProviderMock.verifyAll();
     partitionKeyFactoryMock.verifyAll();
     loggerMock.verifyAll();
 });
@@ -103,7 +113,7 @@ describe(ScanBatchRequestFeedController, () => {
                         site: {
                             baseUrl: 'base-url-1',
                         },
-                        reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
+                        reportGroups: [{ consolidatedId: 'consolidated-id-1' }, { consolidatedId: 'consolidated-id-2' }],
                     },
                     {
                         scanId: 'scan-2',
@@ -135,7 +145,9 @@ describe(ScanBatchRequestFeedController, () => {
                 ],
             },
         ] as OnDemandPageScanBatchRequest[];
-        setupOnDemandPageScanRunResultProviderMock(documents);
+
+        const websiteScanResults = setupWebsiteScanResultProviderMock(documents);
+        setupOnDemandPageScanRunResultProviderMock(documents, websiteScanResults);
         setupPageScanRequestProviderMock(documents);
         setupPartitionKeyFactoryMock(documents);
         loggerMock
@@ -149,12 +161,48 @@ describe(ScanBatchRequestFeedController, () => {
     });
 });
 
-function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
+function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequest[]): Partial<WebsiteScanResult>[] {
+    const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
+    documents.map((document) => {
+        document.scanRunBatchRequest
+            .filter((request) => request.reportGroups !== undefined)
+            .map((request) => {
+                request.reportGroups.map((reportGroup) => {
+                    const websiteScanResult = {
+                        baseUrl: request.site.baseUrl,
+                        scanGroupId: reportGroup.consolidatedId,
+                        pageScans: [
+                            {
+                                scanId: request.scanId,
+                                url: request.url,
+                                timestamp: dateNow.toJSON(),
+                            },
+                        ],
+                    } as WebsiteScanResult;
+
+                    const documentId = `db-id-${reportGroup.consolidatedId}`;
+                    websiteScanRequests.push({ ...websiteScanResult, id: documentId });
+                    websiteScanResultProviderMock
+                        .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScanResult)))
+                        .returns(() => Promise.resolve({ ...websiteScanResult, id: documentId }))
+                        .verifiable();
+                });
+            });
+    });
+
+    return websiteScanRequests;
+}
+
+function setupOnDemandPageScanRunResultProviderMock(
+    documents: OnDemandPageScanBatchRequest[],
+    websiteScanResults: Partial<WebsiteScanResult>[],
+): void {
     documents.map((document) => {
         const dbDocuments = document.scanRunBatchRequest
             .filter((request) => request.scanId !== undefined)
             .map<OnDemandPageScanResult>((request) => {
-                const res: OnDemandPageScanResult = {
+                const websiteScanIds = websiteScanResults.filter((r) => r.pageScans[0].scanId === request.scanId).map((r) => r.id);
+                const result: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
                     priority: request.priority,
@@ -165,55 +213,48 @@ function setupOnDemandPageScanRunResultProviderMock(documents: OnDemandPageScanB
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
+                    websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
                 };
+
                 if (request.scanNotifyUrl !== undefined) {
-                    res.notification = {
+                    result.notification = {
                         state: 'pending',
                         scanNotifyUrl: request.scanNotifyUrl,
                     };
                 }
-                if (request.site !== undefined) {
-                    res.site = request.site;
-                }
-                if (!isEmpty(request.reportGroups)) {
-                    res.reportGroups = request.reportGroups.map<ReportGroup>((reportGroup) => {
-                        return {
-                            consolidatedId: reportGroup.consolidatedId,
-                        } as ReportGroup;
-                    });
-                }
 
-                return res;
+                return result;
             });
-        onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(dbDocuments)).verifiable(Times.once());
+        onDemandPageScanRunResultProviderMock.setup(async (o) => o.writeScanRuns(It.isValue(dbDocuments))).verifiable(Times.once());
     });
 }
 
 function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchRequest[]): void {
     documents.map((document) => {
         const dbDocuments = document.scanRunBatchRequest
-            .filter((request) => request.scanId !== undefined)
-            .map<OnDemandPageScanRequest>((request) => {
-                const res: OnDemandPageScanRequest = {
-                    id: request.scanId,
-                    url: request.url,
-                    priority: request.priority,
+            .filter((batchRequest) => batchRequest.scanId !== undefined)
+            .map<OnDemandPageScanRequest>((scanRequest) => {
+                const request: OnDemandPageScanRequest = {
+                    id: scanRequest.scanId,
+                    url: scanRequest.url,
+                    priority: scanRequest.priority,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
                 };
 
-                if (!isNil(request.scanNotifyUrl)) {
-                    res.scanNotifyUrl = request.scanNotifyUrl;
-                }
-                if (!isNil(request.site)) {
-                    res.site = request.site;
+                if (!isNil(scanRequest.scanNotifyUrl)) {
+                    request.scanNotifyUrl = scanRequest.scanNotifyUrl;
                 }
 
-                if (!isEmpty(request.reportGroups)) {
-                    res.reportGroups = request.reportGroups;
+                if (!isNil(scanRequest.site)) {
+                    request.site = scanRequest.site;
                 }
 
-                return res;
+                if (!isEmpty(scanRequest.reportGroups)) {
+                    request.reportGroups = scanRequest.reportGroups;
+                }
+
+                return request;
             });
         pageScanRequestProviderMock.setup(async (o) => o.insertRequests(dbDocuments)).verifiable(Times.once());
         scanDataProviderMock.setup(async (o) => o.deleteBatchRequest(document)).verifiable(Times.once());

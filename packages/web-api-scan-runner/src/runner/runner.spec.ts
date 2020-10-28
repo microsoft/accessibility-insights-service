@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportService } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
 import {
     ItemType,
     OnDemandNotificationRequestMessage,
@@ -35,7 +35,7 @@ describe(Runner, () => {
     let scannerMock: IMock<Scanner>;
     let scanMetadataConfig: IMock<ScanMetadataConfig>;
     let loggerMock: IMock<MockableLogger>;
-    let pageScanRunReportServiceMock: IMock<PageScanRunReportService>;
+    let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let reportGeneratorMock: IMock<ReportGenerator>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
@@ -149,7 +149,7 @@ describe(Runner, () => {
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
         scannerMock = Mock.ofType<Scanner>();
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
-        pageScanRunReportServiceMock = Mock.ofType(PageScanRunReportService, MockBehavior.Strict);
+        pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
@@ -173,7 +173,7 @@ describe(Runner, () => {
             scannerMock.object,
             onDemandPageScanRunResultProviderMock.object,
             loggerMock.object,
-            pageScanRunReportServiceMock.object,
+            pageScanRunReportProviderMock.object,
             reportGeneratorMock.object,
             serviceConfigurationMock.object,
             notificationQueueMessageSenderMock.object,
@@ -493,7 +493,7 @@ describe(Runner, () => {
     }
 
     function setupSaveReportCall(report: GeneratedReport, href: string): void {
-        pageScanRunReportServiceMock
+        pageScanRunReportProviderMock
             .setup(async (s) => s.saveReport(report.id, report.content))
             .returns(async () => Promise.resolve(href))
             .verifiable();

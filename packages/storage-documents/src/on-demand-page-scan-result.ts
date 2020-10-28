@@ -35,12 +35,11 @@ export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
     batchRequestId?: string;
     url: string;
-    site?: Website;
+    websiteScanIds?: string[];
     priority: number;
     scannedUrl?: string;
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
-    reportGroups?: ReportGroup[];
     run: OnDemandPageScanRunResult;
     scanNotifyUrl?: string;
     notification?: ScanCompletedNotification;
@@ -75,13 +74,4 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
-}
-
-export interface Website {
-    baseUrl: string;
-}
-
-export interface ReportGroup {
-    consolidatedId: string;
-    reportId: string;
 }

@@ -17,7 +17,6 @@ import {
     ScanCompletedNotification as Notification,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
-
 import { ScanErrorConverter } from './scan-error-converter';
 import { ScanResponseConverter } from './scan-response-converter';
 
@@ -206,7 +205,7 @@ describe(ScanResponseConverter, () => {
 
     it('includes consolidated-html report in response when consolidatedId is present', () => {
         const pageScanDbResult = getPageScanResult('completed', true);
-        pageScanDbResult.reportGroups = [{ consolidatedId: 'consolidatedId', reportId: 'reportId' }];
+        pageScanDbResult.websiteScanIds = ['websiteScanId'];
 
         const responseExpected = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
         responseExpected.reports.push({

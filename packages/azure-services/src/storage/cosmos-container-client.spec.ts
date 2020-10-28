@@ -309,7 +309,7 @@ describe('CosmosContainerClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(async (o) => o.upsertItem(item, dbName, collectionName, item.partitionKey))
+            .setup(async (o) => o.upsertItem(item, dbName, collectionName, item.partitionKey, true))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
@@ -330,7 +330,7 @@ describe('CosmosContainerClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(async (o) => o.upsertItem(item, dbName, collectionName, partitionKey))
+            .setup(async (o) => o.upsertItem(item, dbName, collectionName, partitionKey, true))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 
@@ -349,7 +349,7 @@ describe('CosmosContainerClient', () => {
             statusCode: 200,
         };
         cosmosClientWrapperMock
-            .setup(async (o) => o.readItem('id', dbName, collectionName, partitionKey))
+            .setup(async (o) => o.readItem('id', dbName, collectionName, partitionKey, true))
             .returns(async () => Promise.resolve({ statusCode: 200, item: item }))
             .verifiable(Times.once());
 

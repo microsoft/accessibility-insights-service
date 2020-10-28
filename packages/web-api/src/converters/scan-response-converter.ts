@@ -89,7 +89,7 @@ export class ScanResponseConverter {
 
         let scanReports = pageScanResultDocument.reports;
 
-        if (isEmpty(pageScanResultDocument.reportGroups)) {
+        if (isEmpty(pageScanResultDocument.websiteScanIds)) {
             scanReports = pageScanResultDocument.reports.filter((report) => {
                 return report.format !== 'consolidated-html';
             });

@@ -10,6 +10,7 @@ import {
     PartitionKeyFactory,
     ScanDataProvider,
     WebController,
+    WebsiteScanResultProvider,
 } from 'service-library';
 import {
     ItemType,
@@ -17,8 +18,8 @@ import {
     OnDemandPageScanRequest,
     OnDemandPageScanResult,
     PartitionKey,
-    ReportGroup,
     ScanRunBatchRequest,
+    WebsiteScanResult,
 } from 'storage-documents';
 
 interface ScanRequestTelemetryProperties {
@@ -41,6 +42,7 @@ export class ScanBatchRequestFeedController extends WebController {
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(PageScanRequestProvider) private readonly pageScanRequestProvider: PageScanRequestProvider,
         @inject(ScanDataProvider) private readonly scanDataProvider: ScanDataProvider,
+        @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
@@ -94,11 +96,15 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
+        const websiteScanResults = await this.updateWebsiteScanResults(requests);
         const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
             this.logger.logInfo('Created new scan result document in scan result storage container.', {
                 batchRequestId,
                 scanId: request.scanId,
             });
+            const websiteScanIds = websiteScanResults
+                .filter((websiteScan) => websiteScan.pageScans.some((pageScan) => pageScan.scanId === request.scanId))
+                .map((websiteScan) => websiteScan.id);
 
             return {
                 id: request.scanId,
@@ -119,14 +125,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                ...(isEmpty(request.site) ? {} : { site: request.site }),
-                ...(isEmpty(request.reportGroups)
-                    ? {}
-                    : {
-                          reportGroups: request.reportGroups.map<ReportGroup>((reportGroup) => {
-                              return { consolidatedId: reportGroup.consolidatedId } as ReportGroup;
-                          }),
-                      }),
+                websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
             };
         });
 
@@ -134,6 +133,40 @@ export class ScanBatchRequestFeedController extends WebController {
         this.logger.logInfo(
             `Added scan requests to permanent scan result storage container.`,
             this.getLogPropertiesForRequests(requests, batchRequestId),
+        );
+    }
+
+    private async updateWebsiteScanResults(requests: ScanRunBatchRequest[]): Promise<WebsiteScanResult[]> {
+        const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
+        requests.map((request) => {
+            if (request.reportGroups !== undefined) {
+                request.reportGroups.map((reportGroup) => {
+                    websiteScanRequests.push({
+                        baseUrl: request.site.baseUrl,
+                        scanGroupId: reportGroup.consolidatedId,
+                        pageScans: [
+                            {
+                                scanId: request.scanId,
+                                url: request.url,
+                                timestamp: new Date().toJSON(),
+                            },
+                        ],
+                    });
+                });
+            }
+        });
+
+        return Promise.all(
+            websiteScanRequests.map(async (request) => {
+                const websiteScanResult = await this.websiteScanResultProvider.mergeOrCreate(request);
+                this.logger.logInfo('Updated website scan result document.', {
+                    scanId: request.pageScans[0].scanId,
+                    websiteScanId: websiteScanResult.id,
+                    scanGroupId: websiteScanResult.scanGroupId,
+                });
+
+                return websiteScanResult;
+            }),
         );
     }
 
