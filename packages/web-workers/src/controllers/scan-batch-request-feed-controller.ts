@@ -103,7 +103,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 scanId: request.scanId,
             });
             const websiteScanIds = websiteScanResults
-                .filter((websiteScan) => websiteScan.pageScans[0].scanId === request.scanId)
+                .filter((websiteScan) => websiteScan.pageScans.some((pageScan) => pageScan.scanId === request.scanId))
                 .map((websiteScan) => websiteScan.id);
 
             return {
@@ -125,7 +125,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
+                websiteScanIds,
             };
         });
 
