@@ -31,7 +31,11 @@ Deploy Azure Functions binaries to the Azure Functions App. The Azure Functions 
 
 Azure Functions local debugging is supported from within Visual Studio Code by running function host locally and attaching to the host process. More details on how to to debug Azure Functions can be found [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#start).
 
-The Azure Storage should be configured for use by the function instance. When debugging on Windows the Azure Storage Emulator can be used instead. When there is no Azure Storage Emulator available the **local.settings.json** file should have the **AzureWebJobsStorage** property set to the Azure Storage connection string value and the **COSMOS_CONNECTION_STRING** property set to the Cosmos DB connection string value.
+The Azure Storage should be configured for use by the function instance. When debugging on Windows the Azure Storage Emulator can be used instead. When there is no Azure Storage Emulator available the **local.settings.json** file should have the **AzureWebJobsStorage** property set to the Azure Storage connection string value and the **COSMOS_CONNECTION_STRING** property set to the Cosmos DB connection string value. When there is an existing service deployment the **local.settings.json** file can be auto-generated from an existing function app:
+
+```bash
+        func azure functionapp fetch-app-settings <FunctionAppName>
+```
 
 Select **Attach to Azure Functions host** from Debug options within Visual Studio Core. When function host is started use any client tool to send HTTP request to the local host URL printed in terminal console.
 
