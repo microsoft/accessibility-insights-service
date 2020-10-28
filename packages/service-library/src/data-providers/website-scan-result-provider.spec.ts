@@ -9,6 +9,7 @@ import { HashGenerator, RetryHelper } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import moment from 'moment';
+import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider } from './website-scan-result-provider';
 
@@ -58,9 +59,9 @@ describe(WebsiteScanResultProvider, () => {
             baseUrl: 'baseUrl',
             scanGroupId: 'scanGroupId',
             pageScans: [
-                { scanId: 'scanId-new-to-skip', url: 'url1', timestamp: moment(dateNow).add('minute', -10).toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add('minute', 20).toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url4', timestamp: new Date().toJSON() },
+                { scanId: 'scanId-new-to-skip', url: 'url1', timestamp: moment(dateNow).add(-7, 'minute').toJSON() },
+                { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
+                { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
             ],
         } as WebsiteScanResult;
         const websiteScanResultDbDocument = {
@@ -81,6 +82,12 @@ describe(WebsiteScanResultProvider, () => {
             partitionKey: 'partitionKey',
             itemType: ItemType.websiteScanResult,
             _etag: 'etag', // should preserve current db document etag
+            pageScans: [
+                { scanId: 'scanId-current-to-keep', url: 'url1', timestamp: moment(dateNow).toJSON() },
+                { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
+                { scanId: 'scanId-current-to-keep', url: 'url3', timestamp: moment(dateNow).toJSON() },
+                { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
+            ],
         } as WebsiteScanResult;
         hashGeneratorMock
             .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))

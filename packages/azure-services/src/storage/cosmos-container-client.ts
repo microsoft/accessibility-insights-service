@@ -70,7 +70,7 @@ export class CosmosContainerClient {
      *
      * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
      * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
-     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     * Plain object properties are merged recursively. Array object merged by item index. Other objects and value types are overridden.
      *
      * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *
@@ -133,7 +133,7 @@ export class CosmosContainerClient {
      *
      * Source document properties that resolve to `undefined` are skipped on merge if a current storage document value exists.
      * Source document properties that resolve to `null` will set corresponding target properties to `undefined`.
-     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
+     * Plain object properties are merged recursively. Array object merged by item index. Other objects and value types are overridden.
      *
      * Use document `partitionKey` property if defined; otherwise, the `partitionKey` parameter.
      *

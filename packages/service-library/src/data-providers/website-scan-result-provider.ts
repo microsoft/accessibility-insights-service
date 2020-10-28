@@ -31,7 +31,6 @@ export class WebsiteScanResultProvider {
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
-     * Array and plain object properties are merged recursively. Other objects and value types are overridden.
      */
     public async mergeOrCreate(websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResult> {
         const scanResultNormalized = this.normalizeDbDocument(websiteScanResult);
@@ -59,23 +58,35 @@ export class WebsiteScanResultProvider {
         storageDocument: WebsiteScanResult,
         websiteScanResult: Partial<WebsiteScanResult>,
     ): Promise<WebsiteScanResult> {
-        // Merge with the current storage document
-        _.mergeWith(storageDocument, websiteScanResult, (target, source, key) => {
-            // Preserve the storage document _etag value
+        const mergedDocument = _.mergeWith(storageDocument, websiteScanResult, (target, source, key) => {
+            // Preserve the current _etag value
             if (key === '_etag') {
                 return target;
+            }
+
+            if (_.isArray(target)) {
+                if (key !== 'pageScans' && key !== 'reports') {
+                    throw new Error(`Merge of array type value '${key}' is not implemented.`);
+                }
+
+                return target.concat(source);
             }
 
             return undefined;
         });
 
-        // Remove duplicate page scans
-        const pageScansByUrl = _.groupBy(storageDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
-        storageDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
-            return _.maxBy(pageScansByUrl[url], (scan) => moment.utc(scan.timestamp));
-        });
+        if (mergedDocument.reports !== undefined) {
+            mergedDocument.reports = _.uniqBy(mergedDocument.reports, (r) => r.reportId);
+        }
 
-        return (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(storageDocument)).item;
+        if (mergedDocument.pageScans !== undefined) {
+            const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
+            mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
+                return _.maxBy(pageScansByUrl[url], (scan) => moment.utc(scan.timestamp).valueOf());
+            });
+        }
+
+        return (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(mergedDocument)).item;
     }
 
     private async createIfNotExists(
