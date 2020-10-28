@@ -125,7 +125,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanIds,
+                websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
             };
         });
 
