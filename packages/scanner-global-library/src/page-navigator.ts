@@ -41,6 +41,16 @@ export class PageNavigator {
             return undefined;
         }
 
+        if (response === undefined) {
+            onNavigationError({
+                errorType: 'NavigationError',
+                message: 'Unable to get a page response from the browser.',
+                stack: new Error().stack,
+            });
+
+            return undefined;
+        }
+
         // Validate HTTP response
         const responseError = this.pageResponseProcessor.getResponseError(response);
         if (responseError !== undefined) {
