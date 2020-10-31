@@ -3,7 +3,7 @@
 import * as utils from 'util';
 import { ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import moment from 'moment';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
@@ -16,6 +16,7 @@ import { loggerTypes } from './logger-types';
 
 @injectable()
 export abstract class BaseConsoleLoggerClient implements LoggerClient {
+    public initialized: boolean = false;
     private isConsoleLogEnabled: boolean;
     private baseProperties?: BaseTelemetryProperties;
 
@@ -26,8 +27,8 @@ export abstract class BaseConsoleLoggerClient implements LoggerClient {
 
     public async setup(baseProperties?: BaseTelemetryProperties): Promise<void> {
         this.baseProperties = baseProperties;
-
         this.isConsoleLogEnabled = (await this.serviceConfig.getConfigValue('logConfig')).logInConsole;
+        this.initialized = true;
     }
 
     public trackMetric(name: string, value: number): void {

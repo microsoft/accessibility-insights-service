@@ -3,8 +3,8 @@
 import 'reflect-metadata';
 
 import { System } from 'common';
-import * as _ from 'lodash';
-import { IMock, Mock, MockBehavior, Times } from 'typemoq';
+import _ from 'lodash';
+import { IMock, Mock, Times, It, MockBehavior } from 'typemoq';
 import { VError } from 'verror';
 import { AvailabilityTelemetry } from './availability-telemetry';
 import { BaseTelemetryProperties } from './base-telemetry-properties';
@@ -25,23 +25,31 @@ describe(GlobalLogger, () => {
         processStub = { execArgv: ['--test'] } as typeof process;
         loggerClient1Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
         loggerClient2Mock = Mock.ofType2(ConsoleLoggerClient, null, MockBehavior.Strict);
+        setupAllLoggerClientsInit();
 
-        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], processStub);
+        testSubject = new GlobalLogger([loggerClient1Mock.object, loggerClient2Mock.object], processStub, 500);
     });
 
     describe('setup', () => {
         it('verify default setup', async () => {
-            setupCallsForTelemetrySetup();
-
             await testSubject.setup();
 
             verifyMocks();
         });
 
+        it('throw when client fail to initialize', async () => {
+            invokeAllLoggerClientMocks((client) => {
+                client.reset();
+                client.setup((o) => o.initialized).returns(() => false);
+                client.setup(async (o) => o.setup(It.isAny())).returns(() => Promise.resolve());
+            });
+
+            await expect(testSubject.setup()).rejects.toThrowError(/Failed to initialize logger clients/);
+        });
+
         it('does not initialize more than once', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-
-            setupCallsForTelemetrySetup(baseProps);
+            setupAllLoggerClientsInit(baseProps);
 
             await testSubject.setup(baseProps);
             await testSubject.setup(baseProps);
@@ -51,8 +59,7 @@ describe(GlobalLogger, () => {
 
         it('initializes with additional common properties', async () => {
             const baseProps: BaseTelemetryProperties = { foo: 'bar', source: 'test-source' };
-
-            setupCallsForTelemetrySetup(baseProps);
+            setupAllLoggerClientsInit(baseProps);
 
             await testSubject.setup(baseProps);
 
@@ -70,9 +77,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when value not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackMetric('metric1', 1)).verifiable(Times.once()));
 
             testSubject.trackMetric('metric1');
@@ -81,9 +86,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when value passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackMetric('metric1', 10)).verifiable(Times.once()));
 
             testSubject.trackMetric('metric1', 10);
@@ -102,9 +105,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when properties/measurements not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackEvent('HealthCheck', undefined, undefined)).verifiable(Times.once()));
 
             testSubject.trackEvent('HealthCheck');
@@ -115,9 +116,7 @@ describe(GlobalLogger, () => {
         it('when properties/measurements passed', async () => {
             const properties = { foo: 'bar' };
             const measurements = { completedScanRequests: 1 };
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) =>
                 m.setup((c) => c.trackEvent('HealthCheck', properties, measurements)).verifiable(Times.once()),
             );
@@ -141,9 +140,7 @@ describe(GlobalLogger, () => {
         });
 
         it('invokes logger clients', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) =>
                 m.setup((c) => c.trackAvailability(name, availabilityTelemetryData)).verifiable(Times.once()),
             );
@@ -164,9 +161,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, undefined)).verifiable(Times.once()));
 
             testSubject.log('trace1', LogLevel.error);
@@ -176,9 +171,7 @@ describe(GlobalLogger, () => {
 
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('trace1', LogLevel.error, properties)).verifiable(Times.once()));
 
             testSubject.log('trace1', LogLevel.error, properties);
@@ -197,9 +190,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, undefined)).verifiable(Times.once()));
 
             testSubject.logInfo('info1');
@@ -209,9 +200,7 @@ describe(GlobalLogger, () => {
 
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('info1', LogLevel.info, properties)).verifiable(Times.once()));
 
             testSubject.logInfo('info1', properties);
@@ -230,9 +219,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, undefined)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1');
@@ -242,9 +229,7 @@ describe(GlobalLogger, () => {
 
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('warn1', LogLevel.warn, properties)).verifiable(Times.once()));
 
             testSubject.logWarn('warn1', properties);
@@ -263,9 +248,7 @@ describe(GlobalLogger, () => {
         });
 
         it('when properties not passed', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, undefined)).verifiable(Times.once()));
 
             testSubject.logError('error1');
@@ -275,9 +258,7 @@ describe(GlobalLogger, () => {
 
         it('when properties passed', async () => {
             const properties = { foo: 'bar' };
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('error1', LogLevel.error, properties)).verifiable(Times.once()));
 
             testSubject.logError('error1', properties);
@@ -289,9 +270,7 @@ describe(GlobalLogger, () => {
     describe('logVerbose', () => {
         it('--debug is case insensitive', async () => {
             processStub.execArgv = ['--t', '--DEBUG'];
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.log('HealthCheck', LogLevel.verbose, undefined)).verifiable(Times.once()));
 
             testSubject.logVerbose('HealthCheck');
@@ -302,8 +281,6 @@ describe(GlobalLogger, () => {
         describe('in debug mode', () => {
             beforeEach(async () => {
                 processStub.execArgv = ['--t', '--debug'];
-
-                setupCallsForTelemetrySetup();
                 await testSubject.setup();
             });
 
@@ -319,7 +296,6 @@ describe(GlobalLogger, () => {
 
             it('when properties passed', () => {
                 const properties = { foo: 'bar' };
-
                 invokeAllLoggerClientMocks((m) =>
                     m.setup((c) => c.log('HealthCheck', LogLevel.verbose, properties)).verifiable(Times.once()),
                 );
@@ -331,14 +307,18 @@ describe(GlobalLogger, () => {
         });
 
         describe('in normal mode', () => {
-            it('when properties not passed', () => {
+            it('when properties not passed', async () => {
+                await testSubject.setup();
+
                 testSubject.logVerbose('HealthCheck');
 
                 verifyMocks();
             });
 
-            it('when properties passed', () => {
+            it('when properties passed', async () => {
                 const properties = { foo: 'bar' };
+                await testSubject.setup();
+
                 testSubject.logVerbose('HealthCheck', properties);
 
                 verifyMocks();
@@ -357,9 +337,7 @@ describe(GlobalLogger, () => {
 
         it('trackException', async () => {
             const error = new Error('some error');
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) => m.setup((c) => c.trackException(error)).verifiable(Times.once()));
 
             testSubject.trackException(error);
@@ -380,10 +358,7 @@ describe(GlobalLogger, () => {
         it('handles when passed error object', async () => {
             const underlyingError = new Error('internal error');
             const errorMessage = 'error message';
-
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) =>
                 m.setup((c) => c.trackException(new VError(underlyingError, errorMessage))).verifiable(Times.once()),
             );
@@ -396,10 +371,7 @@ describe(GlobalLogger, () => {
         it('handles when passed non-error object', async () => {
             const underlyingError = { err: 'internal error' };
             const errorMessage = 'error message';
-
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) =>
                 m
                     .setup((c) => c.trackException(new VError(new Error(System.serializeError(underlyingError)), errorMessage)))
@@ -420,9 +392,7 @@ describe(GlobalLogger, () => {
         });
 
         it('flushes events', async () => {
-            setupCallsForTelemetrySetup();
             await testSubject.setup();
-
             invokeAllLoggerClientMocks((m) =>
                 m
                     .setup((c) => c.flush())
@@ -439,12 +409,19 @@ describe(GlobalLogger, () => {
         loggerClient2Mock.verifyAll();
     }
 
-    function setupCallsForTelemetrySetup(additionalCommonProps?: BaseTelemetryProperties): void {
-        invokeAllLoggerClientMocks((loggerClient) =>
-            loggerClient
-                .setup(async (c) => c.setup(additionalCommonProps))
-                .returns(async () => Promise.resolve())
-                .verifiable(Times.once()),
+    function setupAllLoggerClientsInit(baseProperties?: BaseTelemetryProperties): void {
+        invokeAllLoggerClientMocks((client) => client.setup((o) => o.initialized).returns(() => false));
+        invokeAllLoggerClientMocks((client) =>
+            client
+                .setup(async (o) => o.setup(baseProperties !== undefined ? baseProperties : It.isAny()))
+                .callback(() => {
+                    client.reset();
+                    client
+                        .setup((o) => o.initialized)
+                        .returns(() => true)
+                        .verifiable(Times.atLeastOnce());
+                })
+                .returns(() => Promise.resolve()),
         );
     }
 

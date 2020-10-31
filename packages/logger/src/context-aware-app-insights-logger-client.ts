@@ -22,6 +22,7 @@ export class ContextAwareAppInsightsLoggerClient extends BaseAppInsightsLoggerCl
         if (!this.globalLoggerClient.isInitialized()) {
             await this.globalLoggerClient.setup();
         }
+
         this.initialized = true;
     }
 

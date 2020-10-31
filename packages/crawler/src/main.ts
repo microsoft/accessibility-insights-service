@@ -132,5 +132,5 @@ interface ScanArguments {
     });
 })().catch((error) => {
     console.log('Exception: ', System.serializeError(error));
-    process.exit(1);
+    process.exitCode = 1;
 });
