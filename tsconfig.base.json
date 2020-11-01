@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
-        "target": "es2018",
+        "target": "ES2019",
         "module": "commonjs",
-        "lib": ["es2018", "dom", "dom.iterable"],
+        "lib": ["ES2019", "dom", "dom.iterable"],
         "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
