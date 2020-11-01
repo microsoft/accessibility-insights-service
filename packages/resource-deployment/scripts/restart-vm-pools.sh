@@ -39,6 +39,8 @@ function waitForStablePoolNodes() {
     end=$((SECONDS + 300))
     printf " - Running .."
     while [ $SECONDS -le $end ]; do
+        # Node states https://docs.microsoft.com/en-us/azure/batch/batch-get-resource-counts#node-state-counts
+
         local total=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.total" -o tsv)
         local idle=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.idle" -o tsv)
         local running=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.running" -o tsv)

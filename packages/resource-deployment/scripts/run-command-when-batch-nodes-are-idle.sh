@@ -57,9 +57,10 @@ function enableJobSchedule() {
 }
 
 waitForNodesToGoIdleByNodeType() {
-    local isIdle=false
     local pool=$1
     local nodeType=$2
+
+    local isIdle=false
     local waitTime=1800
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
@@ -68,30 +69,18 @@ waitForNodesToGoIdleByNodeType() {
     local endTime=$((SECONDS + waitTime))
     printf " - Running .."
     while [ $SECONDS -le $endTime ]; do
+        # Node states https://docs.microsoft.com/en-us/azure/batch/batch-get-resource-counts#node-state-counts
 
-        local totalCount=$(
-            az batch pool node-counts list \
-                --query "$nodeTypeContentSelector.total" \
-                -o tsv
-        )
-        local idleCount=$(
-            az batch pool node-counts list \
-                --query "$nodeTypeContentSelector.idle" \
-                -o tsv
-        )
-        local startTaskFailedCount=$(
-            az batch pool node-counts list \
-                --query "$nodeTypeContentSelector.startTaskFailed" \
-                -o tsv
-        )
+        local totalCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.total" -o tsv)
+        local idleCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.idle" -o tsv)
+        local offlineCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.offline" -o tsv)
+        local preemptedCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.preempted" -o tsv)
+        # error states
+        local startTaskFailedCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.startTaskFailed" -o tsv)
+        local unusableCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.unusable" -o tsv)
+        local unknownCount=$(az batch pool node-counts list --account-name "$batchAccountName" --query "$nodeTypeContentSelector.unknown" -o tsv)
 
-        local unusableCount=$(
-            az batch pool node-counts list \
-                --query "$nodeTypeContentSelector.unusable" \
-                -o tsv
-        )
-
-        local stableCount=$(($idleCount + $startTaskFailedCount + $unusableCount))
+        local stableCount=$(($idleCount + $offlineCount + $preemptedCount + $startTaskFailedCount + $unusableCount + $unknownCount))
         if [[ $stableCount == $totalCount ]]; then
             echo "The '$nodeType' nodes under $pool pool are idle."
             isIdle=true
@@ -106,7 +95,7 @@ waitForNodesToGoIdleByNodeType() {
     az batch pool node-counts list --query "$nodeTypeContentSelector" 1>/dev/null
 
     if [[ $isIdle == false ]]; then
-        echo "Pool $pool & $nodeType is not in the expected state."
+        echo "Pool $pool $nodeType nodes did not become idle."
         exit 1
     fi
 }
