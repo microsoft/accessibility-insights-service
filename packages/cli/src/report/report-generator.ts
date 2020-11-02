@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import {
     AxeReportParameters,
-    CrawlSummaryDetails,
     ReporterFactory,
+    ScanSummaryDetails,
     SummaryScanResult,
     SummaryScanResults,
 } from 'accessibility-insights-report';
@@ -40,13 +40,13 @@ export class ReportGenerator {
         return reporter.fromAxeResult(htmlReportParams).asHTML();
     }
 
-    public async generateSummaryReport(crawlDetails: CrawlSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
+    public async generateSummaryReport(scanDetails: ScanSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
         // eslint-disable-next-line one-var
         const parameters = {
             serviceName: serviceName,
             axeVersion: this.axeInfo.version,
             userAgent: userAgent,
-            crawlDetails: crawlDetails,
+            scanDetails: scanDetails,
             results: this.sortScanResults(results),
         };
         const reporter = this.reporterFactoryFunc();
