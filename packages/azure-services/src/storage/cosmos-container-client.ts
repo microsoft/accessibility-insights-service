@@ -149,10 +149,12 @@ export class CosmosContainerClient {
     }
 
     public async writeDocuments<T>(documents: T[], partitionKey?: string): Promise<void> {
-        documents.forEach(async (document) => {
-            const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
-            await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
-        });
+        await Promise.all(
+            documents.map(async (document) => {
+                const effectivePartitionKey = this.getEffectivePartitionKey(document, partitionKey);
+                await this.cosmosClientWrapper.upsertItem<T>(document, this.dbName, this.collectionName, effectivePartitionKey);
+            }),
+        );
     }
 
     public async tryExecuteOperation<T>(

@@ -15,4 +15,5 @@ export interface LoggerClient {
     trackException(error: Error): void;
     flush(): Promise<void>;
     setCommonProperties(properties: LoggerProperties): void;
+    initialized: boolean;
 }

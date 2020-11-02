@@ -105,7 +105,7 @@ export class BatchTaskConfigGenerator {
 
     private createEnvironmentVariableOptions(environmentSettings: BatchServiceModels.EnvironmentSetting[]): string {
         let options = '';
-        // To pass environment variable from host to container valur should be empty
+        // To pass environment variable from host to container value should be empty
         environmentSettings.forEach((env) => (options += `-e ${env.name} `));
 
         return options.trimRight();

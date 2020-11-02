@@ -4,6 +4,7 @@ import { System } from 'common';
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
+import axe from 'axe-core';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
@@ -52,7 +53,14 @@ export class Page {
 
     private async scanPageForIssues(response: Puppeteer.Response, contentSourcePath?: string): Promise<AxeScanResults> {
         const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
-        const axeResults = await axePuppeteer.analyze();
+        let axeResults: axe.AxeResults;
+        try {
+            axeResults = await axePuppeteer.analyze();
+        } catch (error) {
+            this.logger?.logError('Axe core engine error', { browserError: System.serializeError(error), url: this.page.url() });
+
+            return { error: `Axe core engine error. ${System.serializeError(error)}`, scannedUrl: this.page.url() };
+        }
 
         const scanResults: AxeScanResults = {
             results: axeResults,

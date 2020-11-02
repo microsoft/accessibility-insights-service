@@ -21,7 +21,7 @@ import { setupCliContainer } from './setup-cli-container';
     await cliEntryPoint.runScan(scanArguments);
 })().catch((error) => {
     console.log('Exception occurred while running the tool: ', error);
-    process.exit(1);
+    process.exitCode = 1;
 });
 
 function readScanArguments(): ScanArguments {

@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Start debugging health client",
+            "type": "node",
+            "request": "launch",
+            "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/src/health-checker.ts",
+            "preLaunchTask": "run",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "smartStep": true,
+            "args": [
+                "--clientId",
+                "",
+                "--clientSecret",
+                "",
+                "--authorityUrl",
+                "",
+                "--waitTimeBeforeEvaluationInMinutes",
+                "1",
+                "--evaluationIntervalInMinutes",
+                "1",
+                "--releaseId",
+                "",
+                "--baseUrl",
+                ""
+            ]
+        }
+    ]
+}

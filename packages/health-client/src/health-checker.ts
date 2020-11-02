@@ -19,19 +19,18 @@ type Argv = {
     baseUrl: string;
 };
 
+const testTimeoutInMinutes = 20;
 const argv: Argv = yargs.argv as any;
 
-const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boolean => {
-    return currentTime.getTime() - startTime.getTime() > timeout;
-};
-
 (async () => {
-    const serviceConfig = new ServiceConfiguration();
-    const logger = new GlobalLogger([new ConsoleLoggerClient(serviceConfig, console)], process);
+    const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
     await logger.setup();
-    const cred = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
-    const client = new A11yServiceClient(cred, argv.baseUrl, logger);
-    const testTimeoutInMinutes = 20;
+
+    const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boolean => {
+        return currentTime.getTime() - startTime.getTime() > timeout;
+    };
+    const serviceCredential = new A11yServiceCredential(argv.clientId, argv.clientSecret, argv.clientId, argv.authorityUrl, logger);
+    const client = new A11yServiceClient(serviceCredential, argv.baseUrl, logger);
     const waitTimeBeforeEvaluation = parseInt(argv.waitTimeBeforeEvaluationInMinutes) * 60000;
     const evaluationInterval = parseInt(argv.evaluationIntervalInMinutes) * 60000;
 
@@ -52,17 +51,15 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
                 );
             }
 
-            logger.logInfo(`Functional tests result: ${JSON.stringify(response.body)}`);
-
             healthStatus = response.body.healthStatus;
+            logger.logInfo(`Functional tests result: ${JSON.stringify(response.body)}`);
         } catch (error) {
-            logger.logInfo(`Failed to retrieve functional tests result. ${error}`);
+            logger.logInfo(`Failed to retrieve functional tests result. ${System.serializeError(error)}`);
         }
 
         if (healthStatus !== 'pass') {
             if (isTestTimeout(startTime, new Date(), testTimeoutInMinutes * 60000)) {
                 logger.logInfo('Functional tests result validation timed out.');
-
                 throw new Error('Functional tests result validation timed out.');
             }
 
@@ -76,6 +73,6 @@ const isTestTimeout = (startTime: Date, currentTime: Date, timeout: number): boo
         }
     }
 })().catch((error) => {
-    console.log(`Exception: ${error}`);
-    process.exit(1);
+    console.log(System.serializeError(error));
+    process.exitCode = 1;
 });

@@ -3,6 +3,7 @@
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
+import { System } from 'common';
 
 @injectable()
 export class PageHandler {
@@ -16,9 +17,16 @@ export class PageHandler {
         let continuousStableCheckCount = 0;
         let lastCheckPageHtmlContentSize = 0;
         let pageHasStableContent = false;
+        let pageHtmlContentSize = 0;
 
         while (checkCount < maxCheckCount) {
-            const pageHtmlContentSize = await page.evaluate(() => document.body.innerHTML.length);
+            try {
+                // Page evaluation may fail because of a navigation
+                pageHtmlContentSize = await page.evaluate(() => document.body.innerHTML.length);
+            } catch (error) {
+                pageHtmlContentSize = 0;
+                this.logger?.logError(`Page evaluation failed.`, { error: System.serializeError(error) });
+            }
 
             if (lastCheckPageHtmlContentSize !== 0 && pageHtmlContentSize === lastCheckPageHtmlContentSize) {
                 continuousStableCheckCount += 1;
