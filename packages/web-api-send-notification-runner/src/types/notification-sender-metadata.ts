@@ -6,5 +6,5 @@ export interface NotificationSenderMetadata {
     scanId: string;
     scanNotifyUrl: string;
     runStatus: OnDemandPageScanRunState;
-    scanStatus: ScanState;
+    scanStatus?: ScanState;
 }

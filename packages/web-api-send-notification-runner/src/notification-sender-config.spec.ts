@@ -28,6 +28,6 @@ describe(NotificationSenderConfig, () => {
 
     it('getConfig', () => {
         expect(testSubject.getConfig()).toBe(argvVal);
-        argvMock.verify((a) => a.demandOption(['scanId', 'scanNotifyUrl', 'runStatus', 'scanStatus']), Times.once());
+        argvMock.verify((a) => a.demandOption(['scanId', 'scanNotifyUrl', 'runStatus']), Times.once());
     });
 });
