@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import { CrawlerEntryPoint, ScanResults } from 'accessibility-insights-crawler';
-import { CrawlSummaryDetails } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
+import { ScanSummaryDetails } from 'accessibility-insights-report';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { ReportNameGenerator } from '../report/report-name-generator';
@@ -63,7 +63,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         const issueCount = scanResult.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
         console.log(`Found ${issueCount} accessibility issues`);
 
-        const crawlDetails: CrawlSummaryDetails = {
+        const scanDetails: ScanSummaryDetails = {
             baseUrl: scanResult.scanMetadata.baseUrl,
             basePageTitle: scanResult.scanMetadata.basePageTitle,
             scanStart: startDate,
@@ -72,7 +72,7 @@ export class CrawlerCommandRunner implements CommandRunner {
         };
 
         const reportContent = await this.reportGenerator.generateSummaryReport(
-            crawlDetails,
+            scanDetails,
             scanResult.summaryScanResults,
             scanResult.scanMetadata.userAgent,
         );

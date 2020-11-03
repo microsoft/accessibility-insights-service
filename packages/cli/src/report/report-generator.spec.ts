@@ -68,7 +68,7 @@ describe('ReportGenerator', () => {
     });
 
     it('generate summary report ', async () => {
-        const crawlDetails = {
+        const scanDetails = {
             baseUrl: 'base url',
             basePageTitle: 'base page title',
             scanStart: reportGenerationTime,
@@ -134,7 +134,7 @@ describe('ReportGenerator', () => {
             serviceName: serviceName,
             axeVersion: 'axe version',
             userAgent: 'user agent',
-            crawlDetails: crawlDetails,
+            scanDetails: scanDetails,
             results: sortedResults,
         };
 
@@ -148,7 +148,7 @@ describe('ReportGenerator', () => {
             .returns(() => htmlReport)
             .verifiable(Times.once());
 
-        const report = await reportGenerator.generateSummaryReport(crawlDetails, results, 'user agent');
+        const report = await reportGenerator.generateSummaryReport(scanDetails, results, 'user agent');
 
         expect(report).toEqual(htmlReportString);
     });

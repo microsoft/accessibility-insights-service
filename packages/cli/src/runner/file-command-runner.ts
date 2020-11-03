@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as fs from 'fs';
-import { CrawlSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
+import { ScanSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
@@ -71,7 +71,7 @@ export class FileCommandRunner implements CommandRunner {
         const issueCount = this.summaryScanResults.failed.reduce((a, b) => a + b.numFailures, 0);
         console.log(`Found ${issueCount} accessibility issues`);
 
-        const crawlDetails: CrawlSummaryDetails = {
+        const scanDetails: ScanSummaryDetails = {
             baseUrl: scanArguments.inputFile,
             basePageTitle: '',
             scanStart: startDate,
@@ -80,7 +80,7 @@ export class FileCommandRunner implements CommandRunner {
         };
 
         const reportContent = await this.reportGenerator.generateSummaryReport(
-            crawlDetails,
+            scanDetails,
             this.summaryScanResults,
             this.scanner.getUserAgent(),
         );
