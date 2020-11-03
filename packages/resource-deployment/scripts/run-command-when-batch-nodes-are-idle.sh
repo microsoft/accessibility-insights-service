@@ -39,9 +39,8 @@ echo "Run command when all pools are idle:
 function setJobScheduleStatus() {
     local status=$1
 
-    query="[?contains('$pools', jobSpecification.poolInfo.poolId)].id"
-    schedules=$(az batch job-schedule list --query "$query" -o tsv)
-
+    local query="[?contains('$pools', jobSpecification.poolInfo.poolId)].id"
+    local schedules=$(az batch job-schedule list --query "$query" -o tsv)
     for schedule in $schedules; do
         echo "Setting job schedule $schedule status to $status"
         az batch job-schedule $status --job-schedule-id "$schedule" 1>/dev/null
@@ -61,7 +60,7 @@ waitForNodesToGoIdleByNodeType() {
     local nodeType=$2
 
     local isIdle=false
-    local waitTime=1800
+    local waitTime=300
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
     echo "Waiting for $nodeType nodes under $pool to go idle"
@@ -96,6 +95,7 @@ waitForNodesToGoIdleByNodeType() {
 
     if [[ $isIdle == false ]]; then
         echo "Pool $pool $nodeType nodes did not become idle."
+        enableJobSchedule
         exit 1
     fi
 }

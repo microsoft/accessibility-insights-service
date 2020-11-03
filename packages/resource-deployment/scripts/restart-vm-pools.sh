@@ -23,7 +23,7 @@ function rebootNodes() {
 
         for node in $nodes; do
             echo "Restarting node $node under pool $pool"
-            az batch node reboot --node-id $node --pool-id $pool --account-name $batchAccountName --node-reboot-option taskcompletion 1>/dev/null
+            az batch node reboot --node-id $node --pool-id $pool --account-name $batchAccountName --node-reboot-option terminate 1>/dev/null
         done
     done
 }
