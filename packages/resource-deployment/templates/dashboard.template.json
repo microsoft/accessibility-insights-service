@@ -63,7 +63,7 @@
                                     "settings": {
                                         "content": {
                                             "settings": {
-                                                "content": "Use this <a href='https://microsoft.sharepoint.com/teams/DD_VSCS/CandC/Keros/_layouts/OneNote.aspx?id=%2Fteams%2FDD_VSCS%2FCandC%2FKeros%2FDocuments%2FKeros%20Engineering&wd=target%28AI%20Service%20Live%20Site%20Support.one%7C700F8953-D0B7-49A5-BA93-54DA25211390%2F%29' target='_blank'>troubleshooting guide</a> to solve some of the most common issues you may face during service outage.\n\nCheck the <a href='https://status.azure.com/en-us/status'>Azure status</a> for the ongoing issues that may be impacting our service.",
+                                                "content": "Use this <a href='https://microsoft.sharepoint.com/teams/DD_VSCS/CandC/Keros/_layouts/15/Doc.aspx?sourcedoc=%7Bd7eb83b2-2900-4d61-8206-384f21d7a0a2%7D&action=edit&wd=target%28DRI.one%7C87bf03df-fae0-4345-8861-64589acaa57d%2FAI%20Service%20Live%20Site%20Support%7Cd2b3343d-fbed-774c-89aa-e21ceba6f0bc%2F%29&wdorigin=703' target='_blank'>troubleshooting guide</a> to solve some of the most common issues you may face during service outage.\n\nCheck the <a href='https://status.azure.com/en-us/status'>Azure status</a> for the ongoing issues that may be impacting our service.",
                                                 "title": "Accessibility Insights Service",
                                                 "subtitle": "Monitoring Dashboard",
                                                 "markdownSource": 1
