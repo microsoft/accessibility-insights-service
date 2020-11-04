@@ -62,6 +62,6 @@
         "reflect-metadata": "^0.1.13",
         "scanner-global-library": "1.0.0",
         "sha.js": "^2.4.11",
-        "yargs": "^15.3.1"
+        "yargs": "^16.1.0"
     }
 }
