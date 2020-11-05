@@ -91,6 +91,10 @@ getCosmosAccessKey() {
     fi
 }
 
+getCosmosDbApiUrl() {
+    cosmosDbApiUrl="https://management.azure.com/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosAccountName"
+}
+
 getStorageAccessKey() {
     storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
 
@@ -144,6 +148,9 @@ if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdC
     exitWithUsageInfo
 fi
 
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
+
 . "${0%/*}/get-resource-names.sh"
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
@@ -155,6 +162,9 @@ grantWritePermissionToKeyVault
 
 getCosmosDbUrl
 pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
+
+getCosmosDbApiUrl
+pushSecretToKeyVault "cosmosDbApiUrl" "$cosmosDbApiUrl"
 
 getCosmosAccessKey
 pushSecretToKeyVault "cosmosDbKey" "$cosmosAccessKey"

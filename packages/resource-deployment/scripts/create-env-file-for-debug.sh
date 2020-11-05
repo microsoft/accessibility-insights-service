@@ -32,6 +32,10 @@ getCosmosDbAccessKey() {
     fi
 }
 
+getCosmosDbApiUrl() {
+    cosmosDbApiUrl="https://management.azure.com/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosAccountName"
+}
+
 getStorageAccessKey() {
     storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
 
@@ -77,6 +81,7 @@ fi
 
 getCosmosDbUrl
 getCosmosDbAccessKey
+getCosmosDbApiUrl
 getStorageAccessKey
 getAppInsightKey
 getBatchAccountEndpoint
@@ -106,6 +111,7 @@ APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
 
 COSMOS_DB_URL=$cosmosDbUrl
 COSMOS_DB_KEY=$cosmosDbAccessKey
+COSMOS_DB_API_URL=$cosmosDbApiUrl
 
 AZURE_STORAGE_NAME=$storageAccountName
 AZURE_STORAGE_KEY=$storageAccountKey
