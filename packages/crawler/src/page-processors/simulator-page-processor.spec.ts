@@ -6,6 +6,7 @@ import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageNavigator } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
+import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -37,6 +38,7 @@ describe(SimulatorPageProcessor, () => {
     let requestStub: Apify.Request;
     let pageStub: Page;
     let simulatorPageProcessor: SimulatorPageProcessor;
+    let axeResults: AxeResults;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -62,14 +64,19 @@ describe(SimulatorPageProcessor, () => {
             .setup((o) => o.selectors())
             .returns(() => selectors)
             .verifiable();
-
+        axeResults = {
+            url: 'url',
+            passes: [],
+            violations: [{ nodes: [{}] }],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
         requestStub = {
             id: testId,
             url: testUrl,
             userData: {},
             errorMessages: [],
         } as any;
-
         pageStub = {
             url: () => testUrl,
         } as any;
@@ -100,14 +107,14 @@ describe(SimulatorPageProcessor, () => {
     it('pageProcessor, no-op', async () => {
         setupEnqueueLinks(pageStub);
         accessibilityScanOpMock
-            .setup((aso) => aso.run(pageStub, testId, blobStoreMock.object))
-            .returns(async () => Promise.resolve(0))
+            .setup((aso) => aso.run(pageStub, testId))
+            .returns(async () => Promise.resolve(axeResults))
             .verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
-            issueCount: 0,
+            issueCount: 1,
         };
         blobStoreMock.setup((bs) => bs.setValue(`${expectedScanData.id}.data`, expectedScanData)).verifiable();
 
@@ -125,7 +132,7 @@ describe(SimulatorPageProcessor, () => {
         } as any;
 
         setupEnqueueLinks(pageStub);
-        accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId, blobStoreMock.object)).verifiable();
+        accessibilityScanOpMock.setup((aso) => aso.run(pageStub, testId)).verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,

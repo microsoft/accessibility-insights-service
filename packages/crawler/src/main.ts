@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 // eslint-disable-next-line import/no-unassigned-import
 import './global-overrides';
@@ -9,7 +8,7 @@ import { System } from 'common';
 import * as dotenv from 'dotenv';
 import { isEmpty } from 'lodash';
 import * as yargs from 'yargs';
-import { CrawlerEntryPoint } from './crawler-entry-point';
+import { Crawler } from './crawler';
 import { setupCrawlerContainer } from './setup-crawler-container';
 
 interface ScanArguments {
@@ -115,7 +114,7 @@ interface ScanArguments {
         })
         .describe('help', 'Show help').argv as unknown) as ScanArguments;
 
-    await new CrawlerEntryPoint(setupCrawlerContainer()).crawl({
+    await new Crawler(setupCrawlerContainer()).crawl({
         baseUrl: scanArguments.url,
         simulate: scanArguments.simulate,
         selectors: scanArguments.selectors,

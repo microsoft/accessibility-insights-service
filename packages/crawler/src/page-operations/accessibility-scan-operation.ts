@@ -2,25 +2,31 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
+import { AxeResults } from 'axe-core';
 import { PageScanner } from '../scanners/page-scanner';
 import { BlobStore } from '../storage/store-types';
+import { ReportGenerator } from '../reports/report-generator';
+import { LocalBlobStore } from '../storage/local-blob-store';
 
 @injectable()
 export class AccessibilityScanOperation {
-    constructor(@inject(PageScanner) private readonly scanner: PageScanner) {}
+    constructor(
+        @inject(PageScanner) private readonly scanner: PageScanner,
+        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
+        @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
+    ) {}
 
-    public async run(page: Page, id: string, keyValueStore: BlobStore): Promise<number> {
-        const scanResult = await this.scanner.scan(page);
+    public async run(page: Page, id: string): Promise<AxeResults> {
+        const axeResults = await this.scanner.scan(page);
+        const report = this.reportGenerator.generateReport(axeResults, page.url(), await page.title());
 
-        await keyValueStore.setValue(`${id}.axe`, scanResult.axeResults);
-        await keyValueStore.setValue(`${id}.report`, scanResult.report.asHTML(), { contentType: 'text/html' });
+        await this.blobStore.setValue(`${id}.axe`, axeResults);
+        await this.blobStore.setValue(`${id}.report`, report.asHTML(), { contentType: 'text/html' });
 
-        if (scanResult.axeResults.violations.length > 0) {
-            console.log(`Found ${scanResult.axeResults.violations.length} accessibility issues on page ${page.url()}`);
-
-            return scanResult.axeResults.violations.reduce((a, b) => a + b.nodes.length, 0);
+        if (axeResults.violations.length > 0) {
+            console.log(`Found ${axeResults.violations.length} accessibility issues on page ${page.url()}`);
         }
 
-        return 0;
+        return axeResults;
     }
 }

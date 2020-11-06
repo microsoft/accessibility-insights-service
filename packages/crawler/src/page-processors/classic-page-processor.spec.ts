@@ -6,6 +6,7 @@ import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageNavigator } from 'scanner-global-library';
 import { IMock, Mock } from 'typemoq';
+import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -33,6 +34,7 @@ describe(ClassicPageProcessor, () => {
     let pageStub: Page;
     let classicPageProcessor: ClassicPageProcessor;
     let requestQueueProvider: ApifyRequestQueueProvider;
+    let axeResults: AxeResults;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -51,6 +53,13 @@ describe(ClassicPageProcessor, () => {
             .setup((o) => o.snapshot())
             .returns(() => false)
             .verifiable();
+        axeResults = {
+            url: 'url',
+            passes: [],
+            violations: [{ nodes: [{}] }],
+            incomplete: [],
+            inapplicable: [],
+        } as AxeResults;
 
         requestStub = {
             id: testId,
@@ -85,14 +94,14 @@ describe(ClassicPageProcessor, () => {
     it('pageProcessor', async () => {
         setupEnqueueLinks(pageStub);
         accessibilityScanOpMock
-            .setup((aso) => aso.run(pageStub, testId, blobStoreMock.object))
-            .returns(async () => Promise.resolve(0))
+            .setup((aso) => aso.run(pageStub, testId))
+            .returns(async () => Promise.resolve(axeResults))
             .verifiable();
         const expectedScanData = {
             id: testId,
             url: testUrl,
             succeeded: true,
-            issueCount: 0,
+            issueCount: 1,
         };
         setupPushScanData(expectedScanData);
 
