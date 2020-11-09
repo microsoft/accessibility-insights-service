@@ -52,7 +52,7 @@
         "@axe-core/puppeteer": "^4.0.0",
         "@azure/cosmos": "^3.9.1",
         "accessibility-insights-report": "3.0.1",
-        "applicationinsights": "^1.8.7",
+        "applicationinsights": "^1.8.8",
         "axe-core": "4.0.2",
         "axe-sarif-converter": "^2.5.1",
         "azure-services": "^1.0.0",
