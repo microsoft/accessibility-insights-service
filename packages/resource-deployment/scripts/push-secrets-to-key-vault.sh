@@ -10,7 +10,6 @@ export resourceGroupName
 export storageAccountName
 export cosmosAccountName
 export cosmosDbUrl
-export cosmosAccessKey
 export containerRegistryName
 
 export loggedInUserType
@@ -78,15 +77,6 @@ getCosmosDbUrl() {
 
     if [[ -z $cosmosDbUrl ]]; then
         echo "Unable to get cosmos db url for cosmos account $cosmosAccountName under resource group $resourceGroupName"
-        exit 1
-    fi
-}
-
-getCosmosAccessKey() {
-    cosmosAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
-
-    if [[ -z $cosmosAccessKey ]]; then
-        echo "Unable to get accessKey for cosmos db account $cosmosAccountName under resource group $resourceGroupName"
         exit 1
     fi
 }
@@ -165,9 +155,6 @@ pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
 
 getCosmosDbApiUrl
 pushSecretToKeyVault "cosmosDbApiUrl" "$cosmosDbApiUrl"
-
-getCosmosAccessKey
-pushSecretToKeyVault "cosmosDbKey" "$cosmosAccessKey"
 
 pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
