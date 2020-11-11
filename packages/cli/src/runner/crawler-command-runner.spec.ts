@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import * as fs from 'fs';
-import { CrawlerEntryPoint, CrawlerRunOptions, ScanResults } from 'accessibility-insights-crawler';
+import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
@@ -15,23 +15,10 @@ import { CrawlerCommandRunner } from './crawler-command-runner';
 
 describe('CrawlerCommandRunner', () => {
     const testUrl = 'http://localhost/';
-    const scanResult: ScanResults = {
-        summaryScanResults: {
-            failed: [],
-            passed: [],
-            unscannable: [],
-        },
-        errors: [],
-        scanMetadata: {
-            baseUrl: '',
-            basePageTitle: '',
-            userAgent: '',
-        },
-    };
 
     let testInput: ScanArguments;
     let crawlerOption: CrawlerRunOptions;
-    let crawlerEntryPointMock: IMock<CrawlerEntryPoint>;
+    let crawlerMock: IMock<Crawler>;
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let reportNameGeneratorMock: IMock<ReportNameGenerator>;
@@ -55,7 +42,7 @@ describe('CrawlerCommandRunner', () => {
             inputFile: undefined,
         };
 
-        crawlerEntryPointMock = Mock.ofType<CrawlerEntryPoint>();
+        crawlerMock = Mock.ofType<Crawler>();
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
@@ -66,22 +53,22 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => false)
             .verifiable();
 
-        crawlerEntryPointMock
+        crawlerMock
             .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve(scanResult))
+            .returns(async () => Promise.resolve())
             .verifiable();
 
         testSubject = new CrawlerCommandRunner(
-            crawlerEntryPointMock.object,
-            reportGeneratorMock.object,
-            reportDiskWriterMock.object,
-            reportNameGeneratorMock.object,
+            crawlerMock.object,
+            // reportGeneratorMock.object,
+            // reportDiskWriterMock.object,
+            // reportNameGeneratorMock.object,
             fsMock.object,
         );
     });
 
     afterEach(() => {
-        crawlerEntryPointMock.verifyAll();
+        crawlerMock.verifyAll();
         reportGeneratorMock.verifyAll();
         reportDiskWriterMock.verifyAll();
         reportNameGeneratorMock.verifyAll();
@@ -95,8 +82,8 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerEntryPointMock.reset();
-        crawlerEntryPointMock.setup((o) => o.crawl(It.isAny())).verifiable(Times.never());
+        crawlerMock.reset();
+        crawlerMock.setup((o) => o.crawl(It.isAny())).verifiable(Times.never());
 
         await testSubject.runCommand(testInput);
     });
@@ -111,10 +98,10 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => true)
             .verifiable();
 
-        crawlerEntryPointMock.reset();
-        crawlerEntryPointMock
+        crawlerMock.reset();
+        crawlerMock
             .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve(scanResult))
+            .returns(async () => Promise.resolve())
             .verifiable();
         await testSubject.runCommand(testInput);
     });

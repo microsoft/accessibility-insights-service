@@ -56,10 +56,11 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             console.log(`Crawling page ${page.url()}`);
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, requestQueue);
-            const issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+            const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
+            const issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
             await this.saveSnapshot(page, request.id as string);
             await this.pushScanData({ succeeded: true, id: request.id as string, url: request.url, issueCount: issueCount });
-            await this.saveScanResultToDataBase(request, issueCount);
+            await this.saveScanResult(request, issueCount);
         } else if (operation.operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
             console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
@@ -67,9 +68,10 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             let issueCount;
             if (operationResult.clickAction === 'page-action') {
                 await this.enqueueLinks(page);
-                issueCount = await this.accessibilityScanOp.run(page, request.id as string, this.blobStore);
+                const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
+                issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;
                 await this.saveSnapshot(page, request.id as string);
-                await this.saveScanResultToDataBase(request, issueCount, activeElement.selector);
+                await this.saveScanResult(request, issueCount, activeElement.selector);
             }
             await this.pushScanData({
                 id: request.id as string,

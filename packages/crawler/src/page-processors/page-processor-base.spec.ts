@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { SummaryScanError } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageNavigator, PageConfigurator } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
+import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
+import { ScanResult } from '../level-storage/storage-documents';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, , @typescript-eslint/consistent-type-assertions */
@@ -160,17 +161,13 @@ describe(PageProcessorBase, () => {
             .returns(() => Promise.reject(error))
             .verifiable();
 
-        blobStoreMock
-            .setup((o) => o.setValue(`${testId}.browser.err`, `${browserError.stack}`, { contentType: 'text/plain' }))
-            .verifiable();
-
-        const summaryScanError = {
-            url: 'url',
-            errorDescription: 'error message',
-            errorType: 'NavigationError',
-            errorLogLocation: 'key_value_stores/scan-results/id.browser.err.txt',
-        } as SummaryScanError;
-        dataBaseMock.setup((o) => o.addBrowserError(testId, summaryScanError)).verifiable();
+        const scanResult = {
+            id: requestStub.id as string,
+            url: requestStub.url,
+            scanState: 'runError',
+            error: System.serializeError(error),
+        } as ScanResult;
+        dataBaseMock.setup((o) => o.addScanResult(testId, scanResult)).verifiable();
 
         try {
             await pageProcessorBase.gotoFunction(inputs);

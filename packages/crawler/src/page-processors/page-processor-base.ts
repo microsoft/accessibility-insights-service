@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
 import { BrowserError, PageNavigator } from 'scanner-global-library';
+import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
 import { AccessibilityScanOperation } from '../page-operations/accessibility-scan-operation';
@@ -46,8 +46,6 @@ export abstract class PageProcessorBase implements PageProcessor {
      */
     protected abstract processPage: Apify.PuppeteerHandlePage;
 
-    // eslint-disable-next-line @typescript-eslint/explicit-member-accessibility
-
     public constructor(
         @inject(AccessibilityScanOperation) protected readonly accessibilityScanOp: AccessibilityScanOperation,
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
@@ -73,7 +71,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
-            await this.saveScanPageErrorToDataBase(inputs.request, err as Error);
+            await this.saveRunError(inputs.request, err);
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
@@ -85,26 +83,30 @@ export abstract class PageProcessorBase implements PageProcessor {
      * Return the result of Puppeteer's [page.goto()](https://pptr.dev/#?product=Puppeteer&show=api-pagegotourl-options) function.
      */
     public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
+        let navigationError: BrowserError;
+        let runError: unknown;
         try {
             return await this.pageNavigator.navigate(inputs.request.url, inputs.page, async (browserError, error) => {
-                await this.logBrowserFailure(inputs.request, browserError);
-                await this.saveScanBrowserErrorToDataBase(inputs.request, browserError);
-
                 if (error !== undefined) {
                     throw error;
                 } else {
-                    new Error(`Navigation error: ${JSON.stringify(browserError)}`);
+                    navigationError = browserError;
                 }
             });
         } catch (err) {
             await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
             await this.logPageError(inputs.request, err as Error);
-            await this.saveScanPageErrorToDataBase(inputs.request, err as Error);
+            runError = err;
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
             await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
+            if (runError !== undefined) {
+                await this.saveRunError(inputs.request, runError);
+            } else if (navigationError !== undefined) {
+                await this.saveBrowserError(inputs.request, navigationError);
+            }
         }
     };
 
@@ -124,7 +126,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.dataStore.pushData(scanData);
         await this.pushScanData({ succeeded: false, id: request.id as string, url: request.url });
         await this.logPageError(request, error);
-        await this.saveScanPageErrorToDataBase(request, error);
+        await this.saveRunError(request, error);
     };
 
     protected async saveSnapshot(page: Page, id: string): Promise<void> {
@@ -153,40 +155,33 @@ export abstract class PageProcessorBase implements PageProcessor {
         await this.blobStore.setValue(`${scanData.id}.data`, scanData);
     }
 
-    protected async saveScanBrowserErrorToDataBase(request: Apify.Request, error: BrowserError): Promise<void> {
-        const summaryScanError: SummaryScanError = {
+    protected async saveRunError(request: Apify.Request, error: unknown): Promise<void> {
+        await this.dataBase.addScanResult(request.id as string, {
+            id: request.id,
             url: request.url,
-            errorDescription: error.message,
-            errorType: error.errorType,
-            errorLogLocation: `key_value_stores/${scanResultStorageName}/${request.id}.browser.err.txt`,
-        };
-
-        await this.dataBase.addBrowserError(request.id as string, summaryScanError);
+            scanState: 'runError',
+            error: error !== undefined ? System.serializeError(error) : undefined,
+        });
     }
 
-    protected async saveScanPageErrorToDataBase(request: Apify.Request, error: Error): Promise<void> {
-        const summaryScanError = {
+    protected async saveBrowserError(request: Apify.Request, error: BrowserError): Promise<void> {
+        await this.dataBase.addScanResult(request.id as string, {
+            id: request.id,
             url: request.url,
-            error: error.stack,
-        };
-
-        await this.dataBase.addError(request.id as string, summaryScanError);
+            scanState: 'browserError',
+            error: error !== undefined ? JSON.stringify(error) : undefined,
+        });
     }
 
-    protected async saveScanResultToDataBase(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
-        // add element selector to URL as bookmark
+    protected async saveScanResult(request: Apify.Request, issueCount: number, selector?: string): Promise<void> {
+        // add CSS selector of simulated element as URL bookmark part
         const url = selector === undefined ? request.url : `${request.url}#selector|${selector}`;
-        const summaryScanResult: SummaryScanResult = {
-            numFailures: issueCount,
+        await this.dataBase.addScanResult(request.id as string, {
+            id: request.id,
             url,
-            reportLocation: `key_value_stores/${scanResultStorageName}/${request.id}.report.html`,
-        };
-
-        if (summaryScanResult.numFailures === 0) {
-            await this.dataBase.addPassedScanResult(request.id as string, summaryScanResult);
-        } else {
-            await this.dataBase.addFailedScanResult(request.id as string, summaryScanResult);
-        }
+            scanState: issueCount > 0 ? 'fail' : 'pass',
+            issueCount,
+        });
     }
 
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
