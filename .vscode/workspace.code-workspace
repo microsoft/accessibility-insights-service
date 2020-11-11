@@ -1,6 +1,10 @@
 {
     "folders": [
         {
+            "name": "axe-result-converter",
+            "path": "../packages/axe-result-converter"
+        },
+        {
             "name": "scanner-global-library",
             "path": "../packages/scanner-global-library"
         },
