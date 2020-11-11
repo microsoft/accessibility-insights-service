@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import * as path from 'path';
-import { PageError } from 'accessibility-insights-crawler';
 import filenamify from 'filenamify';
 import filenamifyUrl from 'filenamify-url';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import normalizePath from 'normalize-path';
+import { PageError } from '../runner/file-command-runner';
 import { ReportFormats } from './report-formats';
 
 /* eslint-disable security/detect-non-literal-fs-filename */

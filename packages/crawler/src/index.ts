@@ -5,6 +5,7 @@
 import './global-overrides';
 
 export { CrawlerRunOptions } from './types/crawler-run-options';
-export { CrawlerEntryPoint } from './crawler-entry-point';
+export { Crawler } from './crawler';
 export { setupCrawlerContainer } from './setup-crawler-container';
-export { ScanResults, PageError } from './level-storage/storage-documents';
+export * from './level-storage/storage-documents';
+export { ScanResultReader } from './scan-result-providers/scan-result-reader';

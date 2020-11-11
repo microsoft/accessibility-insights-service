@@ -21,6 +21,23 @@ describe(LocalBlobStore, () => {
         apifyMock = Mock.ofInstance(Apify, MockBehavior.Strict);
     });
 
+    it('get value', async () => {
+        apifyMock
+            .setup((am) => am.openKeyValueStore(storeName))
+            .returns(async () => keyValueStoreMock.object)
+            .verifiable(Times.never());
+
+        keyValueStoreMock
+            .setup((kvsm) => kvsm.getValue(key))
+            .returns(async () => value)
+            .verifiable(Times.once());
+
+        store = new LocalBlobStore(keyValueStoreMock.object, apifyMock.object);
+        const actualValue = await store.getValue(key);
+
+        expect(actualValue).toBe(value);
+    });
+
     it('setValue while store is open', async () => {
         apifyMock
             .setup((am) => am.openKeyValueStore(storeName))

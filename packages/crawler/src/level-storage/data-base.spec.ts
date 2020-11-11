@@ -2,40 +2,95 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { SummaryScanError, SummaryScanResult } from 'accessibility-insights-report';
 import { LevelUp } from 'levelup';
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { generateHash } from '../utility/crypto';
 import { DataBase } from './data-base';
-import { DataBaseKey, PageError, ScanMetadata } from './storage-documents';
+import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 describe(DataBase, () => {
     let dbMock: IMock<LevelUp>;
+    let asyncIteratorMock: IMock<AsyncIterableIterator<string | Buffer>>;
+    let readableStreamMock: IMock<NodeJS.ReadableStream>;
     let testSubject: DataBase;
 
     beforeEach(() => {
         dbMock = Mock.ofType<LevelUp>();
+        asyncIteratorMock = Mock.ofType<AsyncIterableIterator<string | Buffer>>();
+        readableStreamMock = Mock.ofType<NodeJS.ReadableStream>();
+
         testSubject = new DataBase(dbMock.object);
     });
 
     afterEach(() => {
         dbMock.verifyAll();
+        asyncIteratorMock.verifyAll();
+        readableStreamMock.verifyAll();
     });
 
-    it('add passed scan result', async () => {
-        const key: DataBaseKey = { type: 'passedScanResult', key: 'id' };
-        const value: SummaryScanResult = { url: 'url', numFailures: 0, reportLocation: 'report location' };
-        dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
+    it('iterator next()', async () => {
+        const dataItems = [
+            {
+                key: { key: 'key1', type: 'scanResult' },
+                value: {
+                    id: 'id1',
+                },
+            },
+            {
+                key: { key: 'key2', type: 'scanMetadata' },
+                value: {
+                    id: 'id2',
+                },
+            },
+            {
+                key: { key: 'key3', type: 'scanResult' },
+                value: undefined,
+            },
+            {
+                key: { key: 'key4', type: 'scanResult' },
+                value: {
+                    id: 'id4',
+                },
+            },
+        ];
 
-        await testSubject.addPassedScanResult('id', value);
+        let dataItemIndex = 0;
+        let iteratorResult: IteratorResult<any>;
+        asyncIteratorMock
+            .setup(async (o) => o.next())
+            .callback(() => {
+                iteratorResult = {
+                    done: dataItemIndex + 1 > dataItems.length,
+                    value: dataItems[dataItemIndex],
+                };
+                dataItemIndex++;
+            })
+            .returns(() => Promise.resolve(iteratorResult))
+            .verifiable(Times.exactly(dataItems.length + 1));
+        readableStreamMock
+            .setup((o) => o[Symbol.asyncIterator]())
+            .returns(() => asyncIteratorMock.object)
+            .verifiable();
+        dbMock
+            .setup((o) => o.createReadStream())
+            .returns(() => readableStreamMock.object)
+            .verifiable();
+
+        let iteratorIndex = 0;
+        const expectedDataItemsIndex = [0, 3];
+        for await (const dataItem of testSubject) {
+            expect(dataItem).toEqual(dataItems[expectedDataItemsIndex[iteratorIndex++]].value);
+        }
     });
 
-    it('add failed scan result', async () => {
-        const key: DataBaseKey = { type: 'failedScanResult', key: 'id' };
-        const value: SummaryScanResult = { url: 'url', numFailures: 0, reportLocation: 'report location' };
+    it('add scan result', async () => {
+        const key: DataBaseKey = { type: 'scanResult', key: 'id' };
+        const value = { id: 'id', url: 'url' } as ScanResult;
         dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
 
-        await testSubject.addFailedScanResult('id', value);
+        await testSubject.addScanResult('id', value);
     });
 
     it('add scan metadata', async () => {
@@ -46,27 +101,16 @@ describe(DataBase, () => {
         await testSubject.addScanMetadata(value);
     });
 
-    it('add run error', async () => {
-        const key: DataBaseKey = { type: 'runError', key: 'id' };
-        const value: PageError = {
-            url: 'url',
-            error: 'error',
-        };
-        dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
+    it('get scan metadata', async () => {
+        const key: DataBaseKey = { type: 'scanMetadata', key: generateHash('baseUrl') };
+        const value: ScanMetadata = { baseUrl: 'baseUrl', basePageTitle: 'basePageTitle' };
+        dbMock
+            .setup(async (dbm) => dbm.get(key))
+            .returns(() => Promise.resolve(value))
+            .verifiable();
 
-        await testSubject.addError('id', value);
-    });
+        const actualValue = await testSubject.getScanMetadata('baseUrl');
 
-    it('add browser error', async () => {
-        const key: DataBaseKey = { type: 'browserError', key: 'id' };
-        const value: SummaryScanError = {
-            url: 'url',
-            errorType: 'error type',
-            errorDescription: 'error description',
-            errorLogLocation: 'error log location',
-        };
-        dbMock.setup(async (dbm) => dbm.put(key, value)).verifiable();
-
-        await testSubject.addBrowserError('id', value);
+        expect(value).toBe(actualValue);
     });
 });

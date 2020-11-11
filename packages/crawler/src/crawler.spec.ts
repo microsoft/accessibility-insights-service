@@ -5,33 +5,32 @@ import 'reflect-metadata';
 import { Url } from 'common';
 import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
-import { CrawlerEntryPoint } from './crawler-entry-point';
-import { CrawlerEngine } from './crawler/crawler-engine';
-import { DataBase } from './level-storage/data-base';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
+import { Crawler } from './crawler';
+import { CrawlerEngine } from './crawler/crawler-engine';
 
-describe(CrawlerEntryPoint, () => {
-    let testSubject: CrawlerEntryPoint;
+describe(Crawler, () => {
+    let testSubject: Crawler;
     let containerMock: IMock<Container>;
     let crawlerEngineMock: IMock<CrawlerEngine>;
-    let dataBaseMock: IMock<DataBase>;
     let urlMock: IMock<typeof Url>;
     let containerBindMock: IMock<interfaces.BindingToSyntax<CrawlerRunOptions>>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
         crawlerEngineMock = Mock.ofType(CrawlerEngine);
-        dataBaseMock = Mock.ofType(DataBase);
         urlMock = Mock.ofType<typeof Url>();
         containerBindMock = Mock.ofType<interfaces.BindingToSyntax<CrawlerRunOptions>>();
 
-        testSubject = new CrawlerEntryPoint(containerMock.object, urlMock.object);
+        testSubject = new Crawler(containerMock.object, urlMock.object);
     });
 
     afterEach(() => {
         containerMock.verifyAll();
         urlMock.verifyAll();
+        crawlerEngineMock.verifyAll();
+        containerBindMock.verifyAll();
     });
 
     it('crawl', async () => {
@@ -39,10 +38,6 @@ describe(CrawlerEntryPoint, () => {
         containerMock
             .setup((c) => c.get(CrawlerEngine))
             .returns(() => crawlerEngineMock.object)
-            .verifiable();
-        containerMock
-            .setup((c) => c.get(DataBase))
-            .returns(() => dataBaseMock.object)
             .verifiable();
         containerBindMock.setup((o) => o.toConstantValue(testInput)).verifiable();
         containerMock
@@ -69,8 +64,7 @@ describe(CrawlerEntryPoint, () => {
             .verifiable();
         const startCommand = jest.spyOn(crawlerEngineMock.object, 'start').mockImplementationOnce(async () => Promise.resolve());
 
-        await testSubject.crawl(testInput);
-
+        await expect(() => testSubject.crawl(testInput)).rejects.toThrowError(/Base URL should not have any query parameters/);
         expect(startCommand).not.toBeCalled();
     });
 });

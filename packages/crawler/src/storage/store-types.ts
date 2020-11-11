@@ -7,10 +7,10 @@ export interface DataStore {
     pushData(data: unknown): Promise<void>;
 }
 
+/* eslint-disable @typescript-eslint/ban-types */
 export interface BlobStore {
     setValue(
         key: string,
-        // eslint-disable-next-line @typescript-eslint/ban-types
         value: string | Object,
         options?:
             | {
@@ -18,4 +18,6 @@ export interface BlobStore {
               }
             | undefined,
     ): Promise<void>;
+
+    getValue(key: string): Promise<string | Object | Buffer | null>;
 }

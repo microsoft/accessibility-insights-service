@@ -5,6 +5,7 @@ import { inject, injectable, optional } from 'inversify';
 import { iocTypes } from '../types/ioc-types';
 import { BlobStore, scanResultStorageName } from './store-types';
 
+/* eslint-disable @typescript-eslint/ban-types */
 @injectable()
 export class LocalBlobStore implements BlobStore {
     constructor(
@@ -12,10 +13,15 @@ export class LocalBlobStore implements BlobStore {
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
 
-    // eslint-disable-next-line @typescript-eslint/ban-types
     public async setValue(key: string, value: string | Object, options?: { contentType?: string }): Promise<void> {
         await this.open();
         await this.keyValueStore.setValue(key, value, options);
+    }
+
+    public async getValue(key: string): Promise<string | Object | Buffer | null> {
+        await this.open();
+
+        return this.keyValueStore.getValue(key);
     }
 
     private async open(storeName: string = scanResultStorageName): Promise<void> {
