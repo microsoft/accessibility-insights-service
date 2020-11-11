@@ -156,7 +156,7 @@ export class Batch {
         const client = await this.batchClientProvider();
         const poolInfo = await client.pool.get(this.config.poolId);
 
-        return poolInfo.maxTasksPerNode * (poolInfo.currentDedicatedNodes + poolInfo.currentLowPriorityNodes);
+        return poolInfo.taskSlotsPerNode * (poolInfo.currentDedicatedNodes + poolInfo.currentLowPriorityNodes);
     }
 
     private async getCurrentPoolLoad(): Promise<PoolLoad> {
