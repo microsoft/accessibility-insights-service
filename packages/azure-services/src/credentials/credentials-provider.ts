@@ -7,11 +7,6 @@ import { Credentials, MSICredentialsProvider } from './msi-credential-provider';
 export class CredentialsProvider {
     constructor(@inject(MSICredentialsProvider) private readonly msiCredentialProvider: MSICredentialsProvider) {}
 
-    public async getCredentialsForKeyVault(): Promise<Credentials> {
-        // referred https://azure.microsoft.com/en-us/resources/samples/app-service-msi-keyvault-node/
-        return this.getCredentialsForResource('https://vault.azure.net');
-    }
-
     public async getCredentialsForBatch(): Promise<Credentials> {
         // eslint-disable-next-line max-len
         // referred https://docs.microsoft.com/en-us/rest/api/batchservice/authenticate-requests-to-the-azure-batch-service#authentication-via-azure-ad

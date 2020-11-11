@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
-import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
@@ -10,6 +9,7 @@ import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { DefaultAzureCredential } from '@azure/identity';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { Batch } from './azure-batch/batch';
 import { BatchConfig } from './azure-batch/batch-config';
 import { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
@@ -136,11 +136,10 @@ function setupAuthenticationMethod(container: interfaces.Container): void {
 }
 
 function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<KeyVaultClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
-        const credentialsProvider = context.container.get(CredentialsProvider);
-        const credentials = await credentialsProvider.getCredentialsForKeyVault();
+    IoC.setupSingletonProvider<SecretClient>(iocTypeNames.AzureKeyVaultClientProvider, container, async (context) => {
+        const credentials = new DefaultAzureCredential();
 
-        return new KeyVaultClient(credentials);
+        return new SecretClient(process.env.KEY_VAULT_URL, credentials);
     });
 }
 

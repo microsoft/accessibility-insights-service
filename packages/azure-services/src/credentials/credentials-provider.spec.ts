@@ -17,15 +17,15 @@ describe(CredentialsProvider, () => {
         msiCredProviderMock = Mock.ofType(MSICredentialsProvider);
     });
 
-    it('gets key vault credentials with MSI auth', async () => {
+    it('gets batch credentials with MSI auth', async () => {
         testSubject = new CredentialsProvider(msiCredProviderMock.object);
 
         msiCredProviderMock
-            .setup(async (r) => r.getCredentials('https://vault.azure.net'))
+            .setup(async (r) => r.getCredentials('https://batch.core.windows.net/'))
             .returns(async () => Promise.resolve(credentialsStub))
             .verifiable(Times.once());
 
-        const actualCredentials = await testSubject.getCredentialsForKeyVault();
+        const actualCredentials = await testSubject.getCredentialsForBatch();
 
         expect(actualCredentials).toBe(credentialsStub);
         msiCredProviderMock.verifyAll();

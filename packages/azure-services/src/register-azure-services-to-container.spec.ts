@@ -4,7 +4,6 @@
 import 'reflect-metadata';
 
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
-import { KeyVaultClient } from '@azure/keyvault';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
@@ -12,6 +11,7 @@ import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -217,28 +217,15 @@ describe(registerAzureServicesToContainer, () => {
     });
 
     describe('AzureKeyVaultClientProvider', () => {
-        let credentialsStub: msRestNodeAuth.ApplicationTokenCredentials;
-        let credentialsProviderMock: IMock<CredentialsProvider>;
-
         beforeEach(() => {
-            credentialsStub = new msRestNodeAuth.ApplicationTokenCredentials('clientId', 'domain', 'secret');
-            credentialsProviderMock = Mock.ofType(CredentialsProvider);
             registerAzureServicesToContainer(container);
-
-            stubBinding(container, CredentialsProvider, credentialsProviderMock.object);
-
-            credentialsProviderMock
-                .setup(async (c) => c.getCredentialsForKeyVault())
-                .returns(async () => Promise.resolve(credentialsStub))
-                .verifiable(Times.once());
         });
 
         it('gets KeyVaultClient', async () => {
             const keyVaultClientProvider = container.get<AzureKeyVaultClientProvider>(iocTypeNames.AzureKeyVaultClientProvider);
             const keyVaultClient = await keyVaultClientProvider();
 
-            expect(keyVaultClient).toBeInstanceOf(KeyVaultClient);
-            credentialsProviderMock.verifyAll();
+            expect(keyVaultClient).toBeInstanceOf(SecretClient);
         });
 
         it('gets singleton KeyVaultClient', async () => {
@@ -249,7 +236,6 @@ describe(registerAzureServicesToContainer, () => {
             const keyVaultClient2Promise = keyVaultClientProvider2();
 
             expect(await keyVaultClient1Promise).toBe(await keyVaultClient2Promise);
-            credentialsProviderMock.verifyAll();
         });
     });
 

@@ -157,14 +157,19 @@
   optionalDependencies:
     keytar "^5.4.0"
 
-"@azure/keyvault@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@azure/keyvault/-/keyvault-0.1.0.tgz#7cff48eaf3b933b01967148b634da6661de2ab04"
-  integrity sha512-CUuXCIR8GVVVxBC0NojeTrxAxTWMGKQHaQICIW4Yc51rqAoOd5AwTgnCNxacU2sjrINZo4MSZ3xbE5gn+hQWUQ==
+"@azure/keyvault-secrets@^0.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/keyvault-secrets/-/keyvault-secrets-4.1.0.tgz#47f30639344eefe6ac9e5b558347ea1f626163ef"
+  integrity sha512-26ARU97svPkv8q6QbIdwdky8ntn+Q5mxTTCjpp9FUIyA2LTXmEL0wZDPBeM3mxZLHKnMEXQxEo+KYutrJW5xPQ==
   dependencies:
-    "@azure/ms-rest-azure-js" "^1.1.0"
-    "@azure/ms-rest-js" "^1.1.0"
-    tslib "^1.9.3"
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-http" "^1.1.6"
+    "@azure/core-lro" "^1.0.2"
+    "@azure/core-paging" "^1.1.1"
+    "@azure/core-tracing" "1.0.0-preview.9"
+    "@azure/logger" "^1.0.0"
+    "@opentelemetry/api" "^0.10.2"
+    tslib "^2.0.0"
 
 "@azure/logger@^1.0.0":
   version "1.0.0"
@@ -178,7 +183,7 @@
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-azure-env/-/ms-rest-azure-env-1.1.2.tgz#8505873afd4a1227ec040894a64fdd736b4a101f"
   integrity sha512-l7z0DPCi2Hp88w12JhDTtx5d0Y3+vhfE7JKJb9O7sEz71Cwp053N8piTtTnnk/tUor9oZHgEKi/p3tQQmLPjvA==
 
-"@azure/ms-rest-azure-js@^1.1.0", "@azure/ms-rest-azure-js@^1.3.4":
+"@azure/ms-rest-azure-js@^1.3.4":
   version "1.3.8"
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-azure-js/-/ms-rest-azure-js-1.3.8.tgz#96b518223d3baa2496b2981bc07288b3d887486e"
   integrity sha512-AHLfDTCyIH6wBK6+CpImI6sc9mLZ17ZgUrTx3Rhwv+3Mb3Z73BxormkarfR6Stb6scrBYitxJ27FXyndXlGAYg==
@@ -186,7 +191,7 @@
     "@azure/ms-rest-js" "^1.8.10"
     tslib "^1.9.3"
 
-"@azure/ms-rest-js@^1.1.0", "@azure/ms-rest-js@^1.8.10", "@azure/ms-rest-js@^1.8.6", "@azure/ms-rest-js@^1.8.7":
+"@azure/ms-rest-js@^1.8.10", "@azure/ms-rest-js@^1.8.6", "@azure/ms-rest-js@^1.8.7":
   version "1.8.15"
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-1.8.15.tgz#4267b6b8c00d85301791fe0cf347e0455a807338"
   integrity sha512-kIB71V3DcrA4iysBbOsYcxd4WWlOE7OFtCUYNfflPODM0lbIR23A236QeTn5iAeYwcHmMjR/TAKp5KQQh/WqoQ==
