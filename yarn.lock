@@ -157,7 +157,7 @@
   optionalDependencies:
     keytar "^5.4.0"
 
-"@azure/keyvault-secrets@^0.1.0":
+"@azure/keyvault-secrets@^4.1.0":
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/@azure/keyvault-secrets/-/keyvault-secrets-4.1.0.tgz#47f30639344eefe6ac9e5b558347ea1f626163ef"
   integrity sha512-26ARU97svPkv8q6QbIdwdky8ntn+Q5mxTTCjpp9FUIyA2LTXmEL0wZDPBeM3mxZLHKnMEXQxEo+KYutrJW5xPQ==
@@ -178,10 +178,10 @@
   dependencies:
     tslib "^1.9.3"
 
-"@azure/ms-rest-azure-env@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@azure/ms-rest-azure-env/-/ms-rest-azure-env-1.1.2.tgz#8505873afd4a1227ec040894a64fdd736b4a101f"
-  integrity sha512-l7z0DPCi2Hp88w12JhDTtx5d0Y3+vhfE7JKJb9O7sEz71Cwp053N8piTtTnnk/tUor9oZHgEKi/p3tQQmLPjvA==
+"@azure/ms-rest-azure-env@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@azure/ms-rest-azure-env/-/ms-rest-azure-env-2.0.0.tgz#45809f89763a480924e21d3c620cd40866771625"
+  integrity sha512-dG76W7ElfLi+fbTjnZVGj+M9e0BIEJmRxU6fHaUQ12bZBe8EJKYb2GV50YWNaP2uJiVQ5+7nXEVj1VN1UQtaEw==
 
 "@azure/ms-rest-azure-js@^1.3.4":
   version "1.3.8"
@@ -191,7 +191,7 @@
     "@azure/ms-rest-js" "^1.8.10"
     tslib "^1.9.3"
 
-"@azure/ms-rest-js@^1.8.10", "@azure/ms-rest-js@^1.8.6", "@azure/ms-rest-js@^1.8.7":
+"@azure/ms-rest-js@^1.8.10", "@azure/ms-rest-js@^1.8.7":
   version "1.8.15"
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-1.8.15.tgz#4267b6b8c00d85301791fe0cf347e0455a807338"
   integrity sha512-kIB71V3DcrA4iysBbOsYcxd4WWlOE7OFtCUYNfflPODM0lbIR23A236QeTn5iAeYwcHmMjR/TAKp5KQQh/WqoQ==
@@ -205,10 +205,10 @@
     uuid "^3.2.1"
     xml2js "^0.4.19"
 
-"@azure/ms-rest-js@^2.0.0":
-  version "2.0.8"
-  resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-2.0.8.tgz#f84304fba29e699fc7a391ce47af2824af4f585e"
-  integrity sha512-PO4pnYaF66IAB/RWbhrTprGyhOzDzsgcbT7z8k3O38JKlwifbrhW+8M0fzx0ScZnaacP8rZyBazYMUF9P12c0g==
+"@azure/ms-rest-js@^2.0.0", "@azure/ms-rest-js@^2.0.4":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-2.1.0.tgz#41bc541984983b5242dfbcf699ea281acd045946"
+  integrity sha512-4BXLVImYRt+jcUmEJ5LUWglI8RBNVQndY6IcyvQ4U8O4kIXdmlRz3cJdA/RpXf5rKT38KOoTO2T6Z1f6Z1HDBg==
   dependencies:
     "@types/node-fetch" "^2.3.7"
     "@types/tunnel" "0.0.1"
@@ -221,13 +221,13 @@
     uuid "^3.3.2"
     xml2js "^0.4.19"
 
-"@azure/ms-rest-nodeauth@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@azure/ms-rest-nodeauth/-/ms-rest-nodeauth-1.1.1.tgz#b77a20dcf59b405cac62f6d1f86c2a061aa6bed9"
-  integrity sha512-maESfl2vixP3+zjbfuC8XsSRjf3chDp7SL9nWaURc7D9j8xjg/8ajSv7r9OsJSfgcuO1HaSkjIjDaL+Yz18vLQ==
+"@azure/ms-rest-nodeauth@^3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@azure/ms-rest-nodeauth/-/ms-rest-nodeauth-3.0.6.tgz#7fe959937b0c07dc75581126b5d6f209b91c2939"
+  integrity sha512-2twuzsXHdKMzEFI2+Sr82o6yS4ppNGZceYwil8PFo+rJxOZIoBm9e0//YC+dKilV/3F+6K/HuW8LdskDrJEQWA==
   dependencies:
-    "@azure/ms-rest-azure-env" "^1.1.2"
-    "@azure/ms-rest-js" "^1.8.6"
+    "@azure/ms-rest-azure-env" "^2.0.0"
+    "@azure/ms-rest-js" "^2.0.4"
     adal-node "^0.1.28"
 
 "@azure/storage-blob@12.2.1":
