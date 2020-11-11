@@ -30,6 +30,7 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { registerAzureServicesToContainer } from './register-azure-services-to-container';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
+import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
 
 const cosmosClientFactoryStub = (options: CosmosClientOptions) => {
     return ({ test: 'cosmosClient', options: options } as unknown) as CosmosClient;
@@ -255,28 +256,34 @@ describe(registerAzureServicesToContainer, () => {
     describe('CosmosClientProvider', () => {
         let secretProviderMock: IMock<SecretProvider>;
         const cosmosDbUrl = 'db url';
+        const cosmosDbApiUrl = 'db api url';
         const cosmosDbKey = 'db key';
         const expectedOptions = { endpoint: cosmosDbUrl, key: cosmosDbKey };
+        let cosmosKeyProviderMock: IMock<CosmosKeyProvider>;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
+            cosmosKeyProviderMock = Mock.ofType(CosmosKeyProvider);
 
             secretProviderMock
                 .setup(async (s) => s.getSecret(secretNames.cosmosDbUrl))
                 .returns(async () => Promise.resolve(cosmosDbUrl))
                 .verifiable();
             secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.cosmosDbKey))
-                .returns(async () => Promise.resolve(cosmosDbKey))
+                .setup(async (s) => s.getSecret(secretNames.cosmosDbApiUrl))
+                .returns(async () => Promise.resolve(cosmosDbApiUrl))
                 .verifiable();
+
+            cosmosKeyProviderMock.setup((ckp) => ckp.getCosmosKey(cosmosDbApiUrl)).returns(async () => cosmosDbKey);
         });
 
         afterEach(() => {
             secretProviderMock.verifyAll();
+            cosmosKeyProviderMock.verifyAll();
         });
 
         it('verify CosmosClientProvider resolution', async () => {
-            runCosmosClientTest(container, secretProviderMock);
+            runCosmosClientTest(container, secretProviderMock, cosmosKeyProviderMock);
 
             const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
@@ -286,7 +293,7 @@ describe(registerAzureServicesToContainer, () => {
         });
 
         it('creates singleton queueService instance', async () => {
-            runCosmosClientTest(container, secretProviderMock);
+            runCosmosClientTest(container, secretProviderMock, cosmosKeyProviderMock);
 
             const cosmosClientProvider1 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
             const cosmosClientProvider2 = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
@@ -300,11 +307,11 @@ describe(registerAzureServicesToContainer, () => {
         it('use env variables if available', async () => {
             secretProviderMock.reset();
             secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
-            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbKey)).verifiable(Times.never());
+            secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbApiUrl)).verifiable(Times.never());
             process.env.COSMOS_DB_URL = cosmosDbUrl;
-            process.env.COSMOS_DB_KEY = cosmosDbKey;
+            process.env.COSMOS_DB_API_URL = cosmosDbApiUrl;
 
-            runCosmosClientTest(container, secretProviderMock);
+            runCosmosClientTest(container, secretProviderMock, cosmosKeyProviderMock);
 
             const expectedCosmosClient = cosmosClientFactoryStub(expectedOptions);
             const cosmosClientProvider = container.get<CosmosClientProvider>(iocTypeNames.CosmosClientProvider);
@@ -342,7 +349,12 @@ function verifyCosmosContainerClient(container: Container, cosmosContainerType: 
     expect((cosmosContainerClient as any).logger).toBe(container.get(ContextAwareLogger));
 }
 
-function runCosmosClientTest(container: Container, secretProviderMock: IMock<SecretProvider>): void {
+function runCosmosClientTest(
+    container: Container,
+    secretProviderMock: IMock<SecretProvider>,
+    cosmosKeyProviderMock: IMock<CosmosKeyProvider>,
+): void {
     registerAzureServicesToContainer(container, CredentialType.VM, cosmosClientFactoryStub);
     stubBinding(container, SecretProvider, secretProviderMock.object);
+    stubBinding(container, CosmosKeyProvider, cosmosKeyProviderMock.object);
 }

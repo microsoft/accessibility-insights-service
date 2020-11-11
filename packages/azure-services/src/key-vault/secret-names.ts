@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 export const secretNames = {
     cosmosDbUrl: 'cosmosDbUrl',
-    cosmosDbKey: 'cosmosDbKey',
+    cosmosDbApiUrl: 'cosmosDbApiUrl',
     storageAccountName: 'storageAccountName',
     storageAccountKey: 'storageAccountKey',
     restApiSpAppId: 'restApiSpAppId',

@@ -23,13 +23,8 @@ getCosmosDbUrl() {
     fi
 }
 
-getCosmosDbAccessKey() {
-    cosmosDbAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
-
-    if [[ -z $cosmosDbAccessKey ]]; then
-        echo "Unable to get access key for cosmos DB account $cosmosAccountName"
-        exit 1
-    fi
+getCosmosDbApiUrl() {
+    cosmosDbApiUrl="https://management.azure.com/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosAccountName"
 }
 
 getStorageAccessKey() {
@@ -77,6 +72,7 @@ fi
 
 getCosmosDbUrl
 getCosmosDbAccessKey
+getCosmosDbApiUrl
 getStorageAccessKey
 getAppInsightKey
 getBatchAccountEndpoint
@@ -105,7 +101,7 @@ KEY_VAULT_URL=https://$keyVault.vault.azure.net/
 APPINSIGHTS_INSTRUMENTATIONKEY=$appInsightInstrumentationKey
 
 COSMOS_DB_URL=$cosmosDbUrl
-COSMOS_DB_KEY=$cosmosDbAccessKey
+COSMOS_DB_API_URL=$cosmosDbApiUrl
 
 AZURE_STORAGE_NAME=$storageAccountName
 AZURE_STORAGE_KEY=$storageAccountKey

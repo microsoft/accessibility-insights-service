@@ -18,6 +18,26 @@ Usage: $0 -v <vmss name> -r <vmss resource group> -p <batch pool>
     exit 1
 }
 
+enableResourceGroupAccess() {
+    role="Contributor"
+    scope="--resource-group $resourceGroupName"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
+enableStorageAccess() {
+    role="Storage Blob Data Contributor"
+    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
+enableCosmosAccess() {
+    cosmosAccountId=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query id -o tsv)
+    scope="--scope $cosmosAccountId"
+    
+    role="DocumentDB Account Contributor"
+    . "${0%/*}/role-assign-for-sp.sh"
+}
+
 assignSystemIdentity() {
     principalId=$(az vmss identity assign --name "$vmssName" --resource-group "$vmssResourceGroup" --query systemAssignedIdentity -o tsv)
 
@@ -30,13 +50,9 @@ assignSystemIdentity() {
   "
     . "${0%/*}/key-vault-enable-msi.sh"
 
-    role="Contributor"
-    scope="--resource-group $resourceGroupName"
-    . "${0%/*}/role-assign-for-sp.sh"
-
-    role="Storage Blob Data Contributor"
-    scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
-    . "${0%/*}/role-assign-for-sp.sh"
+    enableResourceGroupAccess
+    enableStorageAccess
+    enableCosmosAccess
 }
 
 # Read script arguments

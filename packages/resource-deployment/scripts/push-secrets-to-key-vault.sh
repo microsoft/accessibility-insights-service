@@ -10,7 +10,6 @@ export resourceGroupName
 export storageAccountName
 export cosmosAccountName
 export cosmosDbUrl
-export cosmosAccessKey
 export containerRegistryName
 
 export loggedInUserType
@@ -82,13 +81,8 @@ getCosmosDbUrl() {
     fi
 }
 
-getCosmosAccessKey() {
-    cosmosAccessKey=$(az cosmosdb keys list --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "primaryMasterKey" -o tsv)
-
-    if [[ -z $cosmosAccessKey ]]; then
-        echo "Unable to get accessKey for cosmos db account $cosmosAccountName under resource group $resourceGroupName"
-        exit 1
-    fi
+getCosmosDbApiUrl() {
+    cosmosDbApiUrl="https://management.azure.com/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.DocumentDB/databaseAccounts/$cosmosAccountName"
 }
 
 getStorageAccessKey() {
@@ -144,6 +138,9 @@ if [[ -z $resourceGroupName ]] || [[ -z $webApiAdClientId ]] || [[ -z $webApiAdC
     exitWithUsageInfo
 fi
 
+# Get the default subscription
+subscription=$(az account show --query "id" -o tsv)
+
 . "${0%/*}/get-resource-names.sh"
 
 echo "Pushing secrets to keyvault $keyVault in resourceGroup $resourceGroupName"
@@ -156,8 +153,8 @@ grantWritePermissionToKeyVault
 getCosmosDbUrl
 pushSecretToKeyVault "cosmosDbUrl" "$cosmosDbUrl"
 
-getCosmosAccessKey
-pushSecretToKeyVault "cosmosDbKey" "$cosmosAccessKey"
+getCosmosDbApiUrl
+pushSecretToKeyVault "cosmosDbApiUrl" "$cosmosDbApiUrl"
 
 pushSecretToKeyVault "storageAccountName" "$storageAccountName"
 
