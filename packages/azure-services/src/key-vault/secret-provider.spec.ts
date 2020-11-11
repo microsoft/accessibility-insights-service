@@ -2,9 +2,9 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { KeyVaultClient, KeyVaultModels } from '@azure/keyvault';
 import { EnvironmentSettings } from 'common';
 import { IMock, Mock } from 'typemoq';
+import { KeyVaultSecret, SecretClient } from '@azure/keyvault-secrets';
 import { AzureKeyVaultClientProvider } from '../ioc-types';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { SecretProvider } from './secret-provider';
@@ -12,7 +12,7 @@ import { SecretProvider } from './secret-provider';
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 describe(SecretProvider, () => {
-    let azureKeyVaultClient: IMock<KeyVaultClient>;
+    let azureKeyVaultClient: IMock<SecretClient>;
     let azureKeyVaultClientProviderStub: AzureKeyVaultClientProvider;
     let testSubject: SecretProvider;
     let environmentSettingsMock: IMock<EnvironmentSettings>;
@@ -24,11 +24,11 @@ describe(SecretProvider, () => {
             .setup((o) => o.getValue('KEY_VAULT_URL'))
             .returns(() => keyVaultUrl)
             .verifiable();
-        azureKeyVaultClient = Mock.ofType<KeyVaultClient>();
+        azureKeyVaultClient = Mock.ofType<SecretClient>();
         getPromisableDynamicMock(azureKeyVaultClient);
         azureKeyVaultClientProviderStub = async () => azureKeyVaultClient.object;
 
-        testSubject = new SecretProvider(azureKeyVaultClientProviderStub, environmentSettingsMock.object);
+        testSubject = new SecretProvider(azureKeyVaultClientProviderStub);
     });
 
     it('gets secret', async () => {
@@ -36,8 +36,8 @@ describe(SecretProvider, () => {
         const secretValue = 'value1';
 
         azureKeyVaultClient
-            .setup(async (a) => a.getSecret(keyVaultUrl, secretName, ''))
-            .returns(async () => Promise.resolve({ value: secretValue } as KeyVaultModels.GetSecretResponse));
+            .setup(async (a) => a.getSecret(secretName))
+            .returns(async () => Promise.resolve({ value: secretValue } as KeyVaultSecret));
 
         await expect(testSubject.getSecret(secretName)).resolves.toBe(secretValue);
     });

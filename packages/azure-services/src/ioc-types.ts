@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient } from '@azure/cosmos';
-import { KeyVaultClient } from '@azure/keyvault';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { BlobServiceClient } from '@azure/storage-blob';
 import { MessageIdURL, MessagesURL, QueueURL, ServiceURL } from '@azure/storage-queue';
 
@@ -20,7 +20,7 @@ export const iocTypeNames = {
     BatchServiceClientProvider: 'BatchServiceClientProvider',
 };
 
-export type AzureKeyVaultClientProvider = () => Promise<KeyVaultClient>;
+export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;
 export type BlobServiceClientProvider = () => Promise<BlobServiceClient>;
 export type CosmosClientProvider = () => Promise<CosmosClient>;
 export type QueueURLProvider = typeof QueueURL.fromServiceURL;

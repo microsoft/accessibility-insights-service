@@ -1,20 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { EnvironmentSettings } from 'common';
+import { SecretClient } from '@azure/keyvault-secrets';
 import { inject, injectable } from 'inversify';
 import { AzureKeyVaultClientProvider, iocTypeNames } from '../ioc-types';
 
 @injectable()
 export class SecretProvider {
-    constructor(
-        @inject(iocTypeNames.AzureKeyVaultClientProvider) private readonly keyVaultClientProvider: AzureKeyVaultClientProvider,
-        @inject(EnvironmentSettings) private readonly environmentSettings: EnvironmentSettings,
-    ) {}
+    constructor(@inject(iocTypeNames.AzureKeyVaultClientProvider) private readonly keyVaultClientProvider: AzureKeyVaultClientProvider) {}
 
     public async getSecret(name: string): Promise<string> {
-        const client = await this.keyVaultClientProvider();
-        const keyVaultUrl = this.environmentSettings.getValue('KEY_VAULT_URL');
-        const result = await client.getSecret(keyVaultUrl, name, '');
+        const client: SecretClient = await this.keyVaultClientProvider();
+        const result = await client.getSecret(name);
 
         return result.value;
     }
