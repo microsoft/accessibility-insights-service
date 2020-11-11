@@ -8,9 +8,11 @@ export interface AxeCoreResults extends axe.AxeResults {
     passes: AxeResult[];
     violations: AxeResult[];
     incomplete: AxeResult[];
+    inapplicable: AxeResult[];
 }
 
 export interface AxeResult extends axe.Result {
+    urls: string[];
     nodes: AxeNodeResult[];
 }
 

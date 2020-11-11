@@ -35,6 +35,7 @@
     },
     "dependencies": {
         "axe-core": "4.0.2",
+        "accessibility-insights-report": "3.0.1",
         "common": "1.0.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",

@@ -2,3 +2,4 @@
 // Licensed under the MIT License.
 export * from './axe-result-types';
 export { AxeResultsReducer } from './axe-results-reducer';
+export * from './scan-result-data';

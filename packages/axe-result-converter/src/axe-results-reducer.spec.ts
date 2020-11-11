@@ -6,34 +6,38 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { HashGenerator } from 'common';
 import axe from 'axe-core';
 import { AxeResultsReducer } from './axe-results-reducer';
-import { AxeResult, AxeCoreResults } from './axe-result-types';
+import { AxeResult, AxeNodeResult, AxeCoreResults } from './axe-result-types';
 
 let hashGeneratorMock: IMock<HashGenerator>;
 let axeResultsReducer: AxeResultsReducer;
-const accumulatedResultsFn = (id: string, nodeId: string = id) =>
+
+const accumulatedNodeFn = (ruleId: string, nodeId: string) => {
+    return {
+        html: `snippet-${nodeId}`,
+        target: [`selector-${nodeId}`],
+        selectors: [{ selector: `selector-${nodeId}`, type: 'css' }],
+        fingerprint: `${ruleId}|snippet-${nodeId}|selector-${nodeId}`,
+    } as AxeNodeResult;
+};
+const accumulatedResultsFn = (ruleId: string, data: { urls: string[]; nodeId?: string }) =>
     [
         {
-            id: `id-${id}`,
-            nodes: [
-                {
-                    html: `snippet-${nodeId}`,
-                    target: [`selector-${nodeId}`],
-                    selectors: [{ selector: `selector-${nodeId}`, type: 'css' }],
-                    fingerprint: `snippet-${nodeId}|selector-${nodeId}`,
-                },
-            ],
+            id: `id-${ruleId}`,
+            urls: data.urls,
+            nodes: data.nodeId ? [accumulatedNodeFn(`id-${ruleId}`, data.nodeId)] : [],
         },
     ] as AxeResult[];
-const currentResultsFn = (id: string, nodeId: string = id) =>
+const currentNodeFn = (nodeId: string) => {
+    return {
+        html: `snippet-${nodeId}`,
+        target: [`selector-${nodeId}`],
+    } as axe.NodeResult;
+};
+const currentResultsFn = (ruleId: string, ...nodeIds: string[]) =>
     [
         {
-            id: `id-${id}`,
-            nodes: [
-                {
-                    html: `snippet-${nodeId}`,
-                    target: [`selector-${nodeId}`],
-                },
-            ],
+            id: `id-${ruleId}`,
+            nodes: nodeIds?.map(currentNodeFn),
         },
     ] as axe.Result[];
 
@@ -41,7 +45,7 @@ describe(AxeResultsReducer, () => {
     beforeEach(() => {
         hashGeneratorMock = Mock.ofType<HashGenerator>();
         hashGeneratorMock
-            .setup((o) => o.generateBase64Hash(It.isAny(), It.isAny()))
+            .setup((o) => o.generateBase64Hash(It.isAny(), It.isAny(), It.isAny()))
             .returns((...args: string[]) => {
                 return args.join('|');
             })
@@ -53,48 +57,78 @@ describe(AxeResultsReducer, () => {
         hashGeneratorMock.verifyAll();
     });
 
-    it('reduce axe core results', () => {
-        const accumulatedAxeCoreResults = {
-            passes: accumulatedResultsFn('passes-1'),
-            violations: accumulatedResultsFn('violations-1'),
-            incomplete: accumulatedResultsFn('incomplete-1'),
-            inapplicable: [{ id: 'inapplicable-1' }],
-        } as AxeCoreResults;
-        const currentAxeCoreResults = {
-            passes: currentResultsFn('passes-2'),
-            violations: currentResultsFn('violations-2'),
-            incomplete: currentResultsFn('incomplete-2'),
-            inapplicable: [{ id: 'inapplicable-2' }],
-        } as axe.AxeResults;
-        const expectedAxeCoreResults = {
-            passes: [...accumulatedAxeCoreResults.passes, ...accumulatedResultsFn('passes-2')],
-            violations: [...accumulatedAxeCoreResults.violations, ...accumulatedResultsFn('violations-2')],
-            incomplete: [...accumulatedAxeCoreResults.incomplete, ...accumulatedResultsFn('incomplete-2')],
-            inapplicable: [...accumulatedAxeCoreResults.inapplicable, ...currentAxeCoreResults.inapplicable],
-        } as AxeCoreResults;
+    it('reduce axe result', () => {
+        const url = 'url-1';
+        const accumulatedResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
+        const violations = currentResultsFn('rule-1', 'node-11');
+        const passes = currentResultsFn('rule-2', 'node-21');
+        const incomplete = currentResultsFn('rule-3', 'node-31');
+        const inapplicable = currentResultsFn('rule-4');
 
-        axeResultsReducer.reduce(accumulatedAxeCoreResults, currentAxeCoreResults);
+        const expectedViolations = accumulatedResultsFn('rule-1', { urls: [url], nodeId: 'node-11' });
+        const expectedPasses = accumulatedResultsFn('rule-2', { urls: [url], nodeId: 'node-21' });
+        const expectedIncomplete = accumulatedResultsFn('rule-3', { urls: [url], nodeId: 'node-31' });
+        const expectedInapplicable = accumulatedResultsFn('rule-4', { urls: [url] });
+        const expectedResults = {
+            violations: expectedViolations,
+            passes: expectedPasses,
+            incomplete: expectedIncomplete,
+            inapplicable: expectedInapplicable,
+        };
 
-        expect(accumulatedAxeCoreResults).toEqual(expectedAxeCoreResults);
+        axeResultsReducer.reduce(accumulatedResults, { url, violations, passes, incomplete, inapplicable } as axe.AxeResults);
+
+        expect(accumulatedResults).toEqual(expectedResults);
     });
 
-    it('reduce results', () => {
-        const accumulatedResults = [...accumulatedResultsFn('rule-1'), ...accumulatedResultsFn('rule-2')] as AxeResult[];
-        const currentResults = [
-            ...currentResultsFn('rule-1'),
-            {
-                id: 'id-rule-3',
-                nodes: [...currentResultsFn('rule-3')[0].nodes, ...currentResultsFn('rule-3', 'node-4')[0].nodes],
-            },
-        ] as axe.Result[];
+    it('reduce result without nodes', () => {
+        hashGeneratorMock.reset();
+
+        const currentUrl = 'url-2';
+        const accumulatedResults = accumulatedResultsFn('rule-1', { urls: ['url-1'] });
+        const currentResults = currentResultsFn('rule-1');
+        const expectedResults = [...accumulatedResultsFn('rule-1', { urls: ['url-1', currentUrl] })];
+
+        axeResultsReducer.reduce(
+            { inapplicable: accumulatedResults } as AxeCoreResults,
+            { url: currentUrl, inapplicable: currentResults } as axe.AxeResults,
+        );
+
+        expect(accumulatedResults).toEqual(expectedResults);
+    });
+
+    it('skip same rule node', () => {
+        const currentUrl = 'url-2';
+        const accumulatedResults = accumulatedResultsFn('rule-1', { urls: ['url-1'], nodeId: 'node-1' });
+        const currentResults = currentResultsFn('rule-1', 'node-1', 'node-2', 'node-3');
         const expectedResults = [
-            ...accumulatedResultsFn('rule-1'),
-            ...accumulatedResultsFn('rule-2'),
-            ...accumulatedResultsFn('rule-3'),
-            ...accumulatedResultsFn('rule-3', 'node-4'),
+            ...accumulatedResultsFn('rule-1', { urls: ['url-1', currentUrl], nodeId: 'node-1' }),
+            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
+            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
         ];
 
-        axeResultsReducer.reduceResults(accumulatedResults, currentResults);
+        axeResultsReducer.reduce(
+            { violations: accumulatedResults } as AxeCoreResults,
+            { url: currentUrl, violations: currentResults } as axe.AxeResults,
+        );
+
+        expect(accumulatedResults).toEqual(expectedResults);
+    });
+
+    it('split multiple nodes from a single result', () => {
+        const currentUrl = 'url-1';
+        const accumulatedResults = [] as AxeResult[];
+        const currentResults = currentResultsFn('rule-1', 'node-1', 'node-2', 'node-3');
+        const expectedResults = [
+            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-1' }),
+            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
+            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
+        ];
+
+        axeResultsReducer.reduce(
+            { violations: accumulatedResults } as AxeCoreResults,
+            { url: currentUrl, violations: currentResults } as axe.AxeResults,
+        );
 
         expect(accumulatedResults).toEqual(expectedResults);
     });

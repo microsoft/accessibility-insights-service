@@ -1,0 +1,244 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CombinedReportDataConverter convert axe results to combined report data 1`] = `
+Object {
+  "axeVersion": "axeCoreVersion",
+  "results": Object {
+    "resultsByRule": Object {
+      "failed": Array [
+        Object {
+          "failed": Array [
+            Object {
+              "elementSelector": "selector-node-31",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-31",
+                    "id": "check-id-node-31",
+                    "message": "check-message-node-31",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-31",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-3",
+                "ruleId": "id-rule-3",
+                "ruleUrl": "helpUrl-rule-3",
+                "tags": Array [
+                  "tag-rule-3",
+                ],
+              },
+              "snippet": "snippet-node-31",
+              "urls": Array [
+                "url-31",
+                "url-32",
+                "url-33",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-32",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-32",
+                    "id": "check-id-node-32",
+                    "message": "check-message-node-32",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-32",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-3",
+                "ruleId": "id-rule-3",
+                "ruleUrl": "helpUrl-rule-3",
+                "tags": Array [
+                  "tag-rule-3",
+                ],
+              },
+              "snippet": "snippet-node-32",
+              "urls": Array [
+                "url-31",
+                "url-32",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-33",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-33",
+                    "id": "check-id-node-33",
+                    "message": "check-message-node-33",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-33",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-3",
+                "ruleId": "id-rule-3",
+                "ruleUrl": "helpUrl-rule-3",
+                "tags": Array [
+                  "tag-rule-3",
+                ],
+              },
+              "snippet": "snippet-node-33",
+              "urls": Array [
+                "url-31",
+              ],
+            },
+          ],
+          "key": "id-rule-3",
+        },
+        Object {
+          "failed": Array [
+            Object {
+              "elementSelector": "selector-node-12",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-12",
+                    "id": "check-id-node-12",
+                    "message": "check-message-node-12",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-12",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-2",
+                "ruleId": "id-rule-2",
+                "ruleUrl": "helpUrl-rule-2",
+                "tags": Array [
+                  "tag-rule-2",
+                ],
+              },
+              "snippet": "snippet-node-12",
+              "urls": Array [
+                "url-21",
+                "url-22",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-22",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-22",
+                    "id": "check-id-node-22",
+                    "message": "check-message-node-22",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-22",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-2",
+                "ruleId": "id-rule-2",
+                "ruleUrl": "helpUrl-rule-2",
+                "tags": Array [
+                  "tag-rule-2",
+                ],
+              },
+              "snippet": "snippet-node-22",
+              "urls": Array [
+                "url-21",
+              ],
+            },
+          ],
+          "key": "id-rule-2",
+        },
+        Object {
+          "failed": Array [
+            Object {
+              "elementSelector": "selector-node-11",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-11",
+                    "id": "check-id-node-11",
+                    "message": "check-message-node-11",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-11",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-1",
+                "ruleId": "id-rule-1",
+                "ruleUrl": "helpUrl-rule-1",
+                "tags": Array [
+                  "tag-rule-1",
+                ],
+              },
+              "snippet": "snippet-node-11",
+              "urls": Array [
+                "url-11",
+              ],
+            },
+          ],
+          "key": "id-rule-1",
+        },
+      ],
+      "notApplicable": Array [
+        Object {
+          "description": "description-rule-41",
+          "ruleId": "id-rule-41",
+          "ruleUrl": "helpUrl-rule-41",
+          "tags": Array [
+            "tag-rule-41",
+          ],
+        },
+        Object {
+          "description": "description-rule-42",
+          "ruleId": "id-rule-42",
+          "ruleUrl": "helpUrl-rule-42",
+          "tags": Array [
+            "tag-rule-42",
+          ],
+        },
+      ],
+      "passed": Array [
+        Object {
+          "description": "description-rule-21",
+          "ruleId": "id-rule-21",
+          "ruleUrl": "helpUrl-rule-21",
+          "tags": Array [
+            "tag-rule-21",
+          ],
+        },
+        Object {
+          "description": "description-rule-22",
+          "ruleId": "id-rule-22",
+          "ruleUrl": "helpUrl-rule-22",
+          "tags": Array [
+            "tag-rule-22",
+          ],
+        },
+      ],
+    },
+    "urlResults": Object {
+      "failedUrls": 10,
+      "passedUrls": 2,
+      "unscannableUrls": 2,
+    },
+  },
+  "scanDetails": Object {
+    "basePageTitle": "basePageTitle",
+    "baseUrl": "baseUrl",
+    "durationSeconds": 59,
+    "scanComplete": 1970-01-01T00:01:00.000Z,
+    "scanStart": 1970-01-01T00:00:01.000Z,
+  },
+  "serviceName": "scanEngineName",
+  "userAgent": "browserUserAgent",
+}
+`;
