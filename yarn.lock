@@ -62,10 +62,10 @@
     "@opentelemetry/api" "^0.6.1"
     tslib "^2.0.0"
 
-"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-1.1.6.tgz#9d76bc569c9907e3224bd09c09b4ac08bde9faf8"
-  integrity sha512-/C+qNzhwlLKt0F6SjaBEyY2pwZvwL2LviyS5PHlCh77qWuTF1sETmYAINM88BCN+kke+UlECK4YOQaAjJwyHvQ==
+"@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6", "@azure/core-http@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@azure/core-http/-/core-http-1.2.0.tgz#eb2a1da9bdba8407a09d78450af5f13f8cc43d63"
+  integrity sha512-SQmyI1tpstWKePNmTseEUp8PMq1uNBslvGBrYF2zNM/fEfLD1q64XCatoH8nDQtSmDydEPsqlyyLSjjnuXrlOQ==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-auth" "^1.1.3"
@@ -80,7 +80,7 @@
     tough-cookie "^4.0.0"
     tslib "^2.0.0"
     tunnel "^0.0.6"
-    uuid "^8.1.0"
+    uuid "^8.3.0"
     xml2js "^0.4.19"
 
 "@azure/core-lro@^1.0.2":
@@ -192,7 +192,7 @@
     "@azure/ms-rest-js" "^2.0.4"
     tslib "^1.10.0"
 
-"@azure/ms-rest-js@^2.0.0", "@azure/ms-rest-js@^2.0.4":
+"@azure/ms-rest-js@^2.0.4":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@azure/ms-rest-js/-/ms-rest-js-2.1.0.tgz#41bc541984983b5242dfbcf699ea281acd045946"
   integrity sha512-4BXLVImYRt+jcUmEJ5LUWglI8RBNVQndY6IcyvQ4U8O4kIXdmlRz3cJdA/RpXf5rKT38KOoTO2T6Z1f6Z1HDBg==
@@ -232,13 +232,18 @@
     events "^3.0.0"
     tslib "^2.0.0"
 
-"@azure/storage-queue@^10.1.0":
-  version "10.3.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-10.3.0.tgz#b4466838e967b49e14601180d1c2e2d04987b29f"
-  integrity sha512-9njyI/63Wvfnsm4eaP0QIdw7CAWjsServb+P0twMnGaG17guEND32IgU0YtzkYhczxoSnDNZM9UNGThAPskvWA==
+"@azure/storage-queue@^12.2.0":
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.2.0.tgz#0c82a0531d82358ee57754c21e1a1fce4ae5e408"
+  integrity sha512-HxFMLs6f0VQ4q1pyj4BKpdgH2amwvSwcNh+SFFcOmVuu6PpjTgP1HLiVPAf982iZlLEAEwNjzwnw2XrLbDumMA==
   dependencies:
-    "@azure/ms-rest-js" "^2.0.0"
-    tslib "^1.9.3"
+    "@azure/abort-controller" "^1.0.0"
+    "@azure/core-http" "^1.2.0"
+    "@azure/core-paging" "^1.1.1"
+    "@azure/core-tracing" "1.0.0-preview.9"
+    "@azure/logger" "^1.0.0"
+    "@opentelemetry/api" "^0.10.2"
+    tslib "^2.0.0"
 
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.10.4", "@babel/code-frame@^7.8.3":
   version "7.10.4"
