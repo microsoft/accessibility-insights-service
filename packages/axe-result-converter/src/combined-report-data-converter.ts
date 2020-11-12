@@ -67,21 +67,27 @@ export class CombinedReportDataConverter {
 
     private getFailureData(results: AxeResult[]): FailureData[] {
         const failureData: FailureData[] = [];
-        if (results) {
-            for (const result of results) {
-                if (result) {
-                    for (const node of result.nodes) {
-                        if (node) {
-                            failureData.push({
-                                urls: result.urls,
-                                elementSelector: this.getElementSelector(node),
-                                snippet: node.html,
-                                fix: this.getNodeResult(node),
-                                rule: this.getAxeRuleDataForResult(result),
-                            });
-                        }
-                    }
+        if (!results) {
+            return failureData;
+        }
+
+        for (const result of results) {
+            if (!result) {
+                continue;
+            }
+
+            for (const node of result.nodes) {
+                if (!node) {
+                    continue;
                 }
+
+                failureData.push({
+                    urls: result.urls,
+                    elementSelector: this.getElementSelector(node),
+                    snippet: node.html,
+                    fix: this.getNodeResult(node),
+                    rule: this.getAxeRuleDataForResult(result),
+                });
             }
         }
 
