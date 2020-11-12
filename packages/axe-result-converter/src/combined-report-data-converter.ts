@@ -10,24 +10,22 @@ import {
 } from 'accessibility-insights-report';
 import axe from 'axe-core';
 import _ from 'lodash';
+import { injectable } from 'inversify';
 import { ScanResultData } from './scan-result-data';
 import { AxeResult, AxeNodeResult, AxeCoreResults } from './axe-result-types';
 
-interface FailureReportData {
-    urlsCount: number;
-    failureData: FailureData[];
-}
-
+@injectable()
 export class CombinedReportDataConverter {
     public convert(axeResults: AxeCoreResults, scanResultData: ScanResultData): CombinedReportParameters {
         const failed = this.getFailureData(axeResults.violations);
-        const failedByRule = this.groupFailureDataByRule(failed.failureData);
-        const passed = this.getAxeRuleData(axeResults.passes);
         const inapplicable = this.getAxeRuleData(axeResults.inapplicable);
+        const passed = this.getAxeRuleData(axeResults.passes);
+
+        const failedByRule = this.groupFailureDataByRule(failed);
         const resultCounts = {
-            failedUrls: failed.urlsCount,
-            passedUrls: passed.length,
-            unscannableUrls: inapplicable.length,
+            failedUrls: scanResultData.urlCount.failed,
+            passedUrls: scanResultData.urlCount.passed,
+            unscannableUrls: scanResultData.urlCount.total - (scanResultData.urlCount.failed + scanResultData.urlCount.passed),
         };
 
         return {
@@ -67,18 +65,13 @@ export class CombinedReportDataConverter {
         return failuresGroup.sort(this.compareFailureGroup);
     }
 
-    private getFailureData(results: AxeResult[]): FailureReportData {
-        let urlsCount = 0;
+    private getFailureData(results: AxeResult[]): FailureData[] {
         const failureData: FailureData[] = [];
         if (results) {
             for (const result of results) {
                 if (result) {
                     for (const node of result.nodes) {
                         if (node) {
-                            if (result.urls) {
-                                urlsCount = urlsCount + result.urls.length;
-                            }
-
                             failureData.push({
                                 urls: result.urls,
                                 elementSelector: this.getElementSelector(node),
@@ -92,19 +85,18 @@ export class CombinedReportDataConverter {
             }
         }
 
-        return {
-            urlsCount,
-            failureData,
-        };
+        return failureData;
     }
 
     private getAxeRuleData(results: axe.Result[]): AxeRuleData[] {
         const axeRuleData: AxeRuleData[] = [];
         if (results) {
             for (const result of results) {
-                const data = this.getAxeRuleDataForResult(result);
-                if (data) {
-                    axeRuleData.push(data);
+                if (!axeRuleData.some((rule) => rule.ruleId === result.id)) {
+                    const data = this.getAxeRuleDataForResult(result);
+                    if (data) {
+                        axeRuleData.push(data);
+                    }
                 }
             }
         }

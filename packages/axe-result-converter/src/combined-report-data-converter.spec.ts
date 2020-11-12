@@ -16,6 +16,11 @@ const scanResultData = {
     browserUserAgent: 'browserUserAgent',
     scanStarted: new Date(1000),
     scanEnded: new Date(60000),
+    urlCount: {
+        total: 7,
+        passed: 3,
+        failed: 1,
+    },
 } as ScanResultData;
 const accumulatedNodeFn = (ruleId: string, nodeId: string) => {
     return {

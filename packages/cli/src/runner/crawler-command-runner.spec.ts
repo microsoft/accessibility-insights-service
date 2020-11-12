@@ -6,9 +6,8 @@ import * as fs from 'fs';
 import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
-import { ReportGenerator } from '../report/report-generator';
-import { ReportNameGenerator } from '../report/report-name-generator';
 import { ScanArguments } from '../scanner/scan-arguments';
+import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
@@ -19,9 +18,8 @@ describe('CrawlerCommandRunner', () => {
     let testInput: ScanArguments;
     let crawlerOption: CrawlerRunOptions;
     let crawlerMock: IMock<Crawler>;
-    let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
-    let reportNameGeneratorMock: IMock<ReportNameGenerator>;
+    let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
     let fsMock: IMock<typeof fs>;
     let testSubject: CrawlerCommandRunner;
 
@@ -43,9 +41,8 @@ describe('CrawlerCommandRunner', () => {
         };
 
         crawlerMock = Mock.ofType<Crawler>();
-        reportGeneratorMock = Mock.ofType<ReportGenerator>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
-        reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
+        consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();
         fsMock = Mock.ofInstance(fs);
 
         fsMock
@@ -60,18 +57,16 @@ describe('CrawlerCommandRunner', () => {
 
         testSubject = new CrawlerCommandRunner(
             crawlerMock.object,
-            // reportGeneratorMock.object,
-            // reportDiskWriterMock.object,
-            // reportNameGeneratorMock.object,
+            consolidatedReportGeneratorMock.object,
+            reportDiskWriterMock.object,
             fsMock.object,
         );
     });
 
     afterEach(() => {
         crawlerMock.verifyAll();
-        reportGeneratorMock.verifyAll();
         reportDiskWriterMock.verifyAll();
-        reportNameGeneratorMock.verifyAll();
+        consolidatedReportGeneratorMock.verifyAll();
         fsMock.verifyAll();
     });
 
@@ -119,6 +114,15 @@ describe('CrawlerCommandRunner', () => {
     });
 
     it('run crawler', async () => {
+        consolidatedReportGeneratorMock
+            .setup(async (o) => o.generateReport(testUrl, It.isAny(), It.isAny()))
+            .returns(() => Promise.resolve('report'))
+            .verifiable();
+        reportDiskWriterMock
+            .setup((o) => o.writeToDirectory(testInput.output, 'index', 'html', 'report'))
+            .returns(() => 'path')
+            .verifiable();
+
         await testSubject.runCommand(testInput);
     });
 });

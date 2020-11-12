@@ -5,6 +5,7 @@ import axe from 'axe-core';
 export declare type SelectorType = 'xpath' | 'css';
 
 export interface AxeCoreResults extends axe.AxeResults {
+    urls: string[];
     passes: AxeResult[];
     violations: AxeResult[];
     incomplete: AxeResult[];

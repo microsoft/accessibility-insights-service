@@ -10,9 +10,7 @@ import { SimulatorPageProcessor } from './page-processors/simulator-page-process
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
-export function setupCrawlerContainer(): inversify.Container {
-    const container = new inversify.Container({ autoBindInjectable: true });
-
+export function setupCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(iocTypes.ReporterFactory).toConstantValue(reporterFactory);
 

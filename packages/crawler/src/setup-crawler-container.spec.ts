@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import * as inversify from 'inversify';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { DataBase } from './level-storage/data-base';
 import { setupCrawlerContainer } from './setup-crawler-container';
@@ -20,7 +21,8 @@ describe(setupCrawlerContainer, () => {
             simulate: false,
         } as CrawlerRunOptions;
 
-        const container = setupCrawlerContainer();
+        const container = new inversify.Container({ autoBindInjectable: true });
+        setupCrawlerContainer(container);
         container.bind(iocTypes.CrawlerRunOptions).toConstantValue(crawlerRunOptions);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
