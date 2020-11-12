@@ -68,8 +68,9 @@ export class DataBase implements AsyncIterable<ScanResult> {
     public async getScanMetadata(baseUrl: string): Promise<ScanMetadata> {
         await this.openDb();
         const dbKey: DataBaseKey = { type: 'scanMetadata', key: generateHash(baseUrl) };
+        const value = await this.db.get(dbKey);
 
-        return (await this.db.get(dbKey)) as ScanMetadata;
+        return value as ScanMetadata;
     }
 
     public async openDb(outputDir: string = process.env.APIFY_LOCAL_STORAGE_DIR): Promise<void> {

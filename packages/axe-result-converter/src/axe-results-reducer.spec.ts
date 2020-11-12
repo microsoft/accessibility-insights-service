@@ -70,6 +70,7 @@ describe(AxeResultsReducer, () => {
         const expectedIncomplete = accumulatedResultsFn('rule-3', { urls: [url], nodeId: 'node-31' });
         const expectedInapplicable = accumulatedResultsFn('rule-4', { urls: [url] });
         const expectedResults = {
+            urls: [url],
             violations: expectedViolations,
             passes: expectedPasses,
             incomplete: expectedIncomplete,

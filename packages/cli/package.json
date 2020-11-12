@@ -36,6 +36,7 @@
         "@types/normalize-path": "^3.0.0",
         "@types/table": "^6.0.0",
         "accessibility-insights-crawler": "1.0.0",
+        "axe-result-converter": "1.0.0",
         "copy-webpack-plugin": "^5.1.1",
         "dts-bundle-generator": "^5.4.0",
         "fork-ts-checker-webpack-plugin": "^5.2.0",

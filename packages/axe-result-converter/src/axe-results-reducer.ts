@@ -12,6 +12,7 @@ export class AxeResultsReducer {
     constructor(@inject(HashGenerator) private readonly hashGenerator: HashGenerator) {}
 
     public reduce(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
+        this.setUrl(accumulatedAxeResults, currentAxeResults);
         this.reduceResults(currentAxeResults.url, accumulatedAxeResults.violations, currentAxeResults.violations);
         this.reduceResults(currentAxeResults.url, accumulatedAxeResults.passes, currentAxeResults.passes);
         this.reduceResults(currentAxeResults.url, accumulatedAxeResults.incomplete, currentAxeResults.incomplete);
@@ -96,5 +97,15 @@ export class AxeResultsReducer {
         }
 
         return selectors;
+    }
+
+    private setUrl(accumulatedAxeResults: AxeCoreResults, currentAxeResults: axe.AxeResults): void {
+        if (accumulatedAxeResults.urls) {
+            if (!accumulatedAxeResults.urls.some((url) => url === currentAxeResults.url)) {
+                accumulatedAxeResults.urls.push(currentAxeResults.url);
+            }
+        } else {
+            accumulatedAxeResults.urls = [currentAxeResults.url];
+        }
     }
 }

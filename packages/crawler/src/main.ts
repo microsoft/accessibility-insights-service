@@ -8,6 +8,7 @@ import { System } from 'common';
 import * as dotenv from 'dotenv';
 import { isEmpty } from 'lodash';
 import * as yargs from 'yargs';
+import * as inversify from 'inversify';
 import { Crawler } from './crawler';
 import { setupCrawlerContainer } from './setup-crawler-container';
 
@@ -114,7 +115,8 @@ interface ScanArguments {
         })
         .describe('help', 'Show help').argv as unknown) as ScanArguments;
 
-    await new Crawler(setupCrawlerContainer()).crawl({
+    const container = new inversify.Container({ autoBindInjectable: true });
+    await new Crawler(setupCrawlerContainer(container)).crawl({
         baseUrl: scanArguments.url,
         simulate: scanArguments.simulate,
         selectors: scanArguments.selectors,
