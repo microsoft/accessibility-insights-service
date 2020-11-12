@@ -366,7 +366,7 @@ describe(Batch, () => {
                 .setup(async (o) => o.get(batchConfigStub.poolId))
                 .returns(async () =>
                     Promise.resolve(<PoolGetResponse>(<unknown>{
-                        maxTasksPerNode: 8,
+                        taskSlotsPerNode: 8,
                         currentDedicatedNodes: 3,
                         currentLowPriorityNodes: 1,
                     })),
