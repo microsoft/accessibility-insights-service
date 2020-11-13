@@ -4,7 +4,7 @@ import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
-import { MessageIdURL, MessagesURL, QueueURL, ServiceURL, SharedKeyCredential, StorageURL } from '@azure/storage-queue';
+import { QueueServiceClient } from '@azure/storage-queue';
 import { IoC } from 'common';
 import { Container, interfaces } from 'inversify';
 import { ContextAwareLogger } from 'logger';
@@ -56,11 +56,7 @@ export function registerAzureServicesToContainer(
     container.bind(CosmosClientWrapper).toSelf();
     container.bind(MSICredentialsProvider).toSelf().inSingletonScope();
 
-    container.bind(iocTypeNames.QueueURLProvider).toConstantValue(QueueURL.fromServiceURL);
-    container.bind(iocTypeNames.MessagesURLProvider).toConstantValue(MessagesURL.fromQueueURL);
-    container.bind(iocTypeNames.MessageIdURLProvider).toConstantValue(MessageIdURL.fromMessagesURL);
-
-    setupSingletonQueueServiceURLProvider(container);
+    setupSingletonQueueServiceClientProvider(container);
 
     container.bind(cosmosContainerClientTypes.OnDemandScanBatchRequestsCosmosContainerClient).toDynamicValue((context) => {
         return createCosmosContainerClient(context.container, 'onDemandScanner', 'scanBatchRequests');
@@ -143,13 +139,12 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
     });
 }
 
-function setupSingletonQueueServiceURLProvider(container: interfaces.Container): void {
-    IoC.setupSingletonProvider<ServiceURL>(iocTypeNames.QueueServiceURLProvider, container, async (context) => {
+function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
+    IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
         const storageKey = await getStorageKey(context);
-        const sharedKeyCredential = new SharedKeyCredential(storageKey.accountName, storageKey.accountKey);
-        const pipeline = StorageURL.newPipeline(sharedKeyCredential);
+        const credential = new DefaultAzureCredential();
 
-        return new ServiceURL(`https://${storageKey.accountName}.queue.core.windows.net`, pipeline);
+        return new QueueServiceClient(`https://${storageKey.accountName}.queue.core.windows.net`, credential);
     });
 }
 

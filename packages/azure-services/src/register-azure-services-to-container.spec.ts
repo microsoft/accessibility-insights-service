@@ -6,12 +6,12 @@ import 'reflect-metadata';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
 import { BlobServiceClient } from '@azure/storage-blob';
-import { MessageIdURL, MessagesURL, QueueURL } from '@azure/storage-queue';
 import { Container, interfaces } from 'inversify';
 import * as _ from 'lodash';
 import { ContextAwareLogger, registerLoggerToContainer } from 'logger';
 import { IMock, Mock, Times } from 'typemoq';
 import { SecretClient } from '@azure/keyvault-secrets';
+import { QueueServiceClient } from '@azure/storage-queue';
 import { CosmosClientWrapper } from './azure-cosmos/cosmos-client-wrapper';
 import { Queue } from './azure-queue/queue';
 import { StorageConfig } from './azure-queue/storage-config';
@@ -24,7 +24,7 @@ import {
     CosmosClientProvider,
     cosmosContainerClientTypes,
     iocTypeNames,
-    QueueServiceURLProvider,
+    QueueServiceClientProvider,
 } from './ioc-types';
 import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
@@ -93,10 +93,6 @@ describe(registerAzureServicesToContainer, () => {
         verifySingletonDependencyResolution(container, StorageConfig);
         verifySingletonDependencyResolution(container, SecretProvider);
         verifySingletonDependencyResolution(container, CredentialsProvider);
-
-        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.QueueURLProvider, QueueURL.fromServiceURL);
-        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.MessagesURLProvider, MessagesURL.fromQueueURL);
-        verifySingletonDependencyResolutionWithValue(container, iocTypeNames.MessageIdURLProvider, MessageIdURL.fromMessagesURL);
 
         expect(container.get(iocTypeNames.CredentialType)).toBe(CredentialType.AppService);
     });
@@ -200,19 +196,19 @@ describe(registerAzureServicesToContainer, () => {
         });
 
         it('verify Azure QueueService resolution', async () => {
-            const queueServiceURLProvider = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
-            const queueServiceURL = await queueServiceURLProvider();
+            const queueServiceClientProvider = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
+            const queueServiceClient = await queueServiceClientProvider();
 
-            expect(queueServiceURL.url).toBe(`https://${storageAccountName}.queue.core.windows.net`);
+            expect(queueServiceClient).toBeInstanceOf(QueueServiceClient);
         });
 
         it('creates singleton queueService instance', async () => {
-            const queueServiceURLProvider1 = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
-            const queueServiceURLProvider2 = container.get<QueueServiceURLProvider>(iocTypeNames.QueueServiceURLProvider);
-            const queueServiceURL1Promise = queueServiceURLProvider1();
-            const queueServiceURL2Promise = queueServiceURLProvider2();
+            const queueServiceClientProvider1 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
+            const queueServiceClientProvider2 = container.get<QueueServiceClientProvider>(iocTypeNames.QueueServiceClientProvider);
+            const queueServiceClient1Promise = queueServiceClientProvider1();
+            const queueServiceClient2Promise = queueServiceClientProvider2();
 
-            expect(await queueServiceURL1Promise).toBe(await queueServiceURL2Promise);
+            expect(await queueServiceClient1Promise).toBe(await queueServiceClient2Promise);
         });
     });
 
@@ -316,11 +312,6 @@ function stubBinding(container: Container, bindingName: interfaces.ServiceIdenti
 function verifySingletonDependencyResolution(container: Container, key: any): void {
     expect(container.get(key)).toBeDefined();
     expect(container.get(key)).toBe(container.get(key));
-}
-
-function verifySingletonDependencyResolutionWithValue(container: Container, key: any, value: any): void {
-    expect(container.get(key)).toBe(value);
-    verifySingletonDependencyResolution(container, key);
 }
 
 function verifyNonSingletonDependencyResolution(container: Container, key: any): void {
