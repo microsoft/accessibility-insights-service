@@ -33,7 +33,6 @@ export class FileCommandRunner implements CommandRunner {
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
-        // @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
@@ -61,16 +60,7 @@ export class FileCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         this.reportDiskWriter.copyToDirectory(scanArguments.inputFile, scanArguments.output);
-        await this.generateConsolidatedReport(scanArguments, startDate, endDate);
         await this.generateSummaryReports(scanArguments, startDate, endDate);
-    }
-
-    private async generateConsolidatedReport(scanArguments: ScanArguments, startDate: Date, endDate: Date): Promise<void> {
-        // console.log('Generating summary scan report...');
-        // const reportContent = await this.consolidatedReportGenerator.generateReport(this.combinedAxeResults.url, startDate, endDate);
-        // console.log(reportContent);
-        // const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
-        // console.log(`Summary report was saved as ${reportLocation}`);
     }
 
     private async generateSummaryReports(scanArguments: ScanArguments, startDate: Date, endDate: Date): Promise<void> {
