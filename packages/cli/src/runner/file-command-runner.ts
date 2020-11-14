@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import { ScanSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
+import { AxeCoreResults, AxeResultsReducer } from 'axe-result-converter';
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
@@ -27,12 +28,14 @@ export class FileCommandRunner implements CommandRunner {
     };
     private readonly errors: PageError[] = [];
     private readonly uniqueUrls = new Set();
+    private readonly combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
 
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
+        @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
+        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -99,6 +102,7 @@ export class FileCommandRunner implements CommandRunner {
         const axeResults = await this.scanner.scan(url);
 
         if (isNil(axeResults.error)) {
+            this.axeResultsReducer.reduce(this.combinedAxeResults, axeResults.results);
             const reportContent = this.reportGenerator.generateReport(axeResults);
             const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'html', reportContent);
             this.processURLScanResult(url, reportName, axeResults);

@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import * as fs from 'fs';
 import { AxeScanResults } from 'scanner-global-library';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import { AxeCoreResults, AxeResultsReducer } from 'axe-result-converter';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { ReportNameGenerator } from '../report/report-name-generator';
@@ -16,11 +17,13 @@ import { FileCommandRunner } from './file-command-runner';
 
 describe(FileCommandRunner, () => {
     let scannerMock: IMock<AIScanner>;
+    let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let fsMock: IMock<typeof fs>;
     let reportNameGeneratorMock: IMock<ReportNameGenerator>;
     let testSubject: FileCommandRunner;
+    let combinedAxeResults: AxeCoreResults;
     const testInputFile = 'input file';
     const testInput: ScanArguments = { inputFile: testInputFile, output: '/users/xyz' };
 
@@ -28,14 +31,16 @@ describe(FileCommandRunner, () => {
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         reportNameGeneratorMock = Mock.ofType<ReportNameGenerator>();
+        axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         scannerMock = Mock.ofType<AIScanner>();
         fsMock = Mock.ofInstance(fs, MockBehavior.Strict);
 
         testSubject = new FileCommandRunner(
             scannerMock.object,
+            axeResultsReducerMock.object,
             reportGeneratorMock.object,
-            reportDiskWriterMock.object,
             reportNameGeneratorMock.object,
+            reportDiskWriterMock.object,
             fsMock.object,
         );
     });
@@ -48,6 +53,8 @@ describe(FileCommandRunner, () => {
                 .setup((f) => f.readFileSync(testInput.inputFile, 'utf-8'))
                 .returns(() => fileContent)
                 .verifiable(Times.once());
+
+            combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
 
             setupScanAndReportWriteCalls();
         });
@@ -114,6 +121,7 @@ describe(FileCommandRunner, () => {
     afterEach(() => {
         fsMock.verifyAll();
         scannerMock.verifyAll();
+        axeResultsReducerMock.verifyAll();
         reportGeneratorMock.verifyAll();
         reportDiskWriterMock.verifyAll();
         reportNameGeneratorMock.verifyAll();
@@ -136,6 +144,7 @@ describe(FileCommandRunner, () => {
                 } as AxeScanResults;
 
                 setupReportCreationCalls(url, result);
+                setupResultsReducerCalls(result);
 
                 return result;
             })
@@ -170,6 +179,7 @@ describe(FileCommandRunner, () => {
                 } as AxeScanResults;
 
                 setupReportCreationCalls(url, result);
+                setupResultsReducerCalls(result);
 
                 return result;
             })
@@ -216,6 +226,10 @@ describe(FileCommandRunner, () => {
             .setup((s) => s.getUserAgent())
             .returns(() => 'user agent')
             .verifiable(Times.atLeast(0));
+    }
+
+    function setupResultsReducerCalls(result: AxeScanResults): void {
+        axeResultsReducerMock.setup((a) => a.reduce(It.isValue(combinedAxeResults), It.isValue(result.results))).verifiable(Times.once());
     }
 
     function setupReportCreationCalls(url: string, result: AxeScanResults): void {
