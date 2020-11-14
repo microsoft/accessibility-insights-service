@@ -229,9 +229,7 @@ describe(FileCommandRunner, () => {
     }
 
     function setupResultsReducerCalls(result: AxeScanResults): void {
-        axeResultsReducerMock
-            .setup((a) => a.reduce(It.isValue(combinedAxeResults), It.isValue(result.results)))
-            .verifiable(Times.once());
+        axeResultsReducerMock.setup((a) => a.reduce(It.isValue(combinedAxeResults), It.isValue(result.results))).verifiable(Times.once());
     }
 
     function setupReportCreationCalls(url: string, result: AxeScanResults): void {
