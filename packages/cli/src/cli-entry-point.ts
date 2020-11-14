@@ -9,11 +9,14 @@ import { CrawlerCommandRunner } from './runner/crawler-command-runner';
 import { FileCommandRunner } from './runner/file-command-runner';
 import { URLCommandRunner } from './runner/url-command-runner';
 import { ScanArguments } from './scanner/scan-arguments';
+import { registerRunOptions } from './setup-cli-container';
 
 export class CliEntryPoint {
     constructor(private readonly container: Container) {}
 
     public async runScan(scanArguments: ScanArguments): Promise<void> {
+        registerRunOptions(this.container, scanArguments);
+
         try {
             const commandRunner = this.getCommandRunner(scanArguments);
             await commandRunner.runCommand(scanArguments);

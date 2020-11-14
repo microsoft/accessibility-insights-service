@@ -1,27 +1,31 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { ScanResultReader } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';
 import { AxeInfo } from '../tool-data/axe-info';
+import { iocTypes } from '../ioc-types';
+import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
+import { serviceName } from './report-formats';
 
-export const serviceName = 'Accessibility Insights Service';
-
-interface ScanResult {
+interface CombinedScanResult {
     urlCount: UrlCount;
     combinedAxeResults: AxeCoreResults;
 }
 
 @injectable()
 export class ConsolidatedReportGenerator {
+    private readonly scanResultReader: ScanResultReader;
+
     constructor(
-        @inject(ScanResultReader) private readonly scanResultReader: ScanResultReader,
+        @inject(iocTypes.ScanResultReaderFactory) private readonly scanResultFactory: () => ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
         @inject(CombinedReportDataConverter) private readonly combinedReportDataConverter: CombinedReportDataConverter,
-        @inject('ReporterFactory') private readonly reporterFactoryFunc: ReporterFactory,
+        @inject(iocTypes.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory,
         @inject(AxeInfo) private readonly axeInfo: AxeInfo,
-    ) {}
+    ) {
+        this.scanResultReader = this.scanResultFactory();
+    }
 
     public async generateReport(baseUrl: string, scanStarted: Date, scanEnded: Date): Promise<string> {
         const combinedAxeResults = await this.combineAxeResults();
@@ -42,7 +46,7 @@ export class ConsolidatedReportGenerator {
         return reporter.fromCombinedResults(combinedReportData).asHTML();
     }
 
-    private async combineAxeResults(): Promise<ScanResult> {
+    private async combineAxeResults(): Promise<CombinedScanResult> {
         const combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
         const urlCount = {
             total: 0,

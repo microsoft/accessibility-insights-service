@@ -10,7 +10,7 @@ import { ScanResult, ScanMetadata } from '../level-storage/storage-documents';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
-export class ScanResultReader implements AsyncIterable<ScanResult> {
+export class DbScanResultReader implements AsyncIterable<ScanResult> {
     public constructor(
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,

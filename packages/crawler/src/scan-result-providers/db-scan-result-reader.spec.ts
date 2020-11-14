@@ -7,20 +7,20 @@ import { AxeResults } from 'axe-core';
 import { BlobStore } from '../storage/store-types';
 import { DataBase } from '../level-storage/data-base';
 import { ScanMetadata } from '../level-storage/storage-documents';
-import { ScanResultReader } from './scan-result-reader';
+import { DbScanResultReader } from './db-scan-result-reader';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-describe(ScanResultReader, () => {
+describe(DbScanResultReader, () => {
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
-    let scanResultReader: ScanResultReader;
+    let scanResultReader: DbScanResultReader;
 
     beforeEach(() => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType(DataBase);
 
-        scanResultReader = new ScanResultReader(dataBaseMock.object, blobStoreMock.object);
+        scanResultReader = new DbScanResultReader(dataBaseMock.object, blobStoreMock.object);
     });
 
     afterEach(() => {

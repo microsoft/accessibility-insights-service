@@ -10,13 +10,13 @@ import {
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner-global-library';
 import { AxeInfo } from '../tool-data/axe-info';
-
-export const serviceName = 'Accessibility Insights Service';
+import { iocTypes } from '../ioc-types';
+import { serviceName } from './report-formats';
 
 @injectable()
 export class ReportGenerator {
     constructor(
-        @inject('ReporterFactory') private readonly reporterFactoryFunc: ReporterFactory,
+        @inject(iocTypes.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory,
         @inject(AxeInfo) private readonly axeInfo: AxeInfo,
     ) {}
 
