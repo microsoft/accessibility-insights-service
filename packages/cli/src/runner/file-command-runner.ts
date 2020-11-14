@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import * as fs from 'fs';
 import { ScanSummaryDetails, SummaryScanError, SummaryScanResult, SummaryScanResults } from 'accessibility-insights-report';
+import { AxeCoreResults, AxeResultsReducer } from 'axe-result-converter';
 import { Spinner } from 'cli-spinner';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
@@ -27,12 +28,15 @@ export class FileCommandRunner implements CommandRunner {
     };
     private readonly errors: PageError[] = [];
     private readonly uniqueUrls = new Set();
+    private readonly combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
 
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
+        @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
+        // @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         @inject(ReportNameGenerator) private readonly reportNameGenerator: ReportNameGenerator,
+        @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         private readonly fileSystemObj: typeof fs = fs,
     ) {}
 
@@ -57,7 +61,16 @@ export class FileCommandRunner implements CommandRunner {
 
         const endDate = new Date();
         this.reportDiskWriter.copyToDirectory(scanArguments.inputFile, scanArguments.output);
+        await this.generateConsolidatedReport(scanArguments, startDate, endDate);
         await this.generateSummaryReports(scanArguments, startDate, endDate);
+    }
+
+    private async generateConsolidatedReport(scanArguments: ScanArguments, startDate: Date, endDate: Date): Promise<void> {
+        // console.log('Generating summary scan report...');
+        // const reportContent = await this.consolidatedReportGenerator.generateReport(this.combinedAxeResults.url, startDate, endDate);
+        // console.log(reportContent);
+        // const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
+        // console.log(`Summary report was saved as ${reportLocation}`);
     }
 
     private async generateSummaryReports(scanArguments: ScanArguments, startDate: Date, endDate: Date): Promise<void> {
@@ -99,6 +112,7 @@ export class FileCommandRunner implements CommandRunner {
         const axeResults = await this.scanner.scan(url);
 
         if (isNil(axeResults.error)) {
+            this.axeResultsReducer.reduce(this.combinedAxeResults, axeResults.results);
             const reportContent = this.reportGenerator.generateReport(axeResults);
             const reportName = this.reportDiskWriter.writeToDirectory(`${scanArguments.output}\\data`, url, 'html', reportContent);
             this.processURLScanResult(url, reportName, axeResults);
