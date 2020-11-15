@@ -53,7 +53,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         const operation = request.userData as Operation;
         const requestQueue = await this.requestQueueProvider();
         if (operation.operationType === undefined || operation.operationType === 'no-op') {
-            console.log(`Crawling page ${page.url()}`);
+            console.log(`Processing page ${page.url()}`);
             await this.enqueueLinks(page);
             await this.enqueueActiveElementsOp.find(page, this.selectors, requestQueue);
             const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
@@ -63,7 +63,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
             await this.saveScanResult(request, issueCount);
         } else if (operation.operationType === 'click') {
             const activeElement = operation.data as ActiveElement;
-            console.log(`Crawling page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
+            console.log(`Processing page ${page.url()} with simulation click on element with selector '${activeElement.selector}'`);
             const operationResult = await this.clickElementOp.click(page, activeElement.selector, requestQueue, this.discoveryPatterns);
             let issueCount;
             if (operationResult.clickAction === 'page-action') {

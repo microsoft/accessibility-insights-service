@@ -189,7 +189,7 @@ type: string
 describe: File path that contains list of URLs (each separated by a new line) to scan in addition to URLs discovered from crawling the provided URL.
 ```
 
--   existingUrls: --existingUrls
+-   inputUrls: --inputUrls
 
 ```sh
 type: array

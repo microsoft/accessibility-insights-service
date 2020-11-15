@@ -53,6 +53,10 @@ describe(ClassicPageProcessor, () => {
             .setup((o) => o.snapshot())
             .returns(() => false)
             .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.crawl())
+            .returns(() => true)
+            .verifiable();
         axeResults = {
             url: 'url',
             passes: [],

@@ -43,7 +43,7 @@ export class FileCommandRunner implements CommandRunner {
         const spinner = new Spinner(`Running scanner... %s \t`);
         spinner.start();
 
-        const startDate = new Date();
+        const scanStarted = new Date();
         try {
             // eslint-disable-next-line security/detect-non-literal-fs-filename
             const lines = this.fileSystemObj.readFileSync(scanArguments.inputFile, 'utf-8').split(/\r?\n/);
@@ -58,9 +58,8 @@ export class FileCommandRunner implements CommandRunner {
             spinner.stop();
         }
 
-        const endDate = new Date();
         this.reportDiskWriter.copyToDirectory(scanArguments.inputFile, scanArguments.output);
-        await this.generateSummaryReports(scanArguments, startDate, endDate);
+        await this.generateSummaryReports(scanArguments, scanStarted, new Date());
     }
 
     private async generateSummaryReports(scanArguments: ScanArguments, startDate: Date, endDate: Date): Promise<void> {

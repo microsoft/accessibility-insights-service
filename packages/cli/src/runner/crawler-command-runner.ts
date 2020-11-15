@@ -34,8 +34,7 @@ export class CrawlerCommandRunner implements CommandRunner {
             snapshot: scanArguments.snapshot,
             memoryMBytes: scanArguments.memoryMBytes,
             silentMode: scanArguments.silentMode,
-            inputFile: scanArguments.inputFile,
-            existingUrls: scanArguments.existingUrls,
+            inputUrls: scanArguments.inputUrls,
             discoveryPatterns: scanArguments.discoveryPatterns,
         });
 

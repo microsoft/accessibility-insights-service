@@ -3,7 +3,7 @@
 
 export interface CrawlerRunOptions {
     baseUrl: string;
-    existingUrls?: string[];
+    inputUrls?: string[];
     discoveryPatterns?: string[];
     simulate?: boolean;
     selectors?: string[];
@@ -13,6 +13,6 @@ export interface CrawlerRunOptions {
     snapshot?: boolean;
     memoryMBytes?: number;
     silentMode?: boolean;
-    inputFile?: string;
     debug?: boolean;
+    crawl?: boolean;
 }

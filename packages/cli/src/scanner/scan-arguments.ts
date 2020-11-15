@@ -12,7 +12,7 @@ export interface ScanArguments {
     snapshot?: boolean;
     memoryMBytes?: number;
     silentMode?: boolean;
-    existingUrls?: string[];
+    inputUrls?: string[];
     discoveryPatterns?: string[];
     // eslint-disable-next-line
     continue?: boolean;

@@ -4,7 +4,7 @@ import { Crawler, setupCrawlerContainer, DbScanResultReader } from 'accessibilit
 import * as inversify from 'inversify';
 import { iocTypes } from './ioc-types';
 import { ScanArguments } from './scanner/scan-arguments';
-import { FileScanResultReader } from './scan-result-providers/file-scan-result-reader';
+// import { FileScanResultReader } from './scan-result-providers/file-scan-result-reader';
 import { ScanResultReader } from './scan-result-providers/scan-result-reader';
 
 export function setupCliContainer(): inversify.Container {
@@ -15,17 +15,18 @@ export function setupCliContainer(): inversify.Container {
     container
         .bind<inversify.interfaces.Factory<ScanResultReader>>(iocTypes.ScanResultReaderFactory)
         .toFactory<ScanResultReader>((context: inversify.interfaces.Context) => {
-            const runOptions = context.container.get<ScanArguments>(iocTypes.RunOptions);
+            return () => context.container.get(DbScanResultReader);
+            // const runOptions = context.container.get<ScanArguments>(iocTypes.RunOptions);
 
-            return () => {
-                if (runOptions.crawl) {
-                    return context.container.get(DbScanResultReader);
-                } else if (runOptions.inputFile) {
-                    return context.container.get(FileScanResultReader);
-                } else {
-                    return undefined;
-                }
-            };
+            // return () => {
+            //     if (runOptions.crawl) {
+            //         return context.container.get(DbScanResultReader);
+            //     } else if (runOptions.inputFile) {
+            //         return context.container.get(FileScanResultReader);
+            //     } else {
+            //         return undefined;
+            //     }
+            // };
         });
 
     return container;

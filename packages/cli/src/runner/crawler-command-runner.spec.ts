@@ -28,7 +28,7 @@ describe('CrawlerCommandRunner', () => {
         crawlerOption = {
             baseUrl: testInput.url,
             localOutputDir: testInput.output,
-            existingUrls: undefined,
+            inputUrls: undefined,
             discoveryPatterns: undefined,
             simulate: undefined,
             selectors: undefined,
@@ -37,7 +37,6 @@ describe('CrawlerCommandRunner', () => {
             snapshot: undefined,
             memoryMBytes: undefined,
             silentMode: undefined,
-            inputFile: undefined,
         };
 
         crawlerMock = Mock.ofType<Crawler>();

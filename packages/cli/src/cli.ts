@@ -10,6 +10,7 @@ import './module-name-mapper';
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
 import * as yargs from 'yargs';
+import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scanner/scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
@@ -20,7 +21,7 @@ import { setupCliContainer } from './setup-cli-container';
     const cliEntryPoint = new CliEntryPoint(setupCliContainer());
     await cliEntryPoint.runScan(scanArguments);
 })().catch((error) => {
-    console.log('Exception occurred while running the tool: ', error);
+    console.log('Exception occurred while running the tool: ', System.serializeError(error));
     process.exitCode = 1;
 });
 
@@ -89,7 +90,7 @@ function readScanArguments(): ScanArguments {
                 type: 'string',
                 describe: 'List of URLs to crawl in addition to URLs discovered from crawling the provided URL.',
             },
-            existingUrls: {
+            inputUrls: {
                 type: 'array',
                 describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.`,
             },

@@ -64,6 +64,10 @@ describe(SimulatorPageProcessor, () => {
             .setup((o) => o.selectors())
             .returns(() => selectors)
             .verifiable();
+        crawlerConfigurationMock
+            .setup((o) => o.crawl())
+            .returns(() => true)
+            .verifiable();
         axeResults = {
             url: 'url',
             passes: [],

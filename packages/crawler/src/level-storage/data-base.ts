@@ -12,6 +12,8 @@ import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
 /* eslint-enable @typescript-eslint/tslint/config */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+export const genericKey = 'genericKey';
+
 @injectable()
 export class DataBase implements AsyncIterable<ScanResult> {
     private iterator: AsyncIterableIterator<string | Buffer>;
@@ -61,13 +63,13 @@ export class DataBase implements AsyncIterable<ScanResult> {
     }
 
     public async addScanMetadata(scanMetadata: ScanMetadata): Promise<void> {
-        const dbKey: DataBaseKey = { type: 'scanMetadata', key: generateHash(scanMetadata.baseUrl) };
+        const dbKey: DataBaseKey = { type: 'scanMetadata', key: generateHash(scanMetadata.baseUrl ?? genericKey) };
         await this.addItem(dbKey, scanMetadata);
     }
 
     public async getScanMetadata(baseUrl: string): Promise<ScanMetadata> {
         await this.openDb();
-        const dbKey: DataBaseKey = { type: 'scanMetadata', key: generateHash(baseUrl) };
+        const dbKey: DataBaseKey = { type: 'scanMetadata', key: generateHash(baseUrl ?? genericKey) };
         const value = await this.db.get(dbKey);
 
         return value as ScanMetadata;
