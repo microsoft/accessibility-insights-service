@@ -28,7 +28,7 @@ export class ConsolidatedReportGenerator {
         const combinedAxeResults = await this.combineAxeResults();
         const scanMetadata = await this.scanResultReader.getScanMetadata(baseUrl);
         const scanResultData: ScanResultData = {
-            baseUrl: scanMetadata.baseUrl ?? combinedAxeResults.combinedAxeResults.urls[0],
+            baseUrl: scanMetadata.baseUrl ?? 'n/a',
             basePageTitle: scanMetadata.basePageTitle,
             scanEngineName: serviceName,
             axeCoreVersion: this.axeInfo.version,
