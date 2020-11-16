@@ -4,17 +4,14 @@ import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient } from '@azure/cosmos';
 import { SecretClient } from '@azure/keyvault-secrets';
 import { BlobServiceClient } from '@azure/storage-blob';
-import { MessageIdURL, MessagesURL, QueueURL, ServiceURL } from '@azure/storage-queue';
+import { QueueServiceClient } from '@azure/storage-queue';
 
 export const iocTypeNames = {
     AzureKeyVaultClientProvider: 'AzureKeyVaultClientProvider',
     BlobServiceClientProvider: 'BlobServiceClientProvider',
-    QueueURLProvider: 'QueueURLProvider',
-    MessagesURLProvider: 'MessagesURLProvider',
-    MessageIdURLProvider: 'MessageIdURLProvider',
     CosmosClientProvider: 'CosmosClientProvider',
     msRestAzure: 'msRestAzure',
-    QueueServiceURLProvider: 'QueueServiceURLProvider',
+    QueueServiceClientProvider: 'QueueServiceClientProvider',
     AuthenticationMethod: 'AuthenticationMethod',
     CredentialType: 'CredentialType',
     BatchServiceClientProvider: 'BatchServiceClientProvider',
@@ -23,10 +20,7 @@ export const iocTypeNames = {
 export type AzureKeyVaultClientProvider = () => Promise<SecretClient>;
 export type BlobServiceClientProvider = () => Promise<BlobServiceClient>;
 export type CosmosClientProvider = () => Promise<CosmosClient>;
-export type QueueURLProvider = typeof QueueURL.fromServiceURL;
-export type MessagesURLProvider = typeof MessagesURL.fromQueueURL;
-export type MessageIdURLProvider = typeof MessageIdURL.fromMessagesURL;
-export type QueueServiceURLProvider = () => Promise<ServiceURL>;
+export type QueueServiceClientProvider = () => Promise<QueueServiceClient>;
 export type BatchServiceClientProvider = () => Promise<BatchServiceClient>;
 
 export const cosmosContainerClientTypes = {

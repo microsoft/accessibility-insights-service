@@ -25,8 +25,12 @@ enableResourceGroupAccess() {
 }
 
 enableStorageAccess() {
-    role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
+
+    role="Storage Blob Data Contributor"
+    . "${0%/*}/role-assign-for-sp.sh"
+
+    role="Storage Queue Data Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
 }
 
