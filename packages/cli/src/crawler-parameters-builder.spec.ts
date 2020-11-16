@@ -65,7 +65,6 @@ describe(CrawlerParametersBuilder, () => {
             discoveryPatterns: ['regex'],
         };
         const actualCrawlOptions = crawlerParametersBuilder.build(scanArguments);
-        console.log(JSON.stringify(actualCrawlOptions));
         expect(actualCrawlOptions).toEqual(expectedCrawlOptions);
     });
 
