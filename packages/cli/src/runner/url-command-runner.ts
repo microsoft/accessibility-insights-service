@@ -6,11 +6,11 @@ import { AxeScanResults } from 'scanner-global-library';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../scan-arguments';
 import { CommandRunner } from './command-runner';
 
 @injectable()
-export class URLCommandRunner implements CommandRunner {
+export class UrlCommandRunner implements CommandRunner {
     constructor(
         @inject(AIScanner) private readonly scanner: AIScanner,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,

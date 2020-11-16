@@ -6,9 +6,9 @@ import { IMock, Mock, It } from 'typemoq';
 import { DbScanResultReader, ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
-import { AxeInfo } from '../tool-data/axe-info';
+import { AxeInfo } from '../axe/axe-info';
+import { serviceName } from '../service-name';
 import { ConsolidatedReportGenerator } from './consolidated-report-generator';
-import { serviceName } from './report-formats';
 
 const axeCoreVersion = 'axe core version';
 const htmlReportString = 'html report';
@@ -48,7 +48,7 @@ describe(ConsolidatedReportGenerator, () => {
             .verifiable();
 
         consolidatedReportGenerator = new ConsolidatedReportGenerator(
-            () => dbScanResultReaderMock.object,
+            dbScanResultReaderMock.object,
             axeResultsReducerMock.object,
             combinedReportDataConverterMock.object,
             reporterFactoryMock,

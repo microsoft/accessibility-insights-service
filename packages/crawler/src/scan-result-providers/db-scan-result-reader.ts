@@ -46,7 +46,12 @@ export class DbScanResultReader implements AsyncIterable<ScanResult> {
     }
 
     public async getScanMetadata(baseUrl: string): Promise<ScanMetadata> {
-        return this.dataBase.getScanMetadata(baseUrl);
+        const scanMetadata = await this.dataBase.getScanMetadata(baseUrl);
+        if (scanMetadata.baseUrl === undefined) {
+            scanMetadata.baseUrl = baseUrl;
+        }
+
+        return scanMetadata;
     }
 
     private async getAxeResults(id: string): Promise<AxeResults> {

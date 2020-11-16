@@ -24,10 +24,10 @@ export class ApifyResourceCreator implements ResourceCreator {
         }
 
         const requestQueue = await this.apify.openRequestQueue(this.requestQueueName);
-        await this.addUrlsFromList(requestQueue, inputUrls);
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
+        await this.addUrlsFromList(requestQueue, inputUrls);
 
         return requestQueue;
     }

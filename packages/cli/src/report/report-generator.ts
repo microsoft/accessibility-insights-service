@@ -9,9 +9,9 @@ import {
 } from 'accessibility-insights-report';
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner-global-library';
-import { AxeInfo } from '../tool-data/axe-info';
+import { AxeInfo } from '../axe/axe-info';
 import { iocTypes } from '../ioc-types';
-import { serviceName } from './report-formats';
+import { serviceName } from '../service-name';
 
 @injectable()
 export class ReportGenerator {

@@ -4,13 +4,13 @@ import fs from 'fs';
 import { injectable } from 'inversify';
 import { Url } from 'common';
 import { CrawlerRunOptions } from 'accessibility-insights-crawler';
-import { ScanArguments } from './scanner/scan-arguments';
+import { ScanArguments } from './scan-arguments';
 
 @injectable()
 export class CrawlerParametersBuilder {
-    constructor(private readonly urlObj: typeof Url = Url, private readonly filesystem: typeof fs = fs) {}
+    constructor(private readonly urlObj: typeof Url = Url, private readonly fileSystem: typeof fs = fs) {}
 
-    public async build(scanArguments: ScanArguments): Promise<CrawlerRunOptions> {
+    public build(scanArguments: ScanArguments): CrawlerRunOptions {
         if (scanArguments.crawl && scanArguments.url) {
             this.validateCrawlBaseUrl(scanArguments.url);
         }
@@ -18,19 +18,27 @@ export class CrawlerParametersBuilder {
         const inputUrlSet = new Set<string>();
         if (scanArguments.inputUrls) {
             const urls = this.validateInputUrls(scanArguments.inputUrls);
-            urls.map(inputUrlSet.add);
+            urls.map((url) => inputUrlSet.add(url));
         }
         if (scanArguments.inputFile) {
-            const urls = await this.validateInputFileContent(scanArguments.inputFile);
-            urls.map(inputUrlSet.add);
+            const urls = this.validateInputFileContent(scanArguments.inputFile);
+            urls.map((url) => inputUrlSet.add(url));
         }
 
-        // const baseUrl = scanArguments.url ?? inputUrlSet[0];
-        // if (scanArguments.url) {
-        //     return scanArguments;
-        // }
-
-        return { ...scanArguments, baseUrl: '', inputUrls: [...inputUrlSet] };
+        return {
+            crawl: scanArguments.crawl,
+            baseUrl: scanArguments.url,
+            simulate: scanArguments.simulate,
+            selectors: scanArguments.selectors,
+            localOutputDir: scanArguments.output,
+            maxRequestsPerCrawl: scanArguments.maxUrls,
+            restartCrawl: scanArguments.restart,
+            snapshot: scanArguments.snapshot,
+            memoryMBytes: scanArguments.memoryMBytes,
+            silentMode: scanArguments.silentMode,
+            inputUrls: [...inputUrlSet],
+            discoveryPatterns: scanArguments.discoveryPatterns,
+        };
     }
 
     private validateCrawlBaseUrl(url: string): void {
@@ -39,14 +47,14 @@ export class CrawlerParametersBuilder {
         }
     }
 
-    private async validateInputFileContent(inputFile: string): Promise<string[]> {
-        /* eslint-disable-next-line */
-        if (!this.filesystem.existsSync(inputFile)) {
+    private validateInputFileContent(inputFile: string): string[] {
+        // eslint-disable-next-line
+        if (!this.fileSystem.existsSync(inputFile)) {
             throw new Error(`Input file does not exist: ${inputFile}`);
         }
 
-        /* eslint-disable-next-line */
-        const inputUrls = await this.filesystem.readFileSync(inputFile, 'utf-8').split(/\r?\n/);
+        // eslint-disable-next-line
+        const inputUrls = this.fileSystem.readFileSync(inputFile, 'utf-8').split(/\r?\n/);
         const urls = this.normalizeUrls(inputUrls);
         if (urls.length === 0) {
             throw new Error(`Input file does not have any URLs.`);

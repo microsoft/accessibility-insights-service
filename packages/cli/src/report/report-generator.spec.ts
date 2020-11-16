@@ -7,9 +7,9 @@ import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
 import { AxeScanResults } from 'scanner-global-library';
 import { IMock, Mock, Times } from 'typemoq';
-import { AxeInfo } from '../tool-data/axe-info';
+import { AxeInfo } from '../axe/axe-info';
+import { serviceName } from '../service-name';
 import { ReportGenerator } from './report-generator';
-import { serviceName } from './report-formats';
 
 describe('ReportGenerator', () => {
     let reportGenerator: ReportGenerator;

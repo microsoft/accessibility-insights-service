@@ -7,7 +7,6 @@ import filenamifyUrl from 'filenamify-url';
 import { injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import normalizePath from 'normalize-path';
-import { PageError } from '../runner/file-command-runner';
 import { ReportFormats } from './report-formats';
 
 /* eslint-disable security/detect-non-literal-fs-filename */
@@ -27,31 +26,6 @@ export class ReportDiskWriter {
         const normalizedDirectory = this.ensureDirectory(directory);
         const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, reportFileName));
         this.fileSystemObj.writeFileSync(filePath, content);
-
-        return filePath;
-    }
-
-    public writeErrorLogToDirectory(directory: string, fileName: string, errors: PageError[]): string {
-        const normalizedDirectory = this.ensureDirectory(directory);
-        const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, fileName));
-
-        const logger = this.fileSystemObj.createWriteStream(filePath);
-        errors.forEach((error) => {
-            logger.write(`${error.url}\n`);
-            logger.write(`${error.error}\n\n`);
-        });
-        logger.end();
-
-        return filePath;
-    }
-
-    public copyToDirectory(sourceFile: string, directory: string): string {
-        const fileInfo = this.pathObj.parse(sourceFile);
-        const fileName = `${fileInfo.name}${fileInfo.ext}`;
-
-        const normalizedDirectory = this.ensureDirectory(directory);
-        const filePath = normalizePath(this.pathObj.resolve(normalizedDirectory, fileName));
-        this.fileSystemObj.copyFileSync(normalizePath(sourceFile), filePath);
 
         return filePath;
     }

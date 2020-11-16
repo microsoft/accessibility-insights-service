@@ -6,8 +6,9 @@ import * as fs from 'fs';
 import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
+import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
 import { CrawlerCommandRunner } from './crawler-command-runner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
@@ -15,19 +16,20 @@ import { CrawlerCommandRunner } from './crawler-command-runner';
 describe('CrawlerCommandRunner', () => {
     const testUrl = 'http://localhost/';
 
-    let testInput: ScanArguments;
+    let scanArguments: ScanArguments;
     let crawlerOption: CrawlerRunOptions;
     let crawlerMock: IMock<Crawler>;
+    let crawlerParametersBuilderMock: IMock<CrawlerParametersBuilder>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
     let fsMock: IMock<typeof fs>;
     let testSubject: CrawlerCommandRunner;
 
     beforeEach(() => {
-        testInput = { url: testUrl, output: './dir' };
+        scanArguments = { url: testUrl, output: './dir' };
         crawlerOption = {
-            baseUrl: testInput.url,
-            localOutputDir: testInput.output,
+            baseUrl: scanArguments.url,
+            localOutputDir: scanArguments.output,
             inputUrls: undefined,
             discoveryPatterns: undefined,
             simulate: undefined,
@@ -40,15 +42,19 @@ describe('CrawlerCommandRunner', () => {
         };
 
         crawlerMock = Mock.ofType<Crawler>();
+        crawlerParametersBuilderMock = Mock.ofType<CrawlerParametersBuilder>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();
         fsMock = Mock.ofInstance(fs);
 
         fsMock
-            .setup((o) => o.existsSync(testInput.output))
+            .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => false)
             .verifiable();
-
+        crawlerParametersBuilderMock
+            .setup(async (o) => o.build(It.isAny()))
+            .returns(() => Promise.resolve(crawlerOption))
+            .verifiable();
         crawlerMock
             .setup((o) => o.crawl(crawlerOption))
             .returns(async () => Promise.resolve())
@@ -56,6 +62,7 @@ describe('CrawlerCommandRunner', () => {
 
         testSubject = new CrawlerCommandRunner(
             crawlerMock.object,
+            crawlerParametersBuilderMock.object,
             consolidatedReportGeneratorMock.object,
             reportDiskWriterMock.object,
             fsMock.object,
@@ -72,23 +79,23 @@ describe('CrawlerCommandRunner', () => {
     it('skip run when last scan data persisted', async () => {
         fsMock.reset();
         fsMock
-            .setup((o) => o.existsSync(testInput.output))
+            .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();
 
         crawlerMock.reset();
         crawlerMock.setup((o) => o.crawl(It.isAny())).verifiable(Times.never());
 
-        await testSubject.runCommand(testInput);
+        await testSubject.runCommand(scanArguments);
     });
 
     it('continue run with --restart when last scan data persisted', async () => {
-        testInput = { url: testUrl, output: './dir', restart: true };
+        scanArguments = { url: testUrl, output: './dir', restart: true };
         crawlerOption.restartCrawl = true;
 
         fsMock.reset();
         fsMock
-            .setup((o) => o.existsSync(testInput.output))
+            .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();
 
@@ -97,19 +104,19 @@ describe('CrawlerCommandRunner', () => {
             .setup((o) => o.crawl(crawlerOption))
             .returns(async () => Promise.resolve())
             .verifiable();
-        await testSubject.runCommand(testInput);
+        await testSubject.runCommand(scanArguments);
     });
 
     it('continue run with --continue when last scan data persisted', async () => {
-        testInput = { url: testUrl, output: './dir', continue: true };
+        scanArguments = { url: testUrl, output: './dir', continue: true };
 
         fsMock.reset();
         fsMock
-            .setup((o) => o.existsSync(testInput.output))
+            .setup((o) => o.existsSync(scanArguments.output))
             .returns(() => true)
             .verifiable();
 
-        await testSubject.runCommand(testInput);
+        await testSubject.runCommand(scanArguments);
     });
 
     it('run crawler', async () => {
@@ -118,10 +125,10 @@ describe('CrawlerCommandRunner', () => {
             .returns(() => Promise.resolve('report'))
             .verifiable();
         reportDiskWriterMock
-            .setup((o) => o.writeToDirectory(testInput.output, 'index', 'html', 'report'))
+            .setup((o) => o.writeToDirectory(scanArguments.output, 'index', 'html', 'report'))
             .returns(() => 'path')
             .verifiable();
 
-        await testSubject.runCommand(testInput);
+        await testSubject.runCommand(scanArguments);
     });
 });

@@ -3,10 +3,11 @@
 import { inject, injectable } from 'inversify';
 import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';
-import { AxeInfo } from '../tool-data/axe-info';
+import { DbScanResultReader } from 'accessibility-insights-crawler';
+import { AxeInfo } from '../axe/axe-info';
 import { iocTypes } from '../ioc-types';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
-import { serviceName } from './report-formats';
+import { serviceName } from '../service-name';
 
 interface CombinedScanResult {
     urlCount: UrlCount;
@@ -15,23 +16,19 @@ interface CombinedScanResult {
 
 @injectable()
 export class ConsolidatedReportGenerator {
-    private readonly scanResultReader: ScanResultReader;
-
     constructor(
-        @inject(iocTypes.ScanResultReaderFactory) private readonly scanResultFactory: () => ScanResultReader,
+        @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
         @inject(CombinedReportDataConverter) private readonly combinedReportDataConverter: CombinedReportDataConverter,
         @inject(iocTypes.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory,
         @inject(AxeInfo) private readonly axeInfo: AxeInfo,
-    ) {
-        this.scanResultReader = this.scanResultFactory();
-    }
+    ) {}
 
     public async generateReport(baseUrl: string, scanStarted: Date, scanEnded: Date): Promise<string> {
         const combinedAxeResults = await this.combineAxeResults();
         const scanMetadata = await this.scanResultReader.getScanMetadata(baseUrl);
         const scanResultData: ScanResultData = {
-            baseUrl: scanMetadata.baseUrl,
+            baseUrl: scanMetadata.baseUrl ?? combinedAxeResults.combinedAxeResults.urls[0],
             basePageTitle: scanMetadata.basePageTitle,
             scanEngineName: serviceName,
             axeCoreVersion: this.axeInfo.version,

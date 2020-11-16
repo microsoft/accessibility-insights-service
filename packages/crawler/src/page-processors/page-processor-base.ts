@@ -194,11 +194,11 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
-        if ((this.baseUrl && this.baseUrl === url) || (!this.baseUrl && !this.scanMetadataSaved)) {
-            // save base page metadata
+        // save metadata for any url first to support the case when base url is not processed
+        if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
-                basePageTitle: pageTitle,
+                basePageTitle: this.baseUrl === url ? pageTitle : '',
                 userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
             });
             this.scanMetadataSaved = true;
