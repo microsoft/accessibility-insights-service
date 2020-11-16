@@ -32,7 +32,7 @@
             "name": "[parameters('keyVault')]",
             "location": "[parameters('location')]",
             "properties": {
-                "sku": {       
+                "sku": {
                     "family": "A",
                     "name": "standard"
                 },
