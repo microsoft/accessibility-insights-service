@@ -18,11 +18,11 @@ export class CrawlerParametersBuilder {
         const inputUrlSet = new Set<string>();
         if (scanArguments.inputUrls) {
             const urls = this.validateInputUrls(scanArguments.inputUrls);
-            urls.map((url) => inputUrlSet.add(url));
+            urls.forEach((url) => inputUrlSet.add(url));
         }
         if (scanArguments.inputFile) {
             const urls = this.validateInputFileContent(scanArguments.inputFile);
-            urls.map((url) => inputUrlSet.add(url));
+            urls.forEach((url) => inputUrlSet.add(url));
         }
 
         return {
