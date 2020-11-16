@@ -44,7 +44,7 @@ describe(ApifyResourceCreator, () => {
             expect(queue).toBe(queueMock.object);
         });
 
-        it('with empty=true and dir exists', async () => {
+        it('delete local queue storage', async () => {
             setupClearRequestQueue(true);
             setupCreateRequestQueue();
 
@@ -53,7 +53,7 @@ describe(ApifyResourceCreator, () => {
             expect(queue).toBe(queueMock.object);
         });
 
-        it('with empty=true and dir does not exist', async () => {
+        it('skip delete local queue storage', async () => {
             setupClearRequestQueue(false);
             setupCreateRequestQueue();
 
@@ -62,36 +62,15 @@ describe(ApifyResourceCreator, () => {
             expect(queue).toBe(queueMock.object);
         });
 
-        it('with inputFile', async () => {
-            const inputFile = 'input file';
-            const fileContent = `url1\n
-                                    url2`;
-
-            setupCreateRequestQueue();
-
-            fsMock
-                .setup((f) => f.readFileSync(inputFile, 'utf-8'))
-                .returns(() => fileContent)
-                .verifiable(Times.once());
-
-            fsMock.setup((fsm) => fsm.existsSync(inputFile)).returns(() => true);
-
-            queueMock.setup((q) => q.addRequest({ url: 'ur1' }, { forefront: true })).verifiable();
-            queueMock.setup((q) => q.addRequest({ url: 'ur2' }, { forefront: true })).verifiable();
-
-            const queue = await apifyResourceCreator.createRequestQueue(url, false, inputFile);
-            expect(queue).toBe(queueMock.object);
-        });
-
-        it('with existing urls"', async () => {
-            const existingUrls = ['url1', 'url2'];
+        it('with input urls"', async () => {
+            const inputUrls = ['url1', 'url2'];
 
             setupCreateRequestQueue();
 
             queueMock.setup((q) => q.addRequest({ url: 'ur1' }, { forefront: true })).verifiable();
             queueMock.setup((q) => q.addRequest({ url: 'ur2' }, { forefront: true })).verifiable();
 
-            const queue = await apifyResourceCreator.createRequestQueue(url, false, undefined, existingUrls);
+            const queue = await apifyResourceCreator.createRequestQueue(url, false, inputUrls);
             expect(queue).toBe(queueMock.object);
         });
     });

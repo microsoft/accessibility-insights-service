@@ -9,7 +9,7 @@ import { PageProcessorBase } from './page-processor-base';
 @injectable()
 export class ClassicPageProcessor extends PageProcessorBase {
     public processPage: Apify.PuppeteerHandlePage = async ({ page, request }) => {
-        console.log(`Crawling page ${page.url()}`);
+        console.log(`Processing page ${page.url()}`);
         await this.enqueueLinks(page);
         const axeResults = await this.accessibilityScanOp.run(page, request.id as string);
         const issueCount = axeResults?.violations?.length > 0 ? axeResults.violations.reduce((a, b) => a + b.nodes.length, 0) : 0;

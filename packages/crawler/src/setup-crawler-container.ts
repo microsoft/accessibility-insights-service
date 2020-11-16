@@ -21,8 +21,7 @@ export function setupCrawlerContainer(container: inversify.Container): inversify
         return apifyResourceCreator.createRequestQueue(
             crawlerRunOptions.baseUrl,
             crawlerRunOptions.restartCrawl,
-            crawlerRunOptions.inputFile,
-            crawlerRunOptions.existingUrls,
+            crawlerRunOptions.inputUrls,
         );
     });
 

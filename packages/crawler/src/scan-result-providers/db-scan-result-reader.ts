@@ -10,7 +10,7 @@ import { ScanResult, ScanMetadata } from '../level-storage/storage-documents';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 @injectable()
-export class ScanResultReader implements AsyncIterable<ScanResult> {
+export class DbScanResultReader implements AsyncIterable<ScanResult> {
     public constructor(
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
@@ -46,7 +46,12 @@ export class ScanResultReader implements AsyncIterable<ScanResult> {
     }
 
     public async getScanMetadata(baseUrl: string): Promise<ScanMetadata> {
-        return this.dataBase.getScanMetadata(baseUrl);
+        const scanMetadata = await this.dataBase.getScanMetadata(baseUrl);
+        if (scanMetadata.baseUrl === undefined) {
+            scanMetadata.baseUrl = baseUrl;
+        }
+
+        return scanMetadata;
     }
 
     private async getAxeResults(id: string): Promise<AxeResults> {

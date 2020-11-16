@@ -4,14 +4,16 @@ import * as fs from 'fs';
 import { Crawler } from 'accessibility-insights-crawler';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
-import { ScanArguments } from '../scanner/scan-arguments';
+import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
+import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
 import { CommandRunner } from './command-runner';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
     constructor(
         @inject(Crawler) private readonly crawler: Crawler,
+        @inject(CrawlerParametersBuilder) private readonly crawlerParametersBuilder: CrawlerParametersBuilder,
         @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
         private readonly filesystem: typeof fs = fs,
@@ -22,23 +24,9 @@ export class CrawlerCommandRunner implements CommandRunner {
             return;
         }
 
-        console.log(`Starting scanning the website under the URL ${scanArguments.url}`);
+        const crawlerRunOptions = await this.crawlerParametersBuilder.build(scanArguments);
         const scanStarted = new Date();
-        await this.crawler.crawl({
-            baseUrl: scanArguments.url,
-            simulate: scanArguments.simulate,
-            selectors: scanArguments.selectors,
-            localOutputDir: scanArguments.output,
-            maxRequestsPerCrawl: scanArguments.maxUrls,
-            restartCrawl: scanArguments.restart,
-            snapshot: scanArguments.snapshot,
-            memoryMBytes: scanArguments.memoryMBytes,
-            silentMode: scanArguments.silentMode,
-            inputFile: scanArguments.inputFile,
-            existingUrls: scanArguments.existingUrls,
-            discoveryPatterns: scanArguments.discoveryPatterns,
-        });
-
+        await this.crawler.crawl(crawlerRunOptions);
         await this.generateConsolidatedReport(scanArguments, scanStarted, new Date());
     }
 

@@ -2,8 +2,9 @@
 // Licensed under the MIT License.
 
 export interface CrawlerRunOptions {
+    crawl?: boolean;
     baseUrl: string;
-    existingUrls?: string[];
+    inputUrls?: string[];
     discoveryPatterns?: string[];
     simulate?: boolean;
     selectors?: string[];
@@ -13,6 +14,5 @@ export interface CrawlerRunOptions {
     snapshot?: boolean;
     memoryMBytes?: number;
     silentMode?: boolean;
-    inputFile?: string;
     debug?: boolean;
 }

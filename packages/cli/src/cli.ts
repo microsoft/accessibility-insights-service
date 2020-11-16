@@ -10,21 +10,21 @@ import './module-name-mapper';
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
 import * as yargs from 'yargs';
+import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';
-import { ScanArguments } from './scanner/scan-arguments';
+import { ScanArguments } from './scan-arguments';
 import { setupCliContainer } from './setup-cli-container';
 
 (async () => {
-    const scanArguments = readScanArguments();
-
+    const scanArguments = getScanArguments();
     const cliEntryPoint = new CliEntryPoint(setupCliContainer());
     await cliEntryPoint.runScan(scanArguments);
 })().catch((error) => {
-    console.log('Exception occurred while running the tool: ', error);
+    console.log('Exception occurred while running the tool: ', System.serializeError(error));
     process.exitCode = 1;
 });
 
-function readScanArguments(): ScanArguments {
+function getScanArguments(): ScanArguments {
     const defaultOutputDir = 'ai_scan_cli_output';
 
     return (yargs
@@ -89,7 +89,7 @@ function readScanArguments(): ScanArguments {
                 type: 'string',
                 describe: 'List of URLs to crawl in addition to URLs discovered from crawling the provided URL.',
             },
-            existingUrls: {
+            inputUrls: {
                 type: 'array',
                 describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.`,
             },
@@ -99,18 +99,16 @@ function readScanArguments(): ScanArguments {
             },
         })
         .check((args) => {
-            if (!args.crawl) {
-                if ((isEmpty(args.url) && isEmpty(args.inputFile)) || (!isEmpty(args.url) && !isEmpty(args.inputFile))) {
-                    throw new Error('Provide either --url or --inputFile option.');
-                }
-            } else {
-                if (isEmpty(args.url)) {
-                    throw new Error('The --url option is required.');
-                }
+            if (args.crawl && isEmpty(args.url)) {
+                throw new Error('The --url option is required for website crawling.');
+            }
 
-                if (args.restart === true && args.continue === true) {
-                    throw new Error('Options --restart and --continue are mutually exclusive.');
-                }
+            if (isEmpty(args.url) && isEmpty(args.inputFile) && isEmpty(args.inputUrls)) {
+                throw new Error('Provide at least --url, --inputFile, or  --inputUrls option.');
+            }
+
+            if (args.restart === true && args.continue === true) {
+                throw new Error('Options --restart and --continue are mutually exclusive.');
             }
 
             return true;

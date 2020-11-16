@@ -8,4 +8,4 @@ export { CrawlerRunOptions } from './types/crawler-run-options';
 export { Crawler } from './crawler';
 export { setupCrawlerContainer } from './setup-crawler-container';
 export * from './level-storage/storage-documents';
-export { ScanResultReader } from './scan-result-providers/scan-result-reader';
+export { DbScanResultReader } from './scan-result-providers/db-scan-result-reader';

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { ScanResultReader } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';
-import { AxeInfo } from '../tool-data/axe-info';
+import { DbScanResultReader } from 'accessibility-insights-crawler';
+import { AxeInfo } from '../axe/axe-info';
+import { iocTypes } from '../ioc-types';
+import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
+import { serviceName } from '../service-name';
 
-export const serviceName = 'Accessibility Insights Service';
-
-interface ScanResult {
+interface CombinedScanResult {
     urlCount: UrlCount;
     combinedAxeResults: AxeCoreResults;
 }
@@ -16,10 +17,10 @@ interface ScanResult {
 @injectable()
 export class ConsolidatedReportGenerator {
     constructor(
-        @inject(ScanResultReader) private readonly scanResultReader: ScanResultReader,
+        @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
         @inject(CombinedReportDataConverter) private readonly combinedReportDataConverter: CombinedReportDataConverter,
-        @inject('ReporterFactory') private readonly reporterFactoryFunc: ReporterFactory,
+        @inject(iocTypes.ReporterFactory) private readonly reporterFactoryFunc: ReporterFactory,
         @inject(AxeInfo) private readonly axeInfo: AxeInfo,
     ) {}
 
@@ -27,7 +28,7 @@ export class ConsolidatedReportGenerator {
         const combinedAxeResults = await this.combineAxeResults();
         const scanMetadata = await this.scanResultReader.getScanMetadata(baseUrl);
         const scanResultData: ScanResultData = {
-            baseUrl: scanMetadata.baseUrl,
+            baseUrl: scanMetadata.baseUrl ?? 'n/a',
             basePageTitle: scanMetadata.basePageTitle,
             scanEngineName: serviceName,
             axeCoreVersion: this.axeInfo.version,
@@ -42,7 +43,7 @@ export class ConsolidatedReportGenerator {
         return reporter.fromCombinedResults(combinedReportData).asHTML();
     }
 
-    private async combineAxeResults(): Promise<ScanResult> {
+    private async combineAxeResults(): Promise<CombinedScanResult> {
         const combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
         const urlCount = {
             total: 0,

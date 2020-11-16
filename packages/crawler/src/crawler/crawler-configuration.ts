@@ -34,6 +34,10 @@ export class CrawlerConfiguration {
         return this.getMaxRequestsPerCrawl(this.crawlerRunOptions.maxRequestsPerCrawl);
     }
 
+    public crawl(): boolean {
+        return this.crawlerRunOptions.crawl ?? false;
+    }
+
     public setDefaultApifySettings(): void {
         this.settingsHandler.setApifySettings(this.getDefaultApifySettings());
     }
@@ -63,13 +67,17 @@ export class CrawlerConfiguration {
     }
 
     private getDefaultDiscoveryPattern(baseUrl: string): string[] {
-        const baseUrlObj = url.parse(baseUrl);
+        if (this.crawl() || baseUrl) {
+            const baseUrlObj = url.parse(baseUrl);
 
-        return [`http[s?]://${baseUrlObj.host}${baseUrlObj.path}[.*]`];
+            return [`http[s?]://${baseUrlObj.host}${baseUrlObj.path}[.*]`];
+        }
+
+        return [];
     }
 
     private getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
-        return discoveryPatterns === undefined ? this.getDefaultDiscoveryPattern(baseUrl) : discoveryPatterns;
+        return discoveryPatterns ?? this.getDefaultDiscoveryPattern(baseUrl);
     }
 
     private getDefaultApifySettings(): ApifySettings {

@@ -3,18 +3,19 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
-import { ScanResultReader, ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
+import { DbScanResultReader, ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
-import { AxeInfo } from '../tool-data/axe-info';
-import { ConsolidatedReportGenerator, serviceName } from './consolidated-report-generator';
+import { AxeInfo } from '../axe/axe-info';
+import { serviceName } from '../service-name';
+import { ConsolidatedReportGenerator } from './consolidated-report-generator';
 
 const axeCoreVersion = 'axe core version';
 const htmlReportString = 'html report';
 const scanStarted = new Date(1000);
 const scanEnded = new Date(60000);
 
-let scanResultReaderMock: IMock<ScanResultReader>;
+let dbScanResultReaderMock: IMock<DbScanResultReader>;
 let axeResultsReducerMock: IMock<AxeResultsReducer>;
 let combinedReportDataConverterMock: IMock<CombinedReportDataConverter>;
 let reporterMock: IMock<Reporter>;
@@ -25,7 +26,7 @@ let combinedReportData: CombinedReportParameters;
 
 describe(ConsolidatedReportGenerator, () => {
     beforeEach(() => {
-        scanResultReaderMock = Mock.ofType<ScanResultReader>();
+        dbScanResultReaderMock = Mock.ofType<DbScanResultReader>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         combinedReportDataConverterMock = Mock.ofType<CombinedReportDataConverter>();
         axeInfoMock = Mock.ofType<AxeInfo>();
@@ -47,7 +48,7 @@ describe(ConsolidatedReportGenerator, () => {
             .verifiable();
 
         consolidatedReportGenerator = new ConsolidatedReportGenerator(
-            scanResultReaderMock.object,
+            dbScanResultReaderMock.object,
             axeResultsReducerMock.object,
             combinedReportDataConverterMock.object,
             reporterFactoryMock,
@@ -105,7 +106,7 @@ describe(ConsolidatedReportGenerator, () => {
 
         for (let index = 0; index <= scanResults.length; index++) {
             const next = index === scanResults.length ? { done: true, value: undefined } : { done: false, value: scanResults[index] };
-            scanResultReaderMock
+            dbScanResultReaderMock
                 .setup(async (o) => o.next())
                 .returns(() => Promise.resolve(next))
                 .verifiable();
@@ -116,11 +117,11 @@ describe(ConsolidatedReportGenerator, () => {
             }
         }
 
-        scanResultReaderMock
+        dbScanResultReaderMock
             .setup(async (o) => o.getScanMetadata(baseUrl))
             .returns(() => Promise.resolve(scanMetadata))
             .verifiable();
-        scanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => scanResultReaderMock.object);
+        dbScanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => dbScanResultReaderMock.object);
         combinedReportDataConverterMock
             .setup((o) => o.convert(combinedAxeResults, scanResultData))
             .returns(() => combinedReportData)

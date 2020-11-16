@@ -8,8 +8,8 @@ import { IMock, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ReportGenerator } from '../report/report-generator';
 import { AIScanner } from '../scanner/ai-scanner';
-import { ScanArguments } from '../scanner/scan-arguments';
-import { URLCommandRunner } from './url-command-runner';
+import { ScanArguments } from '../scan-arguments';
+import { UrlCommandRunner } from './url-command-runner';
 
 /* eslint-disable no-empty, @typescript-eslint/no-empty-function */
 describe('URLCommandRunner', () => {
@@ -17,7 +17,7 @@ describe('URLCommandRunner', () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let scanResults: AxeScanResults;
-    let testSubject: URLCommandRunner;
+    let testSubject: UrlCommandRunner;
     const testUrl = 'http://www.bing.com';
     const htmlReportString = 'html report';
     const testInput: ScanArguments = { url: testUrl, output: '/users/xyz' };
@@ -33,7 +33,7 @@ describe('URLCommandRunner', () => {
             pageTitle: 'page title',
             browserSpec: 'browser version',
         };
-        testSubject = new URLCommandRunner(scannerMock.object, reportGeneratorMock.object, reportDiskWriterMock.object);
+        testSubject = new UrlCommandRunner(scannerMock.object, reportGeneratorMock.object, reportDiskWriterMock.object);
     });
 
     it('Run Command', async () => {

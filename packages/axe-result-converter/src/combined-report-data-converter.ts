@@ -57,7 +57,7 @@ export class CombinedReportDataConverter {
             Object.keys(failuresByRule).map((rule) => {
                 failuresGroup.push({
                     key: rule,
-                    failed: failuresByRule[rule],
+                    failed: failuresByRule[rule].sort(this.compareFailureData),
                 });
             });
         }
@@ -107,7 +107,7 @@ export class CombinedReportDataConverter {
             }
         }
 
-        return axeRuleData;
+        return axeRuleData.sort(this.compareAxeRuleData);
     }
 
     private getNodeResult(node: axe.NodeResult): HowToFixData {
@@ -170,6 +170,30 @@ export class CombinedReportDataConverter {
         }
 
         if (group1.failed?.length > group2.failed?.length) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    private compareFailureData(data1: FailureData, data2: FailureData): number {
+        if (data1.urls[0] > data2.urls[0]) {
+            return 1;
+        }
+
+        if (data1.urls[0] < data2.urls[0]) {
+            return -1;
+        }
+
+        return 0;
+    }
+
+    private compareAxeRuleData(data1: AxeRuleData, data2: AxeRuleData): number {
+        if (data1.ruleId > data2.ruleId) {
+            return 1;
+        }
+
+        if (data1.ruleId < data2.ruleId) {
             return -1;
         }
 

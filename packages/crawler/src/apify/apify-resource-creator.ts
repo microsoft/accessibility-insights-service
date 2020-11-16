@@ -3,7 +3,6 @@
 import * as fs from 'fs';
 import Apify from 'apify';
 import { injectable } from 'inversify';
-import { isEmpty } from 'lodash';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { ResourceCreator } from '../types/resource-creator';
 
@@ -19,49 +18,27 @@ export class ApifyResourceCreator implements ResourceCreator {
         private readonly filesystem: typeof fs = fs,
     ) {}
 
-    public async createRequestQueue(
-        baseUrl: string,
-        empty?: boolean,
-        inputFile?: string,
-        existingUrls?: string[],
-    ): Promise<Apify.RequestQueue> {
-        if (empty === true) {
+    public async createRequestQueue(baseUrl: string, clear?: boolean, inputUrls?: string[]): Promise<Apify.RequestQueue> {
+        if (clear === true) {
             this.clearRequestQueue();
         }
 
         const requestQueue = await this.apify.openRequestQueue(this.requestQueueName);
-        await requestQueue.addRequest({ url: baseUrl.trim() });
-
-        await this.addUrlsFromFile(requestQueue, inputFile);
-        await this.addUrlsFromList(requestQueue, existingUrls);
+        if (baseUrl) {
+            await requestQueue.addRequest({ url: baseUrl.trim() });
+        }
+        await this.addUrlsFromList(requestQueue, inputUrls);
 
         return requestQueue;
     }
 
-    private async addUrlsFromFile(requestQueue: Apify.RequestQueue, inputFile?: string): Promise<void> {
-        if (inputFile === undefined) {
+    private async addUrlsFromList(requestQueue: Apify.RequestQueue, inputUrls?: string[]): Promise<void> {
+        if (inputUrls === undefined) {
             return Promise.resolve();
         }
 
-        if (!this.filesystem.existsSync(inputFile)) {
-            return Promise.resolve();
-        }
-
-        const lines = this.filesystem.readFileSync(inputFile, 'utf-8').split(/\r?\n/);
-
-        await this.addUrlsFromList(requestQueue, lines);
-    }
-
-    private async addUrlsFromList(requestQueue: Apify.RequestQueue, existingUrls?: string[]): Promise<void> {
-        if (existingUrls === undefined) {
-            return Promise.resolve();
-        }
-
-        for (let url of existingUrls) {
-            url = url.trim();
-            if (!isEmpty(url)) {
-                await requestQueue.addRequest({ url: url }, { forefront: true });
-            }
+        for (const url of inputUrls) {
+            await requestQueue.addRequest({ url: url }, { forefront: true });
         }
     }
 

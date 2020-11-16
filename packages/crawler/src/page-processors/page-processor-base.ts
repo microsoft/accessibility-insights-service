@@ -37,7 +37,10 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     protected readonly baseUrl: string;
     protected readonly snapshot: boolean;
+    protected readonly discoveryLinks: boolean;
     protected readonly discoveryPatterns: string[];
+
+    private scanMetadataSaved: boolean;
 
     /**
      * This function is called to extract data from a single web page
@@ -59,6 +62,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
+        this.discoveryLinks = this.crawlerConfiguration.crawl();
         this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
     }
 
@@ -101,11 +105,12 @@ export abstract class PageProcessorBase implements PageProcessor {
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
-            await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
             if (runError !== undefined) {
                 await this.saveRunError(inputs.request, runError);
             } else if (navigationError !== undefined) {
                 await this.saveBrowserError(inputs.request, navigationError);
+            } else {
+                await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
             }
         }
     };
@@ -140,6 +145,10 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
+        if (!this.discoveryLinks) {
+            return [];
+        }
+
         const requestQueue = await this.requestQueueProvider();
         const enqueued = await this.enqueueLinksExt({
             page,
@@ -185,13 +194,14 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
-        if (url === this.baseUrl) {
-            // save base page metadata
+        // save metadata for any url first to support the case when base url is not processed
+        if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
-                basePageTitle: pageTitle,
+                basePageTitle: this.baseUrl === url ? pageTitle : '',
                 userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
             });
+            this.scanMetadataSaved = true;
         }
     }
 
