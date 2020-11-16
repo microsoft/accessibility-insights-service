@@ -32,14 +32,14 @@
             "name": "[parameters('keyVault')]",
             "location": "[parameters('location')]",
             "properties": {
-                "sku": {
+                "sku": {       
                     "family": "A",
                     "name": "standard"
                 },
                 "tenantId": "[subscription().tenantId]",
                 "accessPolicies": [
                     {
-                        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+                        "tenantId": "[subscription().tenantId]",
                         "objectId": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
                         "permissions": {
                             "secrets": ["delete", "get", "list", "set"]
