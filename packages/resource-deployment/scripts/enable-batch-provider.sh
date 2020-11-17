@@ -67,10 +67,10 @@ fi
 
 
 
-# Microsoft directory in case if env is not ppe or prod
+# Microsoft AAD tenant when env is not ppe or prod
 objectId='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
 
-#PME directory in case if env is ppe or prod
+# PME AAD tenant when env is ppe or prod
 if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
     objectId='8ad17ea0-4c88-4465-b8ec-a827df84f896'
 fi
