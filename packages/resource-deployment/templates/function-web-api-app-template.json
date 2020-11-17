@@ -141,7 +141,7 @@
                         "tokenStoreEnabled": true,
                         "defaultProvider": "AzureActiveDirectory",
                         "clientId": "[parameters('clientId')]",
-                        "issuer": "[concat('https://sts.windows.net/', parameters('tenantId'), '/')]"
+                        "issuer": "[concat('https://sts.windows.net/', subscription().tenantId, '/')]"
                     }
                 }
             ]

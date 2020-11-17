@@ -22,6 +22,13 @@
             "metadata": {
                 "description": "Enables/Disables the soft delete option in key vault"
             }
+        },
+        "objectId": {
+            "type": "string",
+            "defaultValue": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
+            "metadata": {
+                "description": "Microsoft.Batch service principal object id"
+            }
         }
     },
     "variables": {},
@@ -39,8 +46,8 @@
                 "tenantId": "[subscription().tenantId]",
                 "accessPolicies": [
                     {
-                        "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
-                        "objectId": "f520d84c-3fd3-4cc8-88d4-2ed25b00d27a",
+                        "tenantId": "[subscription().tenantId]",
+                        "objectId": "[parameters('objectId')]",
                         "permissions": {
                             "secrets": ["delete", "get", "list", "set"]
                         }
