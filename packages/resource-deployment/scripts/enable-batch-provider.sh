@@ -7,6 +7,27 @@ set -eo pipefail
 
 # The script will configure the default Azure subscription account to support Batch user subscription mode
 
+exitWithUsageInfo() {
+    echo "
+Usage: $0 -e <environment>
+"
+    exit 1
+}
+
+# Read script arguments
+while getopts ":e:" option; do
+    case $option in
+    e) environment=${OPTARG} ;;
+    *) exitWithUsageInfo ;;
+    esac
+done
+
+# Print script usage help
+if [[ -z $environment ]]; then
+    exitWithUsageInfo
+fi
+
+
 # Get the default subscription
 subscription=$(az account show --query "id" -o tsv)
 
