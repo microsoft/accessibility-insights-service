@@ -1,25 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import axe from 'axe-core';
+import { HashSet } from 'common';
 
 export declare type SelectorType = 'xpath' | 'css';
 
-export interface AxeCoreResults extends axe.AxeResults {
+export interface AxeCoreResults extends Omit<axe.AxeResults, 'passes' | 'violations' | 'incomplete' | 'inapplicable'> {
     urls: string[];
-    passes: AxeResult[];
-    violations: AxeResult[];
-    incomplete: AxeResult[];
-    inapplicable: AxeResult[];
+    passes: AxeResults;
+    violations: AxeResults;
+    incomplete: AxeResults;
+    inapplicable: AxeResults;
 }
+
+export class AxeResults extends HashSet<AxeResult> {}
 
 export interface AxeResult extends axe.Result {
     urls: string[];
-    nodes: AxeNodeResult[];
+    junctionNode?: AxeNodeResult;
+    fingerprint: string;
 }
 
 export interface AxeNodeResult extends axe.NodeResult {
     selectors: Selector[];
-    fingerprint: string;
 }
 
 export interface Selector {

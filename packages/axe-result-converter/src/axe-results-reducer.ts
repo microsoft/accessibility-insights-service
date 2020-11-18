@@ -3,7 +3,7 @@
 import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
-import { Selector, AxeResult, AxeCoreResults } from './axe-result-types';
+import { Selector, AxeCoreResults, AxeResults, AxeResult } from './axe-result-types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -19,7 +19,7 @@ export class AxeResultsReducer {
         this.reduceResultsWithoutNodes(currentAxeResults.url, accumulatedAxeResults.inapplicable, currentAxeResults.inapplicable);
     }
 
-    private reduceResults(url: string, accumulatedResults: AxeResult[], currentResults: axe.Result[]): void {
+    private reduceResults(url: string, accumulatedResults: AxeResults, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
                 if (currentResult) {
@@ -27,23 +27,23 @@ export class AxeResultsReducer {
                         if (node) {
                             const selectors = this.getElementSelectors(node);
                             const fingerprint = this.getElementFingerprint(currentResult, node, selectors);
-                            const resultWithMatchingNode = this.getResultForNode(accumulatedResults, fingerprint);
-                            if (resultWithMatchingNode !== undefined) {
-                                if (!resultWithMatchingNode.urls.some((u) => u === url)) {
-                                    resultWithMatchingNode.urls.push(url);
+                            const matchingResult = accumulatedResults.get(fingerprint);
+                            if (matchingResult !== undefined) {
+                                if (!matchingResult.urls.some((u) => u === url)) {
+                                    matchingResult.urls.push(url);
                                 }
                             } else {
-                                accumulatedResults.push({
+                                const result: AxeResult = {
                                     ...currentResult,
+                                    nodes: [],
                                     urls: [url],
-                                    nodes: [
-                                        {
-                                            ...node,
-                                            selectors,
-                                            fingerprint,
-                                        },
-                                    ],
-                                });
+                                    junctionNode: {
+                                        ...node,
+                                        selectors,
+                                    },
+                                    fingerprint,
+                                };
+                                accumulatedResults.add(fingerprint, result);
                             }
                         }
                     }
@@ -52,37 +52,28 @@ export class AxeResultsReducer {
         }
     }
 
-    private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResult[], currentResults: axe.Result[]): void {
+    private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResults, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
                 if (currentResult) {
-                    const matchingResult = accumulatedResults.find((result) => result.id === currentResult.id);
+                    const fingerprint = this.hashGenerator.generateBase64Hash(currentResult.id);
+                    const matchingResult = accumulatedResults.get(fingerprint);
                     if (matchingResult !== undefined) {
                         if (!matchingResult.urls.some((u) => u === url)) {
                             matchingResult.urls.push(url);
                         }
                     } else {
-                        accumulatedResults.push({
+                        const result: AxeResult = {
                             ...currentResult,
-                            urls: [url],
                             nodes: [],
-                        });
+                            urls: [url],
+                            fingerprint,
+                        };
+                        accumulatedResults.add(fingerprint, result);
                     }
                 }
             }
         }
-    }
-
-    private getResultForNode(results: AxeResult[], fingerprint: string): AxeResult {
-        for (const result of results) {
-            if (result) {
-                if (result.nodes?.some((node) => node.fingerprint === fingerprint)) {
-                    return result;
-                }
-            }
-        }
-
-        return undefined;
     }
 
     private getElementFingerprint(result: axe.Result, node: axe.NodeResult, selectors: Selector[]): string {
