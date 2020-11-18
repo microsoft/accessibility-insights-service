@@ -2390,10 +2390,10 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.6.1.tgz#b260e454ee4f9635ea024fc83be225e397f15363"
   integrity sha512-5bHhlTBBq82ti3qPT15TRxkYTFPPQWbnkkQkmHPtqiS1XcTB69cEKd3Jm7Cfi/vkPoyxapmePE9tyA7EzLt8SQ==
 
-"@rollup/plugin-commonjs@^15.1.0":
-  version "15.1.0"
-  resolved "https://registry.yarnpkg.com/@rollup/plugin-commonjs/-/plugin-commonjs-15.1.0.tgz#1e7d076c4f1b2abf7e65248570e555defc37c238"
-  integrity sha512-xCQqz4z/o0h2syQ7d9LskIMvBSH4PX5PjYdpSSvgS+pQik3WahkQVNWg3D8XJeYjZoVWnIUQYDghuEMRGrmQYQ==
+"@rollup/plugin-commonjs@^16.0.0":
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/@rollup/plugin-commonjs/-/plugin-commonjs-16.0.0.tgz#169004d56cd0f0a1d0f35915d31a036b0efe281f"
+  integrity sha512-LuNyypCP3msCGVQJ7ki8PqYdpjfEkE/xtFa5DqlF+7IBD0JsfMZ87C58heSwIMint58sAUZbt3ITqOmdQv/dXw==
   dependencies:
     "@rollup/pluginutils" "^3.1.0"
     commondir "^1.0.1"
@@ -3600,9 +3600,9 @@ apify-client@^0.6.0:
     underscore "^1.9.1"
 
 apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.1.tgz#c6ce354fe4fb3014669f98f98a7b0ece6d933de2"
-  integrity sha512-b3QND0R9y2gjz+ro1oyj4JTcyYFjJd3H1z158FSeWYJQ37qk8RHKvNhida5pIaQngPq7D5K8mNQBAQ5WdFxwtw==
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.2.tgz#6fe1f1fea78875e5080cb100f21538b186613467"
+  integrity sha512-iOzEsRbJPs6n9R1KWKqEr/Yzcijvi4VFxTAPdFB95nqpHjq4TY5eb1tnJAMS7RVjMwjladXJFUEVzqRK4gnHGg==
   dependencies:
     axios "^0.19.2"
     chalk "^4.0.0"
