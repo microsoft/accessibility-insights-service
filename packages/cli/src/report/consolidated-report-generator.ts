@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
-import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
+import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, AxeResults } from 'axe-result-converter';
 import { ReporterFactory } from 'accessibility-insights-report';
 import { DbScanResultReader } from 'accessibility-insights-crawler';
 import { AxeInfo } from '../axe/axe-info';
@@ -44,7 +44,12 @@ export class ConsolidatedReportGenerator {
     }
 
     private async combineAxeResults(): Promise<CombinedScanResult> {
-        const combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
+        const combinedAxeResults = {
+            violations: new AxeResults(),
+            passes: new AxeResults(),
+            incomplete: new AxeResults(),
+            inapplicable: new AxeResults(),
+        } as AxeCoreResults;
         const urlCount = {
             total: 0,
             failed: 0,

@@ -6,38 +6,43 @@ import { IMock, Mock, It, Times } from 'typemoq';
 import { HashGenerator } from 'common';
 import axe from 'axe-core';
 import { AxeResultsReducer } from './axe-results-reducer';
-import { AxeResult, AxeNodeResult, AxeCoreResults } from './axe-result-types';
+import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
 
 let hashGeneratorMock: IMock<HashGenerator>;
 let axeResultsReducer: AxeResultsReducer;
 
-const accumulatedNodeFn = (ruleId: string, nodeId: string) => {
+const getAccumulatedNode = (nodeId: string) => {
     return {
         html: `snippet-${nodeId}`,
         target: [`selector-${nodeId}`],
         selectors: [{ selector: `selector-${nodeId}`, type: 'css' }],
-        fingerprint: `${ruleId}|snippet-${nodeId}|selector-${nodeId}`,
     } as AxeNodeResult;
 };
-const accumulatedResultsFn = (ruleId: string, data: { urls: string[]; nodeId?: string }) =>
-    [
-        {
-            id: `id-${ruleId}`,
-            urls: data.urls,
-            nodes: data.nodeId ? [accumulatedNodeFn(`id-${ruleId}`, data.nodeId)] : [],
-        },
-    ] as AxeResult[];
-const currentNodeFn = (nodeId: string) => {
+const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: string }) => {
+    return {
+        id: `id-${ruleId}`,
+        urls: data.urls,
+        nodes: [],
+        junctionNode: data.nodeId ? getAccumulatedNode(data.nodeId) : undefined,
+        fingerprint: data.nodeId ? `id-${ruleId}|snippet-${data.nodeId}|selector-${data.nodeId}` : `id-${ruleId}`,
+    } as AxeResult;
+};
+const addAxeResult = (axeResults: AxeResults, ...axeResultList: AxeResult[]): AxeResults => {
+    axeResultList.forEach((axeResult) => axeResults.add(axeResult.fingerprint, axeResult));
+
+    return axeResults;
+};
+const getCurrentNode = (nodeId: string) => {
     return {
         html: `snippet-${nodeId}`,
         target: [`selector-${nodeId}`],
     } as axe.NodeResult;
 };
-const currentResultsFn = (ruleId: string, ...nodeIds: string[]) =>
+const getCurrentResults = (ruleId: string, ...nodeIds: string[]) =>
     [
         {
             id: `id-${ruleId}`,
-            nodes: nodeIds?.map(currentNodeFn),
+            nodes: nodeIds?.map(getCurrentNode),
         },
     ] as axe.Result[];
 
@@ -59,78 +64,79 @@ describe(AxeResultsReducer, () => {
 
     it('reduce axe result', () => {
         const url = 'url-1';
-        const accumulatedResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
-        const violations = currentResultsFn('rule-1', 'node-11');
-        const passes = currentResultsFn('rule-2', 'node-21');
-        const incomplete = currentResultsFn('rule-3', 'node-31');
-        const inapplicable = currentResultsFn('rule-4');
+        const accumulatedResults = {
+            violations: new AxeResults(),
+            passes: new AxeResults(),
+            incomplete: new AxeResults(),
+            inapplicable: new AxeResults(),
+        } as AxeCoreResults;
+        const violations = getCurrentResults('rule-1', 'node-11');
+        const passes = getCurrentResults('rule-2', 'node-21');
+        const incomplete = getCurrentResults('rule-3', 'node-31');
+        const inapplicable = getCurrentResults('rule-4');
 
-        const expectedViolations = accumulatedResultsFn('rule-1', { urls: [url], nodeId: 'node-11' });
-        const expectedPasses = accumulatedResultsFn('rule-2', { urls: [url], nodeId: 'node-21' });
-        const expectedIncomplete = accumulatedResultsFn('rule-3', { urls: [url], nodeId: 'node-31' });
-        const expectedInapplicable = accumulatedResultsFn('rule-4', { urls: [url] });
-        const expectedResults = {
-            urls: [url],
-            violations: expectedViolations,
-            passes: expectedPasses,
-            incomplete: expectedIncomplete,
-            inapplicable: expectedInapplicable,
-        };
+        const expectedViolations = [getAccumulatedResult('rule-1', { urls: [url], nodeId: 'node-11' })];
+        const expectedPasses = [getAccumulatedResult('rule-2', { urls: [url], nodeId: 'node-21' })];
+        const expectedIncomplete = [getAccumulatedResult('rule-3', { urls: [url], nodeId: 'node-31' })];
+        const expectedInapplicable = [getAccumulatedResult('rule-4', { urls: [url] })];
 
         axeResultsReducer.reduce(accumulatedResults, { url, violations, passes, incomplete, inapplicable } as axe.AxeResults);
 
-        expect(accumulatedResults).toEqual(expectedResults);
+        expect(accumulatedResults.violations.values()).toEqual(expectedViolations);
+        expect(accumulatedResults.passes.values()).toEqual(expectedPasses);
+        expect(accumulatedResults.incomplete.values()).toEqual(expectedIncomplete);
+        expect(accumulatedResults.inapplicable.values()).toEqual(expectedInapplicable);
     });
 
     it('reduce result without nodes', () => {
-        hashGeneratorMock.reset();
-
         const currentUrl = 'url-2';
-        const accumulatedResults = accumulatedResultsFn('rule-1', { urls: ['url-1'] });
-        const currentResults = currentResultsFn('rule-1');
-        const expectedResults = [...accumulatedResultsFn('rule-1', { urls: ['url-1', currentUrl] })];
+        const accumulatedResults = addAxeResult(new AxeResults(), getAccumulatedResult('rule-1', { urls: ['url-1'] }));
+        const currentResults = getCurrentResults('rule-1');
+        const expectedResults = [getAccumulatedResult('rule-1', { urls: ['url-1', currentUrl] })];
 
         axeResultsReducer.reduce(
             { inapplicable: accumulatedResults } as AxeCoreResults,
             { url: currentUrl, inapplicable: currentResults } as axe.AxeResults,
         );
 
-        expect(accumulatedResults).toEqual(expectedResults);
+        expect(accumulatedResults.values()).toEqual(expectedResults);
     });
 
     it('skip same rule node', () => {
         const currentUrl = 'url-2';
-        const accumulatedResults = accumulatedResultsFn('rule-1', { urls: ['url-1'], nodeId: 'node-1' });
-        const currentResults = currentResultsFn('rule-1', 'node-1', 'node-2', 'node-3');
-        const expectedResults = [
-            ...accumulatedResultsFn('rule-1', { urls: ['url-1', currentUrl], nodeId: 'node-1' }),
-            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
-            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
-        ];
+        const accumulatedResults = addAxeResult(new AxeResults(), getAccumulatedResult('rule-1', { urls: ['url-1'], nodeId: 'node-1' }));
+        const currentResults = getCurrentResults('rule-1', 'node-1', 'node-2', 'node-3');
+        const expectedResults = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-1', { urls: ['url-1', currentUrl], nodeId: 'node-1' }),
+            getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
+            getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
+        );
 
         axeResultsReducer.reduce(
             { violations: accumulatedResults } as AxeCoreResults,
             { url: currentUrl, violations: currentResults } as axe.AxeResults,
         );
 
-        expect(accumulatedResults).toEqual(expectedResults);
+        expect(accumulatedResults.values()).toEqual(expectedResults.values());
     });
 
     it('split multiple nodes from a single result', () => {
         const currentUrl = 'url-1';
-        const accumulatedResults = [] as AxeResult[];
-        const currentResults = currentResultsFn('rule-1', 'node-1', 'node-2', 'node-3');
-        const expectedResults = [
-            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-1' }),
-            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
-            ...accumulatedResultsFn('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
-        ];
+        const accumulatedResults = new AxeResults();
+        const currentResults = getCurrentResults('rule-1', 'node-1', 'node-2', 'node-3');
+        const expectedResults = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-1' }),
+            getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-2' }),
+            getAccumulatedResult('rule-1', { urls: [currentUrl], nodeId: 'node-3' }),
+        );
 
         axeResultsReducer.reduce(
             { violations: accumulatedResults } as AxeCoreResults,
             { url: currentUrl, violations: currentResults } as axe.AxeResults,
         );
 
-        expect(accumulatedResults).toEqual(expectedResults);
+        expect(accumulatedResults.values()).toEqual(expectedResults.values());
     });
 });

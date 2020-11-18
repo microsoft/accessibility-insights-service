@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
 import { DbScanResultReader, ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount } from 'axe-result-converter';
+import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, AxeResults } from 'axe-result-converter';
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { serviceName } from '../service-name';
@@ -70,7 +70,12 @@ describe(ConsolidatedReportGenerator, () => {
             basePageTitle: 'basePageTitle',
             userAgent: 'userAgent',
         } as ScanMetadata;
-        const combinedAxeResults = { violations: [], passes: [], incomplete: [], inapplicable: [] } as AxeCoreResults;
+        const combinedAxeResults = {
+            violations: new AxeResults(),
+            passes: new AxeResults(),
+            incomplete: new AxeResults(),
+            inapplicable: new AxeResults(),
+        } as AxeCoreResults;
         const scanResults = [
             {
                 id: 'id-1',

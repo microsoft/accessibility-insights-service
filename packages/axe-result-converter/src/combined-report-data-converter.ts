@@ -11,15 +11,16 @@ import {
 import axe from 'axe-core';
 import _ from 'lodash';
 import { injectable } from 'inversify';
+import { HashSet } from 'common';
 import { ScanResultData } from './scan-result-data';
-import { AxeResult, AxeNodeResult, AxeCoreResults } from './axe-result-types';
+import { AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
 
 @injectable()
 export class CombinedReportDataConverter {
     public convert(axeResults: AxeCoreResults, scanResultData: ScanResultData): CombinedReportParameters {
+        const passed = this.getAxeRuleData(axeResults.passes);
         const failed = this.getFailureData(axeResults.violations);
         const inapplicable = this.getAxeRuleData(axeResults.inapplicable);
-        const passed = this.getAxeRuleData(axeResults.passes);
 
         const failedByRule = this.groupFailureDataByRule(failed);
         const resultCounts = {
@@ -65,27 +66,19 @@ export class CombinedReportDataConverter {
         return failuresGroup.sort(this.compareFailureGroup);
     }
 
-    private getFailureData(results: AxeResult[]): FailureData[] {
+    private getFailureData(results: AxeResults): FailureData[] {
         const failureData: FailureData[] = [];
         if (!results) {
             return failureData;
         }
 
         for (const result of results) {
-            if (!result) {
-                continue;
-            }
-
-            for (const node of result.nodes) {
-                if (!node) {
-                    continue;
-                }
-
+            if (result) {
                 failureData.push({
                     urls: result.urls,
-                    elementSelector: this.getElementSelector(node),
-                    snippet: node.html,
-                    fix: this.getNodeResult(node),
+                    elementSelector: this.getElementSelector(result.junctionNode),
+                    snippet: result.junctionNode.html,
+                    fix: this.getNodeResult(result.junctionNode),
                     rule: this.getAxeRuleDataForResult(result),
                 });
             }
@@ -94,20 +87,19 @@ export class CombinedReportDataConverter {
         return failureData;
     }
 
-    private getAxeRuleData(results: axe.Result[]): AxeRuleData[] {
-        const axeRuleData: AxeRuleData[] = [];
+    private getAxeRuleData(results: AxeResults): AxeRuleData[] {
+        const axeRuleData = new HashSet<AxeRuleData>();
         if (results) {
             for (const result of results) {
-                if (!axeRuleData.some((rule) => rule.ruleId === result.id)) {
-                    const data = this.getAxeRuleDataForResult(result);
-                    if (data) {
-                        axeRuleData.push(data);
+                if (result) {
+                    if (!axeRuleData.get(result.id)) {
+                        axeRuleData.add(result.id, this.getAxeRuleDataForResult(result));
                     }
                 }
             }
         }
 
-        return axeRuleData.sort(this.compareAxeRuleData);
+        return axeRuleData.values().sort(this.compareAxeRuleData);
     }
 
     private getNodeResult(node: axe.NodeResult): HowToFixData {

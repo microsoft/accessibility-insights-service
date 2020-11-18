@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { CombinedReportDataConverter } from './combined-report-data-converter';
-import { AxeResult, AxeNodeResult, AxeCoreResults } from './axe-result-types';
+import { AxeResult, AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
 import { ScanResultData } from './scan-result-data';
 
 let combinedReportDataConverter: CombinedReportDataConverter;
@@ -22,7 +22,7 @@ const scanResultData = {
         failed: 1,
     },
 } as ScanResultData;
-const accumulatedNodeFn = (ruleId: string, nodeId: string) => {
+const getAccumulatedNode = (nodeId: string) => {
     return {
         any: [
             {
@@ -37,20 +37,25 @@ const accumulatedNodeFn = (ruleId: string, nodeId: string) => {
         html: `snippet-${nodeId}`,
         target: [`selector-${nodeId}`],
         selectors: [{ selector: `selector-${nodeId}`, type: 'css' }],
-        fingerprint: `${ruleId}|snippet-${nodeId}|selector-${nodeId}`,
     } as AxeNodeResult;
 };
-const accumulatedResultsFn = (ruleId: string, data: { urls: string[]; nodeId?: string }) =>
-    [
-        {
-            id: `id-${ruleId}`,
-            tags: [`tag-${ruleId}`],
-            description: `description-${ruleId}`,
-            helpUrl: `helpUrl-${ruleId}`,
-            urls: data.urls,
-            nodes: data.nodeId ? [accumulatedNodeFn(`id-${ruleId}`, data.nodeId)] : [],
-        },
-    ] as AxeResult[];
+const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: string }) => {
+    return {
+        id: `id-${ruleId}`,
+        tags: [`tag-${ruleId}`],
+        description: `description-${ruleId}`,
+        helpUrl: `helpUrl-${ruleId}`,
+        urls: data.urls,
+        nodes: [],
+        junctionNode: data.nodeId ? getAccumulatedNode(data.nodeId) : undefined,
+        fingerprint: data.nodeId ? `id-${ruleId}|snippet-${data.nodeId}|selector-${data.nodeId}` : `id-${ruleId}`,
+    } as AxeResult;
+};
+const addAxeResult = (axeResults: AxeResults, ...axeResultList: AxeResult[]): AxeResults => {
+    axeResultList.forEach((axeResult) => axeResults.add(axeResult.fingerprint, axeResult));
+
+    return axeResults;
+};
 
 describe(CombinedReportDataConverter, () => {
     beforeEach(() => {
@@ -58,26 +63,30 @@ describe(CombinedReportDataConverter, () => {
     });
 
     it('convert axe results to combined report data', () => {
-        const violations = [
-            ...accumulatedResultsFn('rule-1', { urls: ['url-11'], nodeId: 'node-11' }),
-            ...accumulatedResultsFn('rule-2', { urls: ['url-21', 'url-22'], nodeId: 'node-12' }),
-            ...accumulatedResultsFn('rule-2', { urls: ['url-21'], nodeId: 'node-22' }),
-            ...accumulatedResultsFn('rule-3', { urls: ['url-31', 'url-32', 'url-33'], nodeId: 'node-31' }),
-            ...accumulatedResultsFn('rule-3', { urls: ['url-31', 'url-32'], nodeId: 'node-32' }),
-            ...accumulatedResultsFn('rule-3', { urls: ['url-31'], nodeId: 'node-33' }),
-        ];
-        const passes = [
-            ...accumulatedResultsFn('rule-21', { urls: ['url-21'], nodeId: 'node-21' }),
-            ...accumulatedResultsFn('rule-22', { urls: ['url-22'], nodeId: 'node-22' }),
-        ];
-        const incomplete = [
-            ...accumulatedResultsFn('rule-31', { urls: ['url-31'], nodeId: 'node-31' }),
-            ...accumulatedResultsFn('rule-32', { urls: ['url-32'], nodeId: 'node-32' }),
-        ];
-        const inapplicable = [
-            ...accumulatedResultsFn('rule-41', { urls: ['url-41'] }),
-            ...accumulatedResultsFn('rule-42', { urls: ['url-42'] }),
-        ];
+        const violations = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-1', { urls: ['url-11'], nodeId: 'node-11' }),
+            getAccumulatedResult('rule-2', { urls: ['url-21', 'url-22'], nodeId: 'node-12' }),
+            getAccumulatedResult('rule-2', { urls: ['url-21'], nodeId: 'node-22' }),
+            getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32', 'url-33'], nodeId: 'node-31' }),
+            getAccumulatedResult('rule-3', { urls: ['url-31', 'url-32'], nodeId: 'node-32' }),
+            getAccumulatedResult('rule-3', { urls: ['url-31'], nodeId: 'node-33' }),
+        );
+        const passes = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-21', { urls: ['url-21'], nodeId: 'node-21' }),
+            getAccumulatedResult('rule-22', { urls: ['url-22'], nodeId: 'node-22' }),
+        );
+        const incomplete = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-31', { urls: ['url-31'], nodeId: 'node-31' }),
+            getAccumulatedResult('rule-32', { urls: ['url-32'], nodeId: 'node-32' }),
+        );
+        const inapplicable = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult('rule-41', { urls: ['url-41'] }),
+            getAccumulatedResult('rule-42', { urls: ['url-42'] }),
+        );
         const axeCoreResults = {
             violations,
             passes,
