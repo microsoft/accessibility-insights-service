@@ -88,21 +88,18 @@ export class CombinedReportDataConverter {
     }
 
     private getAxeRuleData(results: AxeResults): AxeRuleData[] {
-        const axeRuleData: AxeRuleData[] = [];
-        const axeRuleSet = new HashSet<string>();
+        const axeRuleData = new HashSet<AxeRuleData>();
         if (results) {
             for (const result of results) {
-                if (!axeRuleSet.get(result.id)) {
-                    axeRuleSet.add(result.id, result.id);
-                    const data = this.getAxeRuleDataForResult(result);
-                    if (data) {
-                        axeRuleData.push(data);
+                if (result) {
+                    if (!axeRuleData.get(result.id)) {
+                        axeRuleData.add(result.id, this.getAxeRuleDataForResult(result));
                     }
                 }
             }
         }
 
-        return axeRuleData.sort(this.compareAxeRuleData);
+        return axeRuleData.values().sort(this.compareAxeRuleData);
     }
 
     private getNodeResult(node: axe.NodeResult): HowToFixData {
