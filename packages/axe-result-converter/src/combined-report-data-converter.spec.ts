@@ -41,7 +41,7 @@ const getAccumulatedNode = (nodeId: string) => {
 };
 const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: string }) => {
     return {
-        id: `id-${ruleId}`,
+        id: ruleId,
         tags: [`tag-${ruleId}`],
         description: `description-${ruleId}`,
         helpUrl: `helpUrl-${ruleId}`,
@@ -97,5 +97,74 @@ describe(CombinedReportDataConverter, () => {
         const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
 
         expect(combinedReportData).toMatchSnapshot();
+    });
+
+    it('Does not repeat failed rules in passed or not applicable sections', () => {
+        const failedRuleId = 'failed-rule';
+        const violations = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(failedRuleId, { urls: ['url-11'], nodeId: 'node-11' }),
+        );
+        const passes = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(failedRuleId, { urls: ['url-21'], nodeId: 'node-21' }),
+            getAccumulatedResult('passed-rule', { urls: ['url-22'], nodeId: 'node-22' }),
+        );
+        const incomplete = new AxeResults();
+        const inapplicable = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(failedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
+            getAccumulatedResult('not-applicable-rule', { urls: ['url-32'], nodeId: 'node-32' }),
+        );
+
+        const axeCoreResults = {
+            violations,
+            passes,
+            incomplete,
+            inapplicable,
+        } as AxeCoreResults;
+
+        const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
+        const resultsByRule = combinedReportData.results.resultsByRule;
+
+        expect(resultsByRule.failed.length).toBe(1);
+        expect(resultsByRule.failed[0].failed[0].rule.ruleId).toBe(failedRuleId);
+
+        expect(resultsByRule.passed.length).toBe(1);
+        expect(resultsByRule.passed[0].ruleId).not.toBe(failedRuleId);
+
+        expect(resultsByRule.notApplicable.length).toBe(1);
+        expect(resultsByRule.notApplicable[0].ruleId).not.toBe(failedRuleId);
+    });
+
+    it('Does not repeat passed rule in not applicable section', () => {
+        const passedRuleId = 'passed-rule';
+        const violations = new AxeResults();
+        const passes = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(passedRuleId, { urls: ['url-21'], nodeId: 'node-21' }),
+        );
+        const incomplete = new AxeResults();
+        const inapplicable = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(passedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
+            getAccumulatedResult('not-applicable-rule', { urls: ['url-32'], nodeId: 'node-32' }),
+        );
+
+        const axeCoreResults = {
+            violations,
+            passes,
+            incomplete,
+            inapplicable,
+        } as AxeCoreResults;
+
+        const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
+        const resultsByRule = combinedReportData.results.resultsByRule;
+
+        expect(resultsByRule.passed.length).toBe(1);
+        expect(resultsByRule.passed[0].ruleId).toBe(passedRuleId);
+
+        expect(resultsByRule.notApplicable.length).toBe(1);
+        expect(resultsByRule.notApplicable[0].ruleId).not.toBe(passedRuleId);
     });
 });

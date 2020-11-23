@@ -24,7 +24,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-3",
-                "ruleId": "id-rule-3",
+                "ruleId": "rule-3",
                 "ruleUrl": "helpUrl-rule-3",
                 "tags": Array [
                   "tag-rule-3",
@@ -53,7 +53,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-3",
-                "ruleId": "id-rule-3",
+                "ruleId": "rule-3",
                 "ruleUrl": "helpUrl-rule-3",
                 "tags": Array [
                   "tag-rule-3",
@@ -81,7 +81,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-3",
-                "ruleId": "id-rule-3",
+                "ruleId": "rule-3",
                 "ruleUrl": "helpUrl-rule-3",
                 "tags": Array [
                   "tag-rule-3",
@@ -93,7 +93,7 @@ Object {
               ],
             },
           ],
-          "key": "id-rule-3",
+          "key": "rule-3",
         },
         Object {
           "failed": Array [
@@ -113,7 +113,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-2",
-                "ruleId": "id-rule-2",
+                "ruleId": "rule-2",
                 "ruleUrl": "helpUrl-rule-2",
                 "tags": Array [
                   "tag-rule-2",
@@ -141,7 +141,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-2",
-                "ruleId": "id-rule-2",
+                "ruleId": "rule-2",
                 "ruleUrl": "helpUrl-rule-2",
                 "tags": Array [
                   "tag-rule-2",
@@ -153,7 +153,7 @@ Object {
               ],
             },
           ],
-          "key": "id-rule-2",
+          "key": "rule-2",
         },
         Object {
           "failed": Array [
@@ -173,7 +173,7 @@ Object {
               },
               "rule": Object {
                 "description": "description-rule-1",
-                "ruleId": "id-rule-1",
+                "ruleId": "rule-1",
                 "ruleUrl": "helpUrl-rule-1",
                 "tags": Array [
                   "tag-rule-1",
@@ -185,13 +185,13 @@ Object {
               ],
             },
           ],
-          "key": "id-rule-1",
+          "key": "rule-1",
         },
       ],
       "notApplicable": Array [
         Object {
           "description": "description-rule-41",
-          "ruleId": "id-rule-41",
+          "ruleId": "rule-41",
           "ruleUrl": "helpUrl-rule-41",
           "tags": Array [
             "tag-rule-41",
@@ -199,7 +199,7 @@ Object {
         },
         Object {
           "description": "description-rule-42",
-          "ruleId": "id-rule-42",
+          "ruleId": "rule-42",
           "ruleUrl": "helpUrl-rule-42",
           "tags": Array [
             "tag-rule-42",
@@ -209,7 +209,7 @@ Object {
       "passed": Array [
         Object {
           "description": "description-rule-21",
-          "ruleId": "id-rule-21",
+          "ruleId": "rule-21",
           "ruleUrl": "helpUrl-rule-21",
           "tags": Array [
             "tag-rule-21",
@@ -217,7 +217,7 @@ Object {
         },
         Object {
           "description": "description-rule-22",
-          "ruleId": "id-rule-22",
+          "ruleId": "rule-22",
           "ruleUrl": "helpUrl-rule-22",
           "tags": Array [
             "tag-rule-22",
