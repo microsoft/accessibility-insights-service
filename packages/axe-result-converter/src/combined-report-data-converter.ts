@@ -18,9 +18,15 @@ import { AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
 @injectable()
 export class CombinedReportDataConverter {
     public convert(axeResults: AxeCoreResults, scanResultData: ScanResultData): CombinedReportParameters {
-        const passed = this.getAxeRuleData(axeResults.passes);
+        const handledRuleIds = new HashSet<string>();
+
         const failed = this.getFailureData(axeResults.violations);
-        const inapplicable = this.getAxeRuleData(axeResults.inapplicable);
+        this.addRuleIdsFromFailures(handledRuleIds, failed);
+
+        const passed = this.getAxeRuleData(axeResults.passes, handledRuleIds);
+        this.addRuleIdsFromRuleData(handledRuleIds, passed);
+
+        const inapplicable = this.getAxeRuleData(axeResults.inapplicable, handledRuleIds);
 
         const failedByRule = this.groupFailureDataByRule(failed);
         const resultCounts = {
@@ -87,12 +93,12 @@ export class CombinedReportDataConverter {
         return failureData;
     }
 
-    private getAxeRuleData(results: AxeResults): AxeRuleData[] {
+    private getAxeRuleData(results: AxeResults, excludeRuleIds: HashSet<string>): AxeRuleData[] {
         const axeRuleData = new HashSet<AxeRuleData>();
         if (results) {
             for (const result of results) {
                 if (result) {
-                    if (!axeRuleData.get(result.id)) {
+                    if (!axeRuleData.has(result.id) && !excludeRuleIds.has(result.id)) {
                         axeRuleData.add(result.id, this.getAxeRuleDataForResult(result));
                     }
                 }
@@ -169,6 +175,10 @@ export class CombinedReportDataConverter {
     }
 
     private compareFailureData(data1: FailureData, data2: FailureData): number {
+        if (data1.urls.length !== data2.urls.length) {
+            return data2.urls.length - data1.urls.length;
+        }
+
         if (data1.urls[0] > data2.urls[0]) {
             return 1;
         }
@@ -190,5 +200,18 @@ export class CombinedReportDataConverter {
         }
 
         return 0;
+    }
+
+    private addRuleIdsFromFailures(ruleIds: HashSet<string>, failureData: FailureData[]): void {
+        failureData.forEach((failure) => {
+            const ruleId = failure.rule.ruleId;
+            ruleIds.add(ruleId, ruleId);
+        });
+    }
+
+    private addRuleIdsFromRuleData(ruleIds: HashSet<string>, passedRuleData: AxeRuleData[]): void {
+        passedRuleData.forEach((passedRule) => {
+            ruleIds.add(passedRule.ruleId, passedRule.ruleId);
+        });
     }
 }
