@@ -175,6 +175,10 @@ export class CombinedReportDataConverter {
     }
 
     private compareFailureData(data1: FailureData, data2: FailureData): number {
+        if (data1.urls.length !== data2.urls.length) {
+            return data2.urls.length - data1.urls.length;
+        }
+
         if (data1.urls[0] > data2.urls[0]) {
             return 1;
         }
@@ -199,14 +203,14 @@ export class CombinedReportDataConverter {
     }
 
     private addRuleIdsFromFailures(ruleIds: HashSet<string>, failureData: FailureData[]): void {
-        failureData.forEach(failure => {
+        failureData.forEach((failure) => {
             const ruleId = failure.rule.ruleId;
             ruleIds.add(ruleId, ruleId);
         });
     }
 
     private addRuleIdsFromRuleData(ruleIds: HashSet<string>, passedRuleData: AxeRuleData[]): void {
-        passedRuleData.forEach(passedRule => {
+        passedRuleData.forEach((passedRule) => {
             ruleIds.add(passedRule.ruleId, passedRule.ruleId);
         });
     }

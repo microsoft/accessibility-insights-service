@@ -242,3 +242,148 @@ Object {
   "userAgent": "browserUserAgent",
 }
 `;
+
+exports[`CombinedReportDataConverter sorts failure cards by url count, then alphabetically by url 1`] = `
+Object {
+  "axeVersion": "axeCoreVersion",
+  "results": Object {
+    "resultsByRule": Object {
+      "failed": Array [
+        Object {
+          "failed": Array [
+            Object {
+              "elementSelector": "selector-node-1",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-1",
+                    "id": "check-id-node-1",
+                    "message": "check-message-node-1",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-1",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-id",
+                "ruleId": "rule-id",
+                "ruleUrl": "helpUrl-rule-id",
+                "tags": Array [
+                  "tag-rule-id",
+                ],
+              },
+              "snippet": "snippet-node-1",
+              "urls": Array [
+                "url-z",
+                "url-y",
+                "url-x",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-2",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-2",
+                    "id": "check-id-node-2",
+                    "message": "check-message-node-2",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-2",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-id",
+                "ruleId": "rule-id",
+                "ruleUrl": "helpUrl-rule-id",
+                "tags": Array [
+                  "tag-rule-id",
+                ],
+              },
+              "snippet": "snippet-node-2",
+              "urls": Array [
+                "url-b",
+                "url-d",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-3",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-3",
+                    "id": "check-id-node-3",
+                    "message": "check-message-node-3",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-3",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-id",
+                "ruleId": "rule-id",
+                "ruleUrl": "helpUrl-rule-id",
+                "tags": Array [
+                  "tag-rule-id",
+                ],
+              },
+              "snippet": "snippet-node-3",
+              "urls": Array [
+                "url-c",
+                "url-d",
+              ],
+            },
+            Object {
+              "elementSelector": "selector-node-4",
+              "fix": Object {
+                "all": Array [],
+                "any": Array [
+                  Object {
+                    "data": "check-data-node-4",
+                    "id": "check-id-node-4",
+                    "message": "check-message-node-4",
+                  },
+                ],
+                "failureSummary": "failureSummary-node-4",
+                "none": Array [],
+              },
+              "rule": Object {
+                "description": "description-rule-id",
+                "ruleId": "rule-id",
+                "ruleUrl": "helpUrl-rule-id",
+                "tags": Array [
+                  "tag-rule-id",
+                ],
+              },
+              "snippet": "snippet-node-4",
+              "urls": Array [
+                "url-a",
+              ],
+            },
+          ],
+          "key": "rule-id",
+        },
+      ],
+      "notApplicable": Array [],
+      "passed": Array [],
+    },
+    "urlResults": Object {
+      "failedUrls": 1,
+      "passedUrls": 3,
+      "unscannableUrls": 3,
+    },
+  },
+  "scanDetails": Object {
+    "basePageTitle": "basePageTitle",
+    "baseUrl": "baseUrl",
+    "durationSeconds": 59,
+    "scanComplete": 1970-01-01T00:01:00.000Z,
+    "scanStart": 1970-01-01T00:00:01.000Z,
+  },
+  "serviceName": "scanEngineName",
+  "userAgent": "browserUserAgent",
+}
+`;

@@ -22,6 +22,7 @@ const scanResultData = {
         failed: 1,
     },
 } as ScanResultData;
+
 const getAccumulatedNode = (nodeId: string) => {
     return {
         any: [
@@ -39,6 +40,7 @@ const getAccumulatedNode = (nodeId: string) => {
         selectors: [{ selector: `selector-${nodeId}`, type: 'css' }],
     } as AxeNodeResult;
 };
+
 const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: string }) => {
     return {
         id: ruleId,
@@ -51,6 +53,7 @@ const getAccumulatedResult = (ruleId: string, data: { urls: string[]; nodeId?: s
         fingerprint: data.nodeId ? `id-${ruleId}|snippet-${data.nodeId}|selector-${data.nodeId}` : `id-${ruleId}`,
     } as AxeResult;
 };
+
 const addAxeResult = (axeResults: AxeResults, ...axeResultList: AxeResult[]): AxeResults => {
     axeResultList.forEach((axeResult) => axeResults.add(axeResult.fingerprint, axeResult));
 
@@ -101,16 +104,12 @@ describe(CombinedReportDataConverter, () => {
 
     it('Does not repeat failed rules in passed or not applicable sections', () => {
         const failedRuleId = 'failed-rule';
-        const violations = addAxeResult(
-            new AxeResults(),
-            getAccumulatedResult(failedRuleId, { urls: ['url-11'], nodeId: 'node-11' }),
-        );
+        const violations = addAxeResult(new AxeResults(), getAccumulatedResult(failedRuleId, { urls: ['url-11'], nodeId: 'node-11' }));
         const passes = addAxeResult(
             new AxeResults(),
             getAccumulatedResult(failedRuleId, { urls: ['url-21'], nodeId: 'node-21' }),
             getAccumulatedResult('passed-rule', { urls: ['url-22'], nodeId: 'node-22' }),
         );
-        const incomplete = new AxeResults();
         const inapplicable = addAxeResult(
             new AxeResults(),
             getAccumulatedResult(failedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
@@ -120,7 +119,7 @@ describe(CombinedReportDataConverter, () => {
         const axeCoreResults = {
             violations,
             passes,
-            incomplete,
+            incomplete: new AxeResults(),
             inapplicable,
         } as AxeCoreResults;
 
@@ -139,12 +138,7 @@ describe(CombinedReportDataConverter, () => {
 
     it('Does not repeat passed rule in not applicable section', () => {
         const passedRuleId = 'passed-rule';
-        const violations = new AxeResults();
-        const passes = addAxeResult(
-            new AxeResults(),
-            getAccumulatedResult(passedRuleId, { urls: ['url-21'], nodeId: 'node-21' }),
-        );
-        const incomplete = new AxeResults();
+        const passes = addAxeResult(new AxeResults(), getAccumulatedResult(passedRuleId, { urls: ['url-21'], nodeId: 'node-21' }));
         const inapplicable = addAxeResult(
             new AxeResults(),
             getAccumulatedResult(passedRuleId, { urls: ['url-31'], nodeId: 'node-31' }),
@@ -152,9 +146,9 @@ describe(CombinedReportDataConverter, () => {
         );
 
         const axeCoreResults = {
-            violations,
+            violations: new AxeResults(),
             passes,
-            incomplete,
+            incomplete: new AxeResults(),
             inapplicable,
         } as AxeCoreResults;
 
@@ -166,5 +160,27 @@ describe(CombinedReportDataConverter, () => {
 
         expect(resultsByRule.notApplicable.length).toBe(1);
         expect(resultsByRule.notApplicable[0].ruleId).not.toBe(passedRuleId);
+    });
+
+    it('sorts failure cards by url count, then alphabetically by url', () => {
+        const ruleId = 'rule-id';
+        const violations = addAxeResult(
+            new AxeResults(),
+            // failure cards should be sorted in the reverse of this order
+            getAccumulatedResult(ruleId, { urls: ['url-a'], nodeId: 'node-4' }),
+            getAccumulatedResult(ruleId, { urls: ['url-c', 'url-d'], nodeId: 'node-3' }),
+            getAccumulatedResult(ruleId, { urls: ['url-b', 'url-d'], nodeId: 'node-2' }),
+            getAccumulatedResult(ruleId, { urls: ['url-z', 'url-y', 'url-x'], nodeId: 'node-1' }),
+        );
+        const axeCoreResults = {
+            violations,
+            passes: new AxeResults(),
+            inapplicable: new AxeResults(),
+            incomplete: new AxeResults(),
+        } as AxeCoreResults;
+
+        const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
+
+        expect(combinedReportData).toMatchSnapshot();
     });
 });
