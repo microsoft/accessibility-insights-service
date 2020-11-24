@@ -32,7 +32,8 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve(1024))
             .verifiable(Times.exactly(minCheckBreakCount + 1));
         pageMock
-            .setup(async (o) => o.waitFor(checkIntervalMsecs))
+            // @ts-ignore
+            .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(minCheckBreakCount));
 
