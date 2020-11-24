@@ -51,7 +51,8 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve(contentSize))
             .verifiable(Times.exactly(validationCallCount));
         pageMock
-            .setup(async (o) => o.waitFor(checkIntervalMsecs))
+            // @ts-ignore
+            .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(validationCallCount));
 
