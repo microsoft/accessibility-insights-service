@@ -183,4 +183,28 @@ describe(CombinedReportDataConverter, () => {
 
         expect(combinedReportData).toMatchSnapshot();
     });
+
+    it('sorts failed rules by number of failure instances', () => {
+        const ruleId1 = 'rule-id-1';
+        const ruleId2 = 'rule-id-2';
+        const violations = addAxeResult(
+            new AxeResults(),
+            getAccumulatedResult(ruleId1, { urls: ['url-1', 'url-2', 'url-3'], nodeId: 'node-1' }),
+            getAccumulatedResult(ruleId1, { urls: ['url-4'], nodeId: 'node-2' }),
+            getAccumulatedResult(ruleId2, { urls: ['url-5'], nodeId: 'node-3' }),
+        );
+        const axeCoreResults = {
+            violations,
+            passes: new AxeResults(),
+            inapplicable: new AxeResults(),
+            incomplete: new AxeResults(),
+        } as AxeCoreResults;
+
+        const combinedReportData = combinedReportDataConverter.convert(axeCoreResults, scanResultData);
+        const failedRules = combinedReportData.results.resultsByRule.failed;
+
+        expect(failedRules.length).toBe(2);
+        expect(failedRules[0].failed[0].rule.ruleId).toBe(ruleId1);
+        expect(failedRules[1].failed[0].rule.ruleId).toBe(ruleId2);
+    });
 });

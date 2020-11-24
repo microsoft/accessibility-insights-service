@@ -15,6 +15,11 @@ import { HashSet } from 'common';
 import { ScanResultData } from './scan-result-data';
 import { AxeNodeResult, AxeCoreResults, AxeResults } from './axe-result-types';
 
+type SortableFailuresGroup = {
+    failuresGroup: FailuresGroup;
+    instancesCount: number;
+};
+
 @injectable()
 export class CombinedReportDataConverter {
     public convert(axeResults: AxeCoreResults, scanResultData: ScanResultData): CombinedReportParameters {
@@ -69,7 +74,7 @@ export class CombinedReportDataConverter {
             });
         }
 
-        return failuresGroup.sort(this.compareFailureGroup);
+        return this.sortFailuresGroups(failuresGroup);
     }
 
     private getFailureData(results: AxeResults): FailureData[] {
@@ -162,12 +167,29 @@ export class CombinedReportDataConverter {
         return undefined;
     }
 
-    private compareFailureGroup(group1: FailuresGroup, group2: FailuresGroup): number {
-        if (group1.failed?.length < group2.failed?.length) {
+    private sortFailuresGroups(failuresGroups: FailuresGroup[]): FailuresGroup[] {
+        let sortableFailuresGroups: SortableFailuresGroup[] = failuresGroups.map((failuresGroup) => {
+            let instancesCount = 0;
+            if (failuresGroup.failed) {
+                failuresGroup.failed.forEach((failureData) => {
+                    instancesCount += failureData.urls.length;
+                });
+            }
+
+            return { failuresGroup, instancesCount };
+        });
+
+        sortableFailuresGroups = sortableFailuresGroups.sort(this.compareFailureGroup);
+
+        return sortableFailuresGroups.map((sortable) => sortable.failuresGroup);
+    }
+
+    private compareFailureGroup(group1: SortableFailuresGroup, group2: SortableFailuresGroup): number {
+        if (group1.instancesCount < group2.instancesCount) {
             return 1;
         }
 
-        if (group1.failed?.length > group2.failed?.length) {
+        if (group1.instancesCount > group2.instancesCount) {
             return -1;
         }
 
