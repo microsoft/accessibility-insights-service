@@ -27,7 +27,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/cheerio": "^0.22.21",
+        "@types/cheerio": "^0.22.22",
         "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^0.0.20",
         "@types/jest": "^26.0.14",
@@ -59,7 +59,7 @@
     "dependencies": {
         "@axe-core/puppeteer": "^4.0.0",
         "accessibility-insights-report": "3.0.1",
-        "apify": "^0.21.4",
+        "apify": "^0.21.8",
         "apify-shared": "^0.5.0",
         "axe-core": "4.0.2",
         "cheerio": "^1.0.0-rc.3",
