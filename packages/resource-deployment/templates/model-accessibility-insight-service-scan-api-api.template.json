@@ -10,7 +10,7 @@
         },
         "maxCallsPerMinute": {
             "type": "int",
-            "defaultValue": 1000
+            "defaultValue": 3000
         }
     },
     "resources": [
