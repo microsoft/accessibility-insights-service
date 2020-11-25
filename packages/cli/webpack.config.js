@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 const path = require('path');
+const { exec } = require('child_process');
 const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
-const { exec } = require('child_process');
 
 function getCommonConfig(version, generateTypings) {
     return {
@@ -49,7 +49,7 @@ function getCommonConfig(version, generateTypings) {
             new webpack.DefinePlugin({
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
-            new copyFilesPlugin([{ from: './../crawler/dist/browser-imports.js', to: '.' }]),
+            new copyFilesPlugin({ patterns: [{ from: './../crawler/dist/browser-imports.js', to: '.' }] }),
         ]
             .concat(
                 generateTypings
@@ -59,8 +59,12 @@ function getCommonConfig(version, generateTypings) {
                                   exec(
                                       'dts-bundle-generator --project tsconfig.sdk.json src/index.ts -o dist/index.d.ts',
                                       (_, out, err) => {
-                                          if (out) process.stdout.write(out);
-                                          if (err) process.stderr.write(err);
+                                          if (out) {
+                                              process.stdout.write(out);
+                                          }
+                                          if (err) {
+                                              process.stderr.write(err);
+                                          }
                                       },
                                   );
                               });
@@ -88,6 +92,7 @@ function getCommonConfig(version, generateTypings) {
 module.exports = (env) => {
     const version = env ? env.version : 'dev';
     console.log(`Building for version : ${version}`);
+
     return [
         {
             ...getCommonConfig(version, false),

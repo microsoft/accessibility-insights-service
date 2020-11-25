@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 const path = require('path');
 const webpack = require('webpack');
-
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -60,28 +59,30 @@ module.exports = (env) => {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new ForkTsCheckerWebpackPlugin(),
-            new copyWebpackPlugin([
-                {
-                    context: './',
-                    from: '**/function.json',
-                    to: '',
-                    ignore: ['dist/**'],
-                },
-                {
-                    context: './',
-                    from: 'host.json',
-                    to: '',
-                    ignore: ['dist/**'],
-                },
-                {
-                    from: 'package.json',
-                    to: '',
-                },
-                {
-                    from: '../../yarn.lock',
-                    to: '',
-                },
-            ]),
+            new copyWebpackPlugin({
+                patterns: [
+                    {
+                        context: './',
+                        from: '**/function.json',
+                        to: '',
+                        globOptions: { ignore: ['dist/**'] },
+                    },
+                    {
+                        context: './',
+                        from: 'host.json',
+                        to: '',
+                        globOptions: { ignore: ['dist/**'] },
+                    },
+                    {
+                        from: 'package.json',
+                        to: '',
+                    },
+                    {
+                        from: '../../yarn.lock',
+                        to: '',
+                    },
+                ],
+            }),
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
