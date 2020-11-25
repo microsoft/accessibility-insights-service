@@ -40,8 +40,7 @@ export class PageHandler {
                 break;
             }
 
-            // @ts-ignore
-            await page.waitForTimeout(checkIntervalMsecs);
+            await page.waitFor(checkIntervalMsecs);
             checkCount += 1;
         }
 

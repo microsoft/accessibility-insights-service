@@ -32,8 +32,7 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve(1024))
             .verifiable(Times.exactly(minCheckBreakCount + 1));
         pageMock
-            // @ts-ignore
-            .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
+            .setup(async (o) => o.waitFor(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(minCheckBreakCount));
 
@@ -51,8 +50,7 @@ describe(PageHandler, () => {
             .returns(() => Promise.resolve(contentSize))
             .verifiable(Times.exactly(validationCallCount));
         pageMock
-            // @ts-ignore
-            .setup(async (o) => o.waitForTimeout(checkIntervalMsecs))
+            .setup(async (o) => o.waitFor(checkIntervalMsecs))
             .returns(() => Promise.resolve())
             .verifiable(Times.exactly(validationCallCount));
 
