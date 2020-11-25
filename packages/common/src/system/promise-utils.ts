@@ -10,7 +10,7 @@ export class PromiseUtils {
         let timeoutHandle: NodeJS.Timeout;
         let hasTimedOut = false;
 
-        const timeoutPromise = new Promise<Y>((resolve, reject) => {
+        const timeoutPromise = new Promise<void>((resolve) => {
             timeoutHandle = this.globalObj.setTimeout(() => {
                 hasTimedOut = true;
                 resolve();

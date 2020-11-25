@@ -37,7 +37,7 @@ export abstract class WebController {
 
     protected abstract validateRequest(...args: any[]): boolean;
 
-    protected abstract async handleRequest(...args: any[]): Promise<unknown>;
+    protected abstract handleRequest(...args: any[]): Promise<unknown>;
 
     protected getBaseTelemetryProperties(): { [name: string]: string } {
         return {

@@ -41,7 +41,7 @@ export abstract class ProcessEntryPointBase {
 
     protected abstract getTelemetryBaseProperties(): BaseTelemetryProperties;
 
-    protected abstract async runCustomAction(container: Container, ...args: any[]): Promise<void>;
+    protected abstract runCustomAction(container: Container, ...args: any[]): Promise<void>;
 
     private verifyDotEnvParsing(dotEnvConfig: DotenvConfigOutput, logger: GlobalLogger): void {
         if (dotEnvConfig.parsed !== undefined) {

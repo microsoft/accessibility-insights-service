@@ -16,7 +16,7 @@ export abstract class BaseAppInsightsLoggerClient implements LoggerClient {
     public initialized: boolean = false;
     protected telemetryClient: TelemetryClient;
 
-    public abstract async setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
+    public abstract setup(baseProperties?: BaseTelemetryProperties): Promise<void>;
 
     public isInitialized(): boolean {
         return this.initialized;
