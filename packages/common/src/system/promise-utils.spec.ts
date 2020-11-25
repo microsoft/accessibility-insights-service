@@ -61,7 +61,7 @@ describe(PromiseUtils, () => {
             const timeoutValue = 'timed out value';
             let exceptionThrown = false;
 
-            const promise = new Promise<string>((resolve) => {
+            const promise = new Promise<void>((resolve) => {
                 resolvePromise = resolve;
             });
 

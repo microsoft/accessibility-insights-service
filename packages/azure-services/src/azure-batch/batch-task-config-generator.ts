@@ -13,7 +13,7 @@ export interface BatchTaskPropertyProvider {
 
 @injectable()
 export abstract class BatchTaskPropertyProvider {
-    public abstract async getImageName(): Promise<string>;
+    public abstract getImageName(): Promise<string>;
 
     public getAdditionalContainerRunOptions?(): string {
         return '';
