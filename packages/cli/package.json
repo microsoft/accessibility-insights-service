@@ -38,7 +38,7 @@
         "accessibility-insights-crawler": "1.0.0",
         "axe-result-converter": "1.0.0",
         "common": "1.0.0",
-        "copy-webpack-plugin": "^5.1.1",
+        "copy-webpack-plugin": "^6.3.2",
         "dts-bundle-generator": "^5.4.0",
         "fork-ts-checker-webpack-plugin": "^5.2.0",
         "jest": "^26.4.2",

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 const path = require('path');
 const webpack = require('webpack');
-
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyWebpackPlugin = require('copy-webpack-plugin');
 
@@ -56,18 +55,20 @@ module.exports = (env) => {
                 __IMAGE_VERSION__: JSON.stringify(version),
             }),
             new ForkTsCheckerWebpackPlugin(),
-            new copyWebpackPlugin([
-                {
-                    context: './docker-image-config',
-                    from: '.dockerignore',
-                    to: '',
-                },
-                {
-                    context: './docker-image-config',
-                    from: 'Dockerfile',
-                    to: '',
-                },
-            ]),
+            new copyWebpackPlugin({
+                patterns: [
+                    {
+                        context: './docker-image-config',
+                        from: '.dockerignore',
+                        to: '',
+                    },
+                    {
+                        context: './docker-image-config',
+                        from: 'Dockerfile',
+                        to: '',
+                    },
+                ],
+            }),
         ],
         resolve: {
             extensions: ['.ts', '.js', '.json'],
