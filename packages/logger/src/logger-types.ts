@@ -6,5 +6,4 @@ export const loggerTypes = {
     Process: 'Process',
     Console: 'Console',
     DotEnvConfig: 'DotEnvConfig',
-    Argv: 'Argv',
 };

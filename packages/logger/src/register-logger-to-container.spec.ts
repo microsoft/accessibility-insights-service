@@ -5,7 +5,6 @@ import 'reflect-metadata';
 import * as appInsights from 'applicationinsights';
 import * as dotenv from 'dotenv';
 import { Container } from 'inversify';
-import * as argv from 'yargs';
 import { AppInsightsLoggerClient } from './app-insights-logger-client';
 import { ConsoleLoggerClient } from './console-logger-client';
 import { ContextAwareAppInsightsLoggerClient } from './context-aware-app-insights-logger-client';
@@ -31,7 +30,6 @@ describe('registerGlobalLoggerToContainer', () => {
         expect(container.get(loggerTypes.AppInsights)).toStrictEqual(appInsights);
         expect(container.get(loggerTypes.Process)).toStrictEqual(process);
         expect(container.get(loggerTypes.Console)).toStrictEqual(console);
-        expect(container.get(loggerTypes.Argv)).toStrictEqual(argv);
         expect(container.get(loggerTypes.DotEnvConfig)).toStrictEqual(dotenv.config());
 
         verifySingletonDependencyResolution(AppInsightsLoggerClient);
