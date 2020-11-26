@@ -11,7 +11,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['@azure/functions'],
+        externals: ['@azure/functions', 'yargs'],
         entry: {
             ['scan-batch-requests-feed-func']: path.resolve('./scan-batch-requests-feed-func/index.ts'),
             ['health-monitor-timer-func']: path.resolve('./health-monitor-timer-func/index.ts'),
