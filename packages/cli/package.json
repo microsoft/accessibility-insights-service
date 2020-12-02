@@ -39,7 +39,7 @@
         "axe-result-converter": "1.0.0",
         "common": "1.0.0",
         "copy-webpack-plugin": "^6.3.2",
-        "dts-bundle-generator": "^5.4.0",
+        "dts-bundle-generator": "^5.5.0",
         "fork-ts-checker-webpack-plugin": "^6.0.4",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
