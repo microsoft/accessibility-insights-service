@@ -21,7 +21,7 @@
     "devDependencies": {
         "@types/got": "^9.6.11",
         "@types/jest": "^26.0.14",
-        "@types/lodash": "^4.14.161",
+        "@types/lodash": "^4.14.165",
         "@types/node": "^12.12.54",
         "jest": "^26.4.2",
         "jest-circus": "^26.4.0",
