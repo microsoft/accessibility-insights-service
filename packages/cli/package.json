@@ -72,7 +72,7 @@
         "levelup": "^4.4.0",
         "lodash": "^4.17.20",
         "normalize-path": "^3.0.0",
-        "puppeteer": "^4.0.0",
+        "puppeteer": "^5.5.0",
         "reflect-metadata": "^0.1.13",
         "serialize-error": "^7.0.1",
         "yargs": "^16.1.1"
