@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider, WebsiteScanResultProvider } from 'service-library';
 import {
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
@@ -15,6 +15,7 @@ import {
     OnDemandScanResult,
     ScanError,
 } from 'storage-documents';
+import { AxeCoreResults, AxeResults } from 'axe-result-converter';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
@@ -34,6 +35,7 @@ export class Runner {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
+        @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
     ) {}
 
     public async run(): Promise<void> {
@@ -42,7 +44,7 @@ export class Runner {
         this.logger.logInfo('Starting page scan task.');
 
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
-        const pageScanResult: Partial<OnDemandPageScanResult> = {
+        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanMetadata.id,
             run: {
                 state: 'running',
@@ -52,7 +54,7 @@ export class Runner {
             scanResult: null,
             reports: null,
         };
-        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(pageScanResult);
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {
             this.logger.logInfo(
                 `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
@@ -60,7 +62,7 @@ export class Runner {
 
             return;
         }
-
+        let fullPageScanResult = response.result;
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
@@ -72,11 +74,11 @@ export class Runner {
 
         try {
             this.logger.logInfo('Starting the page scanner.');
-            await this.scan(pageScanResult, scanMetadata.url);
+            await this.scan(partialPageScanResult, scanMetadata.url);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             const errorMessage = System.serializeError(error);
-            pageScanResult.run = this.createRunResult('failed', errorMessage);
+            partialPageScanResult.run = this.createRunResult('failed', errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
@@ -92,13 +94,16 @@ export class Runner {
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         }
 
-        const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        await this.createOrUpdateCombinedResults(fullPageScanResult.websiteScanIds);
+
+        fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(partialPageScanResult);
+
         await this.queueScanCompletionNotification(fullPageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<AxeScanResults> {
         const axeScanResults = await this.scanner.scan(url);
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
@@ -116,6 +121,8 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+
+        return axeScanResults;
     }
 
     private async queueScanCompletionNotification(fullPageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -127,6 +134,44 @@ export class Runner {
             });
             await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
         }
+    }
+
+    private async createOrUpdateCombinedResults(websiteScanIds: string[]): Promise<void> {
+        if (isNil(websiteScanIds)) {
+            return;
+        }
+        websiteScanIds.forEach(async (websiteScanId) => {
+            this.logger.logInfo('Updating combined scan results', { websiteScanId });
+
+            const websiteScanResults = {
+                combinedAxeResults: {
+                    violations: new AxeResults(),
+                    passes: new AxeResults(),
+                    incomplete: new AxeResults(),
+                    inapplicable: new AxeResults(),
+                } as AxeCoreResults,
+                urlCount: {
+                    passed: 0,
+                    failed: 0,
+                    total: 0,
+                },
+            };
+
+            const updatedWebsiteScanResults = {
+                websiteScanResults,
+                id: websiteScanId,
+            };
+
+            try {
+                await this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+            } catch (error) {
+                this.logger.logError('Failed to update website scan result', { error: JSON.stringify(error), websiteScanId });
+
+                return;
+            }
+
+            this.logger.logInfo('Successfully updated website scan result', { websiteScanId });
+        });
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {

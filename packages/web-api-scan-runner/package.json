@@ -54,6 +54,7 @@
         "accessibility-insights-report": "3.0.1",
         "applicationinsights": "^1.8.8",
         "axe-core": "4.0.2",
+        "axe-result-converter": "^1.0.0",
         "axe-sarif-converter": "^2.6.0",
         "azure-services": "^1.0.0",
         "common": "1.0.0",

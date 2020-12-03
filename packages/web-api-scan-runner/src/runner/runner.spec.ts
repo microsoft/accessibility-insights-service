@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
+import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider, WebsiteScanResultProvider } from 'service-library';
 import {
     ItemType,
     OnDemandNotificationRequestMessage,
@@ -40,6 +40,7 @@ describe(Runner, () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let notificationQueueMessageSenderMock: IMock<NotificationQueueMessageSender>;
+    let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -160,6 +161,7 @@ describe(Runner, () => {
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender, MockBehavior.Strict);
+        websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -177,6 +179,7 @@ describe(Runner, () => {
             reportGeneratorMock.object,
             serviceConfigurationMock.object,
             notificationQueueMessageSenderMock.object,
+            websiteScanResultProviderMock.object,
         );
     });
 
@@ -186,6 +189,7 @@ describe(Runner, () => {
         onDemandPageScanRunResultProviderMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         notificationQueueMessageSenderMock.verifyAll();
+        websiteScanResultProviderMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
@@ -232,7 +236,7 @@ describe(Runner, () => {
     });
 
     it('skip task run when database state lock conflict', async () => {
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), false);
+        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), {}, false);
         serviceConfigurationMock.reset();
         loggerMock
             .setup((o) =>
@@ -462,15 +466,45 @@ describe(Runner, () => {
         }
     });
 
+    describe('Combined website scan', () => {
+        const websiteScanIds = ['websiteScanId1', 'websiteScanId2'];
+
+        it('updates all website scan results when websiteScanIds are provided', async () => {
+            const scanRunProperties = { websiteScanIds };
+            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), scanRunProperties);
+            scannerMock
+                .setup(async (s) => s.scan(scanMetadata.url))
+                .returns(async () => passedAxeScanResults)
+                .verifiable();
+            websiteScanResultProviderMock
+                .setup((wsrp) => wsrp.mergeOrCreate(It.isObjectWith({ id: websiteScanIds[0] })))
+                .verifiable(Times.once());
+            websiteScanResultProviderMock
+                .setup((wsrp) => wsrp.mergeOrCreate(It.isObjectWith({ id: websiteScanIds[1] })))
+                .verifiable(Times.once());
+
+            setupGenerateReportsCall(passedAxeScanResults);
+            setupSaveAllReportsCall();
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
+
+            await runner.run();
+        });
+    });
+
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
         reportGeneratorMock.setup((r) => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
-    function setupTryUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>, succeeded: boolean = true): void {
+    function setupTryUpdateScanRunResultCall(
+        result: Partial<OnDemandPageScanResult>,
+        returnedProperties?: Partial<OnDemandPageScanResult>,
+        succeeded: boolean = true,
+    ): void {
         const clonedResult = cloneDeep(result) as OnDemandPageScanResult;
+        const returnedResult = { ...clonedResult, ...returnedProperties };
         onDemandPageScanRunResultProviderMock
             .setup(async (d) => d.tryUpdateScanRun(It.isValue(result)))
-            .returns(async () => Promise.resolve({ succeeded, result: clonedResult }))
+            .returns(async () => Promise.resolve({ succeeded, result: returnedResult }))
             .verifiable(Times.once());
     }
 
