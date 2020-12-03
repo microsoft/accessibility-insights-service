@@ -5,6 +5,8 @@
 
 set -eo pipefail
 
+export resourceGroupName
+
 exitWithUsageInfo() {
     echo "
         Usage: $0 -r <resource group name>
@@ -19,7 +21,12 @@ deleteResourceGroup() {
     response=$(az group exists --name "$resourceGroupName")
 
     if [[ "$response" == true ]]; then
-        echo "Resource group $resourceGroupName exists - Triggering delete operation."
+        echo "Resource group $resourceGroupName exists."
+
+        deleteApimIfExists
+
+        echo "Triggering delete operation on resource group $resourceGroupName"
+
         response=$(az group delete --name "$resourceGroupName" --yes)
         if [[ -z $response ]]; then
             echo "$resourceGroupName - Resource group deleted."
@@ -29,6 +36,17 @@ deleteResourceGroup() {
         fi
     else
         echo "$resourceGroupName - Does not exist."
+    fi
+}
+
+deleteApimIfExists() {
+    . "${0%/*}/get-resource-names.sh"
+
+    response=$(az apim show --name $apiManagementName --resource-group $resourceGroupName -o tsv)
+
+    if [[ -n "$response" ]]; then
+        echo "Deleting API Management $apiManagementName"
+        az apim delete --name $apiManagementName --resource-group $resourceGroupName --yes || true
     fi
 }
 
