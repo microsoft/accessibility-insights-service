@@ -34,6 +34,7 @@
     },
     "dependencies": {
         "inversify": "^5.0.1",
-        "reflect-metadata": "^0.1.13"
+        "reflect-metadata": "^0.1.13",
+        "axe-result-converter": "1.0.0"
     }
 }
