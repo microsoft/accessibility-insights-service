@@ -59,8 +59,19 @@ export class A11yServiceClient {
         )) as ResponseWithBodyType<ScanRunResponse[]>;
     }
 
-    public async postConsolidatedScan(scanUrl: string, reportId: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest[] = [{ url: scanUrl, site: { baseUrl: scanUrl }, reportGroups: [{consolidatedId: reportId}],  priority: priority === undefined ? 0 : priority }];
+    public async postConsolidatedScan(
+        scanUrl: string,
+        reportId: string,
+        priority?: number,
+    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        const requestBody: ScanRunRequest[] = [
+            {
+                url: scanUrl,
+                site: { baseUrl: scanUrl },
+                reportGroups: [{ consolidatedId: reportId }],
+                priority: priority === undefined ? 0 : priority,
+            },
+        ];
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
         const options: Options = { json: requestBody };
 

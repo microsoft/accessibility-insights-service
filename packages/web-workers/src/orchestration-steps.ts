@@ -160,7 +160,10 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return scanId;
     }
 
-    public *invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<Task, string, SerializableResponse & void> {
+    public *invokeSubmitConsolidatedScanRequestRestApi(
+        url: string,
+        reportId: string,
+    ): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateConsolidatedScanRequestData = {
             scanUrl: url,
             reportId: reportId,

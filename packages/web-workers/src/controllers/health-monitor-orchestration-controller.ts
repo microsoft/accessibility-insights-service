@@ -70,7 +70,10 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
             const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
-            const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(availabilityTestConfig.urlToScan, availabilityTestConfig.consolidatedReportId)
+            const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(
+                availabilityTestConfig.urlToScan,
+                availabilityTestConfig.consolidatedReportId,
+            );
             testContextData.scanId = scanId;
             testContextData.consolidatedScanId = consolidatedScanId;
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanSubmissionTests);

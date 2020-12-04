@@ -38,7 +38,10 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
         const reportsInfo = (<ScanRunResultResponse>response.body).reports;
         await Promise.all(
             reportsInfo.map(async (reportData: ScanReport) => {
-                const reportResponse = await this.a11yServiceClient.getScanReport(this.testContextData.consolidatedScanId, this.testContextData.consolidatedReportId);
+                const reportResponse = await this.a11yServiceClient.getScanReport(
+                    this.testContextData.consolidatedScanId,
+                    this.testContextData.consolidatedReportId,
+                );
 
                 console.log(`reportData report id is: ${reportData.reportId}`);
                 console.log(`testContextData report id is: ${this.testContextData.consolidatedReportId}`);
