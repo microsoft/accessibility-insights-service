@@ -91,7 +91,7 @@ export class ScanResponseConverter {
 
         if (isEmpty(pageScanResultDocument.websiteScanIds)) {
             scanReports = pageScanResultDocument.reports.filter((report) => {
-                return report.format !== 'consolidated-html';
+                return report.format !== 'consolidated.html';
             });
         }
 

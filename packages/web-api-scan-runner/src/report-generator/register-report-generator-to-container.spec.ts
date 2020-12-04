@@ -32,6 +32,6 @@ describe('registerReportGeneratorToContainer', () => {
         const axeResultConverterTypes = axeResultConverters.map((converter) => converter.targetReportFormat);
         expect(axeResultConverterTypes).toContain('html');
         expect(axeResultConverterTypes).toContain('sarif');
-        expect(axeResultConverterTypes).toContain('consolidated-html');
+        expect(axeResultConverterTypes).toContain('consolidated.html');
     });
 });
