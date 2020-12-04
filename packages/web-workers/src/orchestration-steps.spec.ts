@@ -56,6 +56,7 @@ describe(OrchestrationStepsImpl, () => {
             urlToScan: 'https://www.bing.com',
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
+            consolidatedReportId: 'somereportid',
         };
 
         loggerMock = Mock.ofType(MockableLogger);

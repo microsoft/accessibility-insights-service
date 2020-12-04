@@ -59,6 +59,23 @@ export class A11yServiceClient {
         )) as ResponseWithBodyType<ScanRunResponse[]>;
     }
 
+    public async postConsolidatedScan(scanUrl: string, reportId: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        const requestBody: ScanRunRequest[] = [{ url: scanUrl, site: { baseUrl: scanUrl }, reportGroups: [{consolidatedId: reportId}],  priority: priority === undefined ? 0 : priority }];
+        const requestUrl: string = `${this.requestBaseUrl}/scans`;
+        const options: Options = { json: requestBody };
+
+        return (await this.retryHelper.executeWithRetries(
+            async () => (await this.signRequest()).post(requestUrl, options),
+            async (e) =>
+                this.logger.logError('POST scans REST API request fail. Retrying on error.', {
+                    url: requestUrl,
+                    error: System.serializeError(e),
+                }),
+            this.maxRetryCount,
+            this.msecBetweenRetries,
+        )) as ResponseWithBodyType<ScanRunResponse[]>;
+    }
+
     public async getScanStatus(scanId: string): Promise<ResponseWithBodyType<ScanResultResponse>> {
         const requestUrl: string = `${this.requestBaseUrl}/scans/${scanId}`;
 

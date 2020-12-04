@@ -13,6 +13,10 @@ export interface CreateScanRequestData {
     priority: number;
 }
 
+export interface CreateConsolidatedScanRequestData extends CreateScanRequestData {
+    reportId: string;
+}
+
 export interface GetScanResultData {
     scanId: string;
 }
