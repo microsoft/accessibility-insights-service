@@ -2,11 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient } from 'azure-services';
+import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, BlobContentUploadResponse } from 'azure-services';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { AxeResults } from 'axe-result-converter';
-import { BlobContentUploadResponse } from 'azure-services';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
 
@@ -48,7 +47,7 @@ describe(CombinedScanResultsProvider, () => {
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType<BlobStorageClient>();
         dataProvidersCommonMock = Mock.ofType<DataProvidersCommon>();
-        dataProvidersCommonMock.setup(dp => dp.getBlobName(fileId)).returns(() => filePath);
+        dataProvidersCommonMock.setup((dp) => dp.getBlobName(fileId)).returns(() => filePath);
 
         testSubject = new CombinedScanResultsProvider(blobStorageClientMock.object, dataProvidersCommonMock.object);
     });
@@ -173,9 +172,9 @@ describe(CombinedScanResultsProvider, () => {
     });
 
     function stubReadableStream(content: string): NodeJS.ReadableStream {
-        return {
+        return ({
             read: () => content,
-        } as unknown as NodeJS.ReadableStream;
+        } as unknown) as NodeJS.ReadableStream;
     }
 
     function setupRead(content: string): void {
@@ -184,7 +183,7 @@ describe(CombinedScanResultsProvider, () => {
             content: stubReadableStream(content),
         } as BlobContentDownloadResponse;
         blobStorageClientMock
-            .setup(bc => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
+            .setup((bc) => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
             .returns(async () => response)
             .verifiable();
     }
@@ -195,7 +194,7 @@ describe(CombinedScanResultsProvider, () => {
             content: null,
         } as BlobContentDownloadResponse;
         blobStorageClientMock
-            .setup(bc => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
+            .setup((bc) => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
             .returns(async () => response)
             .verifiable();
     }
@@ -203,9 +202,8 @@ describe(CombinedScanResultsProvider, () => {
     function setupSave(content: string, statusCode: number, condition?: BlobSaveCondition): void {
         const response = { statusCode } as BlobContentUploadResponse;
         blobStorageClientMock
-            .setup(bc => bc.uploadBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath, content, condition))
+            .setup((bc) => bc.uploadBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath, content, condition))
             .returns(() => Promise.resolve(response))
             .verifiable();
     }
 });
-

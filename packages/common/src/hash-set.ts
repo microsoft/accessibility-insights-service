@@ -3,13 +3,13 @@
 
 export type SerializedHashSet<T> = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    hashDictionary: {[key: string]: T};
+    hashDictionary: { [key: string]: T };
     keysSnapshot: string[];
 };
 
 export class HashSet<T> implements IterableIterator<T> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private hashDictionary: {[key: string]: T} = {};
+    private hashDictionary: { [key: string]: T } = {};
     private pointer = 0;
     private keysSnapshot: string[];
 

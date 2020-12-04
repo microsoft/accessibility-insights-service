@@ -5,8 +5,14 @@ import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
 import {
+    OnDemandPageScanRunResultProvider,
+    PageScanRunReportProvider,
+    WebsiteScanResultProvider,
+    CombinedScanResultsProvider,
+} from 'service-library';
+import {
+    CombinedScanResults,
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
@@ -14,6 +20,7 @@ import {
     OnDemandPageScanRunState,
     OnDemandScanResult,
     ScanError,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -34,6 +41,8 @@ export class Runner {
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
+        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
+        @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
     ) {}
 
     public async run(): Promise<void> {
@@ -42,7 +51,7 @@ export class Runner {
         this.logger.logInfo('Starting page scan task.');
 
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
-        const pageScanResult: Partial<OnDemandPageScanResult> = {
+        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
             id: scanMetadata.id,
             run: {
                 state: 'running',
@@ -52,7 +61,7 @@ export class Runner {
             scanResult: null,
             reports: null,
         };
-        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(pageScanResult);
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
         if (!response.succeeded) {
             this.logger.logInfo(
                 `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
@@ -60,6 +69,7 @@ export class Runner {
 
             return;
         }
+        let fullPageScanResult = response.result;
 
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
@@ -72,11 +82,11 @@ export class Runner {
 
         try {
             this.logger.logInfo('Starting the page scanner.');
-            await this.scan(pageScanResult, scanMetadata.url);
+            await this.scan(partialPageScanResult, scanMetadata.url);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             const errorMessage = System.serializeError(error);
-            pageScanResult.run = this.createRunResult('failed', errorMessage);
+            partialPageScanResult.run = this.createRunResult('failed', errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
@@ -92,7 +102,9 @@ export class Runner {
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         }
 
-        const fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+        this.updateCombinedResults(fullPageScanResult.websiteScanIds);
+
+        fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(partialPageScanResult);
         await this.queueScanCompletionNotification(fullPageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
@@ -135,6 +147,93 @@ export class Runner {
             timestamp: new Date().toJSON(),
             error,
         };
+    }
+
+    private async updateCombinedResults(websiteScanIds: string[]): Promise<void> {
+        if (isNil(websiteScanIds)) {
+            return;
+        }
+        websiteScanIds.forEach((websiteScanId) => {
+            this.getOrCreateCombinedResults(websiteScanId);
+
+            this.logger.logInfo('Successfully fetched combined results blob', { websiteScanId });
+        });
+    }
+
+    private async getOrCreateCombinedResults(websiteScanId: string): Promise<CombinedScanResults | null> {
+        let websiteScanResult: WebsiteScanResult;
+        try {
+            websiteScanResult = await this.websiteScanResultProvider.read(websiteScanId);
+        } catch (error) {
+            this.logger.logError('Failed to read website scan results', { error: JSON.stringify(error), websiteScanId });
+
+            return null;
+        }
+
+        if (websiteScanResult.combinedResultsBlobId) {
+            return this.getCombinedResultsBlob(websiteScanResult.combinedResultsBlobId, websiteScanId);
+        }
+
+        return this.createCombinedResultsBlob(websiteScanResult);
+    }
+
+    private async getCombinedResultsBlob(combinedResultsBlobId: string, websiteScanId: string): Promise<CombinedScanResults | null> {
+        const loggerProperties = {
+            combinedResultsBlobId,
+            websiteScanId,
+        };
+        const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
+
+        if (response.error) {
+            this.logger.logError('Failed to read combined results blob', {
+                error: JSON.stringify(response.error),
+                ...loggerProperties,
+            });
+
+            return null;
+        }
+
+        this.logger.logInfo('Successfully retrieved combined results from blob storage', loggerProperties);
+
+        return response.results;
+    }
+
+    private async createCombinedResultsBlob(websiteScanResult: WebsiteScanResult): Promise<CombinedScanResults | null> {
+        const combinedResultsBlobId = this.guidGenerator.createGuid();
+        const loggerProperties = {
+            websiteScanId: websiteScanResult.id,
+            combinedResultsBlobId,
+        };
+        this.logger.logInfo('No combined results blob associated with this website scan. Creating a new document.', loggerProperties);
+
+        const response = await this.combinedScanResultsProvider.createCombinedResults(combinedResultsBlobId);
+        if (response.error) {
+            this.logger.logError('Failed to create new combined scan results.', {
+                error: JSON.stringify(response.error),
+                ...loggerProperties,
+            });
+
+            return null;
+        }
+
+        const updatedWebsiteScanResults = {
+            id: websiteScanResult.id,
+            combinedResultsBlobId: combinedResultsBlobId,
+            _etag: websiteScanResult._etag,
+        };
+        try {
+            this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+            this.logger.logInfo('Successfully updated website scan results with results blob id', loggerProperties);
+
+            return response.results;
+        } catch (error) {
+            this.logger.logError('Failed to update website scan results with results blob id', {
+                error: JSON.stringify(error),
+                ...loggerProperties,
+            });
+
+            return null;
+        }
     }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {

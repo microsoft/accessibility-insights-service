@@ -42,7 +42,7 @@ export class CombinedScanResultsProvider {
     public async saveCombinedResults(
         fileId: string,
         content: CombinedScanResults,
-        etag?: string
+        etag?: string,
     ): Promise<CombinedScanResultsWriteResponse> {
         const filePath = this.dataProvidersCommon.getBlobName(fileId);
         const contentString = JSON.stringify(content);
@@ -51,7 +51,7 @@ export class CombinedScanResultsProvider {
             DataProvidersCommon.combinedResultsBlobContainerName,
             filePath,
             contentString,
-            condition
+            condition,
         );
 
         if (this.statusSuccessful(response.statusCode)) {
@@ -72,7 +72,6 @@ export class CombinedScanResultsProvider {
             },
         };
     }
-
 
     public async createCombinedResults(fileId: string): Promise<CombinedScanResultsCreateResponse> {
         const response = await this.readBlob(fileId);
@@ -118,7 +117,7 @@ export class CombinedScanResultsProvider {
             };
         }
 
-        const  contentString = downloadResponse.content.read().toString();
+        const contentString = downloadResponse.content.read().toString();
         try {
             const content = JSON.parse(contentString);
 

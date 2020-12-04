@@ -8,14 +8,23 @@ import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
 import { AxeScanResults } from 'scanner-global-library';
-import { OnDemandPageScanRunResultProvider, PageScanRunReportProvider } from 'service-library';
 import {
+    CombinedScanResultsProvider,
+    OnDemandPageScanRunResultProvider,
+    PageScanRunReportProvider,
+    WebsiteScanResultProvider,
+    CombinedScanResultsCreateResponse,
+    CombinedScanResultsReadResponse,
+} from 'service-library';
+import {
+    CombinedScanResults,
     ItemType,
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanState,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -40,6 +49,8 @@ describe(Runner, () => {
     let reportGeneratorMock: IMock<ReportGenerator>;
     let serviceConfigurationMock: IMock<ServiceConfiguration>;
     let notificationQueueMessageSenderMock: IMock<NotificationQueueMessageSender>;
+    let websiteScanResultsProviderMock: IMock<WebsiteScanResultProvider>;
+    let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -151,15 +162,15 @@ describe(Runner, () => {
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
+        setupGuidGenerator();
         dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
 
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender, MockBehavior.Strict);
+        websiteScanResultsProviderMock = Mock.ofType<WebsiteScanResultProvider>();
+        combinedScanResultsProviderMock = Mock.ofType<CombinedScanResultsProvider>();
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -177,6 +188,8 @@ describe(Runner, () => {
             reportGeneratorMock.object,
             serviceConfigurationMock.object,
             notificationQueueMessageSenderMock.object,
+            websiteScanResultsProviderMock.object,
+            combinedScanResultsProviderMock.object,
         );
     });
 
@@ -186,6 +199,8 @@ describe(Runner, () => {
         onDemandPageScanRunResultProviderMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         notificationQueueMessageSenderMock.verifyAll();
+        websiteScanResultsProviderMock.verifyAll();
+        combinedScanResultsProviderMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
@@ -232,7 +247,7 @@ describe(Runner, () => {
     });
 
     it('skip task run when database state lock conflict', async () => {
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), false);
+        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), {}, false);
         serviceConfigurationMock.reset();
         loggerMock
             .setup((o) =>
@@ -462,15 +477,148 @@ describe(Runner, () => {
         }
     });
 
+    describe('Combined website scan', () => {
+        const websiteScanId = 'website scan id';
+        let websiteScanResult: WebsiteScanResult;
+        const combinedResultsBlobId = 'combined results blob id';
+        const combinedResults = {} as CombinedScanResults;
+
+        beforeEach(() => {
+            websiteScanResult = {
+                id: websiteScanId,
+                _etag: 'etag',
+            } as WebsiteScanResult;
+        });
+
+        it('handles website scan results read failure', async () => {
+            setupSuccessfulWebsiteScan();
+            websiteScanResultsProviderMock
+                .setup((wp) => wp.read(It.isAny()))
+                .throws(new Error())
+                .verifiable();
+            setupCallsAfterCombinedResultsUpdate();
+
+            await runner.run();
+        });
+
+        describe('results blob does not exist', () => {
+            beforeEach(() => {
+                setupSuccessfulWebsiteScan();
+                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
+            });
+
+            it('successfully create new results blob', async () => {
+                setupCreateNewCombinedResults({});
+
+                const mergeProperties = {
+                    ...websiteScanResult,
+                    combinedResultsBlobId,
+                };
+                websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(mergeProperties)).verifiable();
+
+                setupCallsAfterCombinedResultsUpdate();
+
+                await runner.run();
+            });
+
+            it('handles website results update failure', async () => {
+                setupCreateNewCombinedResults({});
+
+                websiteScanResultsProviderMock
+                    .setup((wp) => wp.mergeOrCreate(It.isAny()))
+                    .throws(new Error())
+                    .verifiable();
+
+                setupCallsAfterCombinedResultsUpdate();
+
+                await runner.run();
+            });
+
+            it('handles blob creation failure', async () => {
+                setupCreateNewCombinedResults({ error: {} } as CombinedScanResultsCreateResponse);
+
+                websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(It.isAny())).verifiable(Times.never());
+
+                setupCallsAfterCombinedResultsUpdate();
+
+                await runner.run();
+            });
+
+            function setupCreateNewCombinedResults(response: CombinedScanResultsCreateResponse): void {
+                guidGeneratorMock.reset();
+                guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => combinedResultsBlobId);
+                setupGuidGenerator();
+
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.createCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve(response))
+                    .verifiable();
+            }
+        });
+
+        describe('Results blob already exists', () => {
+            beforeEach(() => {
+                setupSuccessfulWebsiteScan();
+                websiteScanResult.combinedResultsBlobId = combinedResultsBlobId;
+                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
+            });
+
+            it('Successfully reads existing blob', async () => {
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve({ results: combinedResults }))
+                    .verifiable();
+
+                setupCallsAfterCombinedResultsUpdate();
+
+                await runner.run();
+            });
+
+            it('Handles blob read error', async () => {
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve({ error: {} } as CombinedScanResultsReadResponse))
+                    .verifiable();
+
+                setupCallsAfterCombinedResultsUpdate();
+
+                await runner.run();
+            });
+        });
+
+        function setupSuccessfulWebsiteScan(): void {
+            const scanRunProperties = { websiteScanIds: [websiteScanId] };
+            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), scanRunProperties);
+            scannerMock
+                .setup(async (s) => s.scan(scanMetadata.url))
+                .returns(async () => passedAxeScanResults)
+                .verifiable();
+        }
+
+        function setupCallsAfterCombinedResultsUpdate(): void {
+            setupGenerateReportsCall(passedAxeScanResults);
+            setupSaveAllReportsCall();
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
+        }
+    });
+
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
         reportGeneratorMock.setup((r) => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
     }
 
-    function setupTryUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>, succeeded: boolean = true): void {
+    function setupTryUpdateScanRunResultCall(
+        result: Partial<OnDemandPageScanResult>,
+        scanRunProperties?: Partial<OnDemandPageScanResult>,
+        succeeded: boolean = true,
+    ): void {
         const clonedResult = cloneDeep(result) as OnDemandPageScanResult;
+        const returnedResult = {
+            ...clonedResult,
+            ...scanRunProperties,
+        };
         onDemandPageScanRunResultProviderMock
             .setup(async (d) => d.tryUpdateScanRun(It.isValue(result)))
-            .returns(async () => Promise.resolve({ succeeded, result: clonedResult }))
+            .returns(async () => Promise.resolve({ succeeded, result: returnedResult }))
             .verifiable(Times.once());
     }
 
@@ -573,6 +721,12 @@ describe(Runner, () => {
     interface ScanRunTimestamps {
         scanRequestTime: Date;
         scanCompleteTime: Date;
+    }
+
+    function setupGuidGenerator(): void {
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
     }
 
     function setupTimeMocks(queueTimestamp: number, executionTimestamp: number): ScanRunTimestamps {

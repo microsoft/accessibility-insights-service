@@ -15,7 +15,10 @@ export interface BlobContentUploadResponse {
     headers: BlockBlobUploadHeaders;
 }
 
-export interface BlobSaveCondition { ifMatchEtag?: string; ifNoneMatchEtag?: string }
+export interface BlobSaveCondition {
+    ifMatchEtag?: string;
+    ifNoneMatchEtag?: string;
+}
 
 @injectable()
 export class BlobStorageClient {
@@ -61,7 +64,7 @@ export class BlobStorageClient {
             options = { conditions: { ifNoneMatch: condition.ifNoneMatchEtag } };
         }
 
-        const { _response, ...parsedHeaders} = await blockBlobClient.upload(content, content.length, options);
+        const { _response, ...parsedHeaders } = await blockBlobClient.upload(content, content.length, options);
 
         return {
             statusCode: _response.status,

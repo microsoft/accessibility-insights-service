@@ -24,4 +24,9 @@ export { BatchPoolLoadSnapshotProvider } from './data-providers/batch-pool-load-
 export { BatchTaskCreator, ScanMessage } from './batch/batch-task-creator';
 export { OperationResult } from './data-providers/operation-result';
 export { WebsiteScanResultProvider } from './data-providers/website-scan-result-provider';
-export { CombinedScanResultsProvider } from './data-providers/combined-scan-results-provider';
+export {
+    CombinedScanResultsProvider,
+    CombinedScanResultsCreateResponse,
+    CombinedScanResultsReadResponse,
+    CombinedScanResultsWriteResponse,
+} from './data-providers/combined-scan-results-provider';

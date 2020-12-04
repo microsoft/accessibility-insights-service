@@ -102,7 +102,7 @@ describe(BlobStorageClient, () => {
 
             const response = await testSubject.uploadBlobContent(containerName, blobName, content);
 
-            expect(response).toBe(expectedUploadResponse);
+            expect(response).toEqual(expectedUploadResponse);
 
             blockBlobClientMock.verifyAll();
         });
@@ -116,7 +116,7 @@ describe(BlobStorageClient, () => {
 
             const response = await testSubject.uploadBlobContent(containerName, blobName, content, { ifMatchEtag: etag });
 
-            expect(response).toBe(expectedUploadResponse);
+            expect(response).toEqual(expectedUploadResponse);
 
             blockBlobClientMock.verifyAll();
         });
@@ -130,7 +130,7 @@ describe(BlobStorageClient, () => {
 
             const response = await testSubject.uploadBlobContent(containerName, blobName, content, { ifNoneMatchEtag: etag });
 
-            expect(response).toBe(expectedUploadResponse);
+            expect(response).toEqual(expectedUploadResponse);
 
             blockBlobClientMock.verifyAll();
         });
