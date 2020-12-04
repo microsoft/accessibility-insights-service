@@ -54,6 +54,13 @@
                 "description": "The name of the blob container for storing report of a page scan run"
             }
         },
+        "combinedResultsContainerName": {
+            "type": "string",
+            "defaultValue": "combined-scan-results",
+            "metadata": {
+                "description": "The name of the blob container for storing combined website scan result data"
+            }
+        },
         "runtimeConfigurationContainerName": {
             "type": "string",
             "defaultValue": "runtime-configuration",
@@ -116,6 +123,12 @@
                 },
                 {
                     "name": "[concat('default/', parameters('pageScanRunReportContainerName'))]",
+                    "type": "blobServices/containers",
+                    "apiVersion": "2018-07-01",
+                    "dependsOn": ["[parameters('storageAccountName')]"]
+                },
+                {
+                    "name": "[concat('default/', parameters('combinedResultsContainerName'))]",
                     "type": "blobServices/containers",
                     "apiVersion": "2018-07-01",
                     "dependsOn": ["[parameters('storageAccountName')]"]

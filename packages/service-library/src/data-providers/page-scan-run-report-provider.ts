@@ -12,7 +12,7 @@ export class PageScanRunReportProvider {
     ) {}
 
     public async saveReport(fileId: string, content: string): Promise<string> {
-        const filePath = this.dataProvidersCommon.getReportBlobName(fileId);
+        const filePath = this.dataProvidersCommon.getBlobName(fileId);
         await this.blobStorageClient.uploadBlobContent(DataProvidersCommon.reportBlobContainerName, filePath, content);
 
         return filePath;
@@ -21,7 +21,7 @@ export class PageScanRunReportProvider {
     public async readReport(fileId: string): Promise<BlobContentDownloadResponse> {
         const downloadResponse = await this.blobStorageClient.getBlobContent(
             DataProvidersCommon.reportBlobContainerName,
-            this.dataProvidersCommon.getReportBlobName(fileId),
+            this.dataProvidersCommon.getBlobName(fileId),
         );
 
         return downloadResponse;

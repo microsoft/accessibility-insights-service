@@ -6,10 +6,11 @@ import { GuidGenerator } from 'common';
 @injectable()
 export class DataProvidersCommon {
     public static readonly reportBlobContainerName = 'page-scan-run-reports';
+    public static readonly combinedResultsBlobContainerName = 'combined-scan-results';
 
     constructor(@inject(GuidGenerator) private readonly guidGenerator: GuidGenerator) {}
 
-    public getReportBlobName(fileId: string): string {
+    public getBlobName(fileId: string): string {
         const fileCreatedTime = this.guidGenerator.getGuidTimestamp(fileId);
 
         return `${fileCreatedTime.getUTCFullYear()}/${
