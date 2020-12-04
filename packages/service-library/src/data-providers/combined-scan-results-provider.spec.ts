@@ -6,6 +6,7 @@ import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient } fro
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { AxeResults } from 'axe-result-converter';
+import { BlobContentUploadResponse } from 'azure-services';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
 
@@ -58,19 +59,48 @@ describe(CombinedScanResultsProvider, () => {
 
     describe('saveCombinedResults', () => {
         it('without etag', async () => {
-            setupSave(resultsString);
+            setupSave(resultsString, 200);
+            const expectedResult = { filePath };
 
-            const resultFilePath = await testSubject.saveCombinedResults(fileId, combinedResults);
+            const result = await testSubject.saveCombinedResults(fileId, combinedResults);
 
-            expect(resultFilePath).toBe(filePath);
+            expect(result).toEqual(expectedResult);
         });
 
         it('with etag', async () => {
-            setupSave(resultsString, { ifMatchEtag: etag });
+            setupSave(resultsString, 200, { ifMatchEtag: etag });
+            const expectedResult = { filePath };
 
-            const resultFilePath = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
 
-            expect(resultFilePath).toBe(filePath);
+            expect(result).toEqual(expectedResult);
+        });
+
+        it('returns etagMismatch error', async () => {
+            setupSave(resultsString, 412, { ifMatchEtag: etag });
+            const expectedResult = {
+                error: {
+                    errorCode: 'etagMismatch',
+                },
+            };
+
+            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+
+            expect(result).toEqual(expectedResult);
+        });
+
+        it('returns unrecognized error', async () => {
+            setupSave(resultsString, 404, { ifMatchEtag: etag });
+            const expectedResult = {
+                error: {
+                    errorCode: 'httpStatusError',
+                    data: '404',
+                },
+            };
+
+            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+
+            expect(result).toEqual(expectedResult);
         });
     });
 
@@ -116,40 +146,27 @@ describe(CombinedScanResultsProvider, () => {
     });
 
     describe('readOrCreateCombinedResults', () => {
-        it('results exist', async () => {
+        it('returns error if results exist', async () => {
             setupRead(resultsString);
             const expectedResults = {
-                results: combinedResults,
-            };
-
-            const actualResults = await testSubject.readOrCreateCombinedResults(fileId);
-
-            expect(actualResults).toEqual(expectedResults);
-        });
-
-        it('results exist but cannot be parsed', async () => {
-            const unparsableString = '{ unparsable content string';
-            setupRead(unparsableString);
-            const expectedResults = {
                 error: {
-                    errorCode: 'parseError',
-                    data: unparsableString,
+                    errorCode: 'documentAlreadyExists',
                 },
             };
 
-            const actualResults = await testSubject.readOrCreateCombinedResults(fileId);
+            const actualResults = await testSubject.createCombinedResults(fileId);
 
             expect(actualResults).toEqual(expectedResults);
         });
 
         it('creates results if none exist', async () => {
             setupDocumentNotFound();
-            setupSave(emptyResultsString);
+            setupSave(emptyResultsString, 200);
             const expectedResults = {
                 results: emptyResults,
             };
 
-            const actualResults = await testSubject.readOrCreateCombinedResults(fileId);
+            const actualResults = await testSubject.createCombinedResults(fileId);
 
             expect(actualResults).toEqual(expectedResults);
         });
@@ -183,9 +200,11 @@ describe(CombinedScanResultsProvider, () => {
             .verifiable();
     }
 
-    function setupSave(content: string, condition?: BlobSaveCondition): void {
+    function setupSave(content: string, statusCode: number, condition?: BlobSaveCondition): void {
+        const response = { statusCode } as BlobContentUploadResponse;
         blobStorageClientMock
             .setup(bc => bc.uploadBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath, content, condition))
+            .returns(() => Promise.resolve(response))
             .verifiable();
     }
 });

@@ -1,48 +1,87 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { AxeResults } from 'axe-result-converter';
-import { BlobStorageClient } from 'azure-services';
+import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { DataProvidersCommon } from './data-providers-common';
 
-export type CombinedScanResultsErrorCode = 'documentNotFound' | 'parseError';
-export type CombinedScanResultsError = {
-    errorCode: CombinedScanResultsErrorCode;
+export type ReadErrorCode = 'documentNotFound' | 'parseError' | 'documentAlreadyExists';
+export type CreateErrorCode = 'documentAlreadyExists' | WriteErrorCode;
+export type WriteErrorCode = 'etagMismatch' | 'httpStatusError';
+
+export type CombinedScanResultsError<ErrorCodeType> = {
+    errorCode: ErrorCodeType;
     data?: string;
 };
 
-export type CombinedScanResultsResponse = {
-    error?: CombinedScanResultsError;
+export type CombinedScanResultsReadResponse = {
+    error?: CombinedScanResultsError<ReadErrorCode>;
+    results?: CombinedScanResults;
+};
+
+export type CombinedScanResultsWriteResponse = {
+    error?: CombinedScanResultsError<WriteErrorCode>;
+    filePath?: string;
+};
+
+export type CombinedScanResultsCreateResponse = {
+    error?: CombinedScanResultsError<CreateErrorCode>;
     results?: CombinedScanResults;
 };
 
 @injectable()
 export class CombinedScanResultsProvider {
+    private static readonly preconditionFailedStatusCode = 412;
+
     constructor(
         @inject(BlobStorageClient) private readonly blobStorageClient: BlobStorageClient,
         @inject(DataProvidersCommon) private readonly dataProvidersCommon: DataProvidersCommon,
     ) {}
 
-    public async saveCombinedResults(fileId: string, content: CombinedScanResults, etag?: string): Promise<string> {
+    public async saveCombinedResults(
+        fileId: string,
+        content: CombinedScanResults,
+        etag?: string
+    ): Promise<CombinedScanResultsWriteResponse> {
         const filePath = this.dataProvidersCommon.getBlobName(fileId);
         const contentString = JSON.stringify(content);
         const condition = etag ? { ifMatchEtag: etag } : undefined;
-        await this.blobStorageClient.uploadBlobContent(
+        const response = await this.blobStorageClient.uploadBlobContent(
             DataProvidersCommon.combinedResultsBlobContainerName,
             filePath,
             contentString,
             condition
         );
 
-        return filePath;
+        if (this.statusSuccessful(response.statusCode)) {
+            return { filePath };
+        }
+        if (response.statusCode === CombinedScanResultsProvider.preconditionFailedStatusCode) {
+            return {
+                error: {
+                    errorCode: 'etagMismatch',
+                },
+            };
+        }
+
+        return {
+            error: {
+                errorCode: 'httpStatusError',
+                data: `${response.statusCode}`,
+            },
+        };
     }
 
-    public async readOrCreateCombinedResults(fileId: string): Promise<CombinedScanResultsResponse> {
-        const combinedResults = await this.readCombinedResults(fileId);
-        if (isNil(combinedResults.error) || combinedResults.error.errorCode !== 'documentNotFound') {
-            return combinedResults;
+
+    public async createCombinedResults(fileId: string): Promise<CombinedScanResultsCreateResponse> {
+        const response = await this.readBlob(fileId);
+        if (!response.notFound) {
+            return {
+                error: {
+                    errorCode: 'documentAlreadyExists',
+                },
+            };
         }
 
         const emptyCombinedResults: CombinedScanResults = {
@@ -59,18 +98,19 @@ export class CombinedScanResultsProvider {
                 inapplicable: new AxeResults().serialize(),
             } as CombinedAxeResults,
         };
-        this.saveCombinedResults(fileId, emptyCombinedResults);
+
+        const saveResponse = await this.saveCombinedResults(fileId, emptyCombinedResults);
+        if (saveResponse.error) {
+            return saveResponse;
+        }
 
         return {
             results: emptyCombinedResults,
         };
     }
 
-    public async readCombinedResults(fileId: string): Promise<CombinedScanResultsResponse> {
-        const downloadResponse = await this.blobStorageClient.getBlobContent(
-            DataProvidersCommon.combinedResultsBlobContainerName,
-            this.dataProvidersCommon.getBlobName(fileId),
-        );
+    public async readCombinedResults(fileId: string): Promise<CombinedScanResultsReadResponse> {
+        const downloadResponse = await this.readBlob(fileId);
 
         if (downloadResponse.notFound) {
             return {
@@ -93,5 +133,16 @@ export class CombinedScanResultsProvider {
                 },
             };
         }
+    }
+
+    private async readBlob(fileId: string): Promise<BlobContentDownloadResponse> {
+        return this.blobStorageClient.getBlobContent(
+            DataProvidersCommon.combinedResultsBlobContainerName,
+            this.dataProvidersCommon.getBlobName(fileId),
+        );
+    }
+
+    private statusSuccessful(statusCode: number): boolean {
+        return statusCode >= 200 && statusCode < 300;
     }
 }

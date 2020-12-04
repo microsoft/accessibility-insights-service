@@ -14,7 +14,7 @@ export { CredentialsProvider } from './credentials/credentials-provider';
 export { Credentials, CredentialType } from './credentials/msi-credential-provider';
 export { client } from './storage/client';
 export { cosmosContainerClientTypes } from './ioc-types';
-export { BlobContentDownloadResponse, BlobStorageClient, BlobSaveCondition } from './azure-blob/blob-storage-client';
+export { BlobContentDownloadResponse, BlobContentUploadResponse, BlobStorageClient, BlobSaveCondition } from './azure-blob/blob-storage-client';
 export { iocTypeNames as AzureServicesIocTypes } from './ioc-types';
 export { StorageContainerSASUrlProvider } from './azure-blob/storage-container-sas-url-provider';
 export { BatchTaskConfigGenerator, BatchTaskPropertyProvider } from './azure-batch/batch-task-config-generator';
