@@ -37,7 +37,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
     });
 
     it('has correct report type', () => {
-        expect(axeConsolidatedHtmlResultConverter.targetReportFormat).toEqual('consolidated-html');
+        expect(axeConsolidatedHtmlResultConverter.targetReportFormat).toEqual('consolidated.html');
     });
 
     it('convert', () => {
