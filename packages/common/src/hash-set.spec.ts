@@ -51,4 +51,15 @@ describe(HashSet, () => {
     it('iterator', () => {
         expect(hashSet[Symbol.iterator]()).toBe(hashSet);
     });
+
+    it('serializes and deserializes', () => {
+        hashSet.add('key1', 'value1');
+        hashSet.add('key2', 'value2');
+
+        const serialized = hashSet.serialize();
+        const deserialized = HashSet.deserialize(serialized);
+
+        expect(deserialized.get('key1')).toBe('value1');
+        expect(deserialized.get('key2')).toBe('value2');
+    });
 });

@@ -10,6 +10,8 @@ export interface BlobContentDownloadResponse {
     content: NodeJS.ReadableStream;
 }
 
+export interface BlobSaveCondition { ifMatchEtag?: string; ifNoneMatchEtag?: string }
+
 @injectable()
 export class BlobStorageClient {
     constructor(@inject(iocTypeNames.BlobServiceClientProvider) private readonly blobServiceClientProvider: BlobServiceClientProvider) {}
@@ -42,7 +44,7 @@ export class BlobStorageClient {
         containerName: string,
         blobName: string,
         content: string,
-        condition?: { ifMatchEtag?: string; ifNoneMatchEtag?: string },
+        condition?: BlobSaveCondition,
     ): Promise<BlockBlobUploadResponse> {
         const blobClient = await this.getBlobClient(containerName, blobName);
         const blockBlobClient = blobClient.getBlockBlobClient();
