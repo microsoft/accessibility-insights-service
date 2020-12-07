@@ -2,13 +2,10 @@
 // Licensed under the MIT License.
 
 export type SerializedHashSet<T> = {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     hashDictionary: { [key: string]: T };
-    keysSnapshot: string[];
 };
 
 export class HashSet<T> implements IterableIterator<T> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     private hashDictionary: { [key: string]: T } = {};
     private pointer = 0;
     private keysSnapshot: string[];
@@ -67,14 +64,12 @@ export class HashSet<T> implements IterableIterator<T> {
 
         return {
             hashDictionary: this.hashDictionary,
-            keysSnapshot: this.keys(),
         };
     }
 
     public static deserialize<U>(serialized: SerializedHashSet<U>): HashSet<U> {
         const hashSet = new HashSet<U>();
         hashSet.hashDictionary = serialized.hashDictionary;
-        hashSet.keysSnapshot = serialized.keysSnapshot;
 
         return hashSet;
     }
