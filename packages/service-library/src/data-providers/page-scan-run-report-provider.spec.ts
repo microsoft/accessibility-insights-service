@@ -24,7 +24,7 @@ describe(PageScanRunReportProvider, () => {
         blobStorageClientMock = Mock.ofType(BlobStorageClient);
         dataProvidersCommonMock = Mock.ofType(DataProvidersCommon);
         dataProvidersCommonMock
-            .setup((o) => o.getReportBlobName(guid))
+            .setup((o) => o.getBlobName(guid))
             .returns(() => expectedSarifBlobFilePath)
             .verifiable();
 

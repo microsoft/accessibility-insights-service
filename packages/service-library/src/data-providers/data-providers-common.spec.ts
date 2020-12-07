@@ -31,7 +31,7 @@ describe(DataProvidersCommon, () => {
             fileCreatedTime.getUTCMonth() + 1
         }/${fileCreatedTime.getUTCDate()}/${fileCreatedTime.getUTCHours()}/${fileId}`;
 
-        const actualBlobName = dataProvidersCommon.getReportBlobName(fileId);
+        const actualBlobName = dataProvidersCommon.getBlobName(fileId);
 
         expect(actualBlobName).toEqual(expectedBlobName);
     });

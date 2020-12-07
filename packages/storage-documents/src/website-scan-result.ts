@@ -10,6 +10,7 @@ export interface WebsiteScanResult extends StorageDocument {
     baseUrl: string;
     pageScans?: PageScan[];
     reports?: WebsiteScanReport[];
+    combinedResultsBlobId?: string;
 }
 
 export interface WebsiteScanReport {

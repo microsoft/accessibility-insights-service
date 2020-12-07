@@ -1,9 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+export type SerializedHashSet<T> = {
+    hashDictionary: { [key: string]: T };
+};
+
 export class HashSet<T> implements IterableIterator<T> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private hashDictionary: any = {};
+    private hashDictionary: { [key: string]: T } = {};
     private pointer = 0;
     private keysSnapshot: string[];
 
@@ -54,6 +57,21 @@ export class HashSet<T> implements IterableIterator<T> {
 
     public [Symbol.iterator](): IterableIterator<T> {
         return this;
+    }
+
+    public serialize(): SerializedHashSet<T> {
+        this.getSnapshot();
+
+        return {
+            hashDictionary: this.hashDictionary,
+        };
+    }
+
+    public static deserialize<U>(serialized: SerializedHashSet<U>): HashSet<U> {
+        const hashSet = new HashSet<U>();
+        hashSet.hashDictionary = serialized.hashDictionary;
+
+        return hashSet;
     }
 
     private getSnapshot(): void {

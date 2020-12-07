@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { BlobClient, RestError, BlockBlobUploadResponse, BlockBlobUploadOptions } from '@azure/storage-blob';
+import { BlobClient, RestError, BlockBlobUploadOptions, BlockBlobUploadHeaders } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
@@ -8,6 +8,16 @@ import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
 export interface BlobContentDownloadResponse {
     notFound: boolean;
     content: NodeJS.ReadableStream;
+}
+
+export interface BlobContentUploadResponse {
+    statusCode: number;
+    headers: BlockBlobUploadHeaders;
+}
+
+export interface BlobSaveCondition {
+    ifMatchEtag?: string;
+    ifNoneMatchEtag?: string;
 }
 
 @injectable()
@@ -42,8 +52,8 @@ export class BlobStorageClient {
         containerName: string,
         blobName: string,
         content: string,
-        condition?: { ifMatchEtag?: string; ifNoneMatchEtag?: string },
-    ): Promise<BlockBlobUploadResponse> {
+        condition?: BlobSaveCondition,
+    ): Promise<BlobContentUploadResponse> {
         const blobClient = await this.getBlobClient(containerName, blobName);
         const blockBlobClient = blobClient.getBlockBlobClient();
 
@@ -54,7 +64,12 @@ export class BlobStorageClient {
             options = { conditions: { ifNoneMatch: condition.ifNoneMatchEtag } };
         }
 
-        return blockBlobClient.upload(content, content.length, options);
+        const { _response, ...parsedHeaders } = await blockBlobClient.upload(content, content.length, options);
+
+        return {
+            statusCode: _response.status,
+            headers: parsedHeaders,
+        };
     }
 
     private async getBlobClient(containerName: string, blobName: string): Promise<BlobClient> {
