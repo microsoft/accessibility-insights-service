@@ -7,6 +7,8 @@ export class RuleExclusion {
     public accessibilityRuleExclusionList = [
         'accesskeys',
         'aria-allowed-role',
+        'aria-dialog-name',
+        'aria-treeitem-name',
         'css-orientation-lock',
         'empty-heading',
         'focus-order-semantics',
@@ -34,6 +36,7 @@ export class RuleExclusion {
         'no-autoplay-audio',
         'p-as-heading',
         'page-has-heading-one',
+        'presentation-role-conflict',
         'region',
         'scope-attr-valid',
         'skip-link',
