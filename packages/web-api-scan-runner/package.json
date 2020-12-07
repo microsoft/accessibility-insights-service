@@ -56,7 +56,7 @@
         "axe-core": "4.1.1",
         "axe-sarif-converter": "^2.6.0",
         "azure-services": "^1.0.0",
-        "common": "1.0.0",
+        "common": "^1.0.0",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",

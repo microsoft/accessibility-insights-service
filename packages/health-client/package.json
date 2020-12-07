@@ -35,7 +35,7 @@
         "inversify": "^5.0.1",
         "lodash": "^4.17.20",
         "reflect-metadata": "^0.1.13",
-        "common": "1.0.0",
+        "common": "^1.0.0",
         "service-library": "1.0.0",
         "web-api-client": "1.0.0",
         "functional-tests": "1.0.0",
