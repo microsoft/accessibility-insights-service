@@ -13,18 +13,18 @@ import {
     OnDemandPageScanRunResultProvider,
     PageScanRunReportProvider,
     WebsiteScanResultProvider,
-    // CombinedScanResultsCreateResponse,
-    // CombinedScanResultsReadResponse,
+    CombinedScanResultsCreateResponse,
+    CombinedScanResultsReadResponse,
 } from 'service-library';
 import {
-    // CombinedScanResults,
+    CombinedScanResults,
     ItemType,
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanState,
-    // WebsiteScanResult,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
@@ -477,130 +477,130 @@ describe(Runner, () => {
         }
     });
 
-    // describe('Combined website scan', () => {
-    //     const websiteScanId = 'website scan id';
-    //     let websiteScanResult: WebsiteScanResult;
-    //     const combinedResultsBlobId = 'combined results blob id';
-    //     const combinedResults = {} as CombinedScanResults;
+    describe('Combined website scan', () => {
+        const websiteScanId = 'website scan id';
+        let websiteScanResult: WebsiteScanResult;
+        const combinedResultsBlobId = 'combined results blob id';
+        const combinedResults = {} as CombinedScanResults;
 
-    //     beforeEach(() => {
-    //         websiteScanResult = {
-    //             id: websiteScanId,
-    //             _etag: 'etag',
-    //         } as WebsiteScanResult;
-    //     });
+        beforeEach(() => {
+            websiteScanResult = {
+                id: websiteScanId,
+                _etag: 'etag',
+            } as WebsiteScanResult;
+        });
 
-    //     it('handles website scan results read failure', async () => {
-    //         setupSuccessfulWebsiteScan();
-    //         websiteScanResultsProviderMock
-    //             .setup((wp) => wp.read(It.isAny()))
-    //             .throws(new Error())
-    //             .verifiable();
-    //         setupCallsAfterCombinedResultsUpdate();
+        it('handles website scan results read failure', async () => {
+            setupSuccessfulWebsiteScan();
+            websiteScanResultsProviderMock
+                .setup((wp) => wp.read(It.isAny()))
+                .throws(new Error())
+                .verifiable();
+            setupCallsAfterCombinedResultsUpdate();
 
-    //         await runner.run();
-    //     });
+            await runner.run();
+        });
 
-    //     describe('results blob does not exist', () => {
-    //         beforeEach(() => {
-    //             setupSuccessfulWebsiteScan();
-    //             websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
-    //         });
+        describe('results blob does not exist', () => {
+            beforeEach(() => {
+                setupSuccessfulWebsiteScan();
+                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
+            });
 
-    //         it('successfully create new results blob', async () => {
-    //             setupCreateNewCombinedResults({});
+            it('successfully create new results blob', async () => {
+                setupCreateNewCombinedResults({});
 
-    //             const mergeProperties = {
-    //                 ...websiteScanResult,
-    //                 combinedResultsBlobId,
-    //             };
-    //             websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(mergeProperties)).verifiable();
+                const mergeProperties = {
+                    ...websiteScanResult,
+                    combinedResultsBlobId,
+                };
+                websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(mergeProperties)).verifiable();
 
-    //             setupCallsAfterCombinedResultsUpdate();
+                setupCallsAfterCombinedResultsUpdate();
 
-    //             await runner.run();
-    //         });
+                await runner.run();
+            });
 
-    //         it('handles website results update failure', async () => {
-    //             setupCreateNewCombinedResults({});
+            it('handles website results update failure', async () => {
+                setupCreateNewCombinedResults({});
 
-    //             websiteScanResultsProviderMock
-    //                 .setup((wp) => wp.mergeOrCreate(It.isAny()))
-    //                 .throws(new Error())
-    //                 .verifiable();
+                websiteScanResultsProviderMock
+                    .setup((wp) => wp.mergeOrCreate(It.isAny()))
+                    .throws(new Error())
+                    .verifiable();
 
-    //             setupCallsAfterCombinedResultsUpdate();
+                setupCallsAfterCombinedResultsUpdate();
 
-    //             await runner.run();
-    //         });
+                await runner.run();
+            });
 
-    //         it('handles blob creation failure', async () => {
-    //             setupCreateNewCombinedResults({ error: {} } as CombinedScanResultsCreateResponse);
+            it('handles blob creation failure', async () => {
+                setupCreateNewCombinedResults({ error: {} } as CombinedScanResultsCreateResponse);
 
-    //             websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(It.isAny())).verifiable(Times.never());
+                websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(It.isAny())).verifiable(Times.never());
 
-    //             setupCallsAfterCombinedResultsUpdate();
+                setupCallsAfterCombinedResultsUpdate();
 
-    //             await runner.run();
-    //         });
+                await runner.run();
+            });
 
-    //         function setupCreateNewCombinedResults(response: CombinedScanResultsCreateResponse): void {
-    //             guidGeneratorMock.reset();
-    //             guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => combinedResultsBlobId);
-    //             setupGuidGenerator();
+            function setupCreateNewCombinedResults(response: CombinedScanResultsCreateResponse): void {
+                guidGeneratorMock.reset();
+                guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => combinedResultsBlobId);
+                setupGuidGenerator();
 
-    //             combinedScanResultsProviderMock
-    //                 .setup((crp) => crp.createCombinedResults(combinedResultsBlobId))
-    //                 .returns(() => Promise.resolve(response))
-    //                 .verifiable();
-    //         }
-    //     });
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.createCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve(response))
+                    .verifiable();
+            }
+        });
 
-    //     describe('Results blob already exists', () => {
-    //         beforeEach(() => {
-    //             setupSuccessfulWebsiteScan();
-    //             websiteScanResult.combinedResultsBlobId = combinedResultsBlobId;
-    //             websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
-    //         });
+        describe('Results blob already exists', () => {
+            beforeEach(() => {
+                setupSuccessfulWebsiteScan();
+                websiteScanResult.combinedResultsBlobId = combinedResultsBlobId;
+                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
+            });
 
-    //         it('Successfully reads existing blob', async () => {
-    //             combinedScanResultsProviderMock
-    //                 .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
-    //                 .returns(() => Promise.resolve({ results: combinedResults }))
-    //                 .verifiable();
+            it('Successfully reads existing blob', async () => {
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve({ results: combinedResults }))
+                    .verifiable();
 
-    //             setupCallsAfterCombinedResultsUpdate();
+                setupCallsAfterCombinedResultsUpdate();
 
-    //             await runner.run();
-    //         });
+                await runner.run();
+            });
 
-    //         it('Handles blob read error', async () => {
-    //             combinedScanResultsProviderMock
-    //                 .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
-    //                 .returns(() => Promise.resolve({ error: {} } as CombinedScanResultsReadResponse))
-    //                 .verifiable();
+            it('Handles blob read error', async () => {
+                combinedScanResultsProviderMock
+                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
+                    .returns(() => Promise.resolve({ error: {} } as CombinedScanResultsReadResponse))
+                    .verifiable();
 
-    //             setupCallsAfterCombinedResultsUpdate();
+                setupCallsAfterCombinedResultsUpdate();
 
-    //             await runner.run();
-    //         });
-    //     });
+                await runner.run();
+            });
+        });
 
-    //     function setupSuccessfulWebsiteScan(): void {
-    //         const scanRunProperties = { websiteScanIds: [websiteScanId] };
-    //         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), scanRunProperties);
-    //         scannerMock
-    //             .setup(async (s) => s.scan(scanMetadata.url))
-    //             .returns(async () => passedAxeScanResults)
-    //             .verifiable();
-    //     }
+        function setupSuccessfulWebsiteScan(): void {
+            const scanRunProperties = { websiteScanIds: [websiteScanId] };
+            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), scanRunProperties);
+            scannerMock
+                .setup(async (s) => s.scan(scanMetadata.url))
+                .returns(async () => passedAxeScanResults)
+                .verifiable();
+        }
 
-    //     function setupCallsAfterCombinedResultsUpdate(): void {
-    //         setupGenerateReportsCall(passedAxeScanResults);
-    //         setupSaveAllReportsCall();
-    //         setupUpdateScanRunResultCall(getScanResultWithNoViolations());
-    //     }
-    // });
+        function setupCallsAfterCombinedResultsUpdate(): void {
+            setupGenerateReportsCall(passedAxeScanResults);
+            setupSaveAllReportsCall();
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
+        }
+    });
 
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
         reportGeneratorMock.setup((r) => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);

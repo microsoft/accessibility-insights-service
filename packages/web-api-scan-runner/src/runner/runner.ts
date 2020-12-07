@@ -12,7 +12,7 @@ import {
     CombinedScanResultsProvider,
 } from 'service-library';
 import {
-    // CombinedScanResults,
+    CombinedScanResults,
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
@@ -20,7 +20,7 @@ import {
     OnDemandPageScanRunState,
     OnDemandScanResult,
     ScanError,
-    // WebsiteScanResult,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -102,7 +102,7 @@ export class Runner {
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         }
 
-        // this.updateCombinedResults(fullPageScanResult.websiteScanIds);
+        this.updateCombinedResults(fullPageScanResult.websiteScanIds);
 
         fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(partialPageScanResult);
         await this.queueScanCompletionNotification(fullPageScanResult);
@@ -149,90 +149,94 @@ export class Runner {
         };
     }
 
-    // private async updateCombinedResults(websiteScanId: string): Promise<void> {
-    //     if (isNil(websiteScanId)) {
-    //         return;
-    //     }
-    //     this.getOrCreateCombinedResults(websiteScanId);
+    private async updateCombinedResults(websiteScanIds: string[]): Promise<void> {
+        if (isNil(websiteScanIds)) {
+            return;
+        }
 
-    //     this.logger.logInfo('Successfully fetched combined results blob', { websiteScanId });
-    // }
+        await Promise.all(
+            websiteScanIds.map(async (websiteScanId) => {
+                await this.getOrCreateCombinedResults(websiteScanId);
+            }),
+        );
+    }
 
-    // private async getOrCreateCombinedResults(websiteScanId: string): Promise<CombinedScanResults | null> {
-    //     let websiteScanResult: WebsiteScanResult;
-    //     try {
-    //         websiteScanResult = await this.websiteScanResultProvider.read(websiteScanId);
-    //     } catch (error) {
-    //         this.logger.logError('Failed to read website scan results', { error: JSON.stringify(error), websiteScanId });
+    private async getOrCreateCombinedResults(websiteScanId: string): Promise<CombinedScanResults | null> {
+        let websiteScanResult: WebsiteScanResult;
+        try {
+            websiteScanResult = await this.websiteScanResultProvider.read(websiteScanId);
+            this.logger.logInfo('Successfully fetched combined axe scan results blob.', { websiteScanId });
+        } catch (error) {
+            this.logger.logError('Failed to read website scan results', { error: JSON.stringify(error), websiteScanId });
 
-    //         return null;
-    //     }
+            return null;
+        }
 
-    //     if (websiteScanResult.combinedResultsBlobId) {
-    //         return this.getCombinedResultsBlob(websiteScanResult.combinedResultsBlobId, websiteScanId);
-    //     }
+        if (websiteScanResult.combinedResultsBlobId) {
+            return this.getCombinedResultsBlob(websiteScanResult.combinedResultsBlobId, websiteScanId);
+        }
 
-    //     return this.createCombinedResultsBlob(websiteScanResult);
-    // }
+        return this.createCombinedResultsBlob(websiteScanResult);
+    }
 
-    // private async getCombinedResultsBlob(combinedResultsBlobId: string, websiteScanId: string): Promise<CombinedScanResults | null> {
-    //     const loggerProperties = {
-    //         combinedResultsBlobId,
-    //         websiteScanId,
-    //     };
-    //     const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
+    private async getCombinedResultsBlob(combinedResultsBlobId: string, websiteScanId: string): Promise<CombinedScanResults | null> {
+        const loggerProperties = {
+            combinedResultsBlobId,
+            websiteScanId,
+        };
+        const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
 
-    //     if (response.error) {
-    //         this.logger.logError('Failed to read combined results blob', {
-    //             error: JSON.stringify(response.error),
-    //             ...loggerProperties,
-    //         });
+        if (response.error) {
+            this.logger.logError('Failed to read combined axe result results blob.', {
+                error: JSON.stringify(response.error),
+                ...loggerProperties,
+            });
 
-    //         return null;
-    //     }
+            return null;
+        }
 
-    //     this.logger.logInfo('Successfully retrieved combined results from blob storage', loggerProperties);
+        this.logger.logInfo('Successfully retrieved combined axe scan results from blob storage.', loggerProperties);
 
-    //     return response.results;
-    // }
+        return response.results;
+    }
 
-    // private async createCombinedResultsBlob(websiteScanResult: WebsiteScanResult): Promise<CombinedScanResults | null> {
-    //     const combinedResultsBlobId = this.guidGenerator.createGuid();
-    //     const loggerProperties = {
-    //         websiteScanId: websiteScanResult.id,
-    //         combinedResultsBlobId,
-    //     };
-    //     this.logger.logInfo('No combined results blob associated with this website scan. Creating a new document.', loggerProperties);
+    private async createCombinedResultsBlob(websiteScanResult: WebsiteScanResult): Promise<CombinedScanResults | null> {
+        const combinedResultsBlobId = this.guidGenerator.createGuid();
+        const loggerProperties = {
+            websiteScanId: websiteScanResult.id,
+            combinedResultsBlobId,
+        };
+        this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.', loggerProperties);
 
-    //     const response = await this.combinedScanResultsProvider.createCombinedResults(combinedResultsBlobId);
-    //     if (response.error) {
-    //         this.logger.logError('Failed to create new combined scan results.', {
-    //             error: JSON.stringify(response.error),
-    //             ...loggerProperties,
-    //         });
+        const response = await this.combinedScanResultsProvider.createCombinedResults(combinedResultsBlobId);
+        if (response.error) {
+            this.logger.logError('Failed to create new combined axe scan results.', {
+                error: JSON.stringify(response.error),
+                ...loggerProperties,
+            });
 
-    //         return null;
-    //     }
+            return null;
+        }
 
-    //     const updatedWebsiteScanResults = {
-    //         id: websiteScanResult.id,
-    //         combinedResultsBlobId: combinedResultsBlobId,
-    //         _etag: websiteScanResult._etag,
-    //     };
-    //     try {
-    //         this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
-    //         this.logger.logInfo('Successfully updated website scan results with results blob id', loggerProperties);
+        const updatedWebsiteScanResults = {
+            id: websiteScanResult.id,
+            combinedResultsBlobId: combinedResultsBlobId,
+            _etag: websiteScanResult._etag,
+        };
+        try {
+            this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+            this.logger.logInfo('Successfully updated website scan results with combined axe scan results blob id.', loggerProperties);
 
-    //         return response.results;
-    //     } catch (error) {
-    //         this.logger.logError('Failed to update website scan results with results blob id', {
-    //             error: JSON.stringify(error),
-    //             ...loggerProperties,
-    //         });
+            return response.results;
+        } catch (error) {
+            this.logger.logError('Failed to update website scan results with combined axe scan results blob id', {
+                error: JSON.stringify(error),
+                ...loggerProperties,
+            });
 
-    //         return null;
-    //     }
-    // }
+            return null;
+        }
+    }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
         if (axeResults.results.violations !== undefined && axeResults.results.violations.length > 0) {
