@@ -71,6 +71,6 @@
         "yargs": "^16.1.1"
     },
     "resolutions": {
-        "axe-core": "4.0.2"
+        "axe-core": "4.1.1"
     }
 }
