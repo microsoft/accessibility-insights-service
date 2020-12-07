@@ -59,7 +59,7 @@ describe(CombinedScanResultsProvider, () => {
     describe('saveCombinedResults', () => {
         it('without etag', async () => {
             setupSave(resultsString, 200);
-            const expectedResult = { filePath };
+            const expectedResult = { etag };
 
             const result = await testSubject.saveCombinedResults(fileId, combinedResults);
 
@@ -68,7 +68,7 @@ describe(CombinedScanResultsProvider, () => {
 
         it('with etag', async () => {
             setupSave(resultsString, 200, { ifMatchEtag: etag });
-            const expectedResult = { filePath };
+            const expectedResult = { etag };
 
             const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
 
@@ -108,6 +108,7 @@ describe(CombinedScanResultsProvider, () => {
             setupRead(resultsString);
             const expectedResults = {
                 results: combinedResults,
+                etag: etag,
             };
 
             const actualResults = await testSubject.readCombinedResults(fileId);
@@ -144,7 +145,7 @@ describe(CombinedScanResultsProvider, () => {
         });
     });
 
-    describe('readOrCreateCombinedResults', () => {
+    describe('createCombinedResults', () => {
         it('returns error if results exist', async () => {
             setupRead(resultsString);
             const expectedResults = {
@@ -163,6 +164,7 @@ describe(CombinedScanResultsProvider, () => {
             setupSave(emptyResultsString, 200);
             const expectedResults = {
                 results: emptyResults,
+                etag: etag,
             };
 
             const actualResults = await testSubject.createCombinedResults(fileId);
@@ -181,6 +183,7 @@ describe(CombinedScanResultsProvider, () => {
         const response = {
             notFound: false,
             content: stubReadableStream(content),
+            etag: etag,
         } as BlobContentDownloadResponse;
         blobStorageClientMock
             .setup((bc) => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
@@ -200,7 +203,7 @@ describe(CombinedScanResultsProvider, () => {
     }
 
     function setupSave(content: string, statusCode: number, condition?: BlobSaveCondition): void {
-        const response = { statusCode } as BlobContentUploadResponse;
+        const response = { statusCode, etag } as BlobContentUploadResponse;
         blobStorageClientMock
             .setup((bc) => bc.uploadBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath, content, condition))
             .returns(() => Promise.resolve(response))

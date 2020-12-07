@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { DataProvidersCommon } from './data-providers-common';
 
-export type ReadErrorCode = 'documentNotFound' | 'parseError' | 'documentAlreadyExists';
+export type ReadErrorCode = 'documentNotFound' | 'parseError';
 export type CreateErrorCode = 'documentAlreadyExists' | WriteErrorCode;
 export type WriteErrorCode = 'etagMismatch' | 'httpStatusError';
 
@@ -18,16 +18,18 @@ export type CombinedScanResultsError<ErrorCodeType> = {
 export type CombinedScanResultsReadResponse = {
     error?: CombinedScanResultsError<ReadErrorCode>;
     results?: CombinedScanResults;
+    etag?: string;
 };
 
 export type CombinedScanResultsWriteResponse = {
     error?: CombinedScanResultsError<WriteErrorCode>;
-    filePath?: string;
+    etag?: string;
 };
 
 export type CombinedScanResultsCreateResponse = {
     error?: CombinedScanResultsError<CreateErrorCode>;
     results?: CombinedScanResults;
+    etag?: string;
 };
 
 @injectable()
@@ -55,7 +57,7 @@ export class CombinedScanResultsProvider {
         );
 
         if (this.statusSuccessful(response.statusCode)) {
-            return { filePath };
+            return { etag: response.etag };
         }
         if (response.statusCode === CombinedScanResultsProvider.preconditionFailedStatusCode) {
             return {
@@ -105,6 +107,7 @@ export class CombinedScanResultsProvider {
 
         return {
             results: emptyCombinedResults,
+            etag: saveResponse.etag,
         };
     }
 
@@ -123,6 +126,7 @@ export class CombinedScanResultsProvider {
 
             return {
                 results: content,
+                etag: downloadResponse.etag,
             };
         } catch (error) {
             return {
