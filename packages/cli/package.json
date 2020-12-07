@@ -57,11 +57,11 @@
         "webpack-node-externals": "^2.5.1"
     },
     "dependencies": {
-        "@axe-core/puppeteer": "^4.0.0",
-        "accessibility-insights-report": "3.0.1",
+        "@axe-core/puppeteer": "^4.1.0",
+        "accessibility-insights-report": "3.1.0",
         "apify": "^0.21.8",
         "apify-shared": "^0.5.0",
-        "axe-core": "4.0.2",
+        "axe-core": "4.1.1",
         "cheerio": "^1.0.0-rc.3",
         "cli-spinner": "^0.2.10",
         "dotenv": "^8.2.0",
