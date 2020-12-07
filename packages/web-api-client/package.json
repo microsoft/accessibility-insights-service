@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "adal-node": "0.2.1",
-        "common": "1.0.0",
+        "common": "^1.0.0",
         "forever-agent": "^0.6.1",
         "got": "^11.8.0",
         "inversify": "^5.0.1",
