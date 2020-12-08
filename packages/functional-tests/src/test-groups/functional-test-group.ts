@@ -3,6 +3,7 @@
 import { expect } from 'chai';
 import { getSerializableResponse, GuidGenerator, ResponseWithBodyType } from 'common';
 import { inject } from 'inversify';
+import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { A11yServiceClient } from 'web-api-client';
 import { TestContextData } from '../test-group-data';
@@ -11,6 +12,7 @@ import { TestContextData } from '../test-group-data';
 
 export abstract class FunctionalTestGroup {
     public testContextData: TestContextData;
+    protected logger: Logger;
 
     constructor(
         @inject(A11yServiceClient) protected readonly a11yServiceClient: A11yServiceClient,
@@ -20,6 +22,10 @@ export abstract class FunctionalTestGroup {
 
     public setTestContext(testContextData: TestContextData): void {
         this.testContextData = testContextData;
+    }
+
+    public setLogger(logger: Logger) {
+        this.logger = logger;
     }
 
     public ensureResponseSuccessStatusCode(response: ResponseWithBodyType<unknown>, message?: string): void {

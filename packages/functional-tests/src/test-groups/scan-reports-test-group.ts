@@ -9,6 +9,8 @@ import { FunctionalTestGroup } from './functional-test-group';
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
 export class ScanReportTestGroup extends FunctionalTestGroup {
+    private static TAG: string = "ScanReportTestGroup: ";
+
     @test(TestEnvironment.all)
     public async testReportGenerated(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
@@ -43,8 +45,8 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
                     this.testContextData.consolidatedReportId,
                 );
 
-                console.log(`reportData report id is: ${reportData.reportId}`);
-                console.log(`testContextData report id is: ${this.testContextData.consolidatedReportId}`);
+                console.log(ScanReportTestGroup.TAG + `reportData report id is: ${reportData.reportId}`);
+                console.log(ScanReportTestGroup.TAG + `testContextData report id is: ${this.testContextData.consolidatedReportId}`);
                 this.ensureResponseSuccessStatusCode(response);
                 expect(reportResponse.statusCode, 'Get Scan Report API should return response with 200 status code').to.not.be.undefined;
             }),
