@@ -116,7 +116,6 @@ export class HealthMonitorClientController extends WebController {
         const functionalTestGroupCtor = this.testGroupTypes[data.testGroupName];
         const functionalTestGroup = new functionalTestGroupCtor(webApiClient, this.onDemandPageScanRunResultProvider, this.guidGenerator);
         functionalTestGroup.setTestContext(data.testContextData);
-        functionalTestGroup.setLogger(this.logger);
 
         await this.testRunner.run(functionalTestGroup, data.environment, this.releaseId, data.runId);
     };
