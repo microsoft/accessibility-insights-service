@@ -3,7 +3,6 @@
 import { expect } from 'chai';
 import { getSerializableResponse, GuidGenerator, ResponseWithBodyType } from 'common';
 import { inject } from 'inversify';
-import { Logger } from 'logger';
 import { OnDemandPageScanRunResultProvider, WebApiErrorCode } from 'service-library';
 import { A11yServiceClient } from 'web-api-client';
 import { TestContextData } from '../test-group-data';
