@@ -5,12 +5,11 @@ import 'reflect-metadata';
 import { Readable } from 'stream';
 import { Context } from '@azure/functions';
 import { BlobContentDownloadResponse } from 'azure-services';
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration, BodyParser } from 'common';
 import { HttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 
-import { BodyParser } from './../utils/body-parser';
 import { ScanReportController } from './scan-report-controller';
 
 describe(ScanReportController, () => {
