@@ -4842,10 +4842,10 @@ combined-stream@^1.0.6, combined-stream@^1.0.8, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-commander@6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/commander/-/commander-6.0.0.tgz#2b270da94f8fb9014455312f829a1129dbf8887e"
-  integrity sha512-s7EA+hDtTYNhuXkTlhqew4txMZVdszBmKWSPEMxGr8ru8JXR7bLUFIAtPhcSuFdJQ0ILMxnJi8GkQL0yvDy/YA==
+commander@6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-6.1.0.tgz#f8d722b78103141006b66f4c7ba1e97315ba75bc"
+  integrity sha512-wl7PNrYWd2y5mp1OK/LhTlv8Ff4kQJQRXXAvF+uU/TPNiVJUxZLRYGj/B0y/lPGAVcSbJqH2Za/cvHmrPMC8mA==
 
 commander@^2.12.1, commander@^2.20.0, commander@^2.8.1:
   version "2.20.3"
@@ -12546,13 +12546,13 @@ symbol-tree@^3.2.4:
   resolved "https://registry.yarnpkg.com/symbol-tree/-/symbol-tree-3.2.4.tgz#430637d248ba77e078883951fb9aa0eed7c63fa2"
   integrity sha512-9QNk5KwDF+Bvz+PyObkmSYjI5ksVUYtjW7AU22r2NKcfLJcXp96hkDWU3+XndOsUb+AQ9QhfzfCT2O+CNWT5Tw==
 
-syncpack@^5.2.5:
-  version "5.5.6"
-  resolved "https://registry.yarnpkg.com/syncpack/-/syncpack-5.5.6.tgz#196fe0e8154efa7c74effb0c3a2d89f240412b18"
-  integrity sha512-rTUbzX6iuKz7saOsj8dDMxgApaZ8Y4S6nudW59ikAALIGa1RNMKaVAIi9P5HMjx94y686UkXp6CmsuxNjNXG8Q==
+syncpack@^5.6.10:
+  version "5.6.10"
+  resolved "https://registry.yarnpkg.com/syncpack/-/syncpack-5.6.10.tgz#9abad3def4ee925c5f55ecfa04564f0f762b5d67"
+  integrity sha512-7YjOACc9syvQVZfNSIhgZoZ2foqzQJ/r8tUPDKdfRgnBYNkDbbcjzYz1XH35oOm2vAllNhZYK2R8N5sAITMbqA==
   dependencies:
     chalk "4.1.0"
-    commander "6.0.0"
+    commander "6.1.0"
     cosmiconfig "7.0.0"
     expect-more "0.8.0"
     fs-extra "9.0.1"
