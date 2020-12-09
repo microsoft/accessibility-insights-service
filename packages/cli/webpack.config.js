@@ -10,7 +10,15 @@ const copyFilesPlugin = require('copy-webpack-plugin');
 function getCommonConfig(version, generateTypings) {
     return {
         devtool: 'cheap-source-map',
-        externals: ['apify', 'apify-shared', 'axe-core', '@axe-core/puppeteer', 'puppeteer', 'yargs', 'levelup', 'leveldown'],
+        // This is a requirement, not an optimization; some of our transitive
+        // dependencies use native modules via node-gyp-build, which means they
+        // must be installed/built on the same platform/architecture as the consuming
+        // system, not built for our build machines' platform and bundled.
+        externals: [nodeExternals({
+            // This is for monorepo compat; webpack-node-externals only looks in
+            // the immediate package's node_modules by default.
+            additionalModuleDirs: [path.join(__dirname, '../../node_modules')]
+        })],
         mode: 'development',
         module: {
             rules: [
@@ -104,7 +112,6 @@ module.exports = (env) => {
         {
             ...getCommonConfig(version, true),
             name: 'ai-scan',
-            externals: [nodeExternals()],
             entry: {
                 ['index']: path.resolve('./src/index.ts'),
             },
