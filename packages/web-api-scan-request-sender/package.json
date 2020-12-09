@@ -49,6 +49,6 @@
         "storage-documents": "1.0.0",
         "lodash": "^4.17.20",
         "why-is-node-running": "^2.2.0",
-        "yargs": "^16.1.1"
+        "yargs": "^15.3.1"
     }
 }
