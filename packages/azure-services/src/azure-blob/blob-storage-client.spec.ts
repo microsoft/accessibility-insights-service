@@ -24,6 +24,7 @@ describe(BlobStorageClient, () => {
     let testSubject: BlobStorageClient;
     const containerName = 'test-container';
     const blobName = 'blob name1';
+    const etag = 'etag';
 
     beforeEach(() => {
         blobServiceClientMock = Mock.ofType<BlobServiceClient>();
@@ -47,12 +48,12 @@ describe(BlobStorageClient, () => {
 
             blobClientMock
                 .setup(async (b) => b.download(0, undefined))
-                .returns(async () => Promise.resolve({ readableStreamBody: readableStream } as BlobDownloadResponseModel))
+                .returns(async () => Promise.resolve({ readableStreamBody: readableStream, etag: etag } as BlobDownloadResponseModel))
                 .verifiable();
 
             const response = await testSubject.getBlobContent(containerName, blobName);
 
-            expect(response).toEqual({ content: readableStream, notFound: false } as BlobContentDownloadResponse);
+            expect(response).toEqual({ content: readableStream, notFound: false, etag: etag } as BlobContentDownloadResponse);
         });
 
         it('returns not found, if blob does not exist', async () => {
@@ -63,7 +64,7 @@ describe(BlobStorageClient, () => {
 
             const response = await testSubject.getBlobContent(containerName, blobName);
 
-            expect(response).toEqual({ content: undefined, notFound: true } as BlobContentDownloadResponse);
+            expect(response).toEqual({ notFound: true } as BlobContentDownloadResponse);
         });
 
         it('throws if unknown error occurred', async () => {
@@ -81,11 +82,11 @@ describe(BlobStorageClient, () => {
         const content = 'blob content 1';
         const blockUploadResponse = {
             _response: { status: 200 },
-            etag: 'etag',
+            etag: etag,
         } as BlockBlobUploadResponse;
         const expectedUploadResponse = {
             statusCode: 200,
-            headers: { etag: 'etag' },
+            etag: etag,
         };
 
         beforeEach(() => {
@@ -108,7 +109,6 @@ describe(BlobStorageClient, () => {
         });
 
         it('uploads content with match to etag', async () => {
-            const etag = 'etag';
             blockBlobClientMock
                 .setup(async (b) => b.upload(content, content.length, { conditions: { ifMatch: etag } }))
                 .returns(async () => Promise.resolve(blockUploadResponse))
@@ -122,7 +122,6 @@ describe(BlobStorageClient, () => {
         });
 
         it('uploads content with none match to etag', async () => {
-            const etag = 'etag';
             blockBlobClientMock
                 .setup(async (b) => b.upload(content, content.length, { conditions: { ifNoneMatch: etag } }))
                 .returns(async () => Promise.resolve(blockUploadResponse))

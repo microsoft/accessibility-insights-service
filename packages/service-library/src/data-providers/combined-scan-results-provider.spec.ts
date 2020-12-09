@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, BlobContentUploadResponse } from 'azure-services';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { AxeResults } from 'axe-result-converter';
+import { BodyParser } from 'common';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
 
@@ -38,18 +40,23 @@ describe(CombinedScanResultsProvider, () => {
     };
     const emptyResultsString = JSON.stringify(emptyResults);
     const etag = 'etag';
+    const readableStream = {
+        readable: true,
+    } as NodeJS.ReadableStream;
 
     let blobStorageClientMock: IMock<BlobStorageClient>;
     let dataProvidersCommonMock: IMock<DataProvidersCommon>;
+    let bodyParserMock: IMock<BodyParser>;
 
     let testSubject: CombinedScanResultsProvider;
 
     beforeEach(() => {
         blobStorageClientMock = Mock.ofType<BlobStorageClient>();
         dataProvidersCommonMock = Mock.ofType<DataProvidersCommon>();
+        bodyParserMock = Mock.ofType<BodyParser>();
         dataProvidersCommonMock.setup((dp) => dp.getBlobName(fileId)).returns(() => filePath);
 
-        testSubject = new CombinedScanResultsProvider(blobStorageClientMock.object, dataProvidersCommonMock.object);
+        testSubject = new CombinedScanResultsProvider(blobStorageClientMock.object, dataProvidersCommonMock.object, bodyParserMock.object);
     });
 
     afterEach(() => {
@@ -59,7 +66,7 @@ describe(CombinedScanResultsProvider, () => {
     describe('saveCombinedResults', () => {
         it('without etag', async () => {
             setupSave(resultsString, 200);
-            const expectedResult = { filePath };
+            const expectedResult = { etag };
 
             const result = await testSubject.saveCombinedResults(fileId, combinedResults);
 
@@ -68,7 +75,7 @@ describe(CombinedScanResultsProvider, () => {
 
         it('with etag', async () => {
             setupSave(resultsString, 200, { ifMatchEtag: etag });
-            const expectedResult = { filePath };
+            const expectedResult = { etag };
 
             const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
 
@@ -105,9 +112,11 @@ describe(CombinedScanResultsProvider, () => {
 
     describe('readCombinedResults', () => {
         it('Read combined results', async () => {
-            setupRead(resultsString);
+            setupReadBlob();
+            setupReadStream(resultsString);
             const expectedResults = {
                 results: combinedResults,
+                etag: etag,
             };
 
             const actualResults = await testSubject.readCombinedResults(fileId);
@@ -128,12 +137,29 @@ describe(CombinedScanResultsProvider, () => {
             expect(actualResults).toEqual(expectedResults);
         });
 
-        it('handles unparsable string', async () => {
-            const unparsableString = '{ unparsable content string';
-            setupRead(unparsableString);
+        it('handles stream read failure', async () => {
+            setupReadBlob();
+            const error = new Error('error');
+            bodyParserMock.setup((bp) => bp.getRawBody(readableStream as Readable)).throws(error);
             const expectedResults = {
                 error: {
-                    errorCode: 'parseError',
+                    errorCode: 'streamError',
+                    data: JSON.stringify(error),
+                },
+            };
+
+            const actualResults = await testSubject.readCombinedResults(fileId);
+
+            expect(actualResults).toEqual(expectedResults);
+        });
+
+        it('handles unparsable string', async () => {
+            const unparsableString = '{ unparsable content string';
+            setupReadBlob();
+            setupReadStream(unparsableString);
+            const expectedResults = {
+                error: {
+                    errorCode: 'JSONParseError',
                     data: unparsableString,
                 },
             };
@@ -144,9 +170,10 @@ describe(CombinedScanResultsProvider, () => {
         });
     });
 
-    describe('readOrCreateCombinedResults', () => {
-        it('returns error if results exist', async () => {
-            setupRead(resultsString);
+    describe('createCombinedResults', () => {
+        it('returns error if results already exist', async () => {
+            setupReadBlob();
+            setupReadStream(resultsString);
             const expectedResults = {
                 error: {
                     errorCode: 'documentAlreadyExists',
@@ -163,6 +190,7 @@ describe(CombinedScanResultsProvider, () => {
             setupSave(emptyResultsString, 200);
             const expectedResults = {
                 results: emptyResults,
+                etag: etag,
             };
 
             const actualResults = await testSubject.createCombinedResults(fileId);
@@ -171,16 +199,15 @@ describe(CombinedScanResultsProvider, () => {
         });
     });
 
-    function stubReadableStream(content: string): NodeJS.ReadableStream {
-        return ({
-            read: () => content,
-        } as unknown) as NodeJS.ReadableStream;
+    function setupReadStream(content: string): void {
+        bodyParserMock.setup((bp) => bp.getRawBody(readableStream as Readable)).returns(() => Promise.resolve(Buffer.from(content)));
     }
 
-    function setupRead(content: string): void {
+    function setupReadBlob(): void {
         const response = {
             notFound: false,
-            content: stubReadableStream(content),
+            content: readableStream,
+            etag: etag,
         } as BlobContentDownloadResponse;
         blobStorageClientMock
             .setup((bc) => bc.getBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath))
@@ -200,7 +227,7 @@ describe(CombinedScanResultsProvider, () => {
     }
 
     function setupSave(content: string, statusCode: number, condition?: BlobSaveCondition): void {
-        const response = { statusCode } as BlobContentUploadResponse;
+        const response = { statusCode, etag } as BlobContentUploadResponse;
         blobStorageClientMock
             .setup((bc) => bc.uploadBlobContent(DataProvidersCommon.combinedResultsBlobContainerName, filePath, content, condition))
             .returns(() => Promise.resolve(response))
