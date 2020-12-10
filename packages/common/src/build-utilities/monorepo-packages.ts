@@ -9,12 +9,14 @@ export function listMonorepoPackageNames(): string[] {
     const packagesDir = path.join(__dirname, '../../../');
     const packageDirNames = fs.readdirSync(packagesDir);
 
-    return packageDirNames.map(dirName => {
-        const packageJsonPath = path.join(packagesDir, dirName, 'package.json');
-        if (!fs.existsSync(packageJsonPath)) {
-            return null;
-        }
+    return packageDirNames
+        .map((dirName) => {
+            const packageJsonPath = path.join(packagesDir, dirName, 'package.json');
+            if (!fs.existsSync(packageJsonPath)) {
+                return null;
+            }
 
-        return JSON.parse(fs.readFileSync(packageJsonPath).toString()).name;
-    }).filter((name): name is string => name != null);
+            return JSON.parse(fs.readFileSync(packageJsonPath).toString()).name;
+        })
+        .filter((name): name is string => name != null);
 }

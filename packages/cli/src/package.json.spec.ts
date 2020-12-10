@@ -41,13 +41,10 @@ describe('package.json dependencies', () => {
     async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
         const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
         const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
-        const directNonMonorepoDeps = deps.filter(d => !isMonorepoPackage(d));
+        const directNonMonorepoDeps = deps.filter((d) => !isMonorepoPackage(d));
         const directMonorepoDeps = deps.filter(isMonorepoPackage);
         const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
 
-        return [
-            ...directNonMonorepoDeps,
-            ...flatten(indirectNonMonorepoDepGroups),
-        ];
+        return [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
     }
 });
