@@ -11,26 +11,6 @@ describe('package.json dependencies', () => {
     const monorepoDevDependencies = Object.keys(packageJson.devDependencies).filter(isMonorepoPackage);
     const monorepoNonDevDependencies = Object.keys(packageJson.dependencies).filter(isMonorepoPackage);
 
-    // suppose:
-    //   * /packages/monorepo-foo/package.json has dependencies: { 'monorepo-bar': '*', 'external-a': '*' }
-    //   * /packages/monorepo-bar/package.json has dependencies: { 'external-b': '*' }
-    //   * /node_modules/external-a/package.json has dependencies: { 'external-c': '*' }
-    //   * external-b and external-c have no dependencies
-    //
-    // then getEdgeNonMonorepoDependencies('monorepo-foo') returns ['external-a', 'external-b']
-    async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
-        const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
-        const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
-        const directNonMonorepoDeps = deps.filter(d => !isMonorepoPackage(d));
-        const directMonorepoDeps = deps.filter(isMonorepoPackage);
-        const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
-
-        return [
-            ...directNonMonorepoDeps,
-            ...flatten(indirectNonMonorepoDepGroups),
-        ];
-    }
-
     // We don't publish other monorepo packages (eg, "common") to npm, so it's important
     // that we only depend on them as devDependencies, not dependencies, to avoid consumers
     // trying to pull down non-published packages.
@@ -50,4 +30,24 @@ describe('package.json dependencies', () => {
             expect(directDependencies).toContain(edgeNonMonorepoDependency);
         }
     });
+
+    // suppose:
+    //   * /packages/monorepo-foo/package.json has dependencies: { 'monorepo-bar': '*', 'external-a': '*' }
+    //   * /packages/monorepo-bar/package.json has dependencies: { 'external-b': '*' }
+    //   * /node_modules/external-a/package.json has dependencies: { 'external-c': '*' }
+    //   * external-b and external-c have no dependencies
+    //
+    // then getEdgeNonMonorepoDependencies('monorepo-foo') returns ['external-a', 'external-b']
+    async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
+        const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
+        const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
+        const directNonMonorepoDeps = deps.filter(d => !isMonorepoPackage(d));
+        const directMonorepoDeps = deps.filter(isMonorepoPackage);
+        const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
+
+        return [
+            ...directNonMonorepoDeps,
+            ...flatten(indirectNonMonorepoDepGroups),
+        ];
+    }
 });
