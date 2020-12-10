@@ -27,7 +27,7 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@types/cheerio": "^0.22.22",
+        "@types/cheerio": "^0.22.23",
         "@types/cli-spinner": "^0.2.0",
         "@types/escape-html": "^0.0.20",
         "@types/jest": "^26.0.14",
@@ -86,7 +86,7 @@
         "uuid-with-v6": "^1.1.2",
         "verror": "^1.10.0",
         "wtfnode": "^0.8.3",
-        "yargs": "^16.1.1"
+        "yargs": "^15.3.1"
     },
     "bin": {
         "ai-scan": "dist/ai-scan-cli.js"

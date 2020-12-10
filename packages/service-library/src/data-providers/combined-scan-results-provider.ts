@@ -1,12 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import { Readable } from 'stream';
 import { AxeResults } from 'axe-result-converter';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
+import { BodyParser } from 'common';
 import { DataProvidersCommon } from './data-providers-common';
 
-export type ReadErrorCode = 'documentNotFound' | 'parseError' | 'documentAlreadyExists';
+export type ReadErrorCode = 'documentNotFound' | 'JSONParseError' | 'streamError';
 export type CreateErrorCode = 'documentAlreadyExists' | WriteErrorCode;
 export type WriteErrorCode = 'etagMismatch' | 'httpStatusError';
 
@@ -18,16 +20,18 @@ export type CombinedScanResultsError<ErrorCodeType> = {
 export type CombinedScanResultsReadResponse = {
     error?: CombinedScanResultsError<ReadErrorCode>;
     results?: CombinedScanResults;
+    etag?: string;
 };
 
 export type CombinedScanResultsWriteResponse = {
     error?: CombinedScanResultsError<WriteErrorCode>;
-    filePath?: string;
+    etag?: string;
 };
 
 export type CombinedScanResultsCreateResponse = {
     error?: CombinedScanResultsError<CreateErrorCode>;
     results?: CombinedScanResults;
+    etag?: string;
 };
 
 @injectable()
@@ -37,6 +41,7 @@ export class CombinedScanResultsProvider {
     constructor(
         @inject(BlobStorageClient) private readonly blobStorageClient: BlobStorageClient,
         @inject(DataProvidersCommon) private readonly dataProvidersCommon: DataProvidersCommon,
+        @inject(BodyParser) private readonly bodyParser: BodyParser,
     ) {}
 
     public async saveCombinedResults(
@@ -55,7 +60,7 @@ export class CombinedScanResultsProvider {
         );
 
         if (this.statusSuccessful(response.statusCode)) {
-            return { filePath };
+            return { etag: response.etag };
         }
         if (response.statusCode === CombinedScanResultsProvider.preconditionFailedStatusCode) {
             return {
@@ -105,6 +110,7 @@ export class CombinedScanResultsProvider {
 
         return {
             results: emptyCombinedResults,
+            etag: saveResponse.etag,
         };
     }
 
@@ -117,17 +123,29 @@ export class CombinedScanResultsProvider {
             };
         }
 
-        const contentString = downloadResponse.content.read().toString();
+        let contentString: string;
+        try {
+            contentString = (await this.bodyParser.getRawBody(downloadResponse.content as Readable)).toString();
+        } catch (error) {
+            return {
+                error: {
+                    errorCode: 'streamError',
+                    data: JSON.stringify(error),
+                },
+            };
+        }
+
         try {
             const content = JSON.parse(contentString);
 
             return {
                 results: content,
+                etag: downloadResponse.etag,
             };
         } catch (error) {
             return {
                 error: {
-                    errorCode: 'parseError',
+                    errorCode: 'JSONParseError',
                     data: contentString,
                 },
             };
