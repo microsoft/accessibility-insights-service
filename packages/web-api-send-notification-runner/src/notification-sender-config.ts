@@ -6,7 +6,14 @@ import { NotificationSenderMetadata } from './types/notification-sender-metadata
 
 @injectable()
 export class NotificationSenderConfig {
-    constructor(private readonly argvObj: Argv = yargs) {}
+    constructor(private readonly argvObj: Argv = yargs) {
+        // Temporary workaround for yargs v16 changing all env variables to lowercase
+        argvObj.alias({
+            scanid: 'scanId',
+            scannotifyurl: 'scanNotifyUrl',
+            runstatus: 'runStatus',
+        });
+    }
 
     public getConfig(): NotificationSenderMetadata {
         this.argvObj.env().demandOption(['scanId', 'scanNotifyUrl', 'runStatus']);
