@@ -1,22 +1,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as fs from 'fs';
-import * as path from 'path';
+import 'reflect-metadata';
 import { flatten } from 'lodash';
+import { listMonorepoPackageNames } from 'common';
 import * as packageJson from '../package.json';
 
 describe('package.json dependencies', () => {
-    const packagesDir = path.join(__dirname, '../../');
-    const monorepoPackageNames: string[] = fs.readdirSync(packagesDir).map(packageDirName => {
-        let packageJsonBuffer: Buffer;
-        try {
-            packageJsonBuffer = fs.readFileSync(path.join(packagesDir, packageDirName, 'package.json'));
-        } catch {
-            return null;
-        }
-
-        return JSON.parse(packageJsonBuffer.toString()).name;
-    }).filter((maybeName): maybeName is string => maybeName != null);
+    const monorepoPackageNames = listMonorepoPackageNames();
     const isMonorepoPackage = (packageName: string) => monorepoPackageNames.includes(packageName);
     const monorepoDevDependencies = Object.keys(packageJson.devDependencies).filter(isMonorepoPackage);
     const monorepoNonDevDependencies = Object.keys(packageJson.dependencies).filter(isMonorepoPackage);
