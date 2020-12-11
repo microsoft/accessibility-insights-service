@@ -87,7 +87,7 @@
         "uuid-with-v6": "^1.1.2",
         "verror": "^1.10.0",
         "wtfnode": "^0.8.3",
-        "yargs": "^15.3.1"
+        "yargs": "^16.1.1"
     },
     "bin": {
         "ai-scan": "dist/ai-scan-cli.js"
