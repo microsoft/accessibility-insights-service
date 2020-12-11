@@ -85,8 +85,9 @@ describe(HealthMonitorClientController, () => {
     describe('invoke', () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
+            const priority = 1;
             webApiClientMock
-                .setup(async (w) => w.postScanUrl(scanUrl, 1))
+                .setup(async (w) => w.postScanUrl(scanUrl, priority))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -94,7 +95,28 @@ describe(HealthMonitorClientController, () => {
                 activityName: ActivityAction.createScanRequest,
                 data: {
                     scanUrl: scanUrl,
-                    priority: 1,
+                    priority: priority,
+                },
+            };
+            const result = await testSubject.invoke(context, args);
+            expect(result).toEqual(jsonResponse);
+        });
+
+        it('handles createConsolidatedScanRequest', async () => {
+            const scanUrl = 'scan-url';
+            const reportIdStub = 'some-report-id';
+            const priority = 1;
+            webApiClientMock
+                .setup(async (w) => w.postConsolidatedScan(scanUrl, reportIdStub, priority))
+                .returns(async () => Promise.resolve(expectedResponse))
+                .verifiable(Times.once());
+
+            const args: ActivityRequestData = {
+                activityName: ActivityAction.createConsolidatedScanRequest,
+                data: {
+                    scanUrl: scanUrl,
+                    priority: priority,
+                    reportId: reportIdStub,
                 },
             };
             const result = await testSubject.invoke(context, args);

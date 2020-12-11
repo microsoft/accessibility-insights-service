@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'common';
+import got, { Agents, ExtendOptions, Got, Options } from 'got';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
-import got, { Got, ExtendOptions, Options, Agents } from 'got';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -43,20 +43,9 @@ export class A11yServiceClient {
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
-        const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: Options = { json: requestBody };
+        const requestBody: ScanRunRequest = { url: scanUrl };
 
-        return (await this.retryHelper.executeWithRetries(
-            async () => (await this.signRequest()).post(requestUrl, options),
-            async (e) =>
-                this.logger.logError('POST scans REST API request fail. Retrying on error.', {
-                    url: requestUrl,
-                    error: System.serializeError(e),
-                }),
-            this.maxRetryCount,
-            this.msecBetweenRetries,
-        )) as ResponseWithBodyType<ScanRunResponse[]>;
+        return this.postScanUrlWithRequest(requestBody, priority);
     }
 
     public async postConsolidatedScan(
@@ -64,16 +53,19 @@ export class A11yServiceClient {
         reportId: string,
         priority?: number,
     ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest[] = [
-            {
-                url: scanUrl,
-                site: { baseUrl: scanUrl },
-                reportGroups: [{ consolidatedId: reportId }],
-                priority: priority === undefined ? 0 : priority,
-            },
-        ];
+        const requestBody: ScanRunRequest = {
+            url: scanUrl,
+            site: { baseUrl: scanUrl },
+            reportGroups: [{ consolidatedId: reportId }],
+        };
+
+        return this.postScanUrlWithRequest(requestBody, priority);
+    }
+
+    private async postScanUrlWithRequest(requestBody: ScanRunRequest, priority: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        requestBody.priority = priority || 0;
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: Options = { json: requestBody };
+        const options: Options = { json: [requestBody] };
 
         return (await this.retryHelper.executeWithRetries(
             async () => (await this.signRequest()).post(requestUrl, options),
