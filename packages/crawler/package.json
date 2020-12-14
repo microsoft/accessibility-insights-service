@@ -25,9 +25,9 @@
     },
     "homepage": "https://github.com/Microsoft/accessibility-insights-service#readme",
     "devDependencies": {
-        "@rollup/plugin-commonjs": "^16.0.0",
+        "@rollup/plugin-commonjs": "^17.0.0",
         "@rollup/plugin-node-resolve": "^9.0.0",
-        "@types/cheerio": "^0.22.22",
+        "@types/cheerio": "^0.22.23",
         "@types/encoding-down": "^5.0.0",
         "@types/jest": "^26.0.14",
         "@types/leveldown": "^4.0.2",

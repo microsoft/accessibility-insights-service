@@ -88,21 +88,22 @@ describe('ReportDiskWriter', () => {
     });
 
     it('output directory is empty', () => {
-        const directory = __dirname;
+        const platformSpecificDirectory = __dirname;
+        const normalizedDirectory = platformSpecificDirectory.replace(/\\/g, '/');
         const fileName = 'http://www.bing.com';
         const format = 'html';
         const content = 'content';
 
         const reportFileName = `${filenamifyUrl(fileName, { replacement: '_' })}.${format}`;
-        const reportFilePath = `${directory}/${reportFileName}`;
+        const reportFilePath = `${normalizedDirectory}/${reportFileName}`;
 
         pathMock
-            .setup((fsm) => fsm.resolve(directory, reportFileName))
+            .setup((fsm) => fsm.resolve(normalizedDirectory, reportFileName))
             .returns(() => reportFilePath)
             .verifiable(Times.once());
 
         fsMock
-            .setup((fsm) => fsm.existsSync(directory))
+            .setup((fsm) => fsm.existsSync(normalizedDirectory))
             .returns(() => false)
             .verifiable(Times.once());
         fsMock
@@ -110,7 +111,7 @@ describe('ReportDiskWriter', () => {
             .returns(() => {})
             .verifiable(Times.once());
         fsMock
-            .setup((fsm) => fsm.mkdirSync(directory, { recursive: true }))
+            .setup((fsm) => fsm.mkdirSync(normalizedDirectory, { recursive: true }))
             .returns(() => {})
             .verifiable(Times.once());
 

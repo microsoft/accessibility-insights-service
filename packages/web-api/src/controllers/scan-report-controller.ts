@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Readable } from 'stream';
-import { GuidGenerator, ServiceConfiguration } from 'common';
+import { GuidGenerator, ServiceConfiguration, BodyParser } from 'common';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { ApiController, HttpResponse, PageScanRunReportProvider, WebApiErrorCodes } from 'service-library';
-import { BodyParser } from './../utils/body-parser';
 
 @injectable()
 export class ScanReportController extends ApiController {
@@ -17,7 +16,7 @@ export class ScanReportController extends ApiController {
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
-        private readonly bodyParser: BodyParser = new BodyParser(),
+        @inject(BodyParser) private readonly bodyParser: BodyParser,
     ) {
         super(logger);
     }

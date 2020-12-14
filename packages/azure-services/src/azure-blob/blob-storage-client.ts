@@ -1,18 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { BlobClient, RestError, BlockBlobUploadOptions, BlockBlobUploadHeaders } from '@azure/storage-blob';
+import { BlobClient, RestError, BlockBlobUploadOptions } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { BlobServiceClientProvider, iocTypeNames } from '../ioc-types';
 
 export interface BlobContentDownloadResponse {
     notFound: boolean;
-    content: NodeJS.ReadableStream;
+    content?: NodeJS.ReadableStream;
+    etag?: string;
 }
 
 export interface BlobContentUploadResponse {
     statusCode: number;
-    headers: BlockBlobUploadHeaders;
+    etag?: string;
 }
 
 export interface BlobSaveCondition {
@@ -33,6 +34,7 @@ export class BlobStorageClient {
             return {
                 notFound: false,
                 content: response.readableStreamBody,
+                etag: response.etag,
             };
         } catch (e) {
             const restResponse = e as RestError;
@@ -40,7 +42,6 @@ export class BlobStorageClient {
                 if (restResponse.statusCode === 404) {
                     return {
                         notFound: true,
-                        content: undefined,
                     };
                 }
             }
@@ -64,11 +65,11 @@ export class BlobStorageClient {
             options = { conditions: { ifNoneMatch: condition.ifNoneMatchEtag } };
         }
 
-        const { _response, ...parsedHeaders } = await blockBlobClient.upload(content, content.length, options);
+        const { _response, etag } = await blockBlobClient.upload(content, content.length, options);
 
         return {
             statusCode: _response.status,
-            headers: parsedHeaders,
+            etag: etag,
         };
     }
 
