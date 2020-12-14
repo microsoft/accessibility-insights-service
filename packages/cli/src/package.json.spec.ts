@@ -43,6 +43,7 @@ describe('package.json dependencies', () => {
             .sort()
             .map((missingDependency) => {
                 const responsibleDependents = missingDependenciesToResponsibleDependents[missingDependency].sort();
+
                 return `package.json needs a dependency on ${missingDependency} (required via ${responsibleDependents.join(', ')})`;
             });
 
