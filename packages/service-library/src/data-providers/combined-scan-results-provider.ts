@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Readable } from 'stream';
-import { AxeResults } from 'axe-result-converter';
+import { AxeResults, AxeCoreResults } from 'axe-result-converter';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
-import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
-import { BodyParser } from 'common';
+import { CombinedScanResults } from 'storage-documents';
+import { BodyParser, System } from 'common';
 import { DataProvidersCommon } from './data-providers-common';
 
-export type ReadErrorCode = 'documentNotFound' | 'JSONParseError' | 'streamError';
-export type CreateErrorCode = 'documentAlreadyExists' | WriteErrorCode;
+export type ReadErrorCode = 'blobNotFound' | 'jsonParseError' | 'streamError';
 export type WriteErrorCode = 'etagMismatch' | 'httpStatusError';
 
 export type CombinedScanResultsError<ErrorCodeType> = {
@@ -28,12 +27,6 @@ export type CombinedScanResultsWriteResponse = {
     etag?: string;
 };
 
-export type CombinedScanResultsCreateResponse = {
-    error?: CombinedScanResultsError<CreateErrorCode>;
-    results?: CombinedScanResults;
-    etag?: string;
-};
-
 @injectable()
 export class CombinedScanResultsProvider {
     private static readonly preconditionFailedStatusCode = 412;
@@ -44,13 +37,13 @@ export class CombinedScanResultsProvider {
         @inject(BodyParser) private readonly bodyParser: BodyParser,
     ) {}
 
-    public async saveCombinedResults(
+    public async writeCombinedResults(
         fileId: string,
-        content: CombinedScanResults,
+        combinedScanResults: CombinedScanResults,
         etag?: string,
     ): Promise<CombinedScanResultsWriteResponse> {
         const filePath = this.dataProvidersCommon.getBlobName(fileId);
-        const contentString = JSON.stringify(content);
+        const contentString = JSON.stringify(combinedScanResults ?? this.getEmptyCombinedScanResults());
         const condition = etag ? { ifMatchEtag: etag } : undefined;
         const response = await this.blobStorageClient.uploadBlobContent(
             DataProvidersCommon.combinedResultsBlobContainerName,
@@ -62,6 +55,7 @@ export class CombinedScanResultsProvider {
         if (this.statusSuccessful(response.statusCode)) {
             return { etag: response.etag };
         }
+
         if (response.statusCode === CombinedScanResultsProvider.preconditionFailedStatusCode) {
             return {
                 error: {
@@ -78,48 +72,11 @@ export class CombinedScanResultsProvider {
         };
     }
 
-    public async createCombinedResults(fileId: string): Promise<CombinedScanResultsCreateResponse> {
-        const response = await this.readBlob(fileId);
-        if (!response.notFound) {
-            return {
-                error: {
-                    errorCode: 'documentAlreadyExists',
-                },
-            };
-        }
-
-        const emptyCombinedResults: CombinedScanResults = {
-            urlCount: {
-                failed: 0,
-                passed: 0,
-                total: 0,
-            },
-            axeResults: {
-                urls: [],
-                violations: new AxeResults().serialize(),
-                passes: new AxeResults().serialize(),
-                incomplete: new AxeResults().serialize(),
-                inapplicable: new AxeResults().serialize(),
-            } as CombinedAxeResults,
-        };
-
-        const saveResponse = await this.saveCombinedResults(fileId, emptyCombinedResults);
-        if (saveResponse.error) {
-            return saveResponse;
-        }
-
-        return {
-            results: emptyCombinedResults,
-            etag: saveResponse.etag,
-        };
-    }
-
     public async readCombinedResults(fileId: string): Promise<CombinedScanResultsReadResponse> {
         const downloadResponse = await this.readBlob(fileId);
-
         if (downloadResponse.notFound) {
             return {
-                error: { errorCode: 'documentNotFound' },
+                error: { errorCode: 'blobNotFound' },
             };
         }
 
@@ -130,13 +87,19 @@ export class CombinedScanResultsProvider {
             return {
                 error: {
                     errorCode: 'streamError',
-                    data: JSON.stringify(error),
+                    data: System.serializeError(error),
                 },
             };
         }
 
         try {
-            const content = JSON.parse(contentString);
+            const content = JSON.parse(contentString, (key, value) => {
+                if (key === 'violations' || key === 'passes' || key === 'incomplete' || key === 'inapplicable') {
+                    return new AxeResults(value);
+                }
+
+                return value;
+            });
 
             return {
                 results: content,
@@ -145,11 +108,34 @@ export class CombinedScanResultsProvider {
         } catch (error) {
             return {
                 error: {
-                    errorCode: 'JSONParseError',
-                    data: contentString,
+                    errorCode: 'jsonParseError',
+                    data: System.serializeError(error),
                 },
             };
         }
+    }
+
+    public getEmptyResponse(): CombinedScanResultsReadResponse {
+        return {
+            results: this.getEmptyCombinedScanResults(),
+        };
+    }
+
+    private getEmptyCombinedScanResults(): CombinedScanResults {
+        return {
+            urlCount: {
+                failed: 0,
+                passed: 0,
+                total: 0,
+            },
+            axeResults: {
+                urls: [],
+                violations: new AxeResults(),
+                passes: new AxeResults(),
+                incomplete: new AxeResults(),
+                inapplicable: new AxeResults(),
+            } as AxeCoreResults,
+        };
     }
 
     private async readBlob(fileId: string): Promise<BlobContentDownloadResponse> {

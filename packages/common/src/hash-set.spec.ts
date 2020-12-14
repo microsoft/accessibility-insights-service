@@ -52,14 +52,11 @@ describe(HashSet, () => {
         expect(hashSet[Symbol.iterator]()).toBe(hashSet);
     });
 
-    it('serializes and deserializes', () => {
+    it('serialize', () => {
         hashSet.add('key1', 'value1');
         hashSet.add('key2', 'value2');
 
-        const serialized = hashSet.serialize();
-        const deserialized = HashSet.deserialize(serialized);
-
-        expect(deserialized.get('key1')).toBe('value1');
-        expect(deserialized.get('key2')).toBe('value2');
+        const json = JSON.stringify(hashSet);
+        expect(json).toEqual(`{"key1":"value1","key2":"value2"}`);
     });
 });

@@ -67,6 +67,7 @@ export class Page {
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
             pageResponseCode: response.status(),
+            userAgent: this.userAgent,
         };
 
         if (response.request().redirectChain().length > 0) {

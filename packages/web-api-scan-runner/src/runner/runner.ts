@@ -10,6 +10,7 @@ import {
     PageScanRunReportProvider,
     WebsiteScanResultProvider,
     CombinedScanResultsProvider,
+    CombinedScanResultsReadResponse,
 } from 'service-library';
 import {
     CombinedScanResults,
@@ -21,7 +22,10 @@ import {
     OnDemandScanResult,
     ScanError,
     WebsiteScanResult,
+    WebsiteScanReport,
 } from 'storage-documents';
+import { AxeResultsReducer } from 'axe-result-converter';
+import axe from 'axe-core';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
@@ -43,6 +47,7 @@ export class Runner {
         @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
+        @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
     ) {}
 
     public async run(): Promise<void> {
@@ -69,8 +74,8 @@ export class Runner {
 
             return;
         }
-        let fullPageScanResult = response.result;
 
+        const pageScanResult = response.result;
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
@@ -80,13 +85,15 @@ export class Runner {
             startedScanTasks: 1,
         });
 
+        let axeScanResults: AxeScanResults;
         try {
             this.logger.logInfo('Starting the page scanner.');
-            await this.scan(partialPageScanResult, scanMetadata.url);
+            axeScanResults = await this.scan(pageScanResult, scanMetadata.url);
+            await this.generateCombinedScanResults(axeScanResults, pageScanResult);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             const errorMessage = System.serializeError(error);
-            partialPageScanResult.run = this.createRunResult('failed', errorMessage);
+            pageScanResult.run = this.createRunResult('failed', errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
@@ -102,15 +109,130 @@ export class Runner {
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         }
 
-        this.updateCombinedResults(fullPageScanResult.websiteScanIds);
-
-        fullPageScanResult = await this.onDemandPageScanRunResultProvider.updateScanRun(partialPageScanResult);
-        await this.queueScanCompletionNotification(fullPageScanResult);
+        await this.queueScanCompletionNotification(pageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<void> {
+    private async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        if (pageScanResult.websiteScanRefs === undefined || pageScanResult.websiteScanRefs.length === 0) {
+            return;
+        }
+
+        const websiteScanRef = pageScanResult.websiteScanRefs.find((ref) => ref.scanGroupType === 'consolidated-scan-report');
+        if (websiteScanRef === undefined) {
+            return;
+        }
+
+        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
+        const combinedResultsBlobId = websiteScanResult.combinedResultsBlobId ?? this.guidGenerator.createGuid();
+        this.logger.setCommonProperties({
+            combinedResultsBlobId,
+            websiteScanId: websiteScanRef.id,
+        });
+
+        const combinedAxeResults = await this.mergeAxeResults(
+            axeScanResults.results,
+            combinedResultsBlobId,
+            websiteScanResult.combinedResultsBlobId === undefined,
+        );
+        const report = await this.generateCombinedReport(combinedAxeResults, websiteScanResult, axeScanResults.userAgent);
+        await this.updateWebsiteScanResult(websiteScanResult, combinedResultsBlobId, report);
+
+        if (report) {
+            pageScanResult.reports.push(report);
+        }
+    }
+
+    private async generateCombinedReport(
+        combinedAxeResults: CombinedScanResults,
+        websiteScanResult: WebsiteScanResult,
+        userAgent: string,
+    ): Promise<OnDemandPageScanReport> {
+        let reportId: string;
+        if (websiteScanResult.reports) {
+            reportId = websiteScanResult.reports.find((ref) => ref.format === 'consolidated.html')?.reportId;
+        }
+
+        reportId = reportId ?? this.guidGenerator.createGuid();
+        const scanStarted = new Date(Math.min(...websiteScanResult.pageScans.map((pageScan) => new Date(pageScan.timestamp).valueOf())));
+
+        this.logger.logInfo(`Generating combined reports from scan results.`);
+        const report = this.reportGenerator.generateConsolidatedReport(combinedAxeResults, {
+            reportId,
+            baseUrl: websiteScanResult.baseUrl,
+            userAgent,
+            scanStarted,
+        });
+
+        return this.saveScanReport(report);
+    }
+
+    private async mergeAxeResults(
+        axeScanResults: axe.AxeResults,
+        combinedResultsBlobId: string,
+        seed: boolean,
+    ): Promise<CombinedScanResults> {
+        const blobReadResponse = await this.getCombinedResultsBlob(seed ? undefined : combinedResultsBlobId);
+        const combinedScanResults = blobReadResponse.results;
+
+        combinedScanResults.urlCount.total++;
+        if (axeScanResults.violations?.length > 0) {
+            combinedScanResults.urlCount.failed++;
+        } else {
+            combinedScanResults.urlCount.passed++;
+        }
+
+        this.axeResultsReducer.reduce(combinedScanResults.axeResults, axeScanResults);
+        const blobWriteResponse = await this.combinedScanResultsProvider.writeCombinedResults(
+            combinedResultsBlobId,
+            combinedScanResults,
+            blobReadResponse.etag,
+        );
+
+        if (blobWriteResponse.error) {
+            this.logger.logError('Failed to write new combined axe scan results blob.', {
+                error: JSON.stringify(blobWriteResponse.error),
+            });
+
+            throw new Error(
+                `Failed to write new combined axe scan results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(
+                    blobWriteResponse.error,
+                )}`,
+            );
+        }
+
+        return combinedScanResults;
+    }
+
+    private async updateWebsiteScanResult(
+        websiteScanResult: WebsiteScanResult,
+        combinedResultsBlobId: string,
+        reportRef: WebsiteScanReport,
+    ): Promise<void> {
+        const updatedWebsiteScanResults = {
+            id: websiteScanResult.id,
+            combinedResultsBlobId: combinedResultsBlobId,
+            reports: [reportRef],
+            _etag: websiteScanResult._etag,
+        } as Partial<WebsiteScanResult>;
+        try {
+            this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+            this.logger.logInfo('Successfully updated website scan results with combined result metadata.');
+        } catch (error) {
+            this.logger.logError('Failed to update website scan results with combined result metadata.', {
+                error: System.serializeError(error),
+            });
+
+            throw new Error(
+                `Failed to update website scan results with combined result metadata. Document Id: ${
+                    websiteScanResult.id
+                } Error: ${System.serializeError(error)}`,
+            );
+        }
+    }
+
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<AxeScanResults> {
         const axeScanResults = await this.scanner.scan(url);
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
@@ -128,6 +250,8 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+
+        return axeScanResults.error ? undefined : axeScanResults;
     }
 
     private async queueScanCompletionNotification(fullPageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -141,114 +265,33 @@ export class Runner {
         }
     }
 
-    private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
-        return {
-            state,
-            timestamp: new Date().toJSON(),
-            error,
-        };
-    }
+    private async getCombinedResultsBlob(combinedResultsBlobId: string): Promise<CombinedScanResultsReadResponse> {
+        if (combinedResultsBlobId === undefined) {
+            this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
 
-    private async updateCombinedResults(websiteScanIds: string[]): Promise<void> {
-        if (isNil(websiteScanIds)) {
-            return;
+            return this.combinedScanResultsProvider.getEmptyResponse();
         }
 
-        await Promise.all(
-            websiteScanIds.map(async (websiteScanId) => {
-                await this.getOrCreateCombinedResults(websiteScanId);
-            }),
-        );
-    }
-
-    private async getOrCreateCombinedResults(websiteScanId: string): Promise<CombinedScanResults | null> {
-        let websiteScanResult: WebsiteScanResult;
-        try {
-            websiteScanResult = await this.websiteScanResultProvider.read(websiteScanId);
-            this.logger.logInfo('Successfully fetched combined axe scan results blob.', { websiteScanId });
-        } catch (error) {
-            this.logger.logError('Failed to read website scan results', { error: JSON.stringify(error), websiteScanId });
-
-            return null;
-        }
-
-        if (websiteScanResult.combinedResultsBlobId) {
-            return this.getCombinedResultsBlob(websiteScanResult.combinedResultsBlobId, websiteScanId);
-        }
-
-        return this.createCombinedResultsBlob(websiteScanResult);
-    }
-
-    private async getCombinedResultsBlob(combinedResultsBlobId: string, websiteScanId: string): Promise<CombinedScanResults | null> {
-        const loggerProperties = {
-            combinedResultsBlobId,
-            websiteScanId,
-        };
         const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
+        if (response.error?.errorCode === 'blobNotFound') {
+            this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');
 
-        if (response.error) {
+            return this.combinedScanResultsProvider.getEmptyResponse();
+        } else if (response.error) {
             this.logger.logError('Failed to read combined axe result results blob.', {
                 error: JSON.stringify(response.error),
-                ...loggerProperties,
             });
 
-            return null;
+            throw new Error(
+                `Failed to read combined axe result results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(
+                    response.error,
+                )}`,
+            );
         }
 
-        this.logger.logInfo('Successfully retrieved combined axe scan results from blob storage.', loggerProperties);
+        this.logger.logInfo('Successfully retrieved combined axe scan results from a blob storage.');
 
-        return response.results;
-    }
-
-    private async createCombinedResultsBlob(websiteScanResult: WebsiteScanResult): Promise<CombinedScanResults | null> {
-        const combinedResultsBlobId = this.guidGenerator.createGuid();
-        const loggerProperties = {
-            websiteScanId: websiteScanResult.id,
-            combinedResultsBlobId,
-        };
-        this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.', loggerProperties);
-
-        const response = await this.combinedScanResultsProvider.createCombinedResults(combinedResultsBlobId);
-        if (response.error) {
-            this.logger.logError('Failed to create new combined axe scan results.', {
-                error: JSON.stringify(response.error),
-                ...loggerProperties,
-            });
-
-            return null;
-        }
-
-        const updatedWebsiteScanResults = {
-            id: websiteScanResult.id,
-            combinedResultsBlobId: combinedResultsBlobId,
-            _etag: websiteScanResult._etag,
-        };
-        try {
-            this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
-            this.logger.logInfo('Successfully updated website scan results with combined axe scan results blob id.', loggerProperties);
-
-            return response.results;
-        } catch (error) {
-            this.logger.logError('Failed to update website scan results with combined axe scan results blob id', {
-                error: JSON.stringify(error),
-                ...loggerProperties,
-            });
-
-            return null;
-        }
-    }
-
-    private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults.results.violations !== undefined && axeResults.results.violations.length > 0) {
-            return {
-                state: 'fail',
-                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
-            };
-        } else {
-            return {
-                state: 'pass',
-            };
-        }
+        return response;
     }
 
     private async generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
@@ -276,6 +319,27 @@ export class Runner {
             runStatus: scanResult.run.state,
             scanStatus: scanResult.scanResult?.state,
         };
+    }
+
+    private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
+        return {
+            state,
+            timestamp: new Date().toJSON(),
+            error,
+        };
+    }
+
+    private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
+        if (axeResults.results.violations !== undefined && axeResults.results.violations.length > 0) {
+            return {
+                state: 'fail',
+                issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
+            };
+        } else {
+            return {
+                state: 'pass',
+            };
+        }
     }
 
     private async getDefaultFeatureFlags(): Promise<FeatureFlags> {

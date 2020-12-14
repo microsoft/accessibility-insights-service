@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import { Readable } from 'stream';
 import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, BlobContentUploadResponse } from 'azure-services';
-import { CombinedAxeResults, CombinedScanResults } from 'storage-documents';
+import { CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
-import { AxeResults } from 'axe-result-converter';
-import { BodyParser } from 'common';
+import { BodyParser, System } from 'common';
+import { AxeResults, AxeResult } from 'axe-result-converter';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
 
@@ -20,25 +20,20 @@ describe(CombinedScanResultsProvider, () => {
             failed: 2,
             total: 3,
         },
-        axeResults: {},
-    } as CombinedScanResults;
-    const resultsString = JSON.stringify(combinedResults);
-
-    const emptyResults = {
-        urlCount: {
-            failed: 0,
-            passed: 0,
-            total: 0,
-        },
         axeResults: {
             urls: [],
-            violations: new AxeResults().serialize(),
-            passes: new AxeResults().serialize(),
-            incomplete: new AxeResults().serialize(),
-            inapplicable: new AxeResults().serialize(),
-        } as CombinedAxeResults,
-    };
-    const emptyResultsString = JSON.stringify(emptyResults);
+            violations: new AxeResults(),
+            passes: new AxeResults(),
+            incomplete: new AxeResults(),
+            inapplicable: new AxeResults(),
+        },
+    } as CombinedScanResults;
+    combinedResults.axeResults.violations.add('1', { fingerprint: 'a' } as AxeResult);
+    combinedResults.axeResults.passes.add('2', { fingerprint: 'b' } as AxeResult);
+    combinedResults.axeResults.incomplete.add('3', { fingerprint: 'c' } as AxeResult);
+    combinedResults.axeResults.inapplicable.add('4', { fingerprint: 'd' } as AxeResult);
+    const resultsString = JSON.stringify(combinedResults);
+
     const etag = 'etag';
     const readableStream = {
         readable: true,
@@ -63,12 +58,12 @@ describe(CombinedScanResultsProvider, () => {
         blobStorageClientMock.verifyAll();
     });
 
-    describe('saveCombinedResults', () => {
+    describe('writeCombinedResults', () => {
         it('without etag', async () => {
             setupSave(resultsString, 200);
             const expectedResult = { etag };
 
-            const result = await testSubject.saveCombinedResults(fileId, combinedResults);
+            const result = await testSubject.writeCombinedResults(fileId, combinedResults);
 
             expect(result).toEqual(expectedResult);
         });
@@ -77,7 +72,7 @@ describe(CombinedScanResultsProvider, () => {
             setupSave(resultsString, 200, { ifMatchEtag: etag });
             const expectedResult = { etag };
 
-            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+            const result = await testSubject.writeCombinedResults(fileId, combinedResults, etag);
 
             expect(result).toEqual(expectedResult);
         });
@@ -90,7 +85,7 @@ describe(CombinedScanResultsProvider, () => {
                 },
             };
 
-            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+            const result = await testSubject.writeCombinedResults(fileId, combinedResults, etag);
 
             expect(result).toEqual(expectedResult);
         });
@@ -104,14 +99,14 @@ describe(CombinedScanResultsProvider, () => {
                 },
             };
 
-            const result = await testSubject.saveCombinedResults(fileId, combinedResults, etag);
+            const result = await testSubject.writeCombinedResults(fileId, combinedResults, etag);
 
             expect(result).toEqual(expectedResult);
         });
     });
 
     describe('readCombinedResults', () => {
-        it('Read combined results', async () => {
+        it('read combined results', async () => {
             setupReadBlob();
             setupReadStream(resultsString);
             const expectedResults = {
@@ -128,7 +123,7 @@ describe(CombinedScanResultsProvider, () => {
             setupDocumentNotFound();
             const expectedResults = {
                 error: {
-                    errorCode: 'documentNotFound',
+                    errorCode: 'blobNotFound',
                 },
             };
 
@@ -144,7 +139,7 @@ describe(CombinedScanResultsProvider, () => {
             const expectedResults = {
                 error: {
                     errorCode: 'streamError',
-                    data: JSON.stringify(error),
+                    data: System.serializeError(error),
                 },
             };
 
@@ -157,45 +152,13 @@ describe(CombinedScanResultsProvider, () => {
             const unparsableString = '{ unparsable content string';
             setupReadBlob();
             setupReadStream(unparsableString);
-            const expectedResults = {
-                error: {
-                    errorCode: 'JSONParseError',
-                    data: unparsableString,
-                },
-            };
 
             const actualResults = await testSubject.readCombinedResults(fileId);
 
-            expect(actualResults).toEqual(expectedResults);
-        });
-    });
-
-    describe('createCombinedResults', () => {
-        it('returns error if results already exist', async () => {
-            setupReadBlob();
-            setupReadStream(resultsString);
-            const expectedResults = {
-                error: {
-                    errorCode: 'documentAlreadyExists',
-                },
-            };
-
-            const actualResults = await testSubject.createCombinedResults(fileId);
-
-            expect(actualResults).toEqual(expectedResults);
-        });
-
-        it('creates results if none exist', async () => {
-            setupDocumentNotFound();
-            setupSave(emptyResultsString, 200);
-            const expectedResults = {
-                results: emptyResults,
-                etag: etag,
-            };
-
-            const actualResults = await testSubject.createCombinedResults(fileId);
-
-            expect(actualResults).toEqual(expectedResults);
+            expect(actualResults.error.errorCode).toEqual('jsonParseError');
+            expect(actualResults.error.data).toStartWith(
+                `{\n  name: 'SyntaxError',\n  message: 'Unexpected token u in JSON at position 2',`,
+            );
         });
     });
 

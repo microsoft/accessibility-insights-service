@@ -27,11 +27,10 @@ describe('registerReportGeneratorToContainer', () => {
 
     it('container has both sarif and html report generators', () => {
         const axeResultConverters: AxeResultConverter[] = container.get(iocTypeNames.AxeResultConverters);
-        expect(axeResultConverters.length).toBe(3);
+        expect(axeResultConverters.length).toBe(2);
 
         const axeResultConverterTypes = axeResultConverters.map((converter) => converter.targetReportFormat);
         expect(axeResultConverterTypes).toContain('html');
         expect(axeResultConverterTypes).toContain('sarif');
-        expect(axeResultConverterTypes).toContain('consolidated.html');
     });
 });

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 export interface LoggerProperties {
+    [key: string]: string;
     scanId?: string;
     url?: string;
     batchRequestId?: string;
