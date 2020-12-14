@@ -6,7 +6,7 @@ import { Report, Reporter, ReporterFactory } from 'accessibility-insights-report
 import { AxeResults } from 'axe-core';
 import * as MockDate from 'mockdate';
 import { IMock, Mock, Times } from 'typemoq';
-import { ReportGenerationParams } from './axe-result-converter';
+import { AxeResultConverterOptions } from './axe-result-converter';
 import { AxeResultToHtmlConverter } from './axe-result-to-html-converter';
 import { htmlReportStrings } from './html-report-strings';
 
@@ -17,7 +17,7 @@ describe('AxeResultToHtmlConverter', () => {
     const htmlReportString = 'html report';
     const scanUrl = 'scan url';
     let axeResults: AxeResults;
-    const params: ReportGenerationParams = {
+    const axeResultConverterOptions: AxeResultConverterOptions = {
         pageTitle: 'page title',
     };
     let time: Date;
@@ -46,7 +46,7 @@ describe('AxeResultToHtmlConverter', () => {
             description: `Automated report for accessibility scan of url ${scanUrl} completed at ${time.toUTCString()}.`,
             serviceName: htmlReportStrings.serviceName,
             scanContext: {
-                pageTitle: params.pageTitle,
+                pageTitle: axeResultConverterOptions.pageTitle,
             },
         };
 
@@ -55,7 +55,7 @@ describe('AxeResultToHtmlConverter', () => {
             .returns(() => htmlReport)
             .verifiable(Times.once());
 
-        const report = axeHtmlResultConverter.convert(axeResults, params);
+        const report = axeHtmlResultConverter.convert(axeResults, axeResultConverterOptions);
 
         reporterMock.verifyAll();
         expect(report).toEqual(htmlReportString);

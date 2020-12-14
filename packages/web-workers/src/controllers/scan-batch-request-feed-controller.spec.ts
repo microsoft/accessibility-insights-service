@@ -20,6 +20,7 @@ import {
     OnDemandPageScanResult,
     PartitionKey,
     WebsiteScanResult,
+    WebsiteScanRef,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -113,7 +114,7 @@ describe(ScanBatchRequestFeedController, () => {
                         site: {
                             baseUrl: 'base-url-1',
                         },
-                        reportGroups: [{ consolidatedId: 'consolidated-id-1' }, { consolidatedId: 'consolidated-id-2' }],
+                        reportGroups: [{ consolidatedId: 'consolidated-id-1' }],
                     },
                     {
                         scanId: 'scan-2',
@@ -171,6 +172,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     const websiteScanResult = {
                         baseUrl: request.site.baseUrl,
                         scanGroupId: reportGroup.consolidatedId,
+                        scanGroupType: 'consolidated-scan-report',
                         pageScans: [
                             {
                                 scanId: request.scanId,
@@ -201,7 +203,11 @@ function setupOnDemandPageScanRunResultProviderMock(
         const dbDocuments = document.scanRunBatchRequest
             .filter((request) => request.scanId !== undefined)
             .map<OnDemandPageScanResult>((request) => {
-                const websiteScanIds = websiteScanResults.filter((r) => r.pageScans[0].scanId === request.scanId).map((r) => r.id);
+                const websiteScanRefs = websiteScanResults
+                    .filter((r) => r.pageScans[0].scanId === request.scanId)
+                    .map((r) => {
+                        return { id: r.id, scanGroupType: 'consolidated-scan-report' } as WebsiteScanRef;
+                    });
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,
                     url: request.url,
@@ -213,7 +219,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
-                    websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
+                    websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
                 };
 
                 if (request.scanNotifyUrl !== undefined) {

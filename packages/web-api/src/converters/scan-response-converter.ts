@@ -87,15 +87,7 @@ export class ScanResponseConverter {
 
         const baseUrlFixed = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-        let scanReports = pageScanResultDocument.reports;
-
-        if (isEmpty(pageScanResultDocument.websiteScanIds)) {
-            scanReports = pageScanResultDocument.reports.filter((report) => {
-                return report.format !== 'consolidated.html';
-            });
-        }
-
-        return scanReports.map((report) => {
+        return pageScanResultDocument.reports.map((report) => {
             return {
                 reportId: report.reportId,
                 format: report.format,
