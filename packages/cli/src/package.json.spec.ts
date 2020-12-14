@@ -23,12 +23,29 @@ describe('package.json dependencies', () => {
     // dependencies of other monorepo packages. To avoid breaking consumers, that means that we
     // need to repeat those transitive dependencies in our own dependency list; ie, the "cli" dependency
     // list should be a superset of the "common" dependency list.
-    it.each(monorepoDevDependencies)("is a superset of %s's dependencies", async (monorepoPackageName) => {
-        const edgeNonMonorepoDependencies = await getEdgeNonMonorepoDependencies(monorepoPackageName);
-        const directDependencies = Object.keys(packageJson.dependencies);
-        for (const edgeNonMonorepoDependency of edgeNonMonorepoDependencies) {
-            expect(directDependencies).toContain(edgeNonMonorepoDependency);
+    it('includes direct dependencies for each non-monorepo dependency of its transitive monorepo dependencies', async () => {
+        const actualDirectDependencies = Object.keys(packageJson.dependencies);
+    
+        const missingDependenciesToResponsibleDependents: { [missingDependency: string]: string[] } = {};
+        for (const monorepoDevDependency of monorepoDevDependencies) {
+            const expectedNonMonorepoDependencies = await getEdgeNonMonorepoDependencies(monorepoDevDependency);
+            const missingDependencies = expectedNonMonorepoDependencies.filter(d => !actualDirectDependencies.includes(d));
+            for(const missingDependency of missingDependencies) {
+                if (!missingDependenciesToResponsibleDependents[missingDependency]) {
+                    missingDependenciesToResponsibleDependents[missingDependency] = [];
+                }
+                missingDependenciesToResponsibleDependents[missingDependency].push(monorepoDevDependency);
+            }
         }
+
+        const missingDependencyExplanations = Object.keys(missingDependenciesToResponsibleDependents)
+            .sort()
+            .map(missingDependency => {
+                const responsibleDependents = missingDependenciesToResponsibleDependents[missingDependency].sort();
+                return `package.json needs a dependency on ${missingDependency} (required via ${responsibleDependents.join(', ')})`;
+            });
+        
+        expect(missingDependencyExplanations).toBe([]);
     });
 
     // suppose:
@@ -44,7 +61,9 @@ describe('package.json dependencies', () => {
         const directNonMonorepoDeps = deps.filter((d) => !isMonorepoPackage(d));
         const directMonorepoDeps = deps.filter(isMonorepoPackage);
         const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
+        const edgeNonMonorepoDeps = [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
+        const dedupedEdgeNonMonorepoDeps = [...new Set(edgeNonMonorepoDeps)];
 
-        return [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
+        return dedupedEdgeNonMonorepoDeps;
     }
 });
