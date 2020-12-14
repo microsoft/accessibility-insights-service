@@ -23,8 +23,8 @@ describe('package.json dependencies', () => {
     // dependencies of other monorepo packages. To avoid breaking consumers, that means that we
     // need to repeat those transitive dependencies in our own dependency list; ie, the "cli" dependency
     // list should be a superset of the "common" dependency list.
-    it.each(monorepoDevDependencies)("is a superset of %s's dependencies", async (monrepoPackageName) => {
-        const edgeNonMonorepoDependencies = await getEdgeNonMonorepoDependencies(monrepoPackageName);
+    it.each(monorepoDevDependencies)("is a superset of %s's dependencies", async (monorepoPackageName) => {
+        const edgeNonMonorepoDependencies = await getEdgeNonMonorepoDependencies(monorepoPackageName);
         const directDependencies = Object.keys(packageJson.dependencies);
         for (const edgeNonMonorepoDependency of edgeNonMonorepoDependencies) {
             expect(directDependencies).toContain(edgeNonMonorepoDependency);
