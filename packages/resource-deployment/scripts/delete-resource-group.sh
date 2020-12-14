@@ -48,7 +48,7 @@ deleteResourceGroup() {
 }
 
 deleteApimIfExists() {
-    response=$(az apim show --name $keyVault --resource-group $resourceGroupName -o tsv)
+    response=$(az apim list --resource-group $resourceGroupName --query "[?name=='$apiManagementName']" -o tsv)
 
     if [[ -n "$response" ]]; then
         echo "Deleting API Management $apiManagementName..."
