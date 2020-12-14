@@ -6,11 +6,25 @@ const webpack = require('webpack');
 const nodeExternals = require('webpack-node-externals');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const copyFilesPlugin = require('copy-webpack-plugin');
+const { listMonorepoPackageNames } = require('common/dist/build-utilities/monorepo-packages');
+
+// We set external node_modules as "externals" (ie, we don't bundle them), but we bundle other
+// monorepo packages. From a library consumer's perspective, that means that they never see
+// the other monorepo packages' package.json metadata; therefore, it is important that this
+// package's "dependencies" entry be a superset of all the dependencies from all of the other
+// monorepo packages we use. package.json.spec.ts enforces this.
+function monorepoExternals() {
+    return nodeExternals({
+        additionalModuleDirs: [path.join(__dirname, '../../node_modules')],
+        // "allowlist" means "these packages are *not* externals, have webpack bundle them"
+        allowlist: listMonorepoPackageNames(),
+    });
+}
 
 function getCommonConfig(version, generateTypings) {
     return {
         devtool: 'cheap-source-map',
-        externals: ['apify', 'apify-shared', 'axe-core', '@axe-core/puppeteer', 'puppeteer', 'yargs', 'levelup', 'leveldown'],
+        externals: [monorepoExternals()],
         mode: 'development',
         module: {
             rules: [
@@ -104,7 +118,6 @@ module.exports = (env) => {
         {
             ...getCommonConfig(version, true),
             name: 'ai-scan',
-            externals: [nodeExternals()],
             entry: {
                 ['index']: path.resolve('./src/index.ts'),
             },
