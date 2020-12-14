@@ -172,7 +172,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createConsolidatedScanRequest, requestData);
         const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createConsolidatedScanRequest);
-        this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId}`);
+        this.logOrchestrationStep(`Orchestrator submitted consolidated scan request with scan Id: ${scanId}`);
 
         return scanId;
     }

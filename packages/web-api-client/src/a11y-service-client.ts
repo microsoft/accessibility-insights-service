@@ -43,9 +43,9 @@ export class A11yServiceClient {
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest = { url: scanUrl };
+        const scanRequestData: ScanRunRequest = { url: scanUrl };
 
-        return this.postScanUrlWithRequest(requestBody, priority);
+        return this.postScanUrlWithRequest(scanRequestData, priority);
     }
 
     public async postConsolidatedScan(
@@ -53,19 +53,19 @@ export class A11yServiceClient {
         reportId: string,
         priority?: number,
     ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest = {
+        const scanRequestData: ScanRunRequest = {
             url: scanUrl,
             site: { baseUrl: scanUrl },
             reportGroups: [{ consolidatedId: reportId }],
         };
 
-        return this.postScanUrlWithRequest(requestBody, priority);
+        return this.postScanUrlWithRequest(scanRequestData, priority);
     }
 
-    private async postScanUrlWithRequest(requestBody: ScanRunRequest, priority: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        requestBody.priority = priority || 0;
+    private async postScanUrlWithRequest(scanRequestData: ScanRunRequest, priority: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        scanRequestData.priority = priority || 0;
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: Options = { json: [requestBody] };
+        const options: Options = { json: [scanRequestData] };
 
         return (await this.retryHelper.executeWithRetries(
             async () => (await this.signRequest()).post(requestUrl, options),

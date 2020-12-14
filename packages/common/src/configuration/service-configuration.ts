@@ -269,7 +269,7 @@ export class ServiceConfiguration {
                 },
                 consolidatedReportId: {
                     format: 'String',
-                    default: 'somerandomid',
+                    default: 'e2e-consolidated-report-id',
                     doc: 'The id for the consolidated report',
                 },
                 maxScanWaitTimeInSeconds: {
