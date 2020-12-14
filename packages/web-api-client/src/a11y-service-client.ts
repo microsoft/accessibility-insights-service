@@ -62,7 +62,10 @@ export class A11yServiceClient {
         return this.postScanUrlWithRequest(scanRequestData, priority);
     }
 
-    private async postScanUrlWithRequest(scanRequestData: ScanRunRequest, priority: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+    private async postScanUrlWithRequest(
+        scanRequestData: ScanRunRequest,
+        priority: number,
+    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         scanRequestData.priority = priority || 0;
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
         const options: Options = { json: [scanRequestData] };
