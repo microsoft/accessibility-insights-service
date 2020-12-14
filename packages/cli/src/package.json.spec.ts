@@ -25,13 +25,13 @@ describe('package.json dependencies', () => {
     // list should be a superset of the "common" dependency list.
     it('includes direct dependencies for each non-monorepo dependency of its transitive monorepo dependencies', async () => {
         const actualDirectDependencyNames = Object.keys(packageJson.dependencies);
-        const actualDirectDependencies = actualDirectDependencyNames.map(name => formatDependencyListing(name, packageJson.dependencies));
-    
+        const actualDirectDependencies = actualDirectDependencyNames.map((name) => formatDependencyListing(name, packageJson.dependencies));
+
         const missingDependenciesToResponsibleDependents: { [missingDependency: string]: string[] } = {};
         for (const monorepoDevDependency of monorepoDevDependencies) {
             const expectedNonMonorepoDependencies = await getEdgeNonMonorepoDependencies(monorepoDevDependency);
-            const missingDependencies = expectedNonMonorepoDependencies.filter(d => !actualDirectDependencies.includes(d));
-            for(const missingDependency of missingDependencies) {
+            const missingDependencies = expectedNonMonorepoDependencies.filter((d) => !actualDirectDependencies.includes(d));
+            for (const missingDependency of missingDependencies) {
                 if (!missingDependenciesToResponsibleDependents[missingDependency]) {
                     missingDependenciesToResponsibleDependents[missingDependency] = [];
                 }
@@ -41,11 +41,11 @@ describe('package.json dependencies', () => {
 
         const missingDependencyExplanations = Object.keys(missingDependenciesToResponsibleDependents)
             .sort()
-            .map(missingDependency => {
+            .map((missingDependency) => {
                 const responsibleDependents = missingDependenciesToResponsibleDependents[missingDependency].sort();
                 return `package.json needs a dependency on ${missingDependency} (required via ${responsibleDependents.join(', ')})`;
             });
-        
+
         expect(missingDependencyExplanations).toStrictEqual([]);
     });
 
@@ -54,17 +54,19 @@ describe('package.json dependencies', () => {
     }
 
     // suppose:
-    //   * /packages/monorepo-foo/package.json has dependencies: { 'monorepo-bar': '*', 'external-a': '*' }
-    //   * /packages/monorepo-bar/package.json has dependencies: { 'external-b': '*' }
-    //   * /node_modules/external-a/package.json has dependencies: { 'external-c': '*' }
+    //   * /packages/monorepo-foo/package.json has dependencies: { "monorepo-bar": "1", "external-a": "2" }
+    //   * /packages/monorepo-bar/package.json has dependencies: { "external-b": "3" }
+    //   * /node_modules/external-a/package.json has dependencies: { "external-c": "4" }
     //   * external-b and external-c have no dependencies
     //
-    // then getEdgeNonMonorepoDependencies('monorepo-foo') returns ['external-a', 'external-b']
+    // then getEdgeNonMonorepoDependencies('monorepo-foo') returns ['"external-a": "2"', '"external-b": "3"']
     async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
         const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
         const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
         const directNonMonorepoDepNames = deps.filter((d) => !isMonorepoPackage(d));
-        const directNonMonorepoDeps = directNonMonorepoDepNames.map(name => formatDependencyListing(name, monorepoPackageJson.dependencies))
+        const directNonMonorepoDeps = directNonMonorepoDepNames.map((name) =>
+            formatDependencyListing(name, monorepoPackageJson.dependencies),
+        );
         const directMonorepoDeps = deps.filter(isMonorepoPackage);
         const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
         const edgeNonMonorepoDeps = [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
