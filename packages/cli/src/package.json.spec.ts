@@ -46,7 +46,7 @@ describe('package.json dependencies', () => {
                 return `package.json needs a dependency on ${missingDependency} (required via ${responsibleDependents.join(', ')})`;
             });
         
-        expect(missingDependencyExplanations).toBe([]);
+        expect(missingDependencyExplanations).toStrictEqual([]);
     });
 
     function formatDependencyListing(depName: string, dependencies: { [x: string]: string }): string {
