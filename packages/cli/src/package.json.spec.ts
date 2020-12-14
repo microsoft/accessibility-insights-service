@@ -24,7 +24,8 @@ describe('package.json dependencies', () => {
     // need to repeat those transitive dependencies in our own dependency list; ie, the "cli" dependency
     // list should be a superset of the "common" dependency list.
     it('includes direct dependencies for each non-monorepo dependency of its transitive monorepo dependencies', async () => {
-        const actualDirectDependencies = Object.keys(packageJson.dependencies);
+        const actualDirectDependencyNames = Object.keys(packageJson.dependencies);
+        const actualDirectDependencies = actualDirectDependencyNames.map(name => formatDependencyListing(name, packageJson.dependencies));
     
         const missingDependenciesToResponsibleDependents: { [missingDependency: string]: string[] } = {};
         for (const monorepoDevDependency of monorepoDevDependencies) {
@@ -48,6 +49,10 @@ describe('package.json dependencies', () => {
         expect(missingDependencyExplanations).toBe([]);
     });
 
+    function formatDependencyListing(depName: string, dependencies: { [x: string]: string }): string {
+        return `${JSON.stringify(depName)}: ${JSON.stringify(dependencies[depName])}`;
+    }
+
     // suppose:
     //   * /packages/monorepo-foo/package.json has dependencies: { 'monorepo-bar': '*', 'external-a': '*' }
     //   * /packages/monorepo-bar/package.json has dependencies: { 'external-b': '*' }
@@ -58,7 +63,8 @@ describe('package.json dependencies', () => {
     async function getEdgeNonMonorepoDependencies(monorepoPackageName: string): Promise<string[]> {
         const monorepoPackageJson = await import(`${monorepoPackageName}/package.json`);
         const deps: string[] = Object.keys(monorepoPackageJson.dependencies);
-        const directNonMonorepoDeps = deps.filter((d) => !isMonorepoPackage(d));
+        const directNonMonorepoDepNames = deps.filter((d) => !isMonorepoPackage(d));
+        const directNonMonorepoDeps = directNonMonorepoDepNames.map(name => formatDependencyListing(name, monorepoPackageJson.dependencies))
         const directMonorepoDeps = deps.filter(isMonorepoPackage);
         const indirectNonMonorepoDepGroups = await Promise.all(directMonorepoDeps.map(getEdgeNonMonorepoDependencies));
         const edgeNonMonorepoDeps = [...directNonMonorepoDeps, ...flatten(indirectNonMonorepoDepGroups)];
