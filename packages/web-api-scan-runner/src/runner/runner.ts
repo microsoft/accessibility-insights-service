@@ -109,6 +109,7 @@ export class Runner {
             this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
         }
 
+        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
         await this.queueScanCompletionNotification(pageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
@@ -232,39 +233,6 @@ export class Runner {
         }
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<AxeScanResults> {
-        const axeScanResults = await this.scanner.scan(url);
-        if (isNil(axeScanResults.error)) {
-            pageScanResult.run = this.createRunResult('completed');
-            pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
-            if (axeScanResults.scannedUrl !== undefined) {
-                pageScanResult.scannedUrl = axeScanResults.scannedUrl;
-            }
-        } else {
-            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
-
-            this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
-            this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
-        }
-
-        pageScanResult.run.pageTitle = axeScanResults.pageTitle;
-        pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
-
-        return axeScanResults.error ? undefined : axeScanResults;
-    }
-
-    private async queueScanCompletionNotification(fullPageScanResult: OnDemandPageScanResult): Promise<void> {
-        const featureFlags = await this.getDefaultFeatureFlags();
-        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
-        if (featureFlags.sendNotification && !isEmpty(fullPageScanResult?.notification?.scanNotifyUrl)) {
-            this.logger.logInfo(`Queuing scan completion notification queue message.`, {
-                scanNotifyUrl: fullPageScanResult.notification.scanNotifyUrl,
-            });
-            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(fullPageScanResult));
-        }
-    }
-
     private async getCombinedResultsBlob(combinedResultsBlobId: string): Promise<CombinedScanResultsReadResponse> {
         if (combinedResultsBlobId === undefined) {
             this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
@@ -292,6 +260,39 @@ export class Runner {
         this.logger.logInfo('Successfully retrieved combined axe scan results from a blob storage.');
 
         return response;
+    }
+
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<AxeScanResults> {
+        const axeScanResults = await this.scanner.scan(url);
+        if (isNil(axeScanResults.error)) {
+            pageScanResult.run = this.createRunResult('completed');
+            pageScanResult.scanResult = this.getScanStatus(axeScanResults);
+            pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
+            if (axeScanResults.scannedUrl !== undefined) {
+                pageScanResult.scannedUrl = axeScanResults.scannedUrl;
+            }
+        } else {
+            pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
+
+            this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
+            this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
+        }
+
+        pageScanResult.run.pageTitle = axeScanResults.pageTitle;
+        pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
+
+        return axeScanResults.error ? undefined : axeScanResults;
+    }
+
+    private async queueScanCompletionNotification(pageScanResult: OnDemandPageScanResult): Promise<void> {
+        const featureFlags = await this.getDefaultFeatureFlags();
+        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
+        if (featureFlags.sendNotification && !isEmpty(pageScanResult?.notification?.scanNotifyUrl)) {
+            this.logger.logInfo(`Queuing scan completion notification queue message.`, {
+                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            });
+            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(pageScanResult));
+        }
     }
 
     private async generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {

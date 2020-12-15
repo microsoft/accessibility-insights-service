@@ -13,18 +13,19 @@ import {
     OnDemandPageScanRunResultProvider,
     PageScanRunReportProvider,
     WebsiteScanResultProvider,
+    CombinedScanResultsWriteResponse,
     CombinedScanResultsReadResponse,
 } from 'service-library';
 import {
-    CombinedScanResults,
     ItemType,
     OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanState,
-    WebsiteScanResult,
     WebsiteScanRef,
+    WebsiteScanResult,
+    CombinedScanResults,
 } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResultsReducer } from 'axe-result-converter';
@@ -38,6 +39,11 @@ import { Runner } from './runner';
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
+
+interface ScanRunTimestamps {
+    scanRequestTime: Date;
+    scanCompleteTime: Date;
+}
 
 describe(Runner, () => {
     let runner: Runner;
@@ -88,6 +94,7 @@ describe(Runner, () => {
         unscannable: false,
         pageTitle: pageTitle,
         pageResponseCode: pageResponseCode,
+        userAgent: 'userAgent',
     };
 
     const unscannableAxeScanResults: AxeScanResults = {
@@ -199,17 +206,22 @@ describe(Runner, () => {
 
     afterEach(() => {
         MockDate.reset();
+        guidGeneratorMock.verifyAll();
+        scanMetadataConfig.verifyAll();
         scannerMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
+        loggerMock.verifyAll();
+        pageScanRunReportProviderMock.verifyAll();
+        reportGeneratorMock.verifyAll();
         serviceConfigurationMock.verifyAll();
         notificationQueueMessageSenderMock.verifyAll();
         websiteScanResultsProviderMock.verifyAll();
         combinedScanResultsProviderMock.verifyAll();
+        axeResultsReducerMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
         scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(unscannableAxeScanResults))
@@ -222,9 +234,7 @@ describe(Runner, () => {
 
     it('sets job state to failed if scanner throws', async () => {
         const failureMessage = 'scanner task failed message';
-
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
         scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.reject(failureMessage))
@@ -267,7 +277,6 @@ describe(Runner, () => {
 
     it('sets scan status to pass if violation length = 0', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
         scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(passedAxeScanResults))
@@ -282,7 +291,6 @@ describe(Runner, () => {
 
     it('return redirected url', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
         scannerMock
@@ -301,7 +309,6 @@ describe(Runner, () => {
 
     it('sets scan status to fail if violation length > 0', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-
         scannerMock
             .setup(async (s) => s.scan(scanMetadata.url))
             .returns(async () => Promise.resolve(axeScanResultsWithViolations))
@@ -371,7 +378,6 @@ describe(Runner, () => {
             })
             .verifiable();
         setupGenerateReportsCall(unscannableAxeScanResults);
-        setupSaveAllReportsCall();
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
@@ -412,10 +418,8 @@ describe(Runner, () => {
                         .returns(async () => Promise.resolve(passedAxeScanResults))
                         .verifiable();
 
-                    const fullResult = cloneDeep(onDemandPageScanResult);
-                    fullResult.notification = notification;
-                    setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-                    setupUpdateScanRunResultCall(getScanResultWithNoViolations(), fullResult);
+                    setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification });
+                    setupUpdateScanRunResultCall({ ...getScanResultWithNoViolations(), notification });
                     setupSendNotificationMessageNeverCalled();
 
                     await runner.run();
@@ -434,14 +438,9 @@ describe(Runner, () => {
 
                 setupGenerateReportsCall(scanResults);
                 setupSaveAllReportsCall();
-
-                const fullResult = cloneDeep(onDemandPageScanResult);
-                fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
-                setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-                setupUpdateScanRunResultCall(
-                    scanStatus === 'pass' ? getScanResultWithNoViolations() : getScanResultWithViolations(),
-                    fullResult,
-                );
+                setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification: { scanNotifyUrl: scanNotifyUrl } });
+                const updatePageScanResult = scanStatus === 'pass' ? getScanResultWithNoViolations() : getScanResultWithViolations();
+                setupUpdateScanRunResultCall({ ...updatePageScanResult, notification: { scanNotifyUrl: scanNotifyUrl } });
                 setupVerifiableSendNotificationMessageCall();
 
                 await runner.run();
@@ -459,10 +458,9 @@ describe(Runner, () => {
                     .returns(async () => Promise.reject(failureMessage))
                     .verifiable(Times.once());
 
-                const fullResult = cloneDeep(onDemandPageScanResult);
-                fullResult.notification = { scanNotifyUrl: scanNotifyUrl };
-                setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-                setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false), fullResult);
+                setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification: { scanNotifyUrl: scanNotifyUrl } });
+                const updatePageScanResult = getFailingJobStateScanResult(System.serializeError(failureMessage), false);
+                setupUpdateScanRunResultCall({ ...updatePageScanResult, notification: { scanNotifyUrl: scanNotifyUrl } });
 
                 setupVerifiableSendNotificationMessageCall();
                 await runner.run();
@@ -471,7 +469,7 @@ describe(Runner, () => {
 
         function setupVerifiableSendNotificationMessageCall(): void {
             notificationQueueMessageSenderMock
-                .setup((ndm) => ndm.sendNotificationMessage(notificationMessage))
+                .setup((o) => o.sendNotificationMessage(It.isValue(notificationMessage)))
                 .returns(async () => Promise.resolve())
                 .verifiable(Times.once());
         }
@@ -481,122 +479,96 @@ describe(Runner, () => {
         }
     });
 
-    describe('Combined website scan', () => {
-        const websiteScanId = 'website scan id';
+    describe('generate combined scan result', () => {
+        const baseUrl = 'baseUrl';
+        const websiteScanId = 'websiteScanId';
+        const reportId = 'reportId';
+        const combinedResultsBlobId = 'combinedResultsBlobId';
+        const websiteScanRefs = [{ id: websiteScanId, scanGroupType: 'consolidated-scan-report' }] as WebsiteScanRef[];
+
+        let scanStarted: Date;
         let websiteScanResult: WebsiteScanResult;
-        const combinedResultsBlobId = 'combined results blob id';
-        const combinedResults = {} as CombinedScanResults;
+        let combinedScanResults: CombinedScanResults;
+        let generatedReport: GeneratedReport;
+        let savedReport: OnDemandPageScanReport;
 
         beforeEach(() => {
+            scanStarted = new Date(2020, 11, 12);
+            guidGeneratorMock.reset();
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => combinedResultsBlobId);
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId);
+            guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
+
             websiteScanResult = {
                 id: websiteScanId,
+                baseUrl,
+                pageScans: [{ timestamp: scanStarted.toISOString() }],
                 _etag: 'etag',
             } as WebsiteScanResult;
+            combinedScanResults = {
+                urlCount: {
+                    total: 1,
+                    passed: 1,
+                },
+                axeResults: {},
+            } as CombinedScanResults;
+            generatedReport = {
+                content: 'consolidated report content',
+                id: reportId,
+                format: 'consolidated.html',
+            } as GeneratedReport;
+            savedReport = {
+                reportId,
+                href: 'href',
+                format: 'consolidated.html',
+            };
+
+            combinedScanResultsProviderMock
+                .setup((o) => o.getEmptyResponse())
+                .returns(() => {
+                    return { results: { ...combinedScanResults, urlCount: { total: 0, passed: 0 } } } as CombinedScanResultsReadResponse;
+                })
+                .verifiable();
+            websiteScanResultsProviderMock
+                .setup(async (o) => o.read(websiteScanId))
+                .returns(async () => websiteScanResult)
+                .verifiable();
+            reportGeneratorMock
+                .setup((r) =>
+                    r.generateConsolidatedReport(combinedScanResults, {
+                        reportId,
+                        baseUrl,
+                        userAgent: passedAxeScanResults.userAgent,
+                        scanStarted,
+                    }),
+                )
+                .returns(() => generatedReport);
+
+            axeResultsReducerMock.setup((o) => o.reduce(combinedScanResults.axeResults, passedAxeScanResults.results)).verifiable();
+
+            websiteScanResultsProviderMock
+                .setup((o) => o.mergeOrCreate({ id: websiteScanId, combinedResultsBlobId, reports: [savedReport], _etag: 'etag' }))
+                .verifiable();
         });
 
-        it('handles website scan results read failure', async () => {
+        it('generate combined scan report without previous combined result', async () => {
             setupSuccessfulWebsiteScan();
-            websiteScanResultsProviderMock
-                .setup((wp) => wp.read(It.isAny()))
-                .throws(new Error())
+            setupSaveReportCall(generatedReport, 'href');
+            combinedScanResultsProviderMock
+                .setup(async (o) => o.writeCombinedResults(combinedResultsBlobId, combinedScanResults, undefined))
+                .returns(async () => {
+                    return {} as CombinedScanResultsWriteResponse;
+                })
                 .verifiable();
             setupCallsAfterCombinedResultsUpdate();
 
             await runner.run();
         });
 
-        describe('results blob does not exist', () => {
-            beforeEach(() => {
-                setupSuccessfulWebsiteScan();
-                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
-            });
-
-            // it('successfully create new results blob', async () => {
-            //     setupCreateNewCombinedResults({});
-
-            //     const mergeProperties = {
-            //         ...websiteScanResult,
-            //         combinedResultsBlobId,
-            //     };
-            //     websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(mergeProperties)).verifiable();
-
-            //     setupCallsAfterCombinedResultsUpdate();
-
-            //     await runner.run();
-            // });
-
-            // it('handles website results update failure', async () => {
-            //     setupCreateNewCombinedResults({});
-
-            //     websiteScanResultsProviderMock
-            //         .setup((wp) => wp.mergeOrCreate(It.isAny()))
-            //         .throws(new Error())
-            //         .verifiable();
-
-            //     setupCallsAfterCombinedResultsUpdate();
-
-            //     await runner.run();
-            // });
-
-            // it('handles blob creation failure', async () => {
-            //     setupCreateNewCombinedResults({ error: {} } as CombinedScanResultsCreateResponse);
-
-            //     websiteScanResultsProviderMock.setup((wp) => wp.mergeOrCreate(It.isAny())).verifiable(Times.never());
-
-            //     setupCallsAfterCombinedResultsUpdate();
-
-            //     await runner.run();
-            // });
-
-            // function setupCreateNewCombinedResults(response: CombinedScanResultsCreateResponse): void {
-            //     guidGeneratorMock.reset();
-            //     guidGeneratorMock.setup((gg) => gg.createGuid()).returns(() => combinedResultsBlobId);
-            //     setupGuidGenerator();
-
-            //     combinedScanResultsProviderMock
-            //         .setup((crp) => crp.createCombinedResults(combinedResultsBlobId))
-            //         .returns(() => Promise.resolve(response))
-            //         .verifiable();
-            // }
-        });
-
-        describe('Results blob already exists', () => {
-            beforeEach(() => {
-                setupSuccessfulWebsiteScan();
-                websiteScanResult.combinedResultsBlobId = combinedResultsBlobId;
-                websiteScanResultsProviderMock.setup((wp) => wp.read(websiteScanId)).returns(() => Promise.resolve(websiteScanResult));
-            });
-
-            it('Successfully reads existing blob', async () => {
-                combinedScanResultsProviderMock
-                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
-                    .returns(() => Promise.resolve({ results: combinedResults }))
-                    .verifiable();
-
-                setupCallsAfterCombinedResultsUpdate();
-
-                await runner.run();
-            });
-
-            it('Handles blob read error', async () => {
-                combinedScanResultsProviderMock
-                    .setup((crp) => crp.readCombinedResults(combinedResultsBlobId))
-                    .returns(() => Promise.resolve({ error: {} } as CombinedScanResultsReadResponse))
-                    .verifiable();
-
-                setupCallsAfterCombinedResultsUpdate();
-
-                await runner.run();
-            });
-        });
-
         function setupSuccessfulWebsiteScan(): void {
-            const scanRunProperties = {
-                websiteScanRefs: [{ id: websiteScanId, scanGroupType: 'consolidated-scan-report' }] as WebsiteScanRef[],
-            };
-            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), scanRunProperties);
+            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { websiteScanRefs });
             scannerMock
-                .setup(async (s) => s.scan(scanMetadata.url))
+                .setup(async (o) => o.scan(scanMetadata.url))
                 .returns(async () => passedAxeScanResults)
                 .verifiable();
         }
@@ -604,7 +576,11 @@ describe(Runner, () => {
         function setupCallsAfterCombinedResultsUpdate(): void {
             setupGenerateReportsCall(passedAxeScanResults);
             setupSaveAllReportsCall();
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
+
+            const scanResult = getScanResultWithNoViolations();
+            scanResult.websiteScanRefs = websiteScanRefs;
+            scanResult.reports.push(savedReport);
+            setupUpdateScanRunResultCall(scanResult);
         }
     });
 
@@ -614,13 +590,13 @@ describe(Runner, () => {
 
     function setupTryUpdateScanRunResultCall(
         result: Partial<OnDemandPageScanResult>,
-        scanRunProperties?: Partial<OnDemandPageScanResult>,
+        returnedProperties?: Partial<OnDemandPageScanResult>,
         succeeded: boolean = true,
     ): void {
         const clonedResult = cloneDeep(result) as OnDemandPageScanResult;
         const returnedResult = {
             ...clonedResult,
-            ...scanRunProperties,
+            ...returnedProperties,
         };
         onDemandPageScanRunResultProviderMock
             .setup(async (d) => d.tryUpdateScanRun(It.isValue(result)))
@@ -673,19 +649,15 @@ describe(Runner, () => {
         return result;
     }
 
-    function setupUpdateScanRunResultCall(
-        result: Partial<OnDemandPageScanResult>,
-        fullResult: OnDemandPageScanResult = onDemandPageScanResult,
-    ): void {
+    function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         const clonedResult = cloneDeep(result);
-        const fullClonedResult = cloneDeep(fullResult);
+        const fullClonedResult = cloneDeep(onDemandPageScanResult);
         fullClonedResult.run = cloneDeep(clonedResult.run);
         fullClonedResult.scanResult = cloneDeep(clonedResult.scanResult);
         fullClonedResult.reports = cloneDeep(clonedResult.reports);
-
         onDemandPageScanRunResultProviderMock
             .setup(async (d) => d.updateScanRun(It.isValue(clonedResult)))
-            .returns(async () => Promise.resolve(fullClonedResult))
+            .returns(async () => Promise.resolve(fullClonedResult as OnDemandPageScanResult))
             .verifiable();
     }
 
@@ -724,14 +696,9 @@ describe(Runner, () => {
         };
     }
 
-    interface ScanRunTimestamps {
-        scanRequestTime: Date;
-        scanCompleteTime: Date;
-    }
-
     function setupGuidGenerator(): void {
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
+        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
     }
 
