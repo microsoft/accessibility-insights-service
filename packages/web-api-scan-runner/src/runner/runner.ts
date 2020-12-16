@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
@@ -35,6 +35,8 @@ import { NotificationQueueMessageSender } from '../sender/notification-queue-mes
 
 @injectable()
 export class Runner {
+    private readonly maxCombinedResultProcessingRetryCount = 2;
+
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
@@ -48,6 +50,7 @@ export class Runner {
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
+        @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
     ) {}
 
     public async run(): Promise<void> {
@@ -116,6 +119,19 @@ export class Runner {
     }
 
     private async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        await this.retryHelper.executeWithRetries(
+            async () => this.generateCombinedScanResultsImpl(axeScanResults, pageScanResult),
+            async (error: Error) => {
+                this.logger.logError(`Failure to generate combined scan result. Retrying on error.`, {
+                    error: System.serializeError(error),
+                });
+            },
+            this.maxCombinedResultProcessingRetryCount,
+            1000,
+        );
+    }
+
+    private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
         if (pageScanResult.websiteScanRefs === undefined || pageScanResult.websiteScanRefs.length === 0) {
             return;
         }

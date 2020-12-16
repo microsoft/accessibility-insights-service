@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
-import { FeatureFlags, GuidGenerator, ServiceConfiguration, System } from 'common';
+import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper } from 'common';
 import { cloneDeep } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
@@ -59,6 +59,8 @@ describe(Runner, () => {
     let websiteScanResultsProviderMock: IMock<WebsiteScanResultProvider>;
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
+    let retryHelperMock: IMock<RetryHelper<void>>;
+
     const scanMetadata: ScanMetadata = {
         id: 'id',
         url: 'url',
@@ -181,6 +183,7 @@ describe(Runner, () => {
         websiteScanResultsProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         combinedScanResultsProviderMock = Mock.ofType<CombinedScanResultsProvider>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
+        retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -201,6 +204,7 @@ describe(Runner, () => {
             websiteScanResultsProviderMock.object,
             combinedScanResultsProviderMock.object,
             axeResultsReducerMock.object,
+            retryHelperMock.object,
         );
     });
 
@@ -218,6 +222,7 @@ describe(Runner, () => {
         websiteScanResultsProviderMock.verifyAll();
         combinedScanResultsProviderMock.verifyAll();
         axeResultsReducerMock.verifyAll();
+        retryHelperMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
@@ -491,6 +496,7 @@ describe(Runner, () => {
         let combinedScanResults: CombinedScanResults;
         let generatedReport: GeneratedReport;
         let savedReport: OnDemandPageScanReport;
+        let combinedScanResultsBlobRead: CombinedScanResultsReadResponse;
 
         beforeEach(() => {
             scanStarted = new Date(2020, 11, 12);
@@ -512,6 +518,9 @@ describe(Runner, () => {
                 },
                 axeResults: {},
             } as CombinedScanResults;
+            combinedScanResultsBlobRead = {
+                results: { ...combinedScanResults, urlCount: { total: 0, passed: 0 } },
+            } as CombinedScanResultsReadResponse;
             generatedReport = {
                 content: 'consolidated report content',
                 id: reportId,
@@ -523,16 +532,6 @@ describe(Runner, () => {
                 format: 'consolidated.html',
             };
 
-            combinedScanResultsProviderMock
-                .setup((o) => o.getEmptyResponse())
-                .returns(() => {
-                    return { results: { ...combinedScanResults, urlCount: { total: 0, passed: 0 } } } as CombinedScanResultsReadResponse;
-                })
-                .verifiable();
-            websiteScanResultsProviderMock
-                .setup(async (o) => o.read(websiteScanId))
-                .returns(async () => websiteScanResult)
-                .verifiable();
             reportGeneratorMock
                 .setup((r) =>
                     r.generateConsolidatedReport(combinedScanResults, {
@@ -545,25 +544,89 @@ describe(Runner, () => {
                 .returns(() => generatedReport);
 
             axeResultsReducerMock.setup((o) => o.reduce(combinedScanResults.axeResults, passedAxeScanResults.results)).verifiable();
-
-            websiteScanResultsProviderMock
-                .setup((o) => o.mergeOrCreate({ id: websiteScanId, combinedResultsBlobId, reports: [savedReport], _etag: 'etag' }))
-                .verifiable();
+            setupRetryHelperMock();
         });
 
         it('generate combined scan report without previous combined result', async () => {
+            setupWebsiteScanResultsProviderMock(websiteScanResult);
+
             setupSuccessfulWebsiteScan();
             setupSaveReportCall(generatedReport, 'href');
-            combinedScanResultsProviderMock
-                .setup(async (o) => o.writeCombinedResults(combinedResultsBlobId, combinedScanResults, undefined))
-                .returns(async () => {
-                    return {} as CombinedScanResultsWriteResponse;
-                })
-                .verifiable();
+            setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false);
             setupCallsAfterCombinedResultsUpdate();
 
             await runner.run();
         });
+
+        it('generate combined scan report with existing combined result', async () => {
+            websiteScanResult.combinedResultsBlobId = combinedResultsBlobId;
+            websiteScanResult.reports = [
+                {
+                    reportId,
+                    href: 'href',
+                    format: 'consolidated.html',
+                },
+            ];
+            setupWebsiteScanResultsProviderMock(websiteScanResult);
+
+            setupSuccessfulWebsiteScan();
+            setupSaveReportCall(generatedReport, 'href');
+            setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, true);
+            setupCallsAfterCombinedResultsUpdate();
+
+            await runner.run();
+        });
+
+        it('fail when combined scan result write has conflict', async () => {
+            serviceConfigurationMock.reset();
+            reportGeneratorMock.reset();
+
+            setupWebsiteScanResultsProviderMock(websiteScanResult, true);
+            setupSuccessfulWebsiteScan();
+            setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false, true);
+            setupCallsAfterCombinedResultsUpdate(true);
+
+            await expect(runner.run()).rejects.toThrowError(/Failed to write new combined axe scan results blob./);
+        });
+
+        function setupCombinedScanResultsProviderMock(
+            blobReadResponse: CombinedScanResultsReadResponse,
+            blobExists: boolean,
+            blobWriteConflict: boolean = false,
+        ): void {
+            blobReadResponse.etag = blobExists ? 'etag' : undefined;
+            if (blobExists) {
+                combinedScanResultsProviderMock
+                    .setup(async (o) => o.readCombinedResults(combinedResultsBlobId))
+                    .returns(async () => blobReadResponse)
+                    .verifiable();
+            } else {
+                combinedScanResultsProviderMock
+                    .setup((o) => o.getEmptyResponse())
+                    .returns(() => blobReadResponse)
+                    .verifiable();
+            }
+
+            combinedScanResultsProviderMock
+                .setup(async (o) => o.writeCombinedResults(combinedResultsBlobId, combinedScanResults, blobExists ? 'etag' : undefined))
+                .returns(async () => {
+                    return blobWriteConflict ? { error: { errorCode: 'etagMismatch' } } : ({} as CombinedScanResultsWriteResponse);
+                })
+                .verifiable();
+        }
+
+        function setupWebsiteScanResultsProviderMock(websiteResult: WebsiteScanResult, blobWriteConflict: boolean = false): void {
+            websiteScanResultsProviderMock
+                .setup(async (o) => o.read(websiteScanId))
+                .returns(async () => websiteResult)
+                .verifiable();
+
+            if (blobWriteConflict === false) {
+                websiteScanResultsProviderMock
+                    .setup((o) => o.mergeOrCreate({ id: websiteScanId, combinedResultsBlobId, reports: [savedReport], _etag: 'etag' }))
+                    .verifiable();
+            }
+        }
 
         function setupSuccessfulWebsiteScan(): void {
             setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { websiteScanRefs });
@@ -573,14 +636,30 @@ describe(Runner, () => {
                 .verifiable();
         }
 
-        function setupCallsAfterCombinedResultsUpdate(): void {
+        function setupCallsAfterCombinedResultsUpdate(blobWriteConflict: boolean = false): void {
             setupGenerateReportsCall(passedAxeScanResults);
             setupSaveAllReportsCall();
 
-            const scanResult = getScanResultWithNoViolations();
-            scanResult.websiteScanRefs = websiteScanRefs;
-            scanResult.reports.push(savedReport);
-            setupUpdateScanRunResultCall(scanResult);
+            if (blobWriteConflict === false) {
+                const scanResult = getScanResultWithNoViolations();
+                scanResult.websiteScanRefs = websiteScanRefs;
+                scanResult.reports.push(savedReport);
+                setupUpdateScanRunResultCall(scanResult);
+            }
+        }
+
+        function setupRetryHelperMock(): void {
+            retryHelperMock
+                .setup((o) => o.executeWithRetries(It.isAny(), It.isAny(), 2, 1000))
+                .returns(async (action: () => Promise<void>, errorHandler: (err: Error) => Promise<void>, retryCount: number) => {
+                    try {
+                        await action();
+                    } catch (error) {
+                        await errorHandler(error);
+                        throw error;
+                    }
+                })
+                .verifiable();
         }
     });
 
