@@ -29,15 +29,11 @@ describe(A11yServiceClient, () => {
     const scanUrl = 'url';
     const priority = 3;
     let response: unknown;
-    let requestBody: unknown;
-    let requestOptions: unknown;
     const agentsStub = {};
 
     beforeEach(() => {
         error = new Error('HTTP 500 Server Error');
         response = { statusCode: 200 };
-        requestBody = [{ url: scanUrl, priority }];
-        requestOptions = { json: requestBody };
 
         getMock = Mock.ofInstance(() => {
             return null;
@@ -143,6 +139,8 @@ describe(A11yServiceClient, () => {
     });
 
     it('postScanUrl', async () => {
+        const requestBody = [{ url: scanUrl, priority }];
+        const requestOptions = { json: requestBody };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         postMock
@@ -156,6 +154,8 @@ describe(A11yServiceClient, () => {
     });
 
     it('postScanUrl with retry', async () => {
+        const requestBody = [{ url: scanUrl, priority }];
+        const requestOptions = { json: requestBody };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(true);
         setupLoggerMock();
@@ -168,8 +168,8 @@ describe(A11yServiceClient, () => {
     });
 
     it('postScanUrl, priority not set', async () => {
-        requestBody = [{ url: scanUrl, priority: 0 }];
-        requestOptions = { json: requestBody };
+        const requestBody = [{ url: scanUrl, priority: 0 }];
+        const requestOptions = { json: requestBody };
         setupVerifiableSignRequestCall();
         setupRetryHelperMock(false);
         postMock
@@ -178,6 +178,23 @@ describe(A11yServiceClient, () => {
             .verifiable(Times.once());
 
         const actualResponse = await testSubject.postScanUrl(scanUrl);
+
+        expect(actualResponse).toEqual(response);
+    });
+
+    it('postConsolidatedScan', async () => {
+        const reportId = 'some-report-id';
+        const requestBody = [{ url: scanUrl, site: { baseUrl: scanUrl }, reportGroups: [{ consolidatedId: reportId }], priority }];
+        const requestOptions = { json: requestBody };
+
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
+        postMock
+            .setup((req) => req(`${baseUrl}/scans`, requestOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.postConsolidatedScan(scanUrl, reportId, priority);
 
         expect(actualResponse).toEqual(response);
     });
