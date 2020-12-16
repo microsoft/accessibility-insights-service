@@ -39,7 +39,7 @@
         "@sindresorhus/fnv1a": "^2.0.1",
         "convict": "^6.0.0",
         "got": "^11.8.0",
-        "inversify": "^5.0.1",
+        "inversify": "^5.0.5",
         "lodash": "^4.17.20",
         "raw-body": "^2.4.1",
         "reflect-metadata": "^0.1.13",
