@@ -6,9 +6,6 @@
 # shellcheck disable=SC1090
 set -eo pipefail
 
-# This script will deploy Azure Batch account in user subscription mode
-# and enable managed identity for Azure on Batch pools
-
 export resourceGroupName
 export keyVault
 export enableSoftDeleteOnKeyVault
@@ -19,7 +16,7 @@ setupKeyVaultResourcesTemplateFile="${0%/*}/../templates/key-vault-setup-resourc
 
 exitWithUsageInfo() {
     echo "
-Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <webApiAdClientId> -p <webApiAdClientSecret>
+Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <webApiAdClientId> -p <webApiAdClientSecret> [-e <environment>]
 "
     exit 1
 }
@@ -30,9 +27,22 @@ Usage: $0 -r <resource group> -k <enable soft delete for Azure Key Vault> -c <we
 objectId='f520d84c-3fd3-4cc8-88d4-2ed25b00d27a'
 
 # PME AAD tenant when env is ppe or prod
-if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+if [ "$environment" = "prod" ] || [ "$environment" = "ppe" ]; then
     objectId='8ad17ea0-4c88-4465-b8ec-a827df84f896'
 fi
+
+function recoverIfSoftDeleted() {
+    softDeleted=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
+    if [[ -n "$softDeleted" ]]; then
+        echo "Keyvault $keyVault is in soft-deleted state and will be recovered."
+        echo "To recreate $keyVault without recovery, delete and purge the keyvault before running this script."
+
+        az keyvault recover --name "$keyVault" 1>/dev/null
+
+        echo "Keyvault $keyVault was successfully recovered"
+        keyvaultRecovered=true
+    fi
+}
 
 function createKeyvaultIfNotExists() {
     local existingResourceId=$(
@@ -60,6 +70,13 @@ function createKeyvaultIfNotExists() {
     fi
 }
 
+function createOrRecoverKeyvault() {
+    recoverIfSoftDeleted
+    if [[ -z "$keyvaultRecovered" ]]; then
+        createKeyvaultIfNotExists
+    fi
+}
+
 function setupKeyVaultResources() {
     echo "Setting up key vault resources using ARM template."
     resources=$(
@@ -76,12 +93,13 @@ function setupKeyVaultResources() {
 }
 
 # Read script arguments
-while getopts ":r:k:c:p:" option; do
+while getopts ":r:k:c:p:e:" option; do
     case $option in
     r) resourceGroupName=${OPTARG} ;;
     k) enableSoftDeleteOnKeyVault=${OPTARG} ;;
     c) webApiAdClientId=${OPTARG} ;;
     p) webApiAdClientSecret=${OPTARG} ;;
+    e) environment=${OPTARG} ;;
     *) exitWithUsageInfo ;;
     esac
 done
@@ -91,6 +109,10 @@ if [[ -z $resourceGroupName ]] || [[ -z $enableSoftDeleteOnKeyVault ]] || [[ -z 
     exitWithUsageInfo
 fi
 
+if [[ -z $environment ]]; then
+    environment="dev"
+fi
+
 # Login to Azure account if required
 if ! az account show 1>/dev/null; then
     az login
@@ -98,7 +120,7 @@ fi
 
 . "${0%/*}/get-resource-names.sh"
 
-createKeyvaultIfNotExists
+createOrRecoverKeyvault
 
 setupKeyVaultResources
 
