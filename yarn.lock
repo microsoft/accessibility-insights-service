@@ -3602,15 +3602,16 @@ apify-client@^0.6.0:
     underscore "^1.9.1"
 
 apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.5.tgz#f16414e3b0b99b855a9e0dfa2fcfc5c305186563"
-  integrity sha512-43db/E5lEWpxfwi63vwop2CAGZ0xq+bNgd3HVlIvSIQKJmgYtG8eWk0bjX6FNlG0zLRxtauC3rhayn6qt2hwaA==
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.6.tgz#77e674e651ac8930a53f25fe4054acdccefb7666"
+  integrity sha512-cz1ZgV+D5SWBt4r2e+QgxclAiSnhvlhOVjDeufscpDwr224dUVyRLb3gUVOV64ioPRf6ikcOex9dgng0AGxl1g==
   dependencies:
     axios "^0.21.0"
     chalk "^4.0.0"
     cherow "^1.6.9"
     clone "^2.1.1"
     countries-list "^2.5.6"
+    create-hmac "^1.1.7"
     git-url-parse "^11.2.0"
     is-buffer "^2.0.5"
     marked "^1.2.3"
@@ -7699,10 +7700,10 @@ invariant@^2.2.2, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-inversify@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/inversify/-/inversify-5.0.1.tgz#500d709b1434896ce5a0d58915c4a4210e34fb6e"
-  integrity sha512-Ieh06s48WnEYGcqHepdsJUIJUXpwH5o5vodAX+DK2JA/gjy4EbEcQZxw+uFfzysmKjiLXGYwNG3qDZsKVMcINQ==
+inversify@^5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/inversify/-/inversify-5.0.5.tgz#bd1f8e6d8e0f739331acd8ba9bc954635aae0bbf"
+  integrity sha512-60QsfPz8NAU/GZqXu8hJ+BhNf/C/c+Hp0eDc6XMIJTxBiP36AQyyQKpBkOVTLWBFDQWYVHpbbEuIsHu9dLuJDA==
 
 ip-regex@^2.1.0:
   version "2.1.0"
