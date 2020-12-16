@@ -5,5 +5,4 @@ export const iocTypeNames = {
     ReporterFactory: 'ReporterFactory',
     ConvertAxeToSarifFunc: 'ConvertAxeToSarifFunc',
     AxeResultConverters: 'AxeResultConverters',
-    CombinedAxeResultConverter: 'CombinedAxeResultConverter',
 };

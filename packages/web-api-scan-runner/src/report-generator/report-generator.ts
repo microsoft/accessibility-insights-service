@@ -19,7 +19,7 @@ export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
-        @inject(iocTypeNames.CombinedAxeResultConverter) private readonly combinedAxeResultConverter: AxeResultToConsolidatedHtmlConverter,
+        @inject(AxeResultToConsolidatedHtmlConverter) private readonly combinedAxeResultConverter: AxeResultToConsolidatedHtmlConverter,
     ) {}
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {

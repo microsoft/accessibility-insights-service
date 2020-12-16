@@ -84,11 +84,6 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): On
                 format: 'html',
                 href: 'href',
             },
-            {
-                reportId: 'reportIdConsolidatedHtml',
-                format: 'consolidated.html',
-                href: 'href',
-            },
         ],
         run: {
             state: state,
