@@ -62,7 +62,7 @@
         "@sindresorhus/fnv1a": "^2.0.1",
         "accessibility-insights-report": "3.0.1",
         "apify": "^0.21.8",
-        "apify-shared": "^0.5.0",
+        "apify-shared": "^0.5.6",
         "applicationinsights": "^1.8.8",
         "axe-core": "4.0.2",
         "cheerio": "^1.0.0-rc.3",

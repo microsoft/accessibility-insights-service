@@ -3601,16 +3601,17 @@ apify-client@^0.6.0:
     type-check "^0.3.2"
     underscore "^1.9.1"
 
-apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.5.tgz#f16414e3b0b99b855a9e0dfa2fcfc5c305186563"
-  integrity sha512-43db/E5lEWpxfwi63vwop2CAGZ0xq+bNgd3HVlIvSIQKJmgYtG8eWk0bjX6FNlG0zLRxtauC3rhayn6qt2hwaA==
+apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0, apify-shared@^0.5.6:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.6.tgz#77e674e651ac8930a53f25fe4054acdccefb7666"
+  integrity sha512-cz1ZgV+D5SWBt4r2e+QgxclAiSnhvlhOVjDeufscpDwr224dUVyRLb3gUVOV64ioPRf6ikcOex9dgng0AGxl1g==
   dependencies:
     axios "^0.21.0"
     chalk "^4.0.0"
     cherow "^1.6.9"
     clone "^2.1.1"
     countries-list "^2.5.6"
+    create-hmac "^1.1.7"
     git-url-parse "^11.2.0"
     is-buffer "^2.0.5"
     marked "^1.2.3"
@@ -7030,14 +7031,7 @@ git-up@^4.0.0:
     is-ssh "^1.3.0"
     parse-url "^5.0.0"
 
-git-url-parse@^11.1.2:
-  version "11.1.3"
-  resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.1.3.tgz#03625b6fc09905e9ad1da7bb2b84be1bf9123143"
-  integrity sha512-GPsfwticcu52WQ+eHp0IYkAyaOASgYdtsQDIt4rUp6GbiNt1P9ddrh3O0kQB0eD4UJZszVqNT3+9Zwcg40fywA==
-  dependencies:
-    git-up "^4.0.0"
-
-git-url-parse@^11.2.0:
+git-url-parse@^11.1.2, git-url-parse@^11.2.0:
   version "11.4.0"
   resolved "https://registry.yarnpkg.com/git-url-parse/-/git-url-parse-11.4.0.tgz#f2bb1f2b00f05552540e95a62e31399a639a6aa6"
   integrity sha512-KlIa5jvMYLjXMQXkqpFzobsyD/V2K5DRHl5OAf+6oDFPlPLxrGDVQlIdI63c4/Kt6kai4kALENSALlzTGST3GQ==
@@ -13098,12 +13092,7 @@ unbzip2-stream@^1.3.3:
     buffer "^5.2.1"
     through "^2.3.8"
 
-"underscore@>= 1.3.1", underscore@^1.10.2, underscore@^1.9.1:
-  version "1.10.2"
-  resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.10.2.tgz#73d6aa3668f3188e4adb0f1943bd12cfd7efaaaf"
-  integrity sha512-N4P+Q/BuyuEKFJ43B9gYuOj4TQUHXX+j2FqguVOpjkssLUUrnJofCcBccJSCoeturDoZU6GorDTHSvUDlSQbTg==
-
-underscore@^1.11.0:
+"underscore@>= 1.3.1", underscore@^1.10.2, underscore@^1.11.0, underscore@^1.9.1:
   version "1.12.0"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.12.0.tgz#4814940551fc80587cef7840d1ebb0f16453be97"
   integrity sha512-21rQzss/XPMjolTiIezSu3JAjgagXKROtNrYFEOWK109qY1Uv2tVjPTZ1ci2HgvQDA16gHYSthQIJfB+XId/rQ==
