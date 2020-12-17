@@ -249,7 +249,7 @@ export class Runner {
         }
     }
 
-    private async getCombinedResultsBlob(combinedResultsBlobId: string): Promise<CombinedScanResultsReadResponse> {
+    private async getOrCreateCombinedResultsBlob(combinedResultsBlobId: string | undefined): Promise<CombinedScanResultsReadResponse> {
         if (combinedResultsBlobId === undefined) {
             this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
 
