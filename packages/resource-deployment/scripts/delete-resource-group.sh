@@ -60,7 +60,7 @@ deleteApimIfExists() {
         local deleteTimeout=1200
         local end=$((SECONDS + $deleteTimeout))
         apimExists=$(eval "$apimExistsCommand")
-        while [ -n "$apimExists"] && [ $SECONDS -le $end ]; do
+        while [[ -n "$apimExists" ]] && [ $SECONDS -le $end ]; do
             if [[ $waiting != true ]]; then
                 waiting=true
                 echo "Waiting for $apiManagementName to delete"
@@ -72,10 +72,12 @@ deleteApimIfExists() {
             apimExists=$(eval "$apimExistsCommand")
         done
 
-        if [[ -n $apimExists ]]; then
+        if [[ -n "$apimExists" ]]; then
             echo "Unable to delete API Management instance $apiManagementName within $deleteTimeout seconds"
             exit 1
         fi
+
+        echo "$apiManagementName successfully deleted"
     fi
 }
 
