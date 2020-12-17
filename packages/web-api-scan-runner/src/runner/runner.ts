@@ -267,7 +267,7 @@ export class Runner {
             });
 
             throw new Error(
-                `Failed to read combined axe result results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(
+                `Failed to read combined axe results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(
                     response.error,
                 )}`,
             );
