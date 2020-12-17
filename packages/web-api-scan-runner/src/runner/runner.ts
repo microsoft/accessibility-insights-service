@@ -262,7 +262,7 @@ export class Runner {
 
             return this.combinedScanResultsProvider.getEmptyResponse();
         } else if (response.error) {
-            this.logger.logError('Failed to read combined axe result results blob.', {
+            this.logger.logError('Failed to read combined axe results blob.', {
                 error: JSON.stringify(response.error),
             });
 
