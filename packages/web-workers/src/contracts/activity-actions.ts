@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 export enum ActivityAction {
     createScanRequest = 'createScanRequest',
+    createConsolidatedScanRequest = 'createConsolidatedScanRequest',
     getScanResult = 'getScanResult',
     getScanResultBatch = 'getScanResultBatch',
     getScanReport = 'getScanReport',

@@ -129,6 +129,15 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield this.scanId;
     }
 
+    public *invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<any, string, any> {
+        this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
+        this.throwExceptionIfExpected();
+        expect(url).toBe(this.availabilityTestConfig.urlToScan);
+        expect(reportId).toBe(this.availabilityTestConfig.consolidatedReportId);
+
+        return yield this.scanId;
+    }
+
     public *runFunctionalTestGroups(
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
@@ -170,6 +179,7 @@ describe('HealthMonitorOrchestrationController', () => {
             maxScanWaitTimeInSeconds: 20,
             logQueryTimeRange: 'P1D',
             environmentDefinition: TestEnvironment[TestEnvironment.canary],
+            consolidatedReportId: 'somereportid',
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -280,6 +290,10 @@ describe('HealthMonitorOrchestrationController', () => {
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
+            expectedStepsCallCount.callSubmitScanRequest += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+
+            orchestratorIterator.next();
             expectedTests.push('PostScan', 'ScanStatus');
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
@@ -287,6 +301,14 @@ describe('HealthMonitorOrchestrationController', () => {
 
             orchestratorIterator.next();
             expectedStepsCallCount.verifyScanSubmittedCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+
+            orchestratorIterator.next();
+            expectedStepsCallCount.verifyScanSubmittedCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+
+            orchestratorIterator.next();
+            expectedStepsCallCount.waitForScanCompletionCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
@@ -298,6 +320,10 @@ describe('HealthMonitorOrchestrationController', () => {
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
             expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
+            expectedStepsCallCount.getScanReportCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
             expectedStepsCallCount.getScanReportCount += 1;

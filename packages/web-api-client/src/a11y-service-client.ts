@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { getForeverAgents, ResponseWithBodyType, RetryHelper, System } from 'common';
+import got, { Agents, ExtendOptions, Got, Options } from 'got';
 import { injectable } from 'inversify';
 import { Logger } from 'logger';
-import got, { Got, ExtendOptions, Options, Agents } from 'got';
 import { HealthReport, ScanResultResponse, ScanRunRequest, ScanRunResponse } from 'service-library';
 import { A11yServiceCredential } from './a11y-service-credential';
 
@@ -43,9 +43,32 @@ export class A11yServiceClient {
     }
 
     public async postScanUrl(scanUrl: string, priority?: number): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
-        const requestBody: ScanRunRequest[] = [{ url: scanUrl, priority: priority === undefined ? 0 : priority }];
+        const scanRequestData: ScanRunRequest = { url: scanUrl };
+
+        return this.postScanUrlWithRequest(scanRequestData, priority);
+    }
+
+    public async postConsolidatedScan(
+        scanUrl: string,
+        reportId: string,
+        priority?: number,
+    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        const scanRequestData: ScanRunRequest = {
+            url: scanUrl,
+            site: { baseUrl: scanUrl },
+            reportGroups: [{ consolidatedId: reportId }],
+        };
+
+        return this.postScanUrlWithRequest(scanRequestData, priority);
+    }
+
+    private async postScanUrlWithRequest(
+        scanRequestData: ScanRunRequest,
+        priority: number,
+    ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
+        scanRequestData.priority = priority || 0;
         const requestUrl: string = `${this.requestBaseUrl}/scans`;
-        const options: Options = { json: requestBody };
+        const options: Options = { json: [scanRequestData] };
 
         return (await this.retryHelper.executeWithRetries(
             async () => (await this.signRequest()).post(requestUrl, options),

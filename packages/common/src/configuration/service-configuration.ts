@@ -67,6 +67,7 @@ export interface AvailabilityTestConfig {
     maxScanWaitTimeInSeconds: number;
     logQueryTimeRange: string;
     environmentDefinition: string;
+    consolidatedReportId: string;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -265,6 +266,11 @@ export class ServiceConfiguration {
                     format: 'String',
                     default: 'https://www.washington.edu/accesscomputing/AU/before.html',
                     doc: 'Url to scan for availability testing',
+                },
+                consolidatedReportId: {
+                    format: 'String',
+                    default: 'e2e-consolidated-report-id',
+                    doc: 'The id for the consolidated report',
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',

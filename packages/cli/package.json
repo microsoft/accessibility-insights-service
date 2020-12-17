@@ -73,7 +73,7 @@
         "filenamify": "^4.1.0",
         "filenamify-url": "^2.1.1",
         "got": "^11.8.0",
-        "inversify": "^5.0.1",
+        "inversify": "^5.0.5",
         "leveldown": "^5.6.0",
         "levelup": "^4.4.0",
         "lodash": "^4.17.20",
@@ -86,7 +86,7 @@
         "sha.js": "^2.4.11",
         "uuid-with-v6": "^1.1.2",
         "verror": "^1.10.0",
-        "wtfnode": "^0.8.3",
+        "wtfnode": "^0.8.4",
         "yargs": "^16.1.1"
     },
     "bin": {
