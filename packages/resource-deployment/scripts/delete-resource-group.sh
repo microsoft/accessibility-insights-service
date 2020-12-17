@@ -48,11 +48,36 @@ deleteResourceGroup() {
 }
 
 deleteApimIfExists() {
-    response=$(az apim list --resource-group $resourceGroupName --query "[?name=='$apiManagementName']" -o tsv)
+    apimExistsCommand="az apim list --resource-group $resourceGroupName --query \"[?name=='$apiManagementName']\" -o tsv"
+    apimExists=$(eval "$apimExistsCommand")
 
-    if [[ -n "$response" ]]; then
+    if [[ -n "$apimExists" ]]; then
         echo "Deleting API Management $apiManagementName..."
         az apim delete --name $apiManagementName --resource-group $resourceGroupName --yes || true
+
+        # Wait for APIM to delete
+        local waiting=false
+        local deleteTimeout=1200
+        local end=$((SECONDS + $deleteTimeout))
+        apimExists=$(eval "$apimExistsCommand")
+        while [[ -n "$apimExists" ]] && [ $SECONDS -le $end ]; do
+            if [[ $waiting != true ]]; then
+                waiting=true
+                echo "Waiting for $apiManagementName to delete"
+                printf " - Running .."
+            fi
+
+            sleep 5
+            printf "."
+            apimExists=$(eval "$apimExistsCommand")
+        done
+
+        if [[ -n "$apimExists" ]]; then
+            echo "Unable to delete API Management instance $apiManagementName within $deleteTimeout seconds"
+            exit 1
+        fi
+
+        echo "$apiManagementName successfully deleted"
     fi
 }
 

@@ -40,6 +40,7 @@ describe(HealthCheckController, () => {
             urlToScan: 'https://www.bing.com',
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
+            consolidatedReportId: 'somereportid',
         };
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();

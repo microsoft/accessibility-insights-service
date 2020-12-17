@@ -70,16 +70,26 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
             const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
+            const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(
+                availabilityTestConfig.urlToScan,
+                availabilityTestConfig.consolidatedReportId,
+            );
             testContextData.scanId = scanId;
+            testContextData.consolidatedScanId = consolidatedScanId;
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanSubmissionTests);
 
             yield* orchestrationSteps.validateScanRequestSubmissionState(scanId);
+            yield* orchestrationSteps.validateScanRequestSubmissionState(consolidatedScanId);
             const scanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(scanId);
+            const consolidatedScanRunStatus = yield* orchestrationSteps.waitForScanRequestCompletion(consolidatedScanId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionTests);
 
             const reportId = scanRunStatus.reports[0].reportId;
+            const consolidatedReportId = consolidatedScanRunStatus.reports[0].reportId;
             testContextData.reportId = reportId;
+            testContextData.consolidatedReportId = consolidatedReportId;
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
+            yield* orchestrationSteps.invokeGetScanReportRestApi(consolidatedScanId, consolidatedReportId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
 
             // The last test group in a functional test suite to indicated a suite run completion

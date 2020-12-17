@@ -16,6 +16,7 @@ import {
     GetScanResultData,
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
+    CreateConsolidatedScanRequestData,
 } from './controllers/activity-request-data';
 import { getAllTestGroupClassNames } from './e2e-test-group-names';
 
@@ -34,6 +35,7 @@ export interface OrchestrationTelemetryProperties {
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
     invokeSubmitScanRequestRestApi(url: string): Generator<Task, string, SerializableResponse>;
+    invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     invokeGetScanReportRestApi(scanId: string, reportId: string): Generator<Task, void, SerializableResponse & void>;
@@ -154,6 +156,23 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         const response = yield* this.callWebRequestActivity(ActivityAction.createScanRequest, requestData);
         const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createScanRequest);
         this.logOrchestrationStep(`Orchestrator submitted scan with scan Id: ${scanId}`);
+
+        return scanId;
+    }
+
+    public *invokeSubmitConsolidatedScanRequestRestApi(
+        url: string,
+        reportId: string,
+    ): Generator<Task, string, SerializableResponse & void> {
+        const requestData: CreateConsolidatedScanRequestData = {
+            scanUrl: url,
+            reportId: reportId,
+            priority: 1000,
+        };
+
+        const response = yield* this.callWebRequestActivity(ActivityAction.createConsolidatedScanRequest, requestData);
+        const scanId = yield* this.getScanIdFromResponse(response, ActivityAction.createConsolidatedScanRequest);
+        this.logOrchestrationStep(`Orchestrator submitted consolidated scan request with scan Id: ${scanId}`);
 
         return scanId;
     }

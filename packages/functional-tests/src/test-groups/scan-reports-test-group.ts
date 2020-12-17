@@ -33,6 +33,26 @@ export class ScanReportTestGroup extends FunctionalTestGroup {
     }
 
     @test(TestEnvironment.all)
+    public async testGetConsolidatedReport(): Promise<void> {
+        const response = await this.a11yServiceClient.getScanStatus(this.testContextData.consolidatedScanId);
+        const reportsInfo = (<ScanRunResultResponse>response.body).reports;
+
+        expect((<ScanRunResultResponse>response.body).reports, 'Expected three reports to be returned').to.have.lengthOf(3);
+
+        await Promise.all(
+            reportsInfo.map(async (reportData: ScanReport) => {
+                const reportResponse = await this.a11yServiceClient.getScanReport(
+                    this.testContextData.consolidatedScanId,
+                    this.testContextData.consolidatedReportId,
+                );
+
+                this.ensureResponseSuccessStatusCode(response);
+                expect(reportResponse.body, 'Get Scan Report API should return response with defined body').to.not.be.undefined;
+            }),
+        );
+    }
+
+    @test(TestEnvironment.all)
     public async testGetScanReportWithInvalidGuid(): Promise<void> {
         const invalidGuid = 'invalid guid';
         const response = await this.a11yServiceClient.getScanReport(this.testContextData.scanId, invalidGuid);

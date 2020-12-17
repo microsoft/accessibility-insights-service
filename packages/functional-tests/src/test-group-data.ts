@@ -10,4 +10,6 @@ export interface TestContextData {
     scanUrl: string;
     scanId?: string;
     reportId?: string;
+    consolidatedScanId?: string;
+    consolidatedReportId?: string;
 }
