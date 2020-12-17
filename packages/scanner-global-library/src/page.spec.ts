@@ -40,6 +40,7 @@ describe(Page, () => {
             pageTitle: 'pageTitle',
             browserSpec: 'browserSpec',
             pageResponseCode: 200,
+            userAgent,
         };
 
         webDriverMock = Mock.ofType(WebDriver);
@@ -112,6 +113,14 @@ describe(Page, () => {
             .verifiable();
         page.page = puppeteerPageMock.object;
         page.browser = browserMock.object;
+        pageConfiguratorMock
+            .setup((o) => o.getUserAgent())
+            .returns(() => userAgent)
+            .verifiable();
+        pageNavigatorMock
+            .setup((o) => o.pageConfigurator)
+            .returns(() => pageConfiguratorMock.object)
+            .verifiable();
 
         const axeScanResults = await page.scanForA11yIssues(url);
 
@@ -151,6 +160,14 @@ describe(Page, () => {
         pageNavigatorMock
             .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
             .returns(() => Promise.resolve(puppeteerResponseMock.object))
+            .verifiable();
+        pageConfiguratorMock
+            .setup((o) => o.getUserAgent())
+            .returns(() => userAgent)
+            .verifiable();
+        pageNavigatorMock
+            .setup((o) => o.pageConfigurator)
+            .returns(() => pageConfiguratorMock.object)
             .verifiable();
         const expectedAxeScanResults = {
             results: axeResults,

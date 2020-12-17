@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
+import { ScanGroupType } from './website-scan-result';
 
 export declare type ReportFormat = 'sarif' | 'html' | 'consolidated.html';
 export declare type ScanState = 'pending' | 'pass' | 'fail';
@@ -35,7 +36,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     itemType: ItemType.onDemandPageScanRunResult;
     batchRequestId?: string;
     url: string;
-    websiteScanIds?: string[];
+    websiteScanRefs?: WebsiteScanRef[];
     priority: number;
     scannedUrl?: string;
     scanResult?: OnDemandScanResult;
@@ -74,4 +75,9 @@ export interface OnDemandPageScanRunResult {
     error?: string | ScanError;
     pageTitle?: string;
     pageResponseCode?: number;
+}
+
+export interface WebsiteScanRef {
+    id: string;
+    scanGroupType: ScanGroupType;
 }

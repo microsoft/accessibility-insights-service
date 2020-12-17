@@ -15,6 +15,6 @@ export { RetryHelper } from './system/retry-helper';
 export { getForeverAgents } from './web-requests/forever-agents';
 export { ResponseWithBodyType } from './web-requests/response-with-body-type';
 export { SerializableResponse, ResponseSerializer, getSerializableResponse } from './web-requests/serializable-response';
-export { HashSet, SerializedHashSet } from './hash-set';
+export { HashSet } from './hash-set';
 export { BodyParser } from './body-parser';
 export { listMonorepoPackageNames } from './build-utilities/monorepo-packages';

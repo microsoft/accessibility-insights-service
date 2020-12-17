@@ -3,9 +3,10 @@
 import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { AxeScanResults } from 'scanner-global-library';
-import { ReportFormat } from 'storage-documents';
+import { ReportFormat, CombinedScanResults } from 'storage-documents';
 import { iocTypeNames } from '../ioc-types';
-import { AxeResultConverter } from './axe-result-converter';
+import { AxeResultConverter, AxeResultConverterOptions } from './axe-result-converter';
+import { AxeResultToConsolidatedHtmlConverter } from './axe-result-to-consolidated-html-converter';
 
 export type GeneratedReport = {
     content: string;
@@ -18,20 +19,28 @@ export class ReportGenerator {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(iocTypeNames.AxeResultConverters) private readonly axeResultConverters: AxeResultConverter[],
+        @inject(AxeResultToConsolidatedHtmlConverter) private readonly combinedAxeResultConverter: AxeResultToConsolidatedHtmlConverter,
     ) {}
 
     public generateReports(axeResults: AxeScanResults): GeneratedReport[] {
-        const params = {
+        const options = {
             pageTitle: axeResults.pageTitle,
-            browserSpec: axeResults.browserSpec,
-        };
+        } as AxeResultConverterOptions;
 
         return this.axeResultConverters.map<GeneratedReport>((axeResultConverter) => {
             return {
-                content: axeResultConverter.convert(axeResults.results, params),
+                content: axeResultConverter.convert(axeResults.results, options),
                 id: this.guidGenerator.createGuid(),
                 format: axeResultConverter.targetReportFormat,
             };
         });
+    }
+
+    public generateConsolidatedReport(combinedScanResults: CombinedScanResults, options: AxeResultConverterOptions): GeneratedReport {
+        return {
+            content: this.combinedAxeResultConverter.convert(combinedScanResults, options),
+            id: options.reportId,
+            format: this.combinedAxeResultConverter.targetReportFormat,
+        };
     }
 }

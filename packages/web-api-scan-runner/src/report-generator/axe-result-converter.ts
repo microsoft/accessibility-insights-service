@@ -1,15 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import { AxeResults } from 'axe-core';
 import { ReportFormat } from 'storage-documents';
 
-export type ReportGenerationParams = {
-    pageTitle: string;
+export type AxeResultConverterOptions = {
+    pageTitle?: string;
+    reportId?: string;
+    baseUrl?: string;
+    userAgent?: string;
+    scanStarted?: Date;
 };
 
 export interface AxeResultConverter {
     readonly targetReportFormat: ReportFormat;
-
-    convert(results: AxeResults, params: ReportGenerationParams): string;
+    convert(results: AxeResults, options: AxeResultConverterOptions): string;
 }

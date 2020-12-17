@@ -20,6 +20,7 @@ import {
     PartitionKey,
     ScanRunBatchRequest,
     WebsiteScanResult,
+    WebsiteScanRef,
 } from 'storage-documents';
 
 interface ScanRequestTelemetryProperties {
@@ -102,9 +103,11 @@ export class ScanBatchRequestFeedController extends WebController {
                 batchRequestId,
                 scanId: request.scanId,
             });
-            const websiteScanIds = websiteScanResults
+            const websiteScanRefs = websiteScanResults
                 .filter((websiteScan) => websiteScan.pageScans.some((pageScan) => pageScan.scanId === request.scanId))
-                .map((websiteScan) => websiteScan.id);
+                .map((websiteScan) => {
+                    return { id: websiteScan.id, scanGroupType: 'consolidated-scan-report' } as WebsiteScanRef;
+                });
 
             return {
                 id: request.scanId,
@@ -125,7 +128,7 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanIds: websiteScanIds.length > 0 ? websiteScanIds : undefined,
+                websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
             };
         });
 
@@ -140,10 +143,12 @@ export class ScanBatchRequestFeedController extends WebController {
         const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
         requests.map((request) => {
             if (request.reportGroups !== undefined) {
-                request.reportGroups.map((reportGroup) => {
+                const consolidatedReportGroup = request.reportGroups.find((group) => group.consolidatedId !== undefined);
+                if (consolidatedReportGroup) {
                     websiteScanRequests.push({
                         baseUrl: request.site.baseUrl,
-                        scanGroupId: reportGroup.consolidatedId,
+                        scanGroupId: consolidatedReportGroup.consolidatedId,
+                        scanGroupType: 'consolidated-scan-report',
                         pageScans: [
                             {
                                 scanId: request.scanId,
@@ -152,7 +157,7 @@ export class ScanBatchRequestFeedController extends WebController {
                             },
                         ],
                     });
-                });
+                }
             }
         });
 

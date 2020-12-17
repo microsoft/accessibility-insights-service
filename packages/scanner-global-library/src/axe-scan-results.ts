@@ -11,4 +11,5 @@ export interface AxeScanResults {
     scannedUrl?: string;
     pageTitle?: string;
     browserSpec?: string;
+    userAgent?: string;
 }

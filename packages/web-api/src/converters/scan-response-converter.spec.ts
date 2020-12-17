@@ -84,11 +84,6 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): On
                 format: 'html',
                 href: 'href',
             },
-            {
-                reportId: 'reportIdConsolidatedHtml',
-                format: 'consolidated.html',
-                href: 'href',
-            },
         ],
         run: {
             state: state,
@@ -201,24 +196,5 @@ describe(ScanResponseConverter, () => {
         const pageScanDbResult = getPageScanResult('completed');
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect((<any>response).reports[0].links.href).toEqual('https://localhost/api/scans/id/reports/reportIdSarif?api-version=1.0');
-    });
-
-    it('includes consolidated html report in response when consolidatedId is present', () => {
-        const pageScanDbResult = getPageScanResult('completed', true);
-        pageScanDbResult.websiteScanIds = ['websiteScanId'];
-
-        const responseExpected = getScanResultClientResponseFull('completed', true) as ScanRunResultResponse;
-        responseExpected.reports.push({
-            reportId: 'reportIdConsolidatedHtml',
-            format: 'consolidated.html',
-            links: {
-                rel: 'self',
-                href: 'https://localhost/api/scans/id/reports/reportIdConsolidatedHtml?api-version=1.0',
-            },
-        });
-
-        const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
-
-        expect(response).toEqual(responseExpected);
     });
 });
