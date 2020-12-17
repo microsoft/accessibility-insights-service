@@ -188,9 +188,9 @@ export class Runner {
     private async mergeAxeResults(
         axeScanResults: axe.AxeResults,
         combinedResultsBlobId: string,
-        seed: boolean,
+        createNew: boolean,
     ): Promise<CombinedScanResults> {
-        const blobReadResponse = await this.getCombinedResultsBlob(seed ? undefined : combinedResultsBlobId);
+        const blobReadResponse = await this.getOrCreateCombinedResultsBlob(createNew ? undefined : combinedResultsBlobId);
         const combinedScanResults = blobReadResponse.results;
 
         combinedScanResults.urlCount.total++;
@@ -267,9 +267,7 @@ export class Runner {
             });
 
             throw new Error(
-                `Failed to read combined axe results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(
-                    response.error,
-                )}`,
+                `Failed to read combined axe results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(response.error)}`,
             );
         }
 
