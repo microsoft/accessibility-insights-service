@@ -69,6 +69,7 @@ describe(ConsolidatedReportGenerator, () => {
             baseUrl,
             basePageTitle: 'basePageTitle',
             userAgent: 'userAgent',
+            browserResolution: '1920x1080',
         } as ScanMetadata;
         const combinedAxeResults = {
             violations: new AxeResults(),
@@ -104,6 +105,7 @@ describe(ConsolidatedReportGenerator, () => {
             scanEngineName: serviceName,
             axeCoreVersion: axeCoreVersion,
             browserUserAgent: scanMetadata.userAgent,
+            browserResolution: scanMetadata.browserResolution,
             urlCount,
             scanStarted,
             scanEnded,

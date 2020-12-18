@@ -33,6 +33,7 @@ export class ConsolidatedReportGenerator {
             scanEngineName: serviceName,
             axeCoreVersion: this.axeInfo.version,
             browserUserAgent: scanMetadata.userAgent,
+            browserResolution: scanMetadata.browserResolution,
             urlCount: combinedAxeResults.urlCount,
             scanStarted,
             scanEnded,

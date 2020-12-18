@@ -44,6 +44,7 @@ export class CombinedReportDataConverter {
             serviceName: scanResultData.scanEngineName,
             axeVersion: scanResultData.axeCoreVersion,
             userAgent: scanResultData.browserUserAgent,
+            browserResolution: scanResultData.browserResolution,
             scanDetails: {
                 baseUrl: scanResultData.baseUrl,
                 basePageTitle: scanResultData.basePageTitle,

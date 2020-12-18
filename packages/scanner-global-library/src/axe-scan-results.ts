@@ -12,4 +12,5 @@ export interface AxeScanResults {
     pageTitle?: string;
     browserSpec?: string;
     userAgent?: string;
+    browserResolution?: string;
 }

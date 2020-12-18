@@ -40,12 +40,18 @@ export class ReportGenerator {
         return reporter.fromAxeResult(htmlReportParams).asHTML();
     }
 
-    public async generateSummaryReport(scanDetails: ScanSummaryDetails, results: SummaryScanResults, userAgent: string): Promise<string> {
+    public async generateSummaryReport(
+        scanDetails: ScanSummaryDetails,
+        results: SummaryScanResults,
+        userAgent: string,
+        browserResolution: string,
+    ): Promise<string> {
         // eslint-disable-next-line one-var
         const parameters = {
             serviceName: serviceName,
             axeVersion: this.axeInfo.version,
             userAgent: userAgent,
+            browserResolution: browserResolution,
             scanDetails: scanDetails,
             results: this.sortScanResults(results),
         };

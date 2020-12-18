@@ -153,7 +153,12 @@ export class Runner {
             combinedResultsBlobId,
             websiteScanResult.combinedResultsBlobId === undefined,
         );
-        const report = await this.generateCombinedReport(combinedAxeResults, websiteScanResult, axeScanResults.userAgent);
+        const report = await this.generateCombinedReport(
+            combinedAxeResults,
+            websiteScanResult,
+            axeScanResults.userAgent,
+            axeScanResults.browserResolution,
+        );
         await this.updateWebsiteScanResult(websiteScanResult, combinedResultsBlobId, report);
 
         if (report) {
@@ -165,6 +170,7 @@ export class Runner {
         combinedAxeResults: CombinedScanResults,
         websiteScanResult: WebsiteScanResult,
         userAgent: string,
+        browserResolution: string,
     ): Promise<OnDemandPageScanReport> {
         let reportId: string;
         if (websiteScanResult.reports) {
@@ -179,6 +185,7 @@ export class Runner {
             reportId,
             baseUrl: websiteScanResult.baseUrl,
             userAgent,
+            browserResolution,
             scanStarted,
         });
 

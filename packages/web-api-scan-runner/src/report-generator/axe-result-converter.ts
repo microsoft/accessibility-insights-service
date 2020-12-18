@@ -9,6 +9,7 @@ export type AxeResultConverterOptions = {
     baseUrl?: string;
     userAgent?: string;
     scanStarted?: Date;
+    browserResolution?: string;
 };
 
 export interface AxeResultConverter {

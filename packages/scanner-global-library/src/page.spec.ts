@@ -19,6 +19,7 @@ import { PageNavigator } from './page-navigator';
 
 const url = 'url';
 const userAgent = 'user agent';
+const browserResolution = '1920x1080';
 
 let axeResults: AxeResults;
 let scanResults: AxeScanResults;
@@ -41,6 +42,7 @@ describe(Page, () => {
             browserSpec: 'browserSpec',
             pageResponseCode: 200,
             userAgent,
+            browserResolution,
         };
 
         webDriverMock = Mock.ofType(WebDriver);
@@ -113,14 +115,7 @@ describe(Page, () => {
             .verifiable();
         page.page = puppeteerPageMock.object;
         page.browser = browserMock.object;
-        pageConfiguratorMock
-            .setup((o) => o.getUserAgent())
-            .returns(() => userAgent)
-            .verifiable();
-        pageNavigatorMock
-            .setup((o) => o.pageConfigurator)
-            .returns(() => pageConfiguratorMock.object)
-            .verifiable();
+        setupPageConfigurator();
 
         const axeScanResults = await page.scanForA11yIssues(url);
 
@@ -161,14 +156,7 @@ describe(Page, () => {
             .setup(async (o) => o.navigate(url, puppeteerPageMock.object, It.isAny()))
             .returns(() => Promise.resolve(puppeteerResponseMock.object))
             .verifiable();
-        pageConfiguratorMock
-            .setup((o) => o.getUserAgent())
-            .returns(() => userAgent)
-            .verifiable();
-        pageNavigatorMock
-            .setup((o) => o.pageConfigurator)
-            .returns(() => pageConfiguratorMock.object)
-            .verifiable();
+        setupPageConfigurator();
         const expectedAxeScanResults = {
             results: axeResults,
             scannedUrl: axeResults.url,
@@ -193,20 +181,14 @@ describe(Page, () => {
             .setup(async (o) => o.launch(It.isAny()))
             .returns(() => Promise.resolve(browserMock.object))
             .verifiable();
-        pageConfiguratorMock
-            .setup((o) => o.getUserAgent())
-            .returns(() => userAgent)
-            .verifiable();
-        pageNavigatorMock
-            .setup((o) => o.pageConfigurator)
-            .returns(() => pageConfiguratorMock.object)
-            .verifiable();
+        setupPageConfigurator();
         page.browser = undefined;
         page.page = undefined;
 
         await page.create();
 
         expect(page.userAgent).toEqual(userAgent);
+        expect(page.browserResolution).toEqual(browserResolution);
         browserMock.verify(async (o) => o.newPage(), Times.once());
     });
 
@@ -218,4 +200,20 @@ describe(Page, () => {
 
         await page.close();
     });
+
+    function setupPageConfigurator(): void {
+        pageConfiguratorMock
+            .setup((o) => o.getBrowserResolution())
+            .returns(() => browserResolution)
+            .verifiable();
+        pageConfiguratorMock
+            .setup((o) => o.getUserAgent())
+            .returns(() => userAgent)
+            .verifiable();
+
+        pageNavigatorMock
+            .setup((o) => o.pageConfigurator)
+            .returns(() => pageConfiguratorMock.object)
+            .verifiable(Times.atLeastOnce());
+    }
 });

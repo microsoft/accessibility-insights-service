@@ -200,6 +200,7 @@ export abstract class PageProcessorBase implements PageProcessor {
                 baseUrl: this.baseUrl,
                 basePageTitle: this.baseUrl === url ? pageTitle : '',
                 userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
+                browserResolution: this.pageNavigator.pageConfigurator.getBrowserResolution(),
             });
             this.scanMetadataSaved = true;
         }

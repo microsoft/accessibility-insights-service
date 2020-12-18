@@ -27,6 +27,7 @@ export class AxeResultToConsolidatedHtmlConverter {
             scanEngineName: htmlReportStrings.serviceName,
             axeCoreVersion: this.axeCore.version,
             browserUserAgent: options.userAgent,
+            browserResolution: options.browserResolution,
             urlCount: combinedScanResults.urlCount,
             scanStarted: options.scanStarted,
             scanEnded: new Date(),
