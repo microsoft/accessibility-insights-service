@@ -16,4 +16,5 @@ export interface ScanResultData {
     urlCount: UrlCount;
     scanStarted: Date;
     scanEnded: Date;
+    browserResolution: string;
 }

@@ -3,6 +3,7 @@
 exports[`CombinedReportDataConverter convert axe results to combined report data 1`] = `
 Object {
   "axeVersion": "axeCoreVersion",
+  "browserResolution": "1920x1080",
   "results": Object {
     "resultsByRule": Object {
       "failed": Array [
@@ -246,6 +247,7 @@ Object {
 exports[`CombinedReportDataConverter sorts failure cards by url count, then alphabetically by url 1`] = `
 Object {
   "axeVersion": "axeCoreVersion",
+  "browserResolution": "1920x1080",
   "results": Object {
     "resultsByRule": Object {
       "failed": Array [

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { Page, Response } from 'puppeteer';
 import { BrowserError, PageNavigator, PageConfigurator } from 'scanner-global-library';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -119,6 +119,8 @@ describe(PageProcessorBase, () => {
 
     it('gotoFunction', async () => {
         pageProcessorBase.baseUrl = testUrl;
+        const userAgent = 'userAgent';
+        const browserResolution = '1920x1080';
         const inputs: Apify.PuppeteerGotoInputs = {
             page: pageStub,
             request: requestStub,
@@ -126,17 +128,23 @@ describe(PageProcessorBase, () => {
         const response = {} as Response;
         pageConfiguratorMock
             .setup((o) => o.getUserAgent())
-            .returns(() => 'userAgent')
+            .returns(() => userAgent)
+            .verifiable();
+        pageConfiguratorMock
+            .setup((o) => o.getBrowserResolution())
+            .returns(() => browserResolution)
             .verifiable();
         pageNavigatorMock
             .setup((o) => o.pageConfigurator)
             .returns(() => pageConfiguratorMock.object)
-            .verifiable();
+            .verifiable(Times.atLeastOnce());
         pageNavigatorMock
             .setup(async (o) => o.navigate(testUrl, inputs.page, It.isAny()))
             .returns(() => Promise.resolve(response))
             .verifiable();
-        dataBaseMock.setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent: 'userAgent' })).verifiable();
+        dataBaseMock
+            .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))
+            .verifiable();
 
         await pageProcessorBase.gotoFunction(inputs);
     });

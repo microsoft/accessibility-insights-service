@@ -135,6 +135,7 @@ describe('ReportGenerator', () => {
             serviceName: serviceName,
             axeVersion: 'axe version',
             userAgent: 'user agent',
+            browserResolution: '1920x1080',
             scanDetails: scanDetails,
             results: sortedResults,
         };
@@ -149,7 +150,7 @@ describe('ReportGenerator', () => {
             .returns(() => htmlReport)
             .verifiable(Times.once());
 
-        const report = await reportGenerator.generateSummaryReport(scanDetails, results, 'user agent');
+        const report = await reportGenerator.generateSummaryReport(scanDetails, results, 'user agent', '1920x1080');
 
         expect(report).toEqual(htmlReportString);
     });

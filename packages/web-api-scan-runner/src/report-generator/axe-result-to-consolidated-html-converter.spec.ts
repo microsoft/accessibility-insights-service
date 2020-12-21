@@ -25,6 +25,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
         baseUrl: 'base URL',
         userAgent: 'user agent',
         scanStarted: new Date(2020, 11, 1),
+        browserResolution: '1920x1080',
     };
 
     beforeEach(() => {
@@ -79,6 +80,7 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
             scanEngineName: htmlReportStrings.serviceName,
             axeCoreVersion: '1.0.0',
             browserUserAgent: options.userAgent,
+            browserResolution: options.browserResolution,
             urlCount: urlCount,
             scanStarted: options.scanStarted,
             scanEnded: new Date(),

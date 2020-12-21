@@ -14,6 +14,7 @@ const scanResultData = {
     scanEngineName: 'scanEngineName',
     axeCoreVersion: 'axeCoreVersion',
     browserUserAgent: 'browserUserAgent',
+    browserResolution: '1920x1080',
     scanStarted: new Date(1000),
     scanEnded: new Date(60000),
     urlCount: {

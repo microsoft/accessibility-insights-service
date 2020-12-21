@@ -97,6 +97,7 @@ describe(Runner, () => {
         pageTitle: pageTitle,
         pageResponseCode: pageResponseCode,
         userAgent: 'userAgent',
+        browserResolution: '1920x1080',
     };
 
     const unscannableAxeScanResults: AxeScanResults = {
@@ -538,6 +539,7 @@ describe(Runner, () => {
                         reportId,
                         baseUrl,
                         userAgent: passedAxeScanResults.userAgent,
+                        browserResolution: passedAxeScanResults.browserResolution,
                         scanStarted,
                     }),
                 )

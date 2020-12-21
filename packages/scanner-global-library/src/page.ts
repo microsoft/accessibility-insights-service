@@ -17,6 +17,9 @@ export class Page {
     public get userAgent(): string {
         return this.pageNavigator.pageConfigurator.getUserAgent();
     }
+    public get browserResolution(): string {
+        return this.pageNavigator.pageConfigurator.getBrowserResolution();
+    }
 
     constructor(
         @inject(WebDriver) private readonly webDriver: WebDriver,
@@ -68,6 +71,7 @@ export class Page {
             browserSpec: await this.browser.version(),
             pageResponseCode: response.status(),
             userAgent: this.userAgent,
+            browserResolution: this.browserResolution,
         };
 
         if (response.request().redirectChain().length > 0) {

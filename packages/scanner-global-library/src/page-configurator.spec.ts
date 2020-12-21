@@ -54,5 +54,6 @@ describe(PageConfigurator, () => {
     it('configurePage()', async () => {
         await pageConfigurator.configurePage(pageMock.object);
         expect(pageConfigurator.getUserAgent()).toEqual(chromeUserAgent);
+        expect(pageConfigurator.getBrowserResolution()).toEqual('1920x1080');
     });
 });
