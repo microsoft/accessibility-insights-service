@@ -17,7 +17,7 @@ storageAccountName=$(
 
 if [[ -z $storageAccountName ]]; then
     echo "Unable to get storage account for resource group $resourceGroupName"
-    exit 1
+    return
 fi
 
 resourceGroupSuffix=${storageAccountName:11}

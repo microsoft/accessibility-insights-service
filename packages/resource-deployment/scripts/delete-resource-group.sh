@@ -48,6 +48,10 @@ deleteResourceGroup() {
 }
 
 deleteApimIfExists() {
+    if [[ -z "$apiManagementName" ]]; then
+        return
+    fi
+
     apimExistsCommand="az apim list --resource-group $resourceGroupName --query \"[?name=='$apiManagementName']\" -o tsv"
     apimExists=$(eval "$apimExistsCommand")
 
