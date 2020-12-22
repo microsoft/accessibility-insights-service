@@ -11,14 +11,14 @@ export cosmosAccountName
 export resourceGroupName
 
 createCosmosAccount() {
-    echo "[setup-cosmos-db] Creating Cosmos DB account..."
+    echo "Creating Cosmos DB account..."
     resources=$(az deployment group create --resource-group "$resourceGroupName" --template-file "${0%/*}/../templates/cosmos-db.template.json" --parameters "${0%/*}/../templates/cosmos-db.parameters.json" --query "properties.outputResources[].id" -o tsv)
 
     export resourceName
     . "${0%/*}/get-resource-name-from-resource-paths.sh" -p "Microsoft.DocumentDB/databaseAccounts" -r "$resources"
     cosmosAccountName="$resourceName"
 
-    echo "[setup-cosmos-db] Successfully created Cosmos DB account '$cosmosAccountName'"
+    echo "Successfully created Cosmos DB account '$cosmosAccountName'"
 }
 
 createCosmosCollection() {
@@ -31,37 +31,61 @@ createCosmosCollection() {
         ttl=-1
     fi
 
-    echo "[setup-cosmos-db] Checking if collection '$collectionName' exists in db '$dbName' of cosmosAccount '$cosmosAccountName' in resource group '$resourceGroupName'"
+    echo "Checking if collection '$collectionName' exists in database '$dbName' of account '$cosmosAccountName' in resource group '$resourceGroupName'"
 
     if az cosmosdb sql container show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
-        echo "[setup-cosmos-db] Collection '$collectionName' already exists"
-        echo "[setup-cosmos-db] Updating throughput for collection '$collectionName'"
-        az cosmosdb sql container throughput update \
-            --account-name $cosmosAccountName \
-            --database-name $dbName \
-            --name "$collectionName" \
-            --resource-group $resourceGroupName \
-            --throughput $throughput \
-            1>/dev/null
-    else
-        echo "[setup-cosmos-db] Creating DB collection '$collectionName'"
-        az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
-        echo "Successfully created DB collection '$collectionName'"
-    fi
+        echo "Collection '$collectionName' already exists"
 
+        if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+            # configure autoscale throughput for production environment
+            autoscale=$(az cosmosdb sql container throughput show --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --query "resource.autoscaleSettings.maxThroughput" -o tsv)
+            if [[ -n $autoscale ]]; then
+                echo "Autoscale throughput for collection '$collectionName' already enabled"
+                echo "Updating autoscale maximum throughput for collection '$collectionName'"
+                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
+            else
+                echo "Autoscale throughput for collection '$collectionName' is not enabled"
+                echo "Migrating collection '$collectionName' throughput to autoscale provision"
+                az cosmosdb sql container throughput migrate --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput-type "autoscale" 1>/dev/null
+
+                echo "Updating autoscale maximum throughput for collection '$collectionName'"
+                az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --max-throughput "$throughput" 1>/dev/null
+            fi
+        else
+            # configure fixed throughput for dev environment
+            echo "Updating fixed throughput for collection '$collectionName'"
+            az cosmosdb sql container throughput update --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --throughput "$throughput" 1>/dev/null
+        fi
+
+        echo "Successfully updated collection '$collectionName'"
+    else
+        echo "Collection '$collectionName' does not exist"
+
+        if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
+            # create autoscale throughput collection for production environment
+            echo "Creating autoscale throughput collection '$collectionName'"
+            az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --max-throughput "$throughput" --ttl "$ttl" 1>/dev/null
+        else
+            # create fixed throughput collection for dev environment
+            echo "Creating fixed throughput collection '$collectionName'"
+            az cosmosdb sql container create --account-name "$cosmosAccountName" --database-name "$dbName" --name "$collectionName" --resource-group "$resourceGroupName" --partition-key-path "/partitionKey" --throughput "$throughput" --ttl "$ttl" 1>/dev/null
+        fi
+
+        echo "Successfully created collection '$collectionName'"
+    fi
 }
 
 createCosmosDatabase() {
     local dbName=$1
 
-    echo "[setup-cosmos-db] Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
+    echo "Checking if database '$dbName' exists in Cosmos account '$cosmosAccountName' in resource group '$resourceGroupName'"
 
     if az cosmosdb sql database show --name "$dbName" --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" --query "id" 2>/dev/null; then
-        echo "[setup-cosmos-db] Database '$dbName' already exists"
+        echo "Database '$dbName' already exists"
     else
-        echo "[setup-cosmos-db] Creating Cosmos DB '$dbName'"
+        echo "Creating Cosmos DB '$dbName'"
         az cosmosdb sql database create --name "$dbName" --account-name "$cosmosAccountName" --resource-group "$resourceGroupName" 1>/dev/null
-        echo "[setup-cosmos-db] Successfully created Cosmos DB '$dbName'"
+        echo "Successfully created Cosmos DB '$dbName'"
     fi
 }
 
@@ -76,14 +100,14 @@ function setupCosmos() {
     echo "Creating Cosmos databases in parallel"
     runCommandsWithoutSecretsInParallel cosmosSetupProcesses
 
-    # Increase throughput for below collection only in case of prod
+    # Increase autoscale maximum throughput for below collection only in case of prod
     # Refer to https://docs.microsoft.com/en-us/azure/cosmos-db/time-to-live for item TTL scenarios
     if [ $environment = "prod" ] || [ $environment = "ppe" ]; then
         cosmosSetupProcesses=(
-            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"20000\""        # 30 days
-            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"2000\"" # 7 days
-            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"10000\""     # 7 days
-            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"400\""
+            "createCosmosCollection \"scanRuns\" \"$onDemandScannerDbName\" \"2592000\" \"40000\""        # 30 days
+            "createCosmosCollection \"scanBatchRequests\" \"$onDemandScannerDbName\" \"604800\" \"4000\"" # 7 days
+            "createCosmosCollection \"scanRequests\" \"$onDemandScannerDbName\" \"604800\" \"20000\""     # 7 days
+            "createCosmosCollection \"systemData\" \"$onDemandScannerDbName\" \"-1\" \"4000\""
         )
     else
         cosmosSetupProcesses=(
@@ -101,11 +125,7 @@ function setupCosmos() {
 }
 
 exitWithUsageInfo() {
-    echo "
-Usage: $0 \
--r <resource group> \
--e <environment>
-"
+    echo "Usage: $0 -r <resource group> -e <environment>"
     exit 1
 }
 
