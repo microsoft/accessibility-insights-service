@@ -7,7 +7,6 @@ import { Context } from '@azure/functions';
 export async function run(context: Context): Promise<void> {
     context.res = {
         status: 200,
-        body: 'Hello World!',
     };
     context.done();
 }
