@@ -150,6 +150,10 @@ function deployWebWorkersFunction() {
     deployFunctionApp "web-workers-allyfuncapp" "${0%/*}/../templates/function-web-workers-app-template.json" "$webWorkersFuncAppName"
 }
 
+function deployE2EWebApisFunction() {
+    deployFunctionApp "e2e-web-apis-allyfuncapp" "${0%/*}/../templates/function-e2e-web-apis-app-template.json" "$e2eWebApisFuncAppName"
+}
+
 function enableStorageAccess() {
     role="Storage Blob Data Contributor"
     scope="--scope /subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName"
@@ -159,7 +163,7 @@ function enableStorageAccess() {
 function enableCosmosAccess() {
     cosmosAccountId=$(az cosmosdb show --name "$cosmosAccountName" --resource-group "$resourceGroupName" --query id -o tsv)
     scope="--scope $cosmosAccountId"
-    
+
     role="DocumentDB Account Contributor"
     . "${0%/*}/role-assign-for-sp.sh"
 }
@@ -176,6 +180,11 @@ function enableManagedIdentityOnFunctions() {
 
     enableStorageAccess
     enableCosmosAccess
+
+    getFunctionAppPrincipalId $e2eWebApisFuncAppName
+    . "${0%/*}/key-vault-enable-msi.sh"
+
+    enableStorageAccess
 }
 
 function publishWebApiScripts() {
@@ -186,12 +195,17 @@ function publishWebWorkerScripts() {
     publishFunctionAppScripts "web-workers" $webWorkersFuncAppName
 }
 
+function publishE2EWebApisScripts() {
+    publishFunctionAppScripts "e2e-web-apis" $e2eWebApisFuncAppName
+}
+
 function setupAzureFunctions() {
     installAzureFunctionsCoreTools
 
     local functionSetupProcesses=(
         "deployWebApiFunction"
         "deployWebWorkersFunction"
+        "deployE2EWebApisFunction"
     )
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 
@@ -200,6 +214,7 @@ function setupAzureFunctions() {
     functionSetupProcesses=(
         "publishWebApiScripts"
         "publishWebWorkerScripts"
+        "publishE2EWebApisScripts"
     )
     runCommandsWithoutSecretsInParallel functionSetupProcesses
 

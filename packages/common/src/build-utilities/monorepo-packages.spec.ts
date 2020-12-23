@@ -11,6 +11,7 @@ describe('listMonorepoPackageNames', () => {
               "accessibility-insights-scan",
               "common",
               "accessibility-insights-crawler",
+              "e2e-web-apis",
               "functional-tests",
               "health-client",
               "logger",
