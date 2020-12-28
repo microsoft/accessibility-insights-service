@@ -65,6 +65,10 @@
             "path": "../packages/web-workers"
         },
         {
+            "name": "e2e-web-apis",
+            "path": "../packages/e2e-web-apis"
+        },
+        {
             "name": "web-api-client",
             "path": "../packages/web-api-client"
         },

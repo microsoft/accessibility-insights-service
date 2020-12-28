@@ -36,6 +36,7 @@ steps:
               resource-deployment/dist/**/*
               web-api/dist/**/*
               web-workers/dist/**/*
+              e2e-web-apis/dist/**/*
               functional-tests/dist/**/*
               health-client/dist/**/*
               cli/drop/*
