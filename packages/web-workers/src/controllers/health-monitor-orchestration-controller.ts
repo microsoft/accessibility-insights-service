@@ -61,8 +61,8 @@ export class HealthMonitorOrchestrationController extends WebController {
             context: IOrchestrationFunctionContext,
         ): Generator<Task | TaskSet, void, SerializableResponse & void> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
-            const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig
-            const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`
+            const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
+            const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
@@ -94,7 +94,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
             yield* orchestrationSteps.invokeGetScanReportRestApi(consolidatedScanId, consolidatedReportId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
-            
+
             yield* orchestrationSteps.waitForScanCompletionNotification(scanId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionNotificationTests);
 

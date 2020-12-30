@@ -12,7 +12,14 @@ import { ScanQueuingTestGroup } from './test-groups/scan-queuing-test-group';
 import { ScanReportTestGroup } from './test-groups/scan-reports-test-group';
 import { ScanStatusTestGroup } from './test-groups/scan-status-test-group';
 
-export type TestGroupName = 'PostScan' | 'ScanStatus' | 'ScanPreProcessing' | 'ScanQueueing' | 'ScanReports' | 'ScanCompletionNotification' | 'Finalizer';
+export type TestGroupName =
+    | 'PostScan'
+    | 'ScanStatus'
+    | 'ScanPreProcessing'
+    | 'ScanQueueing'
+    | 'ScanReports'
+    | 'ScanCompletionNotification'
+    | 'Finalizer';
 
 export type TestGroupConstructor = new (
     a11yServiceClient: A11yServiceClient,

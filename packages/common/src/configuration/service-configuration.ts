@@ -302,8 +302,8 @@ export class ServiceConfiguration {
                 scanNotifyApiEndpoint: {
                     format: 'String',
                     default: '/scan-notification-url',
-                    doc: 'The end-point to hit when a scan is completed.'
-                }
+                    doc: 'The end-point to hit when a scan is completed.',
+                },
             },
         };
     }
