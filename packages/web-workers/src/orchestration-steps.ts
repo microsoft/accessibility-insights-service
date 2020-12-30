@@ -171,7 +171,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
     public *waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void> {
         let notificationState: NotificationState = 'pending';
-        let completedNotificationStates: NotificationState[] = ['sendFailed', 'queueFailed', 'sent'];
+        const completedNotificationStates: NotificationState[] = ['sendFailed', 'queueFailed', 'sent'];
         let scanStatus: ScanRunResultResponse;
         const waitStartTime = moment.utc(this.context.df.currentUtcDateTime);
         const waitEndTime = waitStartTime
