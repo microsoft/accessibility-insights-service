@@ -7,6 +7,7 @@ export const e2eTestGroupNames: { [key: string]: TestGroupName[] } = {
     postScanSubmissionTests: ['PostScan', 'ScanStatus'],
     postScanCompletionTests: ['ScanPreProcessing', 'ScanQueueing'],
     scanReportTests: ['ScanReports'],
+    postScanCompletionNotificationTests: ['ScanCompletionNotification'],
     finalizerTests: ['Finalizer'],
 };
 

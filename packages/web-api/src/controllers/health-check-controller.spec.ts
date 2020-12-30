@@ -41,6 +41,8 @@ describe(HealthCheckController, () => {
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
             consolidatedReportId: 'somereportid',
+            scanNotifyApiEndpoint: '/some-endpoint',
+            maxScanCompletionNotificationWaitTimeInSeconds: 30,
         };
 
         serviceConfigurationMock = Mock.ofType<ServiceConfiguration>();

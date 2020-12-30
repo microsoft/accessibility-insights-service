@@ -9,12 +9,13 @@ import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
 import { TestContextData, TestEnvironment, TestGroupName } from 'functional-tests';
 import { Logger } from 'logger';
-import { ScanRunResultResponse } from 'service-library';
+import { ScanRunResultResponse, ScanCompletedNotification } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
+import { WebApiConfig } from './web-api-config';
 
 /* eslint-disable
   no-empty,
@@ -32,9 +33,10 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         public availabilityTestConfig: AvailabilityTestConfig,
         serviceConfig: ServiceConfiguration,
         logger: Logger,
+        webApiConfig: WebApiConfig,
         df: typeof durableFunctions,
     ) {
-        super(serviceConfig, logger, df);
+        super(serviceConfig, logger, webApiConfig, df);
     }
 
     protected createOrchestrationSteps(
@@ -53,17 +55,21 @@ export interface OrchestratorStepsCallCount {
     callHealthCheckCount: number;
     getScanReportCount: number;
     waitForScanCompletionCount: number;
+    waitForScanCompletionNotificationCount: number;
     verifyScanSubmittedCount: number;
     callSubmitScanRequest: number;
     runFunctionalTestsCount: number;
     logTestRunStartCount: number;
 }
 
+const baseWebApiUrl = 'some-url';
+
 class OrchestrationStepsStub implements OrchestrationSteps {
     public orchestratorStepsCallCount: OrchestratorStepsCallCount = {
         callHealthCheckCount: 0,
         getScanReportCount: 0,
         waitForScanCompletionCount: 0,
+        waitForScanCompletionNotificationCount: 0,
         verifyScanSubmittedCount: 0,
         callSubmitScanRequest: 0,
         runFunctionalTestsCount: 0,
@@ -113,6 +119,16 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield scanRunResultResponse;
     }
 
+    public *waitForScanCompletionNotification(scanId: string): Generator<any, ScanCompletedNotification, any> {
+        this.orchestratorStepsCallCount.waitForScanCompletionNotificationCount += 1;
+        this.throwExceptionIfExpected();
+        expect(scanId).toBe(this.scanId);
+
+        const scanRunResultResponse = {} as ScanCompletedNotification;
+
+        return yield scanRunResultResponse;
+    }
+
     public *validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void> {
         this.orchestratorStepsCallCount.verifyScanSubmittedCount += 1;
         this.throwExceptionIfExpected();
@@ -121,10 +137,11 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         yield undefined;
     }
 
-    public *invokeSubmitScanRequestRestApi(url: string): Generator<any, string, any> {
+    public *invokeSubmitScanRequestRestApi(url: string, scanNotifyUrl: string): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
+        expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyApiEndpoint}`);
 
         return yield this.scanId;
     }
@@ -171,6 +188,7 @@ describe('HealthMonitorOrchestrationController', () => {
     let orchestratorGeneratorMock: IMock<(ctxt: IOrchestrationFunctionContext) => void>;
     let orchestratorStepsStub: OrchestrationStepsStub;
     let orchestratorIterator: GeneratorExecutor;
+    let webApiConfig: WebApiConfig;
 
     beforeEach(() => {
         availabilityTestConfig = {
@@ -180,11 +198,17 @@ describe('HealthMonitorOrchestrationController', () => {
             logQueryTimeRange: 'P1D',
             environmentDefinition: TestEnvironment[TestEnvironment.canary],
             consolidatedReportId: 'somereportid',
+            scanNotifyApiEndpoint: '/some-endpoint',
+            maxScanCompletionNotificationWaitTimeInSeconds: 30,
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
         loggerMock = Mock.ofType(MockableLogger);
         orchestratorStepsStub = new OrchestrationStepsStub(availabilityTestConfig);
+
+        webApiConfig = {
+            baseUrl: baseWebApiUrl,
+        };
 
         contextStub = ({
             bindingData: {},
@@ -210,6 +234,7 @@ describe('HealthMonitorOrchestrationController', () => {
             availabilityTestConfig,
             serviceConfigurationMock.object,
             loggerMock.object,
+            webApiConfig,
             df.object,
         );
     });
@@ -273,6 +298,7 @@ describe('HealthMonitorOrchestrationController', () => {
                 waitForScanCompletionCount: 0,
                 runFunctionalTestsCount: 0,
                 logTestRunStartCount: 0,
+                waitForScanCompletionNotificationCount: 0,
             };
 
             const actualStepsCallCount: OrchestratorStepsCallCount = orchestratorStepsStub.orchestratorStepsCallCount;
@@ -331,6 +357,16 @@ describe('HealthMonitorOrchestrationController', () => {
 
             orchestratorIterator.next();
             expectedTests.push('ScanReports');
+            expectedStepsCallCount.runFunctionalTestsCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+            expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
+            expectedStepsCallCount.waitForScanCompletionNotificationCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
+
+            orchestratorIterator.next();
+            expectedTests.push('ScanCompletionNotification');
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
             expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);

@@ -11,6 +11,7 @@ export interface ActivityRequestData {
 export interface CreateScanRequestData {
     scanUrl: string;
     priority: number;
+    notifyScanUrl?: string;
 }
 
 export interface CreateConsolidatedScanRequestData extends CreateScanRequestData {

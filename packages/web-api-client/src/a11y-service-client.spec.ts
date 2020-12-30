@@ -30,6 +30,7 @@ describe(A11yServiceClient, () => {
     const priority = 3;
     let response: unknown;
     const agentsStub = {};
+    const scanNotifyUrlStub = 'scan-notification-url-stub';
 
     beforeEach(() => {
         error = new Error('HTTP 500 Server Error');
@@ -136,6 +137,21 @@ describe(A11yServiceClient, () => {
 
             extendMock.verifyAll();
         });
+    });
+
+    it('postScanUrlWithNotifyUrl', async () => {
+        const requestBody = [{ url: scanUrl, scanNotifyUrl: scanNotifyUrlStub, priority }];
+        const requestOptions = { json: requestBody };
+        setupVerifiableSignRequestCall();
+        setupRetryHelperMock(false);
+        postMock
+            .setup((req) => req(`${baseUrl}/scans`, requestOptions))
+            .returns(async () => Promise.resolve(response))
+            .verifiable(Times.once());
+
+        const actualResponse = await testSubject.postScanUrlWithNotifyUrl(scanUrl, scanNotifyUrlStub, priority);
+
+        expect(actualResponse).toEqual(response);
     });
 
     it('postScanUrl', async () => {

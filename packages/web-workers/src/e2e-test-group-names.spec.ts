@@ -11,6 +11,7 @@ describe(getAllTestGroupClassNames, () => {
         'ScanPreProcessingTestGroup',
         'ScanQueuingTestGroup',
         'ScanReportTestGroup',
+        'ScanCompletionNotificationTestGroup',
         'FinalizerTestGroup',
     ];
 

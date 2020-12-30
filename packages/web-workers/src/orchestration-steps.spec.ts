@@ -43,6 +43,7 @@ describe(OrchestrationStepsImpl, () => {
     const scanUrl = 'https://www.bing.com';
     const scanId = 'test-scan-id';
     let currentUtcDateTime: Date;
+    const notifyScanUrl = 'scan-notify-url-stub';
 
     beforeEach(() => {
         currentUtcDateTime = new Date(2019, 2, 1);
@@ -58,6 +59,8 @@ describe(OrchestrationStepsImpl, () => {
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
             consolidatedReportId: 'somereportid',
+            maxScanCompletionNotificationWaitTimeInSeconds: 30,
+            scanNotifyApiEndpoint: '/scan-notify-api',
         };
 
         loggerMock = Mock.ofType(MockableLogger);
@@ -127,12 +130,13 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl));
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl, notifyScanUrl));
             activityRequestData = {
                 activityName: ActivityAction.createScanRequest,
                 data: {
                     scanUrl: scanUrl,
                     priority: 1000,
+                    notifyScanUrl: notifyScanUrl,
                 } as CreateScanRequestData,
             };
         });

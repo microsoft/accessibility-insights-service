@@ -18,10 +18,20 @@ Object {
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
+    "maxScanCompletionNotificationWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for scan notification request to complete",
+      "format": "int",
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 900,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
       "format": "int",
+    },
+    "scanNotifyApiEndpoint": Object {
+      "default": "/scan-notification-url",
+      "doc": "The end-point to hit when a scan is completed.",
+      "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
       "default": 60,
@@ -189,10 +199,20 @@ Object {
       "doc": "The Application Insights query time range",
       "format": [Function],
     },
+    "maxScanCompletionNotificationWaitTimeInSeconds": Object {
+      "default": 600,
+      "doc": "Maximum wait time for scan notification request to complete",
+      "format": "int",
+    },
     "maxScanWaitTimeInSeconds": Object {
       "default": 900,
       "doc": "Maximum wait time for fetching scan status of the submitted request",
       "format": "int",
+    },
+    "scanNotifyApiEndpoint": Object {
+      "default": "/scan-notification-url",
+      "doc": "The end-point to hit when a scan is completed.",
+      "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
       "default": 60,
