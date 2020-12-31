@@ -86,8 +86,9 @@ describe(HealthMonitorClientController, () => {
         it('handles createScanRequest', async () => {
             const scanUrl = 'scan-url';
             const priority = 1;
+            const notifyScanUrl = 'some-notify-url';
             webApiClientMock
-                .setup(async (w) => w.postScanUrl(scanUrl, priority))
+                .setup(async (w) => w.postScanUrlWithNotifyUrl(scanUrl, notifyScanUrl, priority))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -96,6 +97,7 @@ describe(HealthMonitorClientController, () => {
                 data: {
                     scanUrl: scanUrl,
                     priority: priority,
+                    notifyScanUrl: notifyScanUrl,
                 },
             };
             const result = await testSubject.invoke(context, args);

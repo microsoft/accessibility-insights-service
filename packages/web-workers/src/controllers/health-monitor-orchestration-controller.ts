@@ -10,6 +10,7 @@ import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
 import { e2eTestGroupNames } from '../e2e-test-group-names';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
+import { WebApiConfig } from './web-api-config';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -21,6 +22,7 @@ export class HealthMonitorOrchestrationController extends WebController {
     public constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
         @inject(ContextAwareLogger) logger: ContextAwareLogger,
+        @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
     ) {
         super(logger);
@@ -60,6 +62,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         ): Generator<Task | TaskSet, void, SerializableResponse & void> {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
+            const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
@@ -69,7 +72,7 @@ export class HealthMonitorOrchestrationController extends WebController {
 
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
-            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan);
+            const scanId = yield* orchestrationSteps.invokeSubmitScanRequestRestApi(availabilityTestConfig.urlToScan, scanNotificationUrl);
             const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(
                 availabilityTestConfig.urlToScan,
                 availabilityTestConfig.consolidatedReportId,
@@ -91,6 +94,9 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.invokeGetScanReportRestApi(scanId, reportId);
             yield* orchestrationSteps.invokeGetScanReportRestApi(consolidatedScanId, consolidatedReportId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
+
+            yield* orchestrationSteps.waitForScanCompletionNotification(scanId);
+            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionNotificationTests);
 
             // The last test group in a functional test suite to indicated a suite run completion
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.finalizerTests);

@@ -68,6 +68,8 @@ export interface AvailabilityTestConfig {
     logQueryTimeRange: string;
     environmentDefinition: string;
     consolidatedReportId: string;
+    scanNotifyApiEndpoint: string;
+    maxScanCompletionNotificationWaitTimeInSeconds: number;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -277,6 +279,11 @@ export class ServiceConfiguration {
                     default: 900,
                     doc: 'Maximum wait time for fetching scan status of the submitted request',
                 },
+                maxScanCompletionNotificationWaitTimeInSeconds: {
+                    format: 'int',
+                    default: 600,
+                    doc: 'Maximum wait time for scan notification request to complete',
+                },
                 scanWaitIntervalInSeconds: {
                     format: 'int',
                     default: 60,
@@ -291,6 +298,11 @@ export class ServiceConfiguration {
                     format: String,
                     default: 'canary',
                     doc: 'The environment definition used to select tests to run',
+                },
+                scanNotifyApiEndpoint: {
+                    format: 'String',
+                    default: '/scan-notification-url',
+                    doc: 'The end-point to hit when a scan is completed.',
                 },
             },
         };
