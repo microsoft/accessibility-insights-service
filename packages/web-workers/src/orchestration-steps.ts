@@ -42,7 +42,11 @@ export interface OrchestrationTelemetryProperties {
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
     invokeSubmitScanRequestRestApi(url: string, notifyScanUrl: string): Generator<Task, string, SerializableResponse>;
-    invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<Task, string, SerializableResponse>;
+    invokeSubmitConsolidatedScanRequestRestApi(
+        url: string,
+        reportId: string,
+        notifyScanUrl: string,
+    ): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
@@ -240,11 +244,13 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     public *invokeSubmitConsolidatedScanRequestRestApi(
         url: string,
         reportId: string,
+        notifyScanUrl: string,
     ): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateConsolidatedScanRequestData = {
             scanUrl: url,
             reportId: reportId,
             priority: 1000,
+            notifyScanUrl,
         };
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createConsolidatedScanRequest, requestData);

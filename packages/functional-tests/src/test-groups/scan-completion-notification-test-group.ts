@@ -16,4 +16,12 @@ export class ScanCompletionNotificationTestGroup extends FunctionalTestGroup {
 
         expect(notification.state).to.equal('sent');
     }
+
+    @test(TestEnvironment.all)
+    public async testScanNotificatioFail(): Promise<void> {
+        const response = await this.a11yServiceClient.getScanStatus(this.testContextData.consolidatedScanId);
+        const notification = (<ScanRunResultResponse>response.body).notification;
+
+        expect(notification.state).to.equal('sendFailed');
+    }
 }
