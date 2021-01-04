@@ -187,7 +187,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Starting wait for scan completion notification');
 
         while (
-            completedNotificationStates.indexOf(notificationState) === -1 &&
+            !completedNotificationStates.includes(notificationState) &&
             moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)
         ) {
             this.logOrchestrationStep(`Starting timer with wait time ${scanWaitIntervalInSeconds}`, LogLevel.info, {
@@ -213,7 +213,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
-        if (completedNotificationStates.indexOf(notificationState) !== -1) {
+        if (completedNotificationStates.includes(notificationState)) {
             this.logOrchestrationStep('Wait for scan completition notification succeeded', LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
