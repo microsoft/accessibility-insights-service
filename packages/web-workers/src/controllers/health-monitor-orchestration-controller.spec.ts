@@ -146,11 +146,12 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         return yield this.scanId;
     }
 
-    public *invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<any, string, any> {
+    public *invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string, scanNotifyUrl: string): Generator<any, string, any> {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
         expect(reportId).toBe(this.availabilityTestConfig.consolidatedReportId);
+        expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyFailApiEndpoint}`);
 
         return yield this.scanId;
     }
@@ -200,6 +201,7 @@ describe('HealthMonitorOrchestrationController', () => {
             consolidatedReportId: 'somereportid',
             scanNotifyApiEndpoint: '/some-endpoint',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
+            scanNotifyFailApiEndpoint: '/some-fail-endpoint',
         };
 
         serviceConfigurationMock = Mock.ofType(ServiceConfiguration);
@@ -360,6 +362,10 @@ describe('HealthMonitorOrchestrationController', () => {
             expectedStepsCallCount.runFunctionalTestsCount += 1;
             expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
             expect(orchestratorStepsStub.functionalTestsRun).toEqual(expectedTests);
+
+            orchestratorIterator.next();
+            expectedStepsCallCount.waitForScanCompletionNotificationCount += 1;
+            expect(actualStepsCallCount).toEqual(expectedStepsCallCount);
 
             orchestratorIterator.next();
             expectedStepsCallCount.waitForScanCompletionNotificationCount += 1;

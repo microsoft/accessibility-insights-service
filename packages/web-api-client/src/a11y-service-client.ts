@@ -61,12 +61,14 @@ export class A11yServiceClient {
     public async postConsolidatedScan(
         scanUrl: string,
         reportId: string,
+        scanNotificationUrl: string,
         priority?: number,
     ): Promise<ResponseWithBodyType<ScanRunResponse[]>> {
         const scanRequestData: ScanRunRequest = {
             url: scanUrl,
             site: { baseUrl: scanUrl },
             reportGroups: [{ consolidatedId: reportId }],
+            scanNotifyUrl: scanNotificationUrl,
         };
 
         return this.postScanUrlWithRequest(scanRequestData, priority);

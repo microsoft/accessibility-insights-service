@@ -30,7 +30,12 @@ Object {
     },
     "scanNotifyApiEndpoint": Object {
       "default": "/scan-notification-url",
-      "doc": "The end-point to hit when a scan is completed.",
+      "doc": "The end-point to hit when a scan is completed and will respond successfully",
+      "format": "String",
+    },
+    "scanNotifyFailApiEndpoint": Object {
+      "default": "/scan-notification-url-fail",
+      "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {
@@ -211,7 +216,12 @@ Object {
     },
     "scanNotifyApiEndpoint": Object {
       "default": "/scan-notification-url",
-      "doc": "The end-point to hit when a scan is completed.",
+      "doc": "The end-point to hit when a scan is completed and will respond successfully",
+      "format": "String",
+    },
+    "scanNotifyFailApiEndpoint": Object {
+      "default": "/scan-notification-url-fail",
+      "doc": "The end-point to hit when a scan is completed and will respond unsuccessfully",
       "format": "String",
     },
     "scanWaitIntervalInSeconds": Object {

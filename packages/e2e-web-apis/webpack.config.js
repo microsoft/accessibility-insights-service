@@ -14,6 +14,7 @@ module.exports = (env) => {
         externals: ['@azure/functions'],
         entry: {
             ['scan-notification-client-func']: path.resolve('./scan-notification-client-func/index.ts'),
+            ['scan-notification-client-func-fail']: path.resolve('./scan-notification-client-func-fail/index.ts'),
         },
         mode: 'development',
         module: {

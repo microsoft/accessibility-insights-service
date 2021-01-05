@@ -80,7 +80,7 @@ export class HealthMonitorClientController extends WebController {
         data: CreateConsolidatedScanRequestData,
     ): Promise<SerializableResponse<ScanRunResponse[]>> => {
         const webApiClient = await this.webApiClientProvider();
-        const response = await webApiClient.postConsolidatedScan(data.scanUrl, data.reportId, data.priority);
+        const response = await webApiClient.postConsolidatedScan(data.scanUrl, data.reportId, data.notifyScanUrl, data.priority);
 
         return this.serializeResponse(response);
     };
