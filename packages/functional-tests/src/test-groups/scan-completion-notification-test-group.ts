@@ -22,6 +22,7 @@ export class ScanCompletionNotificationTestGroup extends FunctionalTestGroup {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.consolidatedScanId);
         const notification = (<ScanRunResultResponse>response.body).notification;
 
+        // Consolidated scan request submitted with the scan notification url endpoint that would always fail.
         expect(notification.state).to.equal('sendFailed');
     }
 }
