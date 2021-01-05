@@ -40,13 +40,13 @@
         "rimraf": "^3.0.2",
         "ts-jest": "^26.3.0",
         "ts-loader": "^8.0.12",
-        "typescript": "^4.1.2",
+        "typescript": "^4.1.3",
         "webpack": "^4.44.2",
         "webpack-cli": "^3.3.12"
     },
     "dependencies": {
         "azure-services": "^1.0.0",
-        "inversify": "^5.0.1",
+        "inversify": "^5.0.5",
         "lodash": "^4.17.20",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13"
