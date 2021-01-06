@@ -17,5 +17,5 @@ export interface ScanArguments {
     // eslint-disable-next-line
     continue?: boolean;
     chromePath?: string;
-    axeSourcePath?:string;
+    axeSourcePath?: string;
 }

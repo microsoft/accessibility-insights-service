@@ -24,7 +24,7 @@ export class AICrawler {
     public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<CombinedScanResult> {
         try {
             await this.crawler.crawl(crawlerRunOptions);
-            let combinedAxeResult = await this.combineAxeResults();
+            const combinedAxeResult = await this.combineAxeResults();
             combinedAxeResult.scanMetadata = await this.scanResultReader.getScanMetadata(crawlerRunOptions.baseUrl);
 
             return combinedAxeResult;

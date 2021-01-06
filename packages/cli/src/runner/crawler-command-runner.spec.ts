@@ -9,8 +9,8 @@ import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
-import { CrawlerCommandRunner } from './crawler-command-runner';
 import { AICrawler } from '../crawler/ai-crawler';
+import { CrawlerCommandRunner } from './crawler-command-runner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 

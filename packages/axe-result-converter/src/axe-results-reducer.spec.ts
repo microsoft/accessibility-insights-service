@@ -104,7 +104,10 @@ describe(AxeResultsReducer, () => {
 
     it('skip same rule node', () => {
         const currentUrl = 'url-2';
-        const accumulatedResults = addAxeResult(new AxeResultsList(), getAccumulatedResult('rule-1', { urls: ['url-1'], nodeId: 'node-1' }));
+        const accumulatedResults = addAxeResult(
+            new AxeResultsList(),
+            getAccumulatedResult('rule-1', { urls: ['url-1'], nodeId: 'node-1' }),
+        );
         const currentResults = getCurrentResults('rule-1', 'node-1', 'node-2', 'node-3');
         const expectedResults = addAxeResult(
             new AxeResultsList(),

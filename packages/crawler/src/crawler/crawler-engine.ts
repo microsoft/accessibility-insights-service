@@ -4,11 +4,11 @@ import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
+import { isEmpty } from 'lodash';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, iocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
-import { isEmpty } from 'lodash';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
