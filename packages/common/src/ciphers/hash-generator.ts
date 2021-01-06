@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 import fnv1a from '@sindresorhus/fnv1a';
 import { injectable } from 'inversify';
-import SHA from 'sha.js';
 import { JumpConsistentHash } from './jump-consistent-hash';
+
+const shaJS = require('sha.js');
 
 @injectable()
 export class HashGenerator {
-    public constructor(private readonly sha: typeof SHA = SHA) {}
+    public constructor(private readonly shaObj = shaJS) {}
 
     public getWebsiteScanResultDocumentId(baseUrl: string, scanGroupId: string): string {
         // Preserve parameters order below for the hash generation compatibility
@@ -31,6 +32,6 @@ export class HashGenerator {
     public generateBase64Hash(...values: string[]): string {
         const hashSeed: string = values.join('|').toLowerCase();
 
-        return this.sha('sha256').update(hashSeed).digest('hex');
+        return this.shaObj('sha256').update(hashSeed).digest('hex');
     }
 }

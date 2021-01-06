@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { IMock, Mock, It } from 'typemoq';
 import { AICrawler } from './ai-crawler';
 import { DbScanResultReader, Crawler, CrawlerRunOptions, ScanMetadata, ScanResult } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, AxeCoreResults, AxeResults } from 'axe-result-converter';
+import { AxeResultsReducer, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -49,10 +49,10 @@ describe(AICrawler, () => {
             browserResolution: '1920x1080',
         } as ScanMetadata;
         const combinedAxeResults = {
-            violations: new AxeResults(),
-            passes: new AxeResults(),
-            incomplete: new AxeResults(),
-            inapplicable: new AxeResults(),
+            violations: new AxeResultsList(),
+            passes: new AxeResultsList(),
+            incomplete: new AxeResultsList(),
+            inapplicable: new AxeResultsList(),
         } as AxeCoreResults;
         const scanResults = [
             {

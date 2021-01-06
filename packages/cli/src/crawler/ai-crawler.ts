@@ -3,7 +3,7 @@
 import { inject, injectable } from 'inversify';
 import { System } from 'common';
 import { DbScanResultReader, CrawlerRunOptions, Crawler, ScanMetadata } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResults } from 'axe-result-converter';
+import { AxeResultsReducer, UrlCount, AxeCoreResults, AxeResultsList } from 'axe-result-converter';
 import { ScanResultReader } from '../scan-result-providers/scan-result-reader';
 
 export interface CombinedScanResult {
@@ -39,10 +39,10 @@ export class AICrawler {
 
     private async combineAxeResults(): Promise<CombinedScanResult> {
         const combinedAxeResults = {
-            violations: new AxeResults(),
-            passes: new AxeResults(),
-            incomplete: new AxeResults(),
-            inapplicable: new AxeResults(),
+            violations: new AxeResultsList(),
+            passes: new AxeResultsList(),
+            incomplete: new AxeResultsList(),
+            inapplicable: new AxeResultsList(),
         } as AxeCoreResults;
         const urlCount = {
             total: 0,
