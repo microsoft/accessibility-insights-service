@@ -15,4 +15,6 @@ export interface CrawlerRunOptions {
     memoryMBytes?: number;
     silentMode?: boolean;
     debug?: boolean;
+    chromePath?: string;
+    axeSourcePath?:string;
 }

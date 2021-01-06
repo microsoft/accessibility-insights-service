@@ -75,10 +75,6 @@ describe(CrawlerEngine, () => {
         };
 
         puppeteerCrawlerMock.setup((o) => o.run()).verifiable();
-        crawlerFactoryMock
-            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
-            .returns(() => puppeteerCrawlerMock.object)
-            .verifiable();
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
@@ -91,6 +87,24 @@ describe(CrawlerEngine, () => {
     });
 
     it('Run crawler with settings validation', async () => {
+        crawlerFactoryMock
+            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .returns(() => puppeteerCrawlerMock.object)
+            .verifiable();
+
+        await crawlerEngine.start(crawlerRunOptions);
+    });
+
+    it('Run crawler while chrome path is set', async () => {
+        crawlerRunOptions.chromePath = 'chrome path';
+        crawlerConfigurationMock.setup((o) => o.setChromePath(crawlerRunOptions.chromePath)).verifiable();
+
+        baseCrawlerOptions.launchPuppeteerOptions.useChrome = true;
+        crawlerFactoryMock
+            .setup((o) => o.createPuppeteerCrawler(baseCrawlerOptions))
+            .returns(() => puppeteerCrawlerMock.object)
+            .verifiable();
+
         await crawlerEngine.start(crawlerRunOptions);
     });
 

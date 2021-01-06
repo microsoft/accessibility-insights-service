@@ -7,6 +7,7 @@ describe('Apify settings', () => {
     const defaultEnv: ApifySettings = {
         APIFY_HEADLESS: '',
         APIFY_LOCAL_STORAGE_DIR: '',
+        APIFY_CHROME_EXECUTABLE_PATH: '',
     };
 
     beforeEach(() => {
