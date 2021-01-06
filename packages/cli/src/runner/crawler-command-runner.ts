@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import * as fs from 'fs';
-import { Crawler } from 'accessibility-insights-crawler';
 import { inject, injectable } from 'inversify';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
 import { CommandRunner } from './command-runner';
+import { AICrawler } from '../crawler/ai-crawler';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {
     constructor(
-        @inject(Crawler) private readonly crawler: Crawler,
+        @inject(AICrawler) private readonly crawler: AICrawler,
         @inject(CrawlerParametersBuilder) private readonly crawlerParametersBuilder: CrawlerParametersBuilder,
         @inject(ConsolidatedReportGenerator) private readonly consolidatedReportGenerator: ConsolidatedReportGenerator,
         @inject(ReportDiskWriter) private readonly reportDiskWriter: ReportDiskWriter,
@@ -26,13 +26,10 @@ export class CrawlerCommandRunner implements CommandRunner {
 
         const crawlerRunOptions = await this.crawlerParametersBuilder.build(scanArguments);
         const scanStarted = new Date();
-        await this.crawler.crawl(crawlerRunOptions);
-        await this.generateConsolidatedReport(scanArguments, scanStarted, new Date());
-    }
-
-    private async generateConsolidatedReport(scanArguments: ScanArguments, scanStarted: Date, scanEnded: Date): Promise<void> {
+        const combinedScanResult = await this.crawler.crawl(crawlerRunOptions);
+        const scanEnded = new Date();
         console.log('Generating summary scan report...');
-        const reportContent = await this.consolidatedReportGenerator.generateReport(scanArguments.url, scanStarted, scanEnded);
+        const reportContent = await this.consolidatedReportGenerator.generateReport(combinedScanResult, scanStarted, scanEnded);
         const reportLocation = this.reportDiskWriter.writeToDirectory(scanArguments.output, 'index', 'html', reportContent);
         console.log(`Summary report was saved as ${reportLocation}`);
     }

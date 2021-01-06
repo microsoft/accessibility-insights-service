@@ -3,13 +3,14 @@
 import 'reflect-metadata';
 
 import * as fs from 'fs';
-import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
+import { CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
 import { CrawlerCommandRunner } from './crawler-command-runner';
+import { AICrawler } from '../crawler/ai-crawler';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -18,7 +19,7 @@ describe('CrawlerCommandRunner', () => {
 
     let scanArguments: ScanArguments;
     let crawlerOption: CrawlerRunOptions;
-    let crawlerMock: IMock<Crawler>;
+    let crawlerMock: IMock<AICrawler>;
     let crawlerParametersBuilderMock: IMock<CrawlerParametersBuilder>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
@@ -41,7 +42,7 @@ describe('CrawlerCommandRunner', () => {
             silentMode: undefined,
         };
 
-        crawlerMock = Mock.ofType<Crawler>();
+        crawlerMock = Mock.ofType<AICrawler>();
         crawlerParametersBuilderMock = Mock.ofType<CrawlerParametersBuilder>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();
@@ -57,7 +58,7 @@ describe('CrawlerCommandRunner', () => {
             .verifiable();
         crawlerMock
             .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve())
+            .returns(async () => Promise.resolve({}))
             .verifiable();
 
         testSubject = new CrawlerCommandRunner(
@@ -102,7 +103,7 @@ describe('CrawlerCommandRunner', () => {
         crawlerMock.reset();
         crawlerMock
             .setup((o) => o.crawl(crawlerOption))
-            .returns(async () => Promise.resolve())
+            .returns(async () => Promise.resolve({}))
             .verifiable();
         await testSubject.runCommand(scanArguments);
     });
@@ -121,7 +122,7 @@ describe('CrawlerCommandRunner', () => {
 
     it('run crawler', async () => {
         consolidatedReportGeneratorMock
-            .setup(async (o) => o.generateReport(testUrl, It.isAny(), It.isAny()))
+            .setup(async (o) => o.generateReport({}, It.isAny(), It.isAny()))
             .returns(() => Promise.resolve('report'))
             .verifiable();
         reportDiskWriterMock
