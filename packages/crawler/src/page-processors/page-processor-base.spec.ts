@@ -120,6 +120,7 @@ describe(PageProcessorBase, () => {
     it('gotoFunction', async () => {
         pageProcessorBase.baseUrl = testUrl;
         const userAgent = 'userAgent';
+        const browserSpec = 'browser spec';
         const browserResolution = '1920x1080';
         const inputs: Apify.PuppeteerGotoInputs = {
             page: pageStub,
@@ -129,6 +130,10 @@ describe(PageProcessorBase, () => {
         pageConfiguratorMock
             .setup((o) => o.getUserAgent())
             .returns(() => userAgent)
+            .verifiable();
+        pageConfiguratorMock
+            .setup((o) => o.getBrowserSpec())
+            .returns(() => browserSpec)
             .verifiable();
         pageConfiguratorMock
             .setup((o) => o.getBrowserResolution())
@@ -143,7 +148,7 @@ describe(PageProcessorBase, () => {
             .returns(() => Promise.resolve(response))
             .verifiable();
         dataBaseMock
-            .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserResolution }))
+            .setup((o) => o.addScanMetadata({ baseUrl: testUrl, basePageTitle: 'title', userAgent, browserSpec, browserResolution }))
             .verifiable();
 
         await pageProcessorBase.gotoFunction(inputs);

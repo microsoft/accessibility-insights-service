@@ -6,7 +6,7 @@ import { AxePuppeteer } from '@axe-core/puppeteer';
 import { AxeResults } from 'axe-core';
 import { Page } from 'puppeteer';
 import { AxePuppeteerFactory } from 'scanner-global-library';
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, It } from 'typemoq';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { PageScanner } from './page-scanner';
 
@@ -34,7 +34,7 @@ describe(PageScanner, () => {
         createAxePuppeteerMock = Mock.ofType<AxePuppeteerFactory>();
         axePuppeteerMock = getPromisableDynamicMock(Mock.ofType<AxePuppeteer>());
         createAxePuppeteerMock
-            .setup(async (cap) => cap.createAxePuppeteer(pageStub))
+            .setup(async (cap) => cap.createAxePuppeteer(pageStub, It.isAny()))
             .returns(() => Promise.resolve(axePuppeteerMock.object));
 
         pageScanner = new PageScanner(createAxePuppeteerMock.object);

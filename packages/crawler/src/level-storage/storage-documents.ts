@@ -20,6 +20,7 @@ export interface ScanMetadata {
     baseUrl: string;
     basePageTitle?: string;
     userAgent?: string;
+    browserSpec?: string;
     browserResolution?: string;
 }
 

@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { Browser, Page } from 'puppeteer';
-import { IMock, Mock } from 'typemoq';
+import { IMock, Mock, Times } from 'typemoq';
 import { PageConfigurator } from './page-configurator';
 
 describe(PageConfigurator, () => {
@@ -18,6 +18,8 @@ describe(PageConfigurator, () => {
     };
     const chromeUserAgent = 'Mozilla/5.0 Chrome/85.0';
     const headlessChromeUserAgent = 'Mozilla/5.0 HeadlessChrome/85.0';
+    const chromeSpec = 'Chrome/85.0';
+    const headlessChromeSpec = 'HeadlessChrome/85.0';
 
     beforeEach(() => {
         pageMock = Mock.ofType<Page>();
@@ -26,10 +28,14 @@ describe(PageConfigurator, () => {
             .setup(async (o) => o.userAgent())
             .returns(() => Promise.resolve(headlessChromeUserAgent))
             .verifiable();
+        browserMock
+            .setup(async (o) => o.version())
+            .returns(() => Promise.resolve(headlessChromeSpec))
+            .verifiable();
         pageMock
             .setup((o) => o.browser())
             .returns(() => browserMock.object)
-            .verifiable();
+            .verifiable(Times.exactly(2));
         pageMock
             .setup(async (o) => o.setBypassCSP(true))
             .returns(() => Promise.resolve())
@@ -54,6 +60,7 @@ describe(PageConfigurator, () => {
     it('configurePage()', async () => {
         await pageConfigurator.configurePage(pageMock.object);
         expect(pageConfigurator.getUserAgent()).toEqual(chromeUserAgent);
+        expect(pageConfigurator.getBrowserSpec()).toEqual(chromeSpec);
         expect(pageConfigurator.getBrowserResolution()).toEqual('1920x1080');
     });
 });

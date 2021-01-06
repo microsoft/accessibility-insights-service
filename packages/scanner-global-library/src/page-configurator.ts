@@ -6,11 +6,16 @@ import { Page } from 'puppeteer';
 @injectable()
 export class PageConfigurator {
     private userAgent: string;
+    private browserSpec: string;
     private readonly windowWidth = 1920;
     private readonly windowHeight = 1080;
 
     public getUserAgent(): string {
         return this.userAgent;
+    }
+
+    public getBrowserSpec(): string {
+        return this.browserSpec;
     }
 
     public async configurePage(page: Page): Promise<void> {
@@ -22,6 +27,7 @@ export class PageConfigurator {
         });
 
         await this.setUserAgent(page);
+        await this.setBrowserSpec(page);
     }
 
     public getBrowserResolution(): string {
@@ -32,5 +38,10 @@ export class PageConfigurator {
         const browser = page.browser();
         this.userAgent = (await browser.userAgent()).replace('HeadlessChrome', 'Chrome');
         await page.setUserAgent(this.userAgent);
+    }
+
+    private async setBrowserSpec(page: Page): Promise<void> {
+        const browser = page.browser();
+        this.browserSpec = (await browser.version()).replace('HeadlessChrome', 'Chrome');
     }
 }
