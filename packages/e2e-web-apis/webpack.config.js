@@ -42,7 +42,7 @@ module.exports = (env) => {
                 },
             ],
         },
-        name: 'e2e-web-apis',
+        name: 'e2e-web-api',
         node: {
             __dirname: false,
         },
