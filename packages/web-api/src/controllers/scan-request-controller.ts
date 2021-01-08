@@ -168,8 +168,8 @@ export class ScanRequestController extends ApiController {
         }
 
         const emptyBaseUrl = isEmpty(scanRunRequest.site?.baseUrl);
-        const emptyReportGroup = isEmpty(scanRunRequest.reportGroups)
-            || scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId));
+        const emptyReportGroup =
+            isEmpty(scanRunRequest.reportGroups) || scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId));
 
         if (scanRunRequest.deepScan && (emptyBaseUrl || emptyReportGroup)) {
             return { valid: false, error: WebApiErrorCodes.missingRequiredDeepScanProperties.error };
