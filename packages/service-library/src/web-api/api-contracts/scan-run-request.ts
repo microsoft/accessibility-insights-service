@@ -14,10 +14,12 @@ export interface ScanRunRequest {
      * The default value is 0.
      */
     priority?: number;
+    deepScan?: boolean;
 }
 
 export interface Website {
     baseUrl: string;
+    knownPages?: string[];
 }
 
 export interface ReportGroup {

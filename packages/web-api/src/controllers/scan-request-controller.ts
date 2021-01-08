@@ -130,6 +130,7 @@ export class ScanRequestController extends ApiController {
                     ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                     ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
                     ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
+                    ...(!scanRunRequest.deepScan ? {} : { deepScan: scanRunRequest.deepScan }),
                 });
 
                 scanResponses.push({
@@ -164,6 +165,13 @@ export class ScanRequestController extends ApiController {
 
         if (scanRunRequest.priority < this.config.minScanPriorityValue || scanRunRequest.priority > this.config.maxScanPriorityValue) {
             return { valid: false, error: WebApiErrorCodes.outOfRangePriority.error };
+        }
+
+        if (
+            scanRunRequest.deepScan &&
+            (scanRunRequest.reportGroups?.length > 0 ? scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId)) : true)
+        ) {
+            return { valid: false, error: WebApiErrorCodes.missingConsolidatedId.error };
         }
 
         if (

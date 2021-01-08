@@ -20,6 +20,7 @@ export interface ScanRunResultResponse {
     url: string;
     scannedUrl?: string;
     scanResult?: ScanResult;
+    deepScanResult?: DeepScanResult[];
     reports?: ScanReport[];
     run: ScanRun;
     notification?: ScanCompletedNotification;
@@ -69,4 +70,11 @@ export interface ScanRun {
 export interface ScanRunError {
     code: ScanRunErrorCodeName;
     message: string;
+}
+
+export interface DeepScanResult {
+    scanId: string;
+    url: string;
+    scanResultState?: ScanState;
+    scanRunState: RunState;
 }

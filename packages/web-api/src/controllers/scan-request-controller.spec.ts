@@ -305,5 +305,64 @@ describe(ScanRequestController, () => {
             expect(context.res.status).toEqual(400);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
         });
+
+        it('deepScan', async () => {
+            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
+            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
+            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
+            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
+
+            const priority = 10;
+
+            context.req.rawBody = JSON.stringify([
+                {
+                    url: 'https://abc/path/',
+                    priority: priority,
+                    deepScan: true,
+                    site: { baseUrl: 'https://abc/path/', knownPages: [''] },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+                {
+                    url: 'https://def/path/',
+                    priority: priority,
+                    deepScan: true,
+                    reportGroups: [{}], // empty consolidatedId
+                },
+                {
+                    // missing reportGroups
+                    url: 'https://hij/path/',
+                    priority: priority,
+                    deepScan: true,
+                },
+            ]);
+
+            const expectedResponse = [
+                { scanId: guid2, url: 'https://abc/path/' },
+                { url: 'https://def/path/', error: WebApiErrorCodes.missingConsolidatedId.error },
+                { url: 'https://hij/path/', error: WebApiErrorCodes.missingConsolidatedId.error },
+            ];
+
+            const expectedSaveRequest: ScanRunBatchRequest[] = [
+                {
+                    scanId: guid2,
+                    priority: priority,
+                    url: 'https://abc/path/',
+                    site: { baseUrl: 'https://abc/path/', knownPages: [''] },
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    deepScan: true,
+                },
+            ];
+
+            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.status).toEqual(202);
+            expect(context.res.body).toEqual(expectedResponse);
+            scanDataProviderMock.verifyAll();
+            guidGeneratorMock.verifyAll();
+        });
     });
 });

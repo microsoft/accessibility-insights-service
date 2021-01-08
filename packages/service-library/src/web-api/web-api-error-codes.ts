@@ -18,7 +18,8 @@ export declare type WebApiErrorCodeName =
     | 'MalformedBody'
     | 'MissingReleaseVersion'
     | 'InvalidScanNotifyUrl'
-    | 'MissingSiteOrReportGroups';
+    | 'MissingSiteOrReportGroups'
+    | 'MissingConsolidatedId';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -149,6 +150,15 @@ export class WebApiErrorCodes {
             code: 'MissingSiteOrReportGroups',
             codeId: 4013,
             message: 'The request is missing either the site or report groups property.',
+        },
+    };
+
+    public static missingConsolidatedId: WebApiErrorCode = {
+        statusCode: 400,
+        error: {
+            code: 'MissingConsolidatedId',
+            codeId: 4014,
+            message: 'The consolidatedId is required when the deep scanning is enabled.',
         },
     };
 
