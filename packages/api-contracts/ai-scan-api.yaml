@@ -178,6 +178,10 @@ components:
                     type: string
                 url:
                     type: string
+                deepScanResult:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/DeepScanResultItem'
                 error:
                     $ref: '#/components/schemas/WebApiError'
         ScanResult:
@@ -251,6 +255,21 @@ components:
                         - sarif
                 links:
                     $ref: '#/components/schemas/Links'
+        DeepScanResultItem:
+            type: object
+            required:
+                - scanId
+                - url
+                - scanRunState
+            properties:
+                scanId:
+                    type: string
+                url:
+                    type: string
+                scanRunState:
+                    type: string
+                scanResultState:
+                    type: string
         ScanBatchRequest:
             type: object
             required:
