@@ -147,6 +147,7 @@ components:
                     type: string
                 deepScan:
                     type: boolean
+                    description: Enable crawling and scanning of website's pages under baseURL provided
                 site:
                     type: object
                     required:
