@@ -148,10 +148,10 @@ describe(ScanRequestController, () => {
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                 },
                 {
-                    deepScan: true,
                     // missing reportGroups
+                    deepScan: true,
                     url: 'https://hij/path/',
-                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    site: { baseUrl: 'https://base/path' },
                 },
             ]);
 
