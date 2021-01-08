@@ -191,12 +191,7 @@ components:
                 - state
             properties:
                 state:
-                    type: string
-                    default: pending
-                    enum:
-                        - pending
-                        - pass
-                        - fail
+                    $ref: '#/components/schemas/ScanState'
                 issueCount:
                     type: integer
                     format: int32
@@ -225,15 +220,7 @@ components:
                 error:
                     $ref: '#/components/schemas/ScanRunError'
                 state:
-                    type: string
-                    default: pending
-                    enum:
-                        - pending
-                        - accepted
-                        - queued
-                        - running
-                        - completed
-                        - failed
+                    $ref: '#/components/schemas/RunState'
                 pageResponseCode:
                     type: integer
                 pageTitle:
