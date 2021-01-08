@@ -134,7 +134,6 @@ describe(ScanRequestController, () => {
             expect(responseSorted).toEqual(expectedResponseSorted);
         });
 
-
         it("rejects deepScan request if it's missing consolidatedId", async () => {
             const requests: ScanRunRequest[] = [
                 {

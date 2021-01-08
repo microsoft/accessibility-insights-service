@@ -175,7 +175,7 @@ export class ScanRequestController extends ApiController {
             return { valid: false, error: WebApiErrorCodes.missingSiteOrReportGroups.error };
         }
 
-        const validReportGroup = scanRunRequest?.reportGroups?.find(g => !isEmpty(g?.consolidatedId));
+        const validReportGroup = scanRunRequest?.reportGroups?.find((g) => !isEmpty(g?.consolidatedId));
         if (scanRunRequest.deepScan && validReportGroup === undefined) {
             return { valid: false, error: WebApiErrorCodes.missingConsolidatedReportId.error };
         }
