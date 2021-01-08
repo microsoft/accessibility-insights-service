@@ -19,7 +19,7 @@ export declare type WebApiErrorCodeName =
     | 'MissingReleaseVersion'
     | 'InvalidScanNotifyUrl'
     | 'MissingSiteOrReportGroups'
-    | 'MissingConsolidatedReportId';
+    | 'MissingRequiredDeepScanProperties';
 
 export interface WebApiErrorCode {
     statusCode: number;
@@ -149,16 +149,16 @@ export class WebApiErrorCodes {
         error: {
             code: 'MissingSiteOrReportGroups',
             codeId: 4013,
-            message: 'The request is missing either the site or report groups property.',
+            message: 'The request is missing either the site or report groups property. If one is defined, the other must be provided.',
         },
     };
 
-    public static missingConsolidatedReportId: WebApiErrorCode = {
+    public static missingRequiredDeepScanProperties: WebApiErrorCode = {
         statusCode: 400,
         error: {
-            code: 'MissingConsolidatedReportId',
+            code: 'MissingRequiredDeepScanProperties',
             codeId: 4014,
-            message: 'The request is missing the consolidated report ID, which is required when deep scan is true.',
+            message: 'The request is missing either the site or report groups property, which are required when deepScan is true.',
         },
     };
 

@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
-import { HttpResponse, ScanDataProvider, ScanRunRequest, ScanRunResponse, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -134,19 +134,42 @@ describe(ScanRequestController, () => {
             expect(responseSorted).toEqual(expectedResponseSorted);
         });
 
-        it("rejects deepScan request if it's missing consolidatedId", async () => {
-            const requests: ScanRunRequest[] = [
+        it('rejects deepScan requests if they are missing required properties', async () => {
+            context.req.rawBody = JSON.stringify([
                 {
+                    // missing both site and reportGroups
                     deepScan: true,
                     url: 'https://abc/path/',
                 },
+                {
+                    // missing site
+                    deepScan: true,
+                    url: 'https://def/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+                {
+                    deepScan: true,
+                    // missing reportGroups
+                    url: 'https://hij/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+            ]);
+
+            const expectedResponse = [
+                { url: 'https://abc/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
+                { url: 'https://def/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
+                { url: 'https://hij/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
             ];
-            context.req.rawBody = JSON.stringify(requests);
+
             scanRequestController = createScanRequestController(context);
 
             await scanRequestController.handleRequest();
 
-            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.missingConsolidatedReportId.error);
+            // normalize random result order
+            const expectedResponseSorted = sortData(expectedResponse);
+            const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
+
+            expect(responseSorted).toEqual(expectedResponseSorted);
         });
 
         it('accepts valid request only', async () => {
