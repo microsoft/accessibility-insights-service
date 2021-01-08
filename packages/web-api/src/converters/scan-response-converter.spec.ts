@@ -3,6 +3,7 @@
 import 'reflect-metadata';
 
 import {
+    DeepScanResult,
     RunState as RunStateRestApi,
     ScanCompletedNotification,
     ScanNotificationErrorCodes,
@@ -15,6 +16,7 @@ import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState as RunStateDb,
     ScanCompletedNotification as Notification,
+    DeepScanResult as DeepScanResultDb,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
@@ -31,6 +33,8 @@ const pageTitle = 'sample page title';
 const pageResponseCode = 101;
 let notificationDb: Notification;
 let notificationResponse: ScanCompletedNotification;
+let deepScanResultDb: DeepScanResultDb[];
+let deepScanResult: DeepScanResult[];
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
@@ -60,9 +64,11 @@ beforeEach(() => {
         },
         responseCode: 200,
     };
+    deepScanResultDb = [];
+    deepScanResult = [];
 });
 
-function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): OnDemandPageScanResult {
+function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isDeepScanEnabled = false): OnDemandPageScanResult {
     return {
         id: 'id',
         itemType: ItemType.onDemandPageScanRunResult,
@@ -93,10 +99,15 @@ function getPageScanResult(state: RunStateDb, isNotificationEnabled = false): On
         },
         batchRequestId: 'batch-id',
         ...(isNotificationEnabled ? { notification: notificationDb } : {}),
+        ...(isDeepScanEnabled ? { deepScanResult: deepScanResultDb } : {}),
     };
 }
 
-function getScanResultClientResponseFull(state: RunStateRestApi, isNotificationEnabled = false): ScanResultResponse {
+function getScanResultClientResponseFull(
+    state: RunStateRestApi,
+    isNotificationEnabled = false,
+    isDeepScanEnabled = false,
+): ScanResultResponse {
     return {
         scanId: 'id',
         url: 'url',
@@ -128,6 +139,7 @@ function getScanResultClientResponseFull(state: RunStateRestApi, isNotificationE
             pageTitle: pageTitle,
         },
         ...(isNotificationEnabled ? { notification: notificationResponse } : {}),
+        ...(isDeepScanEnabled ? { deepScanResult: deepScanResult } : {}),
     };
 }
 
@@ -171,6 +183,13 @@ describe(ScanResponseConverter, () => {
     test.each([true, false])('return scan run full form of client result, when notification enabled = %s', (notificationEnabled) => {
         const pageScanDbResult = getPageScanResult('completed', notificationEnabled);
         const responseExpected = getScanResultClientResponseFull('completed', notificationEnabled);
+        const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
+        expect(response).toEqual(responseExpected);
+    });
+
+    test.each([true, false])('return scan run full form of client result, when deepScan enabled = %s', (deepScanEnabled) => {
+        const pageScanDbResult = getPageScanResult('completed', false, deepScanEnabled);
+        const responseExpected = getScanResultClientResponseFull('completed', false, deepScanEnabled);
         const response = scanResponseConverter.getScanResultResponse(baseUrl, apiVersion, pageScanDbResult);
         expect(response).toEqual(responseExpected);
     });
