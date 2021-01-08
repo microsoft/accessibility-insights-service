@@ -267,9 +267,9 @@ components:
                 url:
                     type: string
                 scanRunState:
-                    type: string
+                    $ref: '#/components/schemas/RunState'
                 scanResultState:
-                    type: string
+                    $ref: '#/components/schemas/ScanState'
         ScanBatchRequest:
             type: object
             required:
@@ -362,3 +362,20 @@ components:
                     type: string
                 error:
                     $ref: '#/components/schemas/WebApiError'
+        ScanState:
+            type: string
+            default: pending
+            enum:
+                - pending
+                - pass
+                - fail
+        RunState:
+            type: string
+            default: pending
+            enum:
+                - pending
+                - accepted
+                - queued
+                - running
+                - completed
+                - failed
