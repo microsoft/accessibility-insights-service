@@ -145,6 +145,8 @@ components:
                     type: integer
                 scanNotifyUrl:
                     type: string
+                deepScan:
+                    type: boolean
                 site:
                     type: object
                     required:
@@ -153,6 +155,11 @@ components:
                         baseUrl:
                             description: The web site root URL to be displayed in 'Scan Details' report section
                             type: string
+                        knownPages:
+                            type: array
+                            items:
+                                type: string
+                                description: known website page to include in a deep scan run in addition to pages discovered by crawling
                 reportGroups:
                     type: array
                     items:

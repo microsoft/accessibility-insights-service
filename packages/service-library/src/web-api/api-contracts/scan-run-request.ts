@@ -6,6 +6,7 @@
  */
 export interface ScanRunRequest {
     url: string;
+    deepScan?: boolean;
     site?: Website;
     reportGroups?: ReportGroup[];
     scanNotifyUrl?: string;
@@ -18,6 +19,7 @@ export interface ScanRunRequest {
 
 export interface Website {
     baseUrl: string;
+    knownPages?: string[];
 }
 
 export interface ReportGroup {

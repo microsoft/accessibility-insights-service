@@ -127,6 +127,7 @@ export class ScanRequestController extends ApiController {
                     scanId: scanId,
                     priority: isNil(scanRunRequest.priority) ? 0 : scanRunRequest.priority,
                     url: scanRunRequest.url,
+                    ...(scanRunRequest.deepScan === undefined ? {} : { deepScan: scanRunRequest.deepScan }),
                     ...(isEmpty(scanRunRequest.scanNotifyUrl) ? {} : { scanNotifyUrl: scanRunRequest.scanNotifyUrl }),
                     ...(isEmpty(scanRunRequest.site) ? {} : { site: scanRunRequest.site }),
                     ...(isEmpty(scanRunRequest.reportGroups) ? {} : { reportGroups: scanRunRequest.reportGroups }),
@@ -172,6 +173,11 @@ export class ScanRequestController extends ApiController {
                 (scanRunRequest.reportGroups?.length > 0 ? scanRunRequest.reportGroups.some((g) => isEmpty(g?.consolidatedId)) : true))
         ) {
             return { valid: false, error: WebApiErrorCodes.missingSiteOrReportGroups.error };
+        }
+
+        const validReportGroup = scanRunRequest?.reportGroups?.find(g => !isEmpty(g?.consolidatedId));
+        if (scanRunRequest.deepScan && validReportGroup === undefined) {
+            return { valid: false, error: WebApiErrorCodes.missingConsolidatedReportId.error };
         }
 
         return { valid: true };

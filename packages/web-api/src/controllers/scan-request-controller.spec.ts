@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Context } from '@azure/functions';
 import { GuidGenerator, RestApiConfig, ServiceConfiguration } from 'common';
 import { ScanRequestReceivedMeasurements } from 'logger';
-import { HttpResponse, ScanDataProvider, ScanRunResponse, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, ScanDataProvider, ScanRunRequest, ScanRunResponse, WebApiErrorCodes } from 'service-library';
 import { ScanRunBatchRequest } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -134,6 +134,22 @@ describe(ScanRequestController, () => {
             expect(responseSorted).toEqual(expectedResponseSorted);
         });
 
+
+        it("rejects deepScan request if it's missing consolidatedId", async () => {
+            const requests: ScanRunRequest[] = [
+                {
+                    deepScan: true,
+                    url: 'https://abc/path/',
+                },
+            ];
+            context.req.rawBody = JSON.stringify(requests);
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            expect(context.res.body[0].error).toEqual(WebApiErrorCodes.missingConsolidatedReportId.error);
+        });
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
@@ -145,8 +161,9 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path' },
+                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    deepScan: true,
                 }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
@@ -162,8 +179,9 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path' },
+                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    deepScan: true,
                 },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
