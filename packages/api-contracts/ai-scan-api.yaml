@@ -196,33 +196,6 @@ components:
                     type: integer
                     format: int32
                     minimum: 0
-        deepScanResult:
-            type: array
-            items:
-                required:
-                    - scanId
-                    - url
-                    - scanRunState
-                properties:
-                    scanId:
-                        type: string
-                    url:
-                        type: string
-                    scanRunState:
-                        type: string
-                        enum:
-                            - pending
-                            - accepted
-                            - queued
-                            - running
-                            - completed
-                            - failed
-                    scanResultState:
-                        type: string
-                        enum:
-                            - pending
-                            - pass
-                            - fail
         Links:
             type: object
             required:
@@ -305,8 +278,6 @@ components:
                     type: string
                 scanResult:
                     $ref: '#/components/schemas/ScanResult'
-                deepScanResult:
-                    $ref: '#/components/schemas/deepScanResult'
                 reports:
                     type: array
                     items:
