@@ -2,12 +2,12 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { DeepScanResult, ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
+import { DeepScanResultItem, ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
 import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanCompletedNotification as NotificationDb,
-    DeepScanResult as DeepScanResultDb,
+    DeepScanResultItem as DeepScanResultItemDb,
 } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
@@ -125,7 +125,7 @@ export class ScanResponseConverter {
         return { notification: notificationResponse };
     }
 
-    private getDeepScanResult(deepScanResultDb: DeepScanResultDb[]): { [deepScanResult: string]: DeepScanResult[] } | {} {
+    private getDeepScanResult(deepScanResultDb: DeepScanResultItemDb[]): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
         if (isNil(deepScanResultDb)) {
             return {};
         }

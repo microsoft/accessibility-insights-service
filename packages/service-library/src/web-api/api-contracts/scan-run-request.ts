@@ -6,6 +6,7 @@
  */
 export interface ScanRunRequest {
     url: string;
+    deepScan?: boolean;
     site?: Website;
     reportGroups?: ReportGroup[];
     scanNotifyUrl?: string;
@@ -14,7 +15,6 @@ export interface ScanRunRequest {
      * The default value is 0.
      */
     priority?: number;
-    deepScan?: boolean;
 }
 
 export interface Website {

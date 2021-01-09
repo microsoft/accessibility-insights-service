@@ -134,6 +134,44 @@ describe(ScanRequestController, () => {
             expect(responseSorted).toEqual(expectedResponseSorted);
         });
 
+        it('rejects deepScan requests if they are missing required properties', async () => {
+            context.req.rawBody = JSON.stringify([
+                {
+                    // missing both site and reportGroups
+                    deepScan: true,
+                    url: 'https://abc/path/',
+                },
+                {
+                    // missing site
+                    deepScan: true,
+                    url: 'https://def/path/',
+                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                },
+                {
+                    // missing reportGroups
+                    deepScan: true,
+                    url: 'https://hij/path/',
+                    site: { baseUrl: 'https://base/path' },
+                },
+            ]);
+
+            const expectedResponse = [
+                { url: 'https://abc/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
+                { url: 'https://def/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
+                { url: 'https://hij/path/', error: WebApiErrorCodes.missingRequiredDeepScanProperties.error },
+            ];
+
+            scanRequestController = createScanRequestController(context);
+
+            await scanRequestController.handleRequest();
+
+            // normalize random result order
+            const expectedResponseSorted = sortData(expectedResponse);
+            const responseSorted = sortData(<ScanRunResponse[]>(<unknown>context.res.body));
+
+            expect(responseSorted).toEqual(expectedResponseSorted);
+        });
+
         it('accepts valid request only', async () => {
             const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
             const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
@@ -145,8 +183,9 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path' },
+                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    deepScan: true,
                 }, // valid request
                 { url: '/invalid/url' }, // invalid URL
                 { url: 'https://cde/path/', priority: 9999 }, // invalid priority range
@@ -162,8 +201,9 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path' },
+                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
+                    deepScan: true,
                 },
             ];
             scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSavedRequest)).verifiable(Times.once());
@@ -304,65 +344,6 @@ describe(ScanRequestController, () => {
 
             expect(context.res.status).toEqual(400);
             expect(context.res).toEqual(HttpResponse.getErrorResponse(WebApiErrorCodes.malformedRequest));
-        });
-
-        it('deepScan', async () => {
-            const guid1 = '1e9cefa6-538a-6df0-aaaa-ffffffffffff';
-            const guid2 = '1e9cefa6-538a-6df0-bbbb-ffffffffffff';
-            guidGeneratorMock.setup((g) => g.createGuid()).returns(() => guid1);
-            guidGeneratorMock.setup((g) => g.createGuidFromBaseGuid(guid1)).returns(() => guid2);
-
-            const priority = 10;
-
-            context.req.rawBody = JSON.stringify([
-                {
-                    url: 'https://abc/path/',
-                    priority: priority,
-                    deepScan: true,
-                    site: { baseUrl: 'https://abc/path/', knownPages: [''] },
-                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
-                },
-                {
-                    url: 'https://def/path/',
-                    priority: priority,
-                    deepScan: true,
-                    reportGroups: [{}], // empty consolidatedId
-                },
-                {
-                    // missing reportGroups
-                    url: 'https://hij/path/',
-                    priority: priority,
-                    deepScan: true,
-                },
-            ]);
-
-            const expectedResponse = [
-                { scanId: guid2, url: 'https://abc/path/' },
-                { url: 'https://def/path/', error: WebApiErrorCodes.missingConsolidatedId.error },
-                { url: 'https://hij/path/', error: WebApiErrorCodes.missingConsolidatedId.error },
-            ];
-
-            const expectedSaveRequest: ScanRunBatchRequest[] = [
-                {
-                    scanId: guid2,
-                    priority: priority,
-                    url: 'https://abc/path/',
-                    site: { baseUrl: 'https://abc/path/', knownPages: [''] },
-                    reportGroups: [{ consolidatedId: 'reportGroupId' }],
-                    deepScan: true,
-                },
-            ];
-
-            scanDataProviderMock.setup(async (o) => o.writeScanRunBatchRequest(guid1, expectedSaveRequest)).verifiable(Times.once());
-
-            scanRequestController = createScanRequestController(context);
-
-            await scanRequestController.handleRequest();
-
-            expect(context.res.status).toEqual(202);
-            expect(context.res.body).toEqual(expectedResponse);
-            scanDataProviderMock.verifyAll();
-            guidGeneratorMock.verifyAll();
         });
     });
 });

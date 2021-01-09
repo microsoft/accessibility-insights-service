@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import {
-    DeepScanResult,
+    DeepScanResultItem,
     RunState as RunStateRestApi,
     ScanCompletedNotification,
     ScanNotificationErrorCodes,
@@ -16,7 +16,7 @@ import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState as RunStateDb,
     ScanCompletedNotification as Notification,
-    DeepScanResult as DeepScanResultDb,
+    DeepScanResultItem as DeepScanResultItemDb,
 } from 'storage-documents';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanErrorConverter } from './scan-error-converter';
@@ -33,8 +33,8 @@ const pageTitle = 'sample page title';
 const pageResponseCode = 101;
 let notificationDb: Notification;
 let notificationResponse: ScanCompletedNotification;
-let deepScanResultDb: DeepScanResultDb[];
-let deepScanResult: DeepScanResult[];
+let deepScanResultDb: DeepScanResultItemDb[];
+let deepScanResult: DeepScanResultItem[];
 
 beforeEach(() => {
     scanErrorConverterMock = Mock.ofType(ScanErrorConverter);
