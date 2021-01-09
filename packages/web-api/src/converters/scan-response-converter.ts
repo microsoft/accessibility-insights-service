@@ -125,6 +125,7 @@ export class ScanResponseConverter {
         return { notification: notificationResponse };
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-types
     private getDeepScanResult(deepScanResultDb: DeepScanResultItemDb[]): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
         if (isNil(deepScanResultDb)) {
             return {};
