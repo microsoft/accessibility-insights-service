@@ -145,6 +145,9 @@ components:
                     type: integer
                 scanNotifyUrl:
                     type: string
+                deepScan:
+                    type: boolean
+                    description: Enable crawling and scanning of website's pages under baseURL provided
                 site:
                     type: object
                     required:
@@ -153,6 +156,11 @@ components:
                         baseUrl:
                             description: The web site root URL to be displayed in 'Scan Details' report section
                             type: string
+                        knownPages:
+                            type: array
+                            items:
+                                type: string
+                                description: known website page to include in a deep scan run in addition to pages discovered by crawling
                 reportGroups:
                     type: array
                     items:
@@ -171,6 +179,10 @@ components:
                     type: string
                 url:
                     type: string
+                deepScanResult:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/DeepScanResultItem'
                 error:
                     $ref: '#/components/schemas/WebApiError'
         ScanResult:
@@ -179,12 +191,7 @@ components:
                 - state
             properties:
                 state:
-                    type: string
-                    default: pending
-                    enum:
-                        - pending
-                        - pass
-                        - fail
+                    $ref: '#/components/schemas/ScanState'
                 issueCount:
                     type: integer
                     format: int32
@@ -213,15 +220,7 @@ components:
                 error:
                     $ref: '#/components/schemas/ScanRunError'
                 state:
-                    type: string
-                    default: pending
-                    enum:
-                        - pending
-                        - accepted
-                        - queued
-                        - running
-                        - completed
-                        - failed
+                    $ref: '#/components/schemas/RunState'
                 pageResponseCode:
                     type: integer
                 pageTitle:
@@ -244,6 +243,21 @@ components:
                         - sarif
                 links:
                     $ref: '#/components/schemas/Links'
+        DeepScanResultItem:
+            type: object
+            required:
+                - scanId
+                - url
+                - scanRunState
+            properties:
+                scanId:
+                    type: string
+                url:
+                    type: string
+                scanRunState:
+                    $ref: '#/components/schemas/RunState'
+                scanResultState:
+                    $ref: '#/components/schemas/ScanState'
         ScanBatchRequest:
             type: object
             required:
@@ -336,3 +350,20 @@ components:
                     type: string
                 error:
                     $ref: '#/components/schemas/WebApiError'
+        ScanState:
+            type: string
+            default: pending
+            enum:
+                - pending
+                - pass
+                - fail
+        RunState:
+            type: string
+            default: pending
+            enum:
+                - pending
+                - accepted
+                - queued
+                - running
+                - completed
+                - failed
