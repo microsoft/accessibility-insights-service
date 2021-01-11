@@ -141,7 +141,7 @@ export class ScanResponseConverter {
         });
 
         // mock data if the deepScanResult is empty
-        if (deepScanResult.length == 0) {
+        if (deepScanResult.length === 0) {
             deepScanResult.push({
                 scanId: 'scanId1',
                 url: 'url1',
