@@ -6,8 +6,8 @@ import { ReportDiskWriter } from '../report/report-disk-writer';
 import { ScanArguments } from '../scan-arguments';
 import { ConsolidatedReportGenerator } from '../report/consolidated-report-generator';
 import { CrawlerParametersBuilder } from '../crawler-parameters-builder';
-import { CommandRunner } from './command-runner';
 import { AICrawler } from '../crawler/ai-crawler';
+import { CommandRunner } from './command-runner';
 
 @injectable()
 export class CrawlerCommandRunner implements CommandRunner {

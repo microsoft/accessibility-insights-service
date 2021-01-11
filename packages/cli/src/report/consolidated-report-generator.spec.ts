@@ -8,8 +8,8 @@ import { CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, 
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { serviceName } from '../service-name';
-import { ConsolidatedReportGenerator } from './consolidated-report-generator';
 import { CombinedScanResult } from '../crawler/ai-crawler';
+import { ConsolidatedReportGenerator } from './consolidated-report-generator';
 
 const axeCoreVersion = 'axe core version';
 const htmlReportString = 'html report';

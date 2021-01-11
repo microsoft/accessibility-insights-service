@@ -3,9 +3,9 @@
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
-import { AICrawler } from './ai-crawler';
 import { DbScanResultReader, Crawler, CrawlerRunOptions, ScanMetadata, ScanResult } from 'accessibility-insights-crawler';
 import { AxeResultsReducer, AxeCoreResults, AxeResults } from 'axe-result-converter';
+import { AICrawler } from './ai-crawler';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
