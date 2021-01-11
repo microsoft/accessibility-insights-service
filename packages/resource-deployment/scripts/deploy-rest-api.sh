@@ -9,7 +9,7 @@ set -eo pipefail
 deployRestApi() {
     local templateName="$templatesFolder/model-accessibility-insight-service-scan-api-api.template.json"
     echo "Deploying REST API template with resource parameters: Resource = $resourceGroupName, API Instance = $apiManagementName"
-    az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
+    az deployment group create --resource-group "$resourceGroupName" --template-file "$templateName" --parameters functionName="$webApiFuncAppName" e2eFunctionName="$e2eWebApisFuncAppName" apimServiceName="$apiManagementName" 1>/dev/null
     echo "  Completed"
 }
 

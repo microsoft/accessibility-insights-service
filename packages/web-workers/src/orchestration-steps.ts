@@ -42,7 +42,11 @@ export interface OrchestrationTelemetryProperties {
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
     invokeSubmitScanRequestRestApi(url: string, notifyScanUrl: string): Generator<Task, string, SerializableResponse>;
-    invokeSubmitConsolidatedScanRequestRestApi(url: string, reportId: string): Generator<Task, string, SerializableResponse>;
+    invokeSubmitConsolidatedScanRequestRestApi(
+        url: string,
+        reportId: string,
+        notifyScanUrl: string,
+    ): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
@@ -183,7 +187,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Starting wait for scan completion notification');
 
         while (
-            completedNotificationStates.indexOf(notificationState) === -1 &&
+            !completedNotificationStates.includes(notificationState) &&
             moment.utc(this.context.df.currentUtcDateTime).isBefore(waitEndTime)
         ) {
             this.logOrchestrationStep(`Starting timer with wait time ${scanWaitIntervalInSeconds}`, LogLevel.info, {
@@ -209,7 +213,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
 
         const totalWaitTimeInSeconds = moment.utc(this.context.df.currentUtcDateTime).diff(moment.utc(waitStartTime), 'seconds');
 
-        if (completedNotificationStates.indexOf(notificationState) !== -1) {
+        if (completedNotificationStates.includes(notificationState)) {
             this.logOrchestrationStep('Wait for scan completition notification succeeded', LogLevel.info, {
                 totalWaitTimeInSeconds: totalWaitTimeInSeconds.toString(),
                 waitStartTime: waitStartTime.toJSON(),
@@ -240,11 +244,13 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
     public *invokeSubmitConsolidatedScanRequestRestApi(
         url: string,
         reportId: string,
+        notifyScanUrl: string,
     ): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateConsolidatedScanRequestData = {
             scanUrl: url,
             reportId: reportId,
             priority: 1000,
+            notifyScanUrl,
         };
 
         const response = yield* this.callWebRequestActivity(ActivityAction.createConsolidatedScanRequest, requestData);

@@ -69,6 +69,7 @@ export interface AvailabilityTestConfig {
     environmentDefinition: string;
     consolidatedReportId: string;
     scanNotifyApiEndpoint: string;
+    scanNotifyFailApiEndpoint: string;
     maxScanCompletionNotificationWaitTimeInSeconds: number;
 }
 
@@ -302,7 +303,12 @@ export class ServiceConfiguration {
                 scanNotifyApiEndpoint: {
                     format: 'String',
                     default: '/scan-notification-url',
-                    doc: 'The end-point to hit when a scan is completed.',
+                    doc: 'The end-point to hit when a scan is completed and will respond successfully',
+                },
+                scanNotifyFailApiEndpoint: {
+                    format: 'String',
+                    default: '/scan-notification-url-fail',
+                    doc: 'The end-point to hit when a scan is completed and will respond unsuccessfully',
                 },
             },
         };

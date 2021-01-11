@@ -44,6 +44,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     run: OnDemandPageScanRunResult;
     scanNotifyUrl?: string;
     notification?: ScanCompletedNotification;
+    deepScanResult?: DeepScanResultItem[];
 }
 
 export interface ScanCompletedNotification {
@@ -80,4 +81,11 @@ export interface OnDemandPageScanRunResult {
 export interface WebsiteScanRef {
     id: string;
     scanGroupType: ScanGroupType;
+}
+
+export interface DeepScanResultItem {
+    scanId: string;
+    url: string;
+    scanResultState?: ScanState;
+    scanRunState: OnDemandPageScanRunState;
 }

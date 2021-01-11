@@ -200,7 +200,15 @@ describe(A11yServiceClient, () => {
 
     it('postConsolidatedScan', async () => {
         const reportId = 'some-report-id';
-        const requestBody = [{ url: scanUrl, site: { baseUrl: scanUrl }, reportGroups: [{ consolidatedId: reportId }], priority }];
+        const requestBody = [
+            {
+                url: scanUrl,
+                site: { baseUrl: scanUrl },
+                scanNotifyUrl: scanNotifyUrlStub,
+                reportGroups: [{ consolidatedId: reportId }],
+                priority,
+            },
+        ];
         const requestOptions = { json: requestBody };
 
         setupVerifiableSignRequestCall();
@@ -210,7 +218,7 @@ describe(A11yServiceClient, () => {
             .returns(async () => Promise.resolve(response))
             .verifiable(Times.once());
 
-        const actualResponse = await testSubject.postConsolidatedScan(scanUrl, reportId, priority);
+        const actualResponse = await testSubject.postConsolidatedScan(scanUrl, reportId, scanNotifyUrlStub, priority);
 
         expect(actualResponse).toEqual(response);
     });

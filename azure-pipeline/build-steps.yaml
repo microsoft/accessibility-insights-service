@@ -7,5 +7,5 @@ steps:
 
     - script: |
           # 1st '--' needed for yarn since, yarn won't pass the first argument if it is --; 2nd '--' lets lerna to pass on anything after this as args;
-          yarn build -- -- --env.version=$(Build.BuildId)
+          yarn build -- -- --env version=$(Build.BuildId)
       displayName: build

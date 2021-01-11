@@ -106,7 +106,7 @@ export class ScanBatchRequestFeedController extends WebController {
             const websiteScanRefs = websiteScanResults
                 .filter((websiteScan) => websiteScan.pageScans.some((pageScan) => pageScan.scanId === request.scanId))
                 .map((websiteScan) => {
-                    return { id: websiteScan.id, scanGroupType: 'consolidated-scan-report' } as WebsiteScanRef;
+                    return { id: websiteScan.id, scanGroupType: websiteScan.scanGroupType } as WebsiteScanRef;
                 });
 
             return {
@@ -129,6 +129,7 @@ export class ScanBatchRequestFeedController extends WebController {
                           },
                       }),
                 websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
+                deepScanResult: request.deepScan ? [] : undefined,
             };
         });
 
@@ -148,7 +149,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     websiteScanRequests.push({
                         baseUrl: request.site.baseUrl,
                         scanGroupId: consolidatedReportGroup.consolidatedId,
-                        scanGroupType: 'consolidated-scan-report',
+                        scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
                         pageScans: [
                             {
                                 scanId: request.scanId,
@@ -156,6 +157,7 @@ export class ScanBatchRequestFeedController extends WebController {
                                 timestamp: new Date().toJSON(),
                             },
                         ],
+                        knownPages: request.site.knownPages,
                     });
                 }
             }

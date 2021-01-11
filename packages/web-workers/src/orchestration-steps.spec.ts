@@ -61,6 +61,7 @@ describe(OrchestrationStepsImpl, () => {
             consolidatedReportId: 'somereportid',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyApiEndpoint: '/scan-notify-api',
+            scanNotifyFailApiEndpoint: '/some-fail-endpoint',
         };
 
         loggerMock = Mock.ofType(MockableLogger);
@@ -207,7 +208,7 @@ describe(OrchestrationStepsImpl, () => {
         beforeEach(() => {
             reportIdStub = 'some-report-id';
             generatorExecutor = new GeneratorExecutor<string>(
-                testSubject.invokeSubmitConsolidatedScanRequestRestApi(scanUrl, reportIdStub),
+                testSubject.invokeSubmitConsolidatedScanRequestRestApi(scanUrl, reportIdStub, notifyScanUrl),
             );
             activityRequestData = {
                 activityName: ActivityAction.createConsolidatedScanRequest,
@@ -215,6 +216,7 @@ describe(OrchestrationStepsImpl, () => {
                     scanUrl: scanUrl,
                     priority: 1000,
                     reportId: reportIdStub,
+                    notifyScanUrl: notifyScanUrl,
                 } as CreateConsolidatedScanRequestData,
             };
         });

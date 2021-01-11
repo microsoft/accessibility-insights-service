@@ -13,6 +13,7 @@ export interface OnDemandPageScanBatchRequest extends StorageDocument {
 
 export interface WebsiteRequest {
     baseUrl: string;
+    knownPages?: string[];
 }
 
 export interface ReportGroupRequest {
@@ -26,4 +27,5 @@ export interface ScanRunBatchRequest {
     priority: number;
     reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
+    deepScan?: boolean;
 }

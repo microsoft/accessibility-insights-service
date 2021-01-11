@@ -63,6 +63,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
             const scanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyApiEndpoint}`;
+            const failScanNotificationUrl = `${thisObj.webApiConfig.baseUrl}${availabilityTestConfig.scanNotifyFailApiEndpoint}`;
             const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
             const testContextData: TestContextData = {
                 scanUrl: availabilityTestConfig.urlToScan,
@@ -76,6 +77,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             const consolidatedScanId = yield* orchestrationSteps.invokeSubmitConsolidatedScanRequestRestApi(
                 availabilityTestConfig.urlToScan,
                 availabilityTestConfig.consolidatedReportId,
+                failScanNotificationUrl,
             );
             testContextData.scanId = scanId;
             testContextData.consolidatedScanId = consolidatedScanId;
@@ -96,6 +98,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.scanReportTests);
 
             yield* orchestrationSteps.waitForScanCompletionNotification(scanId);
+            yield* orchestrationSteps.waitForScanCompletionNotification(consolidatedScanId);
             yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.postScanCompletionNotificationTests);
 
             // The last test group in a functional test suite to indicated a suite run completion

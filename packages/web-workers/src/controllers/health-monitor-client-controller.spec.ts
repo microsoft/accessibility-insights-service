@@ -108,8 +108,10 @@ describe(HealthMonitorClientController, () => {
             const scanUrl = 'scan-url';
             const reportIdStub = 'some-report-id';
             const priority = 1;
+            const notifyScanUrl = 'some-notify-url';
+
             webApiClientMock
-                .setup(async (w) => w.postConsolidatedScan(scanUrl, reportIdStub, priority))
+                .setup(async (w) => w.postConsolidatedScan(scanUrl, reportIdStub, notifyScanUrl, priority))
                 .returns(async () => Promise.resolve(expectedResponse))
                 .verifiable(Times.once());
 
@@ -119,6 +121,7 @@ describe(HealthMonitorClientController, () => {
                     scanUrl: scanUrl,
                     priority: priority,
                     reportId: reportIdStub,
+                    notifyScanUrl: notifyScanUrl,
                 },
             };
             const result = await testSubject.invoke(context, args);
