@@ -179,10 +179,6 @@ components:
                     type: string
                 url:
                     type: string
-                deepScanResult:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/DeepScanResultItem'
                 error:
                     $ref: '#/components/schemas/WebApiError'
         ScanResult:
@@ -278,6 +274,10 @@ components:
                     type: string
                 scanResult:
                     $ref: '#/components/schemas/ScanResult'
+                deepScanResult:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/DeepScanResultItem'
                 reports:
                     type: array
                     items:
