@@ -131,9 +131,7 @@ export class ScanResponseConverter {
             return {};
         }
 
-        let deepScanResult: DeepScanResultItem[];
-
-        deepScanResult = deepScanResultDb.map((result) => {
+        const deepScanResult: DeepScanResultItem[] = deepScanResultDb.map((result) => {
             return {
                 scanId: result.scanId,
                 url: result.url,
