@@ -131,7 +131,9 @@ export class ScanResponseConverter {
             return {};
         }
 
-        const deepScanResult = deepScanResultDb.map((result) => {
+        let deepScanResult: DeepScanResultItem[];
+
+        deepScanResult = deepScanResultDb.map((result) => {
             return {
                 scanId: result.scanId,
                 url: result.url,
@@ -139,6 +141,35 @@ export class ScanResponseConverter {
                 scanRunState: result.scanRunState,
             };
         });
+
+        // mock data if the deepScanResult is empty
+        if (deepScanResult.length == 0) {
+            deepScanResult.push({
+                scanId: 'scanId1',
+                url: 'url1',
+                scanRunState: 'accepted',
+            } as DeepScanResultItem);
+
+            deepScanResult.push({
+                scanId: 'scanId2',
+                url: 'url2',
+                scanRunState: 'queued',
+            } as DeepScanResultItem);
+
+            deepScanResult.push({
+                scanId: 'scanId3',
+                url: 'url3',
+                scanRunState: 'pending',
+                scanResultState: 'pending',
+            } as DeepScanResultItem);
+
+            deepScanResult.push({
+                scanId: 'scanId4',
+                url: 'url4',
+                scanRunState: 'completed',
+                scanResultState: 'pass',
+            } as DeepScanResultItem);
+        }
 
         return { deepScanResult: deepScanResult };
     }
