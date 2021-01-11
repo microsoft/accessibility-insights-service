@@ -6,8 +6,7 @@ import { ReporterFactory } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { iocTypes } from '../ioc-types';
 import { serviceName } from '../service-name';
-import {CombinedScanResult} from '../crawler/ai-crawler';
-
+import { CombinedScanResult } from '../crawler/ai-crawler';
 
 @injectable()
 export class ConsolidatedReportGenerator {
