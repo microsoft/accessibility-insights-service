@@ -2,8 +2,13 @@
 // Licensed under the MIT License.
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
-import { OnDemandPageScanResult, OnDemandPageScanRunState, ScanCompletedNotification as NotificationDb } from 'storage-documents';
+import { DeepScanResultItem, ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
+import {
+    OnDemandPageScanResult,
+    OnDemandPageScanRunState,
+    ScanCompletedNotification as NotificationDb,
+    DeepScanResultItem as DeepScanResultItemDb,
+} from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
 @injectable()
@@ -34,6 +39,7 @@ export class ScanResponseConverter {
                 state: pageScanResultDocument.run.state,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
         };
     }
 
@@ -49,6 +55,7 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResultDocument.run.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
         };
     }
 
@@ -72,6 +79,7 @@ export class ScanResponseConverter {
                 pageTitle: pageScanResultDocument.run.pageTitle,
             },
             ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
+            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
         };
         if (pageScanResultDocument.scannedUrl !== undefined) {
             scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
@@ -115,5 +123,23 @@ export class ScanResponseConverter {
         }
 
         return { notification: notificationResponse };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    private getDeepScanResult(deepScanResultDb: DeepScanResultItemDb[]): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
+        if (isNil(deepScanResultDb)) {
+            return {};
+        }
+
+        const deepScanResult = deepScanResultDb.map((result) => {
+            return {
+                scanId: result.scanId,
+                url: result.url,
+                scanResultState: result.scanResultState,
+                scanRunState: result.scanRunState,
+            };
+        });
+
+        return { deepScanResult: deepScanResult };
     }
 }

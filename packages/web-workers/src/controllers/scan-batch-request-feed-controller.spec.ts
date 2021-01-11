@@ -136,11 +136,40 @@ describe(ScanBatchRequestFeedController, () => {
                     {
                         scanId: 'scan-4',
                         url: 'url-4',
-                        priority: 0,
+                        priority: 1,
+                        scanNotifyUrl: 'reply-url-4',
+                        site: {
+                            baseUrl: 'base-url-4',
+                            knownPages: ['page1'],
+                        },
+                        reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
+                        deepScan: true,
                     },
                     {
                         scanId: 'scan-5',
                         url: 'url-5',
+                        priority: 0,
+                    },
+                    {
+                        url: 'url-6',
+                        error: 'error-6',
+                        priority: -3,
+                    },
+                ],
+            },
+            {
+                id: '3',
+                partitionKey: 'pk-3',
+                itemType: ItemType.scanRunBatchRequest,
+                scanRunBatchRequest: [
+                    {
+                        scanId: 'scan-7',
+                        url: 'url-7',
+                        priority: 0,
+                    },
+                    {
+                        scanId: 'scan-8',
+                        url: 'url-8',
                         priority: 2,
                     },
                 ],
@@ -172,7 +201,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     const websiteScanResult = {
                         baseUrl: request.site.baseUrl,
                         scanGroupId: reportGroup.consolidatedId,
-                        scanGroupType: 'consolidated-scan-report',
+                        scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
                         pageScans: [
                             {
                                 scanId: request.scanId,
@@ -180,6 +209,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                                 timestamp: dateNow.toJSON(),
                             },
                         ],
+                        knownPages: request.site.knownPages,
                     } as WebsiteScanResult;
 
                     const documentId = `db-id-${reportGroup.consolidatedId}`;
@@ -206,7 +236,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                 const websiteScanRefs = websiteScanResults
                     .filter((r) => r.pageScans[0].scanId === request.scanId)
                     .map((r) => {
-                        return { id: r.id, scanGroupType: 'consolidated-scan-report' } as WebsiteScanRef;
+                        return { id: r.id, scanGroupType: r.scanGroupType } as WebsiteScanRef;
                     });
                 const result: OnDemandPageScanResult = {
                     id: request.scanId,
@@ -220,6 +250,7 @@ function setupOnDemandPageScanRunResultProviderMock(
                     },
                     batchRequestId: document.id,
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
+                    deepScanResult: request.deepScan ? [] : undefined,
                 };
 
                 if (request.scanNotifyUrl !== undefined) {

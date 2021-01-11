@@ -4,7 +4,7 @@ import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
 import { ReportFormat } from './on-demand-page-scan-result';
 
-export declare type ScanGroupType = 'consolidated-scan-report';
+export declare type ScanGroupType = 'consolidated-scan-report' | 'deep-scan';
 
 export interface WebsiteScanResult extends StorageDocument {
     itemType: ItemType.websiteScanResult;
@@ -14,6 +14,7 @@ export interface WebsiteScanResult extends StorageDocument {
     pageScans?: PageScan[];
     reports?: WebsiteScanReport[];
     combinedResultsBlobId?: string;
+    knownPages?: string[];
 }
 
 export interface WebsiteScanReport {

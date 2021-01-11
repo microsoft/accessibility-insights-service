@@ -11,4 +11,5 @@ export interface OnDemandPageScanRequest extends StorageDocument {
     priority: number;
     reportGroups?: ReportGroupRequest[];
     scanNotifyUrl?: string;
+    deepScan?: boolean;
 }
