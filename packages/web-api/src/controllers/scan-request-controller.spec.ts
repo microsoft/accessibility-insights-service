@@ -183,7 +183,11 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/known1', 'https://base/path/known2'],
+                        discoveryPatterns: ['pattern1', 'pattern2'],
+                    },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                     deepScan: true,
                 }, // valid request
@@ -201,7 +205,11 @@ describe(ScanRequestController, () => {
                     url: 'https://abs/path/',
                     priority: 1,
                     scanNotifyUrl: 'https://notify/path/',
-                    site: { baseUrl: 'https://base/path', knownPages: ['https://base/path/known1', 'https://base/path/known2'] },
+                    site: {
+                        baseUrl: 'https://base/path',
+                        knownPages: ['https://base/path/known1', 'https://base/path/known2'],
+                        discoveryPatterns: ['pattern1', 'pattern2'],
+                    },
                     reportGroups: [{ consolidatedId: 'reportGroupId' }],
                     deepScan: true,
                 },

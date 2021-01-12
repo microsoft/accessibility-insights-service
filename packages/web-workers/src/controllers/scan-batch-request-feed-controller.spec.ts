@@ -141,6 +141,7 @@ describe(ScanBatchRequestFeedController, () => {
                         site: {
                             baseUrl: 'base-url-4',
                             knownPages: ['page1'],
+                            discoveryPatterns: ['pattern1'],
                         },
                         reportGroups: [{ consolidatedId: 'consolidated-id-2' }],
                         deepScan: true,
@@ -210,6 +211,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                             },
                         ],
                         knownPages: request.site.knownPages,
+                        discoveryPatterns: request.site.discoveryPatterns,
                     } as WebsiteScanResult;
 
                     const documentId = `db-id-${reportGroup.consolidatedId}`;

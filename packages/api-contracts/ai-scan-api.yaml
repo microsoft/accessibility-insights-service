@@ -161,6 +161,11 @@ components:
                             items:
                                 type: string
                                 description: known website page to include in a deep scan run in addition to pages discovered by crawling
+                        discoveryPatterns:
+                            type: array
+                            items:
+                                type: string
+                                description: RegEx pattern used by web crawler to specify which URLs should website include
                 reportGroups:
                     type: array
                     items:
