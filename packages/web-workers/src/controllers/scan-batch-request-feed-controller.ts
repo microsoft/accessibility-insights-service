@@ -158,6 +158,7 @@ export class ScanBatchRequestFeedController extends WebController {
                             },
                         ],
                         knownPages: request.site.knownPages,
+                        discoveryPatterns: request.site.discoveryPatterns,
                     });
                 }
             }
