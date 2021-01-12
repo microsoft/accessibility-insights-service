@@ -6,8 +6,6 @@ import { injectable } from 'inversify';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { ResourceCreator } from '../types/resource-creator';
 
-/* eslint-disable */
-
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
     private readonly requestQueueName = 'scanRequests';
@@ -44,7 +42,9 @@ export class ApifyResourceCreator implements ResourceCreator {
 
     private clearRequestQueue(): void {
         const outputDir = this.settingsHandler.getApifySettings().APIFY_LOCAL_STORAGE_DIR;
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         if (this.filesystem.existsSync(outputDir)) {
+            // eslint-disable-next-line security/detect-non-literal-fs-filename
             this.filesystem.rmdirSync(outputDir, { recursive: true });
         }
     }
