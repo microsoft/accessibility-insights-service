@@ -14,7 +14,7 @@ export interface OnDemandPageScanBatchRequest extends StorageDocument {
 export interface WebsiteRequest {
     baseUrl: string;
     knownPages?: string[];
-    discoveryPatterns?: string[]; 
+    discoveryPatterns?: string[];
 }
 
 export interface ReportGroupRequest {

@@ -20,7 +20,7 @@ export interface ScanRunRequest {
 export interface Website {
     baseUrl: string;
     knownPages?: string[];
-    discoveryPatterns?: string[]; 
+    discoveryPatterns?: string[];
 }
 
 export interface ReportGroup {
