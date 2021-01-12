@@ -8,7 +8,7 @@ import { PageProcessor, PageProcessorBase } from '../page-processors/page-proces
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
-import { CrawlerEngine } from './crawler-engine';
+import { PuppeteerCrawlerEngine } from './puppeteer-crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 
 /* eslint-disable
@@ -16,7 +16,7 @@ import { CrawlerFactory } from './crawler-factory';
    no-empty,@typescript-eslint/no-empty-function,
    @typescript-eslint/consistent-type-assertions */
 
-describe(CrawlerEngine, () => {
+describe(PuppeteerCrawlerEngine, () => {
     const puppeteerDefaultOptions = ['--disable-dev-shm-usage'];
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {
@@ -32,7 +32,7 @@ describe(CrawlerEngine, () => {
     let puppeteerCrawlerMock: IMock<Apify.PuppeteerCrawler>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let baseCrawlerOptions: Apify.PuppeteerCrawlerOptions;
-    let crawlerEngine: CrawlerEngine;
+    let crawlerEngine: PuppeteerCrawlerEngine;
     let requestQueueProvider: ApifyRequestQueueProvider;
 
     beforeEach(() => {
@@ -82,7 +82,7 @@ describe(CrawlerEngine, () => {
 
         requestQueueProvider = () => Promise.resolve(requestQueueStub);
         pageProcessorFactoryStub = jest.fn().mockImplementation(() => pageProcessorStub as PageProcessorBase);
-        crawlerEngine = new CrawlerEngine(
+        crawlerEngine = new PuppeteerCrawlerEngine(
             pageProcessorFactoryStub,
             requestQueueProvider,
             crawlerFactoryMock.object,

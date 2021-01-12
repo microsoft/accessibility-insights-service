@@ -7,17 +7,17 @@ import { IMock, Mock } from 'typemoq';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 import { Crawler } from './crawler';
-import { CrawlerEngine } from './crawler/crawler-engine';
+import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 
 describe(Crawler, () => {
     let testSubject: Crawler;
     let containerMock: IMock<Container>;
-    let crawlerEngineMock: IMock<CrawlerEngine>;
+    let crawlerEngineMock: IMock<PuppeteerCrawlerEngine>;
     let containerBindMock: IMock<interfaces.BindingToSyntax<CrawlerRunOptions>>;
 
     beforeEach(() => {
         containerMock = Mock.ofType(Container);
-        crawlerEngineMock = Mock.ofType(CrawlerEngine);
+        crawlerEngineMock = Mock.ofType(PuppeteerCrawlerEngine);
         containerBindMock = Mock.ofType<interfaces.BindingToSyntax<CrawlerRunOptions>>();
 
         testSubject = new Crawler(containerMock.object);
@@ -32,7 +32,7 @@ describe(Crawler, () => {
     it('crawl', async () => {
         const testInput: CrawlerRunOptions = { baseUrl: 'url' };
         containerMock
-            .setup((c) => c.get(CrawlerEngine))
+            .setup((c) => c.get(PuppeteerCrawlerEngine))
             .returns(() => crawlerEngineMock.object)
             .verifiable();
         containerBindMock.setup((o) => o.toConstantValue(testInput)).verifiable();
