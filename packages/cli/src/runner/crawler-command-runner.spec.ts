@@ -18,7 +18,7 @@ describe('CrawlerCommandRunner', () => {
 
     let scanArguments: ScanArguments;
     let crawlerOption: CrawlerRunOptions;
-    let crawlerMock: IMock<Crawler>;
+    let crawlerMock: IMock<Crawler<void>>;
     let crawlerParametersBuilderMock: IMock<CrawlerParametersBuilder>;
     let reportDiskWriterMock: IMock<ReportDiskWriter>;
     let consolidatedReportGeneratorMock: IMock<ConsolidatedReportGenerator>;
@@ -41,7 +41,7 @@ describe('CrawlerCommandRunner', () => {
             silentMode: undefined,
         };
 
-        crawlerMock = Mock.ofType<Crawler>();
+        crawlerMock = Mock.ofType<Crawler<void>>();
         crawlerParametersBuilderMock = Mock.ofType<CrawlerParametersBuilder>();
         reportDiskWriterMock = Mock.ofType<ReportDiskWriter>();
         consolidatedReportGeneratorMock = Mock.ofType<ConsolidatedReportGenerator>();

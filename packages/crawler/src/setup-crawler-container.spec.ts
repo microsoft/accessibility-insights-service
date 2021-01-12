@@ -5,13 +5,13 @@ import 'reflect-metadata';
 import * as inversify from 'inversify';
 import { CrawlerConfiguration } from './crawler/crawler-configuration';
 import { DataBase } from './level-storage/data-base';
-import { setupCrawlerContainer } from './setup-crawler-container';
+import { setupLocalCrawlerContainer } from './setup-crawler-container';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
-describe(setupCrawlerContainer, () => {
+describe(setupLocalCrawlerContainer, () => {
     it('resolves dependencies', () => {
         const crawlerRunOptions = {
             baseUrl: 'baseUrl',
@@ -22,7 +22,7 @@ describe(setupCrawlerContainer, () => {
         } as CrawlerRunOptions;
 
         const container = new inversify.Container({ autoBindInjectable: true });
-        setupCrawlerContainer(container);
+        setupLocalCrawlerContainer(container);
         container.bind(iocTypes.CrawlerRunOptions).toConstantValue(crawlerRunOptions);
 
         expect(container.get(CrawlerConfiguration)).toBeDefined();
@@ -30,5 +30,6 @@ describe(setupCrawlerContainer, () => {
         expect(container.get(iocTypes.ReporterFactory)).toBeDefined();
         expect(container.get(iocTypes.ApifyRequestQueueProvider)).toBeDefined();
         expect(container.get(iocTypes.PageProcessorFactory)).toBeDefined();
+        expect(container.get(iocTypes.CrawlerEngine)).toBeDefined();
     });
 });

@@ -10,7 +10,7 @@ import { Crawler } from './crawler';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 
 describe(Crawler, () => {
-    let testSubject: Crawler;
+    let testSubject: Crawler<void>;
     let containerMock: IMock<Container>;
     let crawlerEngineMock: IMock<PuppeteerCrawlerEngine>;
     let containerBindMock: IMock<interfaces.BindingToSyntax<CrawlerRunOptions>>;
@@ -32,7 +32,7 @@ describe(Crawler, () => {
     it('crawl', async () => {
         const testInput: CrawlerRunOptions = { baseUrl: 'url' };
         containerMock
-            .setup((c) => c.get(PuppeteerCrawlerEngine))
+            .setup((c) => c.get(iocTypes.CrawlerEngine))
             .returns(() => crawlerEngineMock.object)
             .verifiable();
         containerBindMock.setup((o) => o.toConstantValue(testInput)).verifiable();
