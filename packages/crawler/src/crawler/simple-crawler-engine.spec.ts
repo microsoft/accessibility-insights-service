@@ -5,6 +5,7 @@ import { Page } from 'puppeteer';
 import 'reflect-metadata';
 
 import { IMock, It, Mock } from 'typemoq';
+import { RequestProcessor } from '../page-processors/request-processor';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -27,6 +28,12 @@ describe(SimpleCrawlerEngine, () => {
     const maxRequestsPerCrawl = 10;
     const pageStub = {} as Page;
     const discoveryPatterns = ['discovery pattern'];
+    const crawlResults = ['url1', 'url2'];
+    const requestProcessorStub = {
+        handleRequest: () => null,
+        handleFailedRequest: () => null,
+        getResults: () => crawlResults,
+    } as RequestProcessor;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -40,6 +47,7 @@ describe(SimpleCrawlerEngine, () => {
             requestQueueProviderMock.object,
             crawlerFactoryMock.object,
             crawlerConfiguration.object,
+            requestProcessorStub,
             enqueueLinksExtMock.object,
         );
         crawlerRunOptions = {
@@ -75,7 +83,7 @@ describe(SimpleCrawlerEngine, () => {
         basicCrawlerMock.setup(bc => bc.run()).verifiable();
         setupEnqueueLinks();
 
-        const expectedUrls: string[] = [];
+        const expectedUrls: string[] = crawlResults;
 
         const discoveredUrls = await testSubject.start(crawlerRunOptions);
 

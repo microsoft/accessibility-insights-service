@@ -8,6 +8,7 @@ import { Page } from 'puppeteer';
 import { isNil } from 'lodash';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
+import { RequestProcessor } from '../page-processors/request-processor';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -22,6 +23,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
+        @inject(iocTypes.RequestProcessor) private readonly requestProcessor: RequestProcessor,
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 
@@ -36,8 +38,8 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         const basicCrawlerOptions: Apify.BasicCrawlerOptions = {
             handleRequestTimeoutSecs: 300,
             requestQueue: requestQueue,
-            handleRequestFunction: () => null, //TODO: implement
-            handleFailedRequestFunction: () => null,
+            handleRequestFunction: this.requestProcessor.handleRequest,
+            handleFailedRequestFunction: this.requestProcessor.handleFailedRequest,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
         };
 
@@ -52,7 +54,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         const crawler = this.crawlerFactory.createBasicCrawler(basicCrawlerOptions);
         await crawler.run();
 
-        return [];
+        return this.requestProcessor.getResults();
     }
 
     private async prepareQueue(requestQueue: Apify.RequestQueue, crawlerRunOptions: SimpleCrawlerRunOptions): Promise<void> {
