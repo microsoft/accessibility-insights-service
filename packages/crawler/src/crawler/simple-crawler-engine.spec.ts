@@ -1,11 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import Apify from 'apify';
-import { Page } from 'puppeteer';
+
 import 'reflect-metadata';
 
+import Apify from 'apify';
+import { ServiceConfiguration } from 'common';
+import { ConsoleLoggerClient, GlobalLogger } from 'logger';
+import { Page } from 'puppeteer';
+import { WebDriver } from 'scanner-global-library';
+
 import { IMock, It, Mock } from 'typemoq';
+import { ApifyResourceCreator } from '../apify/apify-resource-creator';
 import { RequestProcessor } from '../page-processors/request-processor';
+import { UrlCollectionRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -16,7 +23,7 @@ describe(SimpleCrawlerEngine, () => {
 
     let requestQueueProviderMock: IMock<ApifyRequestQueueProvider>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
-    let crawlerConfiguration: IMock<CrawlerConfiguration>;
+    let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestQueueStub: Apify.RequestQueue;
     let basicCrawlerMock: IMock<Apify.BasicCrawler>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
@@ -39,14 +46,14 @@ describe(SimpleCrawlerEngine, () => {
         requestQueueStub = {} as Apify.RequestQueue;
         requestQueueProviderMock = Mock.ofInstance(() => null);
         crawlerFactoryMock = Mock.ofType<CrawlerFactory>();
-        crawlerConfiguration = Mock.ofType<CrawlerConfiguration>();
+        crawlerConfigurationMock = Mock.ofType<CrawlerConfiguration>();
         basicCrawlerMock = Mock.ofType<Apify.BasicCrawler>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
 
         testSubject = new SimpleCrawlerEngine(
             requestQueueProviderMock.object,
             crawlerFactoryMock.object,
-            crawlerConfiguration.object,
+            crawlerConfigurationMock.object,
             requestProcessorStub,
             enqueueLinksExtMock.object,
         );
@@ -60,7 +67,7 @@ describe(SimpleCrawlerEngine, () => {
     });
 
     afterEach(() => {
-        crawlerConfiguration.verifyAll();
+        crawlerConfigurationMock.verifyAll();
         crawlerFactoryMock.verifyAll();
         requestQueueProviderMock.verifyAll();
         basicCrawlerMock.verifyAll();
@@ -71,7 +78,7 @@ describe(SimpleCrawlerEngine, () => {
         crawlerRunOptions.debug = debug;
         setupCrawlerConfig();
         if (debug) {
-            crawlerConfiguration.setup(cc => cc.setSilentMode(false)).verifiable();
+            crawlerConfigurationMock.setup(cc => cc.setSilentMode(false)).verifiable();
         }
         requestQueueProviderMock.setup(rqp => rqp()).returns(() => Promise.resolve(requestQueueStub)).verifiable();
 
@@ -90,12 +97,45 @@ describe(SimpleCrawlerEngine, () => {
         expect(discoveredUrls).toEqual(expectedUrls);
     });
 
+    it.skip('run e2e website crawl', async () => {
+        const apifyResourceCreator = new ApifyResourceCreator();
+        const baseUrl = 'http://accessibilityinsights.io';
+        const requestQueueProvider = () => apifyResourceCreator.createRequestQueue(baseUrl);
+        const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
+        logger.setup();
+        const crawlerFactory = new CrawlerFactory();
+
+        const browser = await (new WebDriver(logger)).launch();
+        const page = await browser.newPage();
+        await page.goto(baseUrl);
+
+        const testCrawlerRunOptions: SimpleCrawlerRunOptions = {
+            baseUrl: baseUrl,
+            page: page,
+            selectors: ['a'],
+            debug: true,
+        };
+
+        const testCrawlerConfiguration = new CrawlerConfiguration(testCrawlerRunOptions);
+
+        const crawlerEngine = new SimpleCrawlerEngine(
+            requestQueueProvider,
+            crawlerFactory,
+            testCrawlerConfiguration,
+            new UrlCollectionRequestProcessor(logger),
+        );
+
+        const urls = await crawlerEngine.start(testCrawlerRunOptions);
+
+        console.log(urls);
+    });
+
     function setupCrawlerConfig(): void {
-        crawlerConfiguration.setup(cc => cc.setDefaultApifySettings()).verifiable();
-        crawlerConfiguration.setup(cc => cc.setLocalOutputDir(localOutputDir)).verifiable();
-        crawlerConfiguration.setup(cc => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
-        crawlerConfiguration.setup(cc => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
-        crawlerConfiguration.setup(cc => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
+        crawlerConfigurationMock.setup(cc => cc.setDefaultApifySettings()).verifiable();
+        crawlerConfigurationMock.setup(cc => cc.setLocalOutputDir(localOutputDir)).verifiable();
+        crawlerConfigurationMock.setup(cc => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
+        crawlerConfigurationMock.setup(cc => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
+        crawlerConfigurationMock.setup(cc => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
     }
 
     function getCrawlerOptions(debug: boolean): Partial<Apify.BasicCrawlerOptions> {
@@ -118,7 +158,7 @@ describe(SimpleCrawlerEngine, () => {
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
-        crawlerConfiguration.setup(cc => cc.discoveryPatterns()).returns(() => discoveryPatterns);
+        crawlerConfigurationMock.setup(cc => cc.discoveryPatterns()).returns(() => discoveryPatterns);
         enqueueLinksExtMock.setup(el => el(expectedOptions)).verifiable();
     }
 });
