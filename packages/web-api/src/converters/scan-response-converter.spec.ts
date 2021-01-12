@@ -65,7 +65,30 @@ beforeEach(() => {
         responseCode: 200,
     };
     deepScanResultDb = [];
-    deepScanResult = [];
+    deepScanResult = [
+        {
+            scanId: 'scanId1',
+            url: 'url1',
+            scanRunState: 'accepted',
+        },
+        {
+            scanId: 'scanId2',
+            url: 'url2',
+            scanRunState: 'queued',
+        },
+        {
+            scanId: 'scanId3',
+            url: 'url3',
+            scanRunState: 'pending',
+            scanResultState: 'pending',
+        },
+        {
+            scanId: 'scanId4',
+            url: 'url4',
+            scanRunState: 'completed',
+            scanResultState: 'pass',
+        },
+    ];
 });
 
 function getPageScanResult(state: RunStateDb, isNotificationEnabled = false, isDeepScanEnabled = false): OnDemandPageScanResult {
