@@ -291,7 +291,7 @@ describe(registerAzureServicesToContainer, () => {
             secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbUrl)).verifiable(Times.never());
             secretProviderMock.setup(async (s) => s.getSecret(secretNames.cosmosDbApiUrl)).verifiable(Times.never());
             process.env.COSMOS_DB_URL = cosmosDbUrl;
-            process.env.COSMOS_DB_API_URL = cosmosDbApiUrl;
+            process.env.COSMOS_DB_KEY = cosmosDbKey;
 
             runCosmosClientTest(container, secretProviderMock, cosmosKeyProviderMock);
 
