@@ -2,12 +2,13 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
-import { DbScanResultReader, ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
-import { AxeResultsReducer, CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, AxeResults } from 'axe-result-converter';
+import { IMock, Mock } from 'typemoq';
+import { ScanResult, ScanMetadata } from 'accessibility-insights-crawler';
+import { CombinedReportDataConverter, AxeCoreResults, ScanResultData, UrlCount, AxeResults } from 'axe-result-converter';
 import { ReporterFactory, CombinedReportParameters, Reporter, Report } from 'accessibility-insights-report';
 import { AxeInfo } from '../axe/axe-info';
 import { serviceName } from '../service-name';
+import { CombinedScanResult } from '../crawler/ai-crawler';
 import { ConsolidatedReportGenerator } from './consolidated-report-generator';
 
 const axeCoreVersion = 'axe core version';
@@ -15,8 +16,6 @@ const htmlReportString = 'html report';
 const scanStarted = new Date(1000);
 const scanEnded = new Date(60000);
 
-let dbScanResultReaderMock: IMock<DbScanResultReader>;
-let axeResultsReducerMock: IMock<AxeResultsReducer>;
 let combinedReportDataConverterMock: IMock<CombinedReportDataConverter>;
 let reporterMock: IMock<Reporter>;
 let axeInfoMock: IMock<AxeInfo>;
@@ -26,8 +25,6 @@ let combinedReportData: CombinedReportParameters;
 
 describe(ConsolidatedReportGenerator, () => {
     beforeEach(() => {
-        dbScanResultReaderMock = Mock.ofType<DbScanResultReader>();
-        axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         combinedReportDataConverterMock = Mock.ofType<CombinedReportDataConverter>();
         axeInfoMock = Mock.ofType<AxeInfo>();
         reporterMock = Mock.ofType<Reporter>();
@@ -48,8 +45,6 @@ describe(ConsolidatedReportGenerator, () => {
             .verifiable();
 
         consolidatedReportGenerator = new ConsolidatedReportGenerator(
-            dbScanResultReaderMock.object,
-            axeResultsReducerMock.object,
             combinedReportDataConverterMock.object,
             reporterFactoryMock,
             axeInfoMock.object,
@@ -57,7 +52,6 @@ describe(ConsolidatedReportGenerator, () => {
     });
 
     afterEach(() => {
-        axeResultsReducerMock.verifyAll();
         combinedReportDataConverterMock.verifyAll();
         reporterMock.verifyAll();
         axeInfoMock.verifyAll();
@@ -111,30 +105,18 @@ describe(ConsolidatedReportGenerator, () => {
             scanEnded,
         };
 
-        for (let index = 0; index <= scanResults.length; index++) {
-            const next = index === scanResults.length ? { done: true, value: undefined } : { done: false, value: scanResults[index] };
-            dbScanResultReaderMock
-                .setup(async (o) => o.next())
-                .returns(() => Promise.resolve(next))
-                .verifiable();
-            if (next.done === false && scanResults[index].axeResults !== undefined) {
-                axeResultsReducerMock
-                    .setup((o) => o.reduce(It.isValue(combinedAxeResults), It.isValue(scanResults[index].axeResults)))
-                    .verifiable();
-            }
-        }
-
-        dbScanResultReaderMock
-            .setup(async (o) => o.getScanMetadata(baseUrl))
-            .returns(() => Promise.resolve(scanMetadata))
-            .verifiable();
-        dbScanResultReaderMock.setup((o) => o[Symbol.asyncIterator]).returns(() => () => dbScanResultReaderMock.object);
         combinedReportDataConverterMock
             .setup((o) => o.convert(combinedAxeResults, scanResultData))
             .returns(() => combinedReportData)
             .verifiable();
 
-        await consolidatedReportGenerator.generateReport(baseUrl, scanStarted, scanEnded);
+        const combinedScanResult = {
+            urlCount: urlCount,
+            scanMetadata: scanMetadata,
+            combinedAxeResults: combinedAxeResults,
+        } as CombinedScanResult;
+
+        await consolidatedReportGenerator.generateReport(combinedScanResult, scanStarted, scanEnded);
     });
 });
 
