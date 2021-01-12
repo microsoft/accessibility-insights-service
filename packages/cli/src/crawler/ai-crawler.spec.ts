@@ -16,7 +16,7 @@ describe(AICrawler, () => {
     let dbScanResultReaderMock: IMock<DbScanResultReader>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let crawlerOption: CrawlerRunOptions;
-    let crawlerMock: IMock<Crawler>;
+    let crawlerMock: IMock<Crawler<unknown>>;
 
     beforeEach(() => {
         crawlerOption = {
@@ -35,7 +35,7 @@ describe(AICrawler, () => {
 
         dbScanResultReaderMock = Mock.ofType<DbScanResultReader>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
-        crawlerMock = Mock.ofType<Crawler>();
+        crawlerMock = Mock.ofType<Crawler<unknown>>();
 
         crawler = new AICrawler(crawlerMock.object, dbScanResultReaderMock.object, axeResultsReducerMock.object);
     });

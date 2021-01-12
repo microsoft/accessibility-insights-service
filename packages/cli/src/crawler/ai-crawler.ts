@@ -16,7 +16,7 @@ export interface CombinedScanResult {
 @injectable()
 export class AICrawler {
     constructor(
-        @inject(Crawler) private readonly crawler: Crawler,
+        @inject(Crawler) private readonly crawler: Crawler<unknown>,
         @inject(DbScanResultReader) private readonly scanResultReader: ScanResultReader,
         @inject(AxeResultsReducer) private readonly axeResultsReducer: AxeResultsReducer,
     ) {}

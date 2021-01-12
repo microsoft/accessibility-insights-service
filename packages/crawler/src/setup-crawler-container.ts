@@ -3,6 +3,7 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
+import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 import { DataBase } from './level-storage/data-base';
 import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
@@ -10,9 +11,10 @@ import { SimulatorPageProcessor } from './page-processors/simulator-page-process
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
-export function setupCrawlerContainer(container: inversify.Container): inversify.Container {
+export function setupLocalCrawlerContainer(container: inversify.Container): inversify.Container {
     container.bind(DataBase).toSelf().inSingletonScope();
     container.bind(iocTypes.ReporterFactory).toConstantValue(reporterFactory);
+    container.bind(iocTypes.CrawlerEngine).to(PuppeteerCrawlerEngine);
 
     setupSingletonProvider(iocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
