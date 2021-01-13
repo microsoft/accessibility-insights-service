@@ -46,10 +46,6 @@ describe(CrawlerConfiguration, () => {
                 .returns(() => baseUrl)
                 .verifiable();
             crawlerRunOptionsMock
-                .setup((o) => o.discoveryPatternUrl)
-                .returns(() => undefined)
-                .verifiable();
-            crawlerRunOptionsMock
                 .setup((o) => o.discoveryPatterns)
                 .returns(() => undefined)
                 .verifiable();
@@ -63,6 +59,10 @@ describe(CrawlerConfiguration, () => {
         it('with list provided', () => {
             const expectedDiscoveryPatterns = ['pattern1', 'pattern2'];
             crawlerRunOptionsMock
+                .setup((o) => o.baseUrl)
+                .returns(() => baseUrl)
+                .verifiable();
+            crawlerRunOptionsMock
                 .setup((o) => o.discoveryPatterns)
                 .returns(() => expectedDiscoveryPatterns)
                 .verifiable();
@@ -70,29 +70,6 @@ describe(CrawlerConfiguration, () => {
             const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 
             expect(discoveryPatterns).toBe(expectedDiscoveryPatterns);
-        });
-
-        it('with discoveryPatternUrls provided', () => {
-            const otherHost = 'otherhostname.com';
-            const otherPath = '/other/path';
-            const discoveryPatternUrl = `https://${otherHost}${otherPath}`;
-            crawlerRunOptionsMock
-                .setup((o) => o.baseUrl)
-                .returns(() => baseUrl)
-                .verifiable();
-            crawlerRunOptionsMock
-                .setup((o) => o.discoveryPatternUrl)
-                .returns(() => discoveryPatternUrl)
-                .verifiable();
-            crawlerRunOptionsMock
-                .setup((o) => o.discoveryPatterns)
-                .returns(() => undefined)
-                .verifiable();
-            const expectedPattern = `http[s?]://${otherHost}${otherPath}[.*]`;
-
-            const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
-
-            expect(discoveryPatterns).toEqual([expectedPattern]);
         });
     });
 

@@ -15,5 +15,4 @@ export interface CrawlerRunOptions {
     memoryMBytes?: number;
     silentMode?: boolean;
     debug?: boolean;
-    discoveryPatternUrl?: string;
 }

@@ -19,11 +19,7 @@ export class CrawlerConfiguration {
     }
 
     public discoveryPatterns(): string[] {
-        return this.getDiscoveryPattern(
-            this.crawlerRunOptions.baseUrl,
-            this.crawlerRunOptions.discoveryPatternUrl,
-            this.crawlerRunOptions.discoveryPatterns,
-        );
+        return this.getDiscoveryPattern(this.crawlerRunOptions.baseUrl, this.crawlerRunOptions.discoveryPatterns);
     }
 
     public selectors(): string[] {
@@ -70,23 +66,18 @@ export class CrawlerConfiguration {
         return selectors === undefined || selectors.length === 0 ? ['button'] : selectors;
     }
 
-    private getDiscoveryPatternForUrl(discoveryPatternUrl: string): string[] {
-        if (this.crawl() || discoveryPatternUrl) {
-            const urlObj = url.parse(discoveryPatternUrl);
+    private getDefaultDiscoveryPattern(baseUrl: string): string[] {
+        if (this.crawl() || baseUrl) {
+            const baseUrlObj = url.parse(baseUrl);
 
-            return [`http[s?]://${urlObj.host}${urlObj.path}[.*]`];
+            return [`http[s?]://${baseUrlObj.host}${baseUrlObj.path}[.*]`];
         }
 
         return [];
     }
 
-    private getDiscoveryPattern(baseUrl: string, discoveryPatternUrl: string, discoveryPatterns: string[]): string[] {
-        if (discoveryPatterns) {
-            return discoveryPatterns;
-        }
-        const urlForDiscoveryPattern = discoveryPatternUrl ?? baseUrl;
-
-        return this.getDiscoveryPatternForUrl(urlForDiscoveryPattern);
+    private getDiscoveryPattern(baseUrl: string, discoveryPatterns: string[]): string[] {
+        return discoveryPatterns ?? this.getDefaultDiscoveryPattern(baseUrl);
     }
 
     private getDefaultApifySettings(): ApifySettings {
