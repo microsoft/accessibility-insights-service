@@ -7,7 +7,6 @@ import { IMock, It, Mock } from 'typemoq';
 import { UrlCollectionRequestProcessor } from './url-collection-request-processor';
 
 describe(UrlCollectionRequestProcessor, () => {
-
     const requestInputs = {
         request: {
             url: 'url',
@@ -29,7 +28,7 @@ describe(UrlCollectionRequestProcessor, () => {
         expect(await testSubject.getResults()).toEqual(['url']);
     });
 
-    it('handleRequest adds multiple URLs to list', async() => {
+    it('handleRequest adds multiple URLs to list', async () => {
         const requestInputs2 = {
             request: {
                 url: 'url2',
@@ -47,7 +46,7 @@ describe(UrlCollectionRequestProcessor, () => {
             request: requestInputs.request,
             error: new Error('error'),
         };
-        loggerMock.setup(l => l.logError(It.isAny(), It.isAny())).verifiable();
+        loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
         await testSubject.handleFailedRequest(requestInputWithError);
 

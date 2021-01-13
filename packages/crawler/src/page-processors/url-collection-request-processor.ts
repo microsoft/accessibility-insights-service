@@ -11,20 +11,17 @@ import { RequestProcessor } from './request-processor';
 
 @injectable()
 export class UrlCollectionRequestProcessor implements RequestProcessor {
-    public constructor(
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        private readonly urlList: string[] = [],
-    ) {}
+    public constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger, private readonly urlList: string[] = []) {}
 
     public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {
         this.urlList.push(inputs.request.url);
     };
 
     public handleFailedRequest = async (inputs: HandleFailedRequestInput): Promise<void> => {
-        this.logger.logError(
-            'Error processing crawl request in UrlCollectionRequestProcessor',
-            { error: System.serializeError(inputs.error), request: JSON.stringify(inputs.request) }
-        );
+        this.logger.logError('Error processing crawl request in UrlCollectionRequestProcessor', {
+            error: System.serializeError(inputs.error),
+            request: JSON.stringify(inputs.request),
+        });
     };
 
     public getResults = (): string[] => {

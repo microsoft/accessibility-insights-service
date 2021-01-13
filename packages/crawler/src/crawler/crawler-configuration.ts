@@ -22,7 +22,7 @@ export class CrawlerConfiguration {
         return this.getDiscoveryPattern(
             this.crawlerRunOptions.baseUrl,
             this.crawlerRunOptions.discoveryPatternUrl,
-            this.crawlerRunOptions.discoveryPatterns
+            this.crawlerRunOptions.discoveryPatterns,
         );
     }
 

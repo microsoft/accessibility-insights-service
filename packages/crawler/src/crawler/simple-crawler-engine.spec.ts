@@ -20,7 +20,6 @@ import { CrawlerFactory } from './crawler-factory';
 import { SimpleCrawlerEngine, SimpleCrawlerRunOptions } from './simple-crawler-engine';
 
 describe(SimpleCrawlerEngine, () => {
-
     let requestQueueProviderMock: IMock<ApifyRequestQueueProvider>;
     let crawlerFactoryMock: IMock<CrawlerFactory>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
@@ -78,16 +77,19 @@ describe(SimpleCrawlerEngine, () => {
         crawlerRunOptions.debug = debug;
         setupCrawlerConfig();
         if (debug) {
-            crawlerConfigurationMock.setup(cc => cc.setSilentMode(false)).verifiable();
+            crawlerConfigurationMock.setup((cc) => cc.setSilentMode(false)).verifiable();
         }
-        requestQueueProviderMock.setup(rqp => rqp()).returns(() => Promise.resolve(requestQueueStub)).verifiable();
+        requestQueueProviderMock
+            .setup((rqp) => rqp())
+            .returns(() => Promise.resolve(requestQueueStub))
+            .verifiable();
 
         const expectedCrawlOptions = getCrawlerOptions(debug);
         crawlerFactoryMock
-            .setup(cf => cf.createBasicCrawler(It.isObjectWith(expectedCrawlOptions)))
+            .setup((cf) => cf.createBasicCrawler(It.isObjectWith(expectedCrawlOptions)))
             .returns(() => basicCrawlerMock.object)
             .verifiable();
-        basicCrawlerMock.setup(bc => bc.run()).verifiable();
+        basicCrawlerMock.setup((bc) => bc.run()).verifiable();
         setupEnqueueLinks();
 
         const expectedUrls: string[] = crawlResults;
@@ -105,7 +107,7 @@ describe(SimpleCrawlerEngine, () => {
         logger.setup();
         const crawlerFactory = new CrawlerFactory();
 
-        const browser = await (new WebDriver(logger)).launch();
+        const browser = await new WebDriver(logger).launch();
         const page = await browser.newPage();
         await page.goto(baseUrl);
 
@@ -131,11 +133,11 @@ describe(SimpleCrawlerEngine, () => {
     });
 
     function setupCrawlerConfig(): void {
-        crawlerConfigurationMock.setup(cc => cc.setDefaultApifySettings()).verifiable();
-        crawlerConfigurationMock.setup(cc => cc.setLocalOutputDir(localOutputDir)).verifiable();
-        crawlerConfigurationMock.setup(cc => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
-        crawlerConfigurationMock.setup(cc => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
-        crawlerConfigurationMock.setup(cc => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
+        crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.setLocalOutputDir(localOutputDir)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.setMemoryMBytes(crawlerRunOptions.memoryMBytes)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.setSilentMode(crawlerRunOptions.silentMode)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.maxRequestsPerCrawl()).returns(() => maxRequestsPerCrawl);
     }
 
     function getCrawlerOptions(debug: boolean): Partial<Apify.BasicCrawlerOptions> {
@@ -158,7 +160,7 @@ describe(SimpleCrawlerEngine, () => {
             requestQueue: requestQueueStub,
             pseudoUrls: discoveryPatterns,
         };
-        crawlerConfigurationMock.setup(cc => cc.discoveryPatterns()).returns(() => discoveryPatterns);
-        enqueueLinksExtMock.setup(el => el(expectedOptions)).verifiable();
+        crawlerConfigurationMock.setup((cc) => cc.discoveryPatterns()).returns(() => discoveryPatterns);
+        enqueueLinksExtMock.setup((el) => el(expectedOptions)).verifiable();
     }
 });
