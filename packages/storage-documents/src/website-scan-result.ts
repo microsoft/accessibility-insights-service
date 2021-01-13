@@ -15,6 +15,7 @@ export interface WebsiteScanResult extends StorageDocument {
     reports?: WebsiteScanReport[];
     combinedResultsBlobId?: string;
     knownPages?: string[];
+    discoveryPatterns?: string[];
 }
 
 export interface WebsiteScanReport {
