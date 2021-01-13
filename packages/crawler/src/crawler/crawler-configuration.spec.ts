@@ -4,6 +4,7 @@ import 'reflect-metadata';
 
 import { IMock, Mock } from 'typemoq';
 import { ApifySettings, ApifySettingsHandler } from '../apify/apify-settings';
+import { DiscoveryPatternFactory } from '../apify/discovery-patterns';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { CrawlerConfiguration } from './crawler-configuration';
 
@@ -11,11 +12,18 @@ describe(CrawlerConfiguration, () => {
     let apifySettingsHandlerMock: IMock<ApifySettingsHandler>;
     let crawlerRunOptionsMock: IMock<CrawlerRunOptions>;
     let crawlerConfiguration: CrawlerConfiguration;
+    let createDiscoveryPatternMock: IMock<DiscoveryPatternFactory>;
 
     beforeEach(() => {
         apifySettingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
         crawlerRunOptionsMock = Mock.ofType<CrawlerRunOptions>();
-        crawlerConfiguration = new CrawlerConfiguration(crawlerRunOptionsMock.object, apifySettingsHandlerMock.object);
+        createDiscoveryPatternMock = Mock.ofType<DiscoveryPatternFactory>();
+
+        crawlerConfiguration = new CrawlerConfiguration(
+            crawlerRunOptionsMock.object,
+            apifySettingsHandlerMock.object,
+            createDiscoveryPatternMock.object,
+        );
     });
 
     afterEach(() => {
@@ -32,15 +40,11 @@ describe(CrawlerConfiguration, () => {
     });
 
     describe('getDiscoveryPattern', () => {
-        const host = 'hostname.com';
-        const path = '/path/to/page';
-        let baseUrl: string;
-
-        beforeEach(() => {
-            baseUrl = `https://${host}${path}`;
-        });
+        const baseUrl = 'base url string';
+        const baseUrlDiscoveryPattern = 'discovery pattern';
 
         it('with no list provided', () => {
+            createDiscoveryPatternMock.setup((cdp) => cdp(baseUrl)).returns(() => baseUrlDiscoveryPattern);
             crawlerRunOptionsMock
                 .setup((o) => o.baseUrl)
                 .returns(() => baseUrl)
@@ -49,19 +53,14 @@ describe(CrawlerConfiguration, () => {
                 .setup((o) => o.discoveryPatterns)
                 .returns(() => undefined)
                 .verifiable();
-            const expectedPattern = `http[s?]://${host}${path}[.*]`;
 
             const discoveryPatterns = crawlerConfiguration.discoveryPatterns();
 
-            expect(discoveryPatterns).toEqual([expectedPattern]);
+            expect(discoveryPatterns).toEqual([baseUrlDiscoveryPattern]);
         });
 
         it('with list provided', () => {
             const expectedDiscoveryPatterns = ['pattern1', 'pattern2'];
-            crawlerRunOptionsMock
-                .setup((o) => o.baseUrl)
-                .returns(() => baseUrl)
-                .verifiable();
             crawlerRunOptionsMock
                 .setup((o) => o.discoveryPatterns)
                 .returns(() => expectedDiscoveryPatterns)
