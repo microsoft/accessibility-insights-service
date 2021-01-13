@@ -65,7 +65,7 @@ export class WebsiteScanResultProvider {
             }
 
             if (_.isArray(target)) {
-                if (key !== 'pageScans' && key !== 'reports') {
+                if (key !== 'pageScans' && key !== 'reports' && key !== 'knownPages' && key !== 'discoveryPatterns') {
                     throw new Error(`Merge of array type value '${key}' is not implemented.`);
                 }
 
