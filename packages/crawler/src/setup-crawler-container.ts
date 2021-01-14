@@ -4,10 +4,12 @@ import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
+import { SimpleCrawlerEngine } from './crawler/simple-crawler-engine';
 import { DataBase } from './level-storage/data-base';
 import { ClassicPageProcessor } from './page-processors/classic-page-processor';
 import { PageProcessor } from './page-processors/page-processor-base';
 import { SimulatorPageProcessor } from './page-processors/simulator-page-processor';
+import { UrlCollectionRequestProcessor } from './page-processors/url-collection-request-processor';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
@@ -40,6 +42,23 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
                 }
             };
         });
+
+    return container;
+}
+
+export function setupCloudCrawlerContainer(container: inversify.Container): inversify.Container {
+    container.bind(iocTypes.CrawlerEngine).to(SimpleCrawlerEngine);
+    setupSingletonProvider(iocTypes.ApifyRequestQueueProvider, container, async (context: inversify.interfaces.Context) => {
+        const apifyResourceCreator = context.container.get(ApifyResourceCreator);
+        const crawlerRunOptions = context.container.get<CrawlerRunOptions>(iocTypes.CrawlerRunOptions);
+
+        return apifyResourceCreator.createRequestQueue(
+            crawlerRunOptions.baseUrl,
+            crawlerRunOptions.restartCrawl,
+            crawlerRunOptions.inputUrls,
+        );
+    });
+    container.bind(iocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);
 
     return container;
 }

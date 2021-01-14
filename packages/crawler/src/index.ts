@@ -6,7 +6,7 @@ import './global-overrides';
 
 export { CrawlerRunOptions } from './types/crawler-run-options';
 export { Crawler } from './crawler';
-export { setupLocalCrawlerContainer } from './setup-crawler-container';
+export { setupLocalCrawlerContainer, setupCloudCrawlerContainer } from './setup-crawler-container';
 export * from './level-storage/storage-documents';
 export { DbScanResultReader } from './scan-result-providers/db-scan-result-reader';
 export { getDiscoveryPatternForUrl, DiscoveryPatternFactory } from './apify/discovery-patterns';
