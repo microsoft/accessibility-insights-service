@@ -5,12 +5,12 @@ import { HandleRequestInputs, HandleFailedRequestInput } from 'apify';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { RequestProcessor } from './request-processor';
+import { CrawlRequestProcessor } from './crawl-request-processor';
 
 /* eslint-disable no-invalid-this */
 
 @injectable()
-export class UrlCollectionRequestProcessor implements RequestProcessor {
+export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
     public constructor(@inject(GlobalLogger) private readonly logger: GlobalLogger, private readonly urlList: string[] = []) {}
 
     public handleRequest = async (inputs: HandleRequestInputs): Promise<void> => {

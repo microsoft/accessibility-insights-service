@@ -8,7 +8,7 @@ import { Page } from 'puppeteer';
 import { isNil } from 'lodash';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
-import { RequestProcessor } from '../page-processors/request-processor';
+import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerConfiguration } from './crawler-configuration';
@@ -23,7 +23,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(iocTypes.RequestProcessor) private readonly requestProcessor: RequestProcessor,
+        @inject(iocTypes.RequestProcessor) private readonly requestProcessor: CrawlRequestProcessor,
         private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 

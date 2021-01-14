@@ -10,7 +10,7 @@ import { WebDriver } from 'scanner-global-library';
 
 import { IMock, It, Mock } from 'typemoq';
 import { ApifyResourceCreator } from '../apify/apify-resource-creator';
-import { RequestProcessor } from '../page-processors/request-processor';
+import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
 import { UrlCollectionRequestProcessor } from '../page-processors/url-collection-request-processor';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
@@ -38,7 +38,7 @@ describe(SimpleCrawlerEngine, () => {
         handleRequest: () => null,
         handleFailedRequest: () => null,
         getResults: () => crawlResults,
-    } as RequestProcessor;
+    } as CrawlRequestProcessor;
 
     beforeEach(() => {
         requestQueueStub = {} as Apify.RequestQueue;
@@ -101,12 +101,13 @@ describe(SimpleCrawlerEngine, () => {
     it.skip('run e2e website crawl', async () => {
         const apifyResourceCreator = new ApifyResourceCreator();
         const baseUrl = 'http://accessibilityinsights.io';
-        const requestQueueProvider = () => apifyResourceCreator.createRequestQueue(baseUrl);
+        const requestQueueProvider = () => apifyResourceCreator.createRequestQueue(baseUrl, true);
         const logger = new GlobalLogger([new ConsoleLoggerClient(new ServiceConfiguration(), console)], process);
         logger.setup();
         const crawlerFactory = new CrawlerFactory();
 
-        const browser = await new WebDriver(logger).launch();
+        const webDriver = new WebDriver(logger);
+        const browser = await webDriver.launch();
         const page = await browser.newPage();
         await page.goto(baseUrl);
 
@@ -128,8 +129,10 @@ describe(SimpleCrawlerEngine, () => {
 
         const urls = await crawlerEngine.start(testCrawlerRunOptions);
 
+        await webDriver.close();
+
         console.log(urls);
-    });
+    }, 50000000);
 
     function setupCrawlerConfig(): void {
         crawlerConfigurationMock.setup((cc) => cc.setDefaultApifySettings()).verifiable();
