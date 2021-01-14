@@ -48,7 +48,7 @@ describe(UrlCollectionRequestProcessor, () => {
         };
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        await testSubject.handleFailedRequest(requestInputWithError);
+        await testSubject.handleRequestError(requestInputWithError);
 
         loggerMock.verifyAll();
     });

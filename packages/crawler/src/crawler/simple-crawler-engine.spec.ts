@@ -36,7 +36,7 @@ describe(SimpleCrawlerEngine, () => {
     const crawlResults = ['url1', 'url2'];
     const requestProcessorStub = {
         handleRequest: () => null,
-        handleFailedRequest: () => null,
+        handleRequestError: () => null,
         getResults: () => crawlResults,
     } as CrawlRequestProcessor;
 

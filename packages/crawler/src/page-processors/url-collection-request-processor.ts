@@ -17,7 +17,7 @@ export class UrlCollectionRequestProcessor implements CrawlRequestProcessor {
         this.urlList.push(inputs.request.url);
     };
 
-    public handleFailedRequest = async (inputs: HandleFailedRequestInput): Promise<void> => {
+    public handleRequestError = async (inputs: HandleFailedRequestInput): Promise<void> => {
         this.logger.logError('Error processing crawl request in UrlCollectionRequestProcessor', {
             error: System.serializeError(inputs.error),
             request: JSON.stringify(inputs.request),

@@ -39,7 +39,7 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
             handleRequestTimeoutSecs: 300,
             requestQueue: requestQueue,
             handleRequestFunction: this.requestProcessor.handleRequest,
-            handleFailedRequestFunction: this.requestProcessor.handleFailedRequest,
+            handleFailedRequestFunction: this.requestProcessor.handleRequestError,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
         };
 

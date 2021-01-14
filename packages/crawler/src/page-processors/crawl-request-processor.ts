@@ -5,6 +5,6 @@ import Apify from 'apify';
 
 export interface CrawlRequestProcessor {
     handleRequest(inputs: Apify.HandleRequestInputs): Promise<void>;
-    handleFailedRequest(inputs: Apify.HandleFailedRequestInput): void | Promise<void>;
+    handleRequestError(inputs: Apify.HandleFailedRequestInput): void | Promise<void>;
     getResults(): string[];
 }
