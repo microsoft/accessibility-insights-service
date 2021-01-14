@@ -10,4 +10,8 @@ export class CrawlerFactory {
     public createPuppeteerCrawler(options: Apify.PuppeteerCrawlerOptions): Apify.PuppeteerCrawler {
         return new this.apify.PuppeteerCrawler(options);
     }
+
+    public createBasicCrawler(options: Apify.BasicCrawlerOptions): Apify.BasicCrawler {
+        return new this.apify.BasicCrawler(options);
+    }
 }

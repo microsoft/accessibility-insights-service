@@ -12,6 +12,7 @@ export const iocTypes = {
     ApifyDataset: 'ApifyDataset',
     LevelUp: 'levelup.LevelUp',
     CrawlerEngine: 'CrawlerEngine',
+    RequestProcessor: 'RequestProcessor',
 };
 
 export type PageProcessorFactory = () => PageProcessorBase;

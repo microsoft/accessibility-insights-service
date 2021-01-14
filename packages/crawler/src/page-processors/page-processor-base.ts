@@ -37,7 +37,7 @@ export abstract class PageProcessorBase implements PageProcessor {
 
     protected readonly baseUrl: string;
     protected readonly snapshot: boolean;
-    protected readonly discoveryLinks: boolean;
+    protected readonly discoverLinks: boolean;
     protected readonly discoveryPatterns: string[];
 
     private scanMetadataSaved: boolean;
@@ -62,7 +62,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     ) {
         this.baseUrl = this.crawlerConfiguration.baseUrl();
         this.snapshot = this.crawlerConfiguration.snapshot();
-        this.discoveryLinks = this.crawlerConfiguration.crawl();
+        this.discoverLinks = this.crawlerConfiguration.crawl();
         this.discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
     }
 
@@ -145,7 +145,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     }
 
     protected async enqueueLinks(page: Page): Promise<Apify.QueueOperationInfo[]> {
-        if (!this.discoveryLinks) {
+        if (!this.discoverLinks) {
             return [];
         }
 

@@ -1,17 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import * as url from 'url';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { iocTypes } from '../types/ioc-types';
+import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
 
 @injectable()
 export class CrawlerConfiguration {
     public constructor(
         @inject(iocTypes.CrawlerRunOptions) private readonly crawlerRunOptions: CrawlerRunOptions,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
+        private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
     public baseUrl(): string {
@@ -68,9 +69,7 @@ export class CrawlerConfiguration {
 
     private getDefaultDiscoveryPattern(baseUrl: string): string[] {
         if (this.crawl() || baseUrl) {
-            const baseUrlObj = url.parse(baseUrl);
-
-            return [`http[s?]://${baseUrlObj.host}${baseUrlObj.path}[.*]`];
+            return [this.createDiscoveryPattern(baseUrl)];
         }
 
         return [];
