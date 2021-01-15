@@ -30,6 +30,7 @@ import { GeneratedReport, ReportGenerator } from '../report-generator/report-gen
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
+import { UrlDeduper } from './url-deduper';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -51,6 +52,7 @@ export class Runner {
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
+        @inject(UrlDeduper) private readonly urlDeduper: UrlDeduper,
     ) {}
 
     public async run(): Promise<void> {
@@ -93,6 +95,7 @@ export class Runner {
             this.logger.logInfo('Starting the page scanner.');
             axeScanResults = await this.scan(pageScanResult, scanMetadata.url);
             await this.generateCombinedScanResults(axeScanResults, pageScanResult);
+            // await this.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, crawlResults.newlyDiscoveredUrls);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             const errorMessage = System.serializeError(error);
@@ -116,6 +119,64 @@ export class Runner {
         await this.queueScanCompletionNotification(pageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
+    }
+
+    private async updateWebsiteScanResultWithDiscoveredUrls(
+        pageScanResult: OnDemandPageScanResult,
+        newlyDiscoveredUrls: string[],
+    ): Promise<void> {
+        await this.retryHelper.executeWithRetries(
+            async () => this.updateWebsiteScanResultWithDiscoveredUrlsImpl(pageScanResult, newlyDiscoveredUrls),
+            async (error: Error) => {
+                this.logger.logError(`Failure to generate combined scan result. Retrying on error.`, {
+                    error: System.serializeError(error),
+                });
+            },
+            this.maxCombinedResultProcessingRetryCount,
+            1000,
+        );
+    }
+
+    private async updateWebsiteScanResultWithDiscoveredUrlsImpl(
+        pageScanResult: OnDemandPageScanResult,
+        newlyDiscoveredUrls: string[],
+    ): Promise<void> {
+        if (pageScanResult.websiteScanRefs === undefined || pageScanResult.websiteScanRefs.length === 0) {
+            return;
+        }
+
+        const websiteScanRef = pageScanResult.websiteScanRefs.find((ref) => ref.scanGroupType === 'consolidated-scan-report');
+        if (websiteScanRef === undefined) {
+            return;
+        }
+
+        const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
+        const knownPages = websiteScanResult.knownPages;
+        const updatedKnownPages = this.urlDeduper.dedupe(knownPages, newlyDiscoveredUrls);
+
+        return this.updateWebsiteScanResultWithKnownUrls(websiteScanResult, updatedKnownPages);
+    }
+
+    private async updateWebsiteScanResultWithKnownUrls(websiteScanResult: WebsiteScanResult, updatedKnownPages: string[]): Promise<void> {
+        const updatedWebsiteScanResults = {
+            id: websiteScanResult.id,
+            knownPages: updatedKnownPages,
+            _etag: websiteScanResult._etag,
+        } as Partial<WebsiteScanResult>;
+        try {
+            this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+            this.logger.logInfo('Successfully updated website scan results with new known urls.');
+        } catch (error) {
+            this.logger.logError('Failed to update website scan results with new known urls.', {
+                error: System.serializeError(error),
+            });
+
+            throw new Error(
+                `Failed to update website scan results with new known urls. Document Id: ${
+                    websiteScanResult.id
+                } Error: ${System.serializeError(error)}`,
+            );
+        }
     }
 
     private async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
