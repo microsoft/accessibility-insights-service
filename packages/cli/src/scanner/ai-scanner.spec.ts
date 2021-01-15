@@ -27,7 +27,8 @@ describe('AIScanner', () => {
     it('should launch browser page with given url and scan the page with axe-core', async () => {
         const url = 'some url';
         const axeResultsStub = ('axe results' as any) as AxeResults;
-        setupNewPageCall(url);
+        setupNewPageCall();
+        setupPageNavigateCall(url);
         setupPageScanCall(url, axeResultsStub);
         await scanner.scan(url);
 
@@ -37,14 +38,15 @@ describe('AIScanner', () => {
     it('should close browser if exception occurs', async () => {
         const url = 'some url';
         const errorMessage: string = `An error occurred while scanning website page ${url}.`;
-        setupNewPageCall(url);
+        setupNewPageCall();
+        setupPageNavigateCall(url);
         setupPageErrorScanCall(url, errorMessage);
         setupPageCloseCall();
         const scanResult: AxeScanResults = await scanner.scan(url);
         expect(scanResult.error).not.toBeNull();
     });
 
-    function setupNewPageCall(url: string): void {
+    function setupNewPageCall(): void {
         pageMock.setup(async (p) => p.create(undefined)).verifiable(Times.once());
     }
 
@@ -52,16 +54,20 @@ describe('AIScanner', () => {
         pageMock.setup(async (b) => b.close()).verifiable();
     }
 
+    function setupPageNavigateCall(url: string): void {
+        pageMock.setup((p) => p.navigateToUrl(url)).verifiable(Times.once());
+    }
+
     function setupPageScanCall(url: string, axeResults: AxeResults): void {
         pageMock
-            .setup(async (p) => p.scanForA11yIssues(url, undefined))
+            .setup(async (p) => p.scanForA11yIssues(undefined))
             .returns(async () => Promise.resolve({ results: axeResults }))
             .verifiable(Times.once());
     }
 
     function setupPageErrorScanCall(url: string, errorMessage: string): void {
         pageMock
-            .setup(async (p) => p.scanForA11yIssues(url, undefined))
+            .setup(async (p) => p.scanForA11yIssues(undefined))
             .returns(async () => Promise.resolve({ error: errorMessage }))
             .verifiable(Times.once());
     }

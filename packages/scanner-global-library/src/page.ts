@@ -5,15 +5,19 @@ import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger } from 'logger';
 import * as Puppeteer from 'puppeteer';
 import axe from 'axe-core';
+import { isNil } from 'lodash';
 import { AxeScanResults } from './axe-scan-results';
 import { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
+import { BrowserError } from './browser-error';
 
 @injectable()
 export class Page {
     public page: Puppeteer.Page;
     public browser: Puppeteer.Browser;
+    public navigationResponse: Puppeteer.Response;
+    public lastBrowserError: BrowserError;
     public get userAgent(): string {
         return this.pageNavigator.pageConfigurator.getUserAgent();
     }
@@ -33,19 +37,25 @@ export class Page {
         this.page = await this.browser.newPage();
     }
 
-    public async scanForA11yIssues(url: string, contentSourcePath?: string): Promise<AxeScanResults> {
-        let scanResults: AxeScanResults;
+    public async navigateToUrl(url: string): Promise<void> {
         const response = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
-
-            scanResults = { error: browserError, pageResponseCode: browserError.statusCode };
+            this.lastBrowserError = browserError;
         });
 
-        if (scanResults?.error !== undefined) {
-            return scanResults;
+        this.navigationResponse = response;
+    }
+
+    public async scanForA11yIssues(contentSourcePath?: string): Promise<AxeScanResults> {
+        if (!isNil(this.lastBrowserError)) {
+            return { error: this.lastBrowserError, pageResponseCode: this.lastBrowserError.statusCode };
         }
 
-        return this.scanPageForIssues(response, contentSourcePath);
+        if (isNil(this.navigationResponse)) {
+            throw new Error('No URL was opened before attempting to scan page');
+        }
+
+        return this.scanPageForIssues(contentSourcePath);
     }
 
     public async close(): Promise<void> {
@@ -54,7 +64,7 @@ export class Page {
         }
     }
 
-    private async scanPageForIssues(response: Puppeteer.Response, contentSourcePath?: string): Promise<AxeScanResults> {
+    private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
         const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
         let axeResults: axe.AxeResults;
         try {
@@ -69,12 +79,12 @@ export class Page {
             results: axeResults,
             pageTitle: await this.page.title(),
             browserSpec: await this.browser.version(),
-            pageResponseCode: response.status(),
+            pageResponseCode: this.navigationResponse.status(),
             userAgent: this.userAgent,
             browserResolution: this.browserResolution,
         };
 
-        if (response.request().redirectChain().length > 0) {
+        if (this.navigationResponse.request().redirectChain().length > 0) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
             scanResults.scannedUrl = axeResults.url;
         }

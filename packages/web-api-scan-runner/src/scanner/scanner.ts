@@ -32,7 +32,8 @@ export class Scanner {
         try {
             this.logger.logInfo(`Starting accessibility website page scanning.`, { url });
             await this.page.create();
-            const scanResult = await this.page.scanForA11yIssues(url);
+            await this.page.navigateToUrl(url);
+            const scanResult = await this.page.scanForA11yIssues();
             this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
 
             return scanResult;

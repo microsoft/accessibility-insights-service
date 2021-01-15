@@ -12,8 +12,9 @@ export class AIScanner {
         try {
             console.log(`Starting accessibility scanning of URL ${url}`);
             await this.page.create(chromePath);
+            await this.page.navigateToUrl(url);
 
-            return await this.page.scanForA11yIssues(url, sourcePath);
+            return await this.page.scanForA11yIssues(sourcePath);
         } catch (error) {
             console.log(error, `An error occurred while scanning website page ${url}`);
 
