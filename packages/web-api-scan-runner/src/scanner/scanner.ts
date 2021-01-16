@@ -8,16 +8,15 @@ import { AxeScanResults, Page } from 'scanner-global-library';
 @injectable()
 export class Scanner {
     constructor(
-        @inject(Page) private readonly page: Page,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
     ) {}
 
-    public async scan(url: string): Promise<AxeScanResults> {
+    public async scan(page: Page): Promise<AxeScanResults> {
         const scanConfig = await this.serviceConfig.getConfigValue('scanConfig');
 
-        return this.promiseUtils.waitFor(this.scanImpl(url), scanConfig.scanTimeoutInMin * 60000, () =>
+        return this.promiseUtils.waitFor(this.scanImpl(page), scanConfig.scanTimeoutInMin * 60000, () =>
             Promise.resolve({
                 error: {
                     errorType: 'ScanTimeout',
@@ -28,26 +27,18 @@ export class Scanner {
         );
     }
 
-    private async scanImpl(url: string): Promise<AxeScanResults> {
+    private async scanImpl(page: Page): Promise<AxeScanResults> {
         try {
-            this.logger.logInfo(`Starting accessibility website page scanning.`, { url });
-            await this.page.create();
-            await this.page.navigateToUrl(url);
-            const scanResult = await this.page.scanForA11yIssues();
-            this.logger.logInfo(`Accessibility scanning of website page successfully completed.`, { url });
+            this.logger.logInfo(`Starting accessibility website page scanning.`);
+            const scanResult = await page.scanForA11yIssues();
+            this.logger.logInfo(`Accessibility scanning of website page successfully completed.`);
 
             return scanResult;
         } catch (error) {
-            this.logger.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(error) });
+            this.logger.logError(`An error occurred while scanning website page.`, { error: System.serializeError(error) });
 
             // throw service originated error to indicate a service failure
             throw error;
-        } finally {
-            try {
-                await this.page.close();
-            } catch (error) {
-                this.logger.logError('An error occurred while closing web browser.', { url, error: System.serializeError(error) });
-            }
         }
     }
 }

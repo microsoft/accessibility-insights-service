@@ -4,7 +4,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper 
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeScanResults, Page } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRunReportProvider,
@@ -51,11 +51,12 @@ export class Runner {
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
+        @inject(Page) private readonly page: Page,
     ) {}
 
     public async run(): Promise<void> {
         const scanMetadata = this.scanMetadataConfig.getConfig();
-        this.logger.setCommonProperties({ scanId: scanMetadata.id });
+        this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
 
         this.logger.logInfo(`Updating page scan run state to 'running'.`);
@@ -90,8 +91,8 @@ export class Runner {
 
         let axeScanResults: AxeScanResults;
         try {
-            this.logger.logInfo('Starting the page scanner.');
-            axeScanResults = await this.scan(pageScanResult, scanMetadata.url);
+            await this.openPage(scanMetadata.url);
+            axeScanResults = await this.scan(pageScanResult, this.page);
             await this.generateCombinedScanResults(axeScanResults, pageScanResult);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
@@ -102,6 +103,7 @@ export class Runner {
             this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
             this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
         } finally {
+            await this.closePage();
             const scanCompletedTimestamp: number = Date.now();
             const telemetryMeasurements: ScanTaskCompletedMeasurements = {
                 scanExecutionTime: (scanCompletedTimestamp - scanStartedTimestamp) / 1000,
@@ -116,6 +118,19 @@ export class Runner {
         await this.queueScanCompletionNotification(pageScanResult);
 
         this.logger.logInfo('Page scan task completed.');
+    }
+
+    private async openPage(url: string): Promise<void> {
+        await this.page.create();
+        await this.page.navigateToUrl(url);
+    }
+
+    private async closePage(): Promise<void> {
+        try {
+            await this.page.close();
+        } catch (error) {
+            this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
+        }
     }
 
     private async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -283,8 +298,8 @@ export class Runner {
         return response;
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, url: string): Promise<AxeScanResults> {
-        const axeScanResults = await this.scanner.scan(url);
+    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, page: Page): Promise<AxeScanResults> {
+        const axeScanResults = await this.scanner.scan(page);
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);

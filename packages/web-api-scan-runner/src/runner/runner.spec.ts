@@ -4,10 +4,10 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper } from 'common';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, isNil } from 'lodash';
 import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
 import * as MockDate from 'mockdate';
-import { AxeScanResults } from 'scanner-global-library';
+import { AxeScanResults, Page } from 'scanner-global-library';
 import {
     CombinedScanResultsProvider,
     OnDemandPageScanRunResultProvider,
@@ -60,6 +60,7 @@ describe(Runner, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let retryHelperMock: IMock<RetryHelper<void>>;
+    let pageMock: IMock<Page>;
 
     const scanMetadata: ScanMetadata = {
         id: 'id',
@@ -171,6 +172,7 @@ describe(Runner, () => {
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
         scannerMock = Mock.ofType<Scanner>();
+        pageMock = Mock.ofType<Page>();
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
@@ -206,6 +208,7 @@ describe(Runner, () => {
             combinedScanResultsProviderMock.object,
             axeResultsReducerMock.object,
             retryHelperMock.object,
+            pageMock.object,
         );
     });
 
@@ -224,14 +227,12 @@ describe(Runner, () => {
         combinedScanResultsProviderMock.verifyAll();
         axeResultsReducerMock.verifyAll();
         retryHelperMock.verifyAll();
+        pageMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.resolve(unscannableAxeScanResults))
-            .verifiable();
+        setupPageScan(unscannableAxeScanResults);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
 
@@ -241,10 +242,7 @@ describe(Runner, () => {
     it('sets job state to failed if scanner throws', async () => {
         const failureMessage = 'scanner task failed message';
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.reject(failureMessage))
-            .verifiable();
+        setupPageScanWithException(failureMessage);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
@@ -283,10 +281,7 @@ describe(Runner, () => {
 
     it('sets scan status to pass if violation length = 0', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.resolve(passedAxeScanResults))
-            .verifiable();
+        setupPageScan(passedAxeScanResults);
 
         setupGenerateReportsCall(passedAxeScanResults);
         setupSaveAllReportsCall();
@@ -299,10 +294,7 @@ describe(Runner, () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.resolve(clonedPassedAxeScanResults))
-            .verifiable();
+        setupPageScan(clonedPassedAxeScanResults);
 
         setupGenerateReportsCall(clonedPassedAxeScanResults);
         setupSaveAllReportsCall();
@@ -315,10 +307,7 @@ describe(Runner, () => {
 
     it('sets scan status to fail if violation length > 0', async () => {
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => Promise.resolve(axeScanResultsWithViolations))
-            .verifiable();
+        setupPageScan(axeScanResultsWithViolations);
 
         setupGenerateReportsCall(axeScanResultsWithViolations);
         setupSaveAllReportsCall();
@@ -343,14 +332,7 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => {
-                MockDate.set(timestamps.scanCompleteTime);
-
-                return passedAxeScanResults;
-            })
-            .verifiable();
+        setupPageScan(passedAxeScanResults, timestamps.scanCompleteTime);
         setupGenerateReportsCall(passedAxeScanResults);
         setupSaveAllReportsCall();
         const scanResult = getScanResultWithNoViolations();
@@ -375,14 +357,7 @@ describe(Runner, () => {
         loggerMock.setup((lm) => lm.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 })).verifiable();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        scannerMock
-            .setup(async (s) => s.scan(scanMetadata.url))
-            .returns(async () => {
-                MockDate.set(timestamps.scanCompleteTime);
-
-                return unscannableAxeScanResults;
-            })
-            .verifiable();
+        setupPageScan(unscannableAxeScanResults, timestamps.scanCompleteTime);
         setupGenerateReportsCall(unscannableAxeScanResults);
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
         scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
@@ -419,10 +394,7 @@ describe(Runner, () => {
                 'Do not send notification when url not present, notification = %o',
                 async (notification) => {
                     notificationMessage.scanStatus = 'pass';
-                    scannerMock
-                        .setup(async (s) => s.scan(scanMetadata.url))
-                        .returns(async () => Promise.resolve(passedAxeScanResults))
-                        .verifiable();
+                    setupPageScan(passedAxeScanResults);
 
                     setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification });
                     setupUpdateScanRunResultCall({ ...getScanResultWithNoViolations(), notification });
@@ -437,10 +409,7 @@ describe(Runner, () => {
                 ['pass', passedAxeScanResults],
             ])('Notification url is not null - scan status - %s', async (scanStatus: ScanState, scanResults) => {
                 notificationMessage.scanStatus = scanStatus;
-                scannerMock
-                    .setup(async (s) => s.scan(scanMetadata.url))
-                    .returns(async () => Promise.resolve(scanResults))
-                    .verifiable();
+                setupPageScan(scanResults);
 
                 setupGenerateReportsCall(scanResults);
                 setupSaveAllReportsCall();
@@ -459,10 +428,7 @@ describe(Runner, () => {
                 notificationMessage.scanStatus = undefined;
 
                 const failureMessage = 'failed to launch';
-                scannerMock
-                    .setup(async (o) => o.scan(It.isAny()))
-                    .returns(async () => Promise.reject(failureMessage))
-                    .verifiable(Times.once());
+                setupPageScanWithException(failureMessage);
 
                 setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification: { scanNotifyUrl: scanNotifyUrl } });
                 const updatePageScanResult = getFailingJobStateScanResult(System.serializeError(failureMessage), false);
@@ -632,10 +598,7 @@ describe(Runner, () => {
 
         function setupSuccessfulWebsiteScan(): void {
             setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { websiteScanRefs });
-            scannerMock
-                .setup(async (o) => o.scan(scanMetadata.url))
-                .returns(async () => passedAxeScanResults)
-                .verifiable();
+            setupPageScan(passedAxeScanResults);
         }
 
         function setupCallsAfterCombinedResultsUpdate(blobWriteConflict: boolean = false): void {
@@ -664,6 +627,36 @@ describe(Runner, () => {
                 .verifiable();
         }
     });
+
+    function setupPageScan(results: AxeScanResults, scanCompleteTime?: Date): void {
+        pageMock.setup((p) => p.create()).verifiable();
+        pageMock.setup((p) => p.navigateToUrl(scanMetadata.url)).verifiable();
+
+        scannerMock
+            .setup(async (s) => s.scan(pageMock.object))
+            .returns(async () => {
+                if (!isNil(scanCompleteTime)) {
+                    MockDate.set(scanCompleteTime);
+                }
+
+                return results;
+            })
+            .verifiable();
+
+        pageMock.setup((p) => p.close()).verifiable();
+    }
+
+    function setupPageScanWithException(error: any): void {
+        pageMock.setup((p) => p.create()).verifiable();
+        pageMock.setup((p) => p.navigateToUrl(scanMetadata.url)).verifiable();
+
+        scannerMock
+            .setup(async (s) => s.scan(It.isAny()))
+            .returns(async () => Promise.reject(error))
+            .verifiable();
+
+        pageMock.setup((p) => p.close()).verifiable();
+    }
 
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
         reportGeneratorMock.setup((r) => r.generateReports(scanResults)).returns(() => [generatedReport1, generatedReport2]);
