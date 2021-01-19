@@ -30,7 +30,7 @@ import { GeneratedReport, ReportGenerator } from '../report-generator/report-gen
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
-import { UrlDeduper } from './url-deduper';
+import { UrlDeduplicator } from './url-deduplicator';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -52,7 +52,7 @@ export class Runner {
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
-        @inject(UrlDeduper) private readonly urlDeduper: UrlDeduper,
+        @inject(UrlDeduplicator) private readonly urlDeduper: UrlDeduplicator,
     ) {}
 
     public async run(): Promise<void> {

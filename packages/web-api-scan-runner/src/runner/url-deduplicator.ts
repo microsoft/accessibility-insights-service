@@ -5,7 +5,7 @@ import { injectable } from 'inversify';
 import { uniq } from 'lodash';
 
 @injectable
-export class UrlDeduper {
+export class UrlDeduplicator {
     public dedupe: (discoveredUrls: string[], newUrls: string[]) => string[] = (discoveredUrls, newUrls) => {
         return uniq(discoveredUrls.concat(newUrls));
     };
