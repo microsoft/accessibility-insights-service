@@ -20,5 +20,8 @@
     },
     "availabilityTestConfig": {
         "environmentDefinition": "insider"
+    },
+    "crawlConfig": {
+        "urlCrawlLimit": 100
     }
 }

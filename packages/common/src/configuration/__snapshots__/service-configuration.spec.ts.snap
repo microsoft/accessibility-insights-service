@@ -49,6 +49,13 @@ Object {
       "format": "String",
     },
   },
+  "crawlConfig": Object {
+    "urlCrawlLimit": Object {
+      "default": 100,
+      "doc": "The max number of URLs that will be discovered for a deep scan",
+      "format": "int",
+    },
+  },
   "featureFlags": Object {
     "sendNotification": Object {
       "default": false,
@@ -233,6 +240,13 @@ Object {
       "default": "https://www.washington.edu/accesscomputing/AU/before.html",
       "doc": "Url to scan for availability testing",
       "format": "String",
+    },
+  },
+  "crawlConfig": Object {
+    "urlCrawlLimit": Object {
+      "default": 100,
+      "doc": "The max number of URLs that will be discovered for a deep scan",
+      "format": "int",
     },
   },
   "featureFlags": Object {

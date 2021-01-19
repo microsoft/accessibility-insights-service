@@ -55,6 +55,7 @@ export interface RuntimeConfig {
     jobManagerConfig: JobManagerConfig;
     restApiConfig: RestApiConfig;
     availabilityTestConfig: AvailabilityTestConfig;
+    crawlConfig: CrawlConfig;
 }
 
 export interface FeatureFlags {
@@ -71,6 +72,10 @@ export interface AvailabilityTestConfig {
     scanNotifyApiEndpoint: string;
     scanNotifyFailApiEndpoint: string;
     maxScanCompletionNotificationWaitTimeInSeconds: number;
+}
+
+export interface CrawlConfig {
+    urlCrawlLimit: number;
 }
 
 export declare type ResourceType = 'batch' | 'registry';
@@ -309,6 +314,13 @@ export class ServiceConfiguration {
                     format: 'String',
                     default: '/scan-notification-url-fail',
                     doc: 'The end-point to hit when a scan is completed and will respond unsuccessfully',
+                },
+            },
+            crawlConfig: {
+                urlCrawlLimit: {
+                    format: 'int',
+                    default: 100,
+                    doc: 'The max number of URLs that will be discovered for a deep scan',
                 },
             },
         };
