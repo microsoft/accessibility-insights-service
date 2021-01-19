@@ -12,7 +12,7 @@ import { Scanner } from './scanner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
-describe('Scanner', () => {
+describe(Scanner, () => {
     let pageMock: IMock<Page>;
     let scanner: Scanner;
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
@@ -32,7 +32,7 @@ describe('Scanner', () => {
             scanTimeoutInMin: 5,
         } as ScanRunTimeConfig;
 
-        scanner = new Scanner(pageMock.object, loggerMock.object, promiseUtilsMock.object, serviceConfigMock.object);
+        scanner = new Scanner(loggerMock.object, promiseUtilsMock.object, serviceConfigMock.object);
     });
 
     it('should create instance', () => {
@@ -45,37 +45,32 @@ describe('Scanner', () => {
         });
 
         it('should launch browser page with given url and scan the page with axe-core', async () => {
-            const url = 'some url';
             const axeResultsStub = ('axe results' as any) as AxeResults;
 
-            setupNewPageCall(url);
-            setupPageScanCall(url, axeResultsStub);
+            setupPageScanCall(axeResultsStub);
             setupWaitForPromisetoReturnOriginalPromise();
 
-            await scanner.scan(url);
+            await scanner.scan(pageMock.object);
 
             verifyMocks();
         });
 
-        it('should close browser if exception occurs', async () => {
-            const url = 'some url';
-            const errorMessage: string = `An error occurred while scanning website page ${url}.`;
-            const axeScanResults = setupPageErrorScanCall(url, errorMessage);
+        it('should throw errors', async () => {
+            const errorMessage: string = 'An error occurred while scanning website page';
+            const axeScanResults = setupPageErrorScanCall(errorMessage);
 
-            setupNewPageCall(url);
-            setupPageCloseCall();
             setupWaitForPromisetoReturnOriginalPromise();
             loggerMock
                 .setup((o) => {
-                    o.logError(`An error occurred while scanning website page.`, { url, error: System.serializeError(axeScanResults) });
+                    o.logError(`An error occurred while scanning website page.`, { error: System.serializeError(axeScanResults) });
                 })
                 .verifiable();
 
             try {
-                await scanner.scan(url);
+                await scanner.scan(pageMock.object);
                 fail('should throw');
             } catch (err) {
-                expect(err).toEqual({ error: 'An error occurred while scanning website page some url.', pageResponseCode: 101 });
+                expect(err).toEqual({ error: 'An error occurred while scanning website page', pageResponseCode: 101 });
             }
 
             verifyMocks();
@@ -83,15 +78,12 @@ describe('Scanner', () => {
         });
 
         it('should return timeout promise', async () => {
-            const url = 'some url';
-            const errorMessage: string = `An error occurred while scanning website page ${url}.`;
+            const errorMessage: string = 'An error occurred while scanning website page';
 
-            setupNewPageCall(url);
-            setupPageErrorScanCall(url, errorMessage);
-            setupPageCloseCall();
+            setupPageErrorScanCall(errorMessage);
             setupWaitForPromiseToReturnTimeoutPromise();
 
-            const scanResult = await scanner.scan(url);
+            const scanResult = await scanner.scan(pageMock.object);
 
             expect((scanResult.error as BrowserError).stack).toBeTruthy();
             (scanResult.error as BrowserError).stack = 'stack';
@@ -126,25 +118,17 @@ describe('Scanner', () => {
         }
     });
 
-    function setupNewPageCall(url: string): void {
-        pageMock.setup(async (p) => p.create()).verifiable(Times.once());
-    }
-
-    function setupPageCloseCall(): void {
-        pageMock.setup(async (b) => b.close()).verifiable();
-    }
-
-    function setupPageScanCall(url: string, axeResults: AxeResults): void {
+    function setupPageScanCall(axeResults: AxeResults): void {
         pageMock
-            .setup(async (p) => p.scanForA11yIssues(url))
+            .setup(async (p) => p.scanForA11yIssues())
             .returns(async () => Promise.resolve({ results: axeResults, pageResponseCode: 101 }))
             .verifiable(Times.once());
     }
 
-    function setupPageErrorScanCall(url: string, errorMessage: string): AxeScanResults {
+    function setupPageErrorScanCall(errorMessage: string): AxeScanResults {
         const error = { error: errorMessage, pageResponseCode: 101 };
         pageMock
-            .setup(async (p) => p.scanForA11yIssues(url))
+            .setup(async (p) => p.scanForA11yIssues())
             .returns(async () => Promise.reject(error))
             .verifiable(Times.once());
 
