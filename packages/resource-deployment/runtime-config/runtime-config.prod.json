@@ -19,5 +19,8 @@
     },
     "availabilityTestConfig": {
         "environmentDefinition": "production"
+    },
+    "crawlConfig": {
+        "urlCrawlLimit": 100
     }
 }
