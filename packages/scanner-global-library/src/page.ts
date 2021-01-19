@@ -64,6 +64,14 @@ export class Page {
         }
     }
 
+    public getUnderlyingPage(): Puppeteer.Page | null {
+        if (!isNil(this.lastBrowserError) || isNil(this.navigationResponse) || isNil(this.page)) {
+            return null;
+        }
+
+        return this.page;
+    }
+
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {
         const axePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(this.page, contentSourcePath);
         let axeResults: axe.AxeResults;

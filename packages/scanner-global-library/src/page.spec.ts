@@ -104,13 +104,12 @@ describe(Page, () => {
 
     describe('scanForA11yIssues', () => {
         beforeEach(() => {
-            page.page = puppeteerPageMock.object;
-            page.browser = browserMock.object;
+            simulatePageLaunch();
         });
 
         it('scan page', async () => {
             setupAxePuppeteerFactoryMock();
-            setupPageNavigation(puppeteerResponseMock.object);
+            simulatePageNavigation(puppeteerResponseMock.object);
             const expectedAxeScanResults = {
                 results: axeResults,
                 ...scanResults,
@@ -124,7 +123,7 @@ describe(Page, () => {
 
         it('scan page with navigation error', async () => {
             const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
-            setupPageNavigation(undefined, browserError);
+            simulatePageNavigation(undefined, browserError);
             const expectedAxeScanResults = {
                 error: browserError,
                 pageResponseCode: browserError.statusCode,
@@ -144,7 +143,7 @@ describe(Page, () => {
                 .returns(() => [{}] as Puppeteer.Request[])
                 .verifiable();
             setupPageConfigurator();
-            setupPageNavigation(puppeteerResponseMock.object);
+            simulatePageNavigation(puppeteerResponseMock.object);
             const expectedAxeScanResults = {
                 results: axeResults,
                 scannedUrl: axeResults.url,
@@ -163,17 +162,11 @@ describe(Page, () => {
 
             await expect(page.scanForA11yIssues(url)).rejects.toThrow();
         });
-
-        function setupPageNavigation(response: Puppeteer.Response, browserError?: BrowserError): void {
-            page.navigationResponse = response;
-            page.lastBrowserError = browserError;
-        }
     });
 
     describe('navigateToUrl', () => {
         beforeEach(() => {
-            page.page = puppeteerPageMock.object;
-            page.browser = browserMock.object;
+            simulatePageLaunch();
         });
 
         it('navigates to page and saves response', async () => {
@@ -236,6 +229,33 @@ describe(Page, () => {
         await page.close();
     });
 
+    describe('getUnderlyingPage', () => {
+        it('returns null if page not launched', () => {
+            expect(page.getUnderlyingPage()).toBeNull();
+        });
+
+        it('returns null if no url was navigated to', () => {
+            simulatePageLaunch();
+
+            expect(page.getUnderlyingPage()).toBeNull();
+        });
+
+        it('returns null if there was a browser error', () => {
+            simulatePageLaunch();
+            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            simulatePageNavigation(puppeteerResponseMock.object, browserError);
+
+            expect(page.getUnderlyingPage()).toBeNull();
+        });
+
+        it('returns underlying puppeteer page', () => {
+            simulatePageLaunch();
+            simulatePageNavigation(puppeteerResponseMock.object);
+
+            expect(page.getUnderlyingPage()).toBe(puppeteerPageMock.object);
+        });
+    });
+
     function setupPageConfigurator(): void {
         pageConfiguratorMock
             .setup((o) => o.getBrowserResolution())
@@ -250,5 +270,15 @@ describe(Page, () => {
             .setup((o) => o.pageConfigurator)
             .returns(() => pageConfiguratorMock.object)
             .verifiable(Times.atLeastOnce());
+    }
+
+    function simulatePageNavigation(response: Puppeteer.Response, browserError?: BrowserError): void {
+        page.navigationResponse = response;
+        page.lastBrowserError = browserError;
+    }
+
+    function simulatePageLaunch(): void {
+        page.browser = browserMock.object;
+        page.page = puppeteerPageMock.object;
     }
 });
