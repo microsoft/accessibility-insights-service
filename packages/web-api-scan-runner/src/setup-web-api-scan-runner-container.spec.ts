@@ -4,18 +4,18 @@ import 'reflect-metadata';
 
 import { ServiceConfiguration } from 'common';
 import { Runner } from './runner/runner';
-import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';
+import { setupWebApiScanRunnerContainer } from './setup-web-api-scan-runner-container';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-describe(setupWebApiScanRequestSenderContainer, () => {
+describe(setupWebApiScanRunnerContainer, () => {
     it('resolves runner dependencies', () => {
-        const container = setupWebApiScanRequestSenderContainer();
+        const container = setupWebApiScanRunnerContainer();
 
         expect(container.get(Runner)).toBeDefined();
     });
 
     it('resolves singleton dependencies', () => {
-        const container = setupWebApiScanRequestSenderContainer();
+        const container = setupWebApiScanRunnerContainer();
 
         const serviceConfig = container.get(ServiceConfiguration);
 
