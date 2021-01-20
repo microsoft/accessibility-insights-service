@@ -14,82 +14,84 @@ exitWithUsageInfo() {
     exit 1
 }
 
+tryDeleteResources() {
+    for resource in "${resourcesToDelete[@]}"; do
+        echo "Deleting resource $resource"
+        az resource delete --ids "$resource" --verbose || continue
+    done
+}
+
+getResourcesToDelete() {
+    ids=$(az resource list --resource-group "$resourceGroupName" --query "[].id" -o tsv)
+
+    resourcesToDelete=()
+
+    echo "Resources to delete on next pass:"
+    # if id contains blanks then the for loop will split the line; using while read instead
+    while read -r id; do
+        # skip deleting API Management because Azure will silently soft-delete the resource
+        # see https://docs.microsoft.com/en-us/azure/api-management/soft-delete
+        # az cli does not support soft-delete feature yet
+        # hence we unable to purge the resource
+        if [[ -n "$apiManagementName" ]] && [[ $id == *"apim-a11y"* ]]; then
+            continue
+        fi
+
+        echo "  $id"
+        resourcesToDelete+=($id)
+    done <<<"$ids"
+}
+
+deleteResources() {
+    local deleteTimeout=1200
+    local end=$((SECONDS + $deleteTimeout))
+
+    getResourcesToDelete
+    while [ ${#resourcesToDelete[@]} -gt 0 ] && [ $SECONDS -le $end ]; do
+        tryDeleteResources
+        getResourcesToDelete
+    done
+
+    if [[ ${#resourcesToDelete[@]} -eq 0 ]]; then
+        echo "Resource group $resourceGroupName contains no resources to delete"
+    elif [[ $SECONDS -ge $end ]]; then
+        echo "Timeout while deleting resources from resource group $resourceGroupName"
+        exit 1
+    else
+        echo "Error deleting resources from resource group $resourceGroupName"
+        exit 1
+    fi
+}
+
 deleteResourceGroup() {
     local resourceGroupName=$1
     local response
 
     response=$(az group exists --name "$resourceGroupName")
-
     if [[ "$response" == true ]]; then
         echo "Resource group $resourceGroupName exists."
 
         . "${0%/*}/get-resource-names.sh"
 
-        deleteApimIfExists
-
-        echo "Triggering delete operation on resource group $resourceGroupName"
-
-        response=$(az group delete --name "$resourceGroupName" --yes)
-        if [[ -z $response ]]; then
-            echo "$resourceGroupName - Resource group deleted."
-        else
-            echo "Unable to delete resource group $resourceGroupName. Response - $response"
-            exit 1
-        fi
+        echo "Deleting resources from resource group $resourceGroupName"
+        deleteResources
 
         if [[ "$purgeKeyVault" == true ]]; then
-            purgeKeyvaultIfSoftDeleted
+            purgeKeyVaultIfSoftDeleted
         else
             echo "Keyvault $keyVault was not purged and will be recoverable for 90 days."
         fi
     else
-        echo "$resourceGroupName - Does not exist."
+        echo "Resource group $resourceGroupName does not exist."
     fi
 }
 
-deleteApimIfExists() {
-    if [[ -z "$apiManagementName" ]]; then
-        return
-    fi
+purgeKeyVaultIfSoftDeleted() {
+    local response
 
-    apimExistsCommand="az apim list --resource-group $resourceGroupName --query \"[?name=='$apiManagementName']\" -o tsv"
-    apimExists=$(eval "$apimExistsCommand")
-
-    if [[ -n "$apimExists" ]]; then
-        echo "Deleting API Management $apiManagementName..."
-        az apim delete --name $apiManagementName --resource-group $resourceGroupName --yes || true
-
-        # Wait for APIM to delete
-        local waiting=false
-        local deleteTimeout=1200
-        local end=$((SECONDS + $deleteTimeout))
-        apimExists=$(eval "$apimExistsCommand")
-        while [[ -n "$apimExists" ]] && [ $SECONDS -le $end ]; do
-            if [[ $waiting != true ]]; then
-                waiting=true
-                echo "Waiting for $apiManagementName to delete"
-                printf " - Running .."
-            fi
-
-            sleep 5
-            printf "."
-            apimExists=$(eval "$apimExistsCommand")
-        done
-
-        if [[ -n "$apimExists" ]]; then
-            echo "Unable to delete API Management instance $apiManagementName within $deleteTimeout seconds"
-            exit 1
-        fi
-
-        echo "$apiManagementName successfully deleted"
-    fi
-}
-
-purgeKeyvaultIfSoftDeleted() {
     response=$(az keyvault list-deleted --resource-type vault --query "[?name=='$keyVault'].id" -o tsv)
-
     if [[ -n "$response" ]]; then
-        echo "Purging keyvault $keyVault..."
+        echo "Purging keyvault $keyVault"
         az keyvault purge --name "$keyVault" || true
     fi
 }
