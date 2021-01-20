@@ -252,10 +252,10 @@
     events "^3.0.0"
     tslib "^2.0.0"
 
-"@azure/storage-queue@^12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.2.0.tgz#0c82a0531d82358ee57754c21e1a1fce4ae5e408"
-  integrity sha512-HxFMLs6f0VQ4q1pyj4BKpdgH2amwvSwcNh+SFFcOmVuu6PpjTgP1HLiVPAf982iZlLEAEwNjzwnw2XrLbDumMA==
+"@azure/storage-queue@^12.3.0":
+  version "12.3.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.3.0.tgz#3ac56704e55875011eb8e1ef78f5b129daccd10b"
+  integrity sha512-woEOFTJ+GYcLT0QUkPOBgeGHexhjOcsCtHGo9ZQLOpWhnrVP6x0KAVBS+f0VMbKYfn91ACtq0Qq88f8Fc3Lrjw==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^1.2.0"
@@ -5619,16 +5619,16 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-durable-functions@^1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.4.tgz#9bb2015439123029bf748781e75c97c75fc8f70b"
-  integrity sha512-Ys1lAuESU8Oz+GIMvS1GzWZkwQCQRMPOJVYmPPTQ5k3eoHeOVvoNLuChY91iAp++18k/yZtpbhLo9DwGU0+4/A==
+durable-functions@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.5.tgz#6feda57f92b02bd5de266e0ac1faf622e35af4c6"
+  integrity sha512-r4CSE5F4Tmn4hn1SXt1eG7yBVX7vugefvxRtpEl5UpMt+sAHFdLfufOQ3IfbN2EFGvEEaT/D38h6yX/GYCdRbg==
   dependencies:
     "@azure/functions" "^1.0.2-beta2"
     "@types/lodash" "^4.14.119"
     "@types/uuid" "~3.4.4"
     "@types/validator" "^9.4.3"
-    axios "^0.19.0"
+    axios "^0.21.1"
     commander "~2.9.0"
     debug "~2.6.9"
     lodash "^4.17.15"
