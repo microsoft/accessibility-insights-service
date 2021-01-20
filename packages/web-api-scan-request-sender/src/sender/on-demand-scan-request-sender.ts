@@ -84,6 +84,7 @@ export class OnDemandScanRequestSender {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
+            deepScan: scanRequest.deepScan,
         };
     }
 }
