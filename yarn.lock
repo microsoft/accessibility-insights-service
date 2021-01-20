@@ -118,10 +118,10 @@
     "@opentelemetry/api" "^0.10.2"
     tslib "^2.0.0"
 
-"@azure/cosmos@^3.9.3":
-  version "3.9.3"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.9.3.tgz#7e95ff92e5c3e9da7e8316bc50c9cc928be6c1d6"
-  integrity sha512-1mh8a6LAIykz24tJvQpafXiABUfq+HSAZBFJVZXea0Rd0qG8Ia9z8AK9FtPbC1nPvDC2RID2mRIjJvYbxRM/BA==
+"@azure/cosmos@^3.9.5":
+  version "3.9.5"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.9.5.tgz#1868b85758db54ae1938ece29fd25ffbe5bcc17c"
+  integrity sha512-4SjJFs9BvUX7bkU1Le/OkDIIG9ojcnSs8rZfa5V9MI9yreMOPgW7QMF0QlqecYERpueHH8zuWeBT7dwd8/U7xA==
   dependencies:
     "@types/debug" "^4.1.4"
     debug "^4.1.1"
@@ -3635,9 +3635,9 @@ apify-client@^0.6.0:
     underscore "^1.9.1"
 
 apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.6.tgz#77e674e651ac8930a53f25fe4054acdccefb7666"
-  integrity sha512-cz1ZgV+D5SWBt4r2e+QgxclAiSnhvlhOVjDeufscpDwr224dUVyRLb3gUVOV64ioPRf6ikcOex9dgng0AGxl1g==
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.7.tgz#fe35c6587a2e8f8f602124115ed9031b08d5c081"
+  integrity sha512-8azrrOsJt5d0ZtnWKzf4kUXYOP9VPCE+pEi5HrPXPEcH1WAmuDR5UCATlG9RFzNP5JyJUtIeZsOuk33dvSHQZg==
   dependencies:
     axios "^0.21.0"
     chalk "^4.0.0"
