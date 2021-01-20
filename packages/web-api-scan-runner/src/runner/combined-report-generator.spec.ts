@@ -1,11 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
 import { PageScanRunReportProvider } from 'service-library';
-import { CombinedScanResults, WebsiteScanReport, WebsiteScanResult } from 'storage-documents';
+import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { MockableLogger } from '../test-utilities/mockable-logger';
