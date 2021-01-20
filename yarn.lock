@@ -3926,7 +3926,7 @@ axe-sarif-converter@^2.6.0:
     axe-core "^3.2.2 || ^4.0.0"
     yargs "^16.0.3"
 
-axios@>=0.21.1, axios@^0.19.0, axios@^0.21.0:
+axios@>=0.21.1, axios@^0.21.0, axios@^0.21.1:
   version "0.21.1"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
   integrity sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA==
@@ -5599,16 +5599,16 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-durable-functions@^1.4.4:
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.4.tgz#9bb2015439123029bf748781e75c97c75fc8f70b"
-  integrity sha512-Ys1lAuESU8Oz+GIMvS1GzWZkwQCQRMPOJVYmPPTQ5k3eoHeOVvoNLuChY91iAp++18k/yZtpbhLo9DwGU0+4/A==
+durable-functions@^1.4.5:
+  version "1.4.5"
+  resolved "https://registry.yarnpkg.com/durable-functions/-/durable-functions-1.4.5.tgz#6feda57f92b02bd5de266e0ac1faf622e35af4c6"
+  integrity sha512-r4CSE5F4Tmn4hn1SXt1eG7yBVX7vugefvxRtpEl5UpMt+sAHFdLfufOQ3IfbN2EFGvEEaT/D38h6yX/GYCdRbg==
   dependencies:
     "@azure/functions" "^1.0.2-beta2"
     "@types/lodash" "^4.14.119"
     "@types/uuid" "~3.4.4"
     "@types/validator" "^9.4.3"
-    axios "^0.19.0"
+    axios "^0.21.1"
     commander "~2.9.0"
     debug "~2.6.9"
     lodash "^4.17.15"
