@@ -38,7 +38,7 @@ getResourcesToDelete() {
         fi
 
         echo "  $id"
-        resourcesToDelete+=($id)
+        resourcesToDelete+=("$id")
     done <<<"$ids"
 }
 
