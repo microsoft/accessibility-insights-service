@@ -5,11 +5,11 @@ import 'reflect-metadata';
 import './module-name-mapper';
 
 import { System } from 'common';
-import { setupWebApiScanRequestSenderContainer } from './setup-web-api-scan-runner-container';
+import { setupWebApiScanRunnerContainer } from './setup-web-api-scan-runner-container';
 import { WebApiScanRunnerEntryPoint } from './web-api-scan-runner-entry-point';
 
 (async () => {
-    await new WebApiScanRunnerEntryPoint(setupWebApiScanRequestSenderContainer()).start();
+    await new WebApiScanRunnerEntryPoint(setupWebApiScanRunnerContainer()).start();
 })().catch((error) => {
     console.log(System.serializeError(error));
     process.exitCode = 1;

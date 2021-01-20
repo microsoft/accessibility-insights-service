@@ -7,7 +7,7 @@ import { registerLoggerToContainer } from 'logger';
 import { registerScannerToContainer } from 'scanner-global-library';
 import { registerReportGeneratorToContainer } from './report-generator/register-report-generator-to-container';
 
-export function setupWebApiScanRequestSenderContainer(): inversify.Container {
+export function setupWebApiScanRunnerContainer(): inversify.Container {
     const container = new inversify.Container({ autoBindInjectable: true });
     setupRuntimeConfigContainer(container);
     registerLoggerToContainer(container);
