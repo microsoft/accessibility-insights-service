@@ -232,10 +232,10 @@
     events "^3.0.0"
     tslib "^2.0.0"
 
-"@azure/storage-queue@^12.2.0":
-  version "12.2.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.2.0.tgz#0c82a0531d82358ee57754c21e1a1fce4ae5e408"
-  integrity sha512-HxFMLs6f0VQ4q1pyj4BKpdgH2amwvSwcNh+SFFcOmVuu6PpjTgP1HLiVPAf982iZlLEAEwNjzwnw2XrLbDumMA==
+"@azure/storage-queue@^12.3.0":
+  version "12.3.0"
+  resolved "https://registry.yarnpkg.com/@azure/storage-queue/-/storage-queue-12.3.0.tgz#3ac56704e55875011eb8e1ef78f5b129daccd10b"
+  integrity sha512-woEOFTJ+GYcLT0QUkPOBgeGHexhjOcsCtHGo9ZQLOpWhnrVP6x0KAVBS+f0VMbKYfn91ACtq0Qq88f8Fc3Lrjw==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^1.2.0"
@@ -3635,9 +3635,9 @@ apify-client@^0.6.0:
     underscore "^1.9.1"
 
 apify-shared@>=0.5.0, apify-shared@^0.1.45, apify-shared@^0.4.0, apify-shared@^0.5.0:
-  version "0.5.6"
-  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.6.tgz#77e674e651ac8930a53f25fe4054acdccefb7666"
-  integrity sha512-cz1ZgV+D5SWBt4r2e+QgxclAiSnhvlhOVjDeufscpDwr224dUVyRLb3gUVOV64ioPRf6ikcOex9dgng0AGxl1g==
+  version "0.5.7"
+  resolved "https://registry.yarnpkg.com/apify-shared/-/apify-shared-0.5.7.tgz#fe35c6587a2e8f8f602124115ed9031b08d5c081"
+  integrity sha512-8azrrOsJt5d0ZtnWKzf4kUXYOP9VPCE+pEi5HrPXPEcH1WAmuDR5UCATlG9RFzNP5JyJUtIeZsOuk33dvSHQZg==
   dependencies:
     axios "^0.21.0"
     chalk "^4.0.0"
