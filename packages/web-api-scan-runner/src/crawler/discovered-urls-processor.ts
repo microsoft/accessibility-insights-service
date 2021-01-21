@@ -16,7 +16,7 @@ export class DiscoveredUrlsProcessor {
             return [];
         }
 
-        if (!isNil(websiteScanResult) && !isNil(websiteScanResult.knownPages)) {
+        if (!isNil(websiteScanResult?.knownPages)) {
             processedUrls = this.removeUrlsFromList(discoveredUrls, websiteScanResult.knownPages);
         }
         processedUrls = this.limitNumUrls(processedUrls, await this.getUrlLimit(websiteScanResult));
