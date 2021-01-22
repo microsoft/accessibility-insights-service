@@ -41,7 +41,7 @@ describe(ScanMetadataConfig, () => {
         beforeEach(() => {
             testSubject = new ScanMetadataConfig();
             Object.keys(args).forEach((varName: keyof ScanMetadata) => {
-                process.env[varName] = args[varName];
+                process.env[varName] = `${args[varName]}`;
             });
         });
 

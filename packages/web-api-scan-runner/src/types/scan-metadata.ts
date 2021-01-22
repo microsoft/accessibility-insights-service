@@ -3,4 +3,5 @@
 export interface ScanMetadata {
     id: string;
     url: string;
+    deepScan?: boolean;
 }

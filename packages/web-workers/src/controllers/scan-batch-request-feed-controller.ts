@@ -190,6 +190,7 @@ export class ScanBatchRequestFeedController extends WebController {
                 id: request.scanId,
                 url: request.url,
                 priority: request.priority,
+                deepScan: request.deepScan,
                 itemType: ItemType.onDemandPageScanRequest,
                 partitionKey: PartitionKey.pageScanRequestDocuments,
                 ...scanNotifyUrl,

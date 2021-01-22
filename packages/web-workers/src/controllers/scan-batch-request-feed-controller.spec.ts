@@ -279,6 +279,7 @@ function setupPageScanRequestProviderMock(documents: OnDemandPageScanBatchReques
                     priority: scanRequest.priority,
                     itemType: ItemType.onDemandPageScanRequest,
                     partitionKey: PartitionKey.pageScanRequestDocuments,
+                    deepScan: scanRequest.deepScan,
                 };
 
                 if (!isNil(scanRequest.scanNotifyUrl)) {
