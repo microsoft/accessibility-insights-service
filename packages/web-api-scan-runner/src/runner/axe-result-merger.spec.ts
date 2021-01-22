@@ -5,7 +5,6 @@ import axe, { AxeResults } from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { cloneDeep } from 'lodash';
 import { CombinedScanResultsProvider, CombinedScanResultsReadResponse, CombinedScanResultsWriteResponse } from 'service-library';
-import { CombinedScanResultsError, WriteErrorCode } from 'service-library/dist/data-providers/combined-scan-results-provider';
 import { CombinedScanResults } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -162,7 +161,7 @@ describe(AxeResultMerger, () => {
             setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
             combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {
-                error: {} as CombinedScanResultsError<WriteErrorCode>,
+                error: {} as any,
             });
 
             await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobId)).rejects.toThrowError(
@@ -176,13 +175,13 @@ describe(AxeResultMerger, () => {
         expectedETag: string,
         expectedCombinedResultsBlobId: string,
         responseStub: CombinedScanResultsWriteResponse,
-    ) {
+    ): void {
         combinedScanResultsProviderMock
             .setup((m) => m.writeCombinedResults(expectedCombinedResultsBlobId, It.isValue(expectedCombinedResults), expectedETag))
             .returns(() => Promise.resolve(responseStub));
     }
 
-    function setupBlobRead(expectedCombinedResultsBlobId: string, response: CombinedScanResultsReadResponse) {
+    function setupBlobRead(expectedCombinedResultsBlobId: string, response: CombinedScanResultsReadResponse): void {
         combinedScanResultsProviderMock
             .setup((m) => m.readCombinedResults(expectedCombinedResultsBlobId))
             .returns(() => Promise.resolve(response));
