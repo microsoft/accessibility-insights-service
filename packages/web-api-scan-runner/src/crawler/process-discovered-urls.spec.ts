@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { WebsiteScanResult } from 'storage-documents';
-import { processDiscoveredUrls } from './discovered-urls-processor';
+import { processDiscoveredUrls } from './process-discovered-urls';
 
 describe(processDiscoveredUrls, () => {
     const urlsList = ['url1', 'url2', 'url3', 'url4'];
