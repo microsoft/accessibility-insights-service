@@ -2,9 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { CrawlConfig, ServiceConfiguration } from 'common';
 import { WebsiteScanResult } from 'storage-documents';
-import { IMock, Mock } from 'typemoq';
 import { DiscoveredUrlsProcessor } from './discovered-urls-processor';
 
 describe(DiscoveredUrlsProcessor, () => {
@@ -14,70 +12,55 @@ describe(DiscoveredUrlsProcessor, () => {
     const websiteScanResultStub = {
         knownPages: knownUrls,
     } as WebsiteScanResult;
-    let serviceConfigMock: IMock<ServiceConfiguration>;
 
     let testSubject: DiscoveredUrlsProcessor;
 
     beforeEach(() => {
-        serviceConfigMock = Mock.ofType<ServiceConfiguration>();
-
-        testSubject = new DiscoveredUrlsProcessor(serviceConfigMock.object);
+        testSubject = new DiscoveredUrlsProcessor();
     });
 
-    it('filters out known urls', async () => {
-        setupUrlLimit(maxUrlsLimit);
+    it('filters out known urls', () => {
         const expectedUrls = ['url3', 'url4'];
 
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, websiteScanResultStub);
+        const processedUrls = testSubject.getProcessedUrls(urlsList, maxUrlsLimit, websiteScanResultStub);
 
         expect(processedUrls).toEqual(expectedUrls);
     });
 
-    it('limits the number of urls according to config and count of knownUrls', async () => {
-        setupUrlLimit(3);
+    it('limits the number of urls according to config and count of knownUrls', () => {
+        const urlCrawlLimit = 3;
 
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, { knownPages: ['some url'] } as WebsiteScanResult);
+        const processedUrls = testSubject.getProcessedUrls(urlsList, urlCrawlLimit, { knownPages: ['some url'] } as WebsiteScanResult);
 
         expect(processedUrls.length).toBe(2);
     });
 
-    it('filters and applies limit in correct order', async () => {
-        setupUrlLimit(knownUrls.length + 1);
+    it('filters and applies limit in correct order', () => {
+        const urlCrawlLimit = knownUrls.length + 1;
 
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, websiteScanResultStub);
+        const processedUrls = testSubject.getProcessedUrls(urlsList, urlCrawlLimit, websiteScanResultStub);
 
         expect(processedUrls.length).toBe(1);
         expect(knownUrls).not.toContain(processedUrls[0]);
     });
 
-    it('handles missing websiteScanResults', async () => {
-        setupUrlLimit(maxUrlsLimit);
-
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, null);
+    it('handles missing websiteScanResults', () => {
+        const processedUrls = testSubject.getProcessedUrls(urlsList, maxUrlsLimit, null);
 
         expect(processedUrls).toEqual(urlsList);
     });
 
-    it('handles missing knownPages', async () => {
-        setupUrlLimit(maxUrlsLimit);
-
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, {} as WebsiteScanResult);
+    it('handles missing knownPages', () => {
+        const processedUrls = testSubject.getProcessedUrls(urlsList, maxUrlsLimit, {} as WebsiteScanResult);
 
         expect(processedUrls).toEqual(urlsList);
     });
 
-    it('handles knownUrls.length > urlCrawlLimit', async () => {
-        setupUrlLimit(knownUrls.length - 1);
+    it('handles knownUrls.length > urlCrawlLimit', () => {
+        const urlCrawlLimit = knownUrls.length - 1;
 
-        const processedUrls = await testSubject.getProcessedUrls(urlsList, websiteScanResultStub);
+        const processedUrls = testSubject.getProcessedUrls(urlsList, urlCrawlLimit, websiteScanResultStub);
 
         expect(processedUrls.length).toBe(0);
     });
-
-    function setupUrlLimit(limit: number): void {
-        const crawlConfig: CrawlConfig = {
-            urlCrawlLimit: limit,
-        };
-        serviceConfigMock.setup((sc) => sc.getConfigValue('crawlConfig')).returns(async () => Promise.resolve(crawlConfig));
-    }
 });
