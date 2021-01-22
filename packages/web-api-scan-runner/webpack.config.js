@@ -11,7 +11,7 @@ module.exports = (env) => {
 
     return {
         devtool: 'cheap-source-map',
-        externals: ['puppeteer', 'yargs', 'axe-core', '@axe-core/puppeteer', 'applicationinsights', 'accessibility-insights-report'],
+        externals: ['puppeteer', 'yargs', 'axe-core', '@axe-core/puppeteer', 'applicationinsights', 'accessibility-insights-report', 'apify'],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
         },

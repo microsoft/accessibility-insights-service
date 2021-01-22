@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { Container } from 'inversify';
+import { interfaces } from 'inversify';
 import { CrawlerEngine } from './crawler/crawler-engine';
 import { registerCrawlerRunOptions } from './setup-crawler-container';
 import { CrawlerRunOptions } from './types/crawler-run-options';
 import { iocTypes } from './types/ioc-types';
 
 export class Crawler<T> {
-    constructor(private readonly container: Container) {}
+    constructor(private readonly container: interfaces.Container) {}
 
     public async crawl(crawlerRunOptions: CrawlerRunOptions): Promise<T> {
         registerCrawlerRunOptions(this.container, crawlerRunOptions);

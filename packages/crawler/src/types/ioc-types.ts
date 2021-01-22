@@ -13,6 +13,7 @@ export const iocTypes = {
     LevelUp: 'levelup.LevelUp',
     CrawlerEngine: 'CrawlerEngine',
     RequestProcessor: 'RequestProcessor',
+    CrawlerProvider: 'CrawlerProvider',
 };
 
 export type PageProcessorFactory = () => PageProcessorBase;
