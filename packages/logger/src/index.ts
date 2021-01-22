@@ -20,3 +20,4 @@ export {
 export { AvailabilityTelemetry } from './availability-telemetry';
 export { LoggerProperties } from './logger-properties';
 export { ConsoleLoggerClient } from './console-logger-client';
+export { LoggerEvent } from './logger-event';
