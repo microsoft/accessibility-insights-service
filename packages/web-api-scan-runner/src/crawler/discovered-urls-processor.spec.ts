@@ -72,7 +72,7 @@ describe(DiscoveredUrlsProcessor, () => {
         const processedUrls = await testSubject.getProcessedUrls(urlsList, websiteScanResultStub);
 
         expect(processedUrls.length).toBe(0);
-    })
+    });
 
     function setupUrlLimit(limit: number): void {
         const crawlConfig: CrawlConfig = {
