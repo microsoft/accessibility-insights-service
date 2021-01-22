@@ -59,27 +59,11 @@ export class Runner {
         this.logger.setCommonProperties({ scanId: scanMetadata.id, url: scanMetadata.url });
         this.logger.logInfo('Starting page scan task.');
 
-        this.logger.logInfo(`Updating page scan run state to 'running'.`);
-        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
-            id: scanMetadata.id,
-            run: {
-                state: 'running',
-                timestamp: new Date().toJSON(),
-                error: null,
-            },
-            scanResult: null,
-            reports: null,
-        };
-        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
-        if (!response.succeeded) {
-            this.logger.logInfo(
-                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
-            );
-
+        const pageScanResult = await this.updateScanRunState(scanMetadata.id);
+        if (pageScanResult === undefined) {
             return;
         }
 
-        const pageScanResult = response.result;
         const scanStartedTimestamp: number = Date.now();
         const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
 
@@ -269,6 +253,30 @@ export class Runner {
                 } Error: ${System.serializeError(error)}`,
             );
         }
+    }
+
+    private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
+        this.logger.logInfo(`Updating page scan run state to 'running'.`);
+        const partialPageScanResult: Partial<OnDemandPageScanResult> = {
+            id: scanId,
+            run: {
+                state: 'running',
+                timestamp: new Date().toJSON(),
+                error: null,
+            },
+            scanResult: null,
+            reports: null,
+        };
+        const response = await this.onDemandPageScanRunResultProvider.tryUpdateScanRun(partialPageScanResult);
+        if (!response.succeeded) {
+            this.logger.logWarn(
+                `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
+            );
+
+            return undefined;
+        }
+
+        return response.result;
     }
 
     private async getOrCreateCombinedResultsBlob(combinedResultsBlobId: string | undefined): Promise<CombinedScanResultsReadResponse> {

@@ -38,12 +38,9 @@ export class Worker extends BatchTaskCreator {
         await this.writePoolLoadSnapshot(poolLoadSnapshot);
 
         let messages: ScanMessage[] = [];
+        const queueName = this.getQueueName();
         if (poolLoadSnapshot.tasksIncrementCountPerInterval > 0) {
-            const queueMessages = await this.queue.getMessagesWithTotalCount(
-                this.getQueueName(),
-                poolLoadSnapshot.tasksIncrementCountPerInterval,
-            );
-
+            const queueMessages = await this.queue.getMessagesWithTotalCount(queueName, poolLoadSnapshot.tasksIncrementCountPerInterval);
             if (queueMessages?.length > 0) {
                 messages = this.convertToScanMessages(queueMessages);
                 messages = await this.excludeCompletedScans(messages);

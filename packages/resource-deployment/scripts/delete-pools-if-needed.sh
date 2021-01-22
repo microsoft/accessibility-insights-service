@@ -13,7 +13,7 @@ export pools
 
 kernelName=$(uname -s 2>/dev/null) || true
 areVmssOld=false
-recycleVmssIntervalDays=10
+recycleVmssIntervalDays=5
 
 exitWithUsageInfo() {
     echo "

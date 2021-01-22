@@ -73,8 +73,8 @@
     },
     "resources": [
         {
-            "apiVersion": "2016-03-01",
             "type": "Microsoft.Web/sites",
+            "apiVersion": "2020-06-01",
             "name": "[parameters('name')]",
             "location": "[parameters('location')]",
             "kind": "functionapp",
