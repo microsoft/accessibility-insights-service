@@ -3,11 +3,12 @@
 
 import axe from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
 import { CombinedScanResults } from 'storage-documents';
 
+@injectable()
 export class AxeResultMerger {
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
