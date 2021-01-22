@@ -2,11 +2,12 @@
 // Licensed under the MIT License.
 
 import { GuidGenerator } from 'common';
-import { inject } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 
+@injectable()
 export class CombinedReportGenerator {
     public constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
