@@ -4,10 +4,10 @@
 import 'reflect-metadata';
 import { PageScanRunReportProvider } from 'service-library';
 import { IMock, Mock, MockBehavior } from 'typemoq';
-import { MockableLogger } from '../test-utilities/mockable-logger';
-import { ReportSaver } from './report-saver';
-import { GeneratedReport } from '../report-generator/report-generator';
 import { OnDemandPageScanReport } from 'storage-documents';
+import { MockableLogger } from '../test-utilities/mockable-logger';
+import { GeneratedReport } from '../report-generator/report-generator';
+import { ReportSaver } from './report-saver';
 
 describe(ReportSaver, () => {
     let loggerMock: IMock<MockableLogger>;
