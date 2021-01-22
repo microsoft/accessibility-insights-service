@@ -4,8 +4,7 @@
 import { GuidGenerator } from 'common';
 import { inject } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { PageScanRunReportProvider } from 'service-library';
-import { CombinedScanResults, OnDemandPageScanReport, WebsiteScanResult } from 'storage-documents';
+import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 
 export class CombinedReportGenerator {
@@ -13,15 +12,14 @@ export class CombinedReportGenerator {
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
     ) {}
 
-    public async generate(
+    public generate(
         combinedAxeResults: CombinedScanResults,
         websiteScanResult: WebsiteScanResult,
         userAgent: string,
         browserResolution: string,
-    ): Promise<OnDemandPageScanReport> {
+    ): GeneratedReport {
         let reportId: string;
         if (websiteScanResult.reports) {
             reportId = websiteScanResult.reports.find((ref) => ref.format === 'consolidated.html')?.reportId;
@@ -39,17 +37,6 @@ export class CombinedReportGenerator {
             scanStarted,
         });
 
-        return this.saveScanReport(report);
-    }
-
-    private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
-        const href = await this.pageScanRunReportProvider.saveReport(report.id, report.content);
-        this.logger.logInfo(`The '${report.format}' report saved to a blob storage.`, { reportId: report.id, blobUrl: href });
-
-        return {
-            format: report.format,
-            href,
-            reportId: report.id,
-        };
+        return report;
     }
 }

@@ -1,21 +1,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
+
 import { GuidGenerator } from 'common';
 import { AxeScanResults } from 'scanner-global-library';
-import { PageScanRunReportProvider } from 'service-library';
 import { CombinedScanResults, WebsiteScanResult } from 'storage-documents';
-import { IMock, Mock, MockBehavior } from 'typemoq';
+import { IMock, Mock } from 'typemoq';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { CombinedReportGenerator } from './combined-report-generator';
 
 describe(CombinedReportGenerator, () => {
     let loggerMock: IMock<MockableLogger>;
-    let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let reportGeneratorMock: IMock<ReportGenerator>;
-
     let scanStarted: Date;
     let websiteScanResult: WebsiteScanResult;
     let combinedScanResults: CombinedScanResults;
@@ -33,7 +31,6 @@ describe(CombinedReportGenerator, () => {
         scanStarted = new Date(2020, 11, 12);
         loggerMock = Mock.ofType(MockableLogger);
         guidGeneratorMock = Mock.ofType(GuidGenerator);
-        pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
 
         websiteScanResult = {
@@ -57,22 +54,16 @@ describe(CombinedReportGenerator, () => {
 
         hrefStub = 'href-stub';
 
-        testSubject = new CombinedReportGenerator(
-            guidGeneratorMock.object,
-            loggerMock.object,
-            reportGeneratorMock.object,
-            pageScanRunReportProviderMock.object,
-        );
+        testSubject = new CombinedReportGenerator(guidGeneratorMock.object, loggerMock.object, reportGeneratorMock.object);
     });
 
     afterEach(() => {
         guidGeneratorMock.verifyAll();
         loggerMock.verifyAll();
-        pageScanRunReportProviderMock.verifyAll();
         reportGeneratorMock.verifyAll();
     });
 
-    it('generate combined scan report with existing combined result', async () => {
+    it('generate combined scan report with existing combined result', () => {
         const reportId = 'existing-report-id';
         websiteScanResult.reports = [
             {
@@ -82,10 +73,9 @@ describe(CombinedReportGenerator, () => {
             },
         ];
 
-        setupSaveReportCall(generatedReportStub, hrefStub);
         setupGetConsolidatedReportCall(reportId);
 
-        await testSubject.generate(
+        testSubject.generate(
             combinedScanResults,
             websiteScanResult,
             passedAxeScanResults.userAgent,
@@ -93,14 +83,13 @@ describe(CombinedReportGenerator, () => {
         );
     });
 
-    it('generate combined scan report with non-existing combined result', async () => {
+    it('generate combined scan report with non-existing combined result', () => {
         const reportId = 'new-report-id';
 
         guidGeneratorMock.setup((mock) => mock.createGuid()).returns(() => reportId);
-        setupSaveReportCall(generatedReportStub, hrefStub);
         setupGetConsolidatedReportCall(reportId);
 
-        await testSubject.generate(
+        testSubject.generate(
             combinedScanResults,
             websiteScanResult,
             passedAxeScanResults.userAgent,
@@ -108,15 +97,14 @@ describe(CombinedReportGenerator, () => {
         );
     });
 
-    it('generate combined scan report with combined result without reports', async () => {
+    it('generate combined scan report with combined result without reports', () => {
         const reportId = 'new-report-id';
         websiteScanResult.reports = [];
 
         guidGeneratorMock.setup((mock) => mock.createGuid()).returns(() => reportId);
-        setupSaveReportCall(generatedReportStub, hrefStub);
         setupGetConsolidatedReportCall(reportId);
 
-        await testSubject.generate(
+        testSubject.generate(
             combinedScanResults,
             websiteScanResult,
             passedAxeScanResults.userAgent,
@@ -136,12 +124,5 @@ describe(CombinedReportGenerator, () => {
                 }),
             )
             .returns(() => generatedReportStub);
-    }
-
-    function setupSaveReportCall(report: GeneratedReport, href: string): void {
-        pageScanRunReportProviderMock
-            .setup(async (s) => s.saveReport(report.id, report.content))
-            .returns(async () => Promise.resolve(href))
-            .verifiable();
     }
 });
