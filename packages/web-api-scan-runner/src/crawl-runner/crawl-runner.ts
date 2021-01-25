@@ -40,8 +40,7 @@ export class CrawlRunner {
         try {
             retVal = await crawler.crawl(crawlerRunOptions);
         } catch (ex) {
-            this.logger.logError('Exception thrown during crawl');
-            this.logger.logInfo(ex);
+            this.logger.logError('Failure while crawling web page', { error: JSON.stringify(ex) });
 
             return undefined;
         }
