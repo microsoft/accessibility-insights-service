@@ -6,7 +6,6 @@ import { inject, injectable } from 'inversify';
 import { Crawler, iocTypes as crawlerIocTypes, SimpleCrawlerRunOptions } from 'accessibility-insights-crawler';
 import { Page } from 'puppeteer';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { System } from 'common';
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
 @injectable()
