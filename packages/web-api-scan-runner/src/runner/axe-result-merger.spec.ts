@@ -9,6 +9,7 @@ import { CombinedScanResults } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { AxeResultMerger } from './axe-result-merger';
+import { CombinedResultsBlobInfo } from './combined-results-blob-getter';
 
 describe(AxeResultMerger, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
@@ -21,6 +22,7 @@ describe(AxeResultMerger, () => {
     let axeResults: AxeResults;
     let combinedResultsBlobId: string;
     let blobReadETagStub: string;
+    let combinedResultsBlobInfoStub: CombinedResultsBlobInfo;
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
@@ -45,126 +47,55 @@ describe(AxeResultMerger, () => {
             axeResults: {},
         } as CombinedScanResults;
         blobReadETagStub = 'some-e-tag';
+        combinedScanResultsBlobRead = {
+            results: combinedScanResults,
+            etag: blobReadETagStub,
+        } as CombinedScanResultsReadResponse;
+        combinedResultsBlobInfoStub = {
+            blobId: combinedResultsBlobId,
+            response: combinedScanResultsBlobRead,
+        };
 
         testSubject = new AxeResultMerger(loggerMock.object, combinedScanResultsProviderMock.object, axeResultsReducerMock.object);
     });
 
     describe('Success', () => {
         test('generate combined scan results with no new violations', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults },
-                etag: blobReadETagStub,
-            } as CombinedScanResultsReadResponse;
-
             const expectedCombinedScanResults = cloneDeep(combinedScanResults);
             expectedCombinedScanResults.urlCount.passed++;
             expectedCombinedScanResults.urlCount.total++;
 
-            setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
-            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobId);
+            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub);
             expect(combinedResults).toEqual(expectedCombinedScanResults);
         });
 
         test('generate combined scan results with new violations', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults },
-                etag: blobReadETagStub,
-            } as CombinedScanResultsReadResponse;
-
             axeResults.violations = [{} as axe.Result];
 
             const expectedCombinedScanResults = cloneDeep(combinedScanResults);
             expectedCombinedScanResults.urlCount.failed++;
             expectedCombinedScanResults.urlCount.total++;
 
-            setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
 
-            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobId);
-            expect(combinedResults).toEqual(expectedCombinedScanResults);
-        });
-
-        test('generate new scan results when no blob id provided', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults, urlCount: { passed: 0, failed: 0, total: 0 } },
-                etag: blobReadETagStub,
-            } as CombinedScanResultsReadResponse;
-            combinedResultsBlobId = undefined;
-
-            const expectedCombinedScanResults = cloneDeep(combinedScanResultsBlobRead.results);
-            expectedCombinedScanResults.urlCount.passed++;
-            expectedCombinedScanResults.urlCount.total++;
-
-            combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
-            setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
-
-            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobId);
-            expect(combinedResults).toEqual(expectedCombinedScanResults);
-        });
-
-        test('generate new scan results when blob not found when reading', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults, urlCount: { passed: 0, failed: 0, total: 0 } },
-                etag: blobReadETagStub,
-                error: {
-                    errorCode: 'blobNotFound',
-                },
-            } as CombinedScanResultsReadResponse;
-
-            const expectedCombinedScanResults = cloneDeep(combinedScanResultsBlobRead.results);
-            expectedCombinedScanResults.urlCount.passed++;
-            expectedCombinedScanResults.urlCount.total++;
-
-            setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
-            combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
-            setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
-
-            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobId);
+            const combinedResults = await testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub);
             expect(combinedResults).toEqual(expectedCombinedScanResults);
         });
     });
 
     describe('Error', () => {
-        test('throw for when read blob error code is not blobNotFound', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults, urlCount: { passed: 0, failed: 0, total: 0 } },
-                etag: blobReadETagStub,
-                error: {
-                    errorCode: 'jsonParseError',
-                },
-            } as CombinedScanResultsReadResponse;
-
+        test('throw for when writing blob fails', async () => {
             const expectedCombinedScanResults = cloneDeep(combinedScanResultsBlobRead.results);
             expectedCombinedScanResults.urlCount.passed++;
             expectedCombinedScanResults.urlCount.total++;
 
-            setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
-            combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
-            setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {});
-
-            await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobId)).rejects.toThrowError(
-                'Failed to read combined axe results blob.',
-            );
-        });
-
-        test('throw for when error code is not blobNotFound', async () => {
-            combinedScanResultsBlobRead = {
-                results: { ...combinedScanResults, urlCount: { passed: 0, failed: 0, total: 0 } },
-                etag: blobReadETagStub,
-            } as CombinedScanResultsReadResponse;
-
-            const expectedCombinedScanResults = cloneDeep(combinedScanResultsBlobRead.results);
-            expectedCombinedScanResults.urlCount.passed++;
-            expectedCombinedScanResults.urlCount.total++;
-
-            setupBlobRead(combinedResultsBlobId, combinedScanResultsBlobRead);
             combinedScanResultsProviderMock.setup((m) => m.getEmptyResponse()).returns(() => combinedScanResultsBlobRead);
             setupBlobWrite(expectedCombinedScanResults, blobReadETagStub, combinedResultsBlobId, {
                 error: {} as any,
             });
 
-            await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobId)).rejects.toThrowError(
+            await expect(testSubject.mergeAxeResults(axeResults, combinedResultsBlobInfoStub)).rejects.toThrowError(
                 'Failed to write new combined axe scan results blob.',
             );
         });
@@ -179,11 +110,5 @@ describe(AxeResultMerger, () => {
         combinedScanResultsProviderMock
             .setup((m) => m.writeCombinedResults(expectedCombinedResultsBlobId, It.isValue(expectedCombinedResults), expectedETag))
             .returns(() => Promise.resolve(responseStub));
-    }
-
-    function setupBlobRead(expectedCombinedResultsBlobId: string, response: CombinedScanResultsReadResponse): void {
-        combinedScanResultsProviderMock
-            .setup((m) => m.readCombinedResults(expectedCombinedResultsBlobId))
-            .returns(() => Promise.resolve(response));
     }
 });

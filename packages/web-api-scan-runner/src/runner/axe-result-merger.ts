@@ -5,8 +5,9 @@ import axe from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
-import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
+import { CombinedScanResultsProvider } from 'service-library';
 import { CombinedScanResults } from 'storage-documents';
+import { CombinedResultsBlobInfo } from './combined-results-blob-getter';
 
 @injectable()
 export class AxeResultMerger {
@@ -16,8 +17,12 @@ export class AxeResultMerger {
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
     ) {}
 
-    public async mergeAxeResults(axeScanResults: axe.AxeResults, combinedResultsBlobId: string): Promise<CombinedScanResults> {
-        const blobReadResponse = await this.getOrCreateCombinedResultsBlob(combinedResultsBlobId);
+    public async mergeAxeResults(
+        axeScanResults: axe.AxeResults,
+        combinedResultsBlobInfo: CombinedResultsBlobInfo,
+    ): Promise<CombinedScanResults> {
+        const combinedResultsBlobId = combinedResultsBlobInfo.blobId;
+        const blobReadResponse = combinedResultsBlobInfo.response;
         const combinedScanResults = blobReadResponse.results;
 
         combinedScanResults.urlCount.total++;
@@ -47,35 +52,5 @@ export class AxeResultMerger {
         }
 
         return combinedScanResults;
-    }
-
-    private async getOrCreateCombinedResultsBlob(combinedResultsBlobId: string | undefined): Promise<CombinedScanResultsReadResponse> {
-        if (combinedResultsBlobId === undefined) {
-            this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
-
-            return this.combinedScanResultsProvider.getEmptyResponse();
-        }
-
-        const response = await this.combinedScanResultsProvider.readCombinedResults(combinedResultsBlobId);
-
-        if (response.error) {
-            if (response.error.errorCode === 'blobNotFound') {
-                this.logger.logWarn('Combined axe scan results not found in a blob storage. Creating a new blob.');
-
-                return this.combinedScanResultsProvider.getEmptyResponse();
-            }
-
-            this.logger.logError('Failed to read combined axe results blob.', {
-                error: JSON.stringify(response.error),
-            });
-
-            throw new Error(
-                `Failed to read combined axe results blob. Blob Id: ${combinedResultsBlobId} Error: ${JSON.stringify(response.error)}`,
-            );
-        }
-
-        this.logger.logInfo('Successfully retrieved combined axe scan results from a blob storage.');
-
-        return response;
     }
 }
