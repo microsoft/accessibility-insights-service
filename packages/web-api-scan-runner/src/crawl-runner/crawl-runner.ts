@@ -3,7 +3,7 @@
 
 import { GlobalLogger } from 'logger';
 import { inject, injectable } from 'inversify';
-import { Crawler, iocTypes as crawlerIocTypes, SimpleCrawlerRunOptions } from 'accessibility-insights-crawler';
+import { Crawler, CrawlerRunOptions, iocTypes as crawlerIocTypes } from 'accessibility-insights-crawler';
 import { Page } from 'puppeteer';
 import { ServiceConfiguration } from 'common';
 import { ScanMetadataConfig } from '../scan-metadata-config';
@@ -37,9 +37,9 @@ export class CrawlRunner {
             const crawlerRunOptions = {
                 baseUrl,
                 discoveryPatterns,
-                page,
+                baseCrawlPage: page,
                 maxRequestsPerCrawl: (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit,
-            } as SimpleCrawlerRunOptions;
+            } as CrawlerRunOptions;
 
             retVal = await crawler.crawl(crawlerRunOptions);
         } catch (ex) {
