@@ -77,7 +77,7 @@ describe(CombinedResultsBlobGetter, () => {
         expect(await testSubject.getBlobInfo(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
     });
 
-    test('readResponse has blobNotFound error code', async () => {
+    test('readResponse has jsonParseError error code', async () => {
         const readResponseWithError: CombinedScanResultsReadResponse = {
             error: {
                 errorCode: 'jsonParseError',
