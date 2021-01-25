@@ -40,6 +40,7 @@ describe(ApifyResourceCreator, () => {
         apifyMock.verifyAll();
         settingsHandlerMock.verifyAll();
         fsMock.verifyAll();
+        enqueueLinksMock.verifyAll();
     });
 
     describe('createRequestQueue', () => {
@@ -91,7 +92,7 @@ describe(ApifyResourceCreator, () => {
                 pseudoUrls: discoveryPatterns,
             };
             setupCreateRequestQueue();
-            enqueueLinksMock.setup((el) => el(expectedEnqueueLinksOpts));
+            enqueueLinksMock.setup((el) => el(expectedEnqueueLinksOpts)).verifiable();
 
             const queue = await apifyResourceCreator.createRequestQueue(url, { page, discoveryPatterns });
 

@@ -28,7 +28,7 @@ export class ApifyResourceCreator implements ResourceCreator {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
         await this.addUrlsFromList(requestQueue, options?.inputUrls);
-        await this.addUrlsFromPageCrawl(requestQueue, options?.page, options?.discoveryPatterns);
+        await this.addUrlsDiscoveredInPage(requestQueue, options?.page, options?.discoveryPatterns);
 
         return requestQueue;
     }
@@ -43,9 +43,9 @@ export class ApifyResourceCreator implements ResourceCreator {
         }
     }
 
-    private async addUrlsFromPageCrawl(requestQueue: Apify.RequestQueue, page?: Page, discoveryPatterns?: string[]): Promise<void> {
+    private async addUrlsDiscoveredInPage(requestQueue: Apify.RequestQueue, page?: Page, discoveryPatterns?: string[]): Promise<void> {
         if (page === undefined || discoveryPatterns === undefined) {
-            return Promise.resolve();
+            return;
         }
 
         await this.enqueueLinksExt({
