@@ -45,7 +45,7 @@ export class CrawlRunner {
             return undefined;
         }
 
-        this.logger.logInfo('Web page crawling completed successfully');
+        this.logger.logInfo(`Web page crawling completed successfully. Found ${retVal ? retVal.length : 0} urls.`);
 
         return retVal;
     }
