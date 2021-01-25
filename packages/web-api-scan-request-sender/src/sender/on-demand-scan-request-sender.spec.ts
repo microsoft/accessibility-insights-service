@@ -236,6 +236,7 @@ describe('Scan request sender', () => {
         return {
             id: scanRequest.id,
             url: scanRequest.url,
+            deepScan: scanRequest.deepScan,
         };
     }
 });

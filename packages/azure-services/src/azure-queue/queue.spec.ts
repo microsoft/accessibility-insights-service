@@ -283,7 +283,7 @@ describe(Queue, () => {
 
     function setupVerifyCallForDequeueMessage(queueMessageResults: DequeuedMessageItem[]): void {
         queueClientMock
-            .setup(async (qc) => qc.receiveMessages({ numberOfMessages: 32, visibilitytimeout: messageVisibilityTimeout }))
+            .setup(async (qc) => qc.receiveMessages({ numberOfMessages: 32, visibilityTimeout: messageVisibilityTimeout }))
             .returns(async () =>
                 Promise.resolve({
                     receivedMessageItems: queueMessageResults,

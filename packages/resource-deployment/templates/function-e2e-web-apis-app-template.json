@@ -26,7 +26,7 @@
             "type": "string",
             "defaultValue": "[if(equals(resourceGroup().location, 'westus2'), 'westus', resourceGroup().location)]",
             "metadata": {
-                "description": "Location for all resources."
+                "description": "The location in which the Azure Function App and its resources should be deployed."
             }
         },
         "appInsightsName": {

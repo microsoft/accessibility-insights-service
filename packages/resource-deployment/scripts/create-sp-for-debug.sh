@@ -63,6 +63,10 @@ az keyvault set-policy --name "$keyVault" --spn "$servicePrincipalName" --secret
 tenant=$(az ad sp show --id "$servicePrincipalName" --query "appOwnerTenantId" -o tsv)
 clientId=$(az ad sp show --id "$servicePrincipalName" --query "appId" -o tsv)
 
-# Granting access to storage account
+# Granting access to storage blob
 echo "Granting service principal permissions to the '$storageAccountName' Blob storage"
 az role assignment create --role "Storage Blob Data Contributor" --assignee "$clientId" --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null
+
+# Granting access to storage queue
+echo "Granting service principal permissions to the '$storageAccountName' Queue storage"
+az role assignment create --role "Storage Queue Data Contributor" --assignee "$clientId" --scope "/subscriptions/$subscription/resourceGroups/$resourceGroupName/providers/Microsoft.Storage/storageAccounts/$storageAccountName" 1>/dev/null

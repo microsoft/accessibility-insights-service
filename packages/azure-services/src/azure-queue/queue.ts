@@ -3,9 +3,9 @@
 import * as util from 'util';
 import { QueueRuntimeConfig, RetryHelper, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import * as _ from 'lodash';
+import _ from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { DequeuedMessageItem, MessagesDequeueOptionalParams, QueueClient } from '@azure/storage-queue';
+import { DequeuedMessageItem, QueueClient, MessagesDequeueOptionalParams } from '@azure/storage-queue';
 import { iocTypeNames, QueueServiceClientProvider } from '../ioc-types';
 import { Message } from './message';
 
@@ -123,14 +123,8 @@ export class Queue {
 
     private async getQueueMessages(queueClient: QueueClient, numberOfMessages: number): Promise<DequeuedMessageItem[]> {
         const messageVisibilityTimeoutInSeconds = (await this.getQueueConfig()).messageVisibilityTimeoutInSeconds;
-        const requestOptions: MessagesDequeueOptionalParams = {
-            numberOfMessages,
-            visibilitytimeout: messageVisibilityTimeoutInSeconds,
-        };
-
-        // await this.ensureQueueExists(queueClient);
-
-        const response = await queueClient.receiveMessages(requestOptions);
+        const options: MessagesDequeueOptionalParams = { numberOfMessages, visibilityTimeout: messageVisibilityTimeoutInSeconds };
+        const response = await queueClient.receiveMessages(options);
 
         return response.receivedMessageItems;
     }

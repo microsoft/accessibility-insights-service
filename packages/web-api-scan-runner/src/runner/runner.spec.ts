@@ -269,7 +269,7 @@ describe(Runner, () => {
         serviceConfigurationMock.reset();
         loggerMock
             .setup((o) =>
-                o.logInfo(
+                o.logWarn(
                     `Update page scan run state to 'running' failed due to merge conflict with other process. Exiting page scan task.`,
                 ),
             )
