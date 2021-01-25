@@ -7,6 +7,7 @@ import { Crawler, SimpleCrawlerRunOptions } from 'accessibility-insights-crawler
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
+import { ServiceConfiguration } from 'common';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlRunner } from './crawl-runner';
@@ -26,9 +27,11 @@ describe('CrawlRunner', () => {
     const baseUrl = 'testUrl';
     const discoveryPatterns = ['testPattern'];
     const page = {} as Page;
+    const urlCrawlLimit = 42;
 
     let loggerMock: IMock<GlobalLogger>;
     let scanMetaDataConfigMock: IMock<ScanMetadataConfig>;
+    let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
@@ -39,17 +42,25 @@ describe('CrawlRunner', () => {
             .setup((m) => m.getConfig())
             .returns(() => ({ id: scanId } as ScanMetadata))
             .verifiable();
+
+        serviceConfigMock = Mock.ofType<ServiceConfiguration>(undefined, MockBehavior.Strict);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
         scanMetaDataConfigMock.verifyAll();
+        serviceConfigMock.verifyAll();
     });
 
     it('returns undefined when crawler provider returns null', async () => {
         const crawlerProviderMock = createCrawlerProviderMock(null);
 
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, scanMetaDataConfigMock.object);
+        const crawlRunner = new CrawlRunner(
+            crawlerProviderMock.object,
+            loggerMock.object,
+            serviceConfigMock.object,
+            scanMetaDataConfigMock.object,
+        );
 
         expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
 
@@ -65,7 +76,14 @@ describe('CrawlRunner', () => {
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, scanMetaDataConfigMock.object);
+        initServiceConfigMock();
+
+        const crawlRunner = new CrawlRunner(
+            crawlerProviderMock.object,
+            loggerMock.object,
+            serviceConfigMock.object,
+            scanMetaDataConfigMock.object,
+        );
 
         const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
@@ -80,6 +98,7 @@ describe('CrawlRunner', () => {
             baseUrl,
             discoveryPatterns,
             page,
+            maxRequestsPerCrawl: urlCrawlLimit,
         } as SimpleCrawlerRunOptions;
 
         let actualRunOptions: SimpleCrawlerRunOptions;
@@ -94,7 +113,14 @@ describe('CrawlRunner', () => {
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
-        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, scanMetaDataConfigMock.object);
+        initServiceConfigMock();
+
+        const crawlRunner = new CrawlRunner(
+            crawlerProviderMock.object,
+            loggerMock.object,
+            serviceConfigMock.object,
+            scanMetaDataConfigMock.object,
+        );
 
         const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
@@ -113,5 +139,14 @@ describe('CrawlRunner', () => {
             .verifiable();
 
         return crawlerProviderMock;
+    }
+
+    function initServiceConfigMock(): void {
+        serviceConfigMock
+            .setup((m) => m.getConfigValue('crawlConfig'))
+            .returns(async () => ({
+                urlCrawlLimit,
+            }))
+            .verifiable();
     }
 });
