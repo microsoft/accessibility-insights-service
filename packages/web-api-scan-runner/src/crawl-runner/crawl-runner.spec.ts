@@ -107,9 +107,10 @@ describe('CrawlRunner', () => {
 
     function createCrawlerProviderMock(crawler: Crawler<string[]> | null): IMock<CrawlerProvider> {
         const crawlerProviderMock = Mock.ofType<CrawlerProvider>();
-        crawlerProviderMock.setup((m) => m())
-        .returns(async () => crawler)
-        .verifiable();
+        crawlerProviderMock
+            .setup((m) => m())
+            .returns(async () => crawler)
+            .verifiable();
 
         return crawlerProviderMock;
     }
