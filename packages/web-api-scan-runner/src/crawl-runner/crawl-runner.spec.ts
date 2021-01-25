@@ -32,10 +32,13 @@ describe('CrawlRunner', () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
-        loggerMock.setup((m) => m.setCommonProperties({ scanId: scanId }));
+        loggerMock.setup((m) => m.setCommonProperties({ scanId: scanId })).verifiable();
 
         scanMetaDataConfigMock = Mock.ofType<ScanMetadataConfig>(undefined, MockBehavior.Strict);
-        scanMetaDataConfigMock.setup((m) => m.getConfig()).returns(() => ({ id: scanId } as ScanMetadata));
+        scanMetaDataConfigMock
+            .setup((m) => m.getConfig())
+            .returns(() => ({ id: scanId } as ScanMetadata))
+            .verifiable();
     });
 
     afterEach(() => {
@@ -55,7 +58,10 @@ describe('CrawlRunner', () => {
 
     it('returns undefined if crawler throws exception', async () => {
         const crawlerMock = Mock.ofType(CrawlerMock);
-        crawlerMock.setup((m) => m.crawl(It.isAny())).throws(Error());
+        crawlerMock
+            .setup((m) => m.crawl(It.isAny()))
+            .throws(Error())
+            .verifiable();
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
@@ -83,7 +89,8 @@ describe('CrawlRunner', () => {
         crawlerMock
             .setup((m) => m.crawl(It.isAny()))
             .callback((runOptions) => (actualRunOptions = runOptions))
-            .returns(async () => expectedRetVal);
+            .returns(async () => expectedRetVal)
+            .verifiable();
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
@@ -100,7 +107,9 @@ describe('CrawlRunner', () => {
 
     function createCrawlerProviderMock(crawler: Crawler<string[]> | null): IMock<CrawlerProvider> {
         const crawlerProviderMock = Mock.ofType<CrawlerProvider>();
-        crawlerProviderMock.setup((m) => m()).returns(async () => crawler);
+        crawlerProviderMock.setup((m) => m())
+        .returns(async () => crawler)
+        .verifiable();
 
         return crawlerProviderMock;
     }
