@@ -6,7 +6,7 @@ import { inject, injectable } from 'inversify';
 import { Crawler, iocTypes as crawlerIocTypes, SimpleCrawlerRunOptions } from 'accessibility-insights-crawler';
 import { Page } from 'puppeteer';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-
+import { System } from 'common';
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
 @injectable()
@@ -34,7 +34,7 @@ export class CrawlRunner {
             page,
         } as SimpleCrawlerRunOptions;
 
-        this.logger.logInfo('begin crawl');
+        this.logger.logInfo('Starting web page crawling');
 
         let retVal: string[] | undefined;
 
@@ -47,7 +47,7 @@ export class CrawlRunner {
             return undefined;
         }
 
-        this.logger.logInfo('crawl succeeded');
+        this.logger.logInfo('Web page crawling completed successfully');
 
         return retVal;
     }
