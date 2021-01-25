@@ -101,13 +101,11 @@ describe('CrawlRunner', () => {
             maxRequestsPerCrawl: urlCrawlLimit,
         } as SimpleCrawlerRunOptions;
 
-        let actualRunOptions: SimpleCrawlerRunOptions;
         const expectedRetVal = ['discoveredUrl'];
 
         const crawlerMock = Mock.ofType(CrawlerMock);
         crawlerMock
-            .setup((m) => m.crawl(It.isAny()))
-            .callback((runOptions) => (actualRunOptions = runOptions))
+            .setup((m) => m.crawl(expectedRunOptions))
             .returns(async () => expectedRetVal)
             .verifiable();
 
@@ -124,7 +122,6 @@ describe('CrawlRunner', () => {
 
         const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
-        expect(actualRunOptions).toMatchObject(expectedRunOptions);
         expect(actualRetVal).toBe(expectedRetVal);
 
         crawlerProviderMock.verifyAll();
