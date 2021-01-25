@@ -23,11 +23,12 @@ export function setupLocalCrawlerContainer(container: inversify.Container): inve
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
         const crawlerRunOptions = context.container.get<CrawlerRunOptions>(iocTypes.CrawlerRunOptions);
 
-        return apifyResourceCreator.createRequestQueue(
-            crawlerRunOptions.baseUrl,
-            crawlerRunOptions.restartCrawl,
-            crawlerRunOptions.inputUrls,
-        );
+        return apifyResourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, {
+            clear: crawlerRunOptions.restartCrawl,
+            inputUrls: crawlerRunOptions.inputUrls,
+            page: crawlerRunOptions.baseCrawlPage,
+            discoveryPatterns: crawlerRunOptions.discoveryPatterns,
+        });
     });
 
     container
@@ -53,11 +54,12 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
         const apifyResourceCreator = context.container.get(ApifyResourceCreator);
         const crawlerRunOptions = context.container.get<CrawlerRunOptions>(iocTypes.CrawlerRunOptions);
 
-        return apifyResourceCreator.createRequestQueue(
-            crawlerRunOptions.baseUrl,
-            crawlerRunOptions.restartCrawl,
-            crawlerRunOptions.inputUrls,
-        );
+        return apifyResourceCreator.createRequestQueue(crawlerRunOptions.baseUrl, {
+            clear: crawlerRunOptions.restartCrawl,
+            inputUrls: crawlerRunOptions.inputUrls,
+            page: crawlerRunOptions.baseCrawlPage,
+            discoveryPatterns: crawlerRunOptions.discoveryPatterns,
+        });
     });
 
     container.bind(iocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);

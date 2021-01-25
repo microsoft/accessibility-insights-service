@@ -3,8 +3,9 @@
 import * as fs from 'fs';
 import Apify from 'apify';
 import { injectable } from 'inversify';
+import { Page } from 'puppeteer';
 import { ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
-import { ResourceCreator } from '../types/resource-creator';
+import { RequestQueueOptions, ResourceCreator } from '../types/resource-creator';
 
 @injectable()
 export class ApifyResourceCreator implements ResourceCreator {
@@ -14,10 +15,11 @@ export class ApifyResourceCreator implements ResourceCreator {
         private readonly apify: typeof Apify = Apify,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly filesystem: typeof fs = fs,
+        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 
-    public async createRequestQueue(baseUrl: string, clear?: boolean, inputUrls?: string[]): Promise<Apify.RequestQueue> {
-        if (clear === true) {
+    public async createRequestQueue(baseUrl: string, options?: RequestQueueOptions): Promise<Apify.RequestQueue> {
+        if (options?.clear === true) {
             this.clearRequestQueue();
         }
 
@@ -25,7 +27,8 @@ export class ApifyResourceCreator implements ResourceCreator {
         if (baseUrl) {
             await requestQueue.addRequest({ url: baseUrl.trim() });
         }
-        await this.addUrlsFromList(requestQueue, inputUrls);
+        await this.addUrlsFromList(requestQueue, options?.inputUrls);
+        await this.addUrlsFromPageCrawl(requestQueue, options?.page, options?.discoveryPatterns);
 
         return requestQueue;
     }
@@ -38,6 +41,18 @@ export class ApifyResourceCreator implements ResourceCreator {
         for (const url of inputUrls) {
             await requestQueue.addRequest({ url: url }, { forefront: true });
         }
+    }
+
+    private async addUrlsFromPageCrawl(requestQueue: Apify.RequestQueue, page?: Page, discoveryPatterns?: string[]): Promise<void> {
+        if (page === undefined || discoveryPatterns === undefined) {
+            return Promise.resolve();
+        }
+
+        await this.enqueueLinksExt({
+            page: page,
+            requestQueue: requestQueue,
+            pseudoUrls: discoveryPatterns,
+        });
     }
 
     private clearRequestQueue(): void {
