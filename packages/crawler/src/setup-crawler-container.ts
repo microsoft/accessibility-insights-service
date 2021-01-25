@@ -3,6 +3,7 @@
 import { reporterFactory } from 'accessibility-insights-report';
 import * as inversify from 'inversify';
 import { ApifyResourceCreator } from './apify/apify-resource-creator';
+import { Crawler } from './crawler';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 import { SimpleCrawlerEngine } from './crawler/simple-crawler-engine';
 import { DataBase } from './level-storage/data-base';
@@ -58,12 +59,17 @@ export function setupCloudCrawlerContainer(container: inversify.Container): inve
             crawlerRunOptions.inputUrls,
         );
     });
+
     container.bind(iocTypes.RequestProcessor).to(UrlCollectionRequestProcessor);
+
+    setupSingletonProvider(iocTypes.CrawlerProvider, container, async (context: inversify.interfaces.Context) => {
+        return new Crawler(context.container);
+    });
 
     return container;
 }
 
-export function registerCrawlerRunOptions(container: inversify.Container, crawlerRunOptions: CrawlerRunOptions): void {
+export function registerCrawlerRunOptions(container: inversify.interfaces.Container, crawlerRunOptions: CrawlerRunOptions): void {
     container.bind(iocTypes.CrawlerRunOptions).toConstantValue(crawlerRunOptions);
 }
 
