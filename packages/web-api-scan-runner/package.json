@@ -62,6 +62,7 @@
         "common": "^1.0.0",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.5",
+        "leveldown": "^5.6.0",
         "lodash": "^4.17.20",
         "logger": "1.0.0",
         "puppeteer": "^5.5.0",
