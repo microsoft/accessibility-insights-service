@@ -126,7 +126,10 @@ describe('CrawlRunner', () => {
             .setup((m) => m.crawl(expectedRunOptions))
             .returns(async () => expectedRetVal)
             .verifiable();
-        urlProcessorMock.setup(p => p(expectedRetVal, urlCrawlLimit, knownUrls)).returns(() => expectedRetVal).verifiable();
+        urlProcessorMock
+            .setup((p) => p(expectedRetVal, urlCrawlLimit, knownUrls))
+            .returns(() => expectedRetVal)
+            .verifiable();
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
