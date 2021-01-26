@@ -12,6 +12,7 @@ import { BatchConfig } from 'azure-services';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlRunner } from './crawl-runner';
+import { DiscoveredUrlProcessor } from './process-discovered-urls';
 
 // This class exists because trying to mock a Crawler without it
 // caused an unexplained timeout while calling the real Crawler class' constructor
@@ -33,10 +34,12 @@ describe('CrawlRunner', () => {
     const batchConfigStub = {
         taskWorkingDir: workingDir,
     } as BatchConfig;
+    const knownUrls = [] as string[];
 
     let loggerMock: IMock<GlobalLogger>;
     let scanMetaDataConfigMock: IMock<ScanMetadataConfig>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
+    let urlProcessorMock: IMock<DiscoveredUrlProcessor>;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
@@ -49,12 +52,15 @@ describe('CrawlRunner', () => {
             .verifiable();
 
         serviceConfigMock = Mock.ofType<ServiceConfiguration>(undefined, MockBehavior.Strict);
+
+        urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
         scanMetaDataConfigMock.verifyAll();
         serviceConfigMock.verifyAll();
+        urlProcessorMock.verifyAll();
     });
 
     it('returns undefined when crawler provider returns null', async () => {
@@ -66,9 +72,10 @@ describe('CrawlRunner', () => {
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
             batchConfigStub,
+            urlProcessorMock.object,
         );
 
-        expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
+        expect(await crawlRunner.run(baseUrl, discoveryPatterns, page, knownUrls)).toBeUndefined();
 
         crawlerProviderMock.verifyAll();
     });
@@ -90,9 +97,10 @@ describe('CrawlRunner', () => {
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
             batchConfigStub,
+            urlProcessorMock.object,
         );
 
-        const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
+        const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page, knownUrls);
 
         expect(retVal).toBeUndefined();
 
@@ -118,6 +126,7 @@ describe('CrawlRunner', () => {
             .setup((m) => m.crawl(expectedRunOptions))
             .returns(async () => expectedRetVal)
             .verifiable();
+        urlProcessorMock.setup(p => p(expectedRetVal, urlCrawlLimit, knownUrls)).returns(() => expectedRetVal).verifiable();
 
         const crawlerProviderMock = createCrawlerProviderMock(crawlerMock.object);
 
@@ -129,9 +138,10 @@ describe('CrawlRunner', () => {
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
             batchConfigStub,
+            urlProcessorMock.object,
         );
 
-        const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
+        const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page, knownUrls);
 
         expect(actualRetVal).toBe(expectedRetVal);
 

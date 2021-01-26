@@ -8,6 +8,7 @@ import { Page } from 'puppeteer';
 import { ServiceConfiguration } from 'common';
 import { BatchConfig } from 'azure-services';
 import { ScanMetadataConfig } from '../scan-metadata-config';
+import { DiscoveredUrlProcessor, processDiscoveredUrls } from './process-discovered-urls';
 
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
@@ -21,12 +22,13 @@ export class CrawlRunner {
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(ScanMetadataConfig) scanMetadataConfig: ScanMetadataConfig,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
+        private readonly processUrls: DiscoveredUrlProcessor = processDiscoveredUrls,
     ) {
         const scanMetadata = scanMetadataConfig.getConfig();
         this.logger.setCommonProperties({ scanId: scanMetadata.id });
     }
 
-    public async run(baseUrl: string, discoveryPatterns: string[], page: Page): Promise<string[] | undefined> {
+    public async run(baseUrl: string, discoveryPatterns: string[], page: Page, knownUrls: string[]): Promise<string[] | undefined> {
         const crawler = await this.getCrawler();
         if (crawler == null) {
             this.logger.logInfo('No crawler provided by crawler provider');
@@ -38,12 +40,14 @@ export class CrawlRunner {
 
         let retVal: string[] | undefined;
 
+        const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;
         try {
             const commonOptions = await this.getCommonCrawlOptions();
             const crawlerRunOptions: CrawlerRunOptions = {
                 baseUrl,
                 discoveryPatterns,
                 baseCrawlPage: page,
+                maxRequestsPerCrawl: urlCrawlLimit,
                 ...commonOptions,
             };
 
@@ -56,15 +60,13 @@ export class CrawlRunner {
 
         this.logger.logInfo(`Web page crawling completed successfully. Found ${retVal ? retVal.length : 0} urls.`);
 
-        return retVal;
+        return this.processUrls(retVal, urlCrawlLimit, knownUrls);
     }
 
-    private async getCommonCrawlOptions(): Promise<Partial<CrawlerRunOptions>> {
-        const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;
+    private getCommonCrawlOptions(): Partial<CrawlerRunOptions> {
         const outputDir = `${this.batchConfig.taskWorkingDir}/${this.storageDirName}`;
 
         return {
-            maxRequestsPerCrawl: urlCrawlLimit,
             localOutputDir: outputDir,
             silentMode: true,
             restartCrawl: true,
