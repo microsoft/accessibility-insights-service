@@ -35,7 +35,7 @@
         "@types/node": "^12.12.54",
         "@types/normalize-path": "^3.0.0",
         "@types/table": "^6.0.0",
-        "accessibility-insights-crawler": "1.0.0",
+        "accessibility-insights-crawler": "^1.0.0",
         "axe-result-converter": "^1.0.0",
         "common": "^1.0.0",
         "copy-webpack-plugin": "^6.3.2",
