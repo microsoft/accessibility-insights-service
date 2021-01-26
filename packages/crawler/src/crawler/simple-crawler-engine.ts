@@ -4,18 +4,12 @@ import { inject, injectable } from 'inversify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import Apify from 'apify';
-import { Page } from 'puppeteer';
-import { isNil } from 'lodash';
-import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
 import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
+import { CrawlerRunOptions } from '..';
 import { CrawlerEngine } from './crawler-engine';
 import { CrawlerFactory } from './crawler-factory';
 import { CrawlerConfiguration } from './crawler-configuration';
-
-export type SimpleCrawlerRunOptions = CrawlerRunOptions & {
-    page?: Page;
-};
 
 @injectable()
 export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
@@ -24,10 +18,9 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
         @inject(iocTypes.RequestProcessor) private readonly requestProcessor: CrawlRequestProcessor,
-        private readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
     ) {}
 
-    public async start(crawlerRunOptions: SimpleCrawlerRunOptions): Promise<string[]> {
+    public async start(crawlerRunOptions: CrawlerRunOptions): Promise<string[]> {
         this.crawlerConfiguration.setDefaultApifySettings();
         this.crawlerConfiguration.setLocalOutputDir(crawlerRunOptions.localOutputDir);
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
@@ -49,23 +42,9 @@ export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
             basicCrawlerOptions.maxConcurrency = 1;
         }
 
-        this.prepareQueue(requestQueue, crawlerRunOptions);
-
         const crawler = this.crawlerFactory.createBasicCrawler(basicCrawlerOptions);
         await crawler.run();
 
         return this.requestProcessor.getResults();
-    }
-
-    private async prepareQueue(requestQueue: Apify.RequestQueue, crawlerRunOptions: SimpleCrawlerRunOptions): Promise<void> {
-        if (!isNil(crawlerRunOptions.page)) {
-            const discoveryPatterns = this.crawlerConfiguration.discoveryPatterns();
-
-            await this.enqueueLinksExt({
-                page: crawlerRunOptions.page,
-                requestQueue: requestQueue,
-                pseudoUrls: discoveryPatterns,
-            });
-        }
     }
 }

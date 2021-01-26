@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import * as fs from 'fs';
 import Apify from 'apify';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { Page } from 'puppeteer';
 import { apifySettingsHandler, ApifySettingsHandler } from '../apify/apify-settings';
 import { getPromisableDynamicMock } from '../test-utilities/promisable-mock';
 import { ApifyResourceCreator } from './apify-resource-creator';
@@ -14,6 +15,7 @@ describe(ApifyResourceCreator, () => {
     let settingsHandlerMock: IMock<typeof apifySettingsHandler>;
     let fsMock: IMock<typeof fs>;
     let queueMock: IMock<Apify.RequestQueue>;
+    let enqueueLinksMock: IMock<typeof Apify.utils.enqueueLinks>;
 
     let apifyResourceCreator: ApifyResourceCreator;
 
@@ -25,17 +27,24 @@ describe(ApifyResourceCreator, () => {
         settingsHandlerMock = Mock.ofType<ApifySettingsHandler>();
         fsMock = Mock.ofType<typeof fs>();
         queueMock = getPromisableDynamicMock(Mock.ofType<Apify.RequestQueue>());
-        apifyResourceCreator = new ApifyResourceCreator(apifyMock.object, settingsHandlerMock.object, fsMock.object);
+        enqueueLinksMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
+        apifyResourceCreator = new ApifyResourceCreator(
+            apifyMock.object,
+            settingsHandlerMock.object,
+            fsMock.object,
+            enqueueLinksMock.object,
+        );
     });
 
     afterEach(() => {
         apifyMock.verifyAll();
         settingsHandlerMock.verifyAll();
         fsMock.verifyAll();
+        enqueueLinksMock.verifyAll();
     });
 
     describe('createRequestQueue', () => {
-        it('with empty=false', async () => {
+        it('with clear=false', async () => {
             setupCreateRequestQueue();
             fsMock.setup((fsm) => fsm.rmdirSync(It.isAny(), It.isAny())).verifiable(Times.never());
 
@@ -48,7 +57,7 @@ describe(ApifyResourceCreator, () => {
             setupClearRequestQueue(true);
             setupCreateRequestQueue();
 
-            const queue = await apifyResourceCreator.createRequestQueue(url, true);
+            const queue = await apifyResourceCreator.createRequestQueue(url, { clear: true });
 
             expect(queue).toBe(queueMock.object);
         });
@@ -57,7 +66,7 @@ describe(ApifyResourceCreator, () => {
             setupClearRequestQueue(false);
             setupCreateRequestQueue();
 
-            const queue = await apifyResourceCreator.createRequestQueue(url, true);
+            const queue = await apifyResourceCreator.createRequestQueue(url, { clear: true });
 
             expect(queue).toBe(queueMock.object);
         });
@@ -70,7 +79,23 @@ describe(ApifyResourceCreator, () => {
             queueMock.setup((q) => q.addRequest({ url: 'ur1' }, { forefront: true })).verifiable();
             queueMock.setup((q) => q.addRequest({ url: 'ur2' }, { forefront: true })).verifiable();
 
-            const queue = await apifyResourceCreator.createRequestQueue(url, false, inputUrls);
+            const queue = await apifyResourceCreator.createRequestQueue(url, { clear: false, inputUrls: inputUrls });
+            expect(queue).toBe(queueMock.object);
+        });
+
+        it('with a page to crawl', async () => {
+            const discoveryPatterns = ['pattern1', 'pattern2'];
+            const page = {} as Page;
+            const expectedEnqueueLinksOpts = {
+                page: page,
+                requestQueue: queueMock.object,
+                pseudoUrls: discoveryPatterns,
+            };
+            setupCreateRequestQueue();
+            enqueueLinksMock.setup((el) => el(expectedEnqueueLinksOpts)).verifiable();
+
+            const queue = await apifyResourceCreator.createRequestQueue(url, { page, discoveryPatterns });
+
             expect(queue).toBe(queueMock.object);
         });
     });

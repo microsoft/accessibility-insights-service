@@ -3,7 +3,7 @@
 
 import 'reflect-metadata';
 
-import { Crawler, SimpleCrawlerRunOptions } from 'accessibility-insights-crawler';
+import { Crawler, CrawlerRunOptions } from 'accessibility-insights-crawler';
 import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
@@ -97,9 +97,9 @@ describe('CrawlRunner', () => {
         const expectedRunOptions = {
             baseUrl,
             discoveryPatterns,
-            page,
+            baseCrawlPage: page,
             maxRequestsPerCrawl: urlCrawlLimit,
-        } as SimpleCrawlerRunOptions;
+        } as CrawlerRunOptions;
 
         const expectedRetVal = ['discoveredUrl'];
 

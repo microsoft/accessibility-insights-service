@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { Page } from 'puppeteer';
+
 export interface CrawlerRunOptions {
     crawl?: boolean;
     baseUrl: string;
@@ -15,4 +17,5 @@ export interface CrawlerRunOptions {
     memoryMBytes?: number;
     silentMode?: boolean;
     debug?: boolean;
+    baseCrawlPage?: Page;
 }
