@@ -9,6 +9,7 @@ export class BatchConfig {
     public readonly accountUrl: string = process.env.AZ_BATCH_ACCOUNT_URL;
     public readonly poolId: string = process.env.AZ_BATCH_POOL_ID;
     public readonly jobId: string = process.env.AZ_BATCH_JOB_ID;
+    public readonly taskWorkingDir: string = process.env.AZ_BATCH_TASK_WORKING_DIR;
 }
 
 export const batchConfig = new BatchConfig();

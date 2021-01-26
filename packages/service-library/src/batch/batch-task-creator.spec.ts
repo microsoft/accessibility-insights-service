@@ -190,7 +190,7 @@ describe(BatchTaskCreator, () => {
             accountUrl: '',
             poolId: 'pool-id',
             jobId: 'job-id',
-        };
+        } as BatchConfig;
         batchMock = Mock.ofType(Batch);
         queueMock = Mock.ofType(Queue);
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
