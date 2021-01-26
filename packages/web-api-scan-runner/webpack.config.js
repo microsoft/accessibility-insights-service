@@ -19,6 +19,7 @@ module.exports = (env) => {
             'applicationinsights',
             'accessibility-insights-report',
             'apify',
+            'leveldown',
         ],
         entry: {
             ['web-api-scan-runner']: path.resolve('./src/index.ts'),
