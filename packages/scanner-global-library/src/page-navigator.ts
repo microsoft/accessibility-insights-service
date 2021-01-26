@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 import { Page, Response } from 'puppeteer';
 import { injectable, inject } from 'inversify';
+import _ from 'lodash';
 import { PageConfigurator } from './page-configurator';
 import { PageResponseProcessor } from './page-response-processor';
 import { BrowserError } from './browser-error';
@@ -41,7 +42,7 @@ export class PageNavigator {
             return undefined;
         }
 
-        if (response === undefined) {
+        if (_.isNil(response)) {
             onNavigationError({
                 errorType: 'NavigationError',
                 message: 'Unable to get a page response from the browser.',
