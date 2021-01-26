@@ -34,7 +34,7 @@ describe(SendNotificationTaskCreator, () => {
         accountUrl: '',
         poolId: 'pool-Id',
         jobId: 'batch-job-id',
-    };
+    } as BatchConfig;
 
     beforeEach(() => {
         batchMock = Mock.ofType(Batch, MockBehavior.Strict);

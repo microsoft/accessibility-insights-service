@@ -155,7 +155,7 @@ describe(Worker, () => {
             accountUrl: '',
             poolId: 'pool-Id',
             jobId: 'batch-job-id',
-        };
+        } as BatchConfig;
 
         poolMetricsInfo = {
             id: 'pool-id',

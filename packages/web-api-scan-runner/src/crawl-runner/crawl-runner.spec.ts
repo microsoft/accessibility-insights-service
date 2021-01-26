@@ -8,6 +8,7 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { ServiceConfiguration } from 'common';
+import { BatchConfig } from 'azure-services';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlRunner } from './crawl-runner';
@@ -28,6 +29,10 @@ describe('CrawlRunner', () => {
     const discoveryPatterns = ['testPattern'];
     const page = {} as Page;
     const urlCrawlLimit = 42;
+    const workingDir = '/workingDir';
+    const batchConfigStub = {
+        taskWorkingDir: workingDir,
+    } as BatchConfig;
 
     let loggerMock: IMock<GlobalLogger>;
     let scanMetaDataConfigMock: IMock<ScanMetadataConfig>;
@@ -60,6 +65,7 @@ describe('CrawlRunner', () => {
             loggerMock.object,
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
+            batchConfigStub,
         );
 
         expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
@@ -83,6 +89,7 @@ describe('CrawlRunner', () => {
             loggerMock.object,
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
+            batchConfigStub,
         );
 
         const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
@@ -99,6 +106,9 @@ describe('CrawlRunner', () => {
             discoveryPatterns,
             baseCrawlPage: page,
             maxRequestsPerCrawl: urlCrawlLimit,
+            silentMode: true,
+            restartCrawl: true,
+            localOutputDir: `${workingDir}/crawler_storage`,
         } as CrawlerRunOptions;
 
         const expectedRetVal = ['discoveredUrl'];
@@ -118,6 +128,7 @@ describe('CrawlRunner', () => {
             loggerMock.object,
             serviceConfigMock.object,
             scanMetaDataConfigMock.object,
+            batchConfigStub,
         );
 
         const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);

@@ -73,7 +73,7 @@ describe(Batch, () => {
             accountUrl: 'accountUrl',
             poolId: 'poolId',
             jobId: 'jobId',
-        };
+        } as BatchConfig;
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
         serviceConfigMock
             .setup(async (s) => s.getConfigValue('taskConfig'))
