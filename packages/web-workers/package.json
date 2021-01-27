@@ -27,7 +27,7 @@
         "@azure/functions": "^1.2.2",
         "@types/dotenv": "^8.2.0",
         "@types/jest": "^26.0.20",
-        "@types/lodash": "^4.14.165",
+        "@types/lodash": "^4.14.168",
         "@types/node": "^12.12.54",
         "@types/sha.js": "^2.4.0",
         "@types/verror": "^1.10.4",
