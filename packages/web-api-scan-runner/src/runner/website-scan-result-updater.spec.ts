@@ -220,7 +220,7 @@ describe(WebsiteScanResultUpdater, () => {
 
                 websiteScanResultsProviderMock.setup((m) => m.read(It.isAny())).verifiable(Times.never());
 
-                await testSubject.updateWebsiteScanResultWithDiscoveredUrls(onDemandPageScanResult, []);
+                await testSubject.updateWebsiteScanResultWithDiscoveredUrls(onDemandPageScanResult, [], []);
 
                 websiteScanResultsProviderMock.verifyAll();
             });
@@ -230,10 +230,12 @@ describe(WebsiteScanResultUpdater, () => {
             let newlyDiscoveredUrls: string[];
             let knownPages: string[];
             let expectedKnownPages: string[];
+            let discoveryPatternsStub: string[];
 
             beforeEach(() => {
                 newlyDiscoveredUrls = ['some-url'];
                 knownPages = ['some-other-url'];
+                discoveryPatternsStub = ['some', 'discovery', 'patterns'];
                 websiteScanResultReadResponse.knownPages = knownPages;
                 expectedKnownPages = [...newlyDiscoveredUrls, ...knownPages];
                 websiteScanRefs = [{ id: websiteScanId, scanGroupType: 'deep-scan' }] as WebsiteScanRef[];
@@ -250,13 +252,18 @@ describe(WebsiteScanResultUpdater, () => {
                     id: websiteScanId,
                     _etag: etagStub,
                     knownPages: expectedKnownPages,
+                    discoveryPatterns: discoveryPatternsStub,
                 };
 
                 setupRetryHelperMock();
 
                 websiteScanResultsProviderMock.setup((m) => m.mergeOrCreate(It.isValue(expectedWebsiteScanResult))).verifiable();
 
-                await testSubject.updateWebsiteScanResultWithDiscoveredUrls(onDemandPageScanResult, newlyDiscoveredUrls);
+                await testSubject.updateWebsiteScanResultWithDiscoveredUrls(
+                    onDemandPageScanResult,
+                    newlyDiscoveredUrls,
+                    discoveryPatternsStub,
+                );
 
                 websiteScanResultsProviderMock.verifyAll();
             });
@@ -266,7 +273,11 @@ describe(WebsiteScanResultUpdater, () => {
                 websiteScanResultsProviderMock.setup((m) => m.mergeOrCreate(It.isAny())).throws(new Error());
 
                 await expect(
-                    testSubject.updateWebsiteScanResultWithDiscoveredUrls(onDemandPageScanResult, newlyDiscoveredUrls),
+                    testSubject.updateWebsiteScanResultWithDiscoveredUrls(
+                        onDemandPageScanResult,
+                        newlyDiscoveredUrls,
+                        discoveryPatternsStub,
+                    ),
                 ).rejects.toThrowError('Failed to update website scan results');
             });
         });

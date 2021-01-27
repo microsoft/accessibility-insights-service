@@ -38,9 +38,10 @@ export class WebsiteScanResultUpdater {
     public async updateWebsiteScanResultWithDiscoveredUrls(
         pageScanResult: OnDemandPageScanResult,
         newlyDiscoveredUrls: string[],
+        discoveryPatterns: string[],
     ): Promise<void> {
         await this.executeUpdateWithRetries(
-            async () => this.updateWebsiteScanResultWithDiscoveredUrlsImpl(pageScanResult, newlyDiscoveredUrls),
+            async () => this.updateWebsiteScanResultWithDiscoveredUrlsImpl(pageScanResult, newlyDiscoveredUrls, discoveryPatterns),
             `Failure to generate combined scan result. Retrying on error.`,
         );
     }
@@ -99,6 +100,7 @@ export class WebsiteScanResultUpdater {
     private async updateWebsiteScanResultWithDiscoveredUrlsImpl(
         pageScanResult: OnDemandPageScanResult,
         newlyDiscoveredUrls: string[],
+        discoveryPatterns: string[],
     ): Promise<void> {
         const websiteScanRef = this.getWebsiteScanRef(pageScanResult, 'deep-scan');
         if (!websiteScanRef) {
@@ -113,6 +115,7 @@ export class WebsiteScanResultUpdater {
             id: websiteScanResult.id,
             knownPages: updatedKnownPages,
             _etag: websiteScanResult._etag,
+            discoveryPatterns: discoveryPatterns,
         };
 
         await this.updateWebsiteScanResult(updatedWebsiteScanResults);
