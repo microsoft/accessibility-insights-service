@@ -11,7 +11,7 @@ import { AxeResultMerger } from './axe-result-merger';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobGetter } from './combined-results-blob-getter';
 import { ReportSaver } from './report-saver';
-import { UrlDeduplicator } from './url-deduplicator';
+import { AddUniqueUrls } from './add-unique-urls';
 
 @injectable()
 export class WebsiteScanResultUpdater {
@@ -25,7 +25,7 @@ export class WebsiteScanResultUpdater {
         @inject(CombinedReportGenerator) protected readonly combinedReportGenerator: CombinedReportGenerator,
         @inject(ReportSaver) protected readonly reportSaver: ReportSaver,
         @inject(CombinedResultsBlobGetter) protected readonly combinedResultsBlobGetter: CombinedResultsBlobGetter,
-        @inject(UrlDeduplicator) protected readonly urlDeduplicator: UrlDeduplicator,
+        protected readonly addUniqueUrls: typeof AddUniqueUrls = AddUniqueUrls,
     ) {}
 
     public async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -74,14 +74,13 @@ export class WebsiteScanResultUpdater {
         });
 
         const combinedAxeResults = await this.axeResultMerger.mergeAxeResults(axeScanResults.results, combinedResultsBlobInfo);
-        const report = await this.reportSaver.save(
-            this.combinedReportGenerator.generate(
-                combinedAxeResults,
-                websiteScanResult,
-                axeScanResults.userAgent,
-                axeScanResults.browserResolution,
-            ),
+        const generatedReport = this.combinedReportGenerator.generate(
+            combinedAxeResults,
+            websiteScanResult,
+            axeScanResults.userAgent,
+            axeScanResults.browserResolution,
         );
+        const report = await this.reportSaver.save(generatedReport);
 
         const updatedWebsiteScanResults = {
             id: websiteScanResult.id,
@@ -90,7 +89,7 @@ export class WebsiteScanResultUpdater {
             _etag: websiteScanResult._etag,
         } as Partial<WebsiteScanResult>;
 
-        await this.updateWebsiteScanResult(updatedWebsiteScanResults, ' with combined result metadata');
+        await this.updateWebsiteScanResult(updatedWebsiteScanResults, 'with combined result metadata');
 
         if (report) {
             pageScanResult.reports.push(report);
@@ -108,7 +107,7 @@ export class WebsiteScanResultUpdater {
 
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
         const knownPages = websiteScanResult.knownPages;
-        const updatedKnownPages = this.urlDeduplicator.dedupe(knownPages, newlyDiscoveredUrls);
+        const updatedKnownPages = this.addUniqueUrls(knownPages, newlyDiscoveredUrls);
 
         const updatedWebsiteScanResults: Partial<WebsiteScanResult> = {
             id: websiteScanResult.id,
@@ -122,14 +121,14 @@ export class WebsiteScanResultUpdater {
     private async updateWebsiteScanResult(updatedWebsiteScanResults: Partial<WebsiteScanResult>, description?: string): Promise<void> {
         try {
             this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
-            this.logger.logInfo(`Successfully updated website scan results${description}.`);
+            this.logger.logInfo(`Successfully updated website scan results ${description}.`);
         } catch (error) {
-            this.logger.logError(`Failed to update website scan results with combined result metadata${description}.`, {
+            this.logger.logError(`Failed to update website scan results with combined result metadata ${description}.`, {
                 error: System.serializeError(error),
             });
 
             throw new Error(
-                `Failed to update website scan results${description}. Document Id: ${
+                `Failed to update website scan results ${description}. Document Id: ${
                     updatedWebsiteScanResults.id
                 } Error: ${System.serializeError(error)}`,
             );

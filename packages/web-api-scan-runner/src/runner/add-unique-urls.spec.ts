@@ -1,34 +1,29 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
-import { UrlDeduplicator } from './url-deduplicator';
+import { AddUniqueUrls } from './add-unique-urls';
 
-describe(UrlDeduplicator, () => {
-    let testSubject: UrlDeduplicator;
-    beforeEach(() => {
-        testSubject = new UrlDeduplicator();
-    });
-
+describe(AddUniqueUrls, () => {
     test('duplicates in given urls', () => {
         const old: string[] = ['abc', 'def'];
         const newUrls: string[] = ['abc', 'ghi'];
         const expected: string[] = ['abc', 'def', 'ghi'];
-        expect(testSubject.dedupe(old, newUrls)).toEqual(expected);
+        expect(AddUniqueUrls(old, newUrls)).toEqual(expected);
     });
 
-    test('no dupelicates', () => {
+    test('no duplicates', () => {
         const old: string[] = ['abc', 'def'];
         const newUrls: string[] = ['ghi'];
         const expected: string[] = ['abc', 'def', 'ghi'];
-        expect(testSubject.dedupe(old, newUrls)).toEqual(expected);
+        expect(AddUniqueUrls(old, newUrls)).toEqual(expected);
     });
 
     test('empty arrays', () => {
         const old: string[] = ['abc', 'def'];
         const newUrls: string[] = [];
         const expected: string[] = ['abc', 'def'];
-        expect(testSubject.dedupe(old, newUrls)).toEqual(expected);
-        expect(testSubject.dedupe(newUrls, old)).toEqual(expected);
-        expect(testSubject.dedupe([], [])).toEqual([]);
+        expect(AddUniqueUrls(old, newUrls)).toEqual(expected);
+        expect(AddUniqueUrls(newUrls, old)).toEqual(expected);
+        expect(AddUniqueUrls([], [])).toEqual([]);
     });
 });

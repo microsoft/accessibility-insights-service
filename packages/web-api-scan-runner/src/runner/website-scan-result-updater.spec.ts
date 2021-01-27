@@ -21,7 +21,7 @@ import { AxeResultMerger } from './axe-result-merger';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobGetter, CombinedResultsBlobInfo } from './combined-results-blob-getter';
 import { ReportSaver } from './report-saver';
-import { UrlDeduplicator } from './url-deduplicator';
+import { AddUniqueUrls } from './add-unique-urls';
 import { WebsiteScanResultUpdater } from './website-scan-result-updater';
 
 describe(WebsiteScanResultUpdater, () => {
@@ -32,7 +32,7 @@ describe(WebsiteScanResultUpdater, () => {
     let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;
     let reportSaverMock: IMock<ReportSaver>;
     let combinedResultsBlobGetterMock: IMock<CombinedResultsBlobGetter>;
-    let urlDeduplicatorMock: IMock<UrlDeduplicator>;
+    let addUniqueUrlsMock: IMock<typeof AddUniqueUrls>;
 
     let testSubject: WebsiteScanResultUpdater;
 
@@ -50,7 +50,7 @@ describe(WebsiteScanResultUpdater, () => {
         combinedReportGeneratorMock = Mock.ofType<CombinedReportGenerator>();
         reportSaverMock = Mock.ofType<ReportSaver>();
         combinedResultsBlobGetterMock = Mock.ofType<CombinedResultsBlobGetter>();
-        urlDeduplicatorMock = Mock.ofType<UrlDeduplicator>();
+        addUniqueUrlsMock = Mock.ofType<typeof AddUniqueUrls>();
 
         testSubject = new WebsiteScanResultUpdater(
             loggerMock.object,
@@ -60,7 +60,7 @@ describe(WebsiteScanResultUpdater, () => {
             combinedReportGeneratorMock.object,
             reportSaverMock.object,
             combinedResultsBlobGetterMock.object,
-            urlDeduplicatorMock.object,
+            addUniqueUrlsMock.object,
         );
 
         onDemandPageScanResult = {
@@ -117,6 +117,7 @@ describe(WebsiteScanResultUpdater, () => {
             let combinedAxeResultsStub: CombinedScanResults;
             let generatedReportStub: GeneratedReport;
             let onDemandPageScanResultStub: OnDemandPageScanReport;
+            let errorStub: Error;
 
             beforeEach(() => {
                 combinedResultsBlobId = 'some-results-blob-id';
@@ -130,6 +131,7 @@ describe(WebsiteScanResultUpdater, () => {
                 websiteScanRefs = [{ id: websiteScanId, scanGroupType: 'consolidated-scan-report' }] as WebsiteScanRef[];
                 onDemandPageScanResult.websiteScanRefs = websiteScanRefs;
 
+                errorStub = new Error();
                 websiteScanResultsProviderMock
                     .setup((m) => m.read(websiteScanId))
                     .returns(() => Promise.resolve(websiteScanResultReadResponse));
@@ -191,11 +193,20 @@ describe(WebsiteScanResultUpdater, () => {
 
             test('unsuccessfully update website scan result; throws error', async () => {
                 setupRetryHelperMock();
-                websiteScanResultsProviderMock.setup((m) => m.mergeOrCreate(It.isAny())).throws(new Error());
+                websiteScanResultsProviderMock.setup((m) => m.mergeOrCreate(It.isAny())).throws(errorStub);
 
                 await expect(testSubject.generateCombinedScanResults(axeResultsStub, onDemandPageScanResult)).rejects.toThrowError(
                     'Failed to update website scan results',
                 );
+            });
+
+            test('axe result merger throws error', async () => {
+                setupRetryHelperMock();
+
+                axeResultMergerMock.reset();
+                axeResultMergerMock.setup((m) => m.mergeAxeResults(It.isAny(), It.isAny())).throws(errorStub);
+
+                await expect(testSubject.generateCombinedScanResults(axeResultsStub, onDemandPageScanResult)).rejects.toThrowError();
             });
         });
     });
@@ -231,7 +242,7 @@ describe(WebsiteScanResultUpdater, () => {
                 websiteScanResultsProviderMock
                     .setup((m) => m.read(websiteScanId))
                     .returns(() => Promise.resolve(websiteScanResultReadResponse));
-                urlDeduplicatorMock.setup((m) => m.dedupe(knownPages, newlyDiscoveredUrls)).returns(() => expectedKnownPages);
+                addUniqueUrlsMock.setup((m) => m(knownPages, newlyDiscoveredUrls)).returns(() => expectedKnownPages);
             });
 
             test('successfully update website scan result', async () => {
