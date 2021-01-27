@@ -115,7 +115,7 @@ export class WebsiteScanResultUpdater {
             _etag: websiteScanResult._etag,
         };
 
-        return this.updateWebsiteScanResult(updatedWebsiteScanResults);
+        await this.updateWebsiteScanResult(updatedWebsiteScanResults);
     }
 
     private async updateWebsiteScanResult(updatedWebsiteScanResults: Partial<WebsiteScanResult>, description?: string): Promise<void> {
