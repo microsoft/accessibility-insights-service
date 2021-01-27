@@ -3,6 +3,6 @@
 
 import { uniq } from 'lodash';
 
-export const AddUniqueUrls = (discoveredUrls: string[], newUrls: string[]) => {
+export const addUniqueUrls = (discoveredUrls: string[], newUrls: string[]) => {
     return uniq(discoveredUrls.concat(newUrls));
 };

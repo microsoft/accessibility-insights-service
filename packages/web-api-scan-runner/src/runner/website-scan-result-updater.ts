@@ -11,7 +11,7 @@ import { AxeResultMerger } from './axe-result-merger';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobGetter } from './combined-results-blob-getter';
 import { ReportSaver } from './report-saver';
-import { AddUniqueUrls } from './add-unique-urls';
+import { addUniqueUrls } from './add-unique-urls';
 
 @injectable()
 export class WebsiteScanResultUpdater {
@@ -25,7 +25,7 @@ export class WebsiteScanResultUpdater {
         @inject(CombinedReportGenerator) protected readonly combinedReportGenerator: CombinedReportGenerator,
         @inject(ReportSaver) protected readonly reportSaver: ReportSaver,
         @inject(CombinedResultsBlobGetter) protected readonly combinedResultsBlobGetter: CombinedResultsBlobGetter,
-        protected readonly addUniqueUrls: typeof AddUniqueUrls = AddUniqueUrls,
+        protected readonly addUniqueUrlsFunc: typeof addUniqueUrls = addUniqueUrls,
     ) {}
 
     public async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -107,7 +107,7 @@ export class WebsiteScanResultUpdater {
 
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
         const knownPages = websiteScanResult.knownPages;
-        const updatedKnownPages = this.addUniqueUrls(knownPages, newlyDiscoveredUrls);
+        const updatedKnownPages = this.addUniqueUrlsFunc(knownPages, newlyDiscoveredUrls);
 
         const updatedWebsiteScanResults: Partial<WebsiteScanResult> = {
             id: websiteScanResult.id,

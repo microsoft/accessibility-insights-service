@@ -21,7 +21,7 @@ import { AxeResultMerger } from './axe-result-merger';
 import { CombinedReportGenerator } from './combined-report-generator';
 import { CombinedResultsBlobGetter, CombinedResultsBlobInfo } from './combined-results-blob-getter';
 import { ReportSaver } from './report-saver';
-import { AddUniqueUrls } from './add-unique-urls';
+import { addUniqueUrls } from './add-unique-urls';
 import { WebsiteScanResultUpdater } from './website-scan-result-updater';
 
 describe(WebsiteScanResultUpdater, () => {
@@ -32,7 +32,7 @@ describe(WebsiteScanResultUpdater, () => {
     let combinedReportGeneratorMock: IMock<CombinedReportGenerator>;
     let reportSaverMock: IMock<ReportSaver>;
     let combinedResultsBlobGetterMock: IMock<CombinedResultsBlobGetter>;
-    let addUniqueUrlsMock: IMock<typeof AddUniqueUrls>;
+    let addUniqueUrlsMock: IMock<typeof addUniqueUrls>;
 
     let testSubject: WebsiteScanResultUpdater;
 
@@ -50,7 +50,7 @@ describe(WebsiteScanResultUpdater, () => {
         combinedReportGeneratorMock = Mock.ofType<CombinedReportGenerator>();
         reportSaverMock = Mock.ofType<ReportSaver>();
         combinedResultsBlobGetterMock = Mock.ofType<CombinedResultsBlobGetter>();
-        addUniqueUrlsMock = Mock.ofType<typeof AddUniqueUrls>();
+        addUniqueUrlsMock = Mock.ofType<typeof addUniqueUrls>();
 
         testSubject = new WebsiteScanResultUpdater(
             loggerMock.object,
