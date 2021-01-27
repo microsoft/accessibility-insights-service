@@ -131,7 +131,7 @@ export class Runner {
     }
 
     private async generateCombinedScanResultsImpl(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (pageScanResult.websiteScanRefs === undefined || pageScanResult.websiteScanRefs.length === 0) {
+        if (axeScanResults === undefined || pageScanResult.websiteScanRefs === undefined || pageScanResult.websiteScanRefs.length === 0) {
             return;
         }
 
