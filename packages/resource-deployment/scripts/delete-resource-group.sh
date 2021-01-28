@@ -49,7 +49,7 @@ getResourcesToDelete() {
 }
 
 deleteResources() {
-    local deleteTimeout=1200
+    local deleteTimeout=1800
     local end=$((SECONDS + $deleteTimeout))
 
     getResourcesToDelete
