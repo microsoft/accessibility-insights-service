@@ -79,6 +79,10 @@ export class WebsiteScanResultProvider {
             mergedDocument.reports = _.uniqBy(mergedDocument.reports, (r) => r.reportId);
         }
 
+        if (mergedDocument.discoveryPatterns !== undefined) {
+            mergedDocument.discoveryPatterns = _.uniq(mergedDocument.discoveryPatterns);
+        }
+
         if (mergedDocument.pageScans !== undefined) {
             const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
             mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
