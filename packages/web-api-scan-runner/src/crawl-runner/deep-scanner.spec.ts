@@ -9,7 +9,7 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { DiscoveredUrlProcessor } from '../crawler/process-discovered-urls';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
@@ -91,15 +91,6 @@ describe(DeepScanner, () => {
         websiteScanResultUpdaterMock.verifyAll();
         urlProcessorMock.verifyAll();
         discoveryPatternGeneratorMock.verifyAll();
-    });
-
-    it('does not crawl if deepScan=false', async () => {
-        scanMetadata.deepScan = false;
-
-        websiteScanResultProviderMock.setup(w => w.read(It.isAny())).verifiable(Times.never());
-        crawlRunnerMock.setup(c => c.run(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-
-        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
     });
 
     it('logs and throws if websiteScanRefs is missing', () => {

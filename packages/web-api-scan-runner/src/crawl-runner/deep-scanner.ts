@@ -27,10 +27,6 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        if (!scanMetadata.deepScan) {
-            return;
-        }
-
         const websiteScanResult = await this.readWebsiteScanResult(pageScanResult, 'deep-scan');
 
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
