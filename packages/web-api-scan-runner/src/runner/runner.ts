@@ -399,7 +399,7 @@ export class Runner {
 
     private async deepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<void> {
         if (scanMetadata.deepScan) {
-            this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
+            await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
         }
     }
 }
