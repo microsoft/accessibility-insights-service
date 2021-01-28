@@ -37,10 +37,7 @@ export class DeepScanner {
         this.websiteScanResultUpdater.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, processedUrls, discoveryPatterns);
     }
 
-    private async readWebsiteScanResult(
-        pageScanResult: OnDemandPageScanResult,
-        scanGroupType: ScanGroupType
-    ): Promise<WebsiteScanResult> {
+    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, scanGroupType: ScanGroupType): Promise<WebsiteScanResult> {
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
         if (isNil(websiteScanRef)) {
             this.logger.logError(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);

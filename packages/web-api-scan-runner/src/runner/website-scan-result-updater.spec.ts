@@ -298,9 +298,7 @@ describe(WebsiteScanResultUpdater, () => {
 
                 setupRetryHelperMock();
 
-                websiteScanResultsProviderMock
-                    .setup((m) => m.mergeOrCreate(It.isValue(expectedWebsiteScanResult)))
-                    .verifiable();
+                websiteScanResultsProviderMock.setup((m) => m.mergeOrCreate(It.isValue(expectedWebsiteScanResult))).verifiable();
 
                 await testSubject.updateWebsiteScanResultWithDiscoveredUrls(
                     onDemandPageScanResult,

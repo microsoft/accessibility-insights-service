@@ -19,7 +19,7 @@ export class CrawlRunner {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
-    ) { }
+    ) {}
 
     public async run(baseUrl: string, discoveryPatterns: string[], page: Page): Promise<string[] | undefined> {
         this.logger.setCommonProperties({ url: baseUrl });

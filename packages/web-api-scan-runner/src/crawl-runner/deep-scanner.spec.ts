@@ -32,10 +32,10 @@ describe(DeepScanner, () => {
     const urlCrawlLimit = 5;
     const crawlConfig = { urlCrawlLimit } as CrawlConfig;
     const websiteScanResultId = 'websiteScanResult id';
-    const knownPages = [ 'knownUrl1', 'knownUrl2'];
-    const discoveredUrls = [ 'discoveredUrl1', 'discoveredUrl2' ];
-    const processedUrls = [ 'processedUrl1', 'processedUrl2' ];
-    const discoveryPatterns = [ 'discovery pattern' ];
+    const knownPages = ['knownUrl1', 'knownUrl2'];
+    const discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
+    const processedUrls = ['processedUrl1', 'processedUrl2'];
+    const discoveryPatterns = ['discovery pattern'];
     const crawlBaseUrl = 'base url';
     let scanMetadata: ScanMetadata;
     let pageScanResult: OnDemandPageScanResult;
@@ -53,8 +53,8 @@ describe(DeepScanner, () => {
         discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
         pageMock = Mock.ofType<Page>();
 
-        serviceConfigMock.setup(sc => sc.getConfigValue('crawlConfig')).returns(() => Promise.resolve(crawlConfig));
-        pageMock.setup(p => p.getUnderlyingPage()).returns(() => puppeteerPageStub);
+        serviceConfigMock.setup((sc) => sc.getConfigValue('crawlConfig')).returns(() => Promise.resolve(crawlConfig));
+        pageMock.setup((p) => p.getUnderlyingPage()).returns(() => puppeteerPageStub);
         scanMetadata = {
             url: url,
             deepScan: true,
@@ -80,7 +80,7 @@ describe(DeepScanner, () => {
             serviceConfigMock.object,
             websiteScanResultUpdaterMock.object,
             urlProcessorMock.object,
-            discoveryPatternGeneratorMock.object
+            discoveryPatternGeneratorMock.object,
         );
     });
 
@@ -96,7 +96,7 @@ describe(DeepScanner, () => {
     it('logs and throws if websiteScanRefs is missing', () => {
         pageScanResult.websiteScanRefs = undefined;
 
-        loggerMock.setup(l => l.logError(It.isAny(), It.isAny())).verifiable();
+        loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
         expect(testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object)).rejects.toThrow();
     });
@@ -104,7 +104,10 @@ describe(DeepScanner, () => {
     it('crawls and updates results with generated discovery pattern', async () => {
         websiteScanResult.discoveryPatterns = undefined;
         const generatedDiscoveryPattern = 'new discovery pattern';
-        discoveryPatternGeneratorMock.setup(d => d(crawlBaseUrl)).returns(() => generatedDiscoveryPattern).verifiable();
+        discoveryPatternGeneratorMock
+            .setup((d) => d(crawlBaseUrl))
+            .returns(() => generatedDiscoveryPattern)
+            .verifiable();
         setupReadWebsiteScanResult();
         setupCrawl([generatedDiscoveryPattern]);
         setupProcessUrls();
@@ -123,28 +126,26 @@ describe(DeepScanner, () => {
     });
 
     function setupReadWebsiteScanResult(): void {
-        websiteScanResultProviderMock
-        .setup(w => w.read(websiteScanResultId))
-        .returns(() => Promise.resolve(websiteScanResult));
+        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResultId)).returns(() => Promise.resolve(websiteScanResult));
     }
 
     function setupCrawl(crawlDiscoveryPatterns: string[]): void {
         crawlRunnerMock
-            .setup(c => c.run(url, crawlDiscoveryPatterns, puppeteerPageStub))
+            .setup((c) => c.run(url, crawlDiscoveryPatterns, puppeteerPageStub))
             .returns(() => Promise.resolve(discoveredUrls))
             .verifiable();
     }
 
     function setupProcessUrls(): void {
         urlProcessorMock
-            .setup(u => u(discoveredUrls, urlCrawlLimit, knownPages))
+            .setup((u) => u(discoveredUrls, urlCrawlLimit, knownPages))
             .returns(() => processedUrls)
             .verifiable();
     }
 
     function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
         websiteScanResultUpdaterMock
-            .setup(w => w.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, processedUrls, crawlDiscoveryPatterns))
+            .setup((w) => w.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, processedUrls, crawlDiscoveryPatterns))
             .verifiable();
     }
 });

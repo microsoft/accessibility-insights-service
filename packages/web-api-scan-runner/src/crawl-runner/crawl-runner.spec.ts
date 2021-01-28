@@ -49,12 +49,7 @@ describe('CrawlRunner', () => {
     it('returns undefined when crawler provider returns null', async () => {
         const crawlerProviderMock = createCrawlerProviderMock(null);
 
-        const crawlRunner = new CrawlRunner(
-            crawlerProviderMock.object,
-            loggerMock.object,
-            serviceConfigMock.object,
-            batchConfigStub,
-        );
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
 
         expect(await crawlRunner.run(baseUrl, discoveryPatterns, page)).toBeUndefined();
 
@@ -72,12 +67,7 @@ describe('CrawlRunner', () => {
 
         initServiceConfigMock();
 
-        const crawlRunner = new CrawlRunner(
-            crawlerProviderMock.object,
-            loggerMock.object,
-            serviceConfigMock.object,
-            batchConfigStub,
-        );
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
 
         const retVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 
@@ -110,12 +100,7 @@ describe('CrawlRunner', () => {
 
         initServiceConfigMock();
 
-        const crawlRunner = new CrawlRunner(
-            crawlerProviderMock.object,
-            loggerMock.object,
-            serviceConfigMock.object,
-            batchConfigStub,
-        );
+        const crawlRunner = new CrawlRunner(crawlerProviderMock.object, loggerMock.object, serviceConfigMock.object, batchConfigStub);
 
         const actualRetVal = await crawlRunner.run(baseUrl, discoveryPatterns, page);
 

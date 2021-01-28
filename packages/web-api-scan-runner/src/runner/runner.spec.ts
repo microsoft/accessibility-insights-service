@@ -633,11 +633,11 @@ describe(Runner, () => {
     });
 
     describe('deepScan', () => {
-        it('run deep scan if deepScan=true', async() => {
+        it('run deep scan if deepScan=true', async () => {
             scanMetadata.deepScan = true;
             setupScanAndSaveReports();
             deepScannerMock
-                .setup(ds => ds.runDeepScan(scanMetadata, It.isObjectWith(getScanResultWithNoViolations()), pageMock.object))
+                .setup((ds) => ds.runDeepScan(scanMetadata, It.isObjectWith(getScanResultWithNoViolations()), pageMock.object))
                 .verifiable();
 
             await runner.run();
@@ -648,9 +648,7 @@ describe(Runner, () => {
         it.each([false, undefined])('Do not run deep scan if deepScan=%s', async (deepScan) => {
             scanMetadata.deepScan = deepScan;
             setupScanAndSaveReports();
-            deepScannerMock
-                .setup(ds => ds.runDeepScan(It.isAny(), It.isAny(), It.isAny()))
-                .verifiable(Times.never());
+            deepScannerMock.setup((ds) => ds.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
             await runner.run();
 
@@ -665,7 +663,6 @@ describe(Runner, () => {
             setupUpdateScanRunResultCall(getScanResultWithNoViolations());
         }
     });
-
 
     function setupPageScan(results: AxeScanResults, scanCompleteTime?: Date): void {
         pageMock.setup((p) => p.create()).verifiable();
