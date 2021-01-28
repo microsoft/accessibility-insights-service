@@ -42,7 +42,7 @@ export class WebsiteScanResultUpdater {
     ): Promise<void> {
         await this.executeUpdateWithRetries(
             async () => this.updateWebsiteScanResultWithDiscoveredUrlsImpl(pageScanResult, newlyDiscoveredUrls, discoveryPatterns),
-            `Failure to generate combined scan result. Retrying on error.`,
+            `Failure to update websiteScanResult with crawl data. Retrying on error.`,
         );
     }
 
@@ -108,7 +108,7 @@ export class WebsiteScanResultUpdater {
         }
 
         const websiteScanResult = await this.websiteScanResultProvider.read(websiteScanRef.id);
-        const knownPages = websiteScanResult.knownPages;
+        const knownPages = websiteScanResult.knownPages ?? [];
         const updatedKnownPages = this.addUniqueUrlsFunc(knownPages, newlyDiscoveredUrls);
 
         const updatedWebsiteScanResults: Partial<WebsiteScanResult> = {

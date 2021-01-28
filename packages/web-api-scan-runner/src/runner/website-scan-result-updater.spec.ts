@@ -280,6 +280,36 @@ describe(WebsiteScanResultUpdater, () => {
                     ),
                 ).rejects.toThrowError('Failed to update website scan results');
             });
+
+            test('updates when knownPages is undefined', async () => {
+                websiteScanResultReadResponse.knownPages = undefined;
+                addUniqueUrlsMock.reset();
+                addUniqueUrlsMock
+                    .setup((m) => m([], newlyDiscoveredUrls))
+                    .returns(() => expectedKnownPages)
+                    .verifiable();
+
+                const expectedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                    id: websiteScanId,
+                    _etag: etagStub,
+                    knownPages: expectedKnownPages,
+                    discoveryPatterns: discoveryPatternsStub,
+                };
+
+                setupRetryHelperMock();
+
+                websiteScanResultsProviderMock
+                    .setup((m) => m.mergeOrCreate(It.isValue(expectedWebsiteScanResult)))
+                    .verifiable();
+
+                await testSubject.updateWebsiteScanResultWithDiscoveredUrls(
+                    onDemandPageScanResult,
+                    newlyDiscoveredUrls,
+                    discoveryPatternsStub,
+                );
+
+                websiteScanResultsProviderMock.verifyAll();
+            });
         });
     });
 
