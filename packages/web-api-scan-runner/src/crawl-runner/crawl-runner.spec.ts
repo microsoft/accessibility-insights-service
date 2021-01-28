@@ -9,8 +9,6 @@ import { Page } from 'puppeteer';
 import { IMock, It, Mock, MockBehavior } from 'typemoq';
 import { ServiceConfiguration } from 'common';
 import { BatchConfig } from 'azure-services';
-import { ScanMetadataConfig } from '../scan-metadata-config';
-import { ScanMetadata } from '../types/scan-metadata';
 import { CrawlRunner } from './crawl-runner';
 
 // This class exists because trying to mock a Crawler without it
@@ -24,7 +22,6 @@ class CrawlerMock extends Crawler<string[]> {
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
 describe('CrawlRunner', () => {
-    const scanId = 'testId';
     const baseUrl = 'testUrl';
     const discoveryPatterns = ['testPattern'];
     const page = {} as Page;
@@ -35,25 +32,17 @@ describe('CrawlRunner', () => {
     } as BatchConfig;
 
     let loggerMock: IMock<GlobalLogger>;
-    let scanMetaDataConfigMock: IMock<ScanMetadataConfig>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
-        loggerMock.setup((m) => m.setCommonProperties({ scanId: scanId })).verifiable();
-
-        scanMetaDataConfigMock = Mock.ofType<ScanMetadataConfig>(undefined, MockBehavior.Strict);
-        scanMetaDataConfigMock
-            .setup((m) => m.getConfig())
-            .returns(() => ({ id: scanId } as ScanMetadata))
-            .verifiable();
+        loggerMock.setup((m) => m.setCommonProperties({ url: baseUrl })).verifiable();
 
         serviceConfigMock = Mock.ofType<ServiceConfiguration>(undefined, MockBehavior.Strict);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
-        scanMetaDataConfigMock.verifyAll();
         serviceConfigMock.verifyAll();
     });
 
@@ -64,7 +53,6 @@ describe('CrawlRunner', () => {
             crawlerProviderMock.object,
             loggerMock.object,
             serviceConfigMock.object,
-            scanMetaDataConfigMock.object,
             batchConfigStub,
         );
 
@@ -88,7 +76,6 @@ describe('CrawlRunner', () => {
             crawlerProviderMock.object,
             loggerMock.object,
             serviceConfigMock.object,
-            scanMetaDataConfigMock.object,
             batchConfigStub,
         );
 
@@ -127,7 +114,6 @@ describe('CrawlRunner', () => {
             crawlerProviderMock.object,
             loggerMock.object,
             serviceConfigMock.object,
-            scanMetaDataConfigMock.object,
             batchConfigStub,
         );
 
