@@ -37,9 +37,15 @@ getResourcesToDelete() {
             continue
         fi
 
-        echo "  $id"
-        resourcesToDelete+=("$id")
+        if [[ -n "$id" ]]; then
+            echo "  $id"
+            resourcesToDelete+=("$id")
+        fi
     done <<<"$ids"
+
+    if [[ ${#resourcesToDelete[@]} -eq 0 ]]; then
+        echo "  none"
+    fi
 }
 
 deleteResources() {
