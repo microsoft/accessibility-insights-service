@@ -11,9 +11,9 @@ import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-import { DiscoveredUrlProcessor } from '../crawler/process-discovered-urls';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
 import { ScanMetadata } from '../types/scan-metadata';
+import { DiscoveredUrlProcessor } from './process-discovered-urls';
 import { CrawlRunner } from './crawl-runner';
 import { DeepScanner } from './deep-scanner';
 

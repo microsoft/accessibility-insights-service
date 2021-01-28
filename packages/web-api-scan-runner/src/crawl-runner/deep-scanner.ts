@@ -9,9 +9,9 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, ScanGroupType, WebsiteScanResult } from 'storage-documents';
-import { DiscoveredUrlProcessor, processDiscoveredUrls } from '../crawler/process-discovered-urls';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
 import { ScanMetadata } from '../types/scan-metadata';
+import { DiscoveredUrlProcessor, processDiscoveredUrls } from './process-discovered-urls';
 import { CrawlRunner } from './crawl-runner';
 
 @injectable()
