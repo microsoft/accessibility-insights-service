@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 import _, { isNil } from 'lodash';
-import { WebsiteScanResult } from 'storage-documents';
 
-export function processDiscoveredUrls(discoveredUrls: string[], urlCrawlLimit: number, websiteScanResult?: WebsiteScanResult): string[] {
+export type DiscoveredUrlProcessor = typeof processDiscoveredUrls;
+
+export function processDiscoveredUrls(discoveredUrls: string[], urlCrawlLimit: number, knownUrls?: string[]): string[] {
     let processedUrls = discoveredUrls;
     if (isNil(discoveredUrls)) {
         return [];
     }
 
-    if (!isNil(websiteScanResult?.knownPages)) {
-        processedUrls = removeUrlsFromList(discoveredUrls, websiteScanResult.knownPages);
+    if (!isNil(knownUrls)) {
+        processedUrls = removeUrlsFromList(discoveredUrls, knownUrls);
     }
 
-    return limitNumUrls(processedUrls, getUrlLimit(urlCrawlLimit, websiteScanResult));
+    return limitNumUrls(processedUrls, getUrlLimit(urlCrawlLimit, knownUrls));
 }
 
 function removeUrlsFromList(urlList: string[], removeUrls: string[]): string[] {
@@ -25,8 +26,8 @@ function limitNumUrls(urlList: string[], numUrls: number): string[] {
     return _.take(urlList, numUrls);
 }
 
-function getUrlLimit(urlCrawlLimit: number, websiteScanResult?: WebsiteScanResult): number {
-    const numKnownPages = isNil(websiteScanResult?.knownPages) ? 0 : websiteScanResult.knownPages.length;
+function getUrlLimit(urlCrawlLimit: number, knownUrls?: string[]): number {
+    const numKnownPages = isNil(knownUrls) ? 0 : knownUrls.length;
 
     return Math.max(urlCrawlLimit - numKnownPages, 0);
 }
