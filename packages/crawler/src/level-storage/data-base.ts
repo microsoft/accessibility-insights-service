@@ -5,7 +5,7 @@ import encode from 'encoding-down';
 import { inject, injectable, optional } from 'inversify';
 import leveldown from 'leveldown';
 import levelup, { LevelUp } from 'levelup';
-import { iocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 import { generateHash } from '../utility/crypto';
 import { DataBaseKey, ScanMetadata, ScanResult } from './storage-documents';
 
@@ -19,7 +19,7 @@ export class DataBase implements AsyncIterable<ScanResult> {
     private iterator: AsyncIterableIterator<string | Buffer>;
 
     constructor(
-        @inject(iocTypes.LevelUp) @optional() protected db?: LevelUp,
+        @inject(crawlerIocTypes.LevelUp) @optional() protected db?: LevelUp,
         protected readonly levelupObj: typeof levelup = levelup,
         protected readonly leveldownObj: typeof leveldown = leveldown,
         protected readonly encodeObj: typeof encode = encode,

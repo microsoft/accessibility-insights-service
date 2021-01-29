@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import { Container, interfaces } from 'inversify';
 import { IMock, Mock } from 'typemoq';
 import { CrawlerRunOptions } from './types/crawler-run-options';
-import { iocTypes } from './types/ioc-types';
+import { crawlerIocTypes } from './types/ioc-types';
 import { Crawler } from './crawler';
 import { PuppeteerCrawlerEngine } from './crawler/puppeteer-crawler-engine';
 
@@ -32,12 +32,12 @@ describe(Crawler, () => {
     it('crawl', async () => {
         const testInput: CrawlerRunOptions = { baseUrl: 'url' };
         containerMock
-            .setup((c) => c.get(iocTypes.CrawlerEngine))
+            .setup((c) => c.get(crawlerIocTypes.CrawlerEngine))
             .returns(() => crawlerEngineMock.object)
             .verifiable();
         containerBindMock.setup((o) => o.toConstantValue(testInput)).verifiable();
         containerMock
-            .setup((c) => c.bind(iocTypes.CrawlerRunOptions))
+            .setup((c) => c.bind(crawlerIocTypes.CrawlerRunOptions))
             .returns(() => containerBindMock.object)
             .verifiable();
         const startCommand = jest.spyOn(crawlerEngineMock.object, 'start').mockImplementationOnce(async () => Promise.resolve());

@@ -3,7 +3,7 @@
 
 import { GlobalLogger } from 'logger';
 import { inject, injectable } from 'inversify';
-import { Crawler, CrawlerRunOptions, iocTypes as crawlerIocTypes } from 'accessibility-insights-crawler';
+import { Crawler, CrawlerRunOptions, crawlerIocTypes } from 'accessibility-insights-crawler';
 import { Page } from 'puppeteer';
 import { ServiceConfiguration } from 'common';
 import { BatchConfig } from 'azure-services';

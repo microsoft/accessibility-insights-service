@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable, optional } from 'inversify';
-import { iocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 import { DataStore, scanResultStorageName } from './store-types';
 
 @injectable()
 export class LocalDataStore implements DataStore {
     constructor(
-        @inject(iocTypes.ApifyDataset) @optional() private datasetStore?: Apify.Dataset,
+        @inject(crawlerIocTypes.ApifyDataset) @optional() private datasetStore?: Apify.Dataset,
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
 

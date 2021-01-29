@@ -5,7 +5,7 @@ import { inject, injectable } from 'inversify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { ApifyRequestQueueProvider, iocTypes, PageProcessorFactory } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
 
@@ -14,8 +14,8 @@ import { CrawlerFactory } from './crawler-factory';
 @injectable()
 export class PuppeteerCrawlerEngine {
     public constructor(
-        @inject(iocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
-        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(crawlerIocTypes.PageProcessorFactory) private readonly pageProcessorFactory: PageProcessorFactory,
+        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
     ) {}

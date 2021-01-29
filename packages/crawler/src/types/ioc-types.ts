@@ -3,7 +3,7 @@
 import Apify from 'apify';
 import { PageProcessorBase } from '../page-processors/page-processor-base';
 
-export const iocTypes = {
+export const crawlerIocTypes = {
     ReporterFactory: 'ReporterFactory',
     CrawlerRunOptions: 'CrawlerRunOptions',
     PageProcessorFactory: 'Factory<PageProcessor>',
