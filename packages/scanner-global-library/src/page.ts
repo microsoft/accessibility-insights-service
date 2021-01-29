@@ -14,6 +14,7 @@ import { BrowserError } from './browser-error';
 
 @injectable()
 export class Page {
+    public requestUrl: string;
     public page: Puppeteer.Page;
     public browser: Puppeteer.Browser;
     public navigationResponse: Puppeteer.Response;
@@ -38,6 +39,7 @@ export class Page {
     }
 
     public async navigateToUrl(url: string): Promise<void> {
+        this.requestUrl = url;
         const response = await this.pageNavigator.navigate(url, this.page, async (browserError) => {
             this.logger?.logError('Page navigation error', { browserError: System.serializeError(browserError) });
             this.lastBrowserError = browserError;
@@ -92,7 +94,10 @@ export class Page {
             browserResolution: this.browserResolution,
         };
 
-        if (this.navigationResponse.request().redirectChain().length > 0) {
+        if (
+            this.navigationResponse.request().redirectChain().length > 0 ||
+            (this.requestUrl !== undefined && this.requestUrl !== axeResults.url)
+        ) {
             this.logger?.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url });
             scanResults.scannedUrl = axeResults.url;
         }
