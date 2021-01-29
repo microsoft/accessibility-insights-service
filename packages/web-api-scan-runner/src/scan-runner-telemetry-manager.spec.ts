@@ -45,11 +45,17 @@ describe(ScanRunnerTelemetryManager, () => {
         expect(testSubject.scanSubmitted).toBe(scanSubmittedTimestamp);
     });
 
-    it('trackScanFailed', () => {
+    it('trackBrowserScanFailed', () => {
+        setupTrackEvent('BrowserScanFailed', { failedBrowserScans: 1 });
+
+        testSubject.trackBrowserScanFailed();
+    });
+
+    it('trackScanTaskFailed', () => {
         setupTrackEvent('ScanRequestFailed', { failedScanRequests: 1 });
         setupTrackEvent('ScanTaskFailed', { failedScanTasks: 1 });
 
-        testSubject.trackScanFailed();
+        testSubject.trackScanTaskFailed();
     });
 
     it('trackScanCompleted', () => {

@@ -25,7 +25,11 @@ export class ScanRunnerTelemetryManager {
         });
     }
 
-    public trackScanFailed(): void {
+    public trackBrowserScanFailed(): void {
+        this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
+    }
+
+    public trackScanTaskFailed(): void {
         this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
         this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
     }

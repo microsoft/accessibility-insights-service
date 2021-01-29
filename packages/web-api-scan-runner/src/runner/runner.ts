@@ -85,7 +85,7 @@ export class Runner {
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
 
-            this.telemetryManager.trackScanFailed();
+            this.telemetryManager.trackScanTaskFailed();
         } finally {
             await this.closePage();
             this.telemetryManager.trackScanCompleted();
@@ -312,7 +312,7 @@ export class Runner {
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
 
             this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
-            this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
+            this.telemetryManager.trackBrowserScanFailed();
         }
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;

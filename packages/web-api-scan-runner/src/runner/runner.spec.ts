@@ -233,7 +233,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
 
         telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
         telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         await runner.run();
@@ -247,7 +247,7 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
         telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable();
         telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         await runner.run();
@@ -266,7 +266,6 @@ describe(Runner, () => {
         telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable(Times.never());
 
         await runner.run();
-        loggerMock.verifyAll();
     });
 
     it('sets scan status to pass if violation length = 0', async () => {
@@ -309,7 +308,8 @@ describe(Runner, () => {
     it('sends telemetry event on successful scan', async () => {
         telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
         telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackBrowserScanFailed()).verifiable(Times.never());
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(passedAxeScanResults);
@@ -319,13 +319,12 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(scanResult);
 
         await runner.run();
-        loggerMock.verifyAll();
     });
 
     it('sends telemetry event on scan error', async () => {
-        loggerMock.setup((lm) => lm.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 })).verifiable();
         telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackBrowserScanFailed()).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
         telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
@@ -335,7 +334,6 @@ describe(Runner, () => {
         setupUpdateScanRunResultCall(scanResult);
 
         await runner.run();
-        loggerMock.verifyAll();
     });
 
     describe('enqueue notification, send notification feature flag is enabled', () => {
