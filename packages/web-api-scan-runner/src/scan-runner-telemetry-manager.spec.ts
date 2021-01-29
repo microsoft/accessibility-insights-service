@@ -35,7 +35,7 @@ describe(ScanRunnerTelemetryManager, () => {
             scanWaitTime: scanWaitTimeMillis / 1000,
             startedScanTasks: 1,
         };
-        getCurrentDateMock.setup(g => g()).returns(() => scanStartedTimestamp);
+        getCurrentDateMock.setup((g) => g()).returns(() => scanStartedTimestamp);
         setupTrackEvent('ScanRequestRunning', scanRunningMeasurements);
         setupTrackEvent('ScanTaskStarted', scanStartedMeasurements);
 
@@ -59,7 +59,7 @@ describe(ScanRunnerTelemetryManager, () => {
     });
 
     it('trackScanCompleted', () => {
-        getCurrentDateMock.setup(g => g()).returns(() => scanCompletedTimestamp);
+        getCurrentDateMock.setup((g) => g()).returns(() => scanCompletedTimestamp);
         const scanTaskCompletedMeasurements = {
             scanExecutionTime: scanExecutionTimeMillis / 1000,
             scanTotalTime: (scanExecutionTimeMillis + scanWaitTimeMillis) / 1000,
@@ -75,20 +75,20 @@ describe(ScanRunnerTelemetryManager, () => {
     });
 
     it('trackScanCompleted does nothing if there is no scan start time set', () => {
-        loggerMock.setup(l => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        loggerMock.setup((l) => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
         testSubject.scanSubmitted = scanSubmittedTimestamp;
 
         testSubject.trackScanCompleted();
     });
 
     it('trackScanCompleted does nothing if there is no scan submitted time set', () => {
-        loggerMock.setup(l => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+        loggerMock.setup((l) => l.trackEvent(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
         testSubject.scanStarted = scanStartedTimestamp;
 
         testSubject.trackScanCompleted();
     });
 
     function setupTrackEvent(eventName: LoggerEvent, measurements: TelemetryMeasurements[LoggerEvent]): void {
-        loggerMock.setup(l => l.trackEvent(eventName, undefined, measurements)).verifiable();
+        loggerMock.setup((l) => l.trackEvent(eventName, undefined, measurements)).verifiable();
     }
 });

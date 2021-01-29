@@ -85,6 +85,7 @@ export class Runner {
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
 
+            this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.telemetryManager.trackScanTaskFailed();
         } finally {
             await this.closePage();

@@ -232,9 +232,9 @@ describe(Runner, () => {
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
 
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
 
         await runner.run();
     });
@@ -246,9 +246,9 @@ describe(Runner, () => {
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
 
         await runner.run();
     });
@@ -263,7 +263,7 @@ describe(Runner, () => {
                 ),
             )
             .verifiable();
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable(Times.never());
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable(Times.never());
 
         await runner.run();
     });
@@ -306,10 +306,10 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on successful scan', async () => {
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup(t => t.trackBrowserScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup((t) => t.trackBrowserScanFailed()).verifiable(Times.never());
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(passedAxeScanResults);
@@ -322,10 +322,10 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on scan error', async () => {
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackBrowserScanFailed()).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackBrowserScanFailed()).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(unscannableAxeScanResults);
