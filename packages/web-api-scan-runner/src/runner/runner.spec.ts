@@ -34,6 +34,7 @@ import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
+import { DeepScanner } from '../crawl-runner/deep-scanner';
 import { Runner } from './runner';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
@@ -61,12 +62,9 @@ describe(Runner, () => {
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let retryHelperMock: IMock<RetryHelper<void>>;
     let pageMock: IMock<Page>;
+    let deepScannerMock: IMock<DeepScanner>;
 
-    const scanMetadata: ScanMetadata = {
-        id: 'id',
-        url: 'url',
-    };
-
+    let scanMetadata: ScanMetadata;
     const onDemandPageScanResult: OnDemandPageScanResult = {
         url: 'url',
         scanResult: null,
@@ -168,6 +166,10 @@ describe(Runner, () => {
     };
 
     beforeEach(() => {
+        scanMetadata = {
+            id: 'id',
+            url: 'url',
+        };
         loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
@@ -187,6 +189,7 @@ describe(Runner, () => {
         combinedScanResultsProviderMock = Mock.ofType<CombinedScanResultsProvider>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
+        deepScannerMock = Mock.ofType<DeepScanner>();
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -209,6 +212,7 @@ describe(Runner, () => {
             axeResultsReducerMock.object,
             retryHelperMock.object,
             pageMock.object,
+            deepScannerMock.object,
         );
     });
 
@@ -625,6 +629,38 @@ describe(Runner, () => {
                     }
                 })
                 .verifiable();
+        }
+    });
+
+    describe('deepScan', () => {
+        it('run deep scan if deepScan=true', async () => {
+            scanMetadata.deepScan = true;
+            setupScanAndSaveReports();
+            deepScannerMock
+                .setup((ds) => ds.runDeepScan(scanMetadata, It.isObjectWith(getScanResultWithNoViolations()), pageMock.object))
+                .verifiable();
+
+            await runner.run();
+
+            deepScannerMock.verifyAll();
+        });
+
+        it.each([false, undefined])('Do not run deep scan if deepScan=%s', async (deepScan) => {
+            scanMetadata.deepScan = deepScan;
+            setupScanAndSaveReports();
+            deepScannerMock.setup((ds) => ds.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
+
+            await runner.run();
+
+            deepScannerMock.verifyAll();
+        });
+
+        function setupScanAndSaveReports(): void {
+            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+            setupPageScan(passedAxeScanResults);
+            setupGenerateReportsCall(passedAxeScanResults);
+            setupSaveAllReportsCall();
+            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
         }
     });
 

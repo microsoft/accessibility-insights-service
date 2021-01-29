@@ -4,7 +4,7 @@ import { inject, injectable } from 'inversify';
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import Apify from 'apify';
-import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { CrawlRequestProcessor } from '../page-processors/crawl-request-processor';
 import { CrawlerRunOptions } from '..';
 import { CrawlerEngine } from './crawler-engine';
@@ -14,10 +14,10 @@ import { CrawlerConfiguration } from './crawler-configuration';
 @injectable()
 export class SimpleCrawlerEngine implements CrawlerEngine<string[]> {
     public constructor(
-        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerFactory) private readonly crawlerFactory: CrawlerFactory,
         @inject(CrawlerConfiguration) private readonly crawlerConfiguration: CrawlerConfiguration,
-        @inject(iocTypes.RequestProcessor) private readonly requestProcessor: CrawlRequestProcessor,
+        @inject(crawlerIocTypes.RequestProcessor) private readonly requestProcessor: CrawlRequestProcessor,
     ) {}
 
     public async start(crawlerRunOptions: CrawlerRunOptions): Promise<string[]> {

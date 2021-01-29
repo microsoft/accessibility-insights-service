@@ -3,11 +3,10 @@
 
 import { GlobalLogger } from 'logger';
 import { inject, injectable } from 'inversify';
-import { Crawler, CrawlerRunOptions, iocTypes as crawlerIocTypes } from 'accessibility-insights-crawler';
+import { Crawler, CrawlerRunOptions, crawlerIocTypes } from 'accessibility-insights-crawler';
 import { Page } from 'puppeteer';
 import { ServiceConfiguration } from 'common';
 import { BatchConfig } from 'azure-services';
-import { ScanMetadataConfig } from '../scan-metadata-config';
 
 type CrawlerProvider = () => Promise<Crawler<string[]>>;
 
@@ -19,12 +18,8 @@ export class CrawlRunner {
         @inject(crawlerIocTypes.CrawlerProvider) private readonly getCrawler: CrawlerProvider,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
-        @inject(ScanMetadataConfig) scanMetadataConfig: ScanMetadataConfig,
         @inject(BatchConfig) private readonly batchConfig: BatchConfig,
-    ) {
-        const scanMetadata = scanMetadataConfig.getConfig();
-        this.logger.setCommonProperties({ scanId: scanMetadata.id });
-    }
+    ) {}
 
     public async run(baseUrl: string, discoveryPatterns: string[], page: Page): Promise<string[] | undefined> {
         const crawler = await this.getCrawler();

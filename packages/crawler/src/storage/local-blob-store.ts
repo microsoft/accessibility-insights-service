@@ -2,14 +2,14 @@
 // Licensed under the MIT License.
 import Apify from 'apify';
 import { inject, injectable, optional } from 'inversify';
-import { iocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 import { BlobStore, scanResultStorageName } from './store-types';
 
 /* eslint-disable @typescript-eslint/ban-types */
 @injectable()
 export class LocalBlobStore implements BlobStore {
     constructor(
-        @inject(iocTypes.ApifyKeyValueStore) @optional() private keyValueStore?: Apify.KeyValueStore,
+        @inject(crawlerIocTypes.ApifyKeyValueStore) @optional() private keyValueStore?: Apify.KeyValueStore,
         private readonly apifyObj: typeof Apify = Apify,
     ) {}
 

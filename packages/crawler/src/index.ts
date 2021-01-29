@@ -6,7 +6,7 @@ import './global-overrides';
 
 export { CrawlerRunOptions } from './types/crawler-run-options';
 
-export { iocTypes } from './types/ioc-types';
+export { crawlerIocTypes } from './types/ioc-types';
 export { Crawler } from './crawler';
 export { setupLocalCrawlerContainer, setupCloudCrawlerContainer } from './setup-crawler-container';
 export * from './level-storage/storage-documents';

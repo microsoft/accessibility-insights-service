@@ -36,6 +36,7 @@ describe(ScanMetadataConfig, () => {
         const args: ScanMetadata = {
             id: 'scan id',
             url: 'url',
+            deepScan: true,
         };
 
         beforeEach(() => {

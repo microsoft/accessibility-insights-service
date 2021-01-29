@@ -11,7 +11,7 @@ import { AccessibilityScanOperation } from '../page-operations/accessibility-sca
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-types';
-import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
 /* eslint-disable no-invalid-this */
@@ -55,7 +55,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
-        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,

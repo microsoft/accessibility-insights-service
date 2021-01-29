@@ -30,6 +30,8 @@ import { GeneratedReport, ReportGenerator } from '../report-generator/report-gen
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
+import { DeepScanner } from '../crawl-runner/deep-scanner';
+import { ScanMetadata } from '../types/scan-metadata';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -52,6 +54,7 @@ export class Runner {
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         @inject(Page) private readonly page: Page,
+        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
     ) {}
 
     public async run(): Promise<void> {
@@ -77,6 +80,9 @@ export class Runner {
         try {
             await this.openPage(scanMetadata.url);
             axeScanResults = await this.scan(pageScanResult, this.page);
+
+            await this.deepScan(scanMetadata, pageScanResult);
+
             await this.generateCombinedScanResults(axeScanResults, pageScanResult);
             this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
@@ -389,5 +395,11 @@ export class Runner {
 
     private async getDefaultFeatureFlags(): Promise<FeatureFlags> {
         return this.serviceConfig.getConfigValue('featureFlags');
+    }
+
+    private async deepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        if (scanMetadata.deepScan) {
+            await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
+        }
     }
 }

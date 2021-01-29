@@ -4,13 +4,13 @@ import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ApifySettings, ApifySettingsHandler, apifySettingsHandler } from '../apify/apify-settings';
 import { CrawlerRunOptions } from '../types/crawler-run-options';
-import { iocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 import { DiscoveryPatternFactory, getDiscoveryPatternForUrl } from '../apify/discovery-patterns';
 
 @injectable()
 export class CrawlerConfiguration {
     public constructor(
-        @inject(iocTypes.CrawlerRunOptions) private readonly crawlerRunOptions: CrawlerRunOptions,
+        @inject(crawlerIocTypes.CrawlerRunOptions) private readonly crawlerRunOptions: CrawlerRunOptions,
         private readonly settingsHandler: ApifySettingsHandler = apifySettingsHandler,
         private readonly createDiscoveryPattern: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}

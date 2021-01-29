@@ -55,6 +55,12 @@ describe(WebsiteScanResultProvider, () => {
     });
 
     it('merge website scan result with db document', async () => {
+        const testReport = {
+            reportId: 'reportId',
+            format: 'html',
+            href: 'report href',
+        };
+        const discoveryPattern = 'discoveryPattern';
         const websiteScanResult = {
             baseUrl: 'baseUrl',
             scanGroupId: 'scanGroupId',
@@ -63,6 +69,16 @@ describe(WebsiteScanResultProvider, () => {
                 { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
                 { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
             ],
+            reports: [
+                testReport,
+                {
+                    reportId: 'new id',
+                    format: 'html',
+                    href: 'report href',
+                },
+            ],
+            knownPages: ['new page'],
+            discoveryPatterns: [discoveryPattern],
         } as WebsiteScanResult;
         const websiteScanResultDbDocument = {
             ...websiteScanResult,
@@ -75,6 +91,16 @@ describe(WebsiteScanResultProvider, () => {
                 { scanId: 'scanId-current-to-remove', url: 'url2', timestamp: moment(dateNow).toJSON() },
                 { scanId: 'scanId-current-to-keep', url: 'url3', timestamp: moment(dateNow).toJSON() },
             ],
+            reports: [
+                testReport,
+                {
+                    reportId: 'existing id',
+                    format: 'html',
+                    href: 'report href',
+                },
+            ],
+            discoveryPatterns: [discoveryPattern, 'existing discovery pattern'],
+            knownPages: ['existing page'],
         } as WebsiteScanResult;
         const websiteScanResultMergedWithDbDocument = {
             ...websiteScanResult,
@@ -88,6 +114,21 @@ describe(WebsiteScanResultProvider, () => {
                 { scanId: 'scanId-current-to-keep', url: 'url3', timestamp: moment(dateNow).toJSON() },
                 { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
             ],
+            reports: [
+                testReport,
+                {
+                    reportId: 'existing id',
+                    format: 'html',
+                    href: 'report href',
+                },
+                {
+                    reportId: 'new id',
+                    format: 'html',
+                    href: 'report href',
+                },
+            ],
+            discoveryPatterns: [discoveryPattern, 'existing discovery pattern'],
+            knownPages: ['existing page', 'new page'],
         } as WebsiteScanResult;
         hashGeneratorMock
             .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))

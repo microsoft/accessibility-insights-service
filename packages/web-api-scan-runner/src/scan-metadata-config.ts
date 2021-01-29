@@ -6,7 +6,13 @@ import { ScanMetadata } from './types/scan-metadata';
 
 @injectable()
 export class ScanMetadataConfig {
-    constructor(private readonly argvObj: Argv = yargs) {}
+    constructor(private readonly argvObj: Argv = yargs) {
+        argvObj.boolean('deepScan');
+        // Temporary workaround for yargs v16 changing all env variables to lowercase
+        argvObj.alias({
+            deepscan: 'deepScan',
+        });
+    }
 
     public getConfig(): ScanMetadata {
         this.argvObj.env().demandOption(['id', 'url']);

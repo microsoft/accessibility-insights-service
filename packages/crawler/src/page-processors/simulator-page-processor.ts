@@ -13,7 +13,7 @@ import { Operation } from '../page-operations/operation';
 import { LocalBlobStore } from '../storage/local-blob-store';
 import { LocalDataStore } from '../storage/local-data-store';
 import { BlobStore, DataStore } from '../storage/store-types';
-import { ApifyRequestQueueProvider, iocTypes } from '../types/ioc-types';
+import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { PageProcessorBase } from './page-processor-base';
 
 /* eslint-disable no-invalid-this */
@@ -30,7 +30,7 @@ export class SimulatorPageProcessor extends PageProcessorBase {
         @inject(EnqueueActiveElementsOperation) protected readonly enqueueActiveElementsOp: EnqueueActiveElementsOperation,
         @inject(ClickElementOperation) protected readonly clickElementOp: ClickElementOperation,
         @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
-        @inject(iocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
+        @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
         protected readonly saveSnapshotExt: typeof Apify.utils.puppeteer.saveSnapshot = Apify.utils.puppeteer.saveSnapshot,

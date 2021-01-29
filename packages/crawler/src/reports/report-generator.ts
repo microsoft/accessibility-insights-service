@@ -3,11 +3,11 @@
 import { Report, ReporterFactory } from 'accessibility-insights-report';
 import { AxeResults } from 'axe-core';
 import { inject, injectable } from 'inversify';
-import { iocTypes } from '../types/ioc-types';
+import { crawlerIocTypes } from '../types/ioc-types';
 
 @injectable()
 export class ReportGenerator {
-    public constructor(@inject(iocTypes.ReporterFactory) private readonly reporterFactory: ReporterFactory) {}
+    public constructor(@inject(crawlerIocTypes.ReporterFactory) private readonly reporterFactory: ReporterFactory) {}
 
     public generateReport(axeResults: AxeResults, url: string, title: string): Report {
         const reporter = this.reporterFactory();
