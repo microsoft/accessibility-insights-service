@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper } from 'common';
-import { cloneDeep, isNil } from 'lodash';
-import { Logger, ScanTaskCompletedMeasurements, ScanTaskStartedMeasurements } from 'logger';
+import { cloneDeep } from 'lodash';
+import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import {
@@ -35,16 +35,12 @@ import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
+import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
-
-interface ScanRunTimestamps {
-    scanRequestTime: Date;
-    scanCompleteTime: Date;
-}
 
 describe(Runner, () => {
     let runner: Runner;
@@ -63,6 +59,7 @@ describe(Runner, () => {
     let retryHelperMock: IMock<RetryHelper<void>>;
     let pageMock: IMock<Page>;
     let deepScannerMock: IMock<DeepScanner>;
+    let telemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
 
     let scanMetadata: ScanMetadata;
     const onDemandPageScanResult: OnDemandPageScanResult = {
@@ -154,16 +151,8 @@ describe(Runner, () => {
         pageResponseCode: pageResponseCode,
     };
 
+    const scanSubmittedDate = new Date(1, 2, 3, 4);
     let dateNow: Date;
-
-    const queueTime: number = 20;
-    const executionTime: number = 30;
-    const scanStartedMeasurements: ScanTaskStartedMeasurements = { scanWaitTime: queueTime, startedScanTasks: 1 };
-    const scanCompletedMeasurements: ScanTaskCompletedMeasurements = {
-        scanExecutionTime: executionTime,
-        scanTotalTime: executionTime + queueTime,
-        completedScanTasks: 1,
-    };
 
     beforeEach(() => {
         scanMetadata = {
@@ -190,6 +179,7 @@ describe(Runner, () => {
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
         deepScannerMock = Mock.ofType<DeepScanner>();
+        telemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -213,6 +203,7 @@ describe(Runner, () => {
             retryHelperMock.object,
             pageMock.object,
             deepScannerMock.object,
+            telemetryManagerMock.object,
         );
     });
 
@@ -232,6 +223,7 @@ describe(Runner, () => {
         axeResultsReducerMock.verifyAll();
         retryHelperMock.verifyAll();
         pageMock.verifyAll();
+        telemetryManagerMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
@@ -239,6 +231,10 @@ describe(Runner, () => {
         setupPageScan(unscannableAxeScanResults);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
+
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         await runner.run();
     });
@@ -250,22 +246,11 @@ describe(Runner, () => {
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable();
-
-        const timestamps = setupTimeMocks(queueTime, executionTime);
-        // need mock Date.Now() after code throws
-        loggerMock
-            .setup((o) => o.logError(`The scanner failed to scan a page.`, It.isAny()))
-            .returns(() => MockDate.set(timestamps.scanCompleteTime));
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         await runner.run();
-
-        loggerMock.verifyAll();
     });
 
     it('skip task run when database state lock conflict', async () => {
@@ -278,6 +263,7 @@ describe(Runner, () => {
                 ),
             )
             .verifiable();
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable(Times.never());
 
         await runner.run();
         loggerMock.verifyAll();
@@ -321,26 +307,15 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on successful scan', async () => {
-        const timestamps = setupTimeMocks(queueTime, executionTime);
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupPageScan(passedAxeScanResults, timestamps.scanCompleteTime);
+        setupPageScan(passedAxeScanResults);
         setupGenerateReportsCall(passedAxeScanResults);
         setupSaveAllReportsCall();
         const scanResult = getScanResultWithNoViolations();
-        scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
 
         await runner.run();
@@ -348,23 +323,15 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on scan error', async () => {
-        const timestamps = setupTimeMocks(queueTime, executionTime);
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 })).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 })).verifiable(Times.never());
-
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskStarted', undefined, scanStartedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskCompleted', undefined, scanCompletedMeasurements)).verifiable();
-        loggerMock.setup((lm) => lm.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 })).verifiable(Times.never());
-
         loggerMock.setup((lm) => lm.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 })).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanFailed()).verifiable(Times.never());
+        telemetryManagerMock.setup(t => t.trackScanCompleted()).verifiable();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupPageScan(unscannableAxeScanResults, timestamps.scanCompleteTime);
+        setupPageScan(unscannableAxeScanResults);
         setupGenerateReportsCall(unscannableAxeScanResults);
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
-        scanResult.run.timestamp = timestamps.scanCompleteTime.toJSON();
         setupUpdateScanRunResultCall(scanResult);
 
         await runner.run();
@@ -474,7 +441,7 @@ describe(Runner, () => {
             guidGeneratorMock.reset();
             guidGeneratorMock.setup((g) => g.createGuid()).returns(() => combinedResultsBlobId);
             guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId);
-            guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
+            guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => scanSubmittedDate);
 
             websiteScanResult = {
                 id: websiteScanId,
@@ -664,19 +631,13 @@ describe(Runner, () => {
         }
     });
 
-    function setupPageScan(results: AxeScanResults, scanCompleteTime?: Date): void {
+    function setupPageScan(results: AxeScanResults): void {
         pageMock.setup((p) => p.create()).verifiable();
         pageMock.setup((p) => p.navigateToUrl(scanMetadata.url)).verifiable();
 
         scannerMock
             .setup(async (s) => s.scan(pageMock.object))
-            .returns(async () => {
-                if (!isNil(scanCompleteTime)) {
-                    MockDate.set(scanCompleteTime);
-                }
-
-                return results;
-            })
+            .returns(async () => results)
             .verifiable();
 
         pageMock.setup((p) => p.close()).verifiable();
@@ -809,31 +770,6 @@ describe(Runner, () => {
     function setupGuidGenerator(): void {
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
-        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => new Date());
-    }
-
-    function setupTimeMocks(queueTimestamp: number, executionTimestamp: number): ScanRunTimestamps {
-        const scanRequestTime: Date = new Date();
-        const scanCompleteTime: Date = new Date();
-        scanRequestTime.setSeconds(scanRequestTime.getSeconds() - queueTimestamp);
-
-        guidGeneratorMock.reset();
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
-        guidGeneratorMock
-            .setup((g) => g.getGuidTimestamp('id'))
-            .returns(() => scanRequestTime)
-            .verifiable();
-        scanCompleteTime.setSeconds(scanCompleteTime.getSeconds() + executionTimestamp);
-
-        guidGeneratorMock.reset();
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
-        guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
-        guidGeneratorMock
-            .setup((g) => g.getGuidTimestamp('id'))
-            .returns(() => scanRequestTime)
-            .verifiable();
-
-        return { scanRequestTime: scanRequestTime, scanCompleteTime: scanCompleteTime };
+        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => scanSubmittedDate);
     }
 });
