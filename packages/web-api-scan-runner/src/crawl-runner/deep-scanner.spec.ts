@@ -13,7 +13,7 @@ import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
 import { ScanMetadata } from '../types/scan-metadata';
-import { DiscoveredUrlProcessor } from './process-discovered-urls';
+import { DiscoveredUrlProcessor } from './discovered-url-processor';
 import { CrawlRunner } from './crawl-runner';
 import { DeepScanner } from './deep-scanner';
 

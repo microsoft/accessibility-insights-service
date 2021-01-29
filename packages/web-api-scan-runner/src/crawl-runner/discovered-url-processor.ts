@@ -3,9 +3,9 @@
 
 import _, { isNil } from 'lodash';
 
-export type DiscoveredUrlProcessor = typeof processDiscoveredUrls;
+export type DiscoveredUrlProcessor = typeof discoveredUrlProcessor;
 
-export function processDiscoveredUrls(discoveredUrls: string[], urlCrawlLimit: number, knownUrls?: string[]): string[] {
+export function discoveredUrlProcessor(discoveredUrls: string[], urlCrawlLimit: number, knownUrls?: string[]): string[] {
     let processedUrls = discoveredUrls;
     if (isNil(discoveredUrls)) {
         return [];

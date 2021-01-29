@@ -11,7 +11,7 @@ import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, ScanGroupType, WebsiteScanResult } from 'storage-documents';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
 import { ScanMetadata } from '../types/scan-metadata';
-import { DiscoveredUrlProcessor, processDiscoveredUrls } from './process-discovered-urls';
+import { DiscoveredUrlProcessor, discoveredUrlProcessor } from './discovered-url-processor';
 import { CrawlRunner } from './crawl-runner';
 
 @injectable()
@@ -22,7 +22,7 @@ export class DeepScanner {
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(WebsiteScanResultUpdater) private readonly websiteScanResultUpdater: WebsiteScanResultUpdater,
-        private readonly processUrls: DiscoveredUrlProcessor = processDiscoveredUrls,
+        private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
         private readonly discoveryPatternGenerator: DiscoveryPatternFactory = getDiscoveryPatternForUrl,
     ) {}
 
