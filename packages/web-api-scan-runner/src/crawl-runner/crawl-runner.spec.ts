@@ -36,7 +36,6 @@ describe('CrawlRunner', () => {
 
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>(undefined, MockBehavior.Loose);
-        loggerMock.setup((m) => m.setCommonProperties({ url: baseUrl })).verifiable();
 
         serviceConfigMock = Mock.ofType<ServiceConfiguration>(undefined, MockBehavior.Strict);
     });

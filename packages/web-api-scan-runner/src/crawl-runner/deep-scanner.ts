@@ -29,6 +29,12 @@ export class DeepScanner {
     public async runDeepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
         const websiteScanResult = await this.readWebsiteScanResult(pageScanResult, 'deep-scan');
 
+        this.logger.setCommonProperties({
+            url: scanMetadata.url,
+            scanId: scanMetadata.id,
+            websiteScanId: websiteScanResult.id,
+        });
+
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.getUnderlyingPage());
         const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;

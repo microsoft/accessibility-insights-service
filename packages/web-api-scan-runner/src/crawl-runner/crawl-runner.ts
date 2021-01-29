@@ -22,8 +22,6 @@ export class CrawlRunner {
     ) {}
 
     public async run(baseUrl: string, discoveryPatterns: string[], page: Page): Promise<string[] | undefined> {
-        this.logger.setCommonProperties({ url: baseUrl });
-
         const crawler = await this.getCrawler();
         if (crawler == null) {
             this.logger.logInfo('No crawler provided by crawler provider');

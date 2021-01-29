@@ -68,6 +68,7 @@ describe(DeepScanner, () => {
             ],
         } as OnDemandPageScanResult;
         websiteScanResult = {
+            id: websiteScanResultId,
             knownPages: knownPages,
             discoveryPatterns: discoveryPatterns,
             baseUrl: crawlBaseUrl,
@@ -104,6 +105,7 @@ describe(DeepScanner, () => {
     it('crawls and updates results with generated discovery pattern', async () => {
         websiteScanResult.discoveryPatterns = undefined;
         const generatedDiscoveryPattern = 'new discovery pattern';
+        setupLoggerProperties();
         discoveryPatternGeneratorMock
             .setup((d) => d(crawlBaseUrl))
             .returns(() => generatedDiscoveryPattern)
@@ -118,6 +120,7 @@ describe(DeepScanner, () => {
 
     it('crawls and updates results with previously existing discovery pattern', async () => {
         setupReadWebsiteScanResult();
+        setupLoggerProperties();
         setupCrawl(discoveryPatterns);
         setupProcessUrls();
         setupUpdateWebsiteScanResult(discoveryPatterns);
@@ -146,6 +149,18 @@ describe(DeepScanner, () => {
     function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
         websiteScanResultUpdaterMock
             .setup((w) => w.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, processedUrls, crawlDiscoveryPatterns))
+            .verifiable();
+    }
+
+    function setupLoggerProperties(): void {
+        loggerMock
+            .setup((l) =>
+                l.setCommonProperties({
+                    url: url,
+                    scanId: scanMetadata.id,
+                    websiteScanId: websiteScanResultId,
+                }),
+            )
             .verifiable();
     }
 });
