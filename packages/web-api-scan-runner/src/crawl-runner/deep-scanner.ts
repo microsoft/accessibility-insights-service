@@ -27,6 +27,12 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
+        if (!page.isOpen()) {
+            this.logger.logError('Page was closed or failed to open, unable to perform crawl');
+
+            return;
+        }
+
         const websiteScanResult = await this.readWebsiteScanResult(pageScanResult, 'deep-scan');
 
         this.logger.setCommonProperties({

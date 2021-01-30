@@ -65,11 +65,22 @@ export class Page {
     }
 
     public getUnderlyingPage(): Puppeteer.Page | null {
-        if (!isNil(this.lastBrowserError) || isNil(this.navigationResponse) || isNil(this.page)) {
+        if (!isNil(this.lastBrowserError) || isNil(this.navigationResponse)) {
             return null;
         }
 
         return this.page;
+    }
+
+    public isOpen(): boolean {
+        const browserOpen = !isNil(this.browser) && this.browser.isConnected();
+        const pageOpen = !isNil(this.page) && !this.page.isClosed();
+        const navigationSucceeded = isNil(this.lastBrowserError) && !isNil(this.navigationResponse);
+        if (browserOpen && pageOpen && navigationSucceeded) {
+            return true;
+        }
+
+        return false;
     }
 
     private async scanPageForIssues(contentSourcePath?: string): Promise<AxeScanResults> {

@@ -256,6 +256,68 @@ describe(Page, () => {
         });
     });
 
+    describe('isOpen', () => {
+        it('returns false if browser not launched', () => {
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns false if browser not connected', () => {
+            setupBrowserClosed(true);
+
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns false if page not launched', () => {
+            setupBrowserClosed(false);
+            page.browser = browserMock.object;
+
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns false if page was closed', () => {
+            setupBrowserClosed(false);
+            setupPageClosed(true);
+            simulatePageLaunch();
+
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns false if no page was navigated to', () => {
+            setupBrowserClosed(false);
+            setupPageClosed(false);
+            simulatePageLaunch();
+
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns false if there was a browser error', () => {
+            const browserError = { errorType: 'SslError', statusCode: 500 } as BrowserError;
+            setupBrowserClosed(false);
+            setupPageClosed(false);
+            simulatePageLaunch();
+            simulatePageNavigation(puppeteerResponseMock.object, browserError);
+
+            expect(page.isOpen()).toBe(false);
+        });
+
+        it('returns true if page is open', () => {
+            setupBrowserClosed(false);
+            setupPageClosed(false);
+            simulatePageLaunch();
+            simulatePageNavigation(puppeteerResponseMock.object);
+
+            expect(page.isOpen()).toBe(true);
+        });
+
+        function setupBrowserClosed(isClosed: boolean): void  {
+            browserMock.setup(b => b.isConnected()).returns(() => !isClosed);
+        }
+
+        function setupPageClosed(isClosed: boolean): void {
+            puppeteerPageMock.setup(pp => pp.isClosed()).returns(() => isClosed);
+        }
+    });
+
     function setupPageConfigurator(): void {
         pageConfiguratorMock
             .setup((o) => o.getBrowserResolution())

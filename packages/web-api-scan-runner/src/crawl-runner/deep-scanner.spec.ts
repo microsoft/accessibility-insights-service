@@ -9,7 +9,7 @@ import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
-import { IMock, It, Mock } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
 import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -37,6 +37,7 @@ describe(DeepScanner, () => {
     const processedUrls = ['processedUrl1', 'processedUrl2'];
     const discoveryPatterns = ['discovery pattern'];
     const crawlBaseUrl = 'base url';
+    let pageIsOpen: boolean;
     let scanMetadata: ScanMetadata;
     let pageScanResult: OnDemandPageScanResult;
     let websiteScanResult: WebsiteScanResult;
@@ -52,6 +53,7 @@ describe(DeepScanner, () => {
         urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
         discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
         pageMock = Mock.ofType<Page>();
+        pageMock.setup(p => p.isOpen()).returns(() => pageIsOpen);
 
         serviceConfigMock.setup((sc) => sc.getConfigValue('crawlConfig')).returns(() => Promise.resolve(crawlConfig));
         pageMock.setup((p) => p.getUnderlyingPage()).returns(() => puppeteerPageStub);
@@ -73,6 +75,7 @@ describe(DeepScanner, () => {
             discoveryPatterns: discoveryPatterns,
             baseUrl: crawlBaseUrl,
         } as WebsiteScanResult;
+        pageIsOpen = true;
 
         testSubject = new DeepScanner(
             loggerMock.object,
@@ -124,6 +127,21 @@ describe(DeepScanner, () => {
         setupCrawl(discoveryPatterns);
         setupProcessUrls();
         setupUpdateWebsiteScanResult(discoveryPatterns);
+
+        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
+    });
+
+    it('does nothing if the page failed to open', async () => {
+        websiteScanResultProviderMock
+            .setup((w) => w.read(It.isAny()))
+            .verifiable(Times.never());
+        crawlRunnerMock
+            .setup(c => c.run(It.isAny(), It.isAny(), It.isAny()))
+            .verifiable(Times.never());
+        websiteScanResultUpdaterMock
+            .setup(w => w.updateWebsiteScanResultWithDiscoveredUrls(It.isAny(), It.isAny(), It.isAny()))
+            .verifiable(Times.never());
+        pageIsOpen = false;
 
         await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
     });
