@@ -4,18 +4,20 @@ import 'reflect-metadata';
 
 import { GlobalLogger, Logger, LoggerEvent, TelemetryMeasurements } from 'logger';
 import { IMock, It, Mock, Times } from 'typemoq';
+import { GuidGenerator } from 'common';
 import { ScanRunnerTelemetryManager } from './scan-runner-telemetry-manager';
 
 class TestableScanRunnerTelemetryManager extends ScanRunnerTelemetryManager {
     public scanSubmitted: number;
     public scanStarted: number;
 
-    public constructor(logger: GlobalLogger, getCurrentTimestamp: () => number = Date.now) {
-        super(logger, getCurrentTimestamp);
+    public constructor(logger: GlobalLogger, guidGenerator: GuidGenerator, getCurrentTimestamp: () => number = Date.now) {
+        super(logger, guidGenerator, getCurrentTimestamp);
     }
 }
 
 describe(ScanRunnerTelemetryManager, () => {
+    const scanId = 'scan id';
     const scanWaitTimeMillis = 10000;
     const scanExecutionTimeMillis = 15000;
     const scanSubmittedTimestamp = 12345678;
@@ -24,14 +26,17 @@ describe(ScanRunnerTelemetryManager, () => {
 
     let loggerMock: IMock<GlobalLogger>;
     let getCurrentDateMock: IMock<() => number>;
+    let guidGeneratorMock: IMock<GuidGenerator>;
 
     let testSubject: TestableScanRunnerTelemetryManager;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
         getCurrentDateMock = Mock.ofInstance(() => null);
+        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        guidGeneratorMock.setup((gg) => gg.getGuidTimestamp(scanId)).returns(() => new Date(scanSubmittedTimestamp));
 
-        testSubject = new TestableScanRunnerTelemetryManager(loggerMock.object, getCurrentDateMock.object);
+        testSubject = new TestableScanRunnerTelemetryManager(loggerMock.object, guidGeneratorMock.object, getCurrentDateMock.object);
     });
 
     afterEach(() => {
@@ -48,7 +53,7 @@ describe(ScanRunnerTelemetryManager, () => {
         setupTrackEvent('ScanRequestRunning', scanRunningMeasurements);
         setupTrackEvent('ScanTaskStarted', scanStartedMeasurements);
 
-        testSubject.trackScanStarted(new Date(scanSubmittedTimestamp));
+        testSubject.trackScanStarted(scanId);
 
         expect(testSubject.scanStarted).toBe(scanStartedTimestamp);
         expect(testSubject.scanSubmitted).toBe(scanSubmittedTimestamp);

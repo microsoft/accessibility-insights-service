@@ -69,8 +69,7 @@ export class Runner {
             return;
         }
 
-        const scanSubmittedTimestamp = this.guidGenerator.getGuidTimestamp(scanMetadata.id);
-        this.telemetryManager.trackScanStarted(scanSubmittedTimestamp);
+        this.telemetryManager.trackScanStarted(scanMetadata.id);
 
         let axeScanResults: AxeScanResults;
         try {

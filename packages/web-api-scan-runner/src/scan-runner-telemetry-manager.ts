@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { isNil } from 'lodash';
 import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
@@ -12,12 +13,13 @@ export class ScanRunnerTelemetryManager {
 
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         private readonly getCurrentTimestamp: () => number = Date.now,
     ) {}
 
-    public trackScanStarted(scanSubmittedTimestamp: Date): void {
+    public trackScanStarted(scanId: string): void {
         this.scanStarted = this.getCurrentTimestamp();
-        this.scanSubmitted = scanSubmittedTimestamp.getTime();
+        this.scanSubmitted = this.guidGenerator.getGuidTimestamp(scanId).getTime();
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, {
             scanWaitTime: this.millisToSeconds(this.scanStarted - this.scanSubmitted),

@@ -763,11 +763,10 @@ describe(Runner, () => {
     function setupGuidGenerator(): void {
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
-        guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => scanSubmittedDate);
     }
 
     function setupBasicTelemetry(): void {
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanStarted('id')).verifiable();
         telemetryManagerMock.setup((t) => t.trackScanCompleted());
     }
 
