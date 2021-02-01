@@ -179,7 +179,7 @@ describe(Runner, () => {
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
         deepScannerMock = Mock.ofType<DeepScanner>();
-        telemetryManagerMock = Mock.ofType<ScanRunnerTelemetryManager>();
+        telemetryManagerMock = Mock.ofType(ScanRunnerTelemetryManager, MockBehavior.Strict);
 
         const featureFlags: FeatureFlags = { sendNotification: false };
         serviceConfigurationMock
@@ -227,28 +227,22 @@ describe(Runner, () => {
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
+        setupTelemetryWithBrowserError();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(unscannableAxeScanResults);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
 
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
-
         await runner.run();
     });
 
     it('sets job state to failed if scanner throws', async () => {
+        setupTelemetryWithTaskFailure();
         const failureMessage = 'scanner task failed message';
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScanWithException(failureMessage);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
-
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
 
         await runner.run();
     });
@@ -263,12 +257,12 @@ describe(Runner, () => {
                 ),
             )
             .verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable(Times.never());
 
         await runner.run();
     });
 
     it('sets scan status to pass if violation length = 0', async () => {
+        setupBasicTelemetry();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(passedAxeScanResults);
 
@@ -280,6 +274,7 @@ describe(Runner, () => {
     });
 
     it('return redirected url', async () => {
+        setupBasicTelemetry();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
@@ -295,6 +290,7 @@ describe(Runner, () => {
     });
 
     it('sets scan status to fail if violation length > 0', async () => {
+        setupBasicTelemetry();
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(axeScanResultsWithViolations);
 
@@ -306,10 +302,7 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on successful scan', async () => {
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup((t) => t.trackBrowserScanFailed()).verifiable(Times.never());
+        setupBasicTelemetry();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(passedAxeScanResults);
@@ -322,10 +315,7 @@ describe(Runner, () => {
     });
 
     it('sends telemetry event on scan error', async () => {
-        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup((t) => t.trackBrowserScanFailed()).verifiable();
-        telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable(Times.never());
-        telemetryManagerMock.setup((t) => t.trackScanCompleted()).verifiable();
+        setupTelemetryWithBrowserError();
 
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
         setupPageScan(unscannableAxeScanResults);
@@ -355,6 +345,7 @@ describe(Runner, () => {
         describe('on run completed', () => {
             beforeEach(() => {
                 notificationMessage.runStatus = 'completed';
+                setupBasicTelemetry();
                 setupGenerateReportsCall(passedAxeScanResults);
                 setupSaveAllReportsCall();
             });
@@ -393,6 +384,7 @@ describe(Runner, () => {
 
         describe('on run failed', () => {
             it('set notification state to failed if scanner throw', async () => {
+                setupTelemetryWithTaskFailure();
                 notificationMessage.runStatus = 'failed';
                 notificationMessage.scanStatus = undefined;
 
@@ -520,6 +512,7 @@ describe(Runner, () => {
 
             setupWebsiteScanResultsProviderMock(websiteScanResult, true);
             setupSuccessfulWebsiteScan();
+            telemetryManagerMock.setup(t => t.trackScanTaskFailed());
             setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false, true);
             setupCallsAfterCombinedResultsUpdate(true);
 
@@ -566,6 +559,7 @@ describe(Runner, () => {
         }
 
         function setupSuccessfulWebsiteScan(): void {
+            setupBasicTelemetry();
             setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { websiteScanRefs });
             setupPageScan(passedAxeScanResults);
         }
@@ -598,6 +592,7 @@ describe(Runner, () => {
     });
 
     describe('deepScan', () => {
+
         it('run deep scan if deepScan=true', async () => {
             scanMetadata.deepScan = true;
             setupScanAndSaveReports();
@@ -621,6 +616,7 @@ describe(Runner, () => {
         });
 
         function setupScanAndSaveReports(): void {
+            setupBasicTelemetry();
             setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
             setupPageScan(passedAxeScanResults);
             setupGenerateReportsCall(passedAxeScanResults);
@@ -769,5 +765,20 @@ describe(Runner, () => {
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId1);
         guidGeneratorMock.setup((g) => g.createGuid()).returns(() => reportId2);
         guidGeneratorMock.setup((g) => g.getGuidTimestamp('id')).returns(() => scanSubmittedDate);
+    }
+
+    function setupBasicTelemetry(): void {
+        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup(t => t.trackScanCompleted());
+    }
+
+    function setupTelemetryWithBrowserError(): void {
+        setupBasicTelemetry();
+        telemetryManagerMock.setup(t => t.trackBrowserScanFailed());
+    }
+
+    function setupTelemetryWithTaskFailure(): void {
+        setupBasicTelemetry();
+        telemetryManagerMock.setup(t => t.trackScanTaskFailed());
     }
 });
