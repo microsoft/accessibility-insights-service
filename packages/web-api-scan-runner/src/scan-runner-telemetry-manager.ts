@@ -7,8 +7,8 @@ import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
 
 @injectable()
 export class ScanRunnerTelemetryManager {
-    public scanSubmitted: number;
-    public scanStarted: number;
+    protected scanSubmitted: number;
+    protected scanStarted: number;
 
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
@@ -20,7 +20,7 @@ export class ScanRunnerTelemetryManager {
         this.scanSubmitted = scanSubmittedTimestamp.getTime();
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, {
-            scanWaitTime: (this.scanStarted - this.scanSubmitted) / 1000,
+            scanWaitTime: this.millisToSeconds(this.scanStarted - this.scanSubmitted),
             startedScanTasks: 1,
         });
     }
@@ -40,11 +40,15 @@ export class ScanRunnerTelemetryManager {
         }
         const scanCompletedTimestamp: number = this.getCurrentTimestamp();
         const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-            scanExecutionTime: (scanCompletedTimestamp - this.scanStarted) / 1000,
-            scanTotalTime: (scanCompletedTimestamp - this.scanSubmitted) / 1000,
+            scanExecutionTime: this.millisToSeconds(scanCompletedTimestamp - this.scanStarted),
+            scanTotalTime: this.millisToSeconds(scanCompletedTimestamp - this.scanSubmitted),
             completedScanTasks: 1,
         };
         this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
         this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+    }
+
+    private millisToSeconds(millis: number): number {
+        return millis / 1000;
     }
 }

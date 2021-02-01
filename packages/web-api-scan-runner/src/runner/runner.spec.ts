@@ -512,7 +512,7 @@ describe(Runner, () => {
 
             setupWebsiteScanResultsProviderMock(websiteScanResult, true);
             setupSuccessfulWebsiteScan();
-            telemetryManagerMock.setup(t => t.trackScanTaskFailed());
+            telemetryManagerMock.setup((t) => t.trackScanTaskFailed());
             setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false, true);
             setupCallsAfterCombinedResultsUpdate(true);
 
@@ -592,7 +592,6 @@ describe(Runner, () => {
     });
 
     describe('deepScan', () => {
-
         it('run deep scan if deepScan=true', async () => {
             scanMetadata.deepScan = true;
             setupScanAndSaveReports();
@@ -768,17 +767,17 @@ describe(Runner, () => {
     }
 
     function setupBasicTelemetry(): void {
-        telemetryManagerMock.setup(t => t.trackScanStarted(scanSubmittedDate)).verifiable();
-        telemetryManagerMock.setup(t => t.trackScanCompleted());
+        telemetryManagerMock.setup((t) => t.trackScanStarted(scanSubmittedDate)).verifiable();
+        telemetryManagerMock.setup((t) => t.trackScanCompleted());
     }
 
     function setupTelemetryWithBrowserError(): void {
         setupBasicTelemetry();
-        telemetryManagerMock.setup(t => t.trackBrowserScanFailed());
+        telemetryManagerMock.setup((t) => t.trackBrowserScanFailed());
     }
 
     function setupTelemetryWithTaskFailure(): void {
         setupBasicTelemetry();
-        telemetryManagerMock.setup(t => t.trackScanTaskFailed());
+        telemetryManagerMock.setup((t) => t.trackScanTaskFailed());
     }
 });

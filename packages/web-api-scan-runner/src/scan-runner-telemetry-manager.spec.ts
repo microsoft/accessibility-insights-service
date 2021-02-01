@@ -6,6 +6,15 @@ import { GlobalLogger, Logger, LoggerEvent, TelemetryMeasurements } from 'logger
 import { IMock, It, Mock, Times } from 'typemoq';
 import { ScanRunnerTelemetryManager } from './scan-runner-telemetry-manager';
 
+class TestableScanRunnerTelemetryManager extends ScanRunnerTelemetryManager {
+    public scanSubmitted: number;
+    public scanStarted: number;
+
+    public constructor(logger: GlobalLogger, getCurrentTimestamp: () => number = Date.now) {
+        super(logger, getCurrentTimestamp);
+    }
+}
+
 describe(ScanRunnerTelemetryManager, () => {
     const scanWaitTimeMillis = 10000;
     const scanExecutionTimeMillis = 15000;
@@ -16,13 +25,13 @@ describe(ScanRunnerTelemetryManager, () => {
     let loggerMock: IMock<GlobalLogger>;
     let getCurrentDateMock: IMock<() => number>;
 
-    let testSubject: ScanRunnerTelemetryManager;
+    let testSubject: TestableScanRunnerTelemetryManager;
 
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
         getCurrentDateMock = Mock.ofInstance(() => null);
 
-        testSubject = new ScanRunnerTelemetryManager(loggerMock.object, getCurrentDateMock.object);
+        testSubject = new TestableScanRunnerTelemetryManager(loggerMock.object, getCurrentDateMock.object);
     });
 
     afterEach(() => {
