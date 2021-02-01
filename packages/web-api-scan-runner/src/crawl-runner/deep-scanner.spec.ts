@@ -53,7 +53,7 @@ describe(DeepScanner, () => {
         urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
         discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
         pageMock = Mock.ofType<Page>();
-        pageMock.setup(p => p.isOpen()).returns(() => pageIsOpen);
+        pageMock.setup((p) => p.isOpen()).returns(() => pageIsOpen);
 
         serviceConfigMock.setup((sc) => sc.getConfigValue('crawlConfig')).returns(() => Promise.resolve(crawlConfig));
         pageMock.setup((p) => p.getUnderlyingPage()).returns(() => puppeteerPageStub);
@@ -132,14 +132,10 @@ describe(DeepScanner, () => {
     });
 
     it('does nothing if the page failed to open', async () => {
-        websiteScanResultProviderMock
-            .setup((w) => w.read(It.isAny()))
-            .verifiable(Times.never());
-        crawlRunnerMock
-            .setup(c => c.run(It.isAny(), It.isAny(), It.isAny()))
-            .verifiable(Times.never());
+        websiteScanResultProviderMock.setup((w) => w.read(It.isAny())).verifiable(Times.never());
+        crawlRunnerMock.setup((c) => c.run(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
         websiteScanResultUpdaterMock
-            .setup(w => w.updateWebsiteScanResultWithDiscoveredUrls(It.isAny(), It.isAny(), It.isAny()))
+            .setup((w) => w.updateWebsiteScanResultWithDiscoveredUrls(It.isAny(), It.isAny(), It.isAny()))
             .verifiable(Times.never());
         pageIsOpen = false;
 

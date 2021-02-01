@@ -309,12 +309,12 @@ describe(Page, () => {
             expect(page.isOpen()).toBe(true);
         });
 
-        function setupBrowserClosed(isClosed: boolean): void  {
-            browserMock.setup(b => b.isConnected()).returns(() => !isClosed);
+        function setupBrowserClosed(isClosed: boolean): void {
+            browserMock.setup((b) => b.isConnected()).returns(() => !isClosed);
         }
 
         function setupPageClosed(isClosed: boolean): void {
-            puppeteerPageMock.setup(pp => pp.isClosed()).returns(() => isClosed);
+            puppeteerPageMock.setup((pp) => pp.isClosed()).returns(() => isClosed);
         }
     });
 

@@ -30,12 +30,7 @@ describe(PageScanProcessor, () => {
         scannerMock = Mock.ofType<Scanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
 
-        testSubject = new PageScanProcessor(
-            loggerMock.object,
-            pageMock.object,
-            scannerMock.object,
-            deepScannerMock.object
-        );
+        testSubject = new PageScanProcessor(loggerMock.object, pageMock.object, scannerMock.object, deepScannerMock.object);
     });
 
     afterEach(() => {
@@ -55,12 +50,10 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         scannerMock
-            .setup(s => s.scan(pageMock.object))
+            .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock
-            .setup(d => d.runDeepScan(It.isAny(), It.isAny(), It.isAny()))
-            .verifiable(Times.never());
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
         const results = await testSubject.scanUrl(scanMetadata, pageScanResult);
 
@@ -78,12 +71,10 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         scannerMock
-            .setup(s => s.scan(pageMock.object))
+            .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock
-            .setup(d => d.runDeepScan(It.isAny(), It.isAny(), It.isAny()))
-            .verifiable();
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable();
 
         const results = await testSubject.scanUrl(scanMetadata, pageScanResult);
 
@@ -100,12 +91,8 @@ describe(PageScanProcessor, () => {
 
         setupOpenPage();
         setupClosePage();
-        scannerMock
-            .setup(s => s.scan(pageMock.object))
-            .throws(error);
-        deepScannerMock
-            .setup(d => d.runDeepScan(It.isAny(), It.isAny(), It.isAny()))
-            .verifiable(Times.never());
+        scannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
+        deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
         const results = await testSubject.scanUrl(scanMetadata, pageScanResult);
 
@@ -127,12 +114,10 @@ describe(PageScanProcessor, () => {
         setupOpenPage();
         setupClosePage();
         scannerMock
-            .setup(s => s.scan(pageMock.object))
+            .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
-        deepScannerMock
-            .setup(d => d.runDeepScan(scanMetadata, pageScanResult, pageMock.object))
-            .throws(error);
+        deepScannerMock.setup((d) => d.runDeepScan(scanMetadata, pageScanResult, pageMock.object)).throws(error);
 
         const results = await testSubject.scanUrl(scanMetadata, pageScanResult);
 
@@ -146,18 +131,21 @@ describe(PageScanProcessor, () => {
             id: 'id',
         };
         setupOpenPage();
-        pageMock.setup(p => p.close()).throws(error).verifiable();
-        loggerMock.setup(l => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
+        pageMock
+            .setup((p) => p.close())
+            .throws(error)
+            .verifiable();
+        loggerMock.setup((l) => l.logError(It.isAny(), { error: System.serializeError(error) })).verifiable();
 
         await testSubject.scanUrl(scanMetadata, pageScanResult);
     });
 
     function setupOpenPage(): void {
-        pageMock.setup(p => p.create()).verifiable();
-        pageMock.setup(p => p.navigateToUrl(url)).verifiable();
+        pageMock.setup((p) => p.create()).verifiable();
+        pageMock.setup((p) => p.navigateToUrl(url)).verifiable();
     }
 
     function setupClosePage(): void {
-        pageMock.setup(p => p.close()).verifiable();
+        pageMock.setup((p) => p.close()).verifiable();
     }
 });

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import {  System } from 'common';
-import {  inject, injectable } from 'inversify';
+import { System } from 'common';
+import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
@@ -18,7 +18,6 @@ export type PageResults = {
 
 @injectable()
 export class PageScanProcessor {
-
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(Page) private readonly page: Page,
@@ -35,7 +34,6 @@ export class PageScanProcessor {
             if (scanMetadata.deepScan) {
                 results.crawlResults = await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
             }
-
         } catch (e) {
             results.error = e;
         } finally {
