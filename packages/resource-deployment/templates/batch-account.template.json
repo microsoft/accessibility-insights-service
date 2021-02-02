@@ -138,12 +138,12 @@
                 "deploymentConfiguration": {
                     "virtualMachineConfiguration": {
                         "imageReference": {
-                            "publisher": "microsoft-azure-batch",
-                            "offer": "ubuntu-server-container",
-                            "sku": "16-04-lts",
+                            "publisher": "microsoftwindowsserver",
+                            "offer": "windowsserver",
+                            "sku": "2019-datacenter-with-containers",
                             "version": "latest"
                         },
-                        "nodeAgentSkuId": "batch.node.ubuntu 16.04",
+                        "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
                             "targets": ["TemporaryDisk"]
                         },
