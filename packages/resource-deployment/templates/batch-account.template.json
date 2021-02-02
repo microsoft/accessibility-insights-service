@@ -174,7 +174,7 @@
                     }
                 },
                 "startTask": {
-                    "commandLine": "/bin/bash -c pool-startup.sh",
+                    "commandLine": "powershell ./win-pool-startup.ps1",
                     "environmentSettings": [
                         {
                             "name": "KEY_VAULT_NAME",
