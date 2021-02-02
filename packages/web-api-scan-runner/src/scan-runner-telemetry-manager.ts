@@ -22,7 +22,7 @@ export class ScanRunnerTelemetryManager {
         this.scanSubmitted = this.guidGenerator.getGuidTimestamp(scanId).getTime();
         this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
         this.logger.trackEvent('ScanTaskStarted', undefined, {
-            scanWaitTime: this.millisToSeconds(this.scanStarted - this.scanSubmitted),
+            scanWaitTime: this.asSeconds(this.scanStarted - this.scanSubmitted),
             startedScanTasks: 1,
         });
     }
@@ -42,15 +42,15 @@ export class ScanRunnerTelemetryManager {
         }
         const scanCompletedTimestamp: number = this.getCurrentTimestamp();
         const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-            scanExecutionTime: this.millisToSeconds(scanCompletedTimestamp - this.scanStarted),
-            scanTotalTime: this.millisToSeconds(scanCompletedTimestamp - this.scanSubmitted),
+            scanExecutionTime: this.asSeconds(scanCompletedTimestamp - this.scanStarted),
+            scanTotalTime: this.asSeconds(scanCompletedTimestamp - this.scanSubmitted),
             completedScanTasks: 1,
         };
         this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
         this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
     }
 
-    private millisToSeconds(millis: number): number {
-        return millis / 1000;
+    private asSeconds(milliseconds: number): number {
+        return milliseconds / 1000;
     }
 }

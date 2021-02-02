@@ -18,11 +18,11 @@ class TestableScanRunnerTelemetryManager extends ScanRunnerTelemetryManager {
 
 describe(ScanRunnerTelemetryManager, () => {
     const scanId = 'scan id';
-    const scanWaitTimeMillis = 10000;
-    const scanExecutionTimeMillis = 15000;
+    const scanWaitTimeMilliseconds = 10000;
+    const scanExecutionTimeMilliseconds = 15000;
     const scanSubmittedTimestamp = 12345678;
-    const scanStartedTimestamp = scanSubmittedTimestamp + scanWaitTimeMillis;
-    const scanCompletedTimestamp = scanStartedTimestamp + scanExecutionTimeMillis;
+    const scanStartedTimestamp = scanSubmittedTimestamp + scanWaitTimeMilliseconds;
+    const scanCompletedTimestamp = scanStartedTimestamp + scanExecutionTimeMilliseconds;
 
     let loggerMock: IMock<GlobalLogger>;
     let getCurrentDateMock: IMock<() => number>;
@@ -46,7 +46,7 @@ describe(ScanRunnerTelemetryManager, () => {
     it('trackScanStarted', () => {
         const scanRunningMeasurements = { runningScanRequests: 1 };
         const scanStartedMeasurements = {
-            scanWaitTime: scanWaitTimeMillis / 1000,
+            scanWaitTime: scanWaitTimeMilliseconds / 1000,
             startedScanTasks: 1,
         };
         getCurrentDateMock.setup((g) => g()).returns(() => scanStartedTimestamp);
@@ -75,8 +75,8 @@ describe(ScanRunnerTelemetryManager, () => {
     it('trackScanCompleted', () => {
         getCurrentDateMock.setup((g) => g()).returns(() => scanCompletedTimestamp);
         const scanTaskCompletedMeasurements = {
-            scanExecutionTime: scanExecutionTimeMillis / 1000,
-            scanTotalTime: (scanExecutionTimeMillis + scanWaitTimeMillis) / 1000,
+            scanExecutionTime: scanExecutionTimeMilliseconds / 1000,
+            scanTotalTime: (scanExecutionTimeMilliseconds + scanWaitTimeMilliseconds) / 1000,
             completedScanTasks: 1,
         };
         const ScanRequestCompletedMeasurements = { completedScanRequests: 1 };
