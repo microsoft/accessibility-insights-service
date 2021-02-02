@@ -7,7 +7,7 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
-import { Scanner } from '../scanner/scanner';
+import { AxeScanner } from '../scanner/axe-scanner';
 import { ScanMetadata } from '../types/scan-metadata';
 
 export type PageResults = {
@@ -21,7 +21,7 @@ export class PageScanProcessor {
     public constructor(
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(Page) private readonly page: Page,
-        @inject(Scanner) private readonly scanner: Scanner,
+        @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
     ) {}
 
@@ -30,7 +30,7 @@ export class PageScanProcessor {
         try {
             await this.tryOpenPage(scanMetadata.url);
 
-            results.axeScanResults = await this.scanner.scan(this.page);
+            results.axeScanResults = await this.axeScanner.scan(this.page);
             if (scanMetadata.deepScan) {
                 results.crawlResults = await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
             }

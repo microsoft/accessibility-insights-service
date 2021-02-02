@@ -31,7 +31,7 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { Scanner } from '../scanner/scanner';
+import { AxeScanner } from '../scanner/axe-scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
@@ -49,7 +49,7 @@ interface ScanRunTimestamps {
 describe(Runner, () => {
     let runner: Runner;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let scannerMock: IMock<Scanner>;
+    let scannerMock: IMock<AxeScanner>;
     let scanMetadataConfig: IMock<ScanMetadataConfig>;
     let loggerMock: IMock<MockableLogger>;
     let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
@@ -173,7 +173,7 @@ describe(Runner, () => {
         loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
-        scannerMock = Mock.ofType<Scanner>();
+        scannerMock = Mock.ofType<AxeScanner>();
         pageMock = Mock.ofType<Page>();
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);

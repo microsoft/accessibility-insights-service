@@ -8,14 +8,14 @@ import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import { OnDemandPageScanResult } from 'storage-documents';
 import { System } from 'common';
-import { Scanner } from '../scanner/scanner';
+import { AxeScanner } from '../scanner/axe-scanner';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
 import { PageScanProcessor } from './page-scan-processor';
 
 describe(PageScanProcessor, () => {
     let loggerMock: IMock<GlobalLogger>;
     let pageMock: IMock<Page>;
-    let scannerMock: IMock<Scanner>;
+    let axeScannerMock: IMock<AxeScanner>;
     let deepScannerMock: IMock<DeepScanner>;
 
     const url = 'url';
@@ -27,16 +27,16 @@ describe(PageScanProcessor, () => {
     beforeEach(() => {
         loggerMock = Mock.ofType<GlobalLogger>();
         pageMock = Mock.ofType<Page>();
-        scannerMock = Mock.ofType<Scanner>();
+        axeScannerMock = Mock.ofType<AxeScanner>();
         deepScannerMock = Mock.ofType<DeepScanner>();
 
-        testSubject = new PageScanProcessor(loggerMock.object, pageMock.object, scannerMock.object, deepScannerMock.object);
+        testSubject = new PageScanProcessor(loggerMock.object, pageMock.object, axeScannerMock.object, deepScannerMock.object);
     });
 
     afterEach(() => {
         loggerMock.verifyAll();
         pageMock.verifyAll();
-        scannerMock.verifyAll();
+        axeScannerMock.verifyAll();
         deepScannerMock.verifyAll();
     });
 
@@ -49,7 +49,7 @@ describe(PageScanProcessor, () => {
 
         setupOpenPage();
         setupClosePage();
-        scannerMock
+        axeScannerMock
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
@@ -70,7 +70,7 @@ describe(PageScanProcessor, () => {
 
         setupOpenPage();
         setupClosePage();
-        scannerMock
+        axeScannerMock
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();
@@ -91,7 +91,7 @@ describe(PageScanProcessor, () => {
 
         setupOpenPage();
         setupClosePage();
-        scannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
+        axeScannerMock.setup((s) => s.scan(pageMock.object)).throws(error);
         deepScannerMock.setup((d) => d.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
         const results = await testSubject.scanUrl(scanMetadata, pageScanResult);
@@ -113,7 +113,7 @@ describe(PageScanProcessor, () => {
 
         setupOpenPage();
         setupClosePage();
-        scannerMock
+        axeScannerMock
             .setup((s) => s.scan(pageMock.object))
             .returns(() => Promise.resolve(axeScanResults))
             .verifiable();

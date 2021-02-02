@@ -28,7 +28,7 @@ import { AxeResultsReducer } from 'axe-result-converter';
 import axe from 'axe-core';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { Scanner } from '../scanner/scanner';
+import { AxeScanner } from '../scanner/axe-scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
 import { ScanMetadata } from '../types/scan-metadata';
@@ -42,7 +42,7 @@ export class Runner {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
-        @inject(Scanner) private readonly scanner: Scanner,
+        @inject(AxeScanner) private readonly scanner: AxeScanner,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,

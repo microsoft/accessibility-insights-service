@@ -8,13 +8,13 @@ import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'c
 import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { Scanner } from './scanner';
+import { AxeScanner } from './axe-scanner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
-describe(Scanner, () => {
+describe(AxeScanner, () => {
     let pageMock: IMock<Page>;
-    let scanner: Scanner;
+    let scanner: AxeScanner;
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
@@ -32,7 +32,7 @@ describe(Scanner, () => {
             scanTimeoutInMin: 5,
         } as ScanRunTimeConfig;
 
-        scanner = new Scanner(loggerMock.object, promiseUtilsMock.object, serviceConfigMock.object);
+        scanner = new AxeScanner(loggerMock.object, promiseUtilsMock.object, serviceConfigMock.object);
     });
 
     it('should create instance', () => {
