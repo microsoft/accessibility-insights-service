@@ -157,6 +157,30 @@ describe(Page, () => {
             puppeteerRequestMock.verifyAll();
         });
 
+        it('scan page with redirect but no response chain', async () => {
+            setupAxePuppeteerFactoryMock();
+
+            puppeteerRequestMock.reset();
+            puppeteerRequestMock
+                .setup((o) => o.redirectChain())
+                .returns(() => [] as Puppeteer.Request[])
+                .verifiable();
+            setupPageConfigurator();
+            simulatePageNavigation(puppeteerResponseMock.object);
+            const expectedAxeScanResults = {
+                results: axeResults,
+                scannedUrl: axeResults.url,
+                ...scanResults,
+            } as AxeScanResults;
+            loggerMock.setup((o) => o.logWarn(`Scanning performed on redirected page`, { redirectedUrl: axeResults.url })).verifiable();
+            page.requestUrl = 'request page';
+
+            const axeScanResults = await page.scanForA11yIssues();
+
+            expect(axeScanResults).toEqual(expectedAxeScanResults);
+            puppeteerRequestMock.verifyAll();
+        });
+
         it('scan throws error if navigateToUrl was not called first', async () => {
             pageNavigatorMock.setup(async (o) => o.navigate(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
 
