@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import { GlobalLogger, Logger, LoggerEvent, TelemetryMeasurements } from 'logger';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { GuidGenerator } from 'common';
 import { ScanRunnerTelemetryManager } from './scan-runner-telemetry-manager';
 
@@ -33,7 +33,7 @@ describe(ScanRunnerTelemetryManager, () => {
     beforeEach(() => {
         loggerMock = Mock.ofType<Logger>();
         getCurrentDateMock = Mock.ofInstance(() => null);
-        guidGeneratorMock = Mock.ofType<GuidGenerator>();
+        guidGeneratorMock = Mock.ofType<GuidGenerator>(GuidGenerator, MockBehavior.Strict);
         guidGeneratorMock.setup((gg) => gg.getGuidTimestamp(scanId)).returns(() => new Date(scanSubmittedTimestamp));
 
         testSubject = new TestableScanRunnerTelemetryManager(loggerMock.object, guidGeneratorMock.object, getCurrentDateMock.object);
