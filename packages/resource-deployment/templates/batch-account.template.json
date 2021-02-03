@@ -145,7 +145,7 @@
                         },
                         "nodeAgentSkuId": "batch.node.windows amd64",
                         "diskEncryptionConfiguration": {
-                            "targets": ["TemporaryDisk"]
+                            "targets": ["TemporaryDisk", "OsDisk"]
                         },
                         "containerConfiguration": {
                             "type": "dockerCompatible",
