@@ -54,8 +54,8 @@
                     }
                 ],
                 "enabledForDeployment": true,
-                "enabledForDiskEncryption": false,
-                "enabledForTemplateDeployment": false,
+                "enabledForDiskEncryption": true,
+                "enabledForTemplateDeployment": true,
                 "enableSoftDelete": "[parameters('enableSoftDeleteOnKeyVault')]"
             }
         }
