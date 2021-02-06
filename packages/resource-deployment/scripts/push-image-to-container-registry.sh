@@ -57,11 +57,11 @@ cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanNoti
 echo "Runtime configuration was copied successfully"
 
 imageBuildProcesses=(
-    "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist" "windows"
-    "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist" "windows"
-    "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist" "linux"
-    "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist" "linux"
-    "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist" "linux"
+    "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
+    "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
+    "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
+    "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
+    "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
 )
 
 # Login to container registry
