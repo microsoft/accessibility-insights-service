@@ -40,10 +40,11 @@ describe(PageScanProcessor, () => {
         deepScannerMock.verifyAll();
     });
 
-    it('scans successfully without deepScan', async () => {
+    it.each([false, undefined])('scans successfully with deepScan=%s', async (deepScan: boolean) => {
         const scanMetadata = {
             url: url,
             id: 'id',
+            deepScan: deepScan,
         };
         const expectedResults = { axeScanResults };
 
@@ -60,7 +61,7 @@ describe(PageScanProcessor, () => {
         expect(results).toEqual(expectedResults);
     });
 
-    it('scans successfully with deepScan', async () => {
+    it('scans successfully with deepScan=true', async () => {
         const scanMetadata = {
             url: url,
             id: 'id',

@@ -4,7 +4,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper 
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
     PageScanRunReportProvider,
@@ -28,11 +28,9 @@ import { AxeResultsReducer } from 'axe-result-converter';
 import axe from 'axe-core';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { AxeScanner } from '../scanner/axe-scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
-import { DeepScanner } from '../crawl-runner/deep-scanner';
-import { ScanMetadata } from '../types/scan-metadata';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
+import { PageScanProcessor } from './page-scan-processor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -43,7 +41,6 @@ export class Runner {
     constructor(
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
-        @inject(AxeScanner) private readonly scanner: AxeScanner,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
@@ -54,9 +51,8 @@ export class Runner {
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
-        @inject(Page) private readonly page: Page,
-        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
         @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
+        @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
     ) {}
 
     public async run(): Promise<void> {
@@ -71,25 +67,20 @@ export class Runner {
 
         this.telemetryManager.trackScanStarted(scanMetadata.id);
 
-        let axeScanResults: AxeScanResults;
-        try {
-            await this.openPage(scanMetadata.url);
-            axeScanResults = await this.scan(pageScanResult, this.page);
-
-            await this.deepScan(scanMetadata, pageScanResult);
-
-            await this.generateCombinedScanResults(axeScanResults, pageScanResult);
-            this.logger.logInfo('The scanner successfully completed a page scan.');
-        } catch (error) {
-            const errorMessage = System.serializeError(error);
-            pageScanResult.run = this.createRunResult('failed', errorMessage);
-
-            this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
-            this.telemetryManager.trackScanTaskFailed();
-        } finally {
-            await this.closePage();
-            this.telemetryManager.trackScanCompleted();
+        const results = await this.pageScanProcessor.scanUrl(scanMetadata, pageScanResult);
+        if (results.error) {
+            this.handleScanTaskFailed(pageScanResult, results.error);
+        } else {
+            try {
+                await this.processScanResults(results.axeScanResults, pageScanResult);
+                await this.generateCombinedScanResults(results.axeScanResults, pageScanResult);
+                this.logger.logInfo('The scanner successfully completed a page scan.');
+            } catch (error) {
+                await this.handleScanTaskFailed(pageScanResult, error);
+            }
         }
+
+        this.telemetryManager.trackScanCompleted();
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
         await this.queueScanCompletionNotification(pageScanResult);
@@ -97,20 +88,10 @@ export class Runner {
         this.logger.logInfo('Page scan task completed.');
     }
 
-    private async openPage(url: string): Promise<void> {
-        await this.page.create();
-        await this.page.navigateToUrl(url);
-    }
-
-    private async closePage(): Promise<void> {
-        try {
-            await this.page.close();
-        } catch (error) {
-            this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
-        }
-    }
-
     private async generateCombinedScanResults(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<void> {
+        if (axeScanResults.error) {
+            return;
+        }
         await this.retryHelper.executeWithRetries(
             async () => this.generateCombinedScanResultsImpl(axeScanResults, pageScanResult),
             async (error: Error) => {
@@ -299,8 +280,7 @@ export class Runner {
         return response;
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, page: Page): Promise<AxeScanResults> {
-        const axeScanResults = await this.scanner.scan(page);
+    private async processScanResults(axeScanResults: AxeScanResults, pageScanResult: Partial<OnDemandPageScanResult>): Promise<void> {
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
@@ -317,8 +297,6 @@ export class Runner {
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;
         pageScanResult.run.pageResponseCode = axeScanResults.pageResponseCode;
-
-        return axeScanResults.error ? undefined : axeScanResults;
     }
 
     private async queueScanCompletionNotification(pageScanResult: OnDemandPageScanResult): Promise<void> {
@@ -384,9 +362,11 @@ export class Runner {
         return this.serviceConfig.getConfigValue('featureFlags');
     }
 
-    private async deepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (scanMetadata.deepScan) {
-            await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
-        }
+    private async handleScanTaskFailed(pageScanResult: OnDemandPageScanResult, error: Error): Promise<void> {
+        const errorMessage = System.serializeError(error);
+        pageScanResult.run = this.createRunResult('failed', errorMessage);
+
+        this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
+        this.telemetryManager.trackScanTaskFailed();
     }
 }

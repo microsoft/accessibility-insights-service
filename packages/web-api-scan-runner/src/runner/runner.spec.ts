@@ -7,7 +7,7 @@ import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper 
 import { cloneDeep } from 'lodash';
 import { Logger } from 'logger';
 import * as MockDate from 'mockdate';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults } from 'scanner-global-library';
 import {
     CombinedScanResultsProvider,
     OnDemandPageScanRunResultProvider,
@@ -31,12 +31,11 @@ import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { AxeScanner } from '../scanner/axe-scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { ScanMetadata } from '../types/scan-metadata';
-import { DeepScanner } from '../crawl-runner/deep-scanner';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { Runner } from './runner';
+import { PageScanProcessor } from './page-scan-processor';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -45,7 +44,6 @@ class MockableLogger extends Logger {}
 describe(Runner, () => {
     let runner: Runner;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
-    let scannerMock: IMock<AxeScanner>;
     let scanMetadataConfig: IMock<ScanMetadataConfig>;
     let loggerMock: IMock<MockableLogger>;
     let pageScanRunReportProviderMock: IMock<PageScanRunReportProvider>;
@@ -57,11 +55,11 @@ describe(Runner, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let retryHelperMock: IMock<RetryHelper<void>>;
-    let pageMock: IMock<Page>;
-    let deepScannerMock: IMock<DeepScanner>;
     let telemetryManagerMock: IMock<ScanRunnerTelemetryManager>;
+    let pageScanProcessorMock: IMock<PageScanProcessor>;
 
     let scanMetadata: ScanMetadata;
+    let runningScanResult: Partial<OnDemandPageScanResult>;
     const onDemandPageScanResult: OnDemandPageScanResult = {
         url: 'url',
         scanResult: null,
@@ -159,16 +157,16 @@ describe(Runner, () => {
             id: 'id',
             url: 'url',
         };
+        dateNow = new Date(2019, 2, 3);
+        runningScanResult = getRunningJobStateScanResult();
         loggerMock = Mock.ofType(MockableLogger);
         onDemandPageScanRunResultProviderMock = Mock.ofType(OnDemandPageScanRunResultProvider, MockBehavior.Strict);
         scanMetadataConfig = Mock.ofType(ScanMetadataConfig);
-        scannerMock = Mock.ofType<AxeScanner>();
-        pageMock = Mock.ofType<Page>();
         scanMetadataConfig.setup((s) => s.getConfig()).returns(() => scanMetadata);
         pageScanRunReportProviderMock = Mock.ofType(PageScanRunReportProvider, MockBehavior.Strict);
+        pageScanProcessorMock = Mock.ofType<PageScanProcessor>();
         guidGeneratorMock = Mock.ofType(GuidGenerator);
         setupGuidGenerator();
-        dateNow = new Date(2019, 2, 3);
         MockDate.set(dateNow);
 
         reportGeneratorMock = Mock.ofType<ReportGenerator>();
@@ -178,7 +176,6 @@ describe(Runner, () => {
         combinedScanResultsProviderMock = Mock.ofType<CombinedScanResultsProvider>();
         axeResultsReducerMock = Mock.ofType<AxeResultsReducer>();
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
-        deepScannerMock = Mock.ofType<DeepScanner>();
         telemetryManagerMock = Mock.ofType(ScanRunnerTelemetryManager, MockBehavior.Strict);
 
         const featureFlags: FeatureFlags = { sendNotification: false };
@@ -190,7 +187,6 @@ describe(Runner, () => {
         runner = new Runner(
             guidGeneratorMock.object,
             scanMetadataConfig.object,
-            scannerMock.object,
             onDemandPageScanRunResultProviderMock.object,
             loggerMock.object,
             pageScanRunReportProviderMock.object,
@@ -201,9 +197,8 @@ describe(Runner, () => {
             combinedScanResultsProviderMock.object,
             axeResultsReducerMock.object,
             retryHelperMock.object,
-            pageMock.object,
-            deepScannerMock.object,
             telemetryManagerMock.object,
+            pageScanProcessorMock.object,
         );
     });
 
@@ -211,7 +206,6 @@ describe(Runner, () => {
         MockDate.reset();
         guidGeneratorMock.verifyAll();
         scanMetadataConfig.verifyAll();
-        scannerMock.verifyAll();
         onDemandPageScanRunResultProviderMock.verifyAll();
         loggerMock.verifyAll();
         pageScanRunReportProviderMock.verifyAll();
@@ -222,13 +216,13 @@ describe(Runner, () => {
         combinedScanResultsProviderMock.verifyAll();
         axeResultsReducerMock.verifyAll();
         retryHelperMock.verifyAll();
-        pageMock.verifyAll();
         telemetryManagerMock.verifyAll();
+        pageScanProcessorMock.verifyAll();
     });
 
     it('sets job state to failed if axe scanning was unsuccessful', async () => {
         setupTelemetryWithBrowserError();
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         setupPageScan(unscannableAxeScanResults);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(unscannableAxeScanResults.error));
@@ -240,7 +234,7 @@ describe(Runner, () => {
         setupTelemetryWithTaskFailure();
         const failureMessage = 'scanner task failed message';
         setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-        setupPageScanWithException(failureMessage);
+        setupPageScanWithError(failureMessage);
 
         setupUpdateScanRunResultCall(getFailingJobStateScanResult(System.serializeError(failureMessage), false));
 
@@ -263,7 +257,7 @@ describe(Runner, () => {
 
     it('sets scan status to pass if violation length = 0', async () => {
         setupBasicTelemetry();
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         setupPageScan(passedAxeScanResults);
 
         setupGenerateReportsCall(passedAxeScanResults);
@@ -275,7 +269,7 @@ describe(Runner, () => {
 
     it('return redirected url', async () => {
         setupBasicTelemetry();
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         const clonedPassedAxeScanResults = cloneDeep(passedAxeScanResults);
         clonedPassedAxeScanResults.scannedUrl = 'redirect url';
         setupPageScan(clonedPassedAxeScanResults);
@@ -291,7 +285,7 @@ describe(Runner, () => {
 
     it('sets scan status to fail if violation length > 0', async () => {
         setupBasicTelemetry();
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         setupPageScan(axeScanResultsWithViolations);
 
         setupGenerateReportsCall(axeScanResultsWithViolations);
@@ -303,8 +297,7 @@ describe(Runner, () => {
 
     it('sends telemetry event on successful scan', async () => {
         setupBasicTelemetry();
-
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         setupPageScan(passedAxeScanResults);
         setupGenerateReportsCall(passedAxeScanResults);
         setupSaveAllReportsCall();
@@ -316,8 +309,7 @@ describe(Runner, () => {
 
     it('sends telemetry event on scan error', async () => {
         setupTelemetryWithBrowserError();
-
-        setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
+        setupTryUpdateScanRunResultCall(runningScanResult);
         setupPageScan(unscannableAxeScanResults);
         setupGenerateReportsCall(unscannableAxeScanResults);
         const scanResult = getFailingJobStateScanResult(unscannableAxeScanResults.error);
@@ -389,7 +381,7 @@ describe(Runner, () => {
                 notificationMessage.scanStatus = undefined;
 
                 const failureMessage = 'failed to launch';
-                setupPageScanWithException(failureMessage);
+                setupPageScanWithError(failureMessage);
 
                 setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { notification: { scanNotifyUrl: scanNotifyUrl } });
                 const updatePageScanResult = getFailingJobStateScanResult(System.serializeError(failureMessage), false);
@@ -482,7 +474,8 @@ describe(Runner, () => {
             setupSuccessfulWebsiteScan();
             setupSaveReportCall(generatedReport, 'href');
             setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false);
-            setupCallsAfterCombinedResultsUpdate();
+            setupGenerateAndSaveReports();
+            setupUpdateScanRunResultCall(getScanResultWithWebsiteScanRefs());
 
             await runner.run();
         });
@@ -501,22 +494,36 @@ describe(Runner, () => {
             setupSuccessfulWebsiteScan();
             setupSaveReportCall(generatedReport, 'href');
             setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, true);
-            setupCallsAfterCombinedResultsUpdate();
+            setupGenerateAndSaveReports();
+            setupUpdateScanRunResultCall(getScanResultWithWebsiteScanRefs());
 
             await runner.run();
         });
 
         it('fail when combined scan result write has conflict', async () => {
-            serviceConfigurationMock.reset();
             reportGeneratorMock.reset();
 
             setupWebsiteScanResultsProviderMock(websiteScanResult, true);
             setupSuccessfulWebsiteScan();
-            telemetryManagerMock.setup((t) => t.trackScanTaskFailed());
+            telemetryManagerMock.setup((t) => t.trackScanTaskFailed()).verifiable();
             setupCombinedScanResultsProviderMock(combinedScanResultsBlobRead, false, true);
-            setupCallsAfterCombinedResultsUpdate(true);
+            setupGenerateAndSaveReports();
 
-            await expect(runner.run()).rejects.toThrowError(/Failed to write new combined axe scan results blob./);
+            const { run, ...scanResult } = getScanResultWithNoViolations();
+            scanResult.websiteScanRefs = websiteScanRefs;
+            let error: string;
+            onDemandPageScanRunResultProviderMock
+                .setup(async (d) => d.updateScanRun(It.isObjectWith(scanResult)))
+                .returns(async (actualScanResult: Partial<OnDemandPageScanResult>) => {
+                    error = actualScanResult.run?.error as string;
+
+                    return actualScanResult as OnDemandPageScanResult;
+                })
+                .verifiable();
+
+            await runner.run();
+
+            expect(error).toMatch(/Failed to write new combined axe scan results blob./);
         });
 
         function setupCombinedScanResultsProviderMock(
@@ -560,20 +567,21 @@ describe(Runner, () => {
 
         function setupSuccessfulWebsiteScan(): void {
             setupBasicTelemetry();
-            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult(), { websiteScanRefs });
+            setupTryUpdateScanRunResultCall(runningScanResult, { websiteScanRefs });
             setupPageScan(passedAxeScanResults);
         }
 
-        function setupCallsAfterCombinedResultsUpdate(blobWriteConflict: boolean = false): void {
+        function getScanResultWithWebsiteScanRefs(): Partial<OnDemandPageScanResult> {
+            const scanResult = getScanResultWithNoViolations();
+            scanResult.websiteScanRefs = websiteScanRefs;
+            scanResult.reports.push(savedReport);
+
+            return scanResult;
+        }
+
+        function setupGenerateAndSaveReports(): void {
             setupGenerateReportsCall(passedAxeScanResults);
             setupSaveAllReportsCall();
-
-            if (blobWriteConflict === false) {
-                const scanResult = getScanResultWithNoViolations();
-                scanResult.websiteScanRefs = websiteScanRefs;
-                scanResult.reports.push(savedReport);
-                setupUpdateScanRunResultCall(scanResult);
-            }
         }
 
         function setupRetryHelperMock(): void {
@@ -591,61 +599,18 @@ describe(Runner, () => {
         }
     });
 
-    describe('deepScan', () => {
-        it('run deep scan if deepScan=true', async () => {
-            scanMetadata.deepScan = true;
-            setupScanAndSaveReports();
-            deepScannerMock
-                .setup((ds) => ds.runDeepScan(scanMetadata, It.isObjectWith(getScanResultWithNoViolations()), pageMock.object))
-                .verifiable();
-
-            await runner.run();
-
-            deepScannerMock.verifyAll();
-        });
-
-        it.each([false, undefined])('Do not run deep scan if deepScan=%s', async (deepScan) => {
-            scanMetadata.deepScan = deepScan;
-            setupScanAndSaveReports();
-            deepScannerMock.setup((ds) => ds.runDeepScan(It.isAny(), It.isAny(), It.isAny())).verifiable(Times.never());
-
-            await runner.run();
-
-            deepScannerMock.verifyAll();
-        });
-
-        function setupScanAndSaveReports(): void {
-            setupBasicTelemetry();
-            setupTryUpdateScanRunResultCall(getRunningJobStateScanResult());
-            setupPageScan(passedAxeScanResults);
-            setupGenerateReportsCall(passedAxeScanResults);
-            setupSaveAllReportsCall();
-            setupUpdateScanRunResultCall(getScanResultWithNoViolations());
-        }
-    });
-
-    function setupPageScan(results: AxeScanResults): void {
-        pageMock.setup((p) => p.create()).verifiable();
-        pageMock.setup((p) => p.navigateToUrl(scanMetadata.url)).verifiable();
-
-        scannerMock
-            .setup(async (s) => s.scan(pageMock.object))
-            .returns(async () => results)
+    function setupPageScan(axeScanResults: AxeScanResults, pageRunResult?: Partial<OnDemandPageScanResult>): void {
+        const pageResults = {
+            axeScanResults: axeScanResults,
+        };
+        pageScanProcessorMock
+            .setup(async (p) => p.scanUrl(scanMetadata, It.isObjectWith(runningScanResult)))
+            .returns(async () => pageResults)
             .verifiable();
-
-        pageMock.setup((p) => p.close()).verifiable();
     }
 
-    function setupPageScanWithException(error: any): void {
-        pageMock.setup((p) => p.create()).verifiable();
-        pageMock.setup((p) => p.navigateToUrl(scanMetadata.url)).verifiable();
-
-        scannerMock
-            .setup(async (s) => s.scan(It.isAny()))
-            .returns(async () => Promise.reject(error))
-            .verifiable();
-
-        pageMock.setup((p) => p.close()).verifiable();
+    function setupPageScanWithError(error: any): void {
+        pageScanProcessorMock.setup(async (p) => p.scanUrl(It.isAny(), It.isAny())).returns(async () => Promise.resolve({ error }));
     }
 
     function setupGenerateReportsCall(scanResults: AxeScanResults): void {
