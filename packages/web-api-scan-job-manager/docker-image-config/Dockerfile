@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-FROM mcr.microsoft.com/windows/servercore:2004-amd64
+FROM mcr.microsoft.com/windows/servercore:ltsc2019-amd64
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
 
