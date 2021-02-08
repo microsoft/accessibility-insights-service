@@ -61,7 +61,7 @@
         "axe-result-converter": "^1.0.0",
         "azure-services": "^1.0.0",
         "common": "^1.0.0",
-        "cheerio": "^1.0.0-rc.3",
+        "cheerio": "^1.0.0-rc.5",
         "dotenv": "^8.2.0",
         "inversify": "^5.0.5",
         "leveldown": "^5.6.0",
