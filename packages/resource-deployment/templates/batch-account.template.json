@@ -87,7 +87,7 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_d11_v2",
+            "defaultValue": "standard_d4_v3",
             "type": "string",
             "metadata": {
                 "description": "vmSize for on-demand-scan-request-pool"
