@@ -79,8 +79,8 @@ describe(WebsiteScanResultProvider, () => {
                     href: 'report href',
                 },
             ],
-            knownPages: ['new page'],
-            discoveryPatterns: [discoveryPattern],
+            knownPages: ['new page', null],
+            discoveryPatterns: [discoveryPattern, null],
         } as WebsiteScanResult;
         const websiteScanResultDbDocument = {
             ...websiteScanResult,

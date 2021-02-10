@@ -31,6 +31,7 @@ export class WebsiteScanResultProvider {
      * Writes documents to a storage if documents do not exist; otherwise, merges documents with corresponding storage documents.
      *
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
     public async mergeOrCreateBatch(websiteScanResults: Partial<WebsiteScanResult>[]): Promise<WebsiteScanResult[]> {
         const sourceDocuments = websiteScanResults.map((scanResult) => this.normalizeToDbDocument(scanResult));
@@ -51,6 +52,7 @@ export class WebsiteScanResultProvider {
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
     public async mergeOrCreate(websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResult> {
         const scanResultNormalized = this.normalizeToDbDocument(websiteScanResult);
@@ -125,7 +127,7 @@ export class WebsiteScanResultProvider {
                     throw new Error(`Merge of array type value '${key}' is not implemented.`);
                 }
 
-                return target.concat(source);
+                return _.compact(target.concat(source));
             }
 
             return undefined;
