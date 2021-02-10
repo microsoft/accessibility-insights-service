@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { AxeResults } from 'axe-core';
 import { AxePuppeteerFactory, AxeScanResults, Page } from 'scanner-global-library';
-import { IMock, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times } from 'typemoq';
 import { AIScanner } from './ai-scanner';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -47,7 +47,8 @@ describe('AIScanner', () => {
     });
 
     function setupNewPageCall(): void {
-        pageMock.setup(async (p) => p.create(undefined)).verifiable(Times.once());
+        pageMock.setup(async (p) => p.create(It.isObjectWith({ browserExecutablePath: undefined })))
+                .verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {

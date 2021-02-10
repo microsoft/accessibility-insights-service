@@ -10,6 +10,7 @@ import { WebDriver } from './web-driver';
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
 type puppeteerLaunch = (options?: Puppeteer.LaunchOptions) => Promise<Puppeteer.Browser>;
+type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppeteer.Browser>;
 
 class PuppeteerBrowserMock {
     public isClosed: boolean;
@@ -26,27 +27,31 @@ class PuppeteerBrowserMock {
 }
 
 let testSubject: WebDriver;
-let puppeteer: typeof Puppeteer;
 let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
+let puppeteerConnectMock: IMock<puppeteerConnect>;
 
 beforeEach(() => {
     puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
-    puppeteerLaunchMock
-        .setup(async (o) => o(It.isAny()))
-        .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-        .verifiable(Times.once());
+    puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
 
-    puppeteer = Puppeteer;
+    const puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
+    puppeteer.connect = puppeteerConnectMock.object;
+
     loggerMock = Mock.ofType(MockableLogger);
     testSubject = new WebDriver(loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
     it('should close puppeteer browser', async () => {
+        puppeteerLaunchMock
+            .setup(async (o) => o(It.isAny()))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
         await testSubject.launch();
         await testSubject.close();
 
@@ -54,7 +59,24 @@ describe('WebDriver', () => {
     });
 
     it('should launch puppeteer browser', async () => {
+        puppeteerLaunchMock
+            .setup(async (o) => o(It.isAny()))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
         const browser = await testSubject.launch();
+
+        expect(browser).toEqual(puppeteerBrowserMock);
+        puppeteerLaunchMock.verifyAll();
+    });
+
+    it('should connect to existing puppeteer browser', async () => {
+        puppeteerConnectMock
+            .setup(async c => c(It.isObjectWith({ browserWSEndpoint: 'ws'})))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
+        const browser = await testSubject.connect('ws');
 
         expect(browser).toEqual(puppeteerBrowserMock);
         puppeteerLaunchMock.verifyAll();
