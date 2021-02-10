@@ -128,7 +128,9 @@ export class Runner {
             return;
         }
 
-        const websiteScanRef = pageScanResult.websiteScanRefs.find((ref) => ref.scanGroupType === 'consolidated-scan-report');
+        const websiteScanRef = pageScanResult.websiteScanRefs.find(
+            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
+        );
         if (websiteScanRef === undefined) {
             return;
         }
