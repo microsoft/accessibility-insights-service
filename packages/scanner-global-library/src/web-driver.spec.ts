@@ -72,7 +72,7 @@ describe('WebDriver', () => {
 
     it('should connect to existing puppeteer browser', async () => {
         puppeteerConnectMock
-            .setup(async c => c(It.isObjectWith({ browserWSEndpoint: 'ws'})))
+            .setup(async (c) => c(It.isObjectWith({ browserWSEndpoint: 'ws' })))
             .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
             .verifiable(Times.once());
 

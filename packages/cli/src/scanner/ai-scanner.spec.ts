@@ -47,8 +47,7 @@ describe('AIScanner', () => {
     });
 
     function setupNewPageCall(): void {
-        pageMock.setup(async (p) => p.create(It.isObjectWith({ browserExecutablePath: undefined })))
-                .verifiable(Times.once());
+        pageMock.setup(async (p) => p.create(It.isObjectWith({ browserExecutablePath: undefined }))).verifiable(Times.once());
     }
 
     function setupPageCloseCall(): void {
