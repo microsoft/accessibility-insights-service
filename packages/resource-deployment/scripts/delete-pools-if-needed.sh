@@ -76,7 +76,7 @@ function compareParameterFileToDeployedConfig() {
 
     if [[ -z $expectedValue ]] || [[ $expectedValue == "null" ]]; then
         echo "No '$templateFileParameterName' parameter value found in template file $parameterFilePath"
-    elif [ $expectedValue != $actualValue ]; then
+    elif [[ $expectedValue != $actualValue ]]; then
         echo "The '$batchConfigPropertyName' value for $poolId must be updated from '$actualValue' to '$expectedValue'"
         echo "Pool must be deleted to perform update."
         poolConfigOutdated=true
