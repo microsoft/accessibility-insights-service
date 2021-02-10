@@ -11,21 +11,23 @@ import { WebsiteScanResultProvider } from 'service-library';
 import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import * as Puppeteer from 'puppeteer';
-import { WebsiteScanResultUpdater } from '../runner/website-scan-result-updater';
+import { WebsiteScanResultWriter } from '../runner/website-scan-result-writer';
 import { ScanMetadata } from '../types/scan-metadata';
 import { DiscoveredUrlProcessor } from './discovered-url-processor';
 import { CrawlRunner } from './crawl-runner';
 import { DeepScanner } from './deep-scanner';
+import { ScanFeedGenerator } from './scan-feed-generator';
 
 describe(DeepScanner, () => {
     let loggerMock: IMock<GlobalLogger>;
     let crawlRunnerMock: IMock<CrawlRunner>;
     let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
-    let websiteScanResultUpdaterMock: IMock<WebsiteScanResultUpdater>;
+    let websiteScanResultWriterMock: IMock<WebsiteScanResultWriter>;
     let urlProcessorMock: IMock<DiscoveredUrlProcessor>;
     let discoveryPatternGeneratorMock: IMock<DiscoveryPatternFactory>;
     let pageMock: IMock<Page>;
+    let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
     const puppeteerPageStub = {} as Puppeteer.Page;
 
     const url = 'test url';
@@ -40,6 +42,7 @@ describe(DeepScanner, () => {
     let scanMetadata: ScanMetadata;
     let pageScanResult: OnDemandPageScanResult;
     let websiteScanResult: WebsiteScanResult;
+    let websiteScanResultDbDocument: WebsiteScanResult;
 
     let testSubject: DeepScanner;
 
@@ -48,10 +51,11 @@ describe(DeepScanner, () => {
         crawlRunnerMock = Mock.ofType<CrawlRunner>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         serviceConfigMock = Mock.ofType<ServiceConfiguration>();
-        websiteScanResultUpdaterMock = Mock.ofType<WebsiteScanResultUpdater>();
+        websiteScanResultWriterMock = Mock.ofType<WebsiteScanResultWriter>();
         urlProcessorMock = Mock.ofType<DiscoveredUrlProcessor>();
         discoveryPatternGeneratorMock = Mock.ofType<DiscoveryPatternFactory>();
         pageMock = Mock.ofType<Page>();
+        scanFeedGeneratorMock = Mock.ofType<ScanFeedGenerator>();
 
         serviceConfigMock.setup((sc) => sc.getConfigValue('crawlConfig')).returns(() => Promise.resolve(crawlConfig));
         pageMock.setup((p) => p.getUnderlyingPage()).returns(() => puppeteerPageStub);
@@ -73,13 +77,18 @@ describe(DeepScanner, () => {
             discoveryPatterns: discoveryPatterns,
             baseUrl: crawlBaseUrl,
         } as WebsiteScanResult;
+        websiteScanResultDbDocument = {
+            ...websiteScanResult,
+            _etag: 'etag',
+        };
 
         testSubject = new DeepScanner(
-            loggerMock.object,
             crawlRunnerMock.object,
+            scanFeedGeneratorMock.object,
             websiteScanResultProviderMock.object,
+            websiteScanResultWriterMock.object,
             serviceConfigMock.object,
-            websiteScanResultUpdaterMock.object,
+            loggerMock.object,
             urlProcessorMock.object,
             discoveryPatternGeneratorMock.object,
         );
@@ -89,9 +98,29 @@ describe(DeepScanner, () => {
         loggerMock.verifyAll();
         crawlRunnerMock.verifyAll();
         websiteScanResultProviderMock.verifyAll();
-        websiteScanResultUpdaterMock.verifyAll();
+        websiteScanResultWriterMock.verifyAll();
         urlProcessorMock.verifyAll();
         discoveryPatternGeneratorMock.verifyAll();
+        scanFeedGeneratorMock.verifyAll();
+    });
+
+    it('skip deep scan if maximum discovered pages limit was reached', async () => {
+        websiteScanResult.knownPages = [];
+        for (let i = 0; i < urlCrawlLimit + 1; i++) {
+            websiteScanResult.knownPages.push(`i`);
+        }
+        setupReadWebsiteScanResult();
+        setupLoggerProperties();
+        loggerMock
+            .setup((o) =>
+                o.logInfo('The website deep scan completed since maximum discovered pages limit was reached.', {
+                    discoveredUrlsTotal: (urlCrawlLimit + 1).toString(),
+                    discoveredUrlsLimit: urlCrawlLimit.toString(),
+                }),
+            )
+            .verifiable();
+
+        await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
     });
 
     it('logs and throws if websiteScanRefs is missing', () => {
@@ -114,6 +143,7 @@ describe(DeepScanner, () => {
         setupCrawl([generatedDiscoveryPattern]);
         setupProcessUrls();
         setupUpdateWebsiteScanResult([generatedDiscoveryPattern]);
+        setupScanFeedGeneratorMock();
 
         await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
     });
@@ -124,9 +154,14 @@ describe(DeepScanner, () => {
         setupCrawl(discoveryPatterns);
         setupProcessUrls();
         setupUpdateWebsiteScanResult(discoveryPatterns);
+        setupScanFeedGeneratorMock();
 
         await testSubject.runDeepScan(scanMetadata, pageScanResult, pageMock.object);
     });
+
+    function setupScanFeedGeneratorMock(): void {
+        scanFeedGeneratorMock.setup((o) => o.queueDiscoveredPages(websiteScanResultDbDocument, pageScanResult)).verifiable();
+    }
 
     function setupReadWebsiteScanResult(): void {
         websiteScanResultProviderMock.setup((w) => w.read(websiteScanResultId)).returns(() => Promise.resolve(websiteScanResult));
@@ -147,19 +182,20 @@ describe(DeepScanner, () => {
     }
 
     function setupUpdateWebsiteScanResult(crawlDiscoveryPatterns: string[]): void {
-        websiteScanResultUpdaterMock
+        websiteScanResultWriterMock
             .setup((w) => w.updateWebsiteScanResultWithDiscoveredUrls(pageScanResult, processedUrls, crawlDiscoveryPatterns))
+            .returns(() => Promise.resolve(websiteScanResultDbDocument))
             .verifiable();
     }
 
     function setupLoggerProperties(): void {
         loggerMock
             .setup((l) =>
-                l.setCommonProperties({
-                    url: url,
-                    scanId: scanMetadata.id,
-                    websiteScanId: websiteScanResultId,
-                }),
+                l.setCommonProperties(
+                    It.isValue({
+                        websiteScanId: websiteScanResultId,
+                    }),
+                ),
             )
             .verifiable();
     }
