@@ -21,7 +21,7 @@ export class DeepScanner {
         @inject(CrawlRunner) private readonly crawlRunner: CrawlRunner,
         @inject(ScanFeedGenerator) private readonly scanFeedGenerator: ScanFeedGenerator,
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(WebsiteScanResultWriter) private readonly websiteScanResultwriter: WebsiteScanResultWriter,
+        @inject(WebsiteScanResultWriter) private readonly websiteScanResultWriter: WebsiteScanResultWriter,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
@@ -47,7 +47,7 @@ export class DeepScanner {
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.getUnderlyingPage());
         const processedUrls = this.processUrls(discoveredUrls, urlCrawlLimit, websiteScanResult.knownPages);
-        const websiteScanResultUpdated = await this.websiteScanResultwriter.updateWebsiteScanResultWithDiscoveredUrls(
+        const websiteScanResultUpdated = await this.websiteScanResultWriter.updateWebsiteScanResultWithDiscoveredUrls(
             pageScanResult,
             processedUrls,
             discoveryPatterns,
