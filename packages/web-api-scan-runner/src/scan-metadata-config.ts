@@ -7,10 +7,12 @@ import { ScanMetadata } from './types/scan-metadata';
 @injectable()
 export class ScanMetadataConfig {
     constructor(private readonly argvObj: Argv = yargs) {
-        argvObj.boolean('deepScan');
-        // Temporary workaround for yargs v16 changing all env variables to lowercase
-        argvObj.alias({
-            deepscan: 'deepScan',
+        argvObj.options({
+            deepScan: {
+                type: 'boolean',
+                // Temporary workaround for yargs v16 changing all env variables to lowercase
+                alias: 'deepscan',
+            },
         });
     }
 

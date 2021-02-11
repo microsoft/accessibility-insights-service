@@ -3,10 +3,11 @@
 import { Crawler, setupLocalCrawlerContainer } from 'accessibility-insights-crawler';
 import * as inversify from 'inversify';
 
-export function setupCliContainer(): inversify.Container {
-    const container = new inversify.Container({ autoBindInjectable: true });
+export function setupCliContainer(
+    container: inversify.Container = new inversify.Container({ autoBindInjectable: true }),
+): inversify.Container {
     setupLocalCrawlerContainer(container);
-    container.bind(Crawler).toConstantValue(new Crawler<void>(container));
+    container.bind(Crawler).toConstantValue(new Crawler(container));
 
     return container;
 }

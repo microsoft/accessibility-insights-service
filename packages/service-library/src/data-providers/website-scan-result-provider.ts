@@ -28,12 +28,34 @@ export class WebsiteScanResultProvider {
     }
 
     /**
+     * Writes documents to a storage if documents do not exist; otherwise, merges documents with corresponding storage documents.
+     *
+     * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
+     */
+    public async mergeOrCreateBatch(websiteScanResults: Partial<WebsiteScanResult>[]): Promise<WebsiteScanResult[]> {
+        const sourceDocuments = websiteScanResults.map((scanResult) => this.normalizeToDbDocument(scanResult));
+        const scanResultsById = _.groupBy(sourceDocuments, (scanResult) => scanResult.id);
+        const response = await Promise.all(
+            Object.keys(scanResultsById).map(async (id) => {
+                // merge same id documents in memory
+                const mergedDocument = this.mergeBatch(scanResultsById[id]);
+
+                return this.mergeOrCreate(mergedDocument);
+            }),
+        );
+
+        return response;
+    }
+
+    /**
      * Writes document to a storage if document does not exist; otherwise, merges the document with the current storage document.
      *
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
+     * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
     public async mergeOrCreate(websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResult> {
-        const scanResultNormalized = this.normalizeDbDocument(websiteScanResult);
+        const scanResultNormalized = this.normalizeToDbDocument(websiteScanResult);
 
         return (await this.retryHelper.executeWithRetries(
             async () => {
@@ -45,7 +67,7 @@ export class WebsiteScanResultProvider {
                 }
             },
             async (err) =>
-                this.logger.logError(`Failed to update website scan result Cosmos DB document`, {
+                this.logger.logError(`Failed to update website scan result Cosmos DB document. Retrying on error.`, {
                     document: JSON.stringify(scanResultNormalized),
                     error: System.serializeError(err),
                 }),
@@ -54,13 +76,49 @@ export class WebsiteScanResultProvider {
         )) as WebsiteScanResult;
     }
 
+    public normalizeToDbDocument(websiteScanResult: Partial<WebsiteScanResult>): WebsiteScanResult {
+        const documentId = this.getWebsiteScanId(websiteScanResult);
+        const partitionKey = websiteScanResult.partitionKey ?? this.getPartitionKey(documentId);
+
+        return {
+            ...(websiteScanResult as WebsiteScanResult),
+            id: documentId,
+            partitionKey: partitionKey,
+            itemType: ItemType.websiteScanResult,
+        };
+    }
+
     private async mergeAndWrite(
         storageDocument: WebsiteScanResult,
         websiteScanResult: Partial<WebsiteScanResult>,
     ): Promise<WebsiteScanResult> {
-        const mergedDocument = _.mergeWith(storageDocument, websiteScanResult, (target, source, key) => {
+        const mergedDocument = this.merge(websiteScanResult, storageDocument);
+
+        return (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(mergedDocument)).item;
+    }
+
+    private mergeBatch(sourceDocuments: WebsiteScanResult[]): WebsiteScanResult {
+        if (sourceDocuments.length === 1) {
+            return sourceDocuments[0];
+        }
+
+        let targetDocument: WebsiteScanResult = sourceDocuments[0];
+        sourceDocuments.map((sourceDocument) => {
+            targetDocument = this.merge(sourceDocument, targetDocument);
+        });
+
+        return targetDocument;
+    }
+
+    private merge(sourceDocument: Partial<WebsiteScanResult>, targetDocument: WebsiteScanResult): WebsiteScanResult {
+        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
             // Preserve the current _etag value
             if (key === '_etag') {
+                return target;
+            }
+
+            // Preserve original deep scan request scan id
+            if (key === 'deepScanId') {
                 return target;
             }
 
@@ -69,7 +127,7 @@ export class WebsiteScanResultProvider {
                     throw new Error(`Merge of array type value '${key}' is not implemented.`);
                 }
 
-                return target.concat(source);
+                return _.compact(target.concat(source));
             }
 
             return undefined;
@@ -77,6 +135,10 @@ export class WebsiteScanResultProvider {
 
         if (mergedDocument.reports !== undefined) {
             mergedDocument.reports = _.uniqBy(mergedDocument.reports, (r) => r.reportId);
+        }
+
+        if (mergedDocument.knownPages !== undefined) {
+            mergedDocument.knownPages = _.uniq(mergedDocument.knownPages);
         }
 
         if (mergedDocument.discoveryPatterns !== undefined) {
@@ -90,7 +152,7 @@ export class WebsiteScanResultProvider {
             });
         }
 
-        return (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(mergedDocument)).item;
+        return mergedDocument;
     }
 
     private async createIfNotExists(
@@ -111,24 +173,12 @@ export class WebsiteScanResultProvider {
         return { created: true, scanResult };
     }
 
-    private normalizeDbDocument(websiteScanResult: Partial<WebsiteScanResult>): WebsiteScanResult {
-        const documentId = this.getWebsiteScanId(websiteScanResult);
-        const partitionKey = websiteScanResult.partitionKey ?? this.getPartitionKey(documentId);
-
-        return {
-            ...(websiteScanResult as WebsiteScanResult),
-            id: documentId,
-            partitionKey: partitionKey,
-            itemType: ItemType.websiteScanResult,
-        };
-    }
-
     private getWebsiteScanId(websiteScanResult: Partial<WebsiteScanResult>): string {
         if (websiteScanResult.id !== undefined) {
             return websiteScanResult.id;
         }
 
-        if (websiteScanResult.baseUrl === undefined && websiteScanResult.scanGroupId) {
+        if (websiteScanResult.baseUrl === undefined && websiteScanResult.scanGroupId === undefined) {
             throw new Error(
                 `WebsiteScanResult instance should have either id or baseUrl and scanGroupId properties defined. ${JSON.stringify(
                     websiteScanResult,

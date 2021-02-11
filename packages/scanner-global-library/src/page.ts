@@ -12,6 +12,11 @@ import { WebDriver } from './web-driver';
 import { PageNavigator } from './page-navigator';
 import { BrowserError } from './browser-error';
 
+export interface BrowserStartOptions {
+    browserExecutablePath?: string;
+    browserWSEndpoint?: string;
+}
+
 @injectable()
 export class Page {
     public requestUrl: string;
@@ -33,8 +38,13 @@ export class Page {
         @inject(GlobalLogger) @optional() private readonly logger: GlobalLogger,
     ) {}
 
-    public async create(browserExecutablePath?: string): Promise<void> {
-        this.browser = await this.webDriver.launch(browserExecutablePath);
+    public async create(options?: BrowserStartOptions): Promise<void> {
+        if (options?.browserWSEndpoint !== undefined) {
+            this.browser = await this.webDriver.connect(options.browserWSEndpoint);
+        } else {
+            this.browser = await this.webDriver.launch(options?.browserExecutablePath);
+        }
+
         this.page = await this.browser.newPage();
     }
 

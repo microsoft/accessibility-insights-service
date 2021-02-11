@@ -97,17 +97,26 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const websiteScanResults = await this.updateWebsiteScanResults(requests);
+        const websiteScanResults: WebsiteScanResult[] = [];
         const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
             this.logger.logInfo('Created new scan result document in scan result storage container.', {
                 batchRequestId,
                 scanId: request.scanId,
             });
-            const websiteScanRefs = websiteScanResults
-                .filter((websiteScan) => websiteScan.pageScans.some((pageScan) => pageScan.scanId === request.scanId))
-                .map((websiteScan) => {
-                    return { id: websiteScan.id, scanGroupType: websiteScan.scanGroupType } as WebsiteScanRef;
+
+            let websiteScanRefs: WebsiteScanRef;
+            const websiteScanResult = this.createWebsiteScanResult(request);
+            if (websiteScanResult) {
+                websiteScanRefs = { id: websiteScanResult.id, scanGroupType: websiteScanResult.scanGroupType };
+                websiteScanResults.push(websiteScanResult);
+                this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
+                    batchRequestId,
+                    scanId: request.scanId,
+                    websiteScanId: websiteScanResult.id,
+                    scanGroupId: websiteScanResult.scanGroupId,
+                    scanGroupType: websiteScanResult.scanGroupType,
                 });
+            }
 
             return {
                 id: request.scanId,
@@ -128,10 +137,13 @@ export class ScanBatchRequestFeedController extends WebController {
                               scanNotifyUrl: request.scanNotifyUrl,
                           },
                       }),
-                websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
-                deepScanResult: request.deepScan ? [] : undefined,
+                websiteScanRefs: websiteScanRefs ? [websiteScanRefs] : undefined,
             };
         });
+
+        if (websiteScanResults.length > 0) {
+            await this.websiteScanResultProvider.mergeOrCreateBatch(websiteScanResults);
+        }
 
         await this.onDemandPageScanRunResultProvider.writeScanRuns(requestDocuments);
         this.logger.logInfo(
@@ -140,42 +152,32 @@ export class ScanBatchRequestFeedController extends WebController {
         );
     }
 
-    private async updateWebsiteScanResults(requests: ScanRunBatchRequest[]): Promise<WebsiteScanResult[]> {
-        const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
-        requests.map((request) => {
-            if (request.reportGroups !== undefined) {
-                const consolidatedReportGroup = request.reportGroups.find((group) => group.consolidatedId !== undefined);
-                if (consolidatedReportGroup) {
-                    websiteScanRequests.push({
-                        baseUrl: request.site.baseUrl,
-                        scanGroupId: consolidatedReportGroup.consolidatedId,
-                        scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
-                        pageScans: [
-                            {
-                                scanId: request.scanId,
-                                url: request.url,
-                                timestamp: new Date().toJSON(),
-                            },
-                        ],
-                        knownPages: request.site.knownPages,
-                        discoveryPatterns: request.site.discoveryPatterns,
-                    });
-                }
+    private createWebsiteScanResult(request: ScanRunBatchRequest): WebsiteScanResult {
+        if (request.reportGroups !== undefined) {
+            const consolidatedGroup = request.reportGroups.find((group) => group.consolidatedId !== undefined);
+            if (consolidatedGroup) {
+                const websiteScanRequest: Partial<WebsiteScanResult> = {
+                    baseUrl: request.site.baseUrl,
+                    scanGroupId: consolidatedGroup.consolidatedId,
+                    // the deep scan id will be saved only when new db document is created
+                    deepScanId: request.deepScan ? request.scanId : undefined,
+                    scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
+                    pageScans: [
+                        {
+                            scanId: request.scanId,
+                            url: request.url,
+                            timestamp: new Date().toJSON(),
+                        },
+                    ],
+                    knownPages: request.site.knownPages,
+                    discoveryPatterns: request.site.discoveryPatterns,
+                };
+
+                return this.websiteScanResultProvider.normalizeToDbDocument(websiteScanRequest);
             }
-        });
+        }
 
-        return Promise.all(
-            websiteScanRequests.map(async (request) => {
-                const websiteScanResult = await this.websiteScanResultProvider.mergeOrCreate(request);
-                this.logger.logInfo('Updated website scan result document.', {
-                    scanId: request.pageScans[0].scanId,
-                    websiteScanId: websiteScanResult.id,
-                    scanGroupId: websiteScanResult.scanGroupId,
-                });
-
-                return websiteScanResult;
-            }),
-        );
+        return undefined;
     }
 
     private async writeRequestsToQueueContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {

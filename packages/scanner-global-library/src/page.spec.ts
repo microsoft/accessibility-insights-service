@@ -244,6 +244,45 @@ describe(Page, () => {
         browserMock.verify(async (o) => o.newPage(), Times.once());
     });
 
+    it('create() with browser url', async () => {
+        browserMock
+            .setup(async (o) => o.newPage())
+            .returns(() => Promise.resolve(puppeteerPageMock.object))
+            .verifiable();
+        webDriverMock
+            .setup(async (m) => m.launch(It.isValue('path')))
+            .returns(() => Promise.resolve(browserMock.object))
+            .verifiable();
+        page.browser = undefined;
+        page.page = undefined;
+
+        await page.create({
+            browserExecutablePath: 'path',
+        });
+
+        browserMock.verify(async (o) => o.newPage(), Times.once());
+    });
+
+    it('create() prioritizes ws endpoint option if provided', async () => {
+        browserMock
+            .setup(async (o) => o.newPage())
+            .returns(() => Promise.resolve(puppeteerPageMock.object))
+            .verifiable();
+        webDriverMock
+            .setup(async (m) => m.connect(It.isValue('ws')))
+            .returns(() => Promise.resolve(browserMock.object))
+            .verifiable();
+        page.browser = undefined;
+        page.page = undefined;
+
+        await page.create({
+            browserExecutablePath: 'path',
+            browserWSEndpoint: 'ws',
+        });
+
+        browserMock.verify(async (o) => o.newPage(), Times.once());
+    });
+
     it('close()', async () => {
         webDriverMock
             .setup(async (o) => o.close())
