@@ -4,8 +4,8 @@ import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
 import { CombinedReportDataConverter } from 'axe-result-converter';
-import { AICombinedReportDataConverter } from './ai-data-converter';
 import { CombinedReportParameters } from 'accessibility-insights-report';
+import { AICombinedReportDataConverter } from './ai-data-converter';
 
 let combinedReportDataConverterMock: IMock<CombinedReportDataConverter>;
 let testSubject: AICombinedReportDataConverter;
@@ -22,10 +22,10 @@ describe(AICombinedReportDataConverter, () => {
     });
 
     it('convert', () => {
-        const CombinedReportParameters = {} as CombinedReportParameters;
+        const combinedReportParameters = {} as CombinedReportParameters;
         combinedReportDataConverterMock
             .setup((o) => o.convert(It.isAny(), It.isAny()))
-            .returns(() => CombinedReportParameters)
+            .returns(() => combinedReportParameters)
             .verifiable();
 
         testSubject.convertCrawlingResults(null, null);
