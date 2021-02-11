@@ -188,7 +188,7 @@
                     ],
                     "userIdentity": {
                         "autoUser": {
-                            "scope": "Pool",
+                            "scope": "Task",
                             "elevationLevel": "Admin"
                         }
                     },
