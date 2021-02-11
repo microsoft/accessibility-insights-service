@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { WebsiteScanResult, ItemType } from 'storage-documents';
 import { HashGenerator, RetryHelper } from 'common';
@@ -64,6 +64,8 @@ describe(WebsiteScanResultProvider, () => {
         const websiteScanResult = {
             baseUrl: 'baseUrl',
             scanGroupId: 'scanGroupId',
+            _etag: '*',
+            deepScanId: '*',
             pageScans: [
                 { scanId: 'scanId-new-to-skip', url: 'url1', timestamp: moment(dateNow).add(-7, 'minute').toJSON() },
                 { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
@@ -77,8 +79,8 @@ describe(WebsiteScanResultProvider, () => {
                     href: 'report href',
                 },
             ],
-            knownPages: ['new page'],
-            discoveryPatterns: [discoveryPattern],
+            knownPages: ['new page', null],
+            discoveryPatterns: [discoveryPattern, null],
         } as WebsiteScanResult;
         const websiteScanResultDbDocument = {
             ...websiteScanResult,
@@ -86,6 +88,7 @@ describe(WebsiteScanResultProvider, () => {
             partitionKey: 'partitionKey',
             itemType: ItemType.websiteScanResult,
             _etag: 'etag',
+            deepScanId: 'deepScanId',
             pageScans: [
                 { scanId: 'scanId-current-to-keep', url: 'url1', timestamp: moment(dateNow).toJSON() },
                 { scanId: 'scanId-current-to-remove', url: 'url2', timestamp: moment(dateNow).toJSON() },
@@ -108,6 +111,7 @@ describe(WebsiteScanResultProvider, () => {
             partitionKey: 'partitionKey',
             itemType: ItemType.websiteScanResult,
             _etag: 'etag', // should preserve current db document etag
+            deepScanId: 'deepScanId', // should preserve current db document scan id
             pageScans: [
                 { scanId: 'scanId-current-to-keep', url: 'url1', timestamp: moment(dateNow).toJSON() },
                 { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
@@ -169,32 +173,60 @@ describe(WebsiteScanResultProvider, () => {
             partitionKey: 'partitionKey',
             itemType: ItemType.websiteScanResult,
         } as WebsiteScanResult;
-        hashGeneratorMock
-            .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))
-            .returns(() => websiteScanResultDbDocument.id)
-            .verifiable();
-        partitionKeyFactoryMock
-            .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultDbDocument.id))
-            .returns(() => websiteScanResultDbDocument.partitionKey)
-            .verifiable();
-        cosmosContainerClientMock
-            .setup(async (o) => o.readDocument(websiteScanResultDbDocument.id, websiteScanResultDbDocument.partitionKey, false))
-            .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResult>))
-            .verifiable();
-        cosmosContainerClientMock
-            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultDbDocument)))
-            .returns(() => Promise.resolve({ item: websiteScanResultDbDocument } as CosmosOperationResponse<WebsiteScanResult>))
-            .verifiable();
-        retryHelperMock
-            .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
-            .returns(async (action: () => Promise<WebsiteScanResult>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
-                return action();
-            })
-            .verifiable();
+        setupHashGeneratorMock(websiteScanResult, websiteScanResultDbDocument);
+        setupPartitionKeyFactoryMock(websiteScanResultDbDocument);
+        setupCosmosContainerClientMock(websiteScanResultDbDocument);
+        setupRetryHelperMock();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(websiteScanResult);
 
         expect(actualWebsiteScanResult).toEqual(websiteScanResultDbDocument);
+    });
+
+    it('create new website scan result db document from batch', async () => {
+        const websiteScanResults = [
+            {
+                baseUrl: 'single url',
+                scanGroupId: 'scanGroupId1',
+            },
+            {
+                baseUrl: 'duplicate url',
+                scanGroupId: 'scanGroupId2',
+            },
+            {
+                baseUrl: 'duplicate url',
+                scanGroupId: 'scanGroupId2',
+            },
+        ] as WebsiteScanResult[];
+        const websiteScanResultDbDocuments = [
+            {
+                ...websiteScanResults[0],
+                id: 'single url id',
+                partitionKey: 'partitionKey1',
+                itemType: ItemType.websiteScanResult,
+            },
+            {
+                ...websiteScanResults[1],
+                id: 'duplicate url id',
+                partitionKey: 'partitionKey2',
+                itemType: ItemType.websiteScanResult,
+            },
+        ] as WebsiteScanResult[];
+
+        setupHashGeneratorMock(websiteScanResults[0], websiteScanResultDbDocuments[0]);
+        setupHashGeneratorMock(websiteScanResults[1], websiteScanResultDbDocuments[1], 2);
+
+        setupPartitionKeyFactoryMock(websiteScanResultDbDocuments[0]);
+        setupPartitionKeyFactoryMock(websiteScanResultDbDocuments[1], 2);
+
+        setupCosmosContainerClientMock(websiteScanResultDbDocuments[1]);
+        setupCosmosContainerClientMock(websiteScanResultDbDocuments[0]);
+
+        setupRetryHelperMock(2);
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreateBatch(websiteScanResults);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultDbDocuments);
     });
 
     it('read website scan result', async () => {
@@ -216,3 +248,41 @@ describe(WebsiteScanResultProvider, () => {
         expect(actualWebsiteScanResult).toEqual(websiteScanResult);
     });
 });
+
+function setupHashGeneratorMock(
+    websiteScanResult: WebsiteScanResult,
+    websiteScanResultDbDocument: WebsiteScanResult,
+    times: number = 1,
+): void {
+    hashGeneratorMock
+        .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))
+        .returns(() => websiteScanResultDbDocument.id)
+        .verifiable(Times.exactly(times));
+}
+
+function setupPartitionKeyFactoryMock(websiteScanResultDbDocument: WebsiteScanResult, times: number = 1): void {
+    partitionKeyFactoryMock
+        .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultDbDocument.id))
+        .returns(() => websiteScanResultDbDocument.partitionKey)
+        .verifiable(Times.exactly(times));
+}
+
+function setupCosmosContainerClientMock(websiteScanResultDbDocument: WebsiteScanResult): void {
+    cosmosContainerClientMock
+        .setup(async (o) => o.readDocument(websiteScanResultDbDocument.id, websiteScanResultDbDocument.partitionKey, false))
+        .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResult>))
+        .verifiable();
+    cosmosContainerClientMock
+        .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultDbDocument)))
+        .returns(() => Promise.resolve({ item: websiteScanResultDbDocument } as CosmosOperationResponse<WebsiteScanResult>))
+        .verifiable();
+}
+
+function setupRetryHelperMock(times: number = 1): void {
+    retryHelperMock
+        .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
+        .returns(async (action: () => Promise<WebsiteScanResult>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
+            return action();
+        })
+        .verifiable(Times.exactly(times));
+}
