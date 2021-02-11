@@ -4,8 +4,7 @@
 // @ts-ignore
 import * as cheerio from 'cheerio';
 export { cheerio };
-export class cheerioModule {
-}
+export class cheerioModule {}
 
 export { AIScanner } from './scanner/ai-scanner';
 export { AICrawler } from './crawler/ai-crawler';
