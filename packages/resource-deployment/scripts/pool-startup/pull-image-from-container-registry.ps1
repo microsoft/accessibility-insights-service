@@ -79,7 +79,7 @@ function getSecretValue($key) {
 function loginToContainerRegistry() {
     $containerRegistryUsername = getSecretValue "containerRegistryUsername"
     $containerRegistryPassword = getSecretValue "containerRegistryPassword"
-    $global:containerRegistryName=$containerRegistryUsername
+    $global:containerRegistryName = $containerRegistryUsername
     $global:azurecr="$containerRegistryUsername.azurecr.io"
 
     Write-Output "Login to the container registry $azurecr..."
