@@ -87,7 +87,7 @@
             }
         },
         "onDemandUrlScanPoolVmSize": {
-            "defaultValue": "standard_d4_v3",
+            "defaultValue": "standard_d11_v2",
             "type": "string",
             "metadata": {
                 "description": "vmSize for on-demand-scan-request-pool"
@@ -174,7 +174,7 @@
                     }
                 },
                 "startTask": {
-                    "commandLine": "powershell.exe win-pool-startup.ps1",
+                    "commandLine": "powershell.exe pool-startup.ps1",
                     "environmentSettings": [
                         {
                             "name": "KEY_VAULT_NAME",

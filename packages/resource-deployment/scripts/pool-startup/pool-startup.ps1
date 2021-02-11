@@ -10,7 +10,7 @@ Param(
 $global:keyvault = $keyvault
 
 function exitWithUsageInfo {
-    Write-Output "Usage: win-pool-startup.ps1 -k <key vault name>"
+    Write-Output "Usage: pool-startup.ps1 -k <key vault name>"
     exit 1
 }
 

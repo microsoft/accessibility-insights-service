@@ -15,7 +15,7 @@
             "value": "1"
         },
         "onDemandUrlScanPoolVmSize": {
-            "value": "standard_d4_v3"
+            "value": "standard_d11_v2"
         },
         "onDemandUrlScanPoolMaxTasksPerNode": {
             "value": "2"
