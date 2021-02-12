@@ -130,7 +130,6 @@ describe(CrawlerConfiguration, () => {
     });
 
     describe('getAxeSourcePath', () => {
-
         it('explicitly set axeSourcePath state', () => {
             crawlerRunOptionsMock
                 .setup((o) => o.axeSourcePath)

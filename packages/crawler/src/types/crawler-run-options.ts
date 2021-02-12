@@ -19,5 +19,5 @@ export interface CrawlerRunOptions {
     debug?: boolean;
     baseCrawlPage?: Page;
     chromePath?: string;
-    axeSourcePath?:string;
+    axeSourcePath?: string;
 }
