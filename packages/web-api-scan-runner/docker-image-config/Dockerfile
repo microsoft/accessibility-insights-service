@@ -1,16 +1,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-FROM mcr.microsoft.com/windows/servercore:ltsc2019-amd64
+FROM mcr.microsoft.com/windows:1809-amd64
 
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
+ENV NODE_VERSION 12.20.2
 
-# install node
-RUN netsh interface ipv4 set subinterface 18 mtu=1460 store=persistent ; \
-	Invoke-WebRequest -OutFile nodejs.zip -UseBasicParsing "https://nodejs.org/dist/v12.4.0/node-v12.4.0-win-x64.zip"; \
-	Expand-Archive nodejs.zip -DestinationPath C:\; \
-	Rename-Item "C:\\node-v12.4.0-win-x64" c:\nodejs
+RUN setx /m PATH "%PATH%;C:\nodejs"
 
-RUN SETX PATH C:\nodejs
+RUN powershell -Command \
+    Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
+    Expand-Archive node.zip -DestinationPath C:\ ; \
+    Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
 
 # Bundle app source
 COPY . .
