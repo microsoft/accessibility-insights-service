@@ -51,28 +51,36 @@
                         "name": "AllowBatchPortsInbound",
                         "properties": {
                             "description": "Allow inbound traffic on ports needed by azure batch",
-                            "protocol": "*",
+                            "protocol": "Tcp",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "*",
-                            "sourceAddressPrefix": "*",
+                            "destinationPortRange": "29876-29877",
+                            "sourceAddressPrefix": "BatchNodeManagement",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 200,
-                            "direction": "Inbound"
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
                         }
                     },
                     {
                         "name": "AllowStoragePortOutBound",
                         "properties": {
                             "description": "Allow outbound traffic from port used by azure storage",
-                            "protocol": "*",
+                            "protocol": "Tcp",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "*",
+                            "destinationPortRange": "443",
                             "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "*",
+                            "destinationAddressPrefix": "Storage",
                             "access": "Allow",
                             "priority": 200,
-                            "direction": "Outbound"
+                            "direction": "Outbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
                         }
                     }
                 ]
