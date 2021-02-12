@@ -51,36 +51,28 @@
                         "name": "AllowBatchPortsInbound",
                         "properties": {
                             "description": "Allow inbound traffic on ports needed by azure batch",
-                            "protocol": "Tcp",
+                            "protocol": "*",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "29876-29877",
-                            "sourceAddressPrefix": "BatchNodeManagement",
+                            "destinationPortRange": "*",
+                            "sourceAddressPrefix": "*",
                             "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 200,
-                            "direction": "Inbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
+                            "direction": "Inbound"
                         }
                     },
                     {
                         "name": "AllowStoragePortOutBound",
                         "properties": {
                             "description": "Allow outbound traffic from port used by azure storage",
-                            "protocol": "Tcp",
+                            "protocol": "*",
                             "sourcePortRange": "*",
-                            "destinationPortRange": "443",
+                            "destinationPortRange": "*",
                             "sourceAddressPrefix": "*",
-                            "destinationAddressPrefix": "Storage",
+                            "destinationAddressPrefix": "*",
                             "access": "Allow",
                             "priority": 200,
-                            "direction": "Outbound",
-                            "sourcePortRanges": [],
-                            "destinationPortRanges": [],
-                            "sourceAddressPrefixes": [],
-                            "destinationAddressPrefixes": []
+                            "direction": "Outbound"
                         }
                     }
                 ]
