@@ -38,6 +38,8 @@ export class CrawlerParametersBuilder {
             silentMode: scanArguments.silentMode,
             inputUrls: [...inputUrlSet],
             discoveryPatterns: scanArguments.discoveryPatterns,
+            chromePath: scanArguments.chromePath,
+            axeSourcePath: scanArguments.axeSourcePath,
         };
     }
 

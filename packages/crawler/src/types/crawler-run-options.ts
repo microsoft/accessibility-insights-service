@@ -18,4 +18,6 @@ export interface CrawlerRunOptions {
     silentMode?: boolean;
     debug?: boolean;
     baseCrawlPage?: Page;
+    chromePath?: string;
+    axeSourcePath?:string;
 }

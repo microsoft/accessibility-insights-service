@@ -16,4 +16,6 @@ export interface ScanArguments {
     discoveryPatterns?: string[];
     // eslint-disable-next-line
     continue?: boolean;
+    chromePath?: string;
+    axeSourcePath?:string;
 }

@@ -16,8 +16,8 @@ export class AccessibilityScanOperation {
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
     ) {}
 
-    public async run(page: Page, id: string): Promise<AxeResults> {
-        const axeResults = await this.scanner.scan(page);
+    public async run(page: Page, id: string, axeSourcePath?: string): Promise<AxeResults> {
+        const axeResults = await this.scanner.scan(page, axeSourcePath);
         const report = this.reportGenerator.generateReport(axeResults, page.url(), await page.title());
 
         await this.blobStore.setValue(`${id}.axe`, axeResults);

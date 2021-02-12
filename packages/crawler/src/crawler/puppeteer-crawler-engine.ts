@@ -8,6 +8,7 @@ import { CrawlerRunOptions } from '../types/crawler-run-options';
 import { ApifyRequestQueueProvider, crawlerIocTypes, PageProcessorFactory } from '../types/ioc-types';
 import { CrawlerConfiguration } from './crawler-configuration';
 import { CrawlerFactory } from './crawler-factory';
+import { isEmpty } from 'lodash';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions */
 
@@ -44,6 +45,14 @@ export class PuppeteerCrawlerEngine {
                 },
             } as Apify.LaunchPuppeteerOptions,
         };
+
+        if (!isEmpty(crawlerRunOptions.chromePath)) {
+            puppeteerCrawlerOptions.launchPuppeteerOptions = {
+                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
+                useChrome: true,
+            } as Apify.LaunchPuppeteerOptions;
+            this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
+        }
 
         if (crawlerRunOptions.debug === true) {
             this.crawlerConfiguration.setSilentMode(false);

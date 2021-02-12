@@ -76,7 +76,7 @@ describe(AccessibilityScanOperation, () => {
             .returns(async () => {})
             .verifiable(Times.once());
         scannerMock
-            .setup((s) => s.scan(It.isAny()))
+            .setup((s) => s.scan(It.isAny(), It.isAny()))
             .returns(async () => axeResult)
             .verifiable(Times.once());
         reportGeneratorMock
