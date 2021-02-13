@@ -4,9 +4,7 @@ FROM mcr.microsoft.com/windows:1809-amd64
 
 ENV NODE_VERSION 12.20.2
 
-USER ContainerAdministrator
 RUN route -p add 169.254.169.0 mask 255.255.255.0 0.0.0.0
-USER ContainerUser
 
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
