@@ -22,5 +22,3 @@ COPY . .
 RUN npm install
 
 CMD ["powershell.exe", "./add-MSI-route.ps1"]
-
-ENTRYPOINT [ "node", "./web-api-scan-job-manager.js" ]

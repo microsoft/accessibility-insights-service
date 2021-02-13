@@ -33,6 +33,6 @@ describe(ScannerBatchTaskPropertyProvider, () => {
 
     it('get additional container run options', () => {
         const actualRunOptions = testSubject.getAdditionalContainerRunOptions();
-        expect(actualRunOptions).toEqual('--cap-add=SYS_ADMIN');
+        expect(actualRunOptions).toEqual('');
     });
 });

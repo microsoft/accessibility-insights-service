@@ -15,7 +15,7 @@ export class ScannerBatchTaskPropertyProvider extends BatchTaskPropertyProvider 
     }
 
     public getAdditionalContainerRunOptions?(): string {
-        return '--cap-add=SYS_ADMIN';
+        return '';
     }
 
     public getUserElevationLevel(): UserAccessLevels {
