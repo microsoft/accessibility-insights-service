@@ -1,16 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { PromiseUtils, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 
 @injectable()
-export class Scanner {
+export class AxeScanner {
     constructor(
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async scan(page: Page): Promise<AxeScanResults> {

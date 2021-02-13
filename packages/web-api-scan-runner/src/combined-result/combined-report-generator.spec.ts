@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
@@ -54,7 +55,7 @@ describe(CombinedReportGenerator, () => {
 
         hrefStub = 'href-stub';
 
-        testSubject = new CombinedReportGenerator(guidGeneratorMock.object, loggerMock.object, reportGeneratorMock.object);
+        testSubject = new CombinedReportGenerator(reportGeneratorMock.object, guidGeneratorMock.object, loggerMock.object);
     });
 
     afterEach(() => {

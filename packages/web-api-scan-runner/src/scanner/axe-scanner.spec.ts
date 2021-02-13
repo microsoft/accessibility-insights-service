@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { fail } from 'assert';
@@ -8,13 +9,13 @@ import { PromiseUtils, ScanRunTimeConfig, ServiceConfiguration, System } from 'c
 import { AxePuppeteerFactory, AxeScanResults, BrowserError, Page } from 'scanner-global-library';
 import { IMock, It, Mock, Times } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { Scanner } from './scanner';
+import { AxeScanner } from './axe-scanner';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
-describe(Scanner, () => {
+describe(AxeScanner, () => {
     let pageMock: IMock<Page>;
-    let scanner: Scanner;
+    let axeScanner: AxeScanner;
     let axeBrowserFactoryMock: IMock<AxePuppeteerFactory>;
     let loggerMock: IMock<MockableLogger>;
     let serviceConfigMock: IMock<ServiceConfiguration>;
@@ -32,11 +33,11 @@ describe(Scanner, () => {
             scanTimeoutInMin: 5,
         } as ScanRunTimeConfig;
 
-        scanner = new Scanner(loggerMock.object, promiseUtilsMock.object, serviceConfigMock.object);
+        axeScanner = new AxeScanner(promiseUtilsMock.object, serviceConfigMock.object, loggerMock.object);
     });
 
     it('should create instance', () => {
-        expect(scanner).not.toBeNull();
+        expect(axeScanner).not.toBeNull();
     });
 
     describe('scan', () => {
@@ -50,7 +51,7 @@ describe(Scanner, () => {
             setupPageScanCall(axeResultsStub);
             setupWaitForPromisetoReturnOriginalPromise();
 
-            await scanner.scan(pageMock.object);
+            await axeScanner.scan(pageMock.object);
 
             verifyMocks();
         });
@@ -67,7 +68,7 @@ describe(Scanner, () => {
                 .verifiable();
 
             try {
-                await scanner.scan(pageMock.object);
+                await axeScanner.scan(pageMock.object);
                 fail('should throw');
             } catch (err) {
                 expect(err).toEqual({ error: 'An error occurred while scanning website page', pageResponseCode: 101 });
@@ -83,7 +84,7 @@ describe(Scanner, () => {
             setupPageErrorScanCall(errorMessage);
             setupWaitForPromiseToReturnTimeoutPromise();
 
-            const scanResult = await scanner.scan(pageMock.object);
+            const scanResult = await axeScanner.scan(pageMock.object);
 
             expect((scanResult.error as BrowserError).stack).toBeTruthy();
             (scanResult.error as BrowserError).stack = 'stack';

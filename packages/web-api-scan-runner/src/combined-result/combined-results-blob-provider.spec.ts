@@ -2,17 +2,19 @@
 // Licensed under the MIT License.
 
 import 'reflect-metadata';
+
 import { GuidGenerator } from 'common';
 import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
 import { IMock, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { CombinedResultsBlobGetter, CombinedResultsBlobInfo } from './combined-results-blob-getter';
+import { CombinedResultsBlob } from '../types/combined-results-blob';
+import { CombinedResultsBlobProvider } from './combined-results-blob-provider';
 
-describe(CombinedResultsBlobGetter, () => {
+describe(CombinedResultsBlobProvider, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
-    let testSubject: CombinedResultsBlobGetter;
+    let testSubject: CombinedResultsBlobProvider;
 
     let givenResultsBlobIdStub: string;
     let emptyReadResponseStub: CombinedScanResultsReadResponse;
@@ -31,13 +33,13 @@ describe(CombinedResultsBlobGetter, () => {
             etag: 'some-response-etag',
         };
 
-        testSubject = new CombinedResultsBlobGetter(loggerMock.object, guidGeneratorMock.object, combinedScanResultsProviderMock.object);
+        testSubject = new CombinedResultsBlobProvider(combinedScanResultsProviderMock.object, guidGeneratorMock.object, loggerMock.object);
     });
 
     test('givenResultsBlobId is undefined', async () => {
         givenResultsBlobIdStub = undefined;
         const generatedGuidStub = 'some-generated-guid';
-        const expectedBlobInfo: CombinedResultsBlobInfo = {
+        const expectedBlobInfo: CombinedResultsBlob = {
             blobId: generatedGuidStub,
             response: emptyReadResponseStub,
         };
@@ -45,11 +47,11 @@ describe(CombinedResultsBlobGetter, () => {
         guidGeneratorMock.setup((mock) => mock.createGuid()).returns(() => generatedGuidStub);
         combinedScanResultsProviderMock.setup((mock) => mock.getEmptyResponse()).returns(() => emptyReadResponseStub);
 
-        expect(await testSubject.getBlobInfo(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
+        expect(await testSubject.getBlob(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
     });
 
     test('readResponse has blobNotFound error code', async () => {
-        const expectedBlobInfo: CombinedResultsBlobInfo = {
+        const expectedBlobInfo: CombinedResultsBlob = {
             blobId: givenResultsBlobIdStub,
             response: emptyReadResponseStub,
         };
@@ -63,18 +65,18 @@ describe(CombinedResultsBlobGetter, () => {
         setupBlobRead(givenResultsBlobIdStub, readResponseWithBlobNotFound);
         combinedScanResultsProviderMock.setup((mock) => mock.getEmptyResponse()).returns(() => emptyReadResponseStub);
 
-        expect(await testSubject.getBlobInfo(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
+        expect(await testSubject.getBlob(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
     });
 
     test('Successfully retrieves the combined results', async () => {
-        const expectedBlobInfo: CombinedResultsBlobInfo = {
+        const expectedBlobInfo: CombinedResultsBlob = {
             blobId: givenResultsBlobIdStub,
             response: readResponseStub,
         };
 
         setupBlobRead(givenResultsBlobIdStub, readResponseStub);
 
-        expect(await testSubject.getBlobInfo(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
+        expect(await testSubject.getBlob(givenResultsBlobIdStub)).toEqual(expectedBlobInfo);
     });
 
     test('readResponse has jsonParseError error code', async () => {
@@ -86,7 +88,7 @@ describe(CombinedResultsBlobGetter, () => {
 
         setupBlobRead(givenResultsBlobIdStub, readResponseWithError);
 
-        await expect(testSubject.getBlobInfo(givenResultsBlobIdStub)).rejects.toThrowError('Failed to read combined axe results blob.');
+        await expect(testSubject.getBlob(givenResultsBlobIdStub)).rejects.toThrowError('Failed to read combined axe results blob.');
     });
 
     function setupBlobRead(expectedCombinedResultsBlobId: string, response: CombinedScanResultsReadResponse): void {

@@ -10,9 +10,9 @@ import { GeneratedReport, ReportGenerator } from '../report-generator/report-gen
 @injectable()
 export class CombinedReportGenerator {
     public constructor(
+        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
     ) {}
 
     public generate(
