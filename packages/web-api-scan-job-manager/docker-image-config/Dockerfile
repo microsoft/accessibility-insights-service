@@ -4,7 +4,9 @@ FROM mcr.microsoft.com/windows:1809-amd64
 
 ENV NODE_VERSION 12.20.2
 
-RUN route -p add 169.254.169.0 mask 255.255.255.0 0.0.0.0
+USER ContainerAdministrator
+
+RUN powershell Set-ExecutionPolicy RemoteSigned
 
 RUN setx /m PATH "%PATH%;C:\nodejs"
 
@@ -18,5 +20,7 @@ COPY . .
 
 # Install app dependencies
 RUN npm install
+
+CMD ["powershell.exe", "./add-MSI-route.ps1"]
 
 ENTRYPOINT [ "node", "./web-api-scan-job-manager.js" ]

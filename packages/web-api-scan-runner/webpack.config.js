@@ -76,6 +76,11 @@ module.exports = (env) => {
                         from: 'Dockerfile',
                         to: '',
                     },
+                    {
+                        context: './docker-image-config',
+                        from: 'add-MSI-route.ps1',
+                        to: '',
+                    },
                 ],
             }),
         ],
