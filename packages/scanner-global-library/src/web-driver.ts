@@ -17,7 +17,7 @@ export class WebDriver {
         this.browser = await this.puppeteer.launch({
             executablePath: browserExecutablePath,
             headless: true,
-            args: ['--disable-dev-shm-usage'],
+            args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
             defaultViewport: {
                 width: 1920,
                 height: 1080,
