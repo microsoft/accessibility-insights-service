@@ -78,7 +78,7 @@ module.exports = (env) => {
                     },
                     {
                         context: './docker-image-config',
-                        from: 'add-MSI-route.ps1',
+                        from: 'web-api-scan-runner.ps1',
                         to: '',
                     },
                 ],

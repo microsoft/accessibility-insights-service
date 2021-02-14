@@ -88,13 +88,14 @@ function loginToContainerRegistry() {
 
 function pullDockerImages() {
     Write-Output "Pulling Batch images from container registry..."
-    $images=$(az acr repository list --name $global:containerRegistryName --query "[?starts_with(@, 'batch-')]" -o tsv)
+    scanManagerImage="$azurecr/batch-scan-manager:latest"
+    scanRunnerImage="$azurecr/batch-scan-runner:latest"
 
-    foreach ($image in $images) {
-        $fullImageName="$azurecr/$image" + ":latest"
-        Write-Output "Pulling image $fullImageName"
-        docker pull $fullImageName
-    }
+    Write-Output "Pulling image $scanManagerImage"
+    docker pull $scanManagerImage
+
+    Write-Output "Pulling image $scanRunnerImage"
+    docker pull $scanRunnerImage
 }
 
 

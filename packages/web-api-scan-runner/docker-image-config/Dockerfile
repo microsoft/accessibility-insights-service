@@ -20,5 +20,5 @@ COPY . .
 # Install app dependencies
 RUN npm install
 
-CMD ["powershell.exe", "./add-MSI-route.ps1"]
+ENTRYPOINT ["powershell.exe", "./web-api-scan-runner.ps1"]
 
