@@ -4,7 +4,7 @@ import 'reflect-metadata';
 
 import { Report, Reporter, ReporterFactory, CombinedReportParameters } from 'accessibility-insights-report';
 import { IMock, Mock } from 'typemoq';
-import { AxeResults, AxeCoreResults, CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
+import { AxeResultsList, AxeCoreResults, CombinedReportDataConverter, ScanResultData } from 'axe-result-converter';
 import axe from 'axe-core';
 import { CombinedScanResults } from 'storage-documents';
 import * as MockDate from 'mockdate';
@@ -67,10 +67,10 @@ describe('AxeResultToConsolidatedHtmlConverter', () => {
         };
         const axeResults = {
             urls: [],
-            violations: new AxeResults(),
-            passes: new AxeResults(),
-            incomplete: new AxeResults(),
-            inapplicable: new AxeResults(),
+            violations: new AxeResultsList(),
+            passes: new AxeResultsList(),
+            incomplete: new AxeResultsList(),
+            inapplicable: new AxeResultsList(),
         } as AxeCoreResults;
         const combinedScanResults = { urlCount, axeResults } as CombinedScanResults;
 

@@ -3,6 +3,7 @@
 import { inject, injectable, optional } from 'inversify';
 import { GlobalLogger, Logger } from 'logger';
 import Puppeteer from 'puppeteer';
+import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options';
 
 @injectable()
 export class WebDriver {
@@ -13,16 +14,20 @@ export class WebDriver {
         private readonly puppeteer: typeof Puppeteer = Puppeteer,
     ) {}
 
+    public async connect(wsEndpoint: string): Promise<Puppeteer.Browser> {
+        this.browser = await this.puppeteer.connect({
+            browserWSEndpoint: wsEndpoint,
+            ...defaultBrowserOptions,
+        });
+        this.logger?.logInfo('Chromium browser instance connected.');
+
+        return this.browser;
+    }
+
     public async launch(browserExecutablePath?: string): Promise<Puppeteer.Browser> {
         this.browser = await this.puppeteer.launch({
             executablePath: browserExecutablePath,
-            headless: true,
-            args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
-            defaultViewport: {
-                width: 1920,
-                height: 1080,
-                deviceScaleFactor: 1,
-            },
+            ...defaultLaunchOptions,
         });
         this.logger?.logInfo('Chromium browser instance started.');
 

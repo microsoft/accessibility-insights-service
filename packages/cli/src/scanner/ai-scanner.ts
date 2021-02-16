@@ -8,10 +8,10 @@ import { System } from 'common';
 export class AIScanner {
     constructor(@inject(Page) private readonly page: Page) {}
 
-    public async scan(url: string, chromePath?: string, sourcePath?: string): Promise<AxeScanResults> {
+    public async scan(url: string, browserExecutablePath?: string, sourcePath?: string): Promise<AxeScanResults> {
         try {
             console.log(`Starting accessibility scanning of URL ${url}`);
-            await this.page.create(chromePath);
+            await this.page.create({ browserExecutablePath });
             await this.page.navigateToUrl(url);
 
             return await this.page.scanForA11yIssues(sourcePath);

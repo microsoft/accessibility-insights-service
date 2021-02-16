@@ -7,7 +7,7 @@ import { BlobContentDownloadResponse, BlobSaveCondition, BlobStorageClient, Blob
 import { CombinedScanResults } from 'storage-documents';
 import { IMock, Mock } from 'typemoq';
 import { BodyParser, System } from 'common';
-import { AxeResults, AxeResult } from 'axe-result-converter';
+import { AxeResultsList, AxeResult } from 'axe-result-converter';
 import { CombinedScanResultsProvider } from './combined-scan-results-provider';
 import { DataProvidersCommon } from './data-providers-common';
 
@@ -22,10 +22,10 @@ describe(CombinedScanResultsProvider, () => {
         },
         axeResults: {
             urls: [],
-            violations: new AxeResults(),
-            passes: new AxeResults(),
-            incomplete: new AxeResults(),
-            inapplicable: new AxeResults(),
+            violations: new AxeResultsList(),
+            passes: new AxeResultsList(),
+            incomplete: new AxeResultsList(),
+            inapplicable: new AxeResultsList(),
         },
     } as CombinedScanResults;
     combinedResults.axeResults.violations.add('1', { fingerprint: 'a' } as AxeResult);

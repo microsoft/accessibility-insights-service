@@ -195,6 +195,8 @@ describe(ScanBatchRequestFeedController, () => {
 function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequest[]): Partial<WebsiteScanResult>[] {
     const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
     documents.map((document) => {
+        const websiteScanRequestDbDocuments: Partial<WebsiteScanResult>[] = [];
+
         document.scanRunBatchRequest
             .filter((request) => request.reportGroups !== undefined)
             .map((request) => {
@@ -202,6 +204,7 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     const websiteScanResult = {
                         baseUrl: request.site.baseUrl,
                         scanGroupId: reportGroup.consolidatedId,
+                        deepScanId: request.deepScan ? request.scanId : undefined,
                         scanGroupType: request.deepScan ? 'deep-scan' : 'consolidated-scan-report',
                         pageScans: [
                             {
@@ -215,13 +218,20 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                     } as WebsiteScanResult;
 
                     const documentId = `db-id-${reportGroup.consolidatedId}`;
-                    websiteScanRequests.push({ ...websiteScanResult, id: documentId });
+                    const websiteScanResultDbDocument = { ...websiteScanResult, id: documentId };
+                    websiteScanRequests.push(websiteScanResultDbDocument);
+                    websiteScanRequestDbDocuments.push(websiteScanResultDbDocument);
+
                     websiteScanResultProviderMock
-                        .setup(async (o) => o.mergeOrCreate(It.isValue(websiteScanResult)))
-                        .returns(() => Promise.resolve({ ...websiteScanResult, id: documentId }))
+                        .setup((o) => o.normalizeToDbDocument(It.isValue(websiteScanResult)))
+                        .returns(() => websiteScanResultDbDocument)
                         .verifiable();
                 });
             });
+
+        if (websiteScanRequestDbDocuments.length > 0) {
+            websiteScanResultProviderMock.setup(async (o) => o.mergeOrCreateBatch(It.isValue(websiteScanRequestDbDocuments))).verifiable();
+        }
     });
 
     return websiteScanRequests;
@@ -251,16 +261,16 @@ function setupOnDemandPageScanRunResultProviderMock(
                         timestamp: dateNow.toJSON(),
                     },
                     batchRequestId: document.id,
+                    ...(isEmpty(request.scanNotifyUrl)
+                        ? {}
+                        : {
+                              notification: {
+                                  state: 'pending',
+                                  scanNotifyUrl: request.scanNotifyUrl,
+                              },
+                          }),
                     websiteScanRefs: websiteScanRefs.length > 0 ? websiteScanRefs : undefined,
-                    deepScanResult: request.deepScan ? [] : undefined,
                 };
-
-                if (request.scanNotifyUrl !== undefined) {
-                    result.notification = {
-                        state: 'pending',
-                        scanNotifyUrl: request.scanNotifyUrl,
-                    };
-                }
 
                 return result;
             });

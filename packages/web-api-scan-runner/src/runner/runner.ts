@@ -3,7 +3,7 @@
 import { FeatureFlags, GuidGenerator, ServiceConfiguration, System, RetryHelper } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
-import { GlobalLogger, ScanTaskCompletedMeasurements } from 'logger';
+import { GlobalLogger } from 'logger';
 import { AxeScanResults, Page } from 'scanner-global-library';
 import {
     OnDemandPageScanRunResultProvider,
@@ -32,6 +32,7 @@ import { Scanner } from '../scanner/scanner';
 import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
 import { DeepScanner } from '../crawl-runner/deep-scanner';
 import { ScanMetadata } from '../types/scan-metadata';
+import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -55,6 +56,7 @@ export class Runner {
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
         @inject(Page) private readonly page: Page,
         @inject(DeepScanner) private readonly deepScanner: DeepScanner,
+        @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
     ) {}
 
     public async run(): Promise<void> {
@@ -67,14 +69,7 @@ export class Runner {
             return;
         }
 
-        const scanStartedTimestamp: number = Date.now();
-        const scanSubmittedTimestamp: number = this.guidGenerator.getGuidTimestamp(scanMetadata.id).getTime();
-
-        this.logger.trackEvent('ScanRequestRunning', undefined, { runningScanRequests: 1 });
-        this.logger.trackEvent('ScanTaskStarted', undefined, {
-            scanWaitTime: (scanStartedTimestamp - scanSubmittedTimestamp) / 1000,
-            startedScanTasks: 1,
-        });
+        this.telemetryManager.trackScanStarted(scanMetadata.id);
 
         let axeScanResults: AxeScanResults;
         try {
@@ -90,18 +85,10 @@ export class Runner {
             pageScanResult.run = this.createRunResult('failed', errorMessage);
 
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
-            this.logger.trackEvent('ScanRequestFailed', undefined, { failedScanRequests: 1 });
-            this.logger.trackEvent('ScanTaskFailed', undefined, { failedScanTasks: 1 });
+            this.telemetryManager.trackScanTaskFailed();
         } finally {
             await this.closePage();
-            const scanCompletedTimestamp: number = Date.now();
-            const telemetryMeasurements: ScanTaskCompletedMeasurements = {
-                scanExecutionTime: (scanCompletedTimestamp - scanStartedTimestamp) / 1000,
-                scanTotalTime: (scanCompletedTimestamp - scanSubmittedTimestamp) / 1000,
-                completedScanTasks: 1,
-            };
-            this.logger.trackEvent('ScanTaskCompleted', undefined, telemetryMeasurements);
-            this.logger.trackEvent('ScanRequestCompleted', undefined, { completedScanRequests: 1 });
+            this.telemetryManager.trackScanCompleted();
         }
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
@@ -141,7 +128,9 @@ export class Runner {
             return;
         }
 
-        const websiteScanRef = pageScanResult.websiteScanRefs.find((ref) => ref.scanGroupType === 'consolidated-scan-report');
+        const websiteScanRef = pageScanResult.websiteScanRefs.find(
+            (ref) => ref.scanGroupType === 'consolidated-scan-report' || ref.scanGroupType === 'deep-scan',
+        );
         if (websiteScanRef === undefined) {
             return;
         }
@@ -325,7 +314,7 @@ export class Runner {
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
 
             this.logger.logError('Browser has failed to scan a page.', { error: JSON.stringify(axeScanResults.error) });
-            this.logger.trackEvent('BrowserScanFailed', undefined, { failedBrowserScans: 1 });
+            this.telemetryManager.trackBrowserScanFailed();
         }
 
         pageScanResult.run.pageTitle = axeScanResults.pageTitle;

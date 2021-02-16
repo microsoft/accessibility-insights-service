@@ -3,7 +3,7 @@
 import { injectable, inject } from 'inversify';
 import axe from 'axe-core';
 import { HashGenerator } from 'common';
-import { Selector, AxeCoreResults, AxeResults, AxeResult } from './axe-result-types';
+import { Selector, AxeCoreResults, AxeResultsList, AxeResult } from './axe-result-types';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -19,7 +19,7 @@ export class AxeResultsReducer {
         this.reduceResultsWithoutNodes(currentAxeResults.url, accumulatedAxeResults.inapplicable, currentAxeResults.inapplicable);
     }
 
-    private reduceResults(url: string, accumulatedResults: AxeResults, currentResults: axe.Result[]): void {
+    private reduceResults(url: string, accumulatedResults: AxeResultsList, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
                 if (currentResult) {
@@ -52,7 +52,7 @@ export class AxeResultsReducer {
         }
     }
 
-    private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResults, currentResults: axe.Result[]): void {
+    private reduceResultsWithoutNodes(url: string, accumulatedResults: AxeResultsList, currentResults: axe.Result[]): void {
         if (currentResults) {
             for (const currentResult of currentResults) {
                 if (currentResult) {

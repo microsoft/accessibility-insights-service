@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import { Readable } from 'stream';
-import { AxeResults, AxeCoreResults } from 'axe-result-converter';
+import { AxeResultsList, AxeCoreResults } from 'axe-result-converter';
 import { BlobContentDownloadResponse, BlobStorageClient } from 'azure-services';
 import { inject, injectable } from 'inversify';
 import { CombinedScanResults } from 'storage-documents';
@@ -95,7 +95,7 @@ export class CombinedScanResultsProvider {
         try {
             const content = JSON.parse(contentString, (key, value) => {
                 if (key === 'violations' || key === 'passes' || key === 'incomplete' || key === 'inapplicable') {
-                    return new AxeResults(value);
+                    return new AxeResultsList(value);
                 }
 
                 return value;
@@ -130,10 +130,10 @@ export class CombinedScanResultsProvider {
             },
             axeResults: {
                 urls: [],
-                violations: new AxeResults(),
-                passes: new AxeResults(),
-                incomplete: new AxeResults(),
-                inapplicable: new AxeResults(),
+                violations: new AxeResultsList(),
+                passes: new AxeResultsList(),
+                incomplete: new AxeResultsList(),
+                inapplicable: new AxeResultsList(),
             } as AxeCoreResults,
         };
     }
