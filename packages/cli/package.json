@@ -60,7 +60,7 @@
         "@axe-core/puppeteer": "^4.1.0",
         "@medv/finder": "^2.0.0",
         "@sindresorhus/fnv1a": "^2.0.1",
-        "accessibility-insights-report": "4.0.0",
+        "accessibility-insights-report": "4.0.1",
         "apify": "^0.21.8",
         "apify-shared": "^0.5.0",
         "applicationinsights": "^1.8.8",
