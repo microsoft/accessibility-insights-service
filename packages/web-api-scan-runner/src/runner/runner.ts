@@ -1,55 +1,43 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { FeatureFlags, ServiceConfiguration, System } from 'common';
+
 import { inject, injectable } from 'inversify';
-import { isEmpty, isNil } from 'lodash';
+import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
-import { AxeScanResults, Page } from 'scanner-global-library';
+import { AxeScanResults } from 'scanner-global-library';
+import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider } from 'service-library';
 import {
-    OnDemandPageScanRunResultProvider,
-    PageScanRunReportProvider,
-    WebsiteScanResultProvider,
-    CombinedScanResultsProvider,
-} from 'service-library';
-import {
-    OnDemandNotificationRequestMessage,
     OnDemandPageScanReport,
     OnDemandPageScanResult,
     OnDemandPageScanRunResult,
     OnDemandPageScanRunState,
     OnDemandScanResult,
     ScanError,
+    WebsiteScanResult,
 } from 'storage-documents';
-import { AxeResultsReducer } from 'axe-result-converter';
-import { GeneratedReport, ReportGenerator } from '../report-generator/report-generator';
+import { System } from 'common';
+import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
-import { AxeScanner } from '../scanner/axe-scanner';
-import { NotificationQueueMessageSender } from '../sender/notification-queue-message-sender';
-import { DeepScanner } from '../scanner/deep-scanner';
-import { ScanMetadata } from '../types/scan-metadata';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
 import { CombinedScanResultProcessor } from '../combined-result/combined-scan-result-processor';
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { PageScanProcessor } from '../scanner/page-scan-processor';
+import { ReportWriter } from '../report-generator/report-writer';
+import { ScanMetadata } from '../types/scan-metadata';
+import { ScanNotificationProcessor } from '../sender/scan-notification-processor';
 
 @injectable()
 export class Runner {
     constructor(
         @inject(ScanMetadataConfig) private readonly scanMetadataConfig: ScanMetadataConfig,
-        @inject(AxeScanner) private readonly axeScanner: AxeScanner,
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(PageScanRunReportProvider) private readonly pageScanRunReportProvider: PageScanRunReportProvider,
-        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
-        @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
         @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
-        @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
-        @inject(Page) private readonly page: Page,
-        @inject(DeepScanner) private readonly deepScanner: DeepScanner,
-        @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
+        @inject(PageScanProcessor) private readonly pageScanProcessor: PageScanProcessor,
+        @inject(ReportWriter) protected readonly reportWriter: ReportWriter,
+        @inject(ReportGenerator) private readonly reportGenerator: ReportGenerator,
         @inject(CombinedScanResultProcessor) private readonly combinedScanResultProcessor: CombinedScanResultProcessor,
+        @inject(ScanNotificationProcessor) protected readonly scanNotificationProcessor: ScanNotificationProcessor,
+        @inject(ScanRunnerTelemetryManager) private readonly telemetryManager: ScanRunnerTelemetryManager,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async run(): Promise<void> {
@@ -63,14 +51,10 @@ export class Runner {
         }
 
         this.telemetryManager.trackScanStarted(scanMetadata.id);
-
-        let axeScanResults: AxeScanResults;
         try {
-            await this.openPage(scanMetadata.url);
-            axeScanResults = await this.scan(pageScanResult, this.page);
-            await this.deepScan(scanMetadata, pageScanResult);
+            const axeScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
+            await this.processScanResult(axeScanResults, pageScanResult);
             await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
-            this.logger.logInfo('The scanner successfully completed a page scan.');
         } catch (error) {
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
@@ -78,27 +62,13 @@ export class Runner {
             this.logger.logError(`The scanner failed to scan a page.`, { error: errorMessage });
             this.telemetryManager.trackScanTaskFailed();
         } finally {
-            await this.closePage();
             this.telemetryManager.trackScanCompleted();
         }
 
-        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
-        await this.queueScanCompletionNotification(pageScanResult);
+        const websiteScanResult = await this.updateScanResult(scanMetadata, pageScanResult);
+        await this.scanNotificationProcessor.sendScanCompletionNotification(scanMetadata, pageScanResult, websiteScanResult);
 
         this.logger.logInfo('Page scan task completed.');
-    }
-
-    private async openPage(url: string): Promise<void> {
-        await this.page.create();
-        await this.page.navigateToUrl(url);
-    }
-
-    private async closePage(): Promise<void> {
-        try {
-            await this.page.close();
-        } catch (error) {
-            this.logger.logError('An error occurred while closing web browser.', { error: System.serializeError(error) });
-        }
     }
 
     private async updateScanRunState(scanId: string): Promise<OnDemandPageScanResult> {
@@ -125,12 +95,14 @@ export class Runner {
         return response.result;
     }
 
-    private async scan(pageScanResult: Partial<OnDemandPageScanResult>, page: Page): Promise<AxeScanResults> {
-        const axeScanResults = await this.axeScanner.scan(page);
+    private async processScanResult(
+        axeScanResults: AxeScanResults,
+        pageScanResult: Partial<OnDemandPageScanResult>,
+    ): Promise<AxeScanResults> {
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
-            pageScanResult.reports = await this.generateAndSaveScanReports(axeScanResults);
+            pageScanResult.reports = await this.generateScanReports(axeScanResults);
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
@@ -147,42 +119,37 @@ export class Runner {
         return axeScanResults.error ? undefined : axeScanResults;
     }
 
-    private async queueScanCompletionNotification(pageScanResult: OnDemandPageScanResult): Promise<void> {
-        const featureFlags = await this.getDefaultFeatureFlags();
-        this.logger.logInfo(`The 'sendNotification' feature flag is set to ${featureFlags.sendNotification}.`);
-        if (featureFlags.sendNotification && !isEmpty(pageScanResult?.notification?.scanNotifyUrl)) {
-            this.logger.logInfo(`Queuing scan completion notification queue message.`, {
-                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
-            });
-            await this.notificationDispatcher.sendNotificationMessage(this.createOnDemandNotificationRequestMessage(pageScanResult));
+    private async updateScanResult(
+        scanMetadata: ScanMetadata,
+        pageScanResult: Partial<OnDemandPageScanResult>,
+    ): Promise<WebsiteScanResult> {
+        await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
+
+        const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === 'deep-scan');
+        if (websiteScanRef) {
+            const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+                id: websiteScanRef.id,
+                pageScans: [
+                    {
+                        scanId: scanMetadata.id,
+                        url: scanMetadata.url,
+                        runState: pageScanResult.run.state,
+                        timestamp: new Date().toJSON(),
+                    },
+                ],
+            };
+
+            return this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResult);
         }
+
+        return undefined;
     }
 
-    private async generateAndSaveScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
+    private async generateScanReports(axeResults: AxeScanResults): Promise<OnDemandPageScanReport[]> {
         this.logger.logInfo(`Generating reports from scan results.`);
         const reports = this.reportGenerator.generateReports(axeResults);
 
-        return Promise.all(reports.map(async (report) => this.saveScanReport(report)));
-    }
-
-    private async saveScanReport(report: GeneratedReport): Promise<OnDemandPageScanReport> {
-        const href = await this.pageScanRunReportProvider.saveReport(report.id, report.content);
-        this.logger.logInfo(`The '${report.format}' report saved to a blob storage.`, { reportId: report.id, blobUrl: href });
-
-        return {
-            format: report.format,
-            href,
-            reportId: report.id,
-        };
-    }
-
-    private createOnDemandNotificationRequestMessage(scanResult: OnDemandPageScanResult): OnDemandNotificationRequestMessage {
-        return {
-            scanId: scanResult.id,
-            scanNotifyUrl: scanResult.notification.scanNotifyUrl,
-            runStatus: scanResult.run.state,
-            scanStatus: scanResult.scanResult?.state,
-        };
+        return this.reportWriter.writeBatch(reports);
     }
 
     private createRunResult(state: OnDemandPageScanRunState, error?: string | ScanError): OnDemandPageScanRunResult {
@@ -194,7 +161,7 @@ export class Runner {
     }
 
     private getScanStatus(axeResults: AxeScanResults): OnDemandScanResult {
-        if (axeResults.results.violations !== undefined && axeResults.results.violations.length > 0) {
+        if (axeResults?.results?.violations !== undefined && axeResults.results.violations.length > 0) {
             return {
                 state: 'fail',
                 issueCount: axeResults.results.violations.reduce((a, b) => a + b.nodes.length, 0),
@@ -203,16 +170,6 @@ export class Runner {
             return {
                 state: 'pass',
             };
-        }
-    }
-
-    private async getDefaultFeatureFlags(): Promise<FeatureFlags> {
-        return this.serviceConfig.getConfigValue('featureFlags');
-    }
-
-    private async deepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult): Promise<void> {
-        if (scanMetadata.deepScan) {
-            await this.deepScanner.runDeepScan(scanMetadata, pageScanResult, this.page);
         }
     }
 }

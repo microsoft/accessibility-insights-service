@@ -30,6 +30,7 @@ export class DeepScanner {
         const websiteScanResult = await this.readWebsiteScanResult(pageScanResult);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
+            deepScanId: websiteScanResult.deepScanId,
         });
 
         const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;

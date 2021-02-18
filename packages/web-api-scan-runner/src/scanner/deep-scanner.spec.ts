@@ -37,6 +37,7 @@ describe(DeepScanner, () => {
     const processedUrls = ['processedUrl1', 'processedUrl2'];
     const discoveryPatterns = ['discovery pattern'];
     const crawlBaseUrl = 'base url';
+    const deepScanId = 'deepScanId';
     let scanMetadata: ScanMetadata;
     let pageScanResult: OnDemandPageScanResult;
     let websiteScanResult: WebsiteScanResult;
@@ -73,6 +74,7 @@ describe(DeepScanner, () => {
             knownPages: knownPages,
             discoveryPatterns: discoveryPatterns,
             baseUrl: crawlBaseUrl,
+            deepScanId,
         } as WebsiteScanResult;
         websiteScanResultDbDocument = {
             ...websiteScanResult,
@@ -194,6 +196,7 @@ describe(DeepScanner, () => {
                 l.setCommonProperties(
                     It.isValue({
                         websiteScanId: websiteScanResultId,
+                        deepScanId,
                     }),
                 ),
             )

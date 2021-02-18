@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { Queue, StorageConfig } from 'azure-services';
 import { RetryHelper, ScanRunTimeConfig, ServiceConfiguration, System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -26,19 +27,22 @@ export class NotificationQueueMessageSender {
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<void>,
     ) {}
 
-    public async sendNotificationMessage(onDemandNotificationRequestMessage: OnDemandNotificationRequestMessage): Promise<void> {
+    public async sendNotificationMessage(notificationRequestMessage: OnDemandNotificationRequestMessage): Promise<void> {
         this.logger.setCommonProperties({
-            scanId: onDemandNotificationRequestMessage.scanId,
+            scanId: notificationRequestMessage.scanId,
         });
         this.logger.logInfo(`Queuing scan result notification message.`);
-        const pageScanResult = await this.enqueueNotificationWithRetry(onDemandNotificationRequestMessage);
+
+        const { deepScanId, ...queueMessage } = notificationRequestMessage;
+        queueMessage.scanId = deepScanId ?? queueMessage.scanId;
+        const pageScanResult = await this.enqueueNotificationWithRetry(queueMessage);
         this.logger.logInfo(`Scan result notification message successfully queued.`);
 
         await this.onDemandPageScanRunResultProvider.updateScanRun(pageScanResult);
     }
 
     private async enqueueNotificationWithRetry(
-        notificationSenderConfigData: OnDemandNotificationRequestMessage,
+        notificationRequestMessage: OnDemandNotificationRequestMessage,
     ): Promise<Partial<OnDemandPageScanResult>> {
         let notificationState: NotificationState = 'queueFailed';
         let error: NotificationError = null;
@@ -46,7 +50,7 @@ export class NotificationQueueMessageSender {
 
         await this.retryHelper.executeWithRetries(
             async () => {
-                const response = await this.queue.createMessage(this.storageConfig.notificationQueue, notificationSenderConfigData);
+                const response = await this.queue.createMessage(this.storageConfig.notificationQueue, notificationRequestMessage);
                 if (response === true) {
                     this.logger.logInfo(`Notification enqueued successfully.`);
                     notificationState = 'queued';
@@ -66,8 +70,8 @@ export class NotificationQueueMessageSender {
         );
 
         return {
-            id: notificationSenderConfigData.scanId,
-            notification: this.generateNotification(notificationSenderConfigData.scanNotifyUrl, notificationState, error),
+            id: notificationRequestMessage.scanId,
+            notification: this.generateNotification(notificationRequestMessage.scanNotifyUrl, notificationState, error),
         };
     }
 

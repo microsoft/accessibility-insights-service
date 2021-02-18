@@ -71,7 +71,7 @@ export class Page {
         }
 
         if (!this.isOpen()) {
-            throw new Error(`Page is not open. Call create() and navigateToUrl() before scan.`);
+            throw new Error(`Page is not ready. Call create() and navigateToUrl() before scan.`);
         }
 
         return this.scanPageForIssues(contentSourcePath);
