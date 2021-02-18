@@ -109,9 +109,11 @@ describe(OnDemandPageScanRunResultProvider, () => {
         cosmosContainerClientMock
             .setup((c) => c.mergeOrWriteDocument(partition1Result1ToBeSaved, undefined, false))
             .returns(() =>
-                Promise.resolve({ item: partition1Result1Saved, statusCode: 500, response: 'server error' } as CosmosOperationResponse<
-                    OnDemandPageScanResult
-                >),
+                Promise.resolve({
+                    item: partition1Result1Saved,
+                    statusCode: 500,
+                    response: 'server error',
+                } as CosmosOperationResponse<OnDemandPageScanResult>),
             )
             .verifiable();
 
