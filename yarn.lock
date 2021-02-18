@@ -237,10 +237,10 @@
     jsonwebtoken "^8.5.1"
     uuid "^8.3.0"
 
-"@azure/storage-blob@^12.3.0":
-  version "12.4.0"
-  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.4.0.tgz#7127ddd9f413105e2c3688691bc4c6245d0806b3"
-  integrity sha512-OnhVSoKD1HzBB79/rFzPbC4w9TdzFXeoOwkX+aIu3rb8qvN0VaqvUqZXSrBCyG2LcLyVkY4MPCJQBrmEUm9kvw==
+"@azure/storage-blob@^12.4.1":
+  version "12.4.1"
+  resolved "https://registry.yarnpkg.com/@azure/storage-blob/-/storage-blob-12.4.1.tgz#f2cc4a36a0df770b7b918ba89e72c02d72afbf2f"
+  integrity sha512-RH6ru8LbnCC+m1rlVLon6mYUXdHsTcyUXFCJAWRQQM7p0XOwVKPS+UiVk2tZXfvMWd3q/qT/meOrEbHEcp/c4g==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
     "@azure/core-http" "^1.2.0"
