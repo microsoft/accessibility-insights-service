@@ -5,6 +5,7 @@ export interface ApifySettings {
     APIFY_HEADLESS?: string;
     APIFY_LOCAL_STORAGE_DIR?: string;
     APIFY_MEMORY_MBYTES?: string;
+    APIFY_CHROME_EXECUTABLE_PATH?: string;
 }
 
 export interface ApifySettingsHandler {
