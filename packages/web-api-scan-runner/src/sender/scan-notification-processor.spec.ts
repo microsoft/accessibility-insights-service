@@ -9,10 +9,10 @@ import { GlobalLogger } from 'logger';
 import { OnDemandPageScanResult, WebsiteScanResult, PageScan, OnDemandNotificationRequestMessage } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
 import { ScanNotificationProcessor } from './scan-notification-processor';
-import { NotificationQueueMessageSender } from './notification-queue-message-sender';
+import { NotificationMessageDispatcher } from './notification-message-dispatcher';
 
 let serviceConfigMock: IMock<ServiceConfiguration>;
-let notificationQueueMessageSenderMock: IMock<NotificationQueueMessageSender>;
+let notificationQueueMessageSenderMock: IMock<NotificationMessageDispatcher>;
 let loggerMock: IMock<GlobalLogger>;
 let scanNotificationProcessor: ScanNotificationProcessor;
 let featureFlagsConfig: FeatureFlags;
@@ -23,7 +23,7 @@ let websiteScanResult: WebsiteScanResult;
 describe(ScanNotificationProcessor, () => {
     beforeEach(() => {
         serviceConfigMock = Mock.ofType(ServiceConfiguration);
-        notificationQueueMessageSenderMock = Mock.ofType(NotificationQueueMessageSender);
+        notificationQueueMessageSenderMock = Mock.ofType(NotificationMessageDispatcher);
         loggerMock = Mock.ofType<GlobalLogger>();
 
         featureFlagsConfig = {

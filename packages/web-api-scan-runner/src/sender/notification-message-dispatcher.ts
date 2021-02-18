@@ -14,10 +14,8 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 @injectable()
-export class NotificationQueueMessageSender {
+export class NotificationMessageDispatcher {
     constructor(
         @inject(OnDemandPageScanRunResultProvider) private readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
@@ -35,6 +33,7 @@ export class NotificationQueueMessageSender {
 
         const { deepScanId, ...queueMessage } = notificationRequestMessage;
         queueMessage.scanId = deepScanId ?? queueMessage.scanId;
+
         const pageScanResult = await this.enqueueNotificationWithRetry(queueMessage);
         this.logger.logInfo(`Scan result notification message successfully queued.`);
 

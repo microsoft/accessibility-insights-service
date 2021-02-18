@@ -7,13 +7,13 @@ import { FeatureFlags, ServiceConfiguration } from 'common';
 import { isEmpty } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { ScanMetadata } from '../types/scan-metadata';
-import { NotificationQueueMessageSender } from './notification-queue-message-sender';
+import { NotificationMessageDispatcher } from './notification-message-dispatcher';
 
 @injectable()
 export class ScanNotificationProcessor {
     constructor(
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
-        @inject(NotificationQueueMessageSender) protected readonly notificationDispatcher: NotificationQueueMessageSender,
+        @inject(NotificationMessageDispatcher) protected readonly notificationMessageDispatcher: NotificationMessageDispatcher,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
@@ -35,10 +35,10 @@ export class ScanNotificationProcessor {
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             runStatus: pageScanResult.run.state,
             scanStatus: pageScanResult.scanResult?.state,
-            deepScanId: websiteScanResult.deepScanId,
+            deepScanId: websiteScanResult?.deepScanId,
         };
 
-        await this.notificationDispatcher.sendNotificationMessage(notificationRequestMessage);
+        await this.notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
     }
 
     private async canSendNotification(
