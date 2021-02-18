@@ -7,7 +7,6 @@
         "./.dependabot",
         "**/yarn.lock",
         "**/*.log",
-        "packages/web-workers/obj",
         "**/*.funcignore",
         "**/.github/pull_request_template.md",
         "**/CODEOWNERS",
@@ -20,7 +19,9 @@
         "**/*.snap",
         "**/.dockerignore",
         "**/Dockerfile",
-        "**/package.json"
+        "**/package.json",
+        "**/packages",
+        "**/.DS_Store"
     ],
     "license": "./copyright-header.txt",
     "licenseFormats": {
