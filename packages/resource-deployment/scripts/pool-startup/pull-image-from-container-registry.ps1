@@ -9,7 +9,6 @@ Param(
 
 $global:userType = ""
 $global:principalName = ""
-$global:containerRegistryName= ""
 $global:azurecr = ""
 $global:keyvault = $keyvault
 
@@ -79,7 +78,6 @@ function getSecretValue($key) {
 function loginToContainerRegistry() {
     $containerRegistryUsername = getSecretValue "containerRegistryUsername"
     $containerRegistryPassword = getSecretValue "containerRegistryPassword"
-    $global:containerRegistryName = $containerRegistryUsername
     $global:azurecr="$containerRegistryUsername.azurecr.io"
 
     Write-Output "Login to the container registry $azurecr..."
@@ -88,8 +86,8 @@ function loginToContainerRegistry() {
 
 function pullDockerImages() {
     Write-Output "Pulling Batch images from container registry..."
-    scanManagerImage="$azurecr/batch-scan-manager:latest"
-    scanRunnerImage="$azurecr/batch-scan-runner:latest"
+    $scanManagerImage="$azurecr/batch-scan-manager:latest"
+    $scanRunnerImage="$azurecr/batch-scan-runner:latest"
 
     Write-Output "Pulling image $scanManagerImage"
     docker pull $scanManagerImage
@@ -97,8 +95,6 @@ function pullDockerImages() {
     Write-Output "Pulling image $scanRunnerImage"
     docker pull $scanRunnerImage
 }
-
-
 
 if ([string]::IsNullOrEmpty($global:keyvault)) {
     $global:keyvault = $env:KEY_VAULT_NAME;
@@ -110,8 +106,6 @@ if ([string]::IsNullOrEmpty($global:keyvault)) {
 
 try {
     getCurrentUserDetails
-
-
     loginToAzure
     grantUserAccessToKeyVault
     loginToContainerRegistry
