@@ -5,7 +5,7 @@ import 'reflect-metadata';
 import Apify from 'apify';
 import { Page } from 'puppeteer';
 import { PageNavigator } from 'scanner-global-library';
-import { IMock, Mock } from 'typemoq';
+import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -98,7 +98,7 @@ describe(ClassicPageProcessor, () => {
     it('pageProcessor', async () => {
         setupEnqueueLinks(pageStub);
         accessibilityScanOpMock
-            .setup((aso) => aso.run(pageStub, testId))
+            .setup((aso) => aso.run(pageStub, testId, It.isAny()))
             .returns(async () => Promise.resolve(axeResults))
             .verifiable();
         const expectedScanData = {
