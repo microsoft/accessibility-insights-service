@@ -15,7 +15,7 @@ export class CombinedResultsBlobProvider {
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async getBlob(existingCombinedResultsBlobId: string): Promise<CombinedResultsBlob> {
+    public async getBlob(existingCombinedResultsBlobId: string | undefined): Promise<CombinedResultsBlob> {
         let actualBlobId = existingCombinedResultsBlobId;
         let blobReadResponse: CombinedScanResultsReadResponse;
 

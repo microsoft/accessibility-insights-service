@@ -15,7 +15,6 @@ describe(CombinedResultsBlobProvider, () => {
     let loggerMock: IMock<MockableLogger>;
     let guidGeneratorMock: IMock<GuidGenerator>;
     let testSubject: CombinedResultsBlobProvider;
-
     let givenResultsBlobIdStub: string;
     let emptyReadResponseStub: CombinedScanResultsReadResponse;
     let readResponseStub: CombinedScanResultsReadResponse;

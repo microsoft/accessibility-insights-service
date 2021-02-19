@@ -110,7 +110,6 @@ describe(Runner, () => {
         setupScanRunnerTelemetryManager();
         setupPageScanProcessor();
         setupProcessScanResult();
-        setupCombinedScanResultProcessor();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
         await runner.run();
@@ -143,7 +142,6 @@ describe(Runner, () => {
         setupScanRunnerTelemetryManager(true, false);
         setupPageScanProcessor();
         setupProcessScanResult();
-        setupCombinedScanResultProcessor();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
         await runner.run();
@@ -166,7 +164,6 @@ describe(Runner, () => {
         setupScanRunnerTelemetryManager();
         setupPageScanProcessor();
         setupProcessScanResult();
-        setupCombinedScanResultProcessor();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
         await runner.run();
@@ -185,7 +182,6 @@ describe(Runner, () => {
         setupScanRunnerTelemetryManager();
         setupPageScanProcessor();
         setupProcessScanResult();
-        setupCombinedScanResultProcessor();
         setupUpdateScanResult();
         setupScanNotificationProcessor();
         await runner.run();
@@ -221,12 +217,6 @@ function setupUpdateScanResult(): void {
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
-}
-
-function setupCombinedScanResultProcessor(): void {
-    combinedScanResultProcessorMock
-        .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))
-        .verifiable();
 }
 
 function setupProcessScanResult(): void {
@@ -267,6 +257,9 @@ function setupProcessScanResult(): void {
         reportWriterMock
             .setup((o) => o.writeBatch(generatedReports))
             .returns(() => Promise.resolve(reports))
+            .verifiable();
+        combinedScanResultProcessorMock
+            .setup((o) => o.generateCombinedScanResults(It.isValue(axeScanResults), It.isValue(pageScanResult)))
             .verifiable();
     }
 

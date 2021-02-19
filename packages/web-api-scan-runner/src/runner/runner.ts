@@ -54,7 +54,6 @@ export class Runner {
         try {
             const axeScanResults = await this.pageScanProcessor.scan(scanMetadata, pageScanResult);
             await this.processScanResult(axeScanResults, pageScanResult);
-            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
         } catch (error) {
             const errorMessage = System.serializeError(error);
             pageScanResult.run = this.createRunResult('failed', errorMessage);
@@ -95,10 +94,7 @@ export class Runner {
         return response.result;
     }
 
-    private async processScanResult(
-        axeScanResults: AxeScanResults,
-        pageScanResult: Partial<OnDemandPageScanResult>,
-    ): Promise<AxeScanResults> {
+    private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
         if (isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
@@ -106,6 +102,8 @@ export class Runner {
             if (axeScanResults.scannedUrl !== undefined) {
                 pageScanResult.scannedUrl = axeScanResults.scannedUrl;
             }
+
+            await this.combinedScanResultProcessor.generateCombinedScanResults(axeScanResults, pageScanResult);
         } else {
             pageScanResult.run = this.createRunResult('failed', axeScanResults.error);
 
