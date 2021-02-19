@@ -7,19 +7,19 @@ import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { CombinedScanResultsProvider } from 'service-library';
 import { CombinedScanResults } from 'storage-documents';
-import { CombinedResultsBlobInfo } from './combined-results-blob-getter';
+import { CombinedResultsBlob } from '../types/combined-results-blob';
 
 @injectable()
-export class AxeResultMerger {
+export class CombinedAxeResultBuilder {
     public constructor(
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
         @inject(AxeResultsReducer) protected readonly axeResultsReducer: AxeResultsReducer,
+        @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
     public async mergeAxeResults(
         axeScanResults: axe.AxeResults,
-        combinedResultsBlobInfo: CombinedResultsBlobInfo,
+        combinedResultsBlobInfo: CombinedResultsBlob,
     ): Promise<CombinedScanResults> {
         const combinedResultsBlobId = combinedResultsBlobInfo.blobId;
         const blobReadResponse = combinedResultsBlobInfo.response;

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
 
 import { Queue, StorageConfig } from 'azure-services';
@@ -17,14 +18,14 @@ import {
     ScanCompletedNotification,
 } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
-import { NotificationQueueMessageSender } from './notification-queue-message-sender';
+import { NotificationMessageDispatcher } from './notification-message-dispatcher';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
 class MockableLogger extends Logger {}
 
-describe(NotificationQueueMessageSender, () => {
-    let dispatcher: NotificationQueueMessageSender;
+describe(NotificationMessageDispatcher, () => {
+    let notificationMessageDispatcher: NotificationMessageDispatcher;
     let onDemandPageScanRunResultProviderMock: IMock<OnDemandPageScanRunResultProvider>;
     let queueMock: IMock<Queue>;
     let loggerMock: IMock<MockableLogger>;
@@ -32,13 +33,7 @@ describe(NotificationQueueMessageSender, () => {
     let scanConfig: ScanRunTimeConfig;
     let storageConfigStub: StorageConfig;
     let retryHelperMock: IMock<RetryHelper<void>>;
-
-    const notificationSenderMetadata: OnDemandNotificationRequestMessage = {
-        scanId: 'id',
-        scanNotifyUrl: 'scanNotifyUrl',
-        runStatus: 'completed',
-        scanStatus: 'pass',
-    };
+    let notificationRequestMessage: OnDemandNotificationRequestMessage;
 
     const onDemandPageScanResult: OnDemandPageScanResult = {
         url: 'url',
@@ -50,12 +45,20 @@ describe(NotificationQueueMessageSender, () => {
         },
         priority: 1,
         itemType: ItemType.onDemandPageScanRunResult,
-        id: 'id',
+        id: 'scanId',
         partitionKey: 'item-partitionKey',
         batchRequestId: 'batch-id',
     };
 
     beforeEach(() => {
+        notificationRequestMessage = {
+            scanId: 'scanId',
+            scanNotifyUrl: 'scanNotifyUrl',
+            runStatus: 'completed',
+            scanStatus: 'pass',
+        };
+        onDemandPageScanResult.id = notificationRequestMessage.scanId;
+
         scanConfig = {
             failedPageRescanIntervalInHours: 3,
             maxScanRetryCount: 4,
@@ -79,7 +82,7 @@ describe(NotificationQueueMessageSender, () => {
             .verifiable(Times.once());
         retryHelperMock = Mock.ofType<RetryHelper<void>>();
 
-        dispatcher = new NotificationQueueMessageSender(
+        notificationMessageDispatcher = new NotificationMessageDispatcher(
             onDemandPageScanRunResultProviderMock.object,
             serviceConfigMock.object,
             storageConfigStub,
@@ -89,53 +92,71 @@ describe(NotificationQueueMessageSender, () => {
         );
     });
 
-    it('Enqueue Notification Succeeded', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queued', null);
-        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-        setupRetryHelperMock();
-
-        queueMock
-            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
-            .returns(async () => Promise.resolve(true))
-            .verifiable(Times.once());
-
-        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
-    });
-
-    it('Send Notification Failed', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
-            errorType: 'InternalError',
-            message: 'Failed to enqueue the notification',
-        });
-        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-        setupRetryHelperMock();
-
-        queueMock
-            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata))
-            .returns(async () => Promise.resolve(false))
-            .verifiable(Times.once());
-
-        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
-    });
-
-    it('Send Notification Failed Error', async () => {
-        const notification = generateNotification(notificationSenderMetadata.scanNotifyUrl, 'queueFailed', {
-            errorType: 'InternalError',
-            message: 'Failed to enqueue the notification',
-        });
-        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
-        setupRetryHelperMock();
-
-        queueMock.setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationSenderMetadata)).verifiable(Times.once());
-
-        await dispatcher.sendNotificationMessage(notificationSenderMetadata);
-    });
-
     afterEach(() => {
         onDemandPageScanRunResultProviderMock.verifyAll();
         queueMock.verifyAll();
         loggerMock.verifyAll();
         serviceConfigMock.verifyAll();
+    });
+
+    it('Enqueue Notification Succeeded', async () => {
+        const notification = generateNotification(notificationRequestMessage.scanNotifyUrl, 'queued', null);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock();
+
+        queueMock
+            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationRequestMessage))
+            .returns(async () => Promise.resolve(true))
+            .verifiable(Times.once());
+
+        await notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
+    });
+
+    it('Enqueue notification for deep scan', async () => {
+        notificationRequestMessage.deepScanId = 'deepScanId';
+        onDemandPageScanResult.id = notificationRequestMessage.deepScanId;
+
+        const notification = generateNotification(notificationRequestMessage.scanNotifyUrl, 'queued', null);
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock();
+
+        const { deepScanId, ...queueMessage } = notificationRequestMessage;
+        queueMessage.scanId = notificationRequestMessage.deepScanId;
+        queueMock
+            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, queueMessage))
+            .returns(async () => Promise.resolve(true))
+            .verifiable(Times.once());
+
+        await notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
+    });
+
+    it('Send Notification Failed', async () => {
+        const notification = generateNotification(notificationRequestMessage.scanNotifyUrl, 'queueFailed', {
+            errorType: 'InternalError',
+            message: 'Failed to enqueue the notification',
+        });
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock();
+
+        queueMock
+            .setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationRequestMessage))
+            .returns(async () => Promise.resolve(false))
+            .verifiable(Times.once());
+
+        await notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
+    });
+
+    it('Send Notification Failed Error', async () => {
+        const notification = generateNotification(notificationRequestMessage.scanNotifyUrl, 'queueFailed', {
+            errorType: 'InternalError',
+            message: 'Failed to enqueue the notification',
+        });
+        setupUpdateScanRunResultCall(getRunningJobStateScanResult(notification));
+        setupRetryHelperMock();
+
+        queueMock.setup((qm) => qm.createMessage(storageConfigStub.notificationQueue, notificationRequestMessage)).verifiable(Times.once());
+
+        await notificationMessageDispatcher.sendNotificationMessage(notificationRequestMessage);
     });
 
     function getRunningJobStateScanResult(notification: ScanCompletedNotification): Partial<OnDemandPageScanResult> {
@@ -148,7 +169,7 @@ describe(NotificationQueueMessageSender, () => {
     function setupUpdateScanRunResultCall(result: Partial<OnDemandPageScanResult>): void {
         const clonedResult = cloneDeep(result);
         onDemandPageScanRunResultProviderMock
-            .setup(async (d) => d.updateScanRun(clonedResult))
+            .setup(async (d) => d.updateScanRun(It.isValue(clonedResult)))
             .returns(async () => Promise.resolve(clonedResult as OnDemandPageScanResult))
             .verifiable(Times.once());
     }

@@ -26,8 +26,7 @@ export class OnDemandScanRequestSender {
     public async sendRequestToScan(onDemandPageScanRequests: OnDemandPageScanRequest[]): Promise<void> {
         await Promise.all(
             onDemandPageScanRequests.map(async (scanRequest) => {
-                const scans = await this.onDemandPageScanRunResultProvider.readScanRuns([scanRequest.id]);
-                const scan = scans.pop();
+                const scan = await this.onDemandPageScanRunResultProvider.readScanRun(scanRequest.id);
                 if (scan !== undefined && scan.run !== undefined && scan.run.state === 'accepted') {
                     this.logger.logInfo('Sending scan request to the scan task queue.', { scanId: scan.id });
                     const message = this.createOnDemandScanRequestMessage(scanRequest);

@@ -66,8 +66,8 @@ describe('Scan request sender', () => {
             const acceptedPageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
-                .returns(async () => Promise.resolve([pageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.readScanRun(request.id))
+                .returns(async () => Promise.resolve(pageScanRunResultDoc))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
@@ -105,8 +105,8 @@ describe('Scan request sender', () => {
             });
 
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.readScanRuns(It.isValue([request.id])))
-                .returns(async () => Promise.resolve([pageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.readScanRun(request.id))
+                .returns(async () => Promise.resolve(pageScanRunResultDoc))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
@@ -143,8 +143,8 @@ describe('Scan request sender', () => {
             const pageScanRunResultDoc = createResultDoc(request, 'queued');
 
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
-                .returns(async () => Promise.resolve([pageScanRunResultDoc]))
+                .setup(async (resultProvider) => resultProvider.readScanRun(request.id))
+                .returns(async () => Promise.resolve(pageScanRunResultDoc))
                 .verifiable(Times.once());
 
             onDemandPageScanRunResultProvider
@@ -180,8 +180,8 @@ describe('Scan request sender', () => {
         const onDemandPageScanRequests = getValidPageScanRequests();
         onDemandPageScanRequests.forEach((request) => {
             onDemandPageScanRunResultProvider
-                .setup(async (resultProvider) => resultProvider.readScanRuns([request.id]))
-                .returns(async () => Promise.resolve([]))
+                .setup(async (resultProvider) => resultProvider.readScanRun(request.id))
+                .returns(async () => Promise.resolve(undefined))
                 .verifiable(Times.once());
 
             loggerMock

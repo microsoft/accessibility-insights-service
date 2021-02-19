@@ -5,35 +5,31 @@ import { GuidGenerator } from 'common';
 import { inject, injectable } from 'inversify';
 import { GlobalLogger } from 'logger';
 import { CombinedScanResultsProvider, CombinedScanResultsReadResponse } from 'service-library';
-
-export interface CombinedResultsBlobInfo {
-    response: CombinedScanResultsReadResponse;
-    blobId: string;
-}
+import { CombinedResultsBlob } from '../types/combined-results-blob';
 
 @injectable()
-export class CombinedResultsBlobGetter {
+export class CombinedResultsBlobProvider {
     public constructor(
-        @inject(GlobalLogger) private readonly logger: GlobalLogger,
-        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
         @inject(CombinedScanResultsProvider) protected readonly combinedScanResultsProvider: CombinedScanResultsProvider,
+        @inject(GuidGenerator) private readonly guidGenerator: GuidGenerator,
+        @inject(GlobalLogger) private readonly logger: GlobalLogger,
     ) {}
 
-    public async getBlobInfo(givenResultsBlobId: string): Promise<CombinedResultsBlobInfo> {
-        let returnedResultsBlobId = givenResultsBlobId;
+    public async getBlob(existingCombinedResultsBlobId: string | undefined): Promise<CombinedResultsBlob> {
+        let actualBlobId = existingCombinedResultsBlobId;
         let blobReadResponse: CombinedScanResultsReadResponse;
 
-        if (givenResultsBlobId === undefined) {
-            returnedResultsBlobId = this.guidGenerator.createGuid();
+        if (existingCombinedResultsBlobId === undefined) {
+            actualBlobId = this.guidGenerator.createGuid();
             this.logger.logInfo('No combined axe scan results blob associated with this website scan. Creating a new blob.');
             blobReadResponse = this.combinedScanResultsProvider.getEmptyResponse();
         } else {
-            blobReadResponse = await this.getCombinedResultsBlob(returnedResultsBlobId);
+            blobReadResponse = await this.getCombinedResultsBlob(actualBlobId);
         }
 
         return {
             response: blobReadResponse,
-            blobId: returnedResultsBlobId,
+            blobId: actualBlobId,
         };
     }
 

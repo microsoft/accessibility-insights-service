@@ -8,12 +8,11 @@ import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { Page } from 'scanner-global-library';
 import { WebsiteScanResultProvider } from 'service-library';
-import { OnDemandPageScanResult, ScanGroupType, WebsiteScanResult } from 'storage-documents';
-import { WebsiteScanResultWriter } from '../runner/website-scan-result-writer';
+import { OnDemandPageScanResult, WebsiteScanResult } from 'storage-documents';
 import { ScanMetadata } from '../types/scan-metadata';
-import { DiscoveredUrlProcessor, discoveredUrlProcessor } from './discovered-url-processor';
-import { CrawlRunner } from './crawl-runner';
-import { ScanFeedGenerator } from './scan-feed-generator';
+import { DiscoveredUrlProcessor, discoveredUrlProcessor } from '../crawl-runner/discovered-url-processor';
+import { CrawlRunner } from '../crawl-runner/crawl-runner';
+import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
 
 @injectable()
 export class DeepScanner {
@@ -21,7 +20,6 @@ export class DeepScanner {
         @inject(CrawlRunner) private readonly crawlRunner: CrawlRunner,
         @inject(ScanFeedGenerator) private readonly scanFeedGenerator: ScanFeedGenerator,
         @inject(WebsiteScanResultProvider) private readonly websiteScanResultProvider: WebsiteScanResultProvider,
-        @inject(WebsiteScanResultWriter) private readonly websiteScanResultWriter: WebsiteScanResultWriter,
         @inject(ServiceConfiguration) private readonly serviceConfig: ServiceConfiguration,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         private readonly processUrls: DiscoveredUrlProcessor = discoveredUrlProcessor,
@@ -29,9 +27,10 @@ export class DeepScanner {
     ) {}
 
     public async runDeepScan(scanMetadata: ScanMetadata, pageScanResult: OnDemandPageScanResult, page: Page): Promise<void> {
-        const websiteScanResult = await this.readWebsiteScanResult(pageScanResult, 'deep-scan');
+        const websiteScanResult = await this.readWebsiteScanResult(pageScanResult);
         this.logger.setCommonProperties({
             websiteScanId: websiteScanResult.id,
+            deepScanId: websiteScanResult.deepScanId,
         });
 
         const urlCrawlLimit = (await this.serviceConfig.getConfigValue('crawlConfig')).urlCrawlLimit;
@@ -45,17 +44,28 @@ export class DeepScanner {
         }
 
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
-        const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.getUnderlyingPage());
+        const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.currentPage);
         const processedUrls = this.processUrls(discoveredUrls, urlCrawlLimit, websiteScanResult.knownPages);
-        const websiteScanResultUpdated = await this.websiteScanResultWriter.updateWebsiteScanResultWithDiscoveredUrls(
-            pageScanResult,
-            processedUrls,
-            discoveryPatterns,
-        );
+        const websiteScanResultUpdated = await this.updateWebsiteScanResult(websiteScanResult, processedUrls, discoveryPatterns);
         await this.scanFeedGenerator.queueDiscoveredPages(websiteScanResultUpdated, pageScanResult);
     }
 
-    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult, scanGroupType: ScanGroupType): Promise<WebsiteScanResult> {
+    private async updateWebsiteScanResult(
+        websiteScanResult: WebsiteScanResult,
+        discoveredUrls: string[],
+        discoveryPatterns: string[],
+    ): Promise<WebsiteScanResult> {
+        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+            id: websiteScanResult.id,
+            knownPages: discoveredUrls,
+            discoveryPatterns: discoveryPatterns,
+        };
+
+        return this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResult);
+    }
+
+    private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
+        const scanGroupType = 'deep-scan';
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
         if (isNil(websiteScanRef)) {
             this.logger.logError(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);

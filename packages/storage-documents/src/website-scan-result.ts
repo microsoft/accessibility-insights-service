@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import { StorageDocument } from './storage-document';
 import { ItemType } from './item-type';
-import { ReportFormat } from './on-demand-page-scan-result';
+import { ReportFormat, OnDemandPageScanRunState } from './on-demand-page-scan-result';
 
 export declare type ScanGroupType = 'consolidated-scan-report' | 'deep-scan';
 
@@ -28,5 +28,6 @@ export interface WebsiteScanReport {
 export interface PageScan {
     scanId: string;
     url: string;
+    runState?: OnDemandPageScanRunState;
     timestamp: string;
 }
