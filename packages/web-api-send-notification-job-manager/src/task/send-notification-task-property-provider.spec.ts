@@ -21,13 +21,10 @@ describe(SendNotificationTaskPropertyProvider, () => {
         testSubject = new SendNotificationTaskPropertyProvider(serviceConfigMock.object);
     });
 
-    afterEach(() => {
-        serviceConfigMock.verifyAll();
-    });
-
     it('get image name', async () => {
         const actualImageName = await testSubject.getImageName();
         expect(actualImageName).toEqual('sendNotificationTaskImageName');
+        serviceConfigMock.verifyAll();
     });
 
     it('get get user elevation level', () => {
