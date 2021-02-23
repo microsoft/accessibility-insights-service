@@ -29,4 +29,9 @@ describe(SendNotificationTaskPropertyProvider, () => {
         const actualImageName = await testSubject.getImageName();
         expect(actualImageName).toEqual('sendNotificationTaskImageName');
     });
+
+    it('get get user elevation level', () => {
+        const actualElevationLevel = testSubject.getUserElevationLevel();
+        expect(actualElevationLevel).toEqual('nonadmin');
+    });
 });

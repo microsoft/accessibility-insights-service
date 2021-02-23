@@ -35,4 +35,9 @@ describe(ScannerBatchTaskPropertyProvider, () => {
         const actualRunOptions = testSubject.getAdditionalContainerRunOptions();
         expect(actualRunOptions).toEqual('');
     });
+
+    it('get get user elevation level', () => {
+        const actualElevationLevel = testSubject.getUserElevationLevel();
+        expect(actualElevationLevel).toEqual('admin');
+    });
 });
