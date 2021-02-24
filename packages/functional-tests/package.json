@@ -42,7 +42,7 @@
         "service-library": "1.0.0",
         "web-api-client": "1.0.0",
         "storage-documents": "1.0.0",
-        "chai": "^4.2.0",
+        "chai": "^4.3.0",
         "yargs": "^16.2.0",
         "@azure/cosmos": "^3.9.5",
         "dotenv": "^8.2.0"
