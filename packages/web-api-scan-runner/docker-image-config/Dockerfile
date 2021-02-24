@@ -19,7 +19,7 @@ COPY package.json ./
 
 RUN npm install \
     # Force npm package resolution
-    && npx npm-force-resolutions \
+    && npx npm-force-resolutions@0.0.3 \
     && npm install \
     # Add user so we don't need --no-sandbox.
     # same layer as npm install to keep re-chowned files from using up several hundred MBs more space
