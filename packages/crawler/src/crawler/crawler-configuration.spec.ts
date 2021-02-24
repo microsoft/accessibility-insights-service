@@ -129,6 +129,17 @@ describe(CrawlerConfiguration, () => {
         });
     });
 
+    describe('getAxeSourcePath', () => {
+        it('explicitly set axeSourcePath state', () => {
+            crawlerRunOptionsMock
+                .setup((o) => o.axeSourcePath)
+                .returns(() => 'axeSourcePath')
+                .verifiable();
+
+            expect(crawlerConfiguration.axeSourcePath()).toEqual('axeSourcePath');
+        });
+    });
+
     describe('getMaxRequestsPerCrawl', () => {
         it('with no value provided', () => {
             crawlerRunOptionsMock
@@ -168,6 +179,7 @@ describe(CrawlerConfiguration, () => {
 
         const prevApifyHeadless = 'prev apify headless value';
         const prevApifyStorageDir = 'prev apify storage dir';
+        const prevChromePath = 'chrome path';
 
         const defaultApifyHeadless = '1';
         const defaultApifyStorageDir = './ai_scan_cli_output';
@@ -176,6 +188,7 @@ describe(CrawlerConfiguration, () => {
             existingSettings = {
                 APIFY_HEADLESS: prevApifyHeadless,
                 APIFY_LOCAL_STORAGE_DIR: prevApifyStorageDir,
+                APIFY_CHROME_EXECUTABLE_PATH: prevChromePath,
             };
             apifySettingsHandlerMock.setup((ash) => ash.getApifySettings()).returns(() => existingSettings);
         });
@@ -190,7 +203,7 @@ describe(CrawlerConfiguration, () => {
             crawlerConfiguration.setDefaultApifySettings();
         });
 
-        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR and APIFY_HEADLESS', () => {
+        it('setDefaultApifySettings sets APIFY_LOCAL_STORAGE_DIR, APIFY_HEADLESS and APIFY_CHROME_EXECUTABLE_PATH', () => {
             const expectedSettings = {
                 APIFY_HEADLESS: defaultApifyHeadless,
                 APIFY_LOCAL_STORAGE_DIR: defaultApifyStorageDir,
@@ -210,6 +223,16 @@ describe(CrawlerConfiguration, () => {
             apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
 
             crawlerConfiguration.setLocalOutputDir(localOutputDir);
+        });
+
+        it('setChromePath', () => {
+            const chromePath = 'new chrome path';
+            const expectedSettings = {
+                APIFY_CHROME_EXECUTABLE_PATH: chromePath,
+            };
+            apifySettingsHandlerMock.setup((ash) => ash.setApifySettings(expectedSettings)).verifiable();
+
+            crawlerConfiguration.setChromePath(chromePath);
         });
 
         it('setSilentMode', () => {

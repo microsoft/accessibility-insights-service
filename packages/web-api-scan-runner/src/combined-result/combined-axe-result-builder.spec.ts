@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import 'reflect-metadata';
+
 import axe, { AxeResults } from 'axe-core';
 import { AxeResultsReducer } from 'axe-result-converter';
 import { cloneDeep } from 'lodash';
@@ -8,21 +10,21 @@ import { CombinedScanResultsProvider, CombinedScanResultsReadResponse, CombinedS
 import { CombinedScanResults } from 'storage-documents';
 import { IMock, It, Mock } from 'typemoq';
 import { MockableLogger } from '../test-utilities/mockable-logger';
-import { AxeResultMerger } from './axe-result-merger';
-import { CombinedResultsBlobInfo } from './combined-results-blob-getter';
+import { CombinedResultsBlob } from '../types/combined-results-blob';
+import { CombinedAxeResultBuilder } from './combined-axe-result-builder';
 
-describe(AxeResultMerger, () => {
+describe(CombinedAxeResultBuilder, () => {
     let combinedScanResultsProviderMock: IMock<CombinedScanResultsProvider>;
     let axeResultsReducerMock: IMock<AxeResultsReducer>;
     let loggerMock: IMock<MockableLogger>;
-    let testSubject: AxeResultMerger;
+    let testSubject: CombinedAxeResultBuilder;
 
     let combinedScanResults: CombinedScanResults;
     let combinedScanResultsBlobRead: CombinedScanResultsReadResponse;
     let axeResults: AxeResults;
     let combinedResultsBlobId: string;
     let blobReadETagStub: string;
-    let combinedResultsBlobInfoStub: CombinedResultsBlobInfo;
+    let combinedResultsBlobInfoStub: CombinedResultsBlob;
 
     beforeEach(() => {
         loggerMock = Mock.ofType(MockableLogger);
@@ -56,7 +58,7 @@ describe(AxeResultMerger, () => {
             response: combinedScanResultsBlobRead,
         };
 
-        testSubject = new AxeResultMerger(loggerMock.object, combinedScanResultsProviderMock.object, axeResultsReducerMock.object);
+        testSubject = new CombinedAxeResultBuilder(axeResultsReducerMock.object, combinedScanResultsProviderMock.object, loggerMock.object);
     });
 
     describe('Success', () => {

@@ -10,8 +10,8 @@ import { AxeResults } from 'axe-core';
 export class PageScanner {
     public constructor(@inject(AxePuppeteerFactory) private readonly axePuppeteerFactory: AxePuppeteerFactory) {}
 
-    public async scan(page: Page): Promise<AxeResults> {
-        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page);
+    public async scan(page: Page, axeSourcePath?: string): Promise<AxeResults> {
+        const axePuppeteer: AxePuppeteer = await this.axePuppeteerFactory.createAxePuppeteer(page, axeSourcePath);
 
         return axePuppeteer.analyze();
     }

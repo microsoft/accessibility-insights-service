@@ -10,8 +10,6 @@ export class ScanMetadataConfig {
         argvObj.options({
             deepScan: {
                 type: 'boolean',
-                // Temporary workaround for yargs v16 changing all env variables to lowercase
-                alias: 'deepscan',
             },
         });
     }

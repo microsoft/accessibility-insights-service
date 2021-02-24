@@ -37,7 +37,7 @@ describe(ScanFeedGenerator, () => {
         pageScanResult = {
             url: 'url',
             priority: 100,
-            scanNotifyUrl: 'scanNotifyUrl',
+            notification: { scanNotifyUrl: 'scanNotifyUrl' },
         } as OnDemandPageScanResult;
         websiteScanResult = {
             id: 'websiteScanResultId',
@@ -120,7 +120,7 @@ function createScanRequests(urls: string[]): ScanRunBatchRequest[] {
             url,
             priority: pageScanResult.priority,
             deepScan: true,
-            scanNotifyUrl: pageScanResult.scanNotifyUrl,
+            scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             site: {
                 baseUrl: websiteScanResult.baseUrl,
             },
