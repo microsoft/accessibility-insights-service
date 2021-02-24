@@ -33,7 +33,7 @@
     },
     "dependencies": {
         "inversify": "^5.0.5",
-        "lodash": "^4.17.20",
+        "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13",
         "common": "^1.0.0",
         "service-library": "1.0.0",
