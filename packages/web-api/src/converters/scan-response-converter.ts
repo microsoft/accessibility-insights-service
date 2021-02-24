@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
 import { isEmpty, isNil } from 'lodash';
 import { DeepScanResultItem, ScanCompletedNotification as NotificationResponse, ScanReport, ScanResultResponse } from 'service-library';
@@ -7,7 +8,7 @@ import {
     OnDemandPageScanResult,
     OnDemandPageScanRunState,
     ScanCompletedNotification as NotificationDb,
-    DeepScanResultItem as DeepScanResultItemDb,
+    WebsiteScanResult,
 } from 'storage-documents';
 import { ScanErrorConverter } from './scan-error-converter';
 
@@ -15,93 +16,97 @@ import { ScanErrorConverter } from './scan-error-converter';
 export class ScanResponseConverter {
     constructor(@inject(ScanErrorConverter) private readonly scanErrorConverter: ScanErrorConverter) {}
 
-    public getScanResultResponse(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
-        const runState: OnDemandPageScanRunState = pageScanResultDocument.run.state;
+    public getScanResultResponse(
+        baseUrl: string,
+        apiVersion: string,
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
+    ): ScanResultResponse {
+        const runState: OnDemandPageScanRunState = pageScanResult.run.state;
         switch (runState) {
             case 'pending':
             case 'accepted':
             case 'queued':
             case 'running':
             default:
-                return this.createIncompleteScanResponse(pageScanResultDocument);
+                return this.createIncompleteScanResponse(pageScanResult);
             case 'failed':
-                return this.createFailedScanResponse(pageScanResultDocument);
+                return this.createFailedScanResponse(pageScanResult);
             case 'completed':
-                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResultDocument);
+                return this.createCompletedScanResponse(baseUrl, apiVersion, pageScanResult, websiteScanResult);
         }
     }
 
-    private createIncompleteScanResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
+    private createIncompleteScanResponse(pageScanResult: OnDemandPageScanResult): ScanResultResponse {
         return {
-            scanId: pageScanResultDocument.id,
-            url: pageScanResultDocument.url,
+            scanId: pageScanResult.id,
+            url: pageScanResult.url,
             run: {
-                state: pageScanResultDocument.run.state,
+                state: pageScanResult.run.state,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
+            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
     }
 
-    private createFailedScanResponse(pageScanResultDocument: OnDemandPageScanResult): ScanResultResponse {
+    private createFailedScanResponse(pageScanResult: OnDemandPageScanResult): ScanResultResponse {
         return {
-            scanId: pageScanResultDocument.id,
-            url: pageScanResultDocument.url,
+            scanId: pageScanResult.id,
+            url: pageScanResult.url,
             run: {
-                state: pageScanResultDocument.run.state,
-                timestamp: pageScanResultDocument.run.timestamp,
-                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResultDocument.run.error),
-                pageResponseCode: pageScanResultDocument.run.pageResponseCode,
-                pageTitle: pageScanResultDocument.run.pageTitle,
+                state: pageScanResult.run.state,
+                timestamp: pageScanResult.run.timestamp,
+                error: this.scanErrorConverter.getScanRunErrorCode(pageScanResult.run.error),
+                pageResponseCode: pageScanResult.run.pageResponseCode,
+                pageTitle: pageScanResult.run.pageTitle,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
+            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
         };
     }
 
     private createCompletedScanResponse(
         baseUrl: string,
         apiVersion: string,
-        pageScanResultDocument: OnDemandPageScanResult,
+        pageScanResult: OnDemandPageScanResult,
+        websiteScanResult: WebsiteScanResult,
     ): ScanResultResponse {
         const scanResultResponse: ScanResultResponse = {
-            scanId: pageScanResultDocument.id,
-            url: pageScanResultDocument.url,
+            scanId: pageScanResult.id,
+            url: pageScanResult.url,
             scanResult: {
-                state: pageScanResultDocument.scanResult.state,
-                issueCount: pageScanResultDocument.scanResult.issueCount,
+                state: pageScanResult.scanResult.state,
+                issueCount: pageScanResult.scanResult.issueCount,
             },
-            reports: this.getScanReports(baseUrl, apiVersion, pageScanResultDocument),
+            reports: this.getScanReports(baseUrl, apiVersion, pageScanResult),
             run: {
-                state: pageScanResultDocument.run.state,
-                timestamp: pageScanResultDocument.run.timestamp,
-                pageResponseCode: pageScanResultDocument.run.pageResponseCode,
-                pageTitle: pageScanResultDocument.run.pageTitle,
+                state: pageScanResult.run.state,
+                timestamp: pageScanResult.run.timestamp,
+                pageResponseCode: pageScanResult.run.pageResponseCode,
+                pageTitle: pageScanResult.run.pageTitle,
             },
-            ...this.getRunCompleteNotificationResponse(pageScanResultDocument.notification),
-            ...this.getDeepScanResult(pageScanResultDocument.deepScanResult),
+            ...this.getRunCompleteNotificationResponse(pageScanResult.notification),
+            ...this.getDeepScanResult(websiteScanResult),
         };
-        if (pageScanResultDocument.scannedUrl !== undefined) {
-            scanResultResponse.scannedUrl = pageScanResultDocument.scannedUrl;
+        if (pageScanResult.scannedUrl !== undefined) {
+            scanResultResponse.scannedUrl = pageScanResult.scannedUrl;
         }
 
         return scanResultResponse;
     }
 
-    private getScanReports(baseUrl: string, apiVersion: string, pageScanResultDocument: OnDemandPageScanResult): ScanReport[] {
-        if (isEmpty(pageScanResultDocument.reports)) {
+    private getScanReports(baseUrl: string, apiVersion: string, pageScanResult: OnDemandPageScanResult): ScanReport[] {
+        if (isEmpty(pageScanResult.reports)) {
             return undefined;
         }
 
         const baseUrlFixed = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
 
-        return pageScanResultDocument.reports.map((report) => {
+        return pageScanResult.reports.map((report) => {
             return {
                 reportId: report.reportId,
                 format: report.format,
                 links: {
                     rel: 'self',
-                    href: `${baseUrlFixed}/scans/${pageScanResultDocument.id}/reports/${report.reportId}?api-version=${apiVersion}`,
+                    href: `${baseUrlFixed}/scans/${pageScanResult.id}/reports/${report.reportId}?api-version=${apiVersion}`,
                 },
             };
         });
@@ -126,49 +131,20 @@ export class ScanResponseConverter {
     }
 
     // eslint-disable-next-line @typescript-eslint/ban-types
-    private getDeepScanResult(deepScanResultDb: DeepScanResultItemDb[]): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
-        if (isNil(deepScanResultDb)) {
+    private getDeepScanResult(websiteScanResult: WebsiteScanResult): { [deepScanResult: string]: DeepScanResultItem[] } | {} {
+        if (isNil(websiteScanResult) || !(websiteScanResult.pageScans?.length > 0)) {
             return {};
         }
 
-        const deepScanResult: DeepScanResultItem[] = deepScanResultDb.map((result) => {
+        const deepScanResult: DeepScanResultItem[] = websiteScanResult.pageScans.map((pageScan) => {
             return {
-                scanId: result.scanId,
-                url: result.url,
-                scanResultState: result.scanResultState,
-                scanRunState: result.scanRunState,
+                scanId: pageScan.scanId,
+                url: pageScan.url,
+                scanResultState: pageScan.scanState,
+                scanRunState: pageScan.runState ?? 'pending',
             };
         });
 
-        // mock data if the deepScanResult is empty
-        if (deepScanResult.length === 0) {
-            deepScanResult.push({
-                scanId: 'scanId1',
-                url: 'url1',
-                scanRunState: 'accepted',
-            } as DeepScanResultItem);
-
-            deepScanResult.push({
-                scanId: 'scanId2',
-                url: 'url2',
-                scanRunState: 'queued',
-            } as DeepScanResultItem);
-
-            deepScanResult.push({
-                scanId: 'scanId3',
-                url: 'url3',
-                scanRunState: 'pending',
-                scanResultState: 'pending',
-            } as DeepScanResultItem);
-
-            deepScanResult.push({
-                scanId: 'scanId4',
-                url: 'url4',
-                scanRunState: 'completed',
-                scanResultState: 'pass',
-            } as DeepScanResultItem);
-        }
-
-        return { deepScanResult: deepScanResult };
+        return { deepScanResult };
     }
 }

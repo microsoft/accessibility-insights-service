@@ -1,10 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes } from 'service-library';
+import { HttpResponse, OnDemandPageScanRunResultProvider, WebApiErrorCodes, WebsiteScanResultProvider } from 'service-library';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -15,6 +16,7 @@ export class ScanResultController extends BaseScanResultController {
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -35,9 +37,9 @@ export class ScanResultController extends BaseScanResultController {
         }
 
         const scanResultItemMap = await this.getScanResultMapKeyByScanId([scanId]);
-        const scanResult = scanResultItemMap[scanId];
+        const pageScanResult = scanResultItemMap[scanId];
 
-        if (isEmpty(scanResult)) {
+        if (isEmpty(pageScanResult)) {
             // scan result not found in result storage
             if (await this.isRequestMadeTooSoon(scanId)) {
                 // user made the scan result query too soon after the scan request, will return a default pending response.
@@ -45,15 +47,17 @@ export class ScanResultController extends BaseScanResultController {
                     status: 200,
                     body: this.getTooSoonRequestResponse(scanId),
                 };
-                this.logger.logInfo('Scan result not found in a storage.');
+                this.logger.logInfo('Scan result is not ready in a storage.');
             } else {
                 // return scan not found response
                 this.context.res = HttpResponse.getErrorResponse(WebApiErrorCodes.resourceNotFound);
+                this.logger.logInfo('Scan result not found in a storage.');
             }
         } else {
+            const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
             this.context.res = {
                 status: 200,
-                body: this.getScanResultResponse(scanResult),
+                body: this.getScanResultResponse(pageScanResult, websiteScanResult),
             };
             this.logger.logInfo('Scan result successfully fetched from a storage.');
         }

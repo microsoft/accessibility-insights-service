@@ -205,6 +205,7 @@ function setupUpdateScanResult(): void {
                 {
                     scanId: scanMetadata.id,
                     url: scanMetadata.url,
+                    scanState: pageScanResult.scanResult.state,
                     runState: pageScanResult.run.state,
                     timestamp: dateNow.toJSON(),
                 },
@@ -213,7 +214,7 @@ function setupUpdateScanResult(): void {
         websiteScanResult = {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
-        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(updatedWebsiteScanResult))
+        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
