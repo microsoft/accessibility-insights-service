@@ -18,19 +18,19 @@ Array [
     "url": undefined,
   },
   Object {
-    "run": Object {
-      "state": "running",
-    },
-    "scanId": "valid-scan-id",
-    "url": "url",
-  },
-  Object {
     "error": Object {
       "code": "ResourceNotFound",
       "codeId": 4001,
       "message": "The specified resource does not exist.",
     },
     "scanId": "not-found-scan-id",
+  },
+  Object {
+    "run": Object {
+      "state": "running",
+    },
+    "scanId": "valid-scan-id",
+    "url": "url",
   },
 ]
 `;

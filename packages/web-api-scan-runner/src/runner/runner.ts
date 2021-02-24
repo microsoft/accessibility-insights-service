@@ -131,6 +131,7 @@ export class Runner {
                     {
                         scanId: scanMetadata.id,
                         url: scanMetadata.url,
+                        scanState: pageScanResult.scanResult?.state,
                         runState: pageScanResult.run.state,
                         timestamp: new Date().toJSON(),
                     },

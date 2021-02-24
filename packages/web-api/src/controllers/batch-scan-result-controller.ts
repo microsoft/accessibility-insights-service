@@ -1,10 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { GuidGenerator, ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
-import { isEmpty } from 'lodash';
+import { isEmpty, Dictionary } from 'lodash';
 import { ContextAwareLogger } from 'logger';
-import { OnDemandPageScanRunResultProvider, ScanBatchRequest, ScanResultResponse, WebApiErrorCodes } from 'service-library';
+import {
+    OnDemandPageScanRunResultProvider,
+    ScanBatchRequest,
+    ScanResultResponse,
+    WebApiErrorCodes,
+    WebsiteScanResultProvider,
+} from 'service-library';
+import { OnDemandPageScanResult } from 'storage-documents';
 import { ScanResponseConverter } from '../converters/scan-response-converter';
 import { BaseScanResultController } from './base-scan-result-controller';
 
@@ -15,6 +23,7 @@ export class BatchScanResultController extends BaseScanResultController {
 
     public constructor(
         @inject(OnDemandPageScanRunResultProvider) protected readonly onDemandPageScanRunResultProvider: OnDemandPageScanRunResultProvider,
+        @inject(WebsiteScanResultProvider) protected readonly websiteScanResultProvider: WebsiteScanResultProvider,
         @inject(ScanResponseConverter) protected readonly scanResponseConverter: ScanResponseConverter,
         @inject(GuidGenerator) protected readonly guidGenerator: GuidGenerator,
         @inject(ServiceConfiguration) protected readonly serviceConfig: ServiceConfiguration,
@@ -29,7 +38,7 @@ export class BatchScanResultController extends BaseScanResultController {
         const payload = this.tryGetPayload<ScanBatchRequest[]>();
         const scanIds = payload.map((request) => request.scanId);
         const responseBody: ScanResultResponse[] = [];
-        const scanIdsToQuery: string[] = [];
+        const scanIdsToQueryFromDb: string[] = [];
 
         for (const scanId of scanIds) {
             if (!this.isScanIdValid(scanId)) {
@@ -44,27 +53,43 @@ export class BatchScanResultController extends BaseScanResultController {
             if (isRequestMadeTooSoon === true) {
                 responseBody.push(this.getTooSoonRequestResponse(scanId));
             } else {
-                scanIdsToQuery.push(scanId);
+                scanIdsToQueryFromDb.push(scanId);
             }
         }
 
-        const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQuery);
-        scanIdsToQuery.forEach((scanId) => {
-            if (isEmpty(scanResultItemMap[scanId])) {
-                responseBody.push({
-                    scanId: scanId,
-                    error: WebApiErrorCodes.resourceNotFound.error,
-                });
-            } else {
-                responseBody.push(this.getScanResultResponse(scanResultItemMap[scanId]));
-            }
-        });
+        const scanResultItemMap = await this.getScanResultMapKeyByScanId(scanIdsToQueryFromDb);
+        const scanResponseBody = await this.getScanResponseBody(scanIdsToQueryFromDb, scanResultItemMap);
+        responseBody.push(...scanResponseBody);
 
         this.context.res = {
             status: 200,
             body: responseBody,
         };
 
-        this.logger.logInfo('Batch scan result successfully fetched.', { scanIds: JSON.stringify(scanIdsToQuery) });
+        this.logger.logInfo('Batch scan result successfully fetched.', { scanIds: JSON.stringify(scanIdsToQueryFromDb) });
+    }
+
+    private async getScanResponseBody(
+        scanIds: string[],
+        pageScanResults: Dictionary<OnDemandPageScanResult>,
+    ): Promise<ScanResultResponse[]> {
+        const responses: ScanResultResponse[] = [];
+
+        await Promise.all(
+            scanIds.map(async (scanId) => {
+                const pageScanResult = pageScanResults[scanId];
+                if (isEmpty(pageScanResult)) {
+                    responses.push({
+                        scanId: scanId,
+                        error: WebApiErrorCodes.resourceNotFound.error,
+                    });
+                } else {
+                    const websiteScanResult = await this.getWebsiteScanResult(pageScanResult);
+                    responses.push(this.getScanResultResponse(pageScanResult, websiteScanResult));
+                }
+            }),
+        );
+
+        return responses;
     }
 }

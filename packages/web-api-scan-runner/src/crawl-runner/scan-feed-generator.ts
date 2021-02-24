@@ -80,7 +80,7 @@ export class ScanFeedGenerator {
                 url,
                 priority: _.isNil(pageScanResult.priority) ? 0 : pageScanResult.priority,
                 deepScan: true,
-                scanNotifyUrl: pageScanResult.scanNotifyUrl ?? undefined,
+                scanNotifyUrl: pageScanResult.notification?.scanNotifyUrl ?? undefined,
                 site: {
                     baseUrl: websiteScanResult.baseUrl,
                 },

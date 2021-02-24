@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ItemType } from './item-type';
 import { StorageDocument } from './storage-document';
 import { ScanGroupType } from './website-scan-result';
@@ -42,9 +43,7 @@ export interface OnDemandPageScanResult extends StorageDocument {
     scanResult?: OnDemandScanResult;
     reports?: OnDemandPageScanReport[];
     run: OnDemandPageScanRunResult;
-    scanNotifyUrl?: string;
     notification?: ScanCompletedNotification;
-    deepScanResult?: DeepScanResultItem[];
 }
 
 export interface ScanCompletedNotification {
@@ -81,11 +80,4 @@ export interface OnDemandPageScanRunResult {
 export interface WebsiteScanRef {
     id: string;
     scanGroupType: ScanGroupType;
-}
-
-export interface DeepScanResultItem {
-    scanId: string;
-    url: string;
-    scanResultState?: ScanState;
-    scanRunState: OnDemandPageScanRunState;
 }
