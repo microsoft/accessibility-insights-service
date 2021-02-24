@@ -34,6 +34,6 @@ installBootstrapPackages
 ./pull-image-from-container-registry.ps1 -k $global:keyvault
 
 Write-Output "Invoking custom pool startup script"
-./custom-pool-post-startup.sh
+./custom-pool-post-startup.ps1
 
 Write-Output "Successfully completed pool startup script execution"
