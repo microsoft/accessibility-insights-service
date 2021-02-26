@@ -27,7 +27,7 @@ export class PuppeteerCrawlerEngine {
         this.crawlerConfiguration.setMemoryMBytes(crawlerRunOptions.memoryMBytes);
         this.crawlerConfiguration.setSilentMode(crawlerRunOptions.silentMode);
 
-        const puppeteerDefaultOptions = ['--disable-dev-shm-usage'];
+        const puppeteerDefaultOptions = ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'];
         const pageProcessor = this.pageProcessorFactory();
         const puppeteerCrawlerOptions: Apify.PuppeteerCrawlerOptions = {
             handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)

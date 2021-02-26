@@ -22,7 +22,13 @@ export abstract class BatchTaskPropertyProvider {
     public getResourceFiles?(): BatchServiceModels.ResourceFile[] {
         return [];
     }
+
+    public getUserElevationLevel(): UserAccessLevels {
+        return 'nonadmin';
+    }
 }
+
+export declare type UserAccessLevels = 'admin' | 'nonadmin';
 
 @injectable()
 export class BatchTaskConfigGenerator {
@@ -66,6 +72,12 @@ export class BatchTaskConfigGenerator {
                 maxWallClockTime: moment.duration({ minute: batchTaskConfig.taskTimeoutInMinutes }).toISOString(),
                 retentionTime: moment.duration({ day: batchTaskConfig.retentionTimeInDays }).toISOString(),
                 maxTaskRetryCount: batchTaskConfig.maxTaskRetryCount,
+            },
+            userIdentity: {
+                autoUser: {
+                    scope: 'task',
+                    elevationLevel: this.batchTaskPropertyProvider.getUserElevationLevel(),
+                },
             },
         };
     }

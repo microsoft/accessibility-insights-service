@@ -1,6 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-import { BatchTaskPropertyProvider } from 'azure-services';
+import { BatchTaskPropertyProvider, UserAccessLevels } from 'azure-services';
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 
@@ -12,5 +12,9 @@ export class SendNotificationTaskPropertyProvider extends BatchTaskPropertyProvi
 
     public async getImageName(): Promise<string> {
         return (await this.serviceConfig.getConfigValue('jobManagerConfig')).sendNotificationTaskImageName;
+    }
+
+    public getUserElevationLevel(): UserAccessLevels {
+        return 'nonadmin';
     }
 }

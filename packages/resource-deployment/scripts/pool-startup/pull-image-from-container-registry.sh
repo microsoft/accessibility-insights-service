@@ -75,12 +75,18 @@ loginToContainerRegistry() {
 
 pullDockerImages() {
     echo "Pulling Batch images from container registry..."
-    images=$(az acr repository list --name $containerRegistryName --query "[?starts_with(@, 'batch-')]" -o tsv)
-    for image in $images; do
-        fullImageName="$azurecr/$image:latest"
-        echo "Pulling image $fullImageName"
-        docker pull $fullImageName
-    done
+    notificationManagerImage="$azurecr/batch-scan-notification-manager:latest"
+    notificationRunnerImage="$azurecr/batch-scan-notification-runner:latest"
+    requestSenderImage="$azurecr/batch-scan-request-sender:latest"
+
+    echo "Pulling image $notificationManagerImage"
+    docker pull $notificationManagerImage
+
+    echo "Pulling image $notificationRunnerImage"
+    docker pull $notificationRunnerImage
+
+    echo "Pulling image $requestSenderImage"
+    docker pull $requestSenderImage
 }
 
 # Read script arguments

@@ -106,6 +106,12 @@ describe(BatchTaskConfigGenerator, () => {
                 retentionTime: `P${taskRuntimeConfig.retentionTimeInDays}D`,
                 maxTaskRetryCount: taskRuntimeConfig.maxTaskRetryCount,
             },
+            userIdentity: {
+                autoUser: {
+                    elevationLevel: 'nonadmin',
+                    scope: 'task',
+                },
+            },
         };
 
         const actualTaskConfig = await testSubject.getTaskConfigWithImageSupport('batchAccountName', 'taskId', taskArgsString);

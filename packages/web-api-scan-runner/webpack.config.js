@@ -76,6 +76,11 @@ module.exports = (env) => {
                         from: 'Dockerfile',
                         to: '',
                     },
+                    {
+                        context: './docker-image-config',
+                        from: 'web-api-scan-runner.ps1',
+                        to: '',
+                    },
                 ],
             }),
         ],

@@ -33,8 +33,9 @@ fi
 pushImageToRegistry() {
     local name=$1
     local source=$2
+    local platform=$3
 
-    az acr build --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source 1>/dev/null
+    az acr build --platform $platform --image $containerRegistryName.azurecr.io/$name:latest --registry $containerRegistryName $source 1>/dev/null
 }
 
 . "${0%/*}/get-resource-names.sh"
@@ -56,11 +57,11 @@ cp "${0%/*}/../runtime-config/runtime-config.$environment.json" "${batchScanNoti
 echo "Runtime configuration was copied successfully"
 
 imageBuildProcesses=(
-    "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist"
-    "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist"
-    "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist"
-    "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist"
-    "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist"
+    "pushImageToRegistry \"batch-scan-runner\" $batchScanRunnerDist windows"
+    "pushImageToRegistry \"batch-scan-manager\" $batchScanManagerDist windows"
+    "pushImageToRegistry \"batch-scan-request-sender\" $batchScanRequestSenderDist linux"
+    "pushImageToRegistry \"batch-scan-notification-manager\" $batchScanNotificationManagerDist linux"
+    "pushImageToRegistry \"batch-scan-notification-runner\" $batchScanNotificationRunnerDist linux"
 )
 
 # Login to container registry
