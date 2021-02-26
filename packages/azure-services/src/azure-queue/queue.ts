@@ -118,7 +118,11 @@ export class Queue {
     }
 
     private async deleteQueueMessage(queueClient: QueueClient, messageId: string, popReceipt: string): Promise<void> {
-        await queueClient.deleteMessage(messageId, popReceipt);
+        try {
+            await queueClient.deleteMessage(messageId, popReceipt);
+        } catch (error) {
+            this.logger.logError(`Failed to delete message in a queue storage: ${util.inspect(messageId)}. Error: ${util.inspect(error)}`);
+        }
     }
 
     private async getQueueMessages(queueClient: QueueClient, numberOfMessages: number): Promise<DequeuedMessageItem[]> {
