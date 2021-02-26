@@ -114,7 +114,7 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 300,
+      "default": 600,
       "doc": "Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.",
       "format": "int",
     },
@@ -185,7 +185,7 @@ Object {
       "format": "int",
     },
     "taskTimeoutInMinutes": Object {
-      "default": 5,
+      "default": 10,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },
@@ -307,7 +307,7 @@ Object {
       "format": "int",
     },
     "messageVisibilityTimeoutInSeconds": Object {
-      "default": 300,
+      "default": 600,
       "doc": "Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.",
       "format": "int",
     },
@@ -378,7 +378,7 @@ Object {
       "format": "int",
     },
     "taskTimeoutInMinutes": Object {
-      "default": 5,
+      "default": 10,
       "doc": "Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.",
       "format": "int",
     },

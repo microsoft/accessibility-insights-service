@@ -155,14 +155,14 @@ export class ServiceConfiguration {
                 },
                 messageVisibilityTimeoutInSeconds: {
                     format: 'int',
-                    default: 300,
+                    default: 600,
                     doc: 'Message visibility timeout in seconds. Must correlate with taskTimeoutInMinutes config value.',
                 },
             },
             taskConfig: {
                 taskTimeoutInMinutes: {
                     format: 'int',
-                    default: 5,
+                    default: 10,
                     doc:
                         'Timeout value after which the task has to be terminated. Must correlate with messageVisibilityTimeoutInSeconds config value.',
                 },
