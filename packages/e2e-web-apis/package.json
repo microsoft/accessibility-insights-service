@@ -47,7 +47,7 @@
     "dependencies": {
         "azure-services": "^1.0.0",
         "inversify": "^5.0.5",
-        "lodash": "^4.17.20",
+        "lodash": "^4.17.21",
         "logger": "1.0.0",
         "reflect-metadata": "^0.1.13"
     }

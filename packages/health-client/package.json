@@ -33,14 +33,14 @@
     },
     "dependencies": {
         "inversify": "^5.0.5",
-        "lodash": "^4.17.20",
+        "lodash": "^4.17.21",
         "reflect-metadata": "^0.1.13",
         "common": "^1.0.0",
         "service-library": "1.0.0",
         "web-api-client": "1.0.0",
         "functional-tests": "1.0.0",
         "logger": "1.0.0",
-        "chai": "^4.2.0",
+        "chai": "^4.3.0",
         "yargs": "^16.2.0"
     }
 }
