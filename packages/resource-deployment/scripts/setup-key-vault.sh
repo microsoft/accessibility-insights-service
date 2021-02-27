@@ -77,6 +77,12 @@ function createOrRecoverKeyvault() {
     fi
 }
 
+function setAccessPolicies() {
+    az keyvault update --name $keyVault --resourceGroup $resourceGroupName --enabled-for-disk-encryption "true"
+    az keyvault update --name $keyVault --resourceGroup $resourceGroupName --enabled-for-deployment "true"
+    az keyvault update --name $keyVault --resourceGroup $resourceGroupName --enabled-for-template-deployment "true"
+}
+
 function setupKeyVaultResources() {
     echo "Setting up key vault resources using ARM template."
     resources=$(
@@ -123,6 +129,8 @@ fi
 createOrRecoverKeyvault
 
 setupKeyVaultResources
+
+setAccessPolicies
 
 . "${0%/*}/push-secrets-to-key-vault.sh"
 
