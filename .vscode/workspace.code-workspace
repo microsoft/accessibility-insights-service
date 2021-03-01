@@ -81,6 +81,10 @@
             "path": "../packages/health-client"
         },
         {
+            "name": "host-browser-service",
+            "path": "../packages/host-browser-service"
+        },
+        {
             "name": "cli",
             "path": "../packages/cli"
         },

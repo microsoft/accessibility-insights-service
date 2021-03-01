@@ -39,6 +39,7 @@ steps:
               e2e-web-apis/dist/**/*
               functional-tests/dist/**/*
               health-client/dist/**/*
+              host-browser-service/dist/**/*
               cli/drop/*
               !**/node_modules/**/*
               !**/.vscode/**/*
