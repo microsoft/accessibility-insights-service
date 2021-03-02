@@ -5,7 +5,6 @@ import 'reflect-metadata';
 import { It, Mock, Times } from 'typemoq';
 import { WebDriver } from 'scanner-global-library';
 import Puppeteer from 'puppeteer';
-import * as MockDate from 'mockdate';
 import { getPromisableDynamicMock } from './test-utilities/promisable-mock';
 import { BrowserLauncher } from './browser-launcher';
 
@@ -14,7 +13,6 @@ describe(BrowserLauncher, () => {
     let testSubject: BrowserLauncher;
 
     beforeAll(() => {
-        MockDate.reset();
         const webdriverMock = Mock.ofType(WebDriver);
         testSubject = new BrowserLauncher(webdriverMock.object);
         webdriverMock.setup((m) => m.launch(It.isAny())).returns(() => Promise.resolve(browserMock.object));
