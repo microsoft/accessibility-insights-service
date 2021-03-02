@@ -1,6 +1,7 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "outDir": "dist"
+        "outDir": "dist",
+        "plugins": [{ "transform": "ts-transformer-keys/transformer" }]
     }
 }

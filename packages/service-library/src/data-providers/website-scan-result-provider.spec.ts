@@ -2,27 +2,41 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It, Times } from 'typemoq';
+import { IMock, Mock, It } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { WebsiteScanResult, ItemType } from 'storage-documents';
+import { WebsiteScanResult, ItemType, WebsiteScanResultBase, WebsiteScanResultPartModel, WebsiteScanResultPart } from 'storage-documents';
 import { HashGenerator, RetryHelper } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
-import moment from 'moment';
 import _ from 'lodash';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider } from './website-scan-result-provider';
+import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
+
+type TestWorkflow = 'merge' | 'create';
 
 const maxRetryCount: number = 5;
 const msecBetweenRetries: number = 1000;
+const scanId = 'scanId';
+const websiteScanResultBaseId = 'websiteScanResultBaseId';
+const websiteScanResultBasePartitionKey = 'websiteScanResultBasePartitionKey';
+const websiteScanResultPartId = 'websiteScanResultPartId';
 
 let websiteScanResultProvider: WebsiteScanResultProvider;
 let cosmosContainerClientMock: IMock<CosmosContainerClient>;
+let websiteScanResultAggregatorMock: IMock<WebsiteScanResultAggregator>;
 let partitionKeyFactoryMock: IMock<PartitionKeyFactory>;
 let retryHelperMock: IMock<RetryHelper<WebsiteScanResult>>;
 let hashGeneratorMock: IMock<HashGenerator>;
 let globalLoggerMock: IMock<GlobalLogger>;
 let dateNow: Date;
+let websiteScanResultBase: WebsiteScanResultBase;
+let websiteScanResultPartModel: WebsiteScanResultPartModel;
+let websiteScanResultPart: WebsiteScanResultPart;
+let websiteScanResult: WebsiteScanResult;
+let websiteScanResultBaseDbDocumentExisting: WebsiteScanResultBase;
+let websiteScanResultBaseDbDocumentCreated: WebsiteScanResultBase;
+let websiteScanResultBaseDbDocumentMerged: WebsiteScanResultBase;
 
 describe(WebsiteScanResultProvider, () => {
     beforeEach(() => {
@@ -30,6 +44,7 @@ describe(WebsiteScanResultProvider, () => {
         MockDate.set(dateNow);
 
         cosmosContainerClientMock = Mock.ofType<CosmosContainerClient>();
+        websiteScanResultAggregatorMock = Mock.ofType<WebsiteScanResultAggregator>();
         partitionKeyFactoryMock = Mock.ofType<PartitionKeyFactory>();
         retryHelperMock = Mock.ofType<RetryHelper<WebsiteScanResult>>();
         hashGeneratorMock = Mock.ofType<HashGenerator>();
@@ -37,6 +52,7 @@ describe(WebsiteScanResultProvider, () => {
 
         websiteScanResultProvider = new WebsiteScanResultProvider(
             cosmosContainerClientMock.object,
+            websiteScanResultAggregatorMock.object,
             partitionKeyFactoryMock.object,
             hashGeneratorMock.object,
             globalLoggerMock.object,
@@ -48,241 +64,256 @@ describe(WebsiteScanResultProvider, () => {
         MockDate.reset();
 
         cosmosContainerClientMock.verifyAll();
+        websiteScanResultAggregatorMock.verifyAll();
         partitionKeyFactoryMock.verifyAll();
         retryHelperMock.verifyAll();
         hashGeneratorMock.verifyAll();
         globalLoggerMock.verifyAll();
     });
 
-    it('merge website scan result with db document', async () => {
-        const testReport = {
-            reportId: 'reportId',
-            format: 'html',
-            href: 'report href',
-        };
-        const discoveryPattern = 'discoveryPattern';
-        const websiteScanResult = {
-            baseUrl: 'baseUrl',
-            scanGroupId: 'scanGroupId',
-            _etag: '*',
-            deepScanId: '*',
-            pageScans: [
-                { scanId: 'scanId-new-to-skip', url: 'url1', timestamp: moment(dateNow).add(-7, 'minute').toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
-            ],
-            reports: [
-                testReport,
-                {
-                    reportId: 'new id',
-                    format: 'html',
-                    href: 'report href',
-                },
-            ],
-            knownPages: ['new page', null],
-            discoveryPatterns: [discoveryPattern, null],
-        } as WebsiteScanResult;
-        const websiteScanResultDbDocument = {
-            ...websiteScanResult,
-            id: 'websiteScanId',
-            partitionKey: 'partitionKey',
-            itemType: ItemType.websiteScanResult,
-            _etag: 'etag',
-            deepScanId: 'deepScanId',
-            pageScans: [
-                { scanId: 'scanId-current-to-keep', url: 'url1', timestamp: moment(dateNow).toJSON() },
-                { scanId: 'scanId-current-to-remove', url: 'url2', timestamp: moment(dateNow).toJSON() },
-                { scanId: 'scanId-current-to-keep', url: 'url3', timestamp: moment(dateNow).toJSON() },
-            ],
-            reports: [
-                testReport,
-                {
-                    reportId: 'existing id',
-                    format: 'html',
-                    href: 'report href',
-                },
-            ],
-            discoveryPatterns: [discoveryPattern, 'existing discovery pattern'],
-            knownPages: ['existing page'],
-        } as WebsiteScanResult;
-        const websiteScanResultMergedWithDbDocument = {
-            ...websiteScanResult,
-            id: 'websiteScanId',
-            partitionKey: 'partitionKey',
-            itemType: ItemType.websiteScanResult,
-            _etag: 'etag', // should preserve current db document etag
-            deepScanId: 'deepScanId', // should preserve current db document scan id
-            pageScans: [
-                { scanId: 'scanId-current-to-keep', url: 'url1', timestamp: moment(dateNow).toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url2', timestamp: moment(dateNow).add(11, 'minute').toJSON() },
-                { scanId: 'scanId-current-to-keep', url: 'url3', timestamp: moment(dateNow).toJSON() },
-                { scanId: 'scanId-new-to-add', url: 'url4', timestamp: moment(dateNow).toJSON() },
-            ],
-            reports: [
-                testReport,
-                {
-                    reportId: 'existing id',
-                    format: 'html',
-                    href: 'report href',
-                },
-                {
-                    reportId: 'new id',
-                    format: 'html',
-                    href: 'report href',
-                },
-            ],
-            discoveryPatterns: [discoveryPattern, 'existing discovery pattern'],
-            knownPages: ['existing page', 'new page'],
-        } as WebsiteScanResult;
-        hashGeneratorMock
-            .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))
-            .returns(() => websiteScanResultDbDocument.id)
-            .verifiable();
-        partitionKeyFactoryMock
-            .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultDbDocument.id))
-            .returns(() => websiteScanResultDbDocument.partitionKey)
-            .verifiable();
-        cosmosContainerClientMock
-            .setup(async (o) => o.readDocument(websiteScanResultDbDocument.id, websiteScanResultDbDocument.partitionKey, false))
-            .returns(() => Promise.resolve({ item: websiteScanResultDbDocument } as CosmosOperationResponse<WebsiteScanResult>))
-            .verifiable();
-        cosmosContainerClientMock
-            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultMergedWithDbDocument)))
-            .returns(() => Promise.resolve({ item: websiteScanResultMergedWithDbDocument } as CosmosOperationResponse<WebsiteScanResult>))
-            .verifiable();
-        retryHelperMock
-            .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
-            .returns(async (action: () => Promise<WebsiteScanResult>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
-                return action();
-            })
-            .verifiable();
-
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(websiteScanResult);
-
-        expect(actualWebsiteScanResult).toEqual(websiteScanResultMergedWithDbDocument);
-    });
-
-    it('create new website scan result db document if not exists', async () => {
-        const websiteScanResult = {
-            baseUrl: 'baseUrl',
-            scanGroupId: 'scanGroupId',
-        } as WebsiteScanResult;
-        const websiteScanResultDbDocument = {
-            ...websiteScanResult,
-            id: 'websiteScanId',
-            partitionKey: 'partitionKey',
-            itemType: ItemType.websiteScanResult,
-        } as WebsiteScanResult;
-        setupHashGeneratorMock(websiteScanResult, websiteScanResultDbDocument);
-        setupPartitionKeyFactoryMock(websiteScanResultDbDocument);
-        setupCosmosContainerClientMock(websiteScanResultDbDocument);
+    it('merge website scan result document with db base document', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
         setupRetryHelperMock();
 
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(websiteScanResult);
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
-        expect(actualWebsiteScanResult).toEqual(websiteScanResultDbDocument);
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
     });
 
-    it('create new website scan result db document from batch', async () => {
-        const websiteScanResults = [
-            {
-                baseUrl: 'single url',
-                scanGroupId: 'scanGroupId1',
-            },
-            {
-                baseUrl: 'duplicate url',
-                scanGroupId: 'scanGroupId2',
-            },
-            {
-                baseUrl: 'duplicate url',
-                scanGroupId: 'scanGroupId2',
-            },
-        ] as WebsiteScanResult[];
-        const websiteScanResultDbDocuments = [
-            {
-                ...websiteScanResults[0],
-                id: 'single url id',
-                partitionKey: 'partitionKey1',
-                itemType: ItemType.websiteScanResult,
-            },
-            {
-                ...websiteScanResults[1],
-                id: 'duplicate url id',
-                partitionKey: 'partitionKey2',
-                itemType: ItemType.websiteScanResult,
-            },
-        ] as WebsiteScanResult[];
+    it('write website scan result documents in batch', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
+        setupRetryHelperMock();
 
-        setupHashGeneratorMock(websiteScanResults[0], websiteScanResultDbDocuments[0]);
-        setupHashGeneratorMock(websiteScanResults[1], websiteScanResultDbDocuments[1], 2);
-
-        setupPartitionKeyFactoryMock(websiteScanResultDbDocuments[0]);
-        setupPartitionKeyFactoryMock(websiteScanResultDbDocuments[1], 2);
-
-        setupCosmosContainerClientMock(websiteScanResultDbDocuments[1]);
-        setupCosmosContainerClientMock(websiteScanResultDbDocuments[0]);
-
-        setupRetryHelperMock(2);
-
-        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreateBatch(websiteScanResults);
-
-        expect(actualWebsiteScanResult).toEqual(websiteScanResultDbDocuments);
+        await websiteScanResultProvider.mergeOrCreateBatch([{ scanId, websiteScanResult }]);
     });
 
-    it('read website scan result', async () => {
-        const websiteScanResult = {
-            id: 'websiteScanId',
-            partitionKey: 'partitionKey',
-        } as WebsiteScanResult;
-        partitionKeyFactoryMock
-            .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResult.id))
-            .returns(() => websiteScanResult.partitionKey)
+    it('skip merge website scan result document with db base document', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
+        setupRetryHelperMock();
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
+    });
+
+    it('create new website scan result db document', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('create');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('create');
+        setupRetryHelperMock();
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
+    });
+
+    it('read partial website scan result', async () => {
+        setupDocumentEntities();
+        setupPartitionKeyFactoryMock();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey))
+            .returns(() => Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResult>))
+            .verifiable();
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, false);
+
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentExisting);
+    });
+
+    it('read complete website scan result', async () => {
+        const query = `SELECT * FROM c WHERE c.partitionKey = "${websiteScanResultBasePartitionKey}" and c.baseId = "${websiteScanResultBaseId}" and c.itemType = "${ItemType.websiteScanResultPart}"`;
+        const partDocuments = [
+            {
+                id: 'id1',
+            },
+            {
+                id: 'id2',
+            },
+        ] as WebsiteScanResultPart[];
+        const partMergedDocuments = [
+            {
+                id: 'id1-merged',
+            },
+            {
+                id: 'id2-merged',
+            },
+        ] as WebsiteScanResultPart[];
+
+        setupDocumentEntities();
+        setupPartitionKeyFactoryMock();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey))
+            .returns(() => Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResult>))
             .verifiable();
         cosmosContainerClientMock
-            .setup(async (o) => o.readDocument(websiteScanResult.id, websiteScanResult.partitionKey))
-            .returns(() => Promise.resolve({ item: websiteScanResult } as CosmosOperationResponse<WebsiteScanResult>))
+            .setup(async (o) => o.queryDocuments(query, undefined))
+            .returns(() =>
+                Promise.resolve({
+                    item: [partDocuments[0]],
+                    continuationToken: 'continuationToken',
+                    statusCode: 200,
+                } as CosmosOperationResponse<WebsiteScanResultPart[]>),
+            )
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.queryDocuments(query, 'continuationToken'))
+            .returns(() =>
+                Promise.resolve({ item: [partDocuments[1]], continuationToken: undefined, statusCode: 200 } as CosmosOperationResponse<
+                    WebsiteScanResultPart[]
+                >),
+            )
             .verifiable();
 
-        const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResult.id);
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergePartDocument(partDocuments[0], {}))
+            .returns(() => partMergedDocuments[0])
+            .verifiable();
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergePartDocument(partDocuments[1], partMergedDocuments[0]))
+            .returns(() => partMergedDocuments[1])
+            .verifiable();
 
-        expect(actualWebsiteScanResult).toEqual(websiteScanResult);
+        const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, true);
+
+        expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partMergedDocuments[1] });
     });
 });
 
-function setupHashGeneratorMock(
-    websiteScanResult: WebsiteScanResult,
-    websiteScanResultDbDocument: WebsiteScanResult,
-    times: number = 1,
-): void {
+function setupHashGeneratorMock(): void {
+    hashGeneratorMock
+        .setup((o) => o.getWebsiteScanResultPartDocumentId(websiteScanResultBaseId, scanId))
+        .returns(() => websiteScanResultPartId)
+        .verifiable();
     hashGeneratorMock
         .setup((o) => o.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId))
-        .returns(() => websiteScanResultDbDocument.id)
-        .verifiable(Times.exactly(times));
+        .returns(() => websiteScanResultBaseId)
+        .verifiable();
 }
 
-function setupPartitionKeyFactoryMock(websiteScanResultDbDocument: WebsiteScanResult, times: number = 1): void {
+function setupPartitionKeyFactoryMock(): void {
     partitionKeyFactoryMock
-        .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultDbDocument.id))
-        .returns(() => websiteScanResultDbDocument.partitionKey)
-        .verifiable(Times.exactly(times));
-}
-
-function setupCosmosContainerClientMock(websiteScanResultDbDocument: WebsiteScanResult): void {
-    cosmosContainerClientMock
-        .setup(async (o) => o.readDocument(websiteScanResultDbDocument.id, websiteScanResultDbDocument.partitionKey, false))
-        .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResult>))
-        .verifiable();
-    cosmosContainerClientMock
-        .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultDbDocument)))
-        .returns(() => Promise.resolve({ item: websiteScanResultDbDocument } as CosmosOperationResponse<WebsiteScanResult>))
+        .setup((o) => o.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultBaseId))
+        .returns(() => websiteScanResultBasePartitionKey)
         .verifiable();
 }
 
-function setupRetryHelperMock(times: number = 1): void {
+function setupCosmosContainerClientMock(workflow: TestWorkflow): void {
+    cosmosContainerClientMock
+        .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultPart)))
+        .returns(() => Promise.resolve({ item: websiteScanResultPart } as CosmosOperationResponse<WebsiteScanResultPart>))
+        .verifiable();
+
+    if (workflow === 'merge') {
+        cosmosContainerClientMock
+            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultBaseDbDocumentMerged)))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultBaseDbDocumentMerged } as CosmosOperationResponse<WebsiteScanResultBase>),
+            )
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultBase>),
+            )
+            .verifiable();
+    }
+    if (workflow === 'create') {
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResultBase>))
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultBaseDbDocumentCreated)))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultBaseDbDocumentCreated } as CosmosOperationResponse<WebsiteScanResultBase>),
+            )
+            .verifiable();
+    }
+}
+
+function setupRetryHelperMock(): void {
     retryHelperMock
         .setup(async (o) => o.executeWithRetries(It.isAny(), It.isAny(), maxRetryCount, msecBetweenRetries))
         .returns(async (action: () => Promise<WebsiteScanResult>, errorHandler: (err: Error) => Promise<void>, maxRetries: number) => {
             return action();
         })
-        .verifiable(Times.exactly(times));
+        .verifiable();
+}
+
+function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
+    const { _etag, ...document } = websiteScanResultBaseDbDocumentCreated;
+    if (workflow === 'create') {
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergeBaseDocument(document, {}))
+            .returns(() => websiteScanResultBaseDbDocumentCreated)
+            .verifiable();
+    }
+    if (workflow === 'merge') {
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergeBaseDocument(document, websiteScanResultBaseDbDocumentExisting))
+            .returns(() => websiteScanResultBaseDbDocumentMerged)
+            .verifiable();
+    }
+    websiteScanResultAggregatorMock
+        .setup((o) => o.mergePartDocument(websiteScanResultPart, {}))
+        .returns(() => websiteScanResultPart)
+        .verifiable();
+}
+
+function setupDocumentEntities(): void {
+    websiteScanResultBase = {
+        baseUrl: 'baseUrl',
+        scanGroupId: 'scanGroupId',
+    } as WebsiteScanResultBase;
+    websiteScanResultPartModel = {
+        pageScans: [{ scanId, url: 'url' }],
+        knownPages: ['new page'],
+    } as WebsiteScanResultPartModel;
+    websiteScanResultPart = {
+        ...websiteScanResultPartModel,
+        id: websiteScanResultPartId,
+        partitionKey: websiteScanResultBasePartitionKey,
+        itemType: ItemType.websiteScanResultPart,
+        baseId: websiteScanResultBaseId,
+        scanId,
+    } as WebsiteScanResultPart;
+    websiteScanResult = {
+        ...websiteScanResultBase,
+        ...websiteScanResultPartModel,
+    } as WebsiteScanResult;
+    websiteScanResultBaseDbDocumentExisting = {
+        ...websiteScanResultBase,
+        id: websiteScanResultBaseId,
+        partitionKey: websiteScanResultBasePartitionKey,
+        itemType: ItemType.websiteScanResult,
+        _etag: 'etag-existing',
+    } as WebsiteScanResultBase;
+    websiteScanResultBaseDbDocumentCreated = {
+        ...websiteScanResultBase,
+        id: websiteScanResultBaseId,
+        partitionKey: websiteScanResultBasePartitionKey,
+        itemType: ItemType.websiteScanResult,
+        _etag: 'etag-created',
+    } as WebsiteScanResultBase;
+    websiteScanResultBaseDbDocumentMerged = {
+        ...websiteScanResultBase,
+        id: websiteScanResultBaseId,
+        partitionKey: websiteScanResultBasePartitionKey,
+        itemType: ItemType.websiteScanResult,
+        _etag: 'etag-merged',
+    } as WebsiteScanResultBase;
 }

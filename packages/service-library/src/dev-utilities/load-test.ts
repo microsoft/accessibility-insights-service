@@ -39,7 +39,7 @@ function setupInputArgsExpectation(): void {
     });
 }
 
-function getRequestOptions(): nodeFetch.RequestInit {
+function getRequestOptions(requestId: number): nodeFetch.RequestInit {
     const myHeaders: nodeFetch.HeaderInit = {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${inputArgs.adAuthToken}`,
@@ -47,9 +47,17 @@ function getRequestOptions(): nodeFetch.RequestInit {
 
     const raw = JSON.stringify([
         {
-            url: 'https://www.bing.com',
+            url: `https://www.bing.com/search?q=a ${requestId}`,
             priority: 1,
             scanNotifyUrl: inputArgs.scanNotifyUrl,
+            site: {
+                baseUrl: 'https://www.bing.com/',
+            },
+            reportGroups: [
+                {
+                    consolidatedId: '9y94yOhEQzYgBSq-2-24-auto2',
+                },
+            ],
         },
     ]);
 
@@ -65,11 +73,11 @@ async function runLoadTest(): Promise<void> {
     const promises: Promise<void>[] = [];
     let successfulRequests = 0;
     let errorRequests = 0;
-    const requestOptions = getRequestOptions();
     const responseCountByStatusCode: { [key: number]: number } = {};
 
-    const submitRequest = async () => {
+    const submitRequest = async (requestId: number) => {
         try {
+            const requestOptions = getRequestOptions(requestId);
             const response = await nodeFetch.default(inputArgs.requestUrl, requestOptions);
             successfulRequests += 1;
             responseCountByStatusCode[response.status] = (responseCountByStatusCode[response.status] ?? 0) + 1;
@@ -83,7 +91,7 @@ async function runLoadTest(): Promise<void> {
     };
 
     for (let i = 0; i < inputArgs.maxLoad; i += 1) {
-        promises.push(submitRequest());
+        promises.push(submitRequest(i + 1));
     }
 
     console.log(`Submitted Requests - ${inputArgs.maxLoad}. Waiting for requests to complete.....`);
