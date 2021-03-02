@@ -78,9 +78,9 @@ function createOrRecoverKeyvault() {
 }
 
 function setAccessPolicies() {
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-disk-encryption "true"
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-deployment "true"
-    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-template-deployment "true"
+    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-disk-encryption "true" 1>/dev/null
+    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-deployment "true" 1>/dev/null
+    az keyvault update --name $keyVault --resource-group $resourceGroupName --enabled-for-template-deployment "true" 1>/dev/null
 }
 
 function setupKeyVaultResources() {
