@@ -19,7 +19,7 @@ export class BrowserServer {
     public run(): void {
         const proxy = this.ProxyServer.createProxyServer();
         const server = this.Http.createServer();
-        server.on('upgrade', async (req, socket: net.Socket, head) => {
+        server.on('upgrade', async (request: http.IncomingMessage, socket: net.Socket, head: Buffer) => {
             try {
                 socket.on('error', (e) => {
                     this.logger.logInfo(`incoming socket error: ${e?.message}`);
@@ -27,7 +27,7 @@ export class BrowserServer {
 
                 const browser = await this.browserLauncher.launch();
                 const target = browser.wsEndpoint();
-                proxy.ws(req, socket, head, { target });
+                proxy.ws(request, socket, head, { target });
             } catch (e) {
                 this.logger.logInfo(`Could not proxy websocket request upon upgrade event: ${e?.message}`);
                 socket.end();
