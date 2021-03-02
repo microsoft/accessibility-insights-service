@@ -13,7 +13,7 @@ try {
     Write-Host("DNS was already configured.")
 }
 catch {
-    # Error means the DNS table doesn't have a mappingfor host.docker.internal
+    # Error means the DNS table doesn't have a mapping for host.docker.internal
     # In Docker the host IP address is configued as the gateway IP address (might not be the case if VPN is configured)
 
     $hostIP = (ipconfig | where-object { $_ -match "Default Gateway" } | foreach-object { $_.Split(":")[1] }).Trim()
