@@ -69,7 +69,7 @@ export class CombinedScanResultProcessor {
             combinedResultsBlobId: combinedResultsBlobId,
             reports: [pageScanReport],
         } as Partial<WebsiteScanResult>;
-        await this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResults);
+        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResults);
 
         if (pageScanReport) {
             if (pageScanResult.reports) {

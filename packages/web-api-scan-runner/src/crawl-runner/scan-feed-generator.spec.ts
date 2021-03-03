@@ -35,6 +35,7 @@ describe(ScanFeedGenerator, () => {
         loggerMock = Mock.ofType<GlobalLogger>();
 
         pageScanResult = {
+            id: 'id',
             url: 'url',
             priority: 100,
             notification: { scanNotifyUrl: 'scanNotifyUrl' },
@@ -56,7 +57,6 @@ describe(ScanFeedGenerator, () => {
                     timestamp: 'ts2',
                 },
             ],
-            _etag: 'etag',
         } as WebsiteScanResult;
 
         setupRetryHelperMock();
@@ -90,12 +90,11 @@ describe(ScanFeedGenerator, () => {
         const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
             id: websiteScanResult.id,
             pageScans,
-            _etag: websiteScanResult._etag,
         };
         websiteScanResult.knownPages.push(...newPages);
         setupGuidGeneratorMock(newPages);
 
-        websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(updatedWebsiteScanResult)).verifiable();
+        websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult)).verifiable();
         scanDataProviderMock.setup((o) => o.writeScanRunBatchRequest(batchId, scanRequests)).verifiable();
         loggerMock.setup((o) => o.logInfo(`Discovered pages has been queued for scanning.`)).verifiable();
 

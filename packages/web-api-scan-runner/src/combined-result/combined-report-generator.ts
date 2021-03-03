@@ -27,7 +27,6 @@ export class CombinedReportGenerator {
         }
 
         reportId = reportId ?? this.guidGenerator.createGuid();
-        const scanStarted = new Date(Math.min(...websiteScanResult.pageScans.map((pageScan) => new Date(pageScan.timestamp).valueOf())));
 
         this.logger.logInfo(`Generating combined reports from scan results.`);
         const report = this.reportGenerator.generateConsolidatedReport(combinedAxeResults, {
@@ -35,7 +34,7 @@ export class CombinedReportGenerator {
             baseUrl: websiteScanResult.baseUrl,
             userAgent,
             browserResolution,
-            scanStarted,
+            scanStarted: new Date(websiteScanResult.created),
         });
 
         return report;

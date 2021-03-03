@@ -11,13 +11,13 @@ export declare type ScanGroupType = 'consolidated-scan-report' | 'deep-scan';
 /**
  * Represents website scan result composite document.
  *
- * The `WebsiteScanResult` document is stored in multiple DB documents. The common data is stored in single instance
+ * The `WebsiteScanResult` document is stored in multiple DB documents. The common data is stored in a single instance
  * of the common `WebsiteScanResultBase` DB document with the composite key (`baseUrl`, `scanGroupId`).
  * The frequent delta updates are stored in multiple `WebsiteScanResultPart` DB documents with the composite key (`baseId`, `scanId`).
  * Each `WebsiteScanResultPart` DB document corresponds to the scan that created the update.
  *
- * The application layer should work with `WebsiteScanResult` document only. The `WebsiteScanResultProvider` data provider
- * hides DB storage corresponding split and merge logics.
+ * The application layer should work with `WebsiteScanResult` document using the `WebsiteScanResultProvider` data provider
+ * for the corresponding DB operations.
  */
 export interface WebsiteScanResult extends WebsiteScanResultBase, WebsiteScanResultPartModel {}
 
@@ -34,6 +34,7 @@ export interface WebsiteScanResultBase extends StorageDocument {
     discoveryPatterns?: string[];
     combinedResultsBlobId?: string;
     reports?: WebsiteScanReport[];
+    created: string;
 }
 
 /**
@@ -65,5 +66,5 @@ export interface WebsiteScanResultPartModel {
     knownPages?: string[];
 }
 
-export const WebsiteScanResultBaseKeys = keys<WebsiteScanResultBase>();
-export const WebsiteScanResultPartModelKeys = keys<WebsiteScanResultPartModel>();
+export const websiteScanResultBaseKeys = keys<WebsiteScanResultBase>();
+export const websiteScanResultPartModelKeys = keys<WebsiteScanResultPartModel>();

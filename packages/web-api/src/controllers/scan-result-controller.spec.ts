@@ -109,7 +109,7 @@ describe(ScanResultController, () => {
         scanResponseConverterMock = Mock.ofType<ScanResponseConverter>();
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock
-            .setup((o) => o.read(dbResponse.websiteScanRefs[0].id))
+            .setup((o) => o.read(dbResponse.websiteScanRefs[0].id, true))
             .returns(() => Promise.resolve(websiteScanResult));
     });
 

@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
@@ -214,7 +213,7 @@ function setupUpdateScanResult(): void {
         websiteScanResult = {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
-        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(It.isValue(updatedWebsiteScanResult)))
+        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }

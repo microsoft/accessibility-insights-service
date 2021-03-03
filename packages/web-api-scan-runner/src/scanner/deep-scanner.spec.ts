@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { DiscoveryPatternFactory } from 'accessibility-insights-crawler';
@@ -18,6 +17,18 @@ import { ScanFeedGenerator } from '../crawl-runner/scan-feed-generator';
 import { DeepScanner } from './deep-scanner';
 
 describe(DeepScanner, () => {
+    const url = 'test url';
+    const urlCrawlLimit = 5;
+    const crawlConfig = { urlCrawlLimit } as CrawlConfig;
+    const puppeteerPageStub = {} as Puppeteer.Page;
+    const websiteScanResultId = 'websiteScanResult id';
+    const knownPages = ['knownUrl1', 'knownUrl2'];
+    const discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
+    const processedUrls = ['processedUrl1', 'processedUrl2'];
+    const discoveryPatterns = ['discovery pattern'];
+    const crawlBaseUrl = 'base url';
+    const deepScanId = 'deepScanId';
+
     let loggerMock: IMock<GlobalLogger>;
     let crawlRunnerMock: IMock<CrawlRunner>;
     let websiteScanResultProviderMock: IMock<WebsiteScanResultProvider>;
@@ -26,23 +37,10 @@ describe(DeepScanner, () => {
     let discoveryPatternGeneratorMock: IMock<DiscoveryPatternFactory>;
     let pageMock: IMock<Page>;
     let scanFeedGeneratorMock: IMock<ScanFeedGenerator>;
-    const puppeteerPageStub = {} as Puppeteer.Page;
-
-    const url = 'test url';
-    const urlCrawlLimit = 5;
-    const crawlConfig = { urlCrawlLimit } as CrawlConfig;
-    const websiteScanResultId = 'websiteScanResult id';
-    const knownPages = ['knownUrl1', 'knownUrl2'];
-    const discoveredUrls = ['discoveredUrl1', 'discoveredUrl2'];
-    const processedUrls = ['processedUrl1', 'processedUrl2'];
-    const discoveryPatterns = ['discovery pattern'];
-    const crawlBaseUrl = 'base url';
-    const deepScanId = 'deepScanId';
     let scanMetadata: ScanMetadata;
     let pageScanResult: OnDemandPageScanResult;
     let websiteScanResult: WebsiteScanResult;
     let websiteScanResultDbDocument: WebsiteScanResult;
-
     let testSubject: DeepScanner;
 
     beforeEach(() => {
@@ -161,7 +159,7 @@ describe(DeepScanner, () => {
     }
 
     function setupReadWebsiteScanResult(): void {
-        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResultId)).returns(() => Promise.resolve(websiteScanResult));
+        websiteScanResultProviderMock.setup((w) => w.read(websiteScanResultId, true)).returns(() => Promise.resolve(websiteScanResult));
     }
 
     function setupCrawl(crawlDiscoveryPatterns: string[]): void {
@@ -185,7 +183,7 @@ describe(DeepScanner, () => {
             discoveryPatterns: crawlDiscoveryPatterns,
         };
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(updatedWebsiteScanResult))
+            .setup((o) => o.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult))
             .returns(() => Promise.resolve(websiteScanResultDbDocument))
             .verifiable();
     }

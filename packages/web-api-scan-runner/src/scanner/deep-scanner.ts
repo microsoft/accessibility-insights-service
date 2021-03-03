@@ -46,11 +46,17 @@ export class DeepScanner {
         const discoveryPatterns = websiteScanResult.discoveryPatterns ?? [this.discoveryPatternGenerator(websiteScanResult.baseUrl)];
         const discoveredUrls = await this.crawlRunner.run(scanMetadata.url, discoveryPatterns, page.currentPage);
         const processedUrls = this.processUrls(discoveredUrls, urlCrawlLimit, websiteScanResult.knownPages);
-        const websiteScanResultUpdated = await this.updateWebsiteScanResult(websiteScanResult, processedUrls, discoveryPatterns);
+        const websiteScanResultUpdated = await this.updateWebsiteScanResult(
+            scanMetadata.id,
+            websiteScanResult,
+            processedUrls,
+            discoveryPatterns,
+        );
         await this.scanFeedGenerator.queueDiscoveredPages(websiteScanResultUpdated, pageScanResult);
     }
 
     private async updateWebsiteScanResult(
+        scanId: string,
         websiteScanResult: WebsiteScanResult,
         discoveredUrls: string[],
         discoveryPatterns: string[],
@@ -61,7 +67,7 @@ export class DeepScanner {
             discoveryPatterns: discoveryPatterns,
         };
 
-        return this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResult);
+        return this.websiteScanResultProvider.mergeOrCreate(scanId, updatedWebsiteScanResult);
     }
 
     private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {
@@ -73,6 +79,6 @@ export class DeepScanner {
             throw new Error(`No websiteScanRef exists with scanGroupType ${scanGroupType}`);
         }
 
-        return this.websiteScanResultProvider.read(websiteScanRef.id);
+        return this.websiteScanResultProvider.read(websiteScanRef.id, true);
     }
 }

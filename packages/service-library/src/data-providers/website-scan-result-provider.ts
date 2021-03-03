@@ -10,8 +10,8 @@ import {
     WebsiteScanResultPart,
     WebsiteScanResultBase,
     WebsiteScanResultPartModel,
-    WebsiteScanResultBaseKeys,
-    WebsiteScanResultPartModelKeys,
+    websiteScanResultBaseKeys,
+    websiteScanResultPartModelKeys,
 } from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import _ from 'lodash';
@@ -191,8 +191,8 @@ export class WebsiteScanResultProvider {
     private convertToDbDocument(scanId: string, websiteScanResult: Partial<WebsiteScanResult>): DbDocument {
         const websiteScanResultNormalized = this.normalizeToDbDocument(websiteScanResult);
 
-        const baseDocument = _.pick(websiteScanResultNormalized, WebsiteScanResultBaseKeys) as Partial<WebsiteScanResultBase>;
-        const part = _.pick(websiteScanResultNormalized, WebsiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        const baseDocument = _.pick(websiteScanResultNormalized, websiteScanResultBaseKeys) as Partial<WebsiteScanResultBase>;
+        const part = _.pick(websiteScanResultNormalized, websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
         const partDocument: Partial<WebsiteScanResultPart> = {
             id: this.hashGenerator.getWebsiteScanResultPartDocumentId(websiteScanResultNormalized.id, scanId),
             partitionKey: websiteScanResultNormalized.partitionKey,
@@ -206,6 +206,6 @@ export class WebsiteScanResultProvider {
     }
 
     private same(storageDocument: Partial<WebsiteScanResultBase>, mergedDocument: Partial<WebsiteScanResultBase>): boolean {
-        return _.isEqual(_.pick(storageDocument, WebsiteScanResultBaseKeys), _.pick(mergedDocument, WebsiteScanResultBaseKeys));
+        return _.isEqual(_.pick(storageDocument, websiteScanResultBaseKeys), _.pick(mergedDocument, websiteScanResultBaseKeys));
     }
 }

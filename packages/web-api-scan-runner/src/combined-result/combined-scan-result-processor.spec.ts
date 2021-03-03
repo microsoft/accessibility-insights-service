@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { IMock, Mock, It, Times } from 'typemoq';
@@ -98,6 +97,7 @@ describe(CombinedScanResultProcessor, () => {
 
     it('generate combined report for consolidated scan request', async () => {
         pageScanResult = {
+            id: 'id',
             websiteScanRefs: [
                 {
                     id: websiteScanId,
@@ -114,6 +114,7 @@ describe(CombinedScanResultProcessor, () => {
 
     it('generate combined report for deep scan request', async () => {
         pageScanResult = {
+            id: 'id',
             websiteScanRefs: [
                 {
                     id: websiteScanId,
@@ -163,7 +164,7 @@ function setupWebsiteScanResultProviderMock(): void {
         .setup((o) => o.read(websiteScanId))
         .returns(() => Promise.resolve(websiteScanResult))
         .verifiable();
-    websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(It.isValue(updatedWebsiteScanResults))).verifiable();
+    websiteScanResultProviderMock.setup((o) => o.mergeOrCreate(pageScanResult.id, It.isValue(updatedWebsiteScanResults))).verifiable();
 }
 
 function setupRetryHelperMock(times: number = 1): void {

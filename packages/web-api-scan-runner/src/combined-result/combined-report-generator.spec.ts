@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { GuidGenerator } from 'common';
@@ -36,7 +35,7 @@ describe(CombinedReportGenerator, () => {
 
         websiteScanResult = {
             baseUrl,
-            pageScans: [{ timestamp: scanStarted.toISOString() }],
+            created: scanStarted.toISOString(),
             _etag: 'etag',
         } as WebsiteScanResult;
 

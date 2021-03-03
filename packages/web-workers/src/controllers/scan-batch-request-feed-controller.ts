@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ServiceConfiguration } from 'common';
 import { inject, injectable } from 'inversify';
 import { isEmpty } from 'lodash';
@@ -97,7 +98,7 @@ export class ScanBatchRequestFeedController extends WebController {
     }
 
     private async writeRequestsToPermanentContainer(requests: ScanRunBatchRequest[], batchRequestId: string): Promise<void> {
-        const websiteScanResults: WebsiteScanResult[] = [];
+        const websiteScanResults: { scanId: string; websiteScanResult: WebsiteScanResult }[] = [];
         const requestDocuments = requests.map<OnDemandPageScanResult>((request) => {
             this.logger.logInfo('Created new scan result document in scan result storage container.', {
                 batchRequestId,
@@ -108,7 +109,7 @@ export class ScanBatchRequestFeedController extends WebController {
             const websiteScanResult = this.createWebsiteScanResult(request);
             if (websiteScanResult) {
                 websiteScanRefs = { id: websiteScanResult.id, scanGroupType: websiteScanResult.scanGroupType };
-                websiteScanResults.push(websiteScanResult);
+                websiteScanResults.push({ scanId: request.scanId, websiteScanResult });
                 this.logger.logInfo('Referenced website scan result document to the new scan result document.', {
                     batchRequestId,
                     scanId: request.scanId,
@@ -171,6 +172,7 @@ export class ScanBatchRequestFeedController extends WebController {
                     ],
                     knownPages: request.site.knownPages,
                     discoveryPatterns: request.site.discoveryPatterns,
+                    created: new Date().toJSON(),
                 };
 
                 return this.websiteScanResultProvider.normalizeToDbDocument(websiteScanRequest);

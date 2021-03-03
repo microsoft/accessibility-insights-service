@@ -34,7 +34,7 @@ export abstract class BaseScanResultController extends ApiController {
     ): Promise<WebsiteScanResult> {
         const websiteScanRef = pageScanResult.websiteScanRefs?.find((ref) => ref.scanGroupType === scanGroupType);
         if (websiteScanRef) {
-            return this.websiteScanResultProvider.read(websiteScanRef.id);
+            return this.websiteScanResultProvider.read(websiteScanRef.id, true);
         }
 
         return undefined;
