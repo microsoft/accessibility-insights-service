@@ -45,7 +45,9 @@ export abstract class BatchTaskCreator {
         }
 
         this.activeScanMessages = [];
-        const restartAfterTime = moment().add(this.jobManagerConfig.maxWallClockTimeInHours / 2.0, 'hour').toDate();
+        const restartAfterTime = moment()
+            .add(this.jobManagerConfig.maxWallClockTimeInHours / 2.0, 'hour')
+            .toDate();
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
