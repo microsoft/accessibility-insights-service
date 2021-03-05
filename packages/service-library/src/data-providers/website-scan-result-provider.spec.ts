@@ -2,9 +2,17 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
-import { WebsiteScanResult, ItemType, WebsiteScanResultBase, WebsiteScanResultPartModel, WebsiteScanResultPart } from 'storage-documents';
+import {
+    WebsiteScanResult,
+    ItemType,
+    WebsiteScanResultBase,
+    WebsiteScanResultPartModel,
+    WebsiteScanResultPart,
+    StorageDocument,
+    websiteScanResultPartModelKeys,
+} from 'storage-documents';
 import { HashGenerator, RetryHelper } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
@@ -13,7 +21,7 @@ import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider } from './website-scan-result-provider';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
 
-type TestWorkflow = 'merge' | 'create';
+type TestWorkflow = 'merge' | 'create' | 'skip-merge';
 
 const maxRetryCount: number = 5;
 const msecBetweenRetries: number = 1000;
@@ -32,8 +40,9 @@ let globalLoggerMock: IMock<GlobalLogger>;
 let dateNow: Date;
 let websiteScanResultBase: WebsiteScanResultBase;
 let websiteScanResultPartModel: WebsiteScanResultPartModel;
-let websiteScanResultPart: WebsiteScanResultPart;
 let websiteScanResult: WebsiteScanResult;
+let websiteScanResultPartDbDocumentExisting: WebsiteScanResultPart;
+let websiteScanResultPartDbDocumentMerged: WebsiteScanResultPart;
 let websiteScanResultBaseDbDocumentExisting: WebsiteScanResultBase;
 let websiteScanResultBaseDbDocumentCreated: WebsiteScanResultBase;
 let websiteScanResultBaseDbDocumentMerged: WebsiteScanResultBase;
@@ -98,14 +107,14 @@ describe(WebsiteScanResultProvider, () => {
     it('skip merge website scan result document with db base document', async () => {
         setupDocumentEntities();
         setupHashGeneratorMock();
-        setupWebsiteScanResultAggregatorMock('merge');
+        setupWebsiteScanResultAggregatorMock('skip-merge');
         setupPartitionKeyFactoryMock();
-        setupCosmosContainerClientMock('merge');
+        setupCosmosContainerClientMock('skip-merge');
         setupRetryHelperMock();
 
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
-        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
+        expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentExisting);
     });
 
     it('create new website scan result db document', async () => {
@@ -119,6 +128,65 @@ describe(WebsiteScanResultProvider, () => {
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
+    });
+
+    it('merge website documents', () => {
+        const target = {
+            id: websiteScanResultBaseId,
+            knownPages: ['page1'],
+        } as WebsiteScanResult;
+        const source = {
+            id: websiteScanResultBaseId,
+            knownPages: ['page2'],
+        } as Partial<WebsiteScanResult>;
+        const expectedResult = {
+            id: websiteScanResultBaseId,
+            knownPages: ['page1', 'page2'],
+        } as WebsiteScanResult;
+        websiteScanResultAggregatorMock
+            .setup((o) =>
+                o.mergeBaseDocument(
+                    { id: websiteScanResultBaseId, itemType: ItemType.websiteScanResult, partitionKey: undefined },
+                    { id: websiteScanResultBaseId, itemType: ItemType.websiteScanResult, partitionKey: undefined },
+                ),
+            )
+            .returns(() => {
+                return { id: websiteScanResultBaseId };
+            })
+            .verifiable();
+        websiteScanResultAggregatorMock
+            .setup((o) =>
+                o.mergePartDocument(
+                    {
+                        baseId: websiteScanResultBaseId,
+                        id: websiteScanResultPartId,
+                        itemType: ItemType.websiteScanResultPart,
+                        partitionKey: undefined,
+                        scanId: undefined,
+                        knownPages: ['page2'],
+                    },
+                    {
+                        baseId: websiteScanResultBaseId,
+                        id: websiteScanResultPartId,
+                        itemType: ItemType.websiteScanResultPart,
+                        partitionKey: undefined,
+                        scanId: undefined,
+                        knownPages: ['page1'],
+                    },
+                ),
+            )
+            .returns(() => {
+                return { knownPages: ['page1', 'page2'] };
+            })
+            .verifiable();
+        hashGeneratorMock
+            .setup((o) => o.getWebsiteScanResultPartDocumentId(websiteScanResultBaseId, undefined))
+            .returns(() => websiteScanResultPartId)
+            .verifiable(Times.exactly(2));
+
+        const actualResult = websiteScanResultProvider.mergeWith(target, source);
+
+        expect(actualResult).toEqual(expectedResult);
     });
 
     it('read partial website scan result', async () => {
@@ -189,7 +257,8 @@ describe(WebsiteScanResultProvider, () => {
 
         const actualWebsiteScanResult = await websiteScanResultProvider.read(websiteScanResultBaseId, true);
 
-        expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partMergedDocuments[1] });
+        const partDocumentModel = _.pick(partMergedDocuments[1], websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        expect(actualWebsiteScanResult).toEqual({ ...websiteScanResultBaseDbDocumentExisting, ...partDocumentModel });
     });
 });
 
@@ -212,12 +281,37 @@ function setupPartitionKeyFactoryMock(): void {
 }
 
 function setupCosmosContainerClientMock(workflow: TestWorkflow): void {
-    cosmosContainerClientMock
-        .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultPart)))
-        .returns(() => Promise.resolve({ item: websiteScanResultPart } as CosmosOperationResponse<WebsiteScanResultPart>))
-        .verifiable();
-
+    if (workflow === 'skip-merge') {
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultBase>),
+            )
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultPartId, websiteScanResultBasePartitionKey, false))
+            .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResultBase>))
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultPartDbDocumentMerged)))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultPartDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultPart>),
+            )
+            .verifiable();
+    }
     if (workflow === 'merge') {
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultBase>),
+            )
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultPartId, websiteScanResultBasePartitionKey, false))
+            .returns(() =>
+                Promise.resolve({ item: websiteScanResultPartDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultPart>),
+            )
+            .verifiable();
         cosmosContainerClientMock
             .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultBaseDbDocumentMerged)))
             .returns(() =>
@@ -225,15 +319,19 @@ function setupCosmosContainerClientMock(workflow: TestWorkflow): void {
             )
             .verifiable();
         cosmosContainerClientMock
-            .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .setup(async (o) => o.writeDocument(It.isValue(websiteScanResultPartDbDocumentMerged)))
             .returns(() =>
-                Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultBase>),
+                Promise.resolve({ item: websiteScanResultPartDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResultPart>),
             )
             .verifiable();
     }
     if (workflow === 'create') {
         cosmosContainerClientMock
             .setup(async (o) => o.readDocument(websiteScanResultBaseId, websiteScanResultBasePartitionKey, false))
+            .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResultBase>))
+            .verifiable();
+        cosmosContainerClientMock
+            .setup(async (o) => o.readDocument(websiteScanResultPartId, websiteScanResultBasePartitionKey, false))
             .returns(() => Promise.resolve({ item: undefined } as CosmosOperationResponse<WebsiteScanResultBase>))
             .verifiable();
         cosmosContainerClientMock
@@ -255,23 +353,43 @@ function setupRetryHelperMock(): void {
 }
 
 function setupWebsiteScanResultAggregatorMock(workflow: TestWorkflow): void {
-    const { _etag, ...document } = websiteScanResultBaseDbDocumentCreated;
+    const baseDocument = getSourceDocument(websiteScanResultBaseDbDocumentCreated);
     if (workflow === 'create') {
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergeBaseDocument(document, {}))
+            .setup((o) => o.mergeBaseDocument(baseDocument, {}))
             .returns(() => websiteScanResultBaseDbDocumentCreated)
             .verifiable();
     }
     if (workflow === 'merge') {
         websiteScanResultAggregatorMock
-            .setup((o) => o.mergeBaseDocument(document, websiteScanResultBaseDbDocumentExisting))
+            .setup((o) => o.mergeBaseDocument(baseDocument, websiteScanResultBaseDbDocumentExisting))
             .returns(() => websiteScanResultBaseDbDocumentMerged)
             .verifiable();
+        websiteScanResultAggregatorMock
+            .setup((o) =>
+                o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), websiteScanResultPartDbDocumentExisting),
+            )
+            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .verifiable();
     }
-    websiteScanResultAggregatorMock
-        .setup((o) => o.mergePartDocument(websiteScanResultPart, {}))
-        .returns(() => websiteScanResultPart)
-        .verifiable();
+    if (workflow === 'skip-merge') {
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergeBaseDocument(baseDocument, websiteScanResultBaseDbDocumentExisting))
+            .returns(() => {
+                return { ...websiteScanResultBaseDbDocumentMerged, itemVersion: undefined };
+            })
+            .verifiable();
+        websiteScanResultAggregatorMock
+            .setup((o) => o.mergePartDocument(getSourceDocument(websiteScanResultPartDbDocumentExisting), {}))
+            .returns(() => websiteScanResultPartDbDocumentMerged)
+            .verifiable();
+    }
+}
+
+function getSourceDocument(dbDocument: StorageDocument): unknown {
+    const { _etag, ...document } = dbDocument;
+
+    return document;
 }
 
 function setupDocumentEntities(): void {
@@ -283,14 +401,20 @@ function setupDocumentEntities(): void {
         pageScans: [{ scanId, url: 'url' }],
         knownPages: ['new page'],
     } as WebsiteScanResultPartModel;
-    websiteScanResultPart = {
+    websiteScanResultPartDbDocumentExisting = {
         ...websiteScanResultPartModel,
         id: websiteScanResultPartId,
         partitionKey: websiteScanResultBasePartitionKey,
         itemType: ItemType.websiteScanResultPart,
         baseId: websiteScanResultBaseId,
         scanId,
+        _etag: 'etag-existing',
     } as WebsiteScanResultPart;
+    websiteScanResultPartDbDocumentMerged = {
+        ...websiteScanResultPartDbDocumentExisting,
+        itemVersion: '2',
+        _etag: 'etag-merged',
+    };
     websiteScanResult = {
         ...websiteScanResultBase,
         ...websiteScanResultPartModel,
@@ -303,17 +427,12 @@ function setupDocumentEntities(): void {
         _etag: 'etag-existing',
     } as WebsiteScanResultBase;
     websiteScanResultBaseDbDocumentCreated = {
-        ...websiteScanResultBase,
-        id: websiteScanResultBaseId,
-        partitionKey: websiteScanResultBasePartitionKey,
-        itemType: ItemType.websiteScanResult,
+        ...websiteScanResultBaseDbDocumentExisting,
         _etag: 'etag-created',
     } as WebsiteScanResultBase;
     websiteScanResultBaseDbDocumentMerged = {
-        ...websiteScanResultBase,
-        id: websiteScanResultBaseId,
-        partitionKey: websiteScanResultBasePartitionKey,
-        itemType: ItemType.websiteScanResult,
+        ...websiteScanResultBaseDbDocumentExisting,
+        itemVersion: '2',
         _etag: 'etag-merged',
     } as WebsiteScanResultBase;
 }

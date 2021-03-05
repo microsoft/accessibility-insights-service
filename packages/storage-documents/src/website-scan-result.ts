@@ -68,3 +68,9 @@ export interface WebsiteScanResultPartModel {
 
 export const websiteScanResultBaseKeys = keys<WebsiteScanResultBase>();
 export const websiteScanResultPartModelKeys = keys<WebsiteScanResultPartModel>();
+
+/**
+ * The `WebsiteScanResultBase` transient keys that are not part of the stable document model.
+ * The keys is not used for the documents comparison.
+ */
+export const websiteScanResultBaseTransientKeys = ['created', '_rid', '_ts', '_self', '_etag'];

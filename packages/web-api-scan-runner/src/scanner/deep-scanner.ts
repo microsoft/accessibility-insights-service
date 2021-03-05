@@ -61,13 +61,15 @@ export class DeepScanner {
         discoveredUrls: string[],
         discoveryPatterns: string[],
     ): Promise<WebsiteScanResult> {
-        const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
+        const websiteScanResultUpdate: Partial<WebsiteScanResult> = {
             id: websiteScanResult.id,
             knownPages: discoveredUrls,
             discoveryPatterns: discoveryPatterns,
         };
 
-        return this.websiteScanResultProvider.mergeOrCreate(scanId, updatedWebsiteScanResult);
+        await this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate);
+
+        return this.websiteScanResultProvider.mergeWith(websiteScanResult, websiteScanResultUpdate);
     }
 
     private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {

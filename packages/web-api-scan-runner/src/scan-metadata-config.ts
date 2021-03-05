@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { injectable } from 'inversify';
 import yargs, { Arguments, Argv } from 'yargs';
 import { ScanMetadata } from './types/scan-metadata';
@@ -10,6 +11,7 @@ export class ScanMetadataConfig {
         argvObj.options({
             deepScan: {
                 type: 'boolean',
+                alias: 'deepscan',
             },
         });
     }
