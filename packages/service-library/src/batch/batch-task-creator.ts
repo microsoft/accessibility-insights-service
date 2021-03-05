@@ -64,7 +64,7 @@ export abstract class BatchTaskCreator {
 
             if (moment().toDate() >= restartAfterTime) {
                 this.logger.logInfo(
-                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours} hours.`,
+                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours / 2} hours.`,
                 );
 
                 break;
