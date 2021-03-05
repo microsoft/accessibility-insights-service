@@ -12,6 +12,6 @@ export const defaultBrowserOptions: Puppeteer.BrowserOptions = {
 
 export const defaultLaunchOptions: Puppeteer.LaunchOptions = {
     headless: true,
-    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'],
+    args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox', '--js-flags=--max-old-space-size=8192'],
     ...defaultBrowserOptions,
 };
