@@ -1,12 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
 
 import * as nodeFetch from 'node-fetch';
 import * as yargs from 'yargs';
+import { GuidGenerator } from 'common';
 
 setupInputArgsExpectation();
 const inputArgs = yargs.argv as yargs.Arguments<LoadTestArgs>;
 console.log('Input args passed', inputArgs);
+
+const consolidatedId = new GuidGenerator().createGuid();
+console.log('Load test consolidated Id', consolidatedId);
 
 type LoadTestArgs = {
     scanNotifyUrl: string;
@@ -55,7 +60,7 @@ function getRequestOptions(requestId: number): nodeFetch.RequestInit {
             },
             reportGroups: [
                 {
-                    consolidatedId: '9y94yOhEQzYgBSq-2-24-auto2',
+                    consolidatedId,
                 },
             ],
         },
