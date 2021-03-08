@@ -5,4 +5,6 @@ $gateway = (route print | ?{$_ -like "*0.0.0.0*0.0.0.0*"} | %{$_ -split " "} | ?
 $arguments = 'add','169.254.169.0','mask','255.255.255.0',$gateway
 &'route' $arguments
 
+./configure-docker-dns.ps1
+
 node ./web-api-scan-job-manager.js

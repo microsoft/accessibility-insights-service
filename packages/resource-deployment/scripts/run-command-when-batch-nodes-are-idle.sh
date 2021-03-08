@@ -60,7 +60,7 @@ waitForNodesToGoIdleByNodeType() {
     local nodeType=$2
 
     local isIdle=false
-    local waitTime=600
+    local waitTime=1800
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
     echo "Waiting for $nodeType nodes under $pool to go idle"
@@ -90,11 +90,13 @@ waitForNodesToGoIdleByNodeType() {
         fi
     done
 
-    echo "Currrent $pool pool status for $nodeType:"
-    az batch pool node-counts list --query "$nodeTypeContentSelector" 1>/dev/null
+    echo "Current $pool pool status for $nodeType:"
+    az batch pool node-counts list --query "$nodeTypeContentSelector"
 
     if [[ $isIdle == false ]]; then
         echo "Pool $pool $nodeType nodes did not become idle."
+        az batch pool node-counts list --query "$nodeTypeContentSelector"
+
         enableJobSchedule
         exit 1
     fi
