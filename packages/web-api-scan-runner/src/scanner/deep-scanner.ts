@@ -69,6 +69,7 @@ export class DeepScanner {
 
         await this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate);
 
+        // merge previously read db document with the current update to avoid full db document read operation
         return this.websiteScanResultProvider.mergeWith(websiteScanResult, websiteScanResultUpdate);
     }
 
