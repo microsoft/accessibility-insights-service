@@ -120,7 +120,7 @@ describe(Runner, () => {
         pageScanResult.run = {
             state: 'failed',
             timestamp: dateNow.toJSON(),
-            error: errorMessage,
+            error: errorMessage.substring(0, 2048),
         };
         loggerMock.setup((o) => o.logError(`The scanner failed to scan a page.`, { error: errorMessage })).verifiable();
 

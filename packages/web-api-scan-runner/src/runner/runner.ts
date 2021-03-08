@@ -155,7 +155,7 @@ export class Runner {
         return {
             state,
             timestamp: new Date().toJSON(),
-            error: _.isString(error) ? error.substring(0, 2000) : error,
+            error: _.isString(error) ? error.substring(0, 2048) : error,
         };
     }
 
