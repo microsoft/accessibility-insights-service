@@ -155,7 +155,9 @@ describe(DeepScanner, () => {
     });
 
     function setupScanFeedGeneratorMock(): void {
-        scanFeedGeneratorMock.setup((o) => o.queueDiscoveredPages(websiteScanResultDbDocument, pageScanResult)).verifiable();
+        scanFeedGeneratorMock
+            .setup((o) => o.queueDiscoveredPages(It.isValue(websiteScanResultDbDocument), It.isValue(pageScanResult)))
+            .verifiable();
     }
 
     function setupReadWebsiteScanResult(): void {
@@ -185,6 +187,10 @@ describe(DeepScanner, () => {
         websiteScanResultProviderMock
             .setup((o) => o.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult))
             .returns(() => Promise.resolve(websiteScanResultDbDocument))
+            .verifiable();
+        websiteScanResultProviderMock
+            .setup((o) => o.mergeWith(websiteScanResult, updatedWebsiteScanResult))
+            .returns(() => websiteScanResultDbDocument)
             .verifiable();
     }
 
