@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 import { inject, injectable } from 'inversify';
-import { isNil } from 'lodash';
 import { GlobalLogger } from 'logger';
 import { AxeScanResults } from 'scanner-global-library';
 import { OnDemandPageScanRunResultProvider, WebsiteScanResultProvider } from 'service-library';
@@ -16,6 +15,7 @@ import {
     WebsiteScanResult,
 } from 'storage-documents';
 import { System } from 'common';
+import _ from 'lodash';
 import { ReportGenerator } from '../report-generator/report-generator';
 import { ScanMetadataConfig } from '../scan-metadata-config';
 import { ScanRunnerTelemetryManager } from '../scan-runner-telemetry-manager';
@@ -95,7 +95,7 @@ export class Runner {
     }
 
     private async processScanResult(axeScanResults: AxeScanResults, pageScanResult: OnDemandPageScanResult): Promise<AxeScanResults> {
-        if (isNil(axeScanResults.error)) {
+        if (_.isNil(axeScanResults.error)) {
             pageScanResult.run = this.createRunResult('completed');
             pageScanResult.scanResult = this.getScanStatus(axeScanResults);
             pageScanResult.reports = await this.generateScanReports(axeScanResults);
@@ -155,7 +155,7 @@ export class Runner {
         return {
             state,
             timestamp: new Date().toJSON(),
-            error,
+            error: _.isString(error) ? error.substring(0, 2000) : error,
         };
     }
 
