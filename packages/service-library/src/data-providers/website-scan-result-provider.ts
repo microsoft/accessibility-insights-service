@@ -76,7 +76,7 @@ export class WebsiteScanResultProvider {
             async () => this.mergeOrCreateImpl(dbDocument),
             async (err) =>
                 this.logger.logError(`Failed to update website scan result Cosmos DB document. Retrying on error.`, {
-                    baseId: dbDocument.baseDocument.id,
+                    baseId: dbDocument?.baseDocument.id,
                     partId: dbDocument?.partDocument.id,
                     baseDocument: JSON.stringify(dbDocument.baseDocument),
                     partDocument: JSON.stringify(dbDocument.partDocument),
