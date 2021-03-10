@@ -46,7 +46,7 @@ export abstract class BatchTaskCreator {
 
         this.activeScanMessages = [];
         const restartAfterTime = moment()
-            .add(this.jobManagerConfig.maxWallClockTimeInHours / 2, 'hour')
+            .add(this.jobManagerConfig.maxWallClockTimeInHours / 4, 'hour')
             .toDate();
 
         // eslint-disable-next-line no-constant-condition
@@ -64,7 +64,7 @@ export abstract class BatchTaskCreator {
 
             if (moment().toDate() >= restartAfterTime) {
                 this.logger.logInfo(
-                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours / 2} hours.`,
+                    `Performing scheduled job manager termination after ${this.jobManagerConfig.maxWallClockTimeInHours / 4} hours.`,
                 );
 
                 break;

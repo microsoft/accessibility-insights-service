@@ -317,7 +317,7 @@ describe(BatchTaskCreator, () => {
 
         loggerMock
             .setup((o) =>
-                o.logInfo(`Performing scheduled job manager termination after ${jobManagerConfig.maxWallClockTimeInHours / 2} hours.`),
+                o.logInfo(`Performing scheduled job manager termination after ${jobManagerConfig.maxWallClockTimeInHours / 4} hours.`),
             )
             .verifiable();
 
