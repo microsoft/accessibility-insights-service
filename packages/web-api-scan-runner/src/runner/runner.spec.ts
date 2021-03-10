@@ -216,6 +216,9 @@ function setupUpdateScanResult(): void {
         WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
+        WebsiteScanResultProviderMock.setup((o) => o.read(websiteScanRef.id, true))
+            .returns(() => Promise.resolve(websiteScanResult))
+            .verifiable();
     }
 }
 

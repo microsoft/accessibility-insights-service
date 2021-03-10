@@ -75,7 +75,7 @@ describe(ScanNotificationProcessor, () => {
     it('send scan notification', async () => {
         loggerMock
             .setup((o) =>
-                o.logInfo('Sending scan completion notification queue message.', {
+                o.logInfo('Sending scan completion notification message for a single scan.', {
                     scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
                 }),
             )
