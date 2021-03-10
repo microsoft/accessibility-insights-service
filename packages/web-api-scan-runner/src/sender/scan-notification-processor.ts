@@ -26,10 +26,6 @@ export class ScanNotificationProcessor {
             return;
         }
 
-        this.logger.logInfo(`Sending scan completion notification queue message.`, {
-            scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
-        });
-
         const notificationRequestMessage: OnDemandNotificationRequestMessage = {
             scanId: pageScanResult.id,
             scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
@@ -62,14 +58,26 @@ export class ScanNotificationProcessor {
         }
 
         if (scanMetadata.deepScan !== true) {
+            this.logger.logInfo(`Sending scan completion notification message for a single scan.`, {
+                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            });
+
             return true;
         }
 
-        return (
+        const deepScanCompleted =
             websiteScanResult.pageScans &&
             websiteScanResult.pageScans.length > 0 &&
-            websiteScanResult.pageScans.every((pageScan) => pageScan.runState === 'completed' || pageScan.runState === 'failed')
-        );
+            websiteScanResult.pageScans.every((pageScan) => pageScan.runState === 'completed' || pageScan.runState === 'failed');
+
+        if (deepScanCompleted) {
+            this.logger.logInfo(`Sending scan completion notification message for a deep scan.`, {
+                deepScanId: websiteScanResult?.deepScanId,
+                scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
+            });
+        }
+
+        return deepScanCompleted;
     }
 
     private async getDefaultFeatureFlags(): Promise<FeatureFlags> {
