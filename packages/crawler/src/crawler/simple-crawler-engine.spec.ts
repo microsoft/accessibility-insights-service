@@ -3,7 +3,7 @@
 import 'reflect-metadata';
 
 import Apify from 'apify';
-import { ServiceConfiguration } from 'common';
+import { PromiseUtils, ServiceConfiguration } from 'common';
 import { ConsoleLoggerClient, GlobalLogger } from 'logger';
 import { Page } from 'puppeteer';
 import { WebDriver } from 'scanner-global-library';
@@ -101,7 +101,7 @@ describe(SimpleCrawlerEngine, () => {
         logger.setup();
         const crawlerFactory = new CrawlerFactory();
 
-        const webDriver = new WebDriver(logger);
+        const webDriver = new WebDriver(new PromiseUtils(), logger);
         const browser = await webDriver.launch();
         const page = await browser.newPage();
         await page.goto(testBaseUrl);
