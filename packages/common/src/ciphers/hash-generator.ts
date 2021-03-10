@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import fnv1a from '@sindresorhus/fnv1a';
 import { injectable } from 'inversify';
 import { JumpConsistentHash } from './jump-consistent-hash';
@@ -14,6 +15,11 @@ export class HashGenerator {
     public getWebsiteScanResultDocumentId(baseUrl: string, scanGroupId: string): string {
         // Preserve parameters order below for the hash generation compatibility
         return this.generateBase64Hash(baseUrl, scanGroupId);
+    }
+
+    public getWebsiteScanResultPartDocumentId(baseId: string, scanId: string): string {
+        // Preserve parameters order below for the hash generation compatibility
+        return this.generateBase64Hash(baseId, scanId);
     }
 
     public getDbHashBucket(prefix: string, ...values: string[]): string {

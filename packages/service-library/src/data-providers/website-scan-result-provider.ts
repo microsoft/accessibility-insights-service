@@ -1,13 +1,28 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
-import { cosmosContainerClientTypes, CosmosContainerClient } from 'azure-services';
+import { cosmosContainerClientTypes, CosmosContainerClient, client, CosmosOperationResponse } from 'azure-services';
 import { System, HashGenerator, RetryHelper } from 'common';
-import { WebsiteScanResult, ItemType } from 'storage-documents';
+import {
+    WebsiteScanResult,
+    ItemType,
+    WebsiteScanResultPart,
+    WebsiteScanResultBase,
+    WebsiteScanResultPartModel,
+    websiteScanResultBaseKeys,
+    websiteScanResultPartModelKeys,
+    websiteScanResultBaseTransientKeys,
+} from 'storage-documents';
 import { GlobalLogger } from 'logger';
 import _ from 'lodash';
-import moment from 'moment';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
+import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
+
+interface DbDocument {
+    baseDocument: Partial<WebsiteScanResultBase>;
+    partDocument: Partial<WebsiteScanResultPart>;
+}
 
 @injectable()
 export class WebsiteScanResultProvider {
@@ -17,14 +32,23 @@ export class WebsiteScanResultProvider {
     constructor(
         @inject(cosmosContainerClientTypes.OnDemandScanRunsCosmosContainerClient)
         private readonly cosmosContainerClient: CosmosContainerClient,
+        @inject(WebsiteScanResultAggregator) private readonly websiteScanResultAggregator: WebsiteScanResultAggregator,
         @inject(PartitionKeyFactory) private readonly partitionKeyFactory: PartitionKeyFactory,
         @inject(HashGenerator) private readonly hashGenerator: HashGenerator,
         @inject(GlobalLogger) private readonly logger: GlobalLogger,
         @inject(RetryHelper) private readonly retryHelper: RetryHelper<WebsiteScanResult> = new RetryHelper<WebsiteScanResult>(),
     ) {}
 
-    public async read(websiteScanId: string): Promise<WebsiteScanResult> {
-        return (await this.cosmosContainerClient.readDocument<WebsiteScanResult>(websiteScanId, this.getPartitionKey(websiteScanId))).item;
+    public async read(websiteScanId: string, readCompleteDocument: boolean = false): Promise<WebsiteScanResult> {
+        const baseDocument = (
+            await this.cosmosContainerClient.readDocument<WebsiteScanResultBase>(websiteScanId, this.getPartitionKey(websiteScanId))
+        ).item;
+
+        const partDocument = readCompleteDocument ? await this.readPartDocument(baseDocument) : {};
+        // ensure that there are no storage properties to overlap
+        const partDocumentModel = _.pick(partDocument, websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+
+        return { ...baseDocument, ...partDocumentModel };
     }
 
     /**
@@ -33,19 +57,10 @@ export class WebsiteScanResultProvider {
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
-    public async mergeOrCreateBatch(websiteScanResults: Partial<WebsiteScanResult>[]): Promise<WebsiteScanResult[]> {
-        const sourceDocuments = websiteScanResults.map((scanResult) => this.normalizeToDbDocument(scanResult));
-        const scanResultsById = _.groupBy(sourceDocuments, (scanResult) => scanResult.id);
-        const response = await Promise.all(
-            Object.keys(scanResultsById).map(async (id) => {
-                // merge same id documents in memory
-                const mergedDocument = this.mergeBatch(scanResultsById[id]);
-
-                return this.mergeOrCreate(mergedDocument);
-            }),
-        );
-
-        return response;
+    public async mergeOrCreateBatch(
+        websiteScanResults: { scanId: string; websiteScanResult: Partial<WebsiteScanResult> }[],
+    ): Promise<void> {
+        await Promise.all(websiteScanResults.map(async (result) => this.mergeOrCreate(result.scanId, result.websiteScanResult)));
     }
 
     /**
@@ -54,29 +69,43 @@ export class WebsiteScanResultProvider {
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
-    public async mergeOrCreate(websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResult> {
-        const scanResultNormalized = this.normalizeToDbDocument(websiteScanResult);
+    public async mergeOrCreate(scanId: string, websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResultBase> {
+        const dbDocument = this.convertToDbDocument(scanId, websiteScanResult);
 
         return (await this.retryHelper.executeWithRetries(
-            async () => {
-                const operationResult = await this.createIfNotExists(scanResultNormalized);
-                if (operationResult.created) {
-                    return operationResult.scanResult;
-                } else {
-                    return this.mergeAndWrite(operationResult.scanResult, websiteScanResult);
-                }
-            },
+            async () => this.mergeOrCreateImpl(dbDocument),
             async (err) =>
                 this.logger.logError(`Failed to update website scan result Cosmos DB document. Retrying on error.`, {
-                    document: JSON.stringify(scanResultNormalized),
+                    baseId: dbDocument?.baseDocument.id,
+                    partId: dbDocument?.partDocument.id,
+                    baseDocument: JSON.stringify(dbDocument.baseDocument),
+                    partDocument: JSON.stringify(dbDocument.partDocument),
                     error: System.serializeError(err),
                 }),
             this.maxRetryCount,
             this.msecBetweenRetries,
-        )) as WebsiteScanResult;
+        )) as WebsiteScanResultBase;
     }
 
-    public normalizeToDbDocument(websiteScanResult: Partial<WebsiteScanResult>): WebsiteScanResult {
+    /**
+     * Merges the `WebsiteScanResult` documents in a memory.
+     */
+    public mergeWith(websiteScanResult: WebsiteScanResult, websiteScanResultUpdate: Partial<WebsiteScanResult>): WebsiteScanResult {
+        const targetDocument = this.convertToDbDocument(undefined, websiteScanResult);
+        const sourceDocument = this.convertToDbDocument(undefined, websiteScanResultUpdate);
+        const baseDocument = this.websiteScanResultAggregator.mergeBaseDocument(
+            sourceDocument.baseDocument,
+            targetDocument.baseDocument,
+        ) as WebsiteScanResultBase;
+        const partDocument = this.websiteScanResultAggregator.mergePartDocument(
+            sourceDocument.partDocument,
+            targetDocument.partDocument,
+        ) as WebsiteScanResultPartModel;
+
+        return { ...baseDocument, ...partDocument };
+    }
+
+    public normalizeToDbDocument(websiteScanResult: Partial<WebsiteScanResult>): WebsiteScanResultBase {
         const documentId = this.getWebsiteScanId(websiteScanResult);
         const partitionKey = websiteScanResult.partitionKey ?? this.getPartitionKey(documentId);
 
@@ -88,77 +117,67 @@ export class WebsiteScanResultProvider {
         };
     }
 
-    private async mergeAndWrite(
-        storageDocument: WebsiteScanResult,
-        websiteScanResult: Partial<WebsiteScanResult>,
-    ): Promise<WebsiteScanResult> {
-        const mergedDocument = this.merge(websiteScanResult, storageDocument);
+    private async mergeOrCreateImpl(dbDocument: DbDocument): Promise<WebsiteScanResultBase> {
+        const baseDocument = await this.mergeAndWriteBaseDocument(dbDocument.baseDocument);
+        await this.mergeAndWritePartDocument(dbDocument.partDocument);
 
-        return (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(mergedDocument)).item;
+        return baseDocument;
     }
 
-    private mergeBatch(sourceDocuments: WebsiteScanResult[]): WebsiteScanResult {
-        if (sourceDocuments.length === 1) {
-            return sourceDocuments[0];
+    private async mergeAndWriteBaseDocument(baseDocument: Partial<WebsiteScanResultBase>): Promise<WebsiteScanResultBase> {
+        const operationResult = await this.createBaseDocumentIfNotExists(baseDocument);
+        if (operationResult.created) {
+            return operationResult.scanResult;
         }
 
-        let targetDocument: WebsiteScanResult = sourceDocuments[0];
-        sourceDocuments.map((sourceDocument) => {
-            targetDocument = this.merge(sourceDocument, targetDocument);
-        });
-
-        return targetDocument;
+        const storageDocument = operationResult.scanResult;
+        const originalDocument = _.cloneDeep(storageDocument);
+        const mergedDocument = this.websiteScanResultAggregator.mergeBaseDocument(baseDocument, storageDocument);
+        if (!this.same(originalDocument, mergedDocument)) {
+            return (await this.cosmosContainerClient.writeDocument(mergedDocument as WebsiteScanResultBase)).item;
+        } else {
+            return storageDocument;
+        }
     }
 
-    private merge(sourceDocument: Partial<WebsiteScanResult>, targetDocument: WebsiteScanResult): WebsiteScanResult {
-        const mergedDocument = _.mergeWith(targetDocument, sourceDocument, (target, source, key) => {
-            // Preserve the current _etag value
-            if (key === '_etag') {
-                return target;
-            }
+    private async mergeAndWritePartDocument(partDocument: Partial<WebsiteScanResultPart>): Promise<void> {
+        const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanResultPart>(
+            partDocument.id,
+            partDocument.partitionKey,
+            false,
+        );
 
-            // Preserve original deep scan request scan id
-            if (key === 'deepScanId') {
-                return target;
-            }
-
-            if (_.isArray(target)) {
-                if (key !== 'pageScans' && key !== 'reports' && key !== 'knownPages' && key !== 'discoveryPatterns') {
-                    throw new Error(`Merge of array type value '${key}' is not implemented.`);
-                }
-
-                return _.compact(target.concat(source));
-            }
-
-            return undefined;
-        });
-
-        if (mergedDocument.reports !== undefined) {
-            mergedDocument.reports = _.uniqBy(mergedDocument.reports, (r) => r.reportId);
-        }
-
-        if (mergedDocument.knownPages !== undefined) {
-            mergedDocument.knownPages = _.uniq(mergedDocument.knownPages);
-        }
-
-        if (mergedDocument.discoveryPatterns !== undefined) {
-            mergedDocument.discoveryPatterns = _.uniq(mergedDocument.discoveryPatterns);
-        }
-
-        if (mergedDocument.pageScans !== undefined) {
-            const pageScansByUrl = _.groupBy(mergedDocument.pageScans, (scan) => scan.url.toLocaleLowerCase());
-            mergedDocument.pageScans = Object.keys(pageScansByUrl).map((url) => {
-                return _.maxBy(pageScansByUrl[url], (scan) => moment.utc(scan.timestamp).valueOf());
-            });
-        }
-
-        return mergedDocument;
+        // compact new document before writing to database
+        const mergedDocument = this.websiteScanResultAggregator.mergePartDocument(partDocument, operationResponse.item ?? {});
+        await this.cosmosContainerClient.writeDocument(mergedDocument);
     }
 
-    private async createIfNotExists(
-        websiteScanResult: Partial<WebsiteScanResult>,
-    ): Promise<{ created: boolean; scanResult: WebsiteScanResult }> {
-        const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanResult>(
+    private async readPartDocument(websiteScanResult: WebsiteScanResultBase): Promise<WebsiteScanResultPartModel> {
+        const query = `SELECT * FROM c WHERE c.partitionKey = "${websiteScanResult.partitionKey}" and c.baseId = "${websiteScanResult.id}" and c.itemType = "${ItemType.websiteScanResultPart}"`;
+
+        let partDocument: Partial<WebsiteScanResultPart>;
+        let continuationToken;
+        do {
+            const response = (await this.cosmosContainerClient.queryDocuments<WebsiteScanResultPart>(
+                query,
+                continuationToken,
+            )) as CosmosOperationResponse<WebsiteScanResultPart[]>;
+
+            client.ensureSuccessStatusCode(response);
+            continuationToken = response.continuationToken;
+            partDocument = response.item.reduce(
+                (prev, next) => this.websiteScanResultAggregator.mergePartDocument(next, prev),
+                partDocument ?? {},
+            );
+        } while (continuationToken !== undefined);
+
+        return partDocument;
+    }
+
+    private async createBaseDocumentIfNotExists(
+        websiteScanResult: Partial<WebsiteScanResultBase>,
+    ): Promise<{ created: boolean; scanResult: WebsiteScanResultBase }> {
+        const operationResponse = await this.cosmosContainerClient.readDocument<WebsiteScanResultBase>(
             websiteScanResult.id,
             websiteScanResult.partitionKey,
             false,
@@ -168,12 +187,14 @@ export class WebsiteScanResultProvider {
             return { created: false, scanResult: operationResponse.item };
         }
 
-        const scanResult = (await this.cosmosContainerClient.writeDocument<WebsiteScanResult>(websiteScanResult as WebsiteScanResult)).item;
+        // compact document before writing to database
+        const websiteScanResultDocument = this.websiteScanResultAggregator.mergeBaseDocument(websiteScanResult, {});
+        const scanResult = (await this.cosmosContainerClient.writeDocument(websiteScanResultDocument as WebsiteScanResultBase)).item;
 
         return { created: true, scanResult };
     }
 
-    private getWebsiteScanId(websiteScanResult: Partial<WebsiteScanResult>): string {
+    private getWebsiteScanId(websiteScanResult: Partial<WebsiteScanResultBase>): string {
         if (websiteScanResult.id !== undefined) {
             return websiteScanResult.id;
         }
@@ -189,7 +210,32 @@ export class WebsiteScanResultProvider {
         return this.hashGenerator.getWebsiteScanResultDocumentId(websiteScanResult.baseUrl, websiteScanResult.scanGroupId);
     }
 
-    private getPartitionKey(websiteScanId: string): string {
-        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanId);
+    private getPartitionKey(websiteScanResultId: string): string {
+        return this.partitionKeyFactory.createPartitionKeyForDocument(ItemType.websiteScanResult, websiteScanResultId);
+    }
+
+    private convertToDbDocument(scanId: string, websiteScanResult: Partial<WebsiteScanResult>): DbDocument {
+        const websiteScanResultNormalized = this.normalizeToDbDocument(websiteScanResult);
+
+        const baseDocument = _.pick(websiteScanResultNormalized, websiteScanResultBaseKeys) as Partial<WebsiteScanResultBase>;
+        const part = _.pick(websiteScanResultNormalized, websiteScanResultPartModelKeys) as Partial<WebsiteScanResultPartModel>;
+        const partDocument: Partial<WebsiteScanResultPart> = {
+            id: this.hashGenerator.getWebsiteScanResultPartDocumentId(websiteScanResultNormalized.id, scanId),
+            partitionKey: websiteScanResultNormalized.partitionKey,
+            itemType: ItemType.websiteScanResultPart,
+            baseId: websiteScanResultNormalized.id,
+            scanId,
+            ...part,
+        };
+
+        return { baseDocument, partDocument };
+    }
+
+    private same(storageDocument: Partial<WebsiteScanResultBase>, mergedDocument: Partial<WebsiteScanResultBase>): boolean {
+        const transientKeys = new Set(websiteScanResultBaseTransientKeys);
+        const keys = websiteScanResultBaseKeys.filter((key) => !transientKeys.has(key));
+
+        // The JSON string comparison corresponds to the storage documents representation
+        return JSON.stringify(_.pick(storageDocument, keys)) === JSON.stringify(_.pick(mergedDocument, keys));
     }
 }

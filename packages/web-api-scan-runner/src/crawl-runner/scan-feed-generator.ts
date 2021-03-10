@@ -53,9 +53,8 @@ export class ScanFeedGenerator {
         const updatedWebsiteScanResult: Partial<WebsiteScanResult> = {
             id: websiteScanResult.id,
             pageScans,
-            _etag: websiteScanResult._etag,
         };
-        await this.websiteScanResultProvider.mergeOrCreate(updatedWebsiteScanResult);
+        await this.websiteScanResultProvider.mergeOrCreate(pageScanResult.id, updatedWebsiteScanResult);
         await this.scanDataProvider.writeScanRunBatchRequest(batchId, scanRequests);
         this.logger.logInfo(`Discovered pages has been queued for scanning.`);
     }

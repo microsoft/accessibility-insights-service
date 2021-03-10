@@ -104,7 +104,7 @@ describe(BatchScanResultController, () => {
 
         websiteScanResultProviderMock = Mock.ofType<WebsiteScanResultProvider>();
         websiteScanResultProviderMock
-            .setup((o) => o.read(scanFetchedResponse.websiteScanRefs[0].id))
+            .setup((o) => o.read(scanFetchedResponse.websiteScanRefs[0].id, true))
             .returns(() => Promise.resolve(websiteScanResult));
     });
 

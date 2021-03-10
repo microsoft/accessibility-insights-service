@@ -195,7 +195,7 @@ describe(ScanBatchRequestFeedController, () => {
 function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequest[]): Partial<WebsiteScanResult>[] {
     const websiteScanRequests: Partial<WebsiteScanResult>[] = [];
     documents.map((document) => {
-        const websiteScanRequestDbDocuments: Partial<WebsiteScanResult>[] = [];
+        const websiteScanRequestDbDocuments: { scanId: string; websiteScanResult: Partial<WebsiteScanResult> }[] = [];
 
         document.scanRunBatchRequest
             .filter((request) => request.reportGroups !== undefined)
@@ -215,12 +215,13 @@ function setupWebsiteScanResultProviderMock(documents: OnDemandPageScanBatchRequ
                         ],
                         knownPages: request.site.knownPages,
                         discoveryPatterns: request.site.discoveryPatterns,
+                        created: dateNow.toJSON(),
                     } as WebsiteScanResult;
 
                     const documentId = `db-id-${reportGroup.consolidatedId}`;
                     const websiteScanResultDbDocument = { ...websiteScanResult, id: documentId };
                     websiteScanRequests.push(websiteScanResultDbDocument);
-                    websiteScanRequestDbDocuments.push(websiteScanResultDbDocument);
+                    websiteScanRequestDbDocuments.push({ scanId: request.scanId, websiteScanResult: websiteScanResultDbDocument });
 
                     websiteScanResultProviderMock
                         .setup((o) => o.normalizeToDbDocument(It.isValue(websiteScanResult)))

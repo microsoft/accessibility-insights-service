@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import * as cosmos from '@azure/cosmos';
 import { System } from 'common';
 import { inject, injectable } from 'inversify';
@@ -52,6 +53,7 @@ export class CosmosClientWrapper {
                             collection: collectionName,
                             itemId: item.id,
                             partitionKey: partitionKey,
+                            item: JSON.stringify(item),
                         });
 
                         responses.push(this.handleFailedOperationResponse('upsertItems', error, throwIfNotSuccess, item.id));
@@ -86,6 +88,7 @@ export class CosmosClientWrapper {
                 collection: collectionName,
                 itemId: item.id,
                 partitionKey: partitionKey,
+                item: JSON.stringify(item),
             });
 
             return this.handleFailedOperationResponse('upsertItem', error, throwIfNotSuccess, item.id);

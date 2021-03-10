@@ -1,6 +1,5 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-
 import 'reflect-metadata';
 
 import { IMock, Mock, It } from 'typemoq';
@@ -121,7 +120,7 @@ describe(Runner, () => {
         pageScanResult.run = {
             state: 'failed',
             timestamp: dateNow.toJSON(),
-            error: errorMessage,
+            error: errorMessage.substring(0, 2048),
         };
         loggerMock.setup((o) => o.logError(`The scanner failed to scan a page.`, { error: errorMessage })).verifiable();
 
@@ -214,7 +213,7 @@ function setupUpdateScanResult(): void {
         websiteScanResult = {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
-        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(It.isValue(updatedWebsiteScanResult)))
+        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
