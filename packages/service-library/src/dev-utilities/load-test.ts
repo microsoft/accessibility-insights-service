@@ -4,86 +4,109 @@ import 'reflect-metadata';
 
 import * as nodeFetch from 'node-fetch';
 import * as yargs from 'yargs';
-import { GuidGenerator } from 'common';
+import { GuidGenerator, System } from 'common';
+import { ScanRunRequest } from '../web-api/api-contracts/scan-run-request';
 
-setupInputArgsExpectation();
-const inputArgs = yargs.argv as yargs.Arguments<LoadTestArgs>;
-console.log('Input args passed', inputArgs);
-
-const consolidatedId = new GuidGenerator().createGuid();
-console.log('Load test consolidated Id', consolidatedId);
+type RequestType = 'scan' | 'consolidated-report' | 'deep-scan';
 
 type LoadTestArgs = {
     scanNotifyUrl: string;
     adAuthToken: string;
     requestUrl: string;
     maxLoad: number;
+    consolidatedId: string;
+    requestType: RequestType;
 };
 
-function setupInputArgsExpectation(): void {
+function getScanArguments(): LoadTestArgs {
     yargs.option<keyof LoadTestArgs, yargs.Options>('maxLoad', {
         alias: 'l',
         default: 10,
         type: 'number',
+        description: 'Maximum number request to send',
     });
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('requestUrl', {
-        alias: 'r',
+        alias: 'u',
         demandOption: true,
+        description: 'The service endpoint URL to send request',
     });
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('scanNotifyUrl', {
         alias: 'n',
+        default: 'http://localhost/',
+        description: 'Scan completion notification URL',
+    });
+
+    yargs.option<keyof LoadTestArgs, yargs.Options>('consolidatedId', {
+        alias: 'c',
+        default: new GuidGenerator().createGuid(),
+        description: 'Consolidated report id',
+    });
+
+    yargs.option<keyof LoadTestArgs, yargs.Options>('requestType', {
+        alias: 'r',
+        default: 'scan',
+        description: `The request type to send. Supported types: 'scan', 'consolidated-report', 'deep-scan'`,
     });
 
     yargs.option<keyof LoadTestArgs, yargs.Options>('adAuthToken', {
         alias: 't',
         default: process.env.adAuthToken,
         demandOption: true,
-        description: 'AD Auth token. Can be created using Postman. Either pass via command line or set env variable - adAuthToken',
+        description: 'Azure Active Directory auth token. Can be created using Postman. Option can also be set via adAuthToken env variable',
     });
+
+    yargs.wrap(yargs.terminalWidth()).describe('help', 'Show help');
+
+    return yargs.argv as yargs.Arguments<LoadTestArgs>;
 }
 
-function getRequestOptions(requestId: number): nodeFetch.RequestInit {
+function getRequestOptions(requestId: number, scanArguments: LoadTestArgs): nodeFetch.RequestInit {
     const myHeaders: nodeFetch.HeaderInit = {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${inputArgs.adAuthToken}`,
+        Authorization: `Bearer ${scanArguments.adAuthToken}`,
     };
 
-    const raw = JSON.stringify([
-        {
-            url: `https://www.bing.com/search?q=a ${requestId}`,
-            priority: 1,
-            scanNotifyUrl: inputArgs.scanNotifyUrl,
-            site: {
-                baseUrl: 'https://www.bing.com/',
+    const request: ScanRunRequest = {
+        url: `https://www.bing.com/search?q=a ${requestId}`,
+        priority: 1,
+        scanNotifyUrl: scanArguments.scanNotifyUrl,
+    };
+
+    if (scanArguments.requestType === 'consolidated-report' || scanArguments.requestType === 'deep-scan') {
+        request.site = {
+            baseUrl: 'https://www.bing.com/',
+        };
+        request.reportGroups = [
+            {
+                consolidatedId: scanArguments.consolidatedId,
             },
-            reportGroups: [
-                {
-                    consolidatedId,
-                },
-            ],
-        },
-    ]);
+        ];
+    }
+
+    if (scanArguments.requestType === 'deep-scan') {
+        request.deepScan = true;
+    }
 
     return {
         method: 'POST',
         headers: myHeaders,
-        body: raw,
+        body: JSON.stringify([request]),
         redirect: 'follow',
     };
 }
 
-async function runLoadTest(): Promise<void> {
+async function runLoadTest(scanArguments: LoadTestArgs): Promise<void> {
     const promises: Promise<void>[] = [];
+    const responseCountByStatusCode: { [key: number]: number } = {};
     let successfulRequests = 0;
     let errorRequests = 0;
-    const responseCountByStatusCode: { [key: number]: number } = {};
 
     const submitRequest = async (requestId: number) => {
         try {
-            const requestOptions = getRequestOptions(requestId);
-            const response = await nodeFetch.default(inputArgs.requestUrl, requestOptions);
+            const requestOptions = getRequestOptions(requestId, scanArguments);
+            const response = await nodeFetch.default(scanArguments.requestUrl, requestOptions);
             successfulRequests += 1;
             responseCountByStatusCode[response.status] = (responseCountByStatusCode[response.status] ?? 0) + 1;
 
@@ -95,19 +118,23 @@ async function runLoadTest(): Promise<void> {
         }
     };
 
-    for (let i = 0; i < inputArgs.maxLoad; i += 1) {
+    for (let i = 0; i < scanArguments.maxLoad; i += 1) {
         promises.push(submitRequest(i + 1));
     }
 
-    console.log(`Submitted Requests - ${inputArgs.maxLoad}. Waiting for requests to complete.....`);
+    console.log(`Submitted Requests - ${scanArguments.maxLoad}. Waiting for requests to complete...`);
     await Promise.all(promises);
 
-    console.log(`Total Requests Submitted: ${inputArgs.maxLoad}`);
+    console.log(`Total Requests Submitted: ${scanArguments.maxLoad}`);
     console.log(`Completed Requests ${successfulRequests}`);
     console.log('Completed Request count by status code', responseCountByStatusCode);
     console.log(`Failed Requests ${errorRequests}`);
 }
 
-runLoadTest().catch((error) => {
-    console.log('Error occurred', error);
+(async () => {
+    const scanArguments = getScanArguments();
+    await runLoadTest(scanArguments);
+})().catch((error) => {
+    console.log('Exception occurred while running the utility: ', System.serializeError(error));
+    process.exitCode = 1;
 });
