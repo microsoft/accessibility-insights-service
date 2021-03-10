@@ -11,7 +11,6 @@ import { TestContextData, TestEnvironment, TestGroupName } from 'functional-test
 import { Logger } from 'logger';
 import { ScanRunResultResponse, ScanCompletedNotification } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
-import * as MockDate from 'mockdate';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -64,7 +63,7 @@ export interface OrchestratorStepsCallCount {
 }
 
 const baseWebApiUrl = 'some-url';
-const dateNow = new Date(1, 2, 3, 4);
+const releaseId = '123';
 
 class OrchestrationStepsStub implements OrchestrationSteps {
     public orchestratorStepsCallCount: OrchestratorStepsCallCount = {
@@ -152,7 +151,7 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
-        const expectedConsolidatedId = `${this.availabilityTestConfig.consolidatedIdBase}-${dateNow.toDateString()}`;
+        const expectedConsolidatedId = `${this.availabilityTestConfig.consolidatedIdBase}-${releaseId}`;
         expect(reportId).toBe(expectedConsolidatedId);
         expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyFailApiEndpoint}`);
 
@@ -233,7 +232,7 @@ describe('HealthMonitorOrchestrationController', () => {
             })
             .returns(() => orchestratorGeneratorMock.object);
 
-        MockDate.set(dateNow);
+        process.env.RELEASE_VERSION = releaseId;
 
         testSubject = new TestableHealthMonitorOrchestrationController(
             orchestratorStepsStub,
