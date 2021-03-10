@@ -63,6 +63,7 @@ export interface OrchestratorStepsCallCount {
 }
 
 const baseWebApiUrl = 'some-url';
+const releaseId = '123';
 
 class OrchestrationStepsStub implements OrchestrationSteps {
     public orchestratorStepsCallCount: OrchestratorStepsCallCount = {
@@ -150,7 +151,8 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
-        expect(reportId).toBe(this.availabilityTestConfig.consolidatedReportId);
+        const expectedConsolidatedId = `${this.availabilityTestConfig.consolidatedIdBase}-${releaseId}`;
+        expect(reportId).toBe(expectedConsolidatedId);
         expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyFailApiEndpoint}`);
 
         return yield this.scanId;
@@ -198,7 +200,7 @@ describe('HealthMonitorOrchestrationController', () => {
             maxScanWaitTimeInSeconds: 20,
             logQueryTimeRange: 'P1D',
             environmentDefinition: TestEnvironment[TestEnvironment.canary],
-            consolidatedReportId: 'somereportid',
+            consolidatedIdBase: 'somereportid',
             scanNotifyApiEndpoint: '/some-endpoint',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',
@@ -229,6 +231,8 @@ describe('HealthMonitorOrchestrationController', () => {
                 orchestratorIterator = new GeneratorExecutor(fn(contextStub));
             })
             .returns(() => orchestratorGeneratorMock.object);
+
+        process.env.RELEASE_VERSION = releaseId;
 
         testSubject = new TestableHealthMonitorOrchestrationController(
             orchestratorStepsStub,

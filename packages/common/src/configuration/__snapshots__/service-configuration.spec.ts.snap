@@ -3,7 +3,7 @@
 exports[`ServiceConfiguration verifies custom config 1`] = `
 Object {
   "availabilityTestConfig": Object {
-    "consolidatedReportId": Object {
+    "consolidatedIdBase": Object {
       "default": "e2e-consolidated-report-id",
       "doc": "The id for the consolidated report",
       "format": "String",
@@ -196,7 +196,7 @@ Object {
 exports[`ServiceConfiguration verifies dev config 1`] = `
 Object {
   "availabilityTestConfig": Object {
-    "consolidatedReportId": Object {
+    "consolidatedIdBase": Object {
       "default": "e2e-consolidated-report-id",
       "doc": "The id for the consolidated report",
       "format": "String",

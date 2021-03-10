@@ -68,7 +68,7 @@ export interface AvailabilityTestConfig {
     maxScanWaitTimeInSeconds: number;
     logQueryTimeRange: string;
     environmentDefinition: string;
-    consolidatedReportId: string;
+    consolidatedIdBase: string;
     scanNotifyApiEndpoint: string;
     scanNotifyFailApiEndpoint: string;
     maxScanCompletionNotificationWaitTimeInSeconds: number;
@@ -275,7 +275,7 @@ export class ServiceConfiguration {
                     default: 'https://www.washington.edu/accesscomputing/AU/before.html',
                     doc: 'Url to scan for availability testing',
                 },
-                consolidatedReportId: {
+                consolidatedIdBase: {
                     format: 'String',
                     default: 'e2e-consolidated-report-id',
                     doc: 'The id for the consolidated report',

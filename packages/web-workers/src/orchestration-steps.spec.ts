@@ -58,7 +58,7 @@ describe(OrchestrationStepsImpl, () => {
             urlToScan: 'https://www.bing.com',
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
-            consolidatedReportId: 'somereportid',
+            consolidatedIdBase: 'somereportid',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyApiEndpoint: '/scan-notify-api',
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',
