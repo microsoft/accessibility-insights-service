@@ -7,6 +7,8 @@ Param(
     [string]$keyvault
 )
 
+$ErrorActionPreference = "Stop"
+
 $global:keyvault = $keyvault
 
 function exitWithUsageInfo {
