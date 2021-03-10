@@ -140,15 +140,15 @@
   resolved "https://registry.yarnpkg.com/@azure/functions/-/functions-1.2.2.tgz#8fcb6aa3a879d3be0dc3d68919f969b054bbe3f3"
   integrity sha512-p/dDHq1sG/iAib+eDY4NxskWHoHW1WFzD85s0SfWxc2wVjJbxB0xz/zBF4s7ymjVgTu+0ceipeBk+tmpnt98oA==
 
-"@azure/identity@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@azure/identity/-/identity-1.2.2.tgz#00d673c8881778c55777fcc76e822b42466d3fc7"
-  integrity sha512-aYkeNXl52aEHW1iOZQJb3SC7Vvbu87f01iNT+pSVHwj09LpN9+gP/Lb9uoWy36Fgv9WlukM55LbjLSbb1Renqw==
+"@azure/identity@^1.2.4":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@azure/identity/-/identity-1.2.4.tgz#fd5ca71370a09e3da537683e82115d031fc27793"
+  integrity sha512-C9mZL700fMvw9xxCGT5V0QHI8KsykZjSjhiFO9ySIiaMYvRCqKyWAXUvxI2ON9FL/n7v0x677n8UhmgrB9BYTA==
   dependencies:
     "@azure/core-http" "^1.2.0"
     "@azure/core-tracing" "1.0.0-preview.9"
     "@azure/logger" "^1.0.0"
-    "@azure/msal-node" "1.0.0-beta.3"
+    "@azure/msal-node" "1.0.0-beta.6"
     "@opentelemetry/api" "^0.10.2"
     axios "^0.21.1"
     events "^3.0.0"
@@ -159,7 +159,7 @@
     tslib "^2.0.0"
     uuid "^8.3.0"
   optionalDependencies:
-    keytar "^5.4.0"
+    keytar "^7.3.0"
 
 "@azure/keyvault-secrets@^4.1.0":
   version "4.1.0"
@@ -220,19 +220,19 @@
     "@azure/ms-rest-js" "^2.0.4"
     adal-node "^0.1.28"
 
-"@azure/msal-common@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-2.1.0.tgz#a4bc17e254d6ec524016f13267947dd4ff4a624d"
-  integrity sha512-Y1Id+jG59S3eY2ZQQtUA/lxwbRcgjcWaiib9YX+SwV3zeRauKfEiZT7l3z+lwV+T+Sst20F6l1mJsfQcfE7CEQ==
+"@azure/msal-common@^4.0.0":
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/@azure/msal-common/-/msal-common-4.0.2.tgz#6489d66929ba71fb30e03f559f2e9ee792088827"
+  integrity sha512-Z6FiDV+uWUZ4jcchRciKYYYKRWOc0sh/UaF5evfx7lXEp/8+KxO7cY1efgD7VOK75FkpRI5YyUzZAdX7I7sTAg==
   dependencies:
     debug "^4.1.1"
 
-"@azure/msal-node@1.0.0-beta.3":
-  version "1.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/@azure/msal-node/-/msal-node-1.0.0-beta.3.tgz#c84c7948028b39e48b901f5fac35bdedcbc8772e"
-  integrity sha512-/KfYRfrsOIrZONvo/0Vi5umuqbPBtCWNtmRvkse64uI0C4CP/W4WXwRD42VMws/8LtKvr1I5rYlYgFzt5zDz/A==
+"@azure/msal-node@1.0.0-beta.6":
+  version "1.0.0-beta.6"
+  resolved "https://registry.yarnpkg.com/@azure/msal-node/-/msal-node-1.0.0-beta.6.tgz#da6bc3a3a861057c85586055960e069f162548ee"
+  integrity sha512-ZQI11Uz1j0HJohb9JZLRD8z0moVcPks1AFW4Q/Gcl67+QvH4aKEJti7fjCcipEEZYb/qzLSO8U6IZgPYytsiJQ==
   dependencies:
-    "@azure/msal-common" "^2.1.0"
+    "@azure/msal-common" "^4.0.0"
     axios "^0.21.1"
     jsonwebtoken "^8.5.1"
     uuid "^8.3.0"
@@ -8492,13 +8492,13 @@ jws@^4.0.0:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
 
-keytar@^5.4.0:
-  version "5.6.0"
-  resolved "https://registry.yarnpkg.com/keytar/-/keytar-5.6.0.tgz#7b5d4bd043d17211163640be6c4a27a49b12bb39"
-  integrity sha512-ueulhshHSGoryfRXaIvTj0BV1yB0KddBGhGoqCxSN9LR1Ks1GKuuCdVhF+2/YOs5fMl6MlTI9On1a4DHDXoTow==
+keytar@^7.3.0:
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/keytar/-/keytar-7.4.0.tgz#0a508d64850ca05aa3ba4127818037d13ca3219f"
+  integrity sha512-nELmc35YjSE4ZNSFaID/743CgDt/MdV4JLX7rRewAh9mKvU72RtF3uJMY0MdMpwdDYZhmD8FSdRCD1J97lEyVg==
   dependencies:
-    nan "2.14.1"
-    prebuild-install "5.3.3"
+    node-addon-api "^3.0.0"
+    prebuild-install "^6.0.0"
 
 keyv@^4.0.0:
   version "4.0.1"
@@ -9211,7 +9211,7 @@ minimist-options@^3.0.1:
     arrify "^1.0.1"
     is-plain-obj "^1.1.0"
 
-minimist@^1.1.1, minimist@^1.1.3, minimist@^1.2.0, minimist@^1.2.5:
+minimist@^1.1.1, minimist@^1.1.3, minimist@^1.2.0, minimist@^1.2.3, minimist@^1.2.5:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
@@ -9255,7 +9255,7 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mkdirp-classic@^0.5.2:
+mkdirp-classic@^0.5.2, mkdirp-classic@^0.5.3:
   version "0.5.3"
   resolved "https://registry.yarnpkg.com/mkdirp-classic/-/mkdirp-classic-0.5.3.tgz#fa10c9115cc6d8865be221ba47ee9bed78601113"
   integrity sha512-gKLcREMhtuZRwRAfqP3RFW+TK4JqApVBtOIftVgjuABpAtpxhPGaDcfvbhNvD0B8iD1oUr/txX35NjcaY6Ns/A==
@@ -9367,11 +9367,6 @@ mz@^2.5.0:
     object-assign "^4.0.1"
     thenify-all "^1.0.0"
 
-nan@2.14.1:
-  version "2.14.1"
-  resolved "https://registry.yarnpkg.com/nan/-/nan-2.14.1.tgz#d7be34dfa3105b91494c3147089315eff8874b01"
-  integrity sha512-isWHgVjnFjh2x2yuJ/tj3JbwoHu3UC2dX5G/88Cm24yB6YopVgxvBObDY7n5xW6ExmFhJpSEQqFPvq9zaXc8Jw==
-
 nanomatch@^1.2.9:
   version "1.2.13"
   resolved "https://registry.yarnpkg.com/nanomatch/-/nanomatch-1.2.13.tgz#b87a8aa4fc0de8fe6be88895b38983ff265bd119"
@@ -9446,6 +9441,11 @@ node-abort-controller@^1.0.4:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/node-abort-controller/-/node-abort-controller-1.1.0.tgz#8a734a631b022af29963be7245c1483cbb9e070d"
   integrity sha512-dEYmUqjtbivotqjraOe8UvhT/poFfog1BQRNsZm/MSEDDESk2cQ1tvD8kGyuN07TM/zoW+n42odL8zTeJupYdQ==
+
+node-addon-api@^3.0.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.1.0.tgz#98b21931557466c6729e51cb77cd39c965f42239"
+  integrity sha512-flmrDNB06LIl5lywUz7YlNGZH/5p0M7W28k8hzd9Lshtdh1wshD2Y+U4h9LD6KObOy1f+fEVdgprPrEymjM5uw==
 
 node-fetch-npm@^2.0.2:
   version "2.0.4"
@@ -10296,16 +10296,16 @@ postinstall-build@^5.0.1:
   resolved "https://registry.yarnpkg.com/postinstall-build/-/postinstall-build-5.0.3.tgz#238692f712a481d8f5bc8960e94786036241efc7"
   integrity sha512-vPvPe8TKgp4FLgY3+DfxCE5PIfoXBK2lyLfNCxsRbDsV6vS4oU5RG/IWxrblMn6heagbnMED3MemUQllQ2bQUg==
 
-prebuild-install@5.3.3:
-  version "5.3.3"
-  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.3.3.tgz#ef4052baac60d465f5ba6bf003c9c1de79b9da8e"
-  integrity sha512-GV+nsUXuPW2p8Zy7SarF/2W/oiK8bFQgJcncoJ0d7kRpekEA0ftChjfEaF9/Y+QJEc/wFR7RAEa8lYByuUIe2g==
+prebuild-install@^6.0.0:
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-6.0.1.tgz#5902172f7a40eb67305b96c2a695db32636ee26d"
+  integrity sha512-7GOJrLuow8yeiyv75rmvZyeMGzl8mdEX5gY69d6a6bHWmiPevwqFw+tQavhK0EYMaSg3/KD24cWqeQv1EWsqDQ==
   dependencies:
     detect-libc "^1.0.3"
     expand-template "^2.0.3"
     github-from-package "0.0.0"
-    minimist "^1.2.0"
-    mkdirp "^0.5.1"
+    minimist "^1.2.3"
+    mkdirp-classic "^0.5.3"
     napi-build-utils "^1.0.1"
     node-abi "^2.7.0"
     noop-logger "^0.1.1"
