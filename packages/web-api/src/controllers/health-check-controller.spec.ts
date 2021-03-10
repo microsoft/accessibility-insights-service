@@ -40,7 +40,7 @@ describe(HealthCheckController, () => {
             urlToScan: 'https://www.bing.com',
             logQueryTimeRange: 'P1D',
             environmentDefinition: 'canary',
-            consolidatedReportId: 'somereportid',
+            consolidatedIdBase: 'somereportid',
             scanNotifyApiEndpoint: '/some-endpoint',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',

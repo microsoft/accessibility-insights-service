@@ -11,6 +11,7 @@ import { TestContextData, TestEnvironment, TestGroupName } from 'functional-test
 import { Logger } from 'logger';
 import { ScanRunResultResponse, ScanCompletedNotification } from 'service-library';
 import { IMock, It, Mock, Times } from 'typemoq';
+import * as MockDate from 'mockdate';
 import { OrchestrationSteps } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
@@ -63,6 +64,7 @@ export interface OrchestratorStepsCallCount {
 }
 
 const baseWebApiUrl = 'some-url';
+const dateNow = new Date(1, 2, 3, 4);
 
 class OrchestrationStepsStub implements OrchestrationSteps {
     public orchestratorStepsCallCount: OrchestratorStepsCallCount = {
@@ -150,7 +152,8 @@ class OrchestrationStepsStub implements OrchestrationSteps {
         this.orchestratorStepsCallCount.callSubmitScanRequest += 1;
         this.throwExceptionIfExpected();
         expect(url).toBe(this.availabilityTestConfig.urlToScan);
-        expect(reportId).toBe(this.availabilityTestConfig.consolidatedReportId);
+        const expectedConsolidatedId = `${this.availabilityTestConfig.consolidatedIdBase}-${dateNow.toDateString()}`;
+        expect(reportId).toBe(expectedConsolidatedId);
         expect(scanNotifyUrl).toEqual(`${baseWebApiUrl}${this.availabilityTestConfig.scanNotifyFailApiEndpoint}`);
 
         return yield this.scanId;
@@ -198,7 +201,7 @@ describe('HealthMonitorOrchestrationController', () => {
             maxScanWaitTimeInSeconds: 20,
             logQueryTimeRange: 'P1D',
             environmentDefinition: TestEnvironment[TestEnvironment.canary],
-            consolidatedReportId: 'somereportid',
+            consolidatedIdBase: 'somereportid',
             scanNotifyApiEndpoint: '/some-endpoint',
             maxScanCompletionNotificationWaitTimeInSeconds: 30,
             scanNotifyFailApiEndpoint: '/some-fail-endpoint',
@@ -229,6 +232,8 @@ describe('HealthMonitorOrchestrationController', () => {
                 orchestratorIterator = new GeneratorExecutor(fn(contextStub));
             })
             .returns(() => orchestratorGeneratorMock.object);
+
+        MockDate.set(dateNow);
 
         testSubject = new TestableHealthMonitorOrchestrationController(
             orchestratorStepsStub,
