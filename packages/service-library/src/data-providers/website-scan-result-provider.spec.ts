@@ -93,6 +93,24 @@ describe(WebsiteScanResultProvider, () => {
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
     });
 
+    it('merge website scan result document with db base document and reload', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
+        setupRetryHelperMock();
+
+        websiteScanResultProvider.read = jest.fn().mockImplementationOnce(async (websiteScanId: string, readCompleteDocument: boolean) => {
+            return websiteScanId === websiteScanResultBaseId && readCompleteDocument
+                ? Promise.resolve(websiteScanResult)
+                : Promise.reject('Unexpected read() method invocation');
+        });
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, true);
+        expect(actualWebsiteScanResult).toEqual(websiteScanResult);
+    });
+
     it('write website scan result documents in batch', async () => {
         setupDocumentEntities();
         setupHashGeneratorMock();

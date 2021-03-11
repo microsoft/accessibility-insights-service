@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-import _, { isNil } from 'lodash';
+import _ from 'lodash';
 
 export type DiscoveredUrlProcessor = typeof discoveredUrlProcessor;
 
 export function discoveredUrlProcessor(discoveredUrls: string[], urlCrawlLimit: number, knownUrls?: string[]): string[] {
-    let processedUrls = discoveredUrls;
-    if (isNil(discoveredUrls)) {
+    if (_.isNil(discoveredUrls)) {
         return [];
     }
 
-    if (!isNil(knownUrls)) {
+    let processedUrls = discoveredUrls;
+    if (!_.isNil(knownUrls)) {
         processedUrls = removeUrlsFromList(discoveredUrls, knownUrls);
     }
 
@@ -27,7 +27,7 @@ function limitNumUrls(urlList: string[], numUrls: number): string[] {
 }
 
 function getUrlLimit(urlCrawlLimit: number, knownUrls?: string[]): number {
-    const numKnownPages = isNil(knownUrls) ? 0 : knownUrls.length;
+    const numKnownPages = _.isNil(knownUrls) ? 0 : knownUrls.length;
 
     return Math.max(urlCrawlLimit - numKnownPages, 0);
 }

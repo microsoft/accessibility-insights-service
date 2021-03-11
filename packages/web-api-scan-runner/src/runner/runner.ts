@@ -138,9 +138,7 @@ export class Runner {
                 ],
             };
 
-            this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult);
-
-            return this.websiteScanResultProvider.read(websiteScanRef.id, true);
+            return this.websiteScanResultProvider.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult, true);
         }
 
         return undefined;

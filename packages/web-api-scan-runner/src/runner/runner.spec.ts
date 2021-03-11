@@ -213,10 +213,7 @@ function setupUpdateScanResult(): void {
         websiteScanResult = {
             id: 'websiteScanResultId',
         } as WebsiteScanResult;
-        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult)))
-            .returns(() => Promise.resolve(websiteScanResult))
-            .verifiable();
-        WebsiteScanResultProviderMock.setup((o) => o.read(websiteScanRef.id, true))
+        WebsiteScanResultProviderMock.setup((o) => o.mergeOrCreate(scanMetadata.id, It.isValue(updatedWebsiteScanResult), true))
             .returns(() => Promise.resolve(websiteScanResult))
             .verifiable();
     }
