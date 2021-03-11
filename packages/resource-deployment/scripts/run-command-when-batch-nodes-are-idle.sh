@@ -60,7 +60,7 @@ waitForNodesToGoIdleByNodeType() {
     local nodeType=$2
 
     local isIdle=false
-    local waitTime=1800
+    local waitTime=2700
     local nodeTypeContentSelector="[?poolId=='$pool']|[0].$nodeType"
 
     echo "Waiting for $nodeType nodes under $pool to go idle"
