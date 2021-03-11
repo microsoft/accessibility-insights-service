@@ -19,8 +19,5 @@
     },
     "availabilityTestConfig": {
         "environmentDefinition": "canary"
-    },
-    "crawlConfig": {
-        "urlCrawlLimit": 100
     }
 }

@@ -282,7 +282,7 @@ export class ServiceConfiguration {
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',
-                    default: 900,
+                    default: 1800,
                     doc: 'Maximum wait time for fetching scan status of the submitted request',
                 },
                 maxScanCompletionNotificationWaitTimeInSeconds: {
@@ -319,8 +319,8 @@ export class ServiceConfiguration {
             crawlConfig: {
                 urlCrawlLimit: {
                     format: 'int',
-                    default: 100,
-                    doc: 'The max number of URLs that will be discovered for a deep scan',
+                    default: 10,
+                    doc: 'The maximum number of URLs that will be discovered for a deep scan',
                 },
             },
         };

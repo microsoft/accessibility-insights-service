@@ -69,11 +69,23 @@ export class WebsiteScanResultProvider {
      * Source document properties that resolve to undefined are skipped if a destination document value exists.
      * Will remove all falsey (false, null, 0, "", undefined, and NaN) values from document's array type properties
      */
-    public async mergeOrCreate(scanId: string, websiteScanResult: Partial<WebsiteScanResult>): Promise<WebsiteScanResultBase> {
+    public async mergeOrCreate(
+        scanId: string,
+        websiteScanResult: Partial<WebsiteScanResult>,
+        readCompleteDocument: boolean = false,
+    ): Promise<WebsiteScanResultBase> {
         const dbDocument = this.convertToDbDocument(scanId, websiteScanResult);
 
         return (await this.retryHelper.executeWithRetries(
-            async () => this.mergeOrCreateImpl(dbDocument),
+            async () => {
+                if (readCompleteDocument) {
+                    const baseDocument = await this.mergeOrCreateImpl(dbDocument);
+
+                    return this.read(baseDocument.id, true);
+                } else {
+                    return this.mergeOrCreateImpl(dbDocument);
+                }
+            },
             async (err) =>
                 this.logger.logError(`Failed to update website scan result Cosmos DB document. Retrying on error.`, {
                     baseId: dbDocument?.baseDocument.id,
@@ -88,23 +100,9 @@ export class WebsiteScanResultProvider {
     }
 
     /**
-     * Merges the `WebsiteScanResult` documents in a memory.
+     *
+     * Sets the required storage document properties.
      */
-    public mergeWith(websiteScanResult: WebsiteScanResult, websiteScanResultUpdate: Partial<WebsiteScanResult>): WebsiteScanResult {
-        const targetDocument = this.convertToDbDocument(undefined, websiteScanResult);
-        const sourceDocument = this.convertToDbDocument(undefined, websiteScanResultUpdate);
-        const baseDocument = this.websiteScanResultAggregator.mergeBaseDocument(
-            sourceDocument.baseDocument,
-            targetDocument.baseDocument,
-        ) as WebsiteScanResultBase;
-        const partDocument = this.websiteScanResultAggregator.mergePartDocument(
-            sourceDocument.partDocument,
-            targetDocument.partDocument,
-        ) as WebsiteScanResultPartModel;
-
-        return { ...baseDocument, ...partDocument };
-    }
-
     public normalizeToDbDocument(websiteScanResult: Partial<WebsiteScanResult>): WebsiteScanResultBase {
         const documentId = this.getWebsiteScanId(websiteScanResult);
         const partitionKey = websiteScanResult.partitionKey ?? this.getPartitionKey(documentId);

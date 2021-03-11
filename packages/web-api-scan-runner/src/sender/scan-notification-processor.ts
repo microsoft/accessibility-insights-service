@@ -73,6 +73,7 @@ export class ScanNotificationProcessor {
         if (deepScanCompleted) {
             this.logger.logInfo(`Sending scan completion notification message for a deep scan.`, {
                 deepScanId: websiteScanResult?.deepScanId,
+                scannedPages: websiteScanResult.pageScans.length.toString(),
                 scanNotifyUrl: pageScanResult.notification.scanNotifyUrl,
             });
         }

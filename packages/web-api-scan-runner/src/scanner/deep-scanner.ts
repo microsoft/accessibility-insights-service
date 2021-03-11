@@ -67,10 +67,7 @@ export class DeepScanner {
             discoveryPatterns: discoveryPatterns,
         };
 
-        await this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate);
-
-        // merge previously read db document with the current update to avoid full db document read operation
-        return this.websiteScanResultProvider.mergeWith(websiteScanResult, websiteScanResultUpdate);
+        return this.websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResultUpdate, true);
     }
 
     private async readWebsiteScanResult(pageScanResult: OnDemandPageScanResult): Promise<WebsiteScanResult> {

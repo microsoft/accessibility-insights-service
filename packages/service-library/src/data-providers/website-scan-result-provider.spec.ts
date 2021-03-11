@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
-import { IMock, Mock, It, Times } from 'typemoq';
+import { IMock, Mock, It } from 'typemoq';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import {
     WebsiteScanResult,
@@ -93,6 +93,24 @@ describe(WebsiteScanResultProvider, () => {
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentMerged);
     });
 
+    it('merge website scan result document with db base document and reload', async () => {
+        setupDocumentEntities();
+        setupHashGeneratorMock();
+        setupWebsiteScanResultAggregatorMock('merge');
+        setupPartitionKeyFactoryMock();
+        setupCosmosContainerClientMock('merge');
+        setupRetryHelperMock();
+
+        websiteScanResultProvider.read = jest.fn().mockImplementationOnce(async (websiteScanId: string, readCompleteDocument: boolean) => {
+            return websiteScanId === websiteScanResultBaseId && readCompleteDocument
+                ? Promise.resolve(websiteScanResult)
+                : Promise.reject('Unexpected read() method invocation');
+        });
+
+        const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult, true);
+        expect(actualWebsiteScanResult).toEqual(websiteScanResult);
+    });
+
     it('write website scan result documents in batch', async () => {
         setupDocumentEntities();
         setupHashGeneratorMock();
@@ -128,65 +146,6 @@ describe(WebsiteScanResultProvider, () => {
         const actualWebsiteScanResult = await websiteScanResultProvider.mergeOrCreate(scanId, websiteScanResult);
 
         expect(actualWebsiteScanResult).toEqual(websiteScanResultBaseDbDocumentCreated);
-    });
-
-    it('merge website documents', () => {
-        const target = {
-            id: websiteScanResultBaseId,
-            knownPages: ['page1'],
-        } as WebsiteScanResult;
-        const source = {
-            id: websiteScanResultBaseId,
-            knownPages: ['page2'],
-        } as Partial<WebsiteScanResult>;
-        const expectedResult = {
-            id: websiteScanResultBaseId,
-            knownPages: ['page1', 'page2'],
-        } as WebsiteScanResult;
-        websiteScanResultAggregatorMock
-            .setup((o) =>
-                o.mergeBaseDocument(
-                    { id: websiteScanResultBaseId, itemType: ItemType.websiteScanResult, partitionKey: undefined },
-                    { id: websiteScanResultBaseId, itemType: ItemType.websiteScanResult, partitionKey: undefined },
-                ),
-            )
-            .returns(() => {
-                return { id: websiteScanResultBaseId };
-            })
-            .verifiable();
-        websiteScanResultAggregatorMock
-            .setup((o) =>
-                o.mergePartDocument(
-                    {
-                        baseId: websiteScanResultBaseId,
-                        id: websiteScanResultPartId,
-                        itemType: ItemType.websiteScanResultPart,
-                        partitionKey: undefined,
-                        scanId: undefined,
-                        knownPages: ['page2'],
-                    },
-                    {
-                        baseId: websiteScanResultBaseId,
-                        id: websiteScanResultPartId,
-                        itemType: ItemType.websiteScanResultPart,
-                        partitionKey: undefined,
-                        scanId: undefined,
-                        knownPages: ['page1'],
-                    },
-                ),
-            )
-            .returns(() => {
-                return { knownPages: ['page1', 'page2'] };
-            })
-            .verifiable();
-        hashGeneratorMock
-            .setup((o) => o.getWebsiteScanResultPartDocumentId(websiteScanResultBaseId, undefined))
-            .returns(() => websiteScanResultPartId)
-            .verifiable(Times.exactly(2));
-
-        const actualResult = websiteScanResultProvider.mergeWith(target, source);
-
-        expect(actualResult).toEqual(expectedResult);
     });
 
     it('read partial website scan result', async () => {

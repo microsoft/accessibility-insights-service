@@ -185,12 +185,8 @@ describe(DeepScanner, () => {
             discoveryPatterns: crawlDiscoveryPatterns,
         };
         websiteScanResultProviderMock
-            .setup((o) => o.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult))
+            .setup((o) => o.mergeOrCreate(scanMetadata.id, updatedWebsiteScanResult, true))
             .returns(() => Promise.resolve(websiteScanResultDbDocument))
-            .verifiable();
-        websiteScanResultProviderMock
-            .setup((o) => o.mergeWith(websiteScanResult, updatedWebsiteScanResult))
-            .returns(() => websiteScanResultDbDocument)
             .verifiable();
     }
 
