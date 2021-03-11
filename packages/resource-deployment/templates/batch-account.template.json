@@ -72,11 +72,11 @@
                 "description": "vmSize for on-demand-scan-request-pool"
             }
         },
-        "onDemandScanRequestPoolMaxTasksPerNode": {
+        "onDemandScanRequestPoolTaskSlotsPerNode": {
             "defaultValue": "2",
             "type": "string",
             "metadata": {
-                "description": "maxTasksPerNode for on-demand-scan-request-pool"
+                "description": "taskSlotsPerNode for on-demand-scan-request-pool"
             }
         },
         "onDemandUrlScanPoolNodes": {
@@ -93,11 +93,11 @@
                 "description": "vmSize for on-demand-scan-request-pool"
             }
         },
-        "onDemandUrlScanPoolMaxTasksPerNode": {
-            "defaultValue": "2",
+        "onDemandUrlScanPoolTaskSlotsPerNode": {
+            "defaultValue": "4",
             "type": "string",
             "metadata": {
-                "description": "maxTasksPerNode for on-demand-scan-request-pool"
+                "description": "taskSlotsPerNode for on-demand-scan-request-pool"
             }
         }
     },
@@ -109,7 +109,7 @@
     "resources": [
         {
             "type": "Microsoft.Batch/batchAccounts",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[parameters('batchAccount')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -125,13 +125,13 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandUrlScanPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
-                "maxTasksPerNode": "[parameters('onDemandUrlScanPoolMaxTasksPerNode')]",
+                "taskSlotsPerNode": "[parameters('onDemandUrlScanPoolTaskSlotsPerNode')]",
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"
                 },
@@ -199,13 +199,13 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
                 "vmSize": "[parameters('onDemandScanRequestPoolVmSize')]",
                 "interNodeCommunication": "Disabled",
-                "maxTasksPerNode": "[parameters('onDemandScanRequestPoolMaxTasksPerNode')]",
+                "taskSlotsPerNode": "[parameters('onDemandScanRequestPoolTaskSlotsPerNode')]",
                 "taskSchedulingPolicy": {
                     "nodeFillType": "Spread"
                 },

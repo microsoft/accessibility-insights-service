@@ -96,7 +96,7 @@ function checkIfPoolConfigOutdated() {
         return
     fi
 
-    compareParameterFileToDeployedConfig $poolId "maxTasksPerNode" "${poolPropertyNamePrefix}MaxTasksPerNode"
+    compareParameterFileToDeployedConfig $poolId "taskSlotsPerNode" "${poolPropertyNamePrefix}TaskSlotsPerNode"
     if [[ $poolConfigOutdated == "true" ]]; then
         return
     fi
