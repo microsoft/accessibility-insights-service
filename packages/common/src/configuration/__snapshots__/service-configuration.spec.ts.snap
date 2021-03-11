@@ -52,7 +52,7 @@ Object {
   "crawlConfig": Object {
     "urlCrawlLimit": Object {
       "default": 10,
-      "doc": "The max number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be discovered for a deep scan",
       "format": "int",
     },
   },
@@ -245,7 +245,7 @@ Object {
   "crawlConfig": Object {
     "urlCrawlLimit": Object {
       "default": 10,
-      "doc": "The max number of URLs that will be discovered for a deep scan",
+      "doc": "The maximum number of URLs that will be discovered for a deep scan",
       "format": "int",
     },
   },
