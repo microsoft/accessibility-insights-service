@@ -282,7 +282,7 @@ export class ServiceConfiguration {
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',
-                    default: 900,
+                    default: 1800,
                     doc: 'Maximum wait time for fetching scan status of the submitted request',
                 },
                 maxScanCompletionNotificationWaitTimeInSeconds: {
