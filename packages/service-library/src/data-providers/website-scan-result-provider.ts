@@ -100,24 +100,6 @@ export class WebsiteScanResultProvider {
     }
 
     /**
-     * Merges the `WebsiteScanResult` documents in a memory.
-     */
-    public mergeWith(websiteScanResult: WebsiteScanResult, websiteScanResultUpdate: Partial<WebsiteScanResult>): WebsiteScanResult {
-        const targetDocument = this.convertToDbDocument(undefined, websiteScanResult);
-        const sourceDocument = this.convertToDbDocument(undefined, websiteScanResultUpdate);
-        const baseDocument = this.websiteScanResultAggregator.mergeBaseDocument(
-            sourceDocument.baseDocument,
-            targetDocument.baseDocument,
-        ) as WebsiteScanResultBase;
-        const partDocument = this.websiteScanResultAggregator.mergePartDocument(
-            sourceDocument.partDocument,
-            targetDocument.partDocument,
-        ) as WebsiteScanResultPartModel;
-
-        return { ...baseDocument, ...partDocument };
-    }
-
-    /**
      *
      * Sets the required storage document properties.
      */
