@@ -319,8 +319,8 @@ export class ServiceConfiguration {
             crawlConfig: {
                 urlCrawlLimit: {
                     format: 'int',
-                    default: 100,
-                    doc: 'The max number of URLs that will be discovered for a deep scan',
+                    default: 10,
+                    doc: 'The maximum number of URLs that will be discovered for a deep scan',
                 },
             },
         };

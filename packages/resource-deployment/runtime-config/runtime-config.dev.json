@@ -8,7 +8,6 @@
     "queueConfig": {
         "maxQueueSize": 10
     },
-
     "scanConfig": {
         "minLastReferenceSeenInDays": 3,
         "pageRescanIntervalInDays": 3,
@@ -20,8 +19,5 @@
     },
     "availabilityTestConfig": {
         "environmentDefinition": "canary"
-    },
-    "crawlConfig": {
-        "urlCrawlLimit": 100
     }
 }
