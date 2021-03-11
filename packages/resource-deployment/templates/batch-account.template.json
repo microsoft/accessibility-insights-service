@@ -109,7 +109,7 @@
     "resources": [
         {
             "type": "Microsoft.Batch/batchAccounts",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[parameters('batchAccount')]",
             "location": "[parameters('location')]",
             "properties": {
@@ -125,7 +125,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-url-scan-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
@@ -199,7 +199,7 @@
         },
         {
             "type": "Microsoft.Batch/batchAccounts/pools",
-            "apiVersion": "2020-05-01",
+            "apiVersion": "2021-01-01",
             "name": "[concat(parameters('batchAccount'), '/on-demand-scan-request-pool')]",
             "dependsOn": ["[resourceId('Microsoft.Batch/batchAccounts', parameters('batchAccount'))]"],
             "properties": {
