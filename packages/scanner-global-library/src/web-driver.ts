@@ -9,7 +9,7 @@ import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options
 @injectable()
 export class WebDriver {
     public browser: Puppeteer.Browser;
-    private readonly browserCloseTimeout = 180000;
+    private readonly browserCloseTimeout = 60000;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
