@@ -9,7 +9,7 @@ import { defaultBrowserOptions, defaultLaunchOptions } from './puppeteer-options
 @injectable()
 export class WebDriver {
     public browser: Puppeteer.Browser;
-    private readonly browserCloseTimeout = 180000;
+    private readonly browserCloseTimeout = 60000;
 
     constructor(
         @inject(PromiseUtils) private readonly promiseUtils: PromiseUtils,
@@ -39,7 +39,7 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.browser.close(), this.browserCloseTimeout, async () => {
+            await this.promiseUtils.waitFor(this.closeBrowser(), this.browserCloseTimeout, async () => {
                 this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeout} ms.`);
                 if (this.browser.process()) {
                     this.logger?.logInfo('Sending kill signal to browser process');
@@ -49,5 +49,11 @@ export class WebDriver {
 
             this.logger?.logInfo('Chromium browser instance stopped.');
         }
+    }
+
+    private async closeBrowser(): Promise<void> {
+        const browserPages = await this.browser.pages();
+        await Promise.all(browserPages.map((p) => p.close()));
+        await this.browser.close();
     }
 }

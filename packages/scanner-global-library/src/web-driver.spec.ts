@@ -16,8 +16,8 @@ type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppetee
 
 class PuppeteerBrowserMock {
     public isClosed: boolean;
-
-    public constructor(public childProcess: ChildProcess) {}
+    public browserPages: Puppeteer.Page[];
+    public childProcess: ChildProcess;
 
     public async close(): Promise<void> {
         this.isClosed = true;
@@ -32,6 +32,10 @@ class PuppeteerBrowserMock {
     public process(): ChildProcess {
         return this.childProcess;
     }
+
+    public async pages(): Promise<Puppeteer.Page[]> {
+        return this.browserPages;
+    }
 }
 
 let testSubject: WebDriver;
@@ -40,11 +44,9 @@ let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
 let promiseUtilsMock: IMock<PromiseUtils>;
-let browserProcessMock: IMock<ChildProcess>;
 
 beforeEach(() => {
-    browserProcessMock = Mock.ofInstance({ kill: () => null } as ChildProcess, MockBehavior.Strict);
-    puppeteerBrowserMock = new PuppeteerBrowserMock(browserProcessMock.object);
+    puppeteerBrowserMock = new PuppeteerBrowserMock();
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
     promiseUtilsMock = Mock.ofType<PromiseUtils>();
@@ -58,45 +60,63 @@ beforeEach(() => {
 });
 
 describe('WebDriver', () => {
-    it('should close puppeteer browser', async () => {
-        setupPromiseUtils(false);
-        puppeteerLaunchMock
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
+    describe('close', () => {
+        let pageMock: IMock<Puppeteer.Page>;
+        let browserProcessMock: IMock<ChildProcess>;
 
-        await testSubject.launch();
-        await testSubject.close();
+        beforeEach(() => {
+            pageMock = Mock.ofType<Puppeteer.Page>();
+            puppeteerBrowserMock.browserPages = [pageMock.object];
 
-        expect(puppeteerBrowserMock.isClosed).toEqual(true);
-    });
+            browserProcessMock = Mock.ofInstance({ kill: () => null } as ChildProcess, MockBehavior.Strict);
+            puppeteerBrowserMock.childProcess = browserProcessMock.object;
+        });
 
-    it('should kill browser process if close times out', async () => {
-        setupPromiseUtils(true);
-        puppeteerLaunchMock
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
-        browserProcessMock.setup((bp) => bp.kill('SIGINT')).verifiable();
+        it('should close puppeteer browser', async () => {
+            setupPromiseUtils(false);
+            puppeteerLaunchMock
+                .setup(async (o) => o(It.isAny()))
+                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+                .verifiable(Times.once());
+            pageMock
+                .setup((p) => p.close())
+                .returns(() => Promise.resolve())
+                .verifiable();
 
-        await testSubject.launch();
-        await testSubject.close();
+            await testSubject.launch();
+            await testSubject.close();
 
-        browserProcessMock.verifyAll();
-    });
+            expect(puppeteerBrowserMock.isClosed).toEqual(true);
+            pageMock.verifyAll();
+        });
 
-    it('should do nothing if close times out and browser process is not found', async () => {
-        setupPromiseUtils(true);
-        puppeteerBrowserMock.childProcess = undefined;
-        puppeteerLaunchMock
-            .setup(async (o) => o(It.isAny()))
-            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
-            .verifiable(Times.once());
+        it('should kill browser process if close times out', async () => {
+            setupPromiseUtils(true);
+            puppeteerLaunchMock
+                .setup(async (o) => o(It.isAny()))
+                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+                .verifiable(Times.once());
+            browserProcessMock.setup((bp) => bp.kill('SIGINT')).verifiable();
 
-        await testSubject.launch();
-        await testSubject.close();
+            await testSubject.launch();
+            await testSubject.close();
 
-        browserProcessMock.verifyAll();
+            browserProcessMock.verifyAll();
+        });
+
+        it('should do nothing if close times out and browser process is not found', async () => {
+            setupPromiseUtils(true);
+            puppeteerBrowserMock.childProcess = undefined;
+            puppeteerLaunchMock
+                .setup(async (o) => o(It.isAny()))
+                .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+                .verifiable(Times.once());
+
+            await testSubject.launch();
+            await testSubject.close();
+
+            browserProcessMock.verifyAll();
+        });
     });
 
     it('should launch puppeteer browser', async () => {
@@ -126,11 +146,11 @@ describe('WebDriver', () => {
     function setupPromiseUtils(simulateTimeout: boolean): void {
         promiseUtilsMock
             .setup((p) => p.waitFor(It.isAny(), It.isAny(), It.isAny()))
-            .callback(async (fn, timeout, onTimeoutCallback) => {
+            .returns(async (fn, timeout, onTimeoutCallback) => {
                 if (simulateTimeout) {
-                    await onTimeoutCallback();
+                    return onTimeoutCallback();
                 } else {
-                    await fn();
+                    return fn;
                 }
             });
     }
