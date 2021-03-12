@@ -39,7 +39,7 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.browser.close(), this.browserCloseTimeout, async () => {
+            await this.promiseUtils.waitFor(this.tryCloseBrowser(), this.browserCloseTimeout, async () => {
                 this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeout} ms.`);
                 if (this.browser.process()) {
                     this.logger?.logInfo('Sending kill signal to browser process');
@@ -49,5 +49,11 @@ export class WebDriver {
 
             this.logger?.logInfo('Chromium browser instance stopped.');
         }
+    }
+
+    private async tryCloseBrowser(): Promise<void> {
+        const browserPages = await this.browser.pages();
+        await Promise.all(browserPages.map((p) => p.close()));
+        await this.browser.close();
     }
 }
