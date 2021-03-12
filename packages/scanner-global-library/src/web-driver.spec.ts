@@ -2,8 +2,10 @@
 // Licensed under the MIT License.
 import 'reflect-metadata';
 
+import { ChildProcess } from 'child_process';
 import * as Puppeteer from 'puppeteer';
-import { IMock, It, Mock, Times } from 'typemoq';
+import { IMock, It, Mock, Times, MockBehavior } from 'typemoq';
+import { PromiseUtils } from 'common';
 import { MockableLogger } from './test-utilities/mockable-logger';
 import { WebDriver } from './web-driver';
 
@@ -15,6 +17,8 @@ type puppeteerConnect = (options?: Puppeteer.ConnectOptions) => Promise<Puppetee
 class PuppeteerBrowserMock {
     public isClosed: boolean;
 
+    public constructor(public childProcess: ChildProcess) {}
+
     public async close(): Promise<void> {
         this.isClosed = true;
 
@@ -24,6 +28,10 @@ class PuppeteerBrowserMock {
     public async userAgent(): Promise<string> {
         return 'HeadlessChrome user agent string';
     }
+
+    public process(): ChildProcess {
+        return this.childProcess;
+    }
 }
 
 let testSubject: WebDriver;
@@ -31,22 +39,27 @@ let loggerMock: IMock<MockableLogger>;
 let puppeteerBrowserMock: PuppeteerBrowserMock;
 let puppeteerLaunchMock: IMock<puppeteerLaunch>;
 let puppeteerConnectMock: IMock<puppeteerConnect>;
+let promiseUtilsMock: IMock<PromiseUtils>;
+let browserProcessMock: IMock<ChildProcess>;
 
 beforeEach(() => {
-    puppeteerBrowserMock = new PuppeteerBrowserMock();
+    browserProcessMock = Mock.ofInstance({ kill: () => null } as ChildProcess, MockBehavior.Strict);
+    puppeteerBrowserMock = new PuppeteerBrowserMock(browserProcessMock.object);
     puppeteerLaunchMock = Mock.ofType<puppeteerLaunch>();
     puppeteerConnectMock = Mock.ofType<puppeteerConnect>();
+    promiseUtilsMock = Mock.ofType<PromiseUtils>();
 
     const puppeteer = Puppeteer;
     puppeteer.launch = puppeteerLaunchMock.object;
     puppeteer.connect = puppeteerConnectMock.object;
 
     loggerMock = Mock.ofType(MockableLogger);
-    testSubject = new WebDriver(loggerMock.object, puppeteer);
+    testSubject = new WebDriver(promiseUtilsMock.object, loggerMock.object, puppeteer);
 });
 
 describe('WebDriver', () => {
     it('should close puppeteer browser', async () => {
+        setupPromiseUtils(false);
         puppeteerLaunchMock
             .setup(async (o) => o(It.isAny()))
             .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
@@ -56,6 +69,34 @@ describe('WebDriver', () => {
         await testSubject.close();
 
         expect(puppeteerBrowserMock.isClosed).toEqual(true);
+    });
+
+    it('should kill browser process if close times out', async () => {
+        setupPromiseUtils(true);
+        puppeteerLaunchMock
+            .setup(async (o) => o(It.isAny()))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+        browserProcessMock.setup((bp) => bp.kill('SIGINT')).verifiable();
+
+        await testSubject.launch();
+        await testSubject.close();
+
+        browserProcessMock.verifyAll();
+    });
+
+    it('should do nothing if close times out and browser process is not found', async () => {
+        setupPromiseUtils(true);
+        puppeteerBrowserMock.childProcess = undefined;
+        puppeteerLaunchMock
+            .setup(async (o) => o(It.isAny()))
+            .returns(async () => Promise.resolve(<Puppeteer.Browser>(<unknown>puppeteerBrowserMock)))
+            .verifiable(Times.once());
+
+        await testSubject.launch();
+        await testSubject.close();
+
+        browserProcessMock.verifyAll();
     });
 
     it('should launch puppeteer browser', async () => {
@@ -81,4 +122,16 @@ describe('WebDriver', () => {
         expect(browser).toEqual(puppeteerBrowserMock);
         puppeteerLaunchMock.verifyAll();
     });
+
+    function setupPromiseUtils(simulateTimeout: boolean): void {
+        promiseUtilsMock
+            .setup((p) => p.waitFor(It.isAny(), It.isAny(), It.isAny()))
+            .callback(async (fn, timeout, onTimeoutCallback) => {
+                if (simulateTimeout) {
+                    await onTimeoutCallback();
+                } else {
+                    await fn();
+                }
+            });
+    }
 });
