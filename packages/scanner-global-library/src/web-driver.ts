@@ -39,7 +39,7 @@ export class WebDriver {
 
     public async close(): Promise<void> {
         if (this.browser !== undefined) {
-            await this.promiseUtils.waitFor(this.tryCloseBrowser(), this.browserCloseTimeout, async () => {
+            await this.promiseUtils.waitFor(this.closeBrowser(), this.browserCloseTimeout, async () => {
                 this.logger?.logError(`Browser failed to close with timeout of ${this.browserCloseTimeout} ms.`);
                 if (this.browser.process()) {
                     this.logger?.logInfo('Sending kill signal to browser process');
