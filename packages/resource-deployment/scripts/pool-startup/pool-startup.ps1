@@ -19,7 +19,7 @@ function exitWithUsageInfo {
 function installBootstrapPackages() {
     Write-Output "Installing az cli"
     Invoke-WebRequest -Uri https://aka.ms/installazurecliwindows -OutFile .\AzureCLI.msi; Start-Process msiexec.exe -Wait -ArgumentList '/I AzureCLI.msi /quiet'; rm .\AzureCLI.msi
-    az upgrade
+    az version
 }
 
 
