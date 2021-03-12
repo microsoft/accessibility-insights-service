@@ -46,7 +46,13 @@ export class WebsiteScanResultAggregator {
         });
 
         if (mergedDocument.knownPages !== undefined) {
-            mergedDocument.knownPages = _.uniq(mergedDocument.knownPages);
+            mergedDocument.knownPages = _.uniqWith(mergedDocument.knownPages, (a, b) => {
+                if (a === undefined || b === undefined) {
+                    return false;
+                }
+
+                return a.toLocaleLowerCase() === b.toLocaleLowerCase();
+            });
         }
 
         if (mergedDocument.pageScans !== undefined) {

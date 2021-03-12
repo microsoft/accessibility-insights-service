@@ -74,7 +74,7 @@ describe(WebsiteScanResultAggregator, () => {
 
     it('merge website part document', () => {
         const source = {
-            knownPages: ['new page', 'existing page', null /* should remove falsey value */],
+            knownPages: ['new page', 'existing page', undefined, null /* should remove falsey value */, 'Various Case Page'],
             pageScans: [
                 {
                     url: 'new url',
@@ -96,7 +96,7 @@ describe(WebsiteScanResultAggregator, () => {
             ],
         } as WebsiteScanResultPart;
         const target = {
-            knownPages: ['existing page', 'old page', null /* should remove falsey value */],
+            knownPages: ['existing page', 'old page', null, undefined /* should remove falsey value */, 'various case page'],
             pageScans: [
                 {
                     url: 'existing url',
@@ -113,7 +113,7 @@ describe(WebsiteScanResultAggregator, () => {
             ],
         } as WebsiteScanResultPart;
         const expectedDocument = {
-            knownPages: ['existing page', 'old page', 'new page'],
+            knownPages: ['existing page', 'old page', 'various case page', 'new page'],
             pageScans: [
                 {
                     url: 'existing url',
