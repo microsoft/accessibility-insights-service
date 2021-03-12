@@ -51,7 +51,7 @@ export class WebDriver {
         }
     }
 
-    private async tryCloseBrowser(): Promise<void> {
+    private async closeBrowser(): Promise<void> {
         const browserPages = await this.browser.pages();
         await Promise.all(browserPages.map((p) => p.close()));
         await this.browser.close();
