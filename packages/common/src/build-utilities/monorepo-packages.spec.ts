@@ -14,7 +14,6 @@ describe('listMonorepoPackageNames', () => {
               "e2e-web-apis",
               "functional-tests",
               "health-client",
-              "host-browser-service",
               "logger",
               "resource-deployment",
               "scanner-global-library",
