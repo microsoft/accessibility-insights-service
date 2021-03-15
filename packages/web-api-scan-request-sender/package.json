@@ -19,7 +19,7 @@
     "bugs": {
         "url": "https://github.com/Microsoft/accessibility-insights-service/issues"
     },
-    "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/master/packages/web-api-scan-request-sender#readme",
+    "homepage": "https://github.com/Microsoft/accessibility-insights-service/tree/main/packages/web-api-scan-request-sender#readme",
     "devDependencies": {
         "@types/jest": "^26.0.20",
         "copy-webpack-plugin": "^7.0.0",

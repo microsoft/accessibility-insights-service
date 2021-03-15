@@ -5,7 +5,7 @@ Licensed under the MIT License.
 
 # Accessibility Insights Service Scan REST API
 
-The Scan REST API is implemented as a set of Azure Functions REST endpoints as defined in [REST API contract](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/api-contracts).
+The Scan REST API is implemented as a set of Azure Functions REST endpoints as defined in [REST API contract](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/api-contracts).
 
 ## Deployment
 
@@ -13,7 +13,7 @@ There are several options to deploy Azure Functions. Some of them are using [Vis
 
 The example below will use Azure Functions Core Tools. Install required packages following the steps from the guide [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools).
 
-Build the [web-api](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/web-api) package from a command console:
+Build the [web-api](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/web-api) package from a command console:
 
 ```bash
         cd accessibility-insights-service/packages/web-api

@@ -1,5 +1,5 @@
 {
-    "codebaseName": "accessibility-insights-service_master",
+    "codebaseName": "accessibility-insights-service_main",
     "notificationAliases": ["a11y-services-dev@microsoft.com"],
     "codebaseAdmins": ["REDMOND\\a11y-services-dev"],
     "instanceUrl": "https://mseng.visualstudio.com/",
