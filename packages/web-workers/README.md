@@ -13,7 +13,7 @@ There are several options to deploy Azure Functions. Some of them are using [Vis
 
 The example below will use Azure Functions Core Tools. Install required packages following the steps from the guide [here](https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local#install-the-azure-functions-core-tools).
 
-Build the [apps](https://github.com/microsoft/accessibility-insights-service/tree/master/packages/web-workers) package from a command console:
+Build the [apps](https://github.com/microsoft/accessibility-insights-service/tree/main/packages/web-workers) package from a command console:
 
 ```bash
         cd accessibility-insights-service/packages/web-workers

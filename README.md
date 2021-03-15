@@ -5,8 +5,8 @@ Licensed under the MIT License.
 
 # ![Product Logo](./icons/brand/blue/brand-blue-48px.png) Accessibility Insights Service
 
-[![Build Status](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_apis/build/status/Accessibility-Insights-Service%20CI?branchName=master)](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_build/latest?definitionId=28&branchName=master)
-[![codecov](https://codecov.io/gh/microsoft/accessibility-insights-service/branch/master/graph/badge.svg)](https://codecov.io/gh/microsoft/accessibility-insights-service)
+[![Build Status](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_apis/build/status/Accessibility-Insights-Service%20CI?branchName=main)](https://dev.azure.com/accessibility-insights/Accessibility%20Insights%20Service/_build/latest?definitionId=28&branchName=main)
+[![codecov](https://codecov.io/gh/microsoft/accessibility-insights-service/branch/main/graph/badge.svg)](https://codecov.io/gh/microsoft/accessibility-insights-service)
 [![Dependabot Status](https://api.dependabot.com/badges/status?host=github&repo=microsoft/accessibility-insights-service)](https://dependabot.com)
 
 Accessibility Insights Service is a service that can be used to scan websites for accessibility issues on a periodic basis. It is Typescript project with shell scripts for install and update scenarios.
@@ -88,7 +88,7 @@ This project can be run in an Azure environment and can be set up easily using t
 
 ## Deployment
 
--   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/master/packages/resource-deployment/README.md) to deploy required Azure resources.
+-   Follow this [README](https://github.com/Microsoft/accessibility-insights-service/blob/main/packages/resource-deployment/README.md) to deploy required Azure resources.
 
 ## Debugging
 
@@ -113,7 +113,7 @@ During deployment, the Azure dashboard will be created to track service metrics 
 
 ## Contributing
 
-All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/accessibility-insights-service/blob/master/Contributing.md) page.
+All contributions are welcome! Please visit our [Contributing](https://github.com/microsoft/accessibility-insights-service/blob/main/Contributing.md) page.
 
 ## Contact us
 
