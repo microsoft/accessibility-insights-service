@@ -52,14 +52,12 @@
   resolved "https://registry.yarnpkg.com/@azure/core-asynciterator-polyfill/-/core-asynciterator-polyfill-1.0.0.tgz#dcccebb88406e5c76e0e1d52e8cc4c43a68b3ee7"
   integrity sha512-kmv8CGrPfN9SwMwrkiBK9VTQYxdFQEGe0BmQk+M8io56P9KNzpAxcWE/1fxJj7uouwN4kXF0BHW8DNlgx+wtCg==
 
-"@azure/core-auth@^1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@azure/core-auth/-/core-auth-1.1.3.tgz#94e7bbc207010e7a2fdba61565443e4e1cf1e131"
-  integrity sha512-A4xigW0YZZpkj1zK7dKuzbBpGwnhEcRk6WWuIshdHC32raR3EQ1j6VA9XZqE+RFsUgH6OAmIK5BWIz+mZjnd6Q==
+"@azure/core-auth@^1.1.3", "@azure/core-auth@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@azure/core-auth/-/core-auth-1.2.0.tgz#a5a181164e99f8446a3ccf9039345ddc9bb63bb9"
+  integrity sha512-KUl+Nwn/Sm6Lw5d3U90m1jZfNSL087SPcqHLxwn2T6PupNKmcgsEbDjHB25gDvHO4h7pBsTlrdJAY7dz+Qk8GA==
   dependencies:
     "@azure/abort-controller" "^1.0.0"
-    "@azure/core-tracing" "1.0.0-preview.8"
-    "@opentelemetry/api" "^0.6.1"
     tslib "^2.0.0"
 
 "@azure/core-http@^1.1.1", "@azure/core-http@^1.1.6", "@azure/core-http@^1.2.0":
@@ -100,15 +98,6 @@
   dependencies:
     "@azure/core-asynciterator-polyfill" "^1.0.0"
 
-"@azure/core-tracing@1.0.0-preview.8":
-  version "1.0.0-preview.8"
-  resolved "https://registry.yarnpkg.com/@azure/core-tracing/-/core-tracing-1.0.0-preview.8.tgz#1e0ff857e855edb774ffd33476003c27b5bb2705"
-  integrity sha512-ZKUpCd7Dlyfn7bdc+/zC/sf0aRIaNQMDuSj2RhYRFe3p70hVAnYGp3TX4cnG2yoEALp/LTj/XnZGQ8Xzf6Ja/Q==
-  dependencies:
-    "@opencensus/web-types" "0.0.7"
-    "@opentelemetry/api" "^0.6.1"
-    tslib "^1.10.0"
-
 "@azure/core-tracing@1.0.0-preview.9":
   version "1.0.0-preview.9"
   resolved "https://registry.yarnpkg.com/@azure/core-tracing/-/core-tracing-1.0.0-preview.9.tgz#84f3b85572013f9d9b85e1e5d89787aa180787eb"
@@ -118,12 +107,12 @@
     "@opentelemetry/api" "^0.10.2"
     tslib "^2.0.0"
 
-"@azure/cosmos@^3.9.5":
-  version "3.9.5"
-  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.9.5.tgz#1868b85758db54ae1938ece29fd25ffbe5bcc17c"
-  integrity sha512-4SjJFs9BvUX7bkU1Le/OkDIIG9ojcnSs8rZfa5V9MI9yreMOPgW7QMF0QlqecYERpueHH8zuWeBT7dwd8/U7xA==
+"@azure/cosmos@^3.10.3":
+  version "3.10.3"
+  resolved "https://registry.yarnpkg.com/@azure/cosmos/-/cosmos-3.10.3.tgz#5a6118fe177082b73704caa6d4bc2a4704294288"
+  integrity sha512-pYfOcFHitOsqt2SsHB5Et/jIqSqH7FsB1MeLrZjgV2rFfxPPUWiedgMu79jFgTAmiVXOznTFj8s3CdS0cLQ4EA==
   dependencies:
-    "@types/debug" "^4.1.4"
+    "@azure/core-auth" "^1.2.0"
     debug "^4.1.1"
     fast-json-stable-stringify "^2.0.0"
     jsbi "^3.1.3"
@@ -2390,22 +2379,10 @@
   dependencies:
     "@opentelemetry/context-base" "^0.10.2"
 
-"@opentelemetry/api@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-0.6.1.tgz#a00b504801f408230b9ad719716fe91ad888c642"
-  integrity sha512-wpufGZa7tTxw7eAsjXJtiyIQ42IWQdX9iUQp7ACJcKo1hCtuhLU+K2Nv1U6oRwT1oAlZTE6m4CgWKZBhOiau3Q==
-  dependencies:
-    "@opentelemetry/context-base" "^0.6.1"
-
 "@opentelemetry/context-base@^0.10.2":
   version "0.10.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.10.2.tgz#55bea904b2b91aa8a8675df9eaba5961bddb1def"
   integrity sha512-hZNKjKOYsckoOEgBziGMnBcX0M7EtstnCmwz5jZUOUYwlZ+/xxX6z3jPu1XVO2Jivk0eLfuP9GP+vFD49CMetw==
-
-"@opentelemetry/context-base@^0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.6.1.tgz#b260e454ee4f9635ea024fc83be225e397f15363"
-  integrity sha512-5bHhlTBBq82ti3qPT15TRxkYTFPPQWbnkkQkmHPtqiS1XcTB69cEKd3Jm7Cfi/vkPoyxapmePE9tyA7EzLt8SQ==
 
 "@rollup/plugin-commonjs@^17.1.0":
   version "17.1.0"
@@ -2597,11 +2574,6 @@
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/@types/dateformat/-/dateformat-3.0.1.tgz#98d747a2e5e9a56070c6bf14e27bff56204e34cc"
   integrity sha512-KlPPdikagvL6ELjWsljbyDIPzNCeliYkqRpI+zea99vBBbCIA5JNshZAwQKTON139c87y9qvTFVgkFd14rtS4g==
-
-"@types/debug@^4.1.4":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
-  integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
 
 "@types/domhandler@^2.4.1":
   version "2.4.1"
