@@ -17,6 +17,7 @@ import { HashGenerator, RetryHelper } from 'common';
 import { GlobalLogger } from 'logger';
 import * as MockDate from 'mockdate';
 import _ from 'lodash';
+import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { WebsiteScanResultProvider } from './website-scan-result-provider';
 import { WebsiteScanResultAggregator } from './website-scan-result-aggregator';
@@ -162,7 +163,6 @@ describe(WebsiteScanResultProvider, () => {
     });
 
     it('read complete website scan result', async () => {
-        const query = `SELECT * FROM c WHERE c.partitionKey = "${websiteScanResultBasePartitionKey}" and c.baseId = "${websiteScanResultBaseId}" and c.itemType = "${ItemType.websiteScanResultPart}"`;
         const partDocuments = [
             {
                 id: 'id1',
@@ -187,7 +187,7 @@ describe(WebsiteScanResultProvider, () => {
             .returns(() => Promise.resolve({ item: websiteScanResultBaseDbDocumentExisting } as CosmosOperationResponse<WebsiteScanResult>))
             .verifiable();
         cosmosContainerClientMock
-            .setup(async (o) => o.queryDocuments(query, undefined))
+            .setup(async (o) => o.queryDocuments(getQuery(), undefined))
             .returns(() =>
                 Promise.resolve({
                     item: [partDocuments[0]],
@@ -197,7 +197,7 @@ describe(WebsiteScanResultProvider, () => {
             )
             .verifiable();
         cosmosContainerClientMock
-            .setup(async (o) => o.queryDocuments(query, 'continuationToken'))
+            .setup(async (o) => o.queryDocuments(getQuery(), 'continuationToken'))
             .returns(() =>
                 Promise.resolve({ item: [partDocuments[1]], continuationToken: undefined, statusCode: 200 } as CosmosOperationResponse<
                     WebsiteScanResultPart[]
@@ -394,4 +394,24 @@ function setupDocumentEntities(): void {
         itemVersion: '2',
         _etag: 'etag-merged',
     } as WebsiteScanResultBase;
+}
+
+function getQuery(): cosmos.SqlQuerySpec {
+    return {
+        query: 'SELECT * FROM c WHERE c.partitionKey = "@partitionKey" and c.baseId = "@baseId" and c.itemType = "@itemType"',
+        parameters: [
+            {
+                name: '@baseId',
+                value: websiteScanResultBaseId,
+            },
+            {
+                name: '@partitionKey',
+                value: websiteScanResultBasePartitionKey,
+            },
+            {
+                name: '@itemType',
+                value: ItemType.websiteScanResultPart,
+            },
+        ],
+    };
 }

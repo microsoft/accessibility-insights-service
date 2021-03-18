@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
 import { IMock, It, Mock, MockBehavior, Times } from 'typemoq';
+import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OnDemandPageScanRunResultProvider } from './on-demand-page-scan-run-result-provider';
 
@@ -186,17 +187,12 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup((c) =>
-                    c.queryDocuments(
-                        'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
-                        'token1',
-                    ),
-                )
+                .setup((o) => o.queryDocuments(getQuery(['partition1id1', 'partition1id2'], 'bucket1'), 'token1'))
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup((c) => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
+                .setup((o) => o.queryDocuments(getQuery(['partition2id1'], 'bucket2'), 'token1'))
                 .returns(() => Promise.reject('sample test error'))
                 .verifiable();
 
@@ -223,17 +219,12 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .verifiable(Times.exactly(2));
 
             cosmosContainerClientMock
-                .setup((c) =>
-                    c.queryDocuments(
-                        'select * from c where c.partitionKey = "bucket1" and c.id in ("partition1id1", "partition1id2")',
-                        'token1',
-                    ),
-                )
+                .setup((o) => o.queryDocuments(getQuery(['partition1id1', 'partition1id2'], 'bucket1'), 'token1'))
                 .returns(() => Promise.resolve({ item: call1Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
             cosmosContainerClientMock
-                .setup((c) => c.queryDocuments('select * from c where c.partitionKey = "bucket2" and c.id in ("partition2id1")', 'token1'))
+                .setup((o) => o.queryDocuments(getQuery(['partition2id1'], 'bucket2'), 'token1'))
                 .returns(() => Promise.resolve({ item: call2Result } as CosmosOperationResponse<any[]>))
                 .verifiable();
 
@@ -278,5 +269,21 @@ describe(OnDemandPageScanRunResultProvider, () => {
                 .returns(() => bucket)
                 .verifiable();
         });
+    }
+
+    function getQuery(scanIds: string[], partitionKey: string): cosmos.SqlQuerySpec {
+        return {
+            query: 'SELECT * FROM c WHERE c.partitionKey = "@partitionKey" and c.id IN ("@scanIds")',
+            parameters: [
+                {
+                    name: '@partitionKey',
+                    value: partitionKey,
+                },
+                {
+                    name: '@scanIds',
+                    value: scanIds.join('", "'),
+                },
+            ],
+        };
     }
 });

@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+import 'reflect-metadata';
 
 import { BlobClient, BlobServiceClient, ContainerClient } from '@azure/storage-blob';
-import 'reflect-metadata';
 import { IMock, Mock, Times } from 'typemoq';
 import { secretNames } from '../key-vault/secret-names';
 import { SecretProvider } from '../key-vault/secret-provider';

@@ -136,7 +136,6 @@ describe(registerAzureServicesToContainer, () => {
 
     describe('BlobServiceClientProvider', () => {
         const storageAccountName = 'test-storage-account-name';
-        const storageAccountKey = 'test-storage-account-key';
 
         it('creates singleton blob service client', async () => {
             const secretProviderMock: IMock<SecretProvider> = Mock.ofType(SecretProvider);
@@ -145,16 +144,6 @@ describe(registerAzureServicesToContainer, () => {
                 .setup(async (s) => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
                 .verifiable(Times.once());
-            secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
-                .returns(async () => storageAccountKey)
-                .verifiable(Times.once());
-
-            secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
-                .returns(async () => storageAccountKey)
-                .verifiable(Times.once());
-
             registerAzureServicesToContainer(container);
             stubBinding(container, SecretProvider, secretProviderMock.object);
 
@@ -172,21 +161,14 @@ describe(registerAzureServicesToContainer, () => {
 
     describe('QueueServiceURLProvider', () => {
         const storageAccountName = 'test-storage-account-name';
-        const storageAccountKey = Buffer.from('test-storage-account-key').toString('base64');
         let secretProviderMock: IMock<SecretProvider>;
 
         beforeEach(() => {
             secretProviderMock = Mock.ofType(SecretProvider);
-
             secretProviderMock
                 .setup(async (s) => s.getSecret(secretNames.storageAccountName))
                 .returns(async () => storageAccountName)
                 .verifiable(Times.once());
-            secretProviderMock
-                .setup(async (s) => s.getSecret(secretNames.storageAccountKey))
-                .returns(async () => storageAccountKey)
-                .verifiable(Times.once());
-
             registerAzureServicesToContainer(container);
             stubBinding(container, SecretProvider, secretProviderMock.object);
         });

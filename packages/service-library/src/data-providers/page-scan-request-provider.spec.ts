@@ -5,6 +5,7 @@ import 'reflect-metadata';
 import { CosmosContainerClient, CosmosOperationResponse } from 'azure-services';
 import { ItemType, OnDemandPageScanRequest, PartitionKey } from 'storage-documents';
 import { IMock, Mock, MockBehavior } from 'typemoq';
+import * as cosmos from '@azure/cosmos';
 import { PageScanRequestProvider } from './page-scan-request-provider';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
@@ -62,12 +63,7 @@ describe(PageScanRequestProvider, () => {
         } as CosmosOperationResponse<OnDemandPageScanRequest[]>;
 
         cosmosContainerClientMock
-            .setup((c) =>
-                c.queryDocuments(
-                    `SELECT TOP ${itemCount} * FROM c WHERE c.partitionKey = "${PartitionKey.pageScanRequestDocuments}" and c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority desc`,
-                    continuationToken,
-                ),
-            )
+            .setup((o) => o.queryDocuments(getQuery(itemCount), continuationToken))
             .returns(() => Promise.resolve(response))
             .verifiable();
 
@@ -94,4 +90,25 @@ describe(PageScanRequestProvider, () => {
 
         cosmosContainerClientMock.verifyAll();
     });
+
+    function getQuery(itemsCount: number): cosmos.SqlQuerySpec {
+        return {
+            query:
+                'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = "@partitionKey" and c.itemType = "@itemType" ORDER BY c.priority DESC',
+            parameters: [
+                {
+                    name: '@itemsCount',
+                    value: itemsCount,
+                },
+                {
+                    name: '@partitionKey',
+                    value: PartitionKey.pageScanRequestDocuments,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.onDemandPageScanRequest,
+                },
+            ],
+        };
+    }
 });

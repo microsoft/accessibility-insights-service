@@ -32,13 +32,12 @@ getCosmosDbAccessKey() {
     fi
 }
 
-getStorageAccessKey() {
-    storageAccountKey=$(az storage account keys list --account-name "$storageAccountName" --query "[0].value" -o tsv)
+getStorageConnectionString() {
+    storageConnectionString=$(az storage account show-connection-string --name "$storageAccountName" --resource-group "$resourceGroupName" --subscription "$subscription" --query connectionString --out tsv)
+}
 
-    if [[ -z $storageAccountKey ]]; then
-        echo "Unable to get access key for storage account $storageAccountName"
-        exit 1
-    fi
+getCosmosDbConnectionString() {
+    cosmosDbConnectionString=$(az cosmosdb keys list --type connection-strings --name "$cosmosAccountName" --resource-group "$resourceGroupName" --subscription "$subscription" --query connectionStrings[0].connectionString --out tsv)
 }
 
 getAppInsightKey() {
@@ -77,14 +76,14 @@ fi
 
 getCosmosDbUrl
 getCosmosDbAccessKey
-getStorageAccessKey
+getStorageConnectionString
+getCosmosDbConnectionString
 getAppInsightKey
 getBatchAccountEndpoint
 
-# Generate environment variable file template
-echo "
-Copy below output into .env file. Update AZ_BATCH_* variables as per debugging project.
-
+echo -e "
+Copy below output into .env file. Update AZ_BATCH_*, URL, and ID variables as needed.
+START of .env file >>> \033[32m
 
 SUBSCRIPTION=$subscription
 RESOURCE_GROUP=$resourceGroupName
@@ -108,7 +107,6 @@ COSMOS_DB_URL=$cosmosDbUrl
 COSMOS_DB_KEY=$cosmosDbAccessKey
 
 AZURE_STORAGE_NAME=$storageAccountName
-AZURE_STORAGE_KEY=$storageAccountKey
 
 AZURE_TENANT_ID=$tenant
 AZURE_CLIENT_ID=$clientId
@@ -117,4 +115,21 @@ AZURE_CLIENT_SECRET=$password
 RUNNER_PARAMETERS=
 URL=
 ID=
+DEEPSCAN=false
+
+\033[0m <<< END of .env file
+
+Copy below output into Azure Function local.settings.json configuration file.
+START of local.settings.json file >>> \033[32m
+
+{
+    \"IsEncrypted\": false,
+    \"Values\": {
+        \"FUNCTIONS_WORKER_RUNTIME\": \"node\",
+        \"AzureWebJobsStorage\": \"$storageConnectionString\",
+        \"COSMOS_CONNECTION_STRING\": \"$cosmosDbConnectionString\"
+    }
+}
+
+\033[0m <<< END of local.settings.json file
 "

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { ContainerSASPermissions, generateBlobSASQueryParameters, SASProtocol, StorageSharedKeyCredential } from '@azure/storage-blob';
 import { inject, injectable } from 'inversify';
 import moment from 'moment';
@@ -19,12 +20,13 @@ export class StorageContainerSASUrlProvider {
         const containerClient = blobServiceClient.getContainerClient(containerName);
         const accountName = await this.secretProvider.getSecret(secretNames.storageAccountName);
         const accountKey = await this.secretProvider.getSecret(secretNames.storageAccountKey);
+
         const containerSAS = generateBlobSASQueryParameters(
             {
                 expiresOn: moment().add(1, 'days').toDate(),
                 containerName: containerName,
                 permissions: ContainerSASPermissions.parse('w'),
-                protocol: SASProtocol.HttpsAndHttp,
+                protocol: SASProtocol.Https,
                 startsOn: moment().toDate(),
             },
             new StorageSharedKeyCredential(accountName, accountKey),
