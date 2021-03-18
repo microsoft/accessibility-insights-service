@@ -398,7 +398,7 @@ function setupDocumentEntities(): void {
 
 function getQuery(): cosmos.SqlQuerySpec {
     return {
-        query: 'SELECT * FROM c WHERE c.partitionKey = "@partitionKey" and c.baseId = "@baseId" and c.itemType = "@itemType"',
+        query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.baseId = @baseId and c.itemType = @itemType',
         parameters: [
             {
                 name: '@baseId',

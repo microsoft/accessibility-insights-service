@@ -152,7 +152,7 @@ export class WebsiteScanResultProvider {
 
     private async readPartDocument(websiteScanResult: WebsiteScanResultBase): Promise<WebsiteScanResultPartModel> {
         const query = {
-            query: 'SELECT * FROM c WHERE c.partitionKey = "@partitionKey" and c.baseId = "@baseId" and c.itemType = "@itemType"',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.baseId = @baseId and c.itemType = @itemType',
             parameters: [
                 {
                     name: '@baseId',

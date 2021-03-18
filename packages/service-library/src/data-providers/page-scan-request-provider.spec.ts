@@ -94,7 +94,7 @@ describe(PageScanRequestProvider, () => {
     function getQuery(itemsCount: number): cosmos.SqlQuerySpec {
         return {
             query:
-                'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = "@partitionKey" and c.itemType = "@itemType" ORDER BY c.priority DESC',
+                'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
             parameters: [
                 {
                     name: '@itemsCount',
