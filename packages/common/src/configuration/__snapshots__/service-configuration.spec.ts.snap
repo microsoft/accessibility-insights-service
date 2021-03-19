@@ -5,7 +5,7 @@ Object {
   "availabilityTestConfig": Object {
     "consolidatedIdBase": Object {
       "default": "e2e-consolidated-report-id",
-      "doc": "The id for the consolidated report",
+      "doc": "The id prefix for the consolidated report",
       "format": "String",
     },
     "environmentDefinition": Object {
@@ -25,7 +25,7 @@ Object {
     },
     "maxScanWaitTimeInSeconds": Object {
       "default": 1800,
-      "doc": "Maximum wait time for fetching scan status of the submitted request",
+      "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
     "scanNotifyApiEndpoint": Object {
@@ -198,7 +198,7 @@ Object {
   "availabilityTestConfig": Object {
     "consolidatedIdBase": Object {
       "default": "e2e-consolidated-report-id",
-      "doc": "The id for the consolidated report",
+      "doc": "The id prefix for the consolidated report",
       "format": "String",
     },
     "environmentDefinition": Object {
@@ -218,7 +218,7 @@ Object {
     },
     "maxScanWaitTimeInSeconds": Object {
       "default": 1800,
-      "doc": "Maximum wait time for fetching scan status of the submitted request",
+      "doc": "Maximum wait time for scan request to complete",
       "format": "int",
     },
     "scanNotifyApiEndpoint": Object {
