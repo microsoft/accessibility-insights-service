@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { inject, injectable } from 'inversify';
 import { client, CosmosContainerClient, cosmosContainerClientTypes, CosmosOperationResponse } from 'azure-services';
 import { flatMap, groupBy } from 'lodash';
 import { ItemType, OnDemandPageScanResult } from 'storage-documents';
+import * as cosmos from '@azure/cosmos';
 import { PartitionKeyFactory } from '../factories/partition-key-factory';
 import { OperationResult } from './operation-result';
 
@@ -35,7 +37,7 @@ export class OnDemandPageScanRunResultProvider {
             Object.keys(scanIdsByPartition).map(async (pKey) => {
                 return this.cosmosContainerClient.executeQueryWithContinuationToken<OnDemandPageScanResult>(async (token) => {
                     return this.cosmosContainerClient.queryDocuments<OnDemandPageScanResult>(
-                        this.getReadScanQueryForScanIds(scanIdsByPartition[pKey], pKey),
+                        this.getQuery(scanIdsByPartition[pKey], pKey),
                         token,
                     );
                 });
@@ -100,8 +102,20 @@ export class OnDemandPageScanRunResultProvider {
         return this.cosmosContainerClient.mergeOrWriteDocument(persistedResult, undefined, throwIfNotSuccess);
     }
 
-    private getReadScanQueryForScanIds(scanIds: string[], partitionKey: string): string {
-        return `select * from c where c.partitionKey = "${partitionKey}" and c.id in ("${scanIds.join('", "')}")`;
+    private getQuery(scanIds: string[], partitionKey: string): cosmos.SqlQuerySpec {
+        return {
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.id IN (@scanIds)',
+            parameters: [
+                {
+                    name: '@partitionKey',
+                    value: partitionKey,
+                },
+                {
+                    name: '@scanIds',
+                    value: scanIds.join('", "'),
+                },
+            ],
+        };
     }
 
     private setSystemProperties(pageScanResult: OnDemandPageScanResult): void {

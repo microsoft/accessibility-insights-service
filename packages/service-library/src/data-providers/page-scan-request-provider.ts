@@ -16,7 +16,24 @@ export class PageScanRequestProvider {
         continuationToken?: string,
         itemsCount: number = 100,
     ): Promise<CosmosOperationResponse<OnDemandPageScanRequest[]>> {
-        const query = `SELECT TOP ${itemsCount} * FROM c WHERE c.partitionKey = "${PartitionKey.pageScanRequestDocuments}" and c.itemType = '${ItemType.onDemandPageScanRequest}' ORDER BY c.priority desc`;
+        const query = {
+            query:
+                'SELECT TOP @itemsCount * FROM c WHERE c.partitionKey = @partitionKey and c.itemType = @itemType ORDER BY c.priority DESC',
+            parameters: [
+                {
+                    name: '@itemsCount',
+                    value: itemsCount,
+                },
+                {
+                    name: '@partitionKey',
+                    value: PartitionKey.pageScanRequestDocuments,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.onDemandPageScanRequest,
+                },
+            ],
+        };
 
         return this.cosmosContainerClient.queryDocuments<OnDemandPageScanRequest>(query, continuationToken);
     }

@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
+
 import { BatchServiceClient } from '@azure/batch';
 import { CosmosClient, CosmosClientOptions } from '@azure/cosmos';
 import * as msRestNodeAuth from '@azure/ms-rest-nodeauth';
@@ -23,15 +24,6 @@ import { secretNames } from './key-vault/secret-names';
 import { SecretProvider } from './key-vault/secret-provider';
 import { CosmosContainerClient } from './storage/cosmos-container-client';
 import { CosmosKeyProvider } from './azure-cosmos/cosmos-key-provider';
-
-export interface StorageKey {
-    accountName: string;
-    accountKey: string;
-}
-
-function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): CosmosClient {
-    return new CosmosClient(cosmosClientOptions);
-}
 
 export function registerAzureServicesToContainer(
     container: Container,
@@ -85,19 +77,13 @@ export function registerAzureServicesToContainer(
     container.bind(Batch).toSelf().inSingletonScope();
 }
 
-async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
-    if (process.env.AZURE_STORAGE_NAME !== undefined && process.env.AZURE_STORAGE_KEY !== undefined) {
-        return {
-            accountName: process.env.AZURE_STORAGE_NAME,
-            accountKey: process.env.AZURE_STORAGE_KEY,
-        };
+async function getStorageAccountName(context: interfaces.Context): Promise<string> {
+    if (process.env.AZURE_STORAGE_NAME !== undefined) {
+        return process.env.AZURE_STORAGE_NAME;
     } else {
         const secretProvider = context.container.get(SecretProvider);
 
-        return {
-            accountName: await secretProvider.getSecret(secretNames.storageAccountName),
-            accountKey: await secretProvider.getSecret(secretNames.storageAccountKey),
-        };
+        return secretProvider.getSecret(secretNames.storageAccountName);
     }
 }
 
@@ -113,10 +99,10 @@ async function getStorageKey(context: interfaces.Context): Promise<StorageKey> {
 // will be used as a fallback authentication source.
 function setupBlobServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<BlobServiceClient>(iocTypeNames.BlobServiceClientProvider, container, async (context) => {
-        const storageKey = await getStorageKey(context);
+        const accountName = await getStorageAccountName(context);
         const defaultAzureCredential = new DefaultAzureCredential();
 
-        return new BlobServiceClient(`https://${storageKey.accountName}.blob.core.windows.net`, defaultAzureCredential);
+        return new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, defaultAzureCredential);
     });
 }
 
@@ -141,10 +127,10 @@ function setupSingletonAzureKeyVaultClientProvider(container: interfaces.Contain
 
 function setupSingletonQueueServiceClientProvider(container: interfaces.Container): void {
     IoC.setupSingletonProvider<QueueServiceClient>(iocTypeNames.QueueServiceClientProvider, container, async (context) => {
-        const storageKey = await getStorageKey(context);
+        const accountName = await getStorageAccountName(context);
         const credential = new DefaultAzureCredential();
 
-        return new QueueServiceClient(`https://${storageKey.accountName}.queue.core.windows.net`, credential);
+        return new QueueServiceClient(`https://${accountName}.queue.core.windows.net`, credential);
     });
 }
 
@@ -177,4 +163,8 @@ function setupSingletonAzureBatchServiceClientProvider(container: Container): vo
 
         return new BatchServiceClient(await credentialProvider.getCredentialsForBatch(), batchConfig.accountUrl);
     });
+}
+
+function defaultCosmosClientFactory(cosmosClientOptions: CosmosClientOptions): CosmosClient {
+    return new CosmosClient(cosmosClientOptions);
 }

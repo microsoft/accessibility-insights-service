@@ -151,7 +151,23 @@ export class WebsiteScanResultProvider {
     }
 
     private async readPartDocument(websiteScanResult: WebsiteScanResultBase): Promise<WebsiteScanResultPartModel> {
-        const query = `SELECT * FROM c WHERE c.partitionKey = "${websiteScanResult.partitionKey}" and c.baseId = "${websiteScanResult.id}" and c.itemType = "${ItemType.websiteScanResultPart}"`;
+        const query = {
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.baseId = @baseId and c.itemType = @itemType',
+            parameters: [
+                {
+                    name: '@baseId',
+                    value: websiteScanResult.id,
+                },
+                {
+                    name: '@partitionKey',
+                    value: websiteScanResult.partitionKey,
+                },
+                {
+                    name: '@itemType',
+                    value: ItemType.websiteScanResultPart,
+                },
+            ],
+        };
 
         let partDocument: Partial<WebsiteScanResultPart>;
         let continuationToken;

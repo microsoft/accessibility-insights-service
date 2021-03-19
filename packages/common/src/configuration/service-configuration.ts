@@ -278,12 +278,12 @@ export class ServiceConfiguration {
                 consolidatedIdBase: {
                     format: 'String',
                     default: 'e2e-consolidated-report-id',
-                    doc: 'The id for the consolidated report',
+                    doc: 'The id prefix for the consolidated report',
                 },
                 maxScanWaitTimeInSeconds: {
                     format: 'int',
                     default: 1800,
-                    doc: 'Maximum wait time for fetching scan status of the submitted request',
+                    doc: 'Maximum wait time for scan request to complete',
                 },
                 maxScanCompletionNotificationWaitTimeInSeconds: {
                     format: 'int',
