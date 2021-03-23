@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 FROM mcr.microsoft.com/windows:1809-amd64
 
-ENV NODE_VERSION 12.20.2
+ENV NODE_VERSION 12.21.0
 
 USER ContainerAdministrator
 
