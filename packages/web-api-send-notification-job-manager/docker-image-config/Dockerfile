@@ -1,6 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-FROM node:12-slim
+FROM node:12.21-slim
 
 # Bundle app source
 COPY . .
