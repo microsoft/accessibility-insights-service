@@ -8598,10 +8598,10 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-license-check-and-add@^3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/license-check-and-add/-/license-check-and-add-3.0.4.tgz#dcbcea5402e969d170ef3286ddbb668b37447135"
-  integrity sha512-j3dotPJECxJRdvfkXxxDJqlKoRyKoR0G1woG1TiuqHAHG2/EjByRQZNcaDZ0GCY6/zBhrkoPC/gZHz0vsQtAsQ==
+license-check-and-add@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/license-check-and-add/-/license-check-and-add-4.0.2.tgz#780611c08717e769f2cbd85aae7790100f59ff14"
+  integrity sha512-Mb2QZiuuTJ/X/428KskTojPs9rSnUjzc6rMsj6QhNt5x5LtzcGgBxsZyBCOklha/iAscDTaRzmb+wXq39Du2Jw==
   dependencies:
     fs-extra "^8.1.0"
     gitignore-to-glob "^0.3.0"
