@@ -104,7 +104,7 @@ export class OnDemandPageScanRunResultProvider {
 
     private getQuery(scanIds: string[], partitionKey: string): cosmos.SqlQuerySpec {
         return {
-            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey and c.id IN (@scanIds)',
+            query: 'SELECT * FROM c WHERE c.partitionKey = @partitionKey AND ARRAY_CONTAINS(@scanIds, c.id)',
             parameters: [
                 {
                     name: '@partitionKey',
@@ -112,7 +112,7 @@ export class OnDemandPageScanRunResultProvider {
                 },
                 {
                     name: '@scanIds',
-                    value: scanIds.join('", "'),
+                    value: scanIds,
                 },
             ],
         };
