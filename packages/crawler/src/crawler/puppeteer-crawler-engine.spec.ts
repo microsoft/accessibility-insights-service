@@ -17,7 +17,12 @@ import { CrawlerFactory } from './crawler-factory';
    @typescript-eslint/consistent-type-assertions */
 
 describe(PuppeteerCrawlerEngine, () => {
-    const puppeteerDefaultOptions = ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox'];
+    const puppeteerDefaultOptions = [
+        '--disable-dev-shm-usage',
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--js-flags=--max-old-space-size=8192',
+    ];
     const maxRequestsPerCrawl: number = 100;
     const pageProcessorStub: PageProcessor = {
         pageHandler: () => null,
