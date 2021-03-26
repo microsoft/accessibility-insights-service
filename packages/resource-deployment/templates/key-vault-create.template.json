@@ -49,7 +49,7 @@
                         "tenantId": "[subscription().tenantId]",
                         "objectId": "[parameters('objectId')]",
                         "permissions": {
-                            "secrets": ["delete", "get", "list", "set"]
+                            "secrets": ["delete", "get", "list", "set", "recover"]
                         }
                     }
                 ],
