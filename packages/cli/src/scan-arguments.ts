@@ -18,4 +18,5 @@ export interface ScanArguments {
     continue?: boolean;
     chromePath?: string;
     axeSourcePath?: string;
+    debug?: boolean;
 }

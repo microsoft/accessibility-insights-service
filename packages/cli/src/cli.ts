@@ -3,13 +3,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 import 'reflect-metadata';
+
 // eslint-disable-next-line import/no-unassigned-import
 import './module-name-mapper';
 
 // @ts-ignore
 import * as cheerio from 'cheerio';
 import { isEmpty } from 'lodash';
-import * as yargs from 'yargs';
+import yargs from 'yargs';
 import { System } from 'common';
 import { CliEntryPoint } from './cli-entry-point';
 import { ScanArguments } from './scan-arguments';
@@ -59,6 +60,7 @@ function getScanArguments(): ScanArguments {
                 describe: `Maximum number of pages that the crawler will open. The crawl will stop when this limit is reached. Default is 100.
                            Note that in cases of parallel crawling, the actual number of pages visited might be slightly higher than this value.`,
                 default: 100,
+                alias: 'maxurls',
             },
             restart: {
                 type: 'boolean',
@@ -79,23 +81,34 @@ function getScanArguments(): ScanArguments {
             memoryMBytes: {
                 type: 'number',
                 describe: 'The maximum number of megabytes to be used by the crawler.',
+                alias: 'memorymbytes',
             },
             silentMode: {
                 type: 'boolean',
                 describe: 'Open browser window while crawling when set to true.',
                 default: true,
+                alias: 'silentmode',
             },
             inputFile: {
                 type: 'string',
                 describe: 'List of URLs to crawl in addition to URLs discovered from crawling the provided URL.',
+                alias: 'inputfile',
             },
             inputUrls: {
                 type: 'array',
                 describe: `List of URLs to crawl in addition to URLs discovered from crawling the provided URL, separated by space.`,
+                alias: 'inputurls',
             },
             discoveryPatterns: {
                 type: 'array',
                 describe: `List of RegEx patterns to crawl in addition to the provided URL, separated by space.`,
+                alias: 'discoverypatterns',
+            },
+            debug: {
+                type: 'boolean',
+                describe: 'Enables crawler engine debug mode.',
+                default: false,
+                hidden: true,
             },
         })
         .check((args) => {
