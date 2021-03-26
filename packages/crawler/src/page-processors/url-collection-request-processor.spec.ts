@@ -49,7 +49,7 @@ describe(UrlCollectionRequestProcessor, () => {
         };
         loggerMock.setup((l) => l.logError(It.isAny(), It.isAny())).verifiable();
 
-        await testSubject.handleRequestError(requestInputWithError);
+        await testSubject.handleRequestError(requestInputWithError as Apify.HandleFailedRequestInput);
 
         loggerMock.verifyAll();
     });

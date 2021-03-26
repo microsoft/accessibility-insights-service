@@ -4,7 +4,7 @@
 import Apify from 'apify';
 import { inject, injectable } from 'inversify';
 import { Page } from 'puppeteer';
-import { BrowserError, PageNavigator } from 'scanner-global-library';
+import { BrowserError, NavigationHooks } from 'scanner-global-library';
 import { System } from 'common';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
 import { DataBase } from '../level-storage/data-base';
@@ -15,7 +15,7 @@ import { BlobStore, DataStore, scanResultStorageName } from '../storage/store-ty
 import { ApifyRequestQueueProvider, crawlerIocTypes } from '../types/ioc-types';
 import { ScanData } from '../types/scan-data';
 
-/* eslint-disable no-invalid-this */
+/* eslint-disable no-invalid-this, @typescript-eslint/no-explicit-any */
 
 export type PartialScanData = {
     url: string;
@@ -24,9 +24,13 @@ export type PartialScanData = {
 
 export interface PageProcessor {
     pageHandler: Apify.PuppeteerHandlePage;
-    gotoFunction: Apify.PuppeteerGoto;
     pageErrorProcessor: Apify.HandleFailedRequest;
+    preNavigation(crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void>;
+    postNavigation(crawlingContext: PuppeteerCrawlingContext): Promise<void>;
 }
+
+export type PuppeteerCrawlingContext = Apify.CrawlingContext & { page: Page };
+export type PuppeteerHandlePageInputs = Apify.CrawlingContext & Apify.BrowserCrawlingContext & Apify.PuppeteerHandlePageFunctionParam;
 
 @injectable()
 export abstract class PageProcessorBase implements PageProcessor {
@@ -50,7 +54,7 @@ export abstract class PageProcessorBase implements PageProcessor {
     /**
      * Function that is called to process each request.
      */
-    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: Apify.PuppeteerHandlePageInputs) => {
+    public pageHandler: Apify.PuppeteerHandlePage = async (inputs: PuppeteerHandlePageInputs) => {
         try {
             await this.processPage(inputs);
         } catch (err) {
@@ -63,35 +67,47 @@ export abstract class PageProcessorBase implements PageProcessor {
         }
     };
 
-    /**
-     * Overrides the function that opens the page in Puppeteer.
-     * Return the result of Puppeteer's [page.goto()](https://pptr.dev/#?product=Puppeteer&show=api-pagegotourl-options) function.
-     */
-    public gotoFunction: Apify.PuppeteerGoto = async (inputs: Apify.PuppeteerGotoInputs) => {
+    // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+    public preNavigation = async (crawlingContext: PuppeteerCrawlingContext, gotoOptions: any): Promise<void> => {
+        await this.navigationHooks.preNavigation(crawlingContext.page);
+    };
+
+    public postNavigation = async (crawlingContext: PuppeteerCrawlingContext): Promise<void> => {
         let navigationError: BrowserError;
         let runError: unknown;
         try {
-            return await this.pageNavigator.navigate(inputs.request.url, inputs.page, async (browserError, error) => {
-                if (error !== undefined) {
-                    throw error;
-                } else {
-                    navigationError = browserError;
-                }
-            });
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if ((crawlingContext as any).page) {
+                await this.navigationHooks.postNavigation(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    (crawlingContext as any).page,
+                    crawlingContext.response,
+                    async (browserError: BrowserError, error?: unknown) => {
+                        if (error !== undefined) {
+                            throw error;
+                        } else {
+                            navigationError = browserError;
+                        }
+                    },
+                );
+            } else {
+                console.log('WARNING: CrawlingContext has no page');
+            }
         } catch (err) {
-            await this.pushScanData({ succeeded: false, id: inputs.request.id as string, url: inputs.request.url });
-            await this.logPageError(inputs.request, err as Error);
+            await this.pushScanData({ succeeded: false, id: crawlingContext.request.id as string, url: crawlingContext.request.url });
+            await this.logPageError(crawlingContext.request, err as Error);
             runError = err;
 
             // Throw the error so Apify puts it back into the queue to retry
             throw err;
         } finally {
             if (runError !== undefined) {
-                await this.saveRunError(inputs.request, runError);
+                await this.saveRunError(crawlingContext.request, runError);
             } else if (navigationError !== undefined) {
-                await this.saveBrowserError(inputs.request, navigationError);
+                await this.saveBrowserError(crawlingContext.request, navigationError);
             } else {
-                await this.saveScanMetadata(inputs.request.url, await inputs.page.title());
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await this.saveScanMetadata(crawlingContext.request.url, await (crawlingContext as any).page.title());
             }
         }
     };
@@ -120,7 +136,7 @@ export abstract class PageProcessorBase implements PageProcessor {
         @inject(LocalDataStore) protected readonly dataStore: DataStore,
         @inject(LocalBlobStore) protected readonly blobStore: BlobStore,
         @inject(DataBase) protected readonly dataBase: DataBase,
-        @inject(PageNavigator) protected readonly pageNavigator: PageNavigator,
+        @inject(NavigationHooks) protected readonly navigationHooks: NavigationHooks,
         @inject(crawlerIocTypes.ApifyRequestQueueProvider) protected readonly requestQueueProvider: ApifyRequestQueueProvider,
         @inject(CrawlerConfiguration) protected readonly crawlerConfiguration: CrawlerConfiguration,
         protected readonly enqueueLinksExt: typeof Apify.utils.enqueueLinks = Apify.utils.enqueueLinks,
@@ -201,11 +217,12 @@ export abstract class PageProcessorBase implements PageProcessor {
     protected async saveScanMetadata(url: string, pageTitle: string): Promise<void> {
         // save metadata for any url first to support the case when base url is not processed
         if ((this.baseUrl && this.baseUrl === url) || !this.scanMetadataSaved) {
+            const pageConfigurator = this.navigationHooks.pageConfigurator;
             await this.dataBase.addScanMetadata({
                 baseUrl: this.baseUrl,
                 basePageTitle: this.baseUrl === url ? pageTitle : '',
-                userAgent: this.pageNavigator.pageConfigurator.getUserAgent(),
-                browserResolution: this.pageNavigator.pageConfigurator.getBrowserResolution(),
+                userAgent: pageConfigurator.getUserAgent(),
+                browserResolution: pageConfigurator.getBrowserResolution(),
             });
             this.scanMetadataSaved = true;
         }

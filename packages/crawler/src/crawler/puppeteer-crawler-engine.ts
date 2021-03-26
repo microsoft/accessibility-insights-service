@@ -39,24 +39,24 @@ export class PuppeteerCrawlerEngine {
             handlePageTimeoutSecs: 300, // timeout includes all page processing activity (navigation, rendering, accessibility scan, etc.)
             requestQueue: await this.requestQueueProvider(),
             handlePageFunction: pageProcessor.pageHandler,
-            gotoFunction: pageProcessor.gotoFunction,
+            preNavigationHooks: [pageProcessor.preNavigation],
+            postNavigationHooks: [pageProcessor.postNavigation],
             handleFailedRequestFunction: pageProcessor.pageErrorProcessor,
             maxRequestsPerCrawl: this.crawlerConfiguration.maxRequestsPerCrawl(),
-            launchPuppeteerOptions: {
-                args: puppeteerDefaultOptions,
-                defaultViewport: {
-                    width: 1920,
-                    height: 1080,
-                    deviceScaleFactor: 1,
+            launchContext: {
+                launchOptions: {
+                    args: puppeteerDefaultOptions,
+                    defaultViewport: {
+                        width: 1920,
+                        height: 1080,
+                        deviceScaleFactor: 1,
+                    },
                 },
-            } as Apify.LaunchPuppeteerOptions,
+            },
         };
 
         if (!isEmpty(crawlerRunOptions.chromePath)) {
-            puppeteerCrawlerOptions.launchPuppeteerOptions = {
-                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
-                useChrome: true,
-            } as Apify.LaunchPuppeteerOptions;
+            puppeteerCrawlerOptions.launchContext.useChrome = true;
             this.crawlerConfiguration.setChromePath(crawlerRunOptions.chromePath);
         }
 
@@ -69,7 +69,7 @@ export class PuppeteerCrawlerEngine {
             this.crawlerConfiguration.setSilentMode(false);
 
             puppeteerCrawlerOptions.handlePageTimeoutSecs = 3600;
-            puppeteerCrawlerOptions.gotoTimeoutSecs = 3600;
+            puppeteerCrawlerOptions.navigationTimeoutSecs = 3600;
             puppeteerCrawlerOptions.maxConcurrency = 1;
             puppeteerCrawlerOptions.sessionPoolOptions = {
                 sessionOptions: {
@@ -77,11 +77,8 @@ export class PuppeteerCrawlerEngine {
                     maxAgeSecs: 3600,
                 },
             };
-            puppeteerCrawlerOptions.launchPuppeteerOptions = {
-                ...puppeteerCrawlerOptions.launchPuppeteerOptions,
-                args: ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions],
-            } as Apify.LaunchPuppeteerOptions;
-            puppeteerCrawlerOptions.puppeteerPoolOptions = {
+            puppeteerCrawlerOptions.launchContext.launchOptions.args = ['--auto-open-devtools-for-tabs', ...puppeteerDefaultOptions];
+            puppeteerCrawlerOptions.browserPoolOptions = {
                 puppeteerOperationTimeoutSecs: 3600,
                 instanceKillerIntervalSecs: 3600,
                 killInstanceAfterSecs: 3600,

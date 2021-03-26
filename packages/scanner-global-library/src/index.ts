@@ -10,4 +10,5 @@ export { AxePuppeteerFactory } from './factories/axe-puppeteer-factory';
 export { Page } from './page';
 export { AxeScanResults } from './axe-scan-results';
 export { WebDriver } from './web-driver';
-export { PageNavigator, OnNavigationError } from './page-navigator';
+export { PageNavigator } from './page-navigator';
+export { NavigationHooks } from './navigation-hooks';

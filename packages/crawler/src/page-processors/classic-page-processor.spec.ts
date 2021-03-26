@@ -5,7 +5,7 @@ import 'reflect-metadata';
 
 import Apify from 'apify';
 import { Page } from 'puppeteer';
-import { PageNavigator } from 'scanner-global-library';
+import { NavigationHooks } from 'scanner-global-library';
 import { IMock, It, Mock } from 'typemoq';
 import { AxeResults } from 'axe-core';
 import { CrawlerConfiguration } from '../crawler/crawler-configuration';
@@ -14,7 +14,7 @@ import { AccessibilityScanOperation } from '../page-operations/accessibility-sca
 import { BlobStore, DataStore } from '../storage/store-types';
 import { ApifyRequestQueueProvider } from '../types/ioc-types';
 import { ClassicPageProcessor } from './classic-page-processor';
-import { PartialScanData } from './page-processor-base';
+import { PartialScanData, PuppeteerHandlePageInputs } from './page-processor-base';
 
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions */
 
@@ -29,7 +29,7 @@ describe(ClassicPageProcessor, () => {
     let blobStoreMock: IMock<BlobStore>;
     let dataBaseMock: IMock<DataBase>;
     let enqueueLinksExtMock: IMock<typeof Apify.utils.enqueueLinks>;
-    let pageNavigatorMock: IMock<PageNavigator>;
+    let navigationHooks: IMock<NavigationHooks>;
     let crawlerConfigurationMock: IMock<CrawlerConfiguration>;
     let requestStub: Apify.Request;
     let pageStub: Page;
@@ -44,7 +44,7 @@ describe(ClassicPageProcessor, () => {
         blobStoreMock = Mock.ofType<BlobStore>();
         dataBaseMock = Mock.ofType<DataBase>();
         enqueueLinksExtMock = Mock.ofType<typeof Apify.utils.enqueueLinks>();
-        pageNavigatorMock = Mock.ofType<PageNavigator>();
+        navigationHooks = Mock.ofType<NavigationHooks>();
         crawlerConfigurationMock = Mock.ofType(CrawlerConfiguration);
         crawlerConfigurationMock
             .setup((o) => o.discoveryPatterns())
@@ -83,7 +83,7 @@ describe(ClassicPageProcessor, () => {
             dataStoreMock.object,
             blobStoreMock.object,
             dataBaseMock.object,
-            pageNavigatorMock.object,
+            navigationHooks.object,
             requestQueueProvider,
             crawlerConfigurationMock.object,
             enqueueLinksExtMock.object,
@@ -110,7 +110,7 @@ describe(ClassicPageProcessor, () => {
         };
         setupPushScanData(expectedScanData);
 
-        const inputs: Apify.PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
+        const inputs: PuppeteerHandlePageInputs = { page: pageStub, request: requestStub } as any;
         await classicPageProcessor.pageHandler(inputs);
     });
 
