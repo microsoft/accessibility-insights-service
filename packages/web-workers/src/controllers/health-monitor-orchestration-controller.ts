@@ -28,6 +28,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         @inject(WebApiConfig) private readonly webApiConfig: WebApiConfig,
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
+        private readonly orchestrationStepsProvider: typeof createOrchestrationSteps = createOrchestrationSteps,
     ) {
         super(logger);
     }
@@ -47,13 +48,6 @@ export class HealthMonitorOrchestrationController extends WebController {
         return true;
     }
 
-    protected createOrchestrationSteps(
-        context: IOrchestrationFunctionContext,
-        availabilityTestConfig: AvailabilityTestConfig,
-    ): OrchestrationSteps {
-        return new OrchestrationStepsImpl(context, availabilityTestConfig, this.logger);
-    }
-
     private invokeOrchestration(): void {
         const orchestrationExecutor = this.getOrchestrationExecutor();
 
@@ -67,7 +61,7 @@ export class HealthMonitorOrchestrationController extends WebController {
             const thisObj = context.bindingData.controller as HealthMonitorOrchestrationController;
             const availabilityTestConfig = context.bindingData.availabilityTestConfig as AvailabilityTestConfig;
 
-            const orchestrationSteps = thisObj.createOrchestrationSteps(context, availabilityTestConfig);
+            const orchestrationSteps = thisObj.orchestrationStepsProvider(context, availabilityTestConfig, thisObj.logger);
 
             const scenarios: E2EScanScenario[] =
                 thisObj.e2eScenarioFactory(orchestrationSteps, availabilityTestConfig, thisObj.webApiConfig);
@@ -102,4 +96,12 @@ export class HealthMonitorOrchestrationController extends WebController {
         this.context.bindingData.controller = this;
         this.context.bindingData.availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
     }
+}
+
+function createOrchestrationSteps(
+    context: IOrchestrationFunctionContext,
+    availabilityTestConfig: AvailabilityTestConfig,
+    logger: ContextAwareLogger,
+): OrchestrationSteps {
+    return new OrchestrationStepsImpl(context, availabilityTestConfig, logger);
 }

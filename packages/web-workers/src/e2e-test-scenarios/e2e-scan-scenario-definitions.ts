@@ -11,7 +11,7 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         return {
             requestOptions: {
                 urlToScan: availabilityConfig.urlToScan,
-                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyApiEndpoint}`,
             },
             testGroups: {
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
