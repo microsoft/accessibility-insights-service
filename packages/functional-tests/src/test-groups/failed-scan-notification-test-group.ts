@@ -8,12 +8,13 @@ import { FunctionalTestGroup } from './functional-test-group';
 
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 
-export class ScanCompletionNotificationTestGroup extends FunctionalTestGroup {
+export class FailedScanNotificationTestGroup extends FunctionalTestGroup {
     @test(TestEnvironment.all)
-    public async testScanNotification(): Promise<void> {
+    public async testScanNotificatioFail(): Promise<void> {
         const response = await this.a11yServiceClient.getScanStatus(this.testContextData.scanId);
         const notification = (<ScanRunResultResponse>response.body).notification;
 
-        expect(notification.state).to.equal('sent');
+        // Consolidated scan request submitted with the scan notification url endpoint that would always fail.
+        expect(notification.state).to.equal('sendFailed');
     }
 }
