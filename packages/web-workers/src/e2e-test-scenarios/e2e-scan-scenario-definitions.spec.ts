@@ -18,8 +18,8 @@ describe('E2EScanScenarioDefinitions', () => {
 
     it('creates request options appropriately from given configs', () => {
         process.env.RELEASE_VERSION = 'test-release-version';
-        const definitions = E2EScanFactories.map(factory => factory(availabilityConfig, webConfig));
-        const requestOptions = definitions.map(d => d.requestOptions);
+        const definitions = E2EScanFactories.map((factory) => factory(availabilityConfig, webConfig));
+        const requestOptions = definitions.map((d) => d.requestOptions);
         expect(requestOptions).toEqual([
             {
                 urlToScan: 'url-to-scan',

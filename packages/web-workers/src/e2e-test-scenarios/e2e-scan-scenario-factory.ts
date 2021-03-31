@@ -11,7 +11,9 @@ import { SingleScanScenario } from './single-scan-scenario';
 export function createScenarios(
     orchestrationSteps: OrchestrationSteps,
     availabilityTestConfig: AvailabilityTestConfig,
-    webApiConfig: WebApiConfig): E2EScanScenario[] {
-    return E2EScanFactories.map((makeDefinition) => makeDefinition(availabilityTestConfig, webApiConfig))
-        .map((definition) => new SingleScanScenario(orchestrationSteps, definition));
+    webApiConfig: WebApiConfig,
+): E2EScanScenario[] {
+    return E2EScanFactories.map((makeDefinition) => makeDefinition(availabilityTestConfig, webApiConfig)).map(
+        (definition) => new SingleScanScenario(orchestrationSteps, definition),
+    );
 }

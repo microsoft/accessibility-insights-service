@@ -50,7 +50,7 @@ export type E2EScanScenarioDefinition = {
     testGroups: Partial<E2ETestGroupNames>;
 };
 
-export type E2EScanScenarioDefinitionFactory =
-    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig) => E2EScanScenarioDefinition;
-
-
+export type E2EScanScenarioDefinitionFactory = (
+    availabilityConfig: AvailabilityTestConfig,
+    webApiConfig: WebApiConfig,
+) => E2EScanScenarioDefinition;
