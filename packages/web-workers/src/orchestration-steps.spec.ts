@@ -21,6 +21,7 @@ import {
 import { OrchestrationStepsImpl, OrchestrationTelemetryProperties } from './orchestration-steps';
 import { GeneratorExecutor } from './test-utilities/generator-executor';
 import { MockableLogger } from './test-utilities/mockable-logger';
+import { ScanRequestOptions } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
 /* eslint-disable @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any */
 
@@ -131,7 +132,11 @@ describe(OrchestrationStepsImpl, () => {
         let activityRequestData: ActivityRequestData;
 
         beforeEach(() => {
-            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanUrl, notifyScanUrl));
+            const scanRequestOptions: ScanRequestOptions = {
+                urlToScan: scanUrl,
+                scanNotificationUrl: notifyScanUrl,
+            };
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanRequestOptions));
             activityRequestData = {
                 activityName: ActivityAction.createScanRequest,
                 data: {
@@ -207,9 +212,12 @@ describe(OrchestrationStepsImpl, () => {
 
         beforeEach(() => {
             reportIdStub = 'some-report-id';
-            generatorExecutor = new GeneratorExecutor<string>(
-                testSubject.invokeSubmitConsolidatedScanRequestRestApi(scanUrl, reportIdStub, notifyScanUrl),
-            );
+            const scanRequestOptions: ScanRequestOptions = {
+                urlToScan: scanUrl,
+                consolidatedId: reportIdStub,
+                scanNotificationUrl: notifyScanUrl,
+            };
+            generatorExecutor = new GeneratorExecutor<string>(testSubject.invokeSubmitScanRequestRestApi(scanRequestOptions));
             activityRequestData = {
                 activityName: ActivityAction.createConsolidatedScanRequest,
                 data: {

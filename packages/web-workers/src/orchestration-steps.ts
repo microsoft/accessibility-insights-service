@@ -26,6 +26,7 @@ import {
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
 import { getAllTestGroupClassNames } from './e2e-test-group-names';
+import { ScanRequestOptions } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
 export interface OrchestrationTelemetryProperties {
     requestResponse?: string;
@@ -41,12 +42,7 @@ export interface OrchestrationTelemetryProperties {
 
 export interface OrchestrationSteps {
     invokeHealthCheckRestApi(): Generator<Task, void, SerializableResponse>;
-    invokeSubmitScanRequestRestApi(url: string, notifyScanUrl: string): Generator<Task, string, SerializableResponse>;
-    invokeSubmitConsolidatedScanRequestRestApi(
-        url: string,
-        reportId: string,
-        notifyScanUrl: string,
-    ): Generator<Task, string, SerializableResponse>;
+    invokeSubmitScanRequestRestApi(options: ScanRequestOptions): Generator<Task, string, SerializableResponse>;
     validateScanRequestSubmissionState(scanId: string): Generator<Task, void, SerializableResponse & void>;
     waitForScanRequestCompletion(scanId: string): Generator<Task, ScanRunResultResponse, SerializableResponse & void>;
     waitForScanCompletionNotification(scanId: string): Generator<Task, ScanCompletedNotification, SerializableResponse & void>;
@@ -159,7 +155,25 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep('Verified scan submitted successfully', LogLevel.info, { requestResponse: JSON.stringify(response) });
     }
 
-    public *invokeSubmitScanRequestRestApi(url: string, notifyScanUrl: string): Generator<Task, string, SerializableResponse & void> {
+    public *invokeSubmitScanRequestRestApi(options: ScanRequestOptions): Generator<Task, string, SerializableResponse & void> {
+        let scanId: string;
+        if (options.consolidatedId) {
+            scanId = yield* this.invokeSubmitConsolidatedScanRequestRestApi(
+                options.urlToScan,
+                options.consolidatedId,
+                options.scanNotificationUrl,
+            );
+        } else {
+            scanId = yield* this.invokeSubmitSingleScanRequestRestApi(options.urlToScan, options.scanNotificationUrl);
+        }
+
+        return scanId;
+    }
+
+    private *invokeSubmitSingleScanRequestRestApi(
+        url: string,
+        notifyScanUrl: string,
+    ): Generator<Task, string, SerializableResponse & void> {
         const requestData: CreateScanRequestData = {
             scanUrl: url,
             priority: 1000,
@@ -241,7 +255,7 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         return scanStatus?.notification;
     }
 
-    public *invokeSubmitConsolidatedScanRequestRestApi(
+    private *invokeSubmitConsolidatedScanRequestRestApi(
         url: string,
         reportId: string,
         notifyScanUrl: string,
