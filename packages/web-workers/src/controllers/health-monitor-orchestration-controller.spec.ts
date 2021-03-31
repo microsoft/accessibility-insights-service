@@ -6,13 +6,13 @@ import { AvailabilityTestConfig, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 // eslint-disable-next-line import/no-internal-modules
 import { IOrchestrationFunctionContext } from 'durable-functions/lib/src/classes';
-import { TestContextData, TestEnvironment } from 'functional-tests';
+import { TestEnvironment } from 'functional-tests';
 import { It, Mock } from 'typemoq';
 import { OrchestrationStepsImpl } from '../orchestration-steps';
 import { GeneratorExecutor } from '../test-utilities/generator-executor';
 import { MockableLogger } from '../test-utilities/mockable-logger';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
-import { e2eTestGroupNames } from '../e2e-test-group-names';
+import { finalizerTestGroupName } from '../e2e-test-group-names';
 import { HealthMonitorOrchestrationController } from './health-monitor-orchestration-controller';
 
 /* eslint-disable
@@ -29,6 +29,7 @@ describe('HealthMonitorOrchestrationController', () => {
     const e2eScanScenarioMock = Mock.ofType<E2EScanScenario>();
     const orchestrationStepsMock = Mock.ofType<OrchestrationStepsImpl>();
     const loggerMock = Mock.ofType(MockableLogger);
+    const allTestGroupClassNames = ['testgroup1', 'testgroup2'];
 
     const availabilityTestConfig: AvailabilityTestConfig = {
         urlToScan: 'some-url',
@@ -41,16 +42,13 @@ describe('HealthMonitorOrchestrationController', () => {
         maxScanCompletionNotificationWaitTimeInSeconds: 30,
         scanNotifyFailApiEndpoint: '/some-fail-endpoint',
     };
-    const testContextData: TestContextData = {
-        scanUrl: availabilityTestConfig.urlToScan,
-    };
-    const contextStub = {
-            bindingData: {},
-            executionContext: {
-                functionName: 'function-name',
-                invocationId: 'id',
-            },
-        } as unknown as IOrchestrationFunctionContext;
+    const contextStub = ({
+        bindingData: {},
+        executionContext: {
+            functionName: 'function-name',
+            invocationId: 'id',
+        },
+    } as unknown) as IOrchestrationFunctionContext;
 
     beforeEach(() => {
         contextStub.bindingData = {};
@@ -77,6 +75,7 @@ describe('HealthMonitorOrchestrationController', () => {
             df.object,
             (_, __, ___) => [e2eScanScenarioMock.object],
             (_, __, ___) => orchestrationStepsMock.object,
+            (_) => allTestGroupClassNames,
         );
     });
 
@@ -94,15 +93,28 @@ describe('HealthMonitorOrchestrationController', () => {
         it('executes activities in sequence', async () => {
             await testSubject.invoke(contextStub);
 
-            orchestrationStepsMock.setup(m => m.logTestRunStart()).verifiable();
-            orchestrationStepsMock.setup(m => m.invokeHealthCheckRestApi()).returns(_ => generatorStub()).verifiable();
-            orchestrationStepsMock.setup(m => m.runFunctionalTestGroups(testContextData, e2eTestGroupNames.finalizerTests))
-            .returns(_ => generatorStub())
-            .verifiable();
+            orchestrationStepsMock.setup((m) => m.logTestRunStart(allTestGroupClassNames)).verifiable();
+            orchestrationStepsMock
+                .setup((m) => m.invokeHealthCheckRestApi())
+                .returns((_) => generatorStub())
+                .verifiable();
+            orchestrationStepsMock
+                .setup((m) => m.runFunctionalTestGroups(It.isAny(), [finalizerTestGroupName]))
+                .returns((_) => generatorStub())
+                .verifiable();
             e2eScanScenarioMock.reset();
-            e2eScanScenarioMock.setup(m => m.submitScanPhase()).returns(_ => generatorStub()).verifiable();
-            e2eScanScenarioMock.setup(m => m.waitForScanCompletionPhase()).returns(_ => generatorStub()).verifiable();
-            e2eScanScenarioMock.setup(m => m.afterScanCompletedPhase()).returns(_ => generatorStub()).verifiable();
+            e2eScanScenarioMock
+                .setup((m) => m.submitScanPhase())
+                .returns((_) => generatorStub())
+                .verifiable();
+            e2eScanScenarioMock
+                .setup((m) => m.waitForScanCompletionPhase())
+                .returns((_) => generatorStub())
+                .verifiable();
+            e2eScanScenarioMock
+                .setup((m) => m.afterScanCompletedPhase())
+                .returns((_) => generatorStub())
+                .verifiable();
 
             orchestratorIterator.runTillEnd();
 

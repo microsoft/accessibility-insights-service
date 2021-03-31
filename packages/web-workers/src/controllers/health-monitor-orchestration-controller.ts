@@ -4,11 +4,10 @@
 import { AvailabilityTestConfig, SerializableResponse, ServiceConfiguration } from 'common';
 import * as durableFunctions from 'durable-functions';
 import { IOrchestrationFunctionContext, Task, TaskSet } from 'durable-functions/lib/src/classes';
-import { TestContextData } from 'functional-tests';
 import { inject, injectable } from 'inversify';
 import { ContextAwareLogger } from 'logger';
 import { WebController } from 'service-library';
-import { e2eTestGroupNames } from '../e2e-test-group-names';
+import { finalizerTestGroupName, getTestGroupClassNamesForScenario } from '../e2e-test-group-names';
 import { E2EScanScenario } from '../e2e-test-scenarios/e2e-scan-scenario';
 import { createScenarios } from '../e2e-test-scenarios/e2e-scan-scenario-factory';
 import { OrchestrationSteps, OrchestrationStepsImpl } from '../orchestration-steps';
@@ -29,6 +28,7 @@ export class HealthMonitorOrchestrationController extends WebController {
         private readonly df = durableFunctions,
         private readonly e2eScenarioFactory: typeof createScenarios = createScenarios,
         private readonly orchestrationStepsProvider: typeof createOrchestrationSteps = createOrchestrationSteps,
+        private readonly testGroupClassNamesProvider: typeof getTestGroupClassNamesForScenario = getTestGroupClassNamesForScenario,
     ) {
         super(logger);
     }
@@ -63,14 +63,13 @@ export class HealthMonitorOrchestrationController extends WebController {
 
             const orchestrationSteps = thisObj.orchestrationStepsProvider(context, availabilityTestConfig, thisObj.logger);
 
-            const scenarios: E2EScanScenario[] =
-                thisObj.e2eScenarioFactory(orchestrationSteps, availabilityTestConfig, thisObj.webApiConfig);
+            const scenarios: E2EScanScenario[] = thisObj.e2eScenarioFactory(
+                orchestrationSteps,
+                availabilityTestConfig,
+                thisObj.webApiConfig,
+            );
 
-            const testContextData: TestContextData = {
-                scanUrl: availabilityTestConfig.urlToScan,
-            };
-
-            orchestrationSteps.logTestRunStart();
+            thisObj.beginE2ETestRun(orchestrationSteps, scenarios);
 
             yield* orchestrationSteps.invokeHealthCheckRestApi();
 
@@ -87,14 +86,23 @@ export class HealthMonitorOrchestrationController extends WebController {
                 yield* scenario.afterScanCompletedPhase();
             }
 
-            // The last test group in a functional test suite to indicated a suite run completion
-            yield* orchestrationSteps.runFunctionalTestGroups(testContextData, e2eTestGroupNames.finalizerTests);
+            yield* thisObj.finalizeE2ETestRun(orchestrationSteps);
         });
     }
 
     private async setContextGenerator(): Promise<void> {
         this.context.bindingData.controller = this;
         this.context.bindingData.availabilityTestConfig = await this.serviceConfig.getConfigValue('availabilityTestConfig');
+    }
+
+    private beginE2ETestRun(orchestrationSteps: OrchestrationSteps, scenarios: E2EScanScenario[]): void {
+        const allTestGroupClassNames = scenarios.flatMap((scenario) => this.testGroupClassNamesProvider(scenario.testDefinition));
+        orchestrationSteps.logTestRunStart(allTestGroupClassNames);
+    }
+
+    private *finalizeE2ETestRun(orchestrationSteps: OrchestrationSteps): Generator<TaskSet, void, SerializableResponse & void> {
+        // The last test group in a functional test suite to indicated a suite run completion
+        yield* orchestrationSteps.runFunctionalTestGroups(undefined, [finalizerTestGroupName]);
     }
 }
 

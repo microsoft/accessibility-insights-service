@@ -622,7 +622,6 @@ describe(OrchestrationStepsImpl, () => {
     describe('Log test run start', () => {
         const testGroupNames = ['testGroup1', 'testGroup2'];
         const testGroupNamesStr = 'testGroup1,testGroup2';
-        const getTestGroupNamesFunc = () => testGroupNames;
         const releaseId = 'release id';
         let expectedLogProperties: { [name: string]: string };
 
@@ -641,7 +640,7 @@ describe(OrchestrationStepsImpl, () => {
         it('logTestRunStart', async () => {
             loggerMock.setup((l) => l.trackEvent('FunctionalTest', expectedLogProperties));
 
-            testSubject.logTestRunStart(getTestGroupNamesFunc);
+            testSubject.logTestRunStart(testGroupNames);
 
             loggerMock.verifyAll();
         });

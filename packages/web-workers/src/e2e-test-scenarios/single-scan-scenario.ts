@@ -12,7 +12,7 @@ import { E2EScanScenarioDefinition } from './e2e-scan-scenario-definitions';
 export class SingleScanScenario implements E2EScanScenario {
     protected readonly testContextData: TestContextData;
 
-    constructor(private readonly orchestrationSteps: OrchestrationSteps, private readonly testDefinition: E2EScanScenarioDefinition) {
+    constructor(private readonly orchestrationSteps: OrchestrationSteps, public readonly testDefinition: E2EScanScenarioDefinition) {
         this.testContextData = {
             scanUrl: this.testDefinition.requestOptions.urlToScan,
         };

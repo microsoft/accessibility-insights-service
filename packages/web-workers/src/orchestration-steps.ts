@@ -25,7 +25,6 @@ import {
     RunFunctionalTestGroupData,
     TrackAvailabilityData,
 } from './controllers/activity-request-data';
-import { getAllTestGroupClassNames } from './e2e-test-group-names';
 import { ScanRequestOptions } from './e2e-test-scenarios/e2e-scan-scenario-definitions';
 
 export interface OrchestrationTelemetryProperties {
@@ -51,7 +50,7 @@ export interface OrchestrationSteps {
         testContextData: TestContextData,
         testGroupNames: TestGroupName[],
     ): Generator<TaskSet, void, SerializableResponse & void>;
-    logTestRunStart(): void;
+    logTestRunStart(testGroupNames: string[]): void;
 }
 
 export class OrchestrationStepsImpl implements OrchestrationSteps {
@@ -304,8 +303,8 @@ export class OrchestrationStepsImpl implements OrchestrationSteps {
         this.logOrchestrationStep(`Completed functional tests: ${testGroupNames}`);
     }
 
-    public logTestRunStart(getTestGroupNamesFunc: () => string[] = getAllTestGroupClassNames): void {
-        const testGroupNamesStr = getTestGroupNamesFunc().join(',');
+    public logTestRunStart(testGroupClassNames: string[]): void {
+        const testGroupNamesStr = testGroupClassNames.join(',');
         const properties = {
             ...this.getDefaultLogProperties(),
             source: 'BeginTestSuite',
