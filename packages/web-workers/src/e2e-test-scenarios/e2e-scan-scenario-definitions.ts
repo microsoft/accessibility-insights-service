@@ -2,14 +2,15 @@
 // Licensed under the MIT License.
 
 import { AvailabilityTestConfig } from 'common';
+import { WebApiConfig } from '../controllers/web-api-config';
 import { E2ETestGroupNames } from '../e2e-test-group-names';
 
 export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
     // Simple scan
-    (config: AvailabilityTestConfig): E2EScanScenarioDefinition => {
+    (availabilityConfig: AvailabilityTestConfig, _: WebApiConfig): E2EScanScenarioDefinition => {
         return {
             requestOptions: {
-                urlToScan: config.urlToScan,
+                urlToScan: availabilityConfig.urlToScan,
             },
             testGroups: {
                 postScanSubmissionTests: ['PostScan', 'ScanStatus'],
@@ -20,12 +21,12 @@ export const E2EScanFactories: E2EScanScenarioDefinitionFactory[] = [
         };
     },
     // Consolidated scan
-    (config: AvailabilityTestConfig): E2EScanScenarioDefinition => {
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig): E2EScanScenarioDefinition => {
         return {
             requestOptions: {
-                urlToScan: config.urlToScan,
-                scanNotificationUrl: config.scanNotifyFailApiEndpoint,
-                consolidatedId: `${config.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
+                urlToScan: availabilityConfig.urlToScan,
+                scanNotificationUrl: `${webApiConfig.baseUrl}${availabilityConfig.scanNotifyFailApiEndpoint}`,
+                consolidatedId: `${availabilityConfig.consolidatedIdBase}-${process.env.RELEASE_VERSION}`,
             },
             testGroups: {
                 postScanSubmissionTests: [],
@@ -48,4 +49,7 @@ export type E2EScanScenarioDefinition = {
     testGroups: Partial<E2ETestGroupNames>;
 };
 
-export type E2EScanScenarioDefinitionFactory = (config: AvailabilityTestConfig) => E2EScanScenarioDefinition;
+export type E2EScanScenarioDefinitionFactory =
+    (availabilityConfig: AvailabilityTestConfig, webApiConfig: WebApiConfig) => E2EScanScenarioDefinition;
+
+

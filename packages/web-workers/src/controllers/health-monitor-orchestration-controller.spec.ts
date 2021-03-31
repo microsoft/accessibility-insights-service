@@ -37,7 +37,7 @@ class TestableHealthMonitorOrchestrationController extends HealthMonitorOrchestr
         webApiConfig: WebApiConfig,
         df: typeof durableFunctions,
     ) {
-        super(serviceConfig, logger, df);
+        super(serviceConfig, logger, webApiConfig, df);
     }
 
     protected createOrchestrationSteps(
